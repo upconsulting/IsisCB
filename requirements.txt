@@ -1,3 +1,4 @@
 Django==1.8.3
 psycopg2==2.6.1
+pyodbc==3.0.10
 wheel==0.24.0

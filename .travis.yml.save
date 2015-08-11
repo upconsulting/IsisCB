@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+jdk::
+
+adf;lkjw:quit
+zz
+
+q
+
+  - oraclejdk8
+script:
+  - pip install nose
+  - nosetests
