@@ -1,6 +1,8 @@
 language: python
 python:
   - "2.7"
+install:
+  - apt-get install unixodbc-devel iodbc
 script:
   - pip install nose
   - nosetests
