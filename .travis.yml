@@ -11,6 +11,7 @@ script:
 deploy:
   provider: codedeploy
   access_key_id: AKIAIVNDMWM77W3N2KTA
+  region: us-west-2
   bucket: S3 Bucket
   revision_type: github
   application: "isiscb-develop-app"
