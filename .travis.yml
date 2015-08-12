@@ -11,7 +11,7 @@ script:
 deploy:
   provider: codedeploy
   access_key_id: AKIAJZVOGJPNL2FRTLBQ
-    bucket: S3 Bucket
+  bucket: S3 Bucket
   revision_type: github
   application: "isiscb-develop-app"
   deployment_group: "isiscb-develop-deploymentgroup"
