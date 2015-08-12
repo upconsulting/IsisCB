@@ -1,9 +1,18 @@
 language: python
 python:
-  - "2.7"
+- '2.7'
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq unixodbc-dev
+- sudo apt-get update -qq
+- sudo apt-get install -qq unixodbc-dev
 script:
-  - pip install nose
-  - nosetests
+- pip install nose
+- nosetests
+deploy:
+  provider: codedeploy
+  access_key_id: AKIAIVNDMWM77W3N2KTA
+  secret_access_key:
+    secure: cwb77t/6jnplRdsEW2mKZoka4kscQUZGaka5WEr05anHg2XpDoo3lJA/ojuPSqp6LA1hvqxbuQ72xvXNZf8dld+FYgHvBYHTHIgy3uZ5dJZ5ZdKipj8FvXNzwMYJK9Lw28JmsLy4518hKyivVZASEAg+AE277D8JqVOcP5ofxjV929cI9O25+kLdMD18CjuEe9dWQfBqJa660Mes8mz7LGI8BvlRkovGu06fUkilRX06KineQ6PeZeZrMOHwqW4Fc99ciZH/N+E2g2fh93ImW7BRk0mE5cbsvVcPz682iOw08RbLhzPsQ6NRclI5Aj0YMeYxRjYpzbRNVFu230+O00WwSBL6RnfQETnltLw/Mdoilj8kEyFQHmnv+ITWYVHRuyXOZeX1rKnGgsOCCBCzh2uT4RCsiH4v+l01Dv2y9PVfkkxZU9sIHtwpkMXVEmhjybBKhSqly3kWYVc4y3eYtmvOG5tvg5qQ1nd3jE8f5jBHyuRg56Jq9DasjpJ2kXRFWZ9H+uleYA7FtGDTgpRfJB+YUzRLFDbyJu9Oc5Y/7jeC1HuizyDzDafb6CKpzjJ77xLp2DR9q5KEi5JP3TNfBz+kw4bwXnluAjVm50s99dzRJiCCLw5c9UWFeo4GMizH+eBgIlyFScs6Q5ANSmoOvAx4YkTdxNoOL8/ukAaazu4=
+  bucket: S3 Bucket
+  revision_type: github
+  application: isiscb-develop-app
+  deployment_group: isiscb-develop-deploymentgroup
