@@ -15,5 +15,5 @@ deploy:
       secure: "JRRf/MY5pJb+xjLG9BPDH3WHLgftpQ+bw6O12SZYi6wc9GXLTs5Eawcd0FW1Jgp+HeqrY9cRCJvl3hecQVvjDYqy75/yly/18lBRjC9s/uaKHbX2a61dqqaaRKAglifuBXWmkZztqWFjBail1a3ir2dNY3jO6azWDjYO8dRd3qmbK73Es8c0Ecin5jhS3k26qQKnefsG1i8XZ3LKuD87vki5dwODIIgk5Z0Z0OGjYDYxG8GRE/9a2u6PCSbBtqpVKufRJxqXoVVOVo3XULEMlSb6M47XtooGZQrF8RvBmCqWCDjtLLTVgJQbeR0phgYK191twGqBqXfLambV0BpdHOxnWLB3QFJMCAdxYPMQ+hD6pnlMW3UbMg5VsPtD8253P9VOD4gpfYRDC0TPkktdQuLRPfZDkuLyp69BK8/ZWqEf83zxTg4CWvDycg3PQ0bFXAome0udussBlemHzp/IFfhhFdkMKoSOdepMqHWVkVC+bPRR09i7uWONNEByKkTshBX8PDUDr+tbEqNkCwCzCn5Kauqq/cnpr4rln+EQl3IvwNIUAxTk3mn+/CRgOBGPlwrnbmhCKHQBze6rCOhQVcn5Yac3/rie/pMsR7ZTA/LTOl7XrOA6afgJucbk8ACAVF+47Bqp9Bhv2+oa8bQsjf25YK+DLfmkKoCZL03EYKg="
   bucket: S3 Bucket
   revision_type: github
-  application: isiscb-develop-app
-  deployment_group: isiscb-develop-deploymentgroup
+  application: "isiscb-develop-app"
+  deployment_group: "isiscb-develop-deploymentgroup"
