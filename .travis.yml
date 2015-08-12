@@ -1,9 +1,10 @@
 language: python
 python:
 - '2.7'
-before_install:
-- sudo apt-get update -qq
-- sudo apt-get install -qq unixodbc-dev
+addons:
+  apt:
+    packages:
+    - unixodbc-dev
 script:
 - pip install nose
 - nosetests
@@ -11,7 +12,7 @@ deploy:
   provider: codedeploy
   access_key_id: AKIAIVNDMWM77W3N2KTA
   secret_access_key:
-      secure: "Cfk9dZUKuvkk6/UUh0MU5xsB7yxfX41e3y45QtHyZptBdAoWbeLtQQkEHKIaTS0/9zi8zo4JAKEDxttU/2wVyR5FhKlRtt9W0/2BI7FwyM2vb4MJRXi1HsfhPJYLR+LKwz+fREXdj0Wz1z97uMl2xFChOCb++ZzpmKAro0FnusHCNr71XNcnaiCRBc9OyAGYKM2GIQydAKcVwwZPN+uqWyIvhtA6Mek5P3I96S2bWd6fGx6ytj12spc2O4kKch7PS58ltsYQ2o6cti9KSTJ3f1FNA9Xc7hLPp2tfwA0b/Pyx07DuIT5lPWzAuqrqCT7k9cgSMabWluOcsQM2W+Rab0RsnoAxklofSQMm7ke6mP0Mt7hQOKAnETe7eEkv1wzmgVezLMbfOumBaIrxe41nzcKzX/T9TjTU+JIkC7XJtvN5fcZ6ofxn9AfHxLNt4KohzoxeKe7MqZn4j/yqAGF56fv4HakdwyIO0XIwXqdCBr21iDtEupsFhR3yzM7OXjF218FpDfB3m1W09/K6yHDb/tV78YZXewhlmFY0VzPjP82WcR3vVkdcer9Vcz5HvyTFt/zAjD3MOQYBOsXD1oSXvproIZMvW7oMWkCqc5JXFfKZHVUn8HZgMknuVaplz0TqzfgVeE3VyYR/DWcaiz9B7Et62sDQUb+CowXDrdAQ6QU="
+      secure: Cfk9dZUKuvkk6/UUh0MU5xsB7yxfX41e3y45QtHyZptBdAoWbeLtQQkEHKIaTS0/9zi8zo4JAKEDxttU/2wVyR5FhKlRtt9W0/2BI7FwyM2vb4MJRXi1HsfhPJYLR+LKwz+fREXdj0Wz1z97uMl2xFChOCb++ZzpmKAro0FnusHCNr71XNcnaiCRBc9OyAGYKM2GIQydAKcVwwZPN+uqWyIvhtA6Mek5P3I96S2bWd6fGx6ytj12spc2O4kKch7PS58ltsYQ2o6cti9KSTJ3f1FNA9Xc7hLPp2tfwA0b/Pyx07DuIT5lPWzAuqrqCT7k9cgSMabWluOcsQM2W+Rab0RsnoAxklofSQMm7ke6mP0Mt7hQOKAnETe7eEkv1wzmgVezLMbfOumBaIrxe41nzcKzX/T9TjTU+JIkC7XJtvN5fcZ6ofxn9AfHxLNt4KohzoxeKe7MqZn4j/yqAGF56fv4HakdwyIO0XIwXqdCBr21iDtEupsFhR3yzM7OXjF218FpDfB3m1W09/K6yHDb/tV78YZXewhlmFY0VzPjP82WcR3vVkdcer9Vcz5HvyTFt/zAjD3MOQYBOsXD1oSXvproIZMvW7oMWkCqc5JXFfKZHVUn8HZgMknuVaplz0TqzfgVeE3VyYR/DWcaiz9B7Et62sDQUb+CowXDrdAQ6QU=
   bucket: S3 Bucket
   revision_type: github
   application: isiscb-develop-app
