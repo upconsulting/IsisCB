@@ -3,7 +3,7 @@ os: linux
 files:
   - source: isiscb
     destination: /home/ec2-user/isiscb/isiscb
-  - source: isiscb/deploy/supervisor.conf
+  - source: isiscb/awsdeploy/supervisor.conf
     destination: /etc/supervisor/conf.d/supervisor.conf
 hooks:
   AfterInstall:
