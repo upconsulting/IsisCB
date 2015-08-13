@@ -25,6 +25,8 @@ os: linux
 files:
   - source: isiscb
     destination: /home/ec2-user/isiscb/isiscb
+  - source: isiscb/deploy/supervisor.conf
+    destination: /etc/supervisor/conf.d/supervisor.conf
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
 #   you can specify a "permissions"
 #   section here that describes special permissions to apply to the files
@@ -86,10 +88,9 @@ files:
   #     runas:
 # During the BeforeInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
-#   BeforeInstall:
-#     - location:
-#       timeout:
-#       runas:
+  BeforeInstall:
+    - location: /home/ec2-user/isiscb/deploy/BeforeInstall.sh
+      timeout: 1000
 #     - location:
 #       timeout:
 #       runas:
