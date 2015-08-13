@@ -17,4 +17,4 @@ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf reread
 supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
 
 cd isiscb
-python manage.py collectstatic
+python manage.py collectstatic --noinput
