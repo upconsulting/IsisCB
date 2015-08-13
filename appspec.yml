@@ -3,12 +3,16 @@ os: linux
 files:
   - source: isiscb
     destination: /home/ec2-user/isiscb/isiscb
+  - source: awsdeploy
+    destination: /home/ec2-user/isiscb/awsdeploy
+  - source: requirements.txt
+    destination: /home/ec2-user/isiscb/requirements.txt    
   - source: awsdeploy/supervisor.conf
     destination: /etc/supervisor/conf.d/supervisor.conf
 hooks:
   AfterInstall:
-    - location: /home/ec2-user/isiscb/isiscb/awsdeploy/BeforeInstall.sh
+    - location: /home/ec2-user/isiscb/awsdeploy/BeforeInstall.sh
       timeout: 1000
   ApplicationStart:
-    - location: /home/ec2-user/isiscb/isiscb/awsdeploy/ApplicationStart.sh
+    - location: /home/ec2-user/isiscb/awsdeploy/ApplicationStart.sh
       timeout: 1000
