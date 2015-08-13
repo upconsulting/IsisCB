@@ -5,5 +5,5 @@ source /usr/local/bin/virtualenvwrapper.sh
 
 workon isiscb
 
-supervisorctl stop isiscb
-supervisorctl shutdown
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf stop isiscb
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf shutdown
