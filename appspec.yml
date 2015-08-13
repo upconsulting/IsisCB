@@ -8,8 +8,8 @@ files:
 
 hooks:
   BeforeInstall:
-    - location: /home/ec2-user/isiscb/isiscb/deploy/BeforeInstall.sh
+    - location: /home/ec2-user/isiscb/isiscb/awsdeploy/BeforeInstall.sh
       timeout: 1000
   ApplicationStart:
-    - location: /home/ec2-user/isiscb/isiscb/deploy/ApplicationStart.sh
+    - location: /home/ec2-user/isiscb/isiscb/awsdeploy/ApplicationStart.sh
       timeout: 1000
