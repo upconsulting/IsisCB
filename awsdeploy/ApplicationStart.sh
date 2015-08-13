@@ -5,4 +5,7 @@ source /usr/local/bin/virtualenvwrapper.sh
 
 workon isiscb
 
+DJANGO_SETTINGS_MODULE="isiscb.development_settings"
+export DJANGO_SETTINGS_MODULE
+
 supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb
