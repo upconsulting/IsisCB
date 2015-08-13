@@ -11,7 +11,7 @@ files:
     destination: /etc/supervisor/conf.d
 hooks:
   AfterInstall:
-    - location: awsdeploy/BeforeInstall.sh
+    - location: awsdeploy/AfterInstall.sh
       timeout: 1000
       runas: ec2-user
   ApplicationStart:
