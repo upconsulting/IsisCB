@@ -8,7 +8,7 @@ files:
   - source: requirements.txt
     destination: /home/ec2-user/isiscb
   - source: awsdeploy/supervisor.conf
-    destination: /etc/supervisor/conf.d/supervisor.conf
+    destination: /etc/supervisor/conf.d
 hooks:
   AfterInstall:
     - location: awsdeploy/BeforeInstall.sh
