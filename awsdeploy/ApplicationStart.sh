@@ -1,1 +1,3 @@
-supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb 
+workon isiscb
+
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb
