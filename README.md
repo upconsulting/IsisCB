@@ -12,6 +12,7 @@ proxy server. For details on configuring nginx to work with Gunicorn,
 see [this documentation](http://docs.gunicorn.org/en/latest/deploy.html).
 
 Here is one procedure for deploying IsisCB from scratch:
+
 1. Install Python2.7.x
 2. Install system packages
 3. Install pip
