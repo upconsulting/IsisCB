@@ -5,9 +5,8 @@ files:
     destination: /home/ec2-user/isiscb/isiscb
   - source: isiscb/deploy/supervisor.conf
     destination: /etc/supervisor/conf.d/supervisor.conf
-
 hooks:
-  BeforeInstall:
+  AfterInstall:
     - location: /home/ec2-user/isiscb/isiscb/awsdeploy/BeforeInstall.sh
       timeout: 1000
   ApplicationStart:
