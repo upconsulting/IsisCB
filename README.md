@@ -13,17 +13,17 @@ see [this documentation](http://docs.gunicorn.org/en/latest/deploy.html).
 
 Here is one procedure for deploying IsisCB from scratch:
 
-1. Install Python2.7.x
-2. Install system packages
-3. Install pip
-4. Download and unpack IsisCB
-5. Install Python dependencies in requirements.txt
-6. Configure settings.py
-7. Install and configure ``nginx``
-8. Configure ``gunicorn``
-9. Configure ``supervisor``
-10. Initialize database
-11. Launch!
+1. [Install Python2.7.x](#1-install-python27x)
+2. [Install system packages](#2-install-system-packages)
+3. [Install pip](#3-install-pip)
+4. [Download and unpack IsisCB](#4-download-and-unpack-isiscb)
+5. [Install Python dependencies in requirements.txt](#5-install-python-dependencies-in-requirementstxt)
+6. [Configure settings.py](#6-configure-settingspy)
+7. [Install and configure ``nginx``](#7-install-and-configure-nginx)
+8. [Configure ``gunicorn``](#8-configure-gunicorn)
+9. [Configure ``supervisor``](#9-configure-supervisor)
+10. [Initialize database](#10-initialize-database)
+11. [Launch!](#11-launch)
 
 ### 1. Install Python2.7.x
 
