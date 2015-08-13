@@ -6,13 +6,15 @@ files:
   - source: awsdeploy
     destination: /home/ec2-user/isiscb/awsdeploy
   - source: requirements.txt
-    destination: /home/ec2-user/isiscb/requirements.txt    
+    destination: /home/ec2-user/isiscb/requirements.txt
   - source: awsdeploy/supervisor.conf
     destination: /etc/supervisor/conf.d/supervisor.conf
 hooks:
   AfterInstall:
-    - location: /home/ec2-user/isiscb/awsdeploy/BeforeInstall.sh
+    - location: awsdeploy/BeforeInstall.sh
       timeout: 1000
+      runas: ec2-user
   ApplicationStart:
-    - location: /home/ec2-user/isiscb/awsdeploy/ApplicationStart.sh
+    - location: awsdeploy/ApplicationStart.sh
       timeout: 1000
+      runas: ec2-user
