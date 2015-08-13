@@ -5,6 +5,9 @@ addons:
   apt:
     packages:
     - unixodbc-dev
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=isiscb.local_settings
 script:
 - pip install nose
 - nosetests
