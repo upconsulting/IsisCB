@@ -3,6 +3,9 @@ cd /home/ec2-user/isiscb
 export WORKON_HOME=$HOME/.virtualenvs
 source /usr/local/bin/virtualenvwrapper.sh
 
+DJANGO_SETTINGS_MODULE="isiscb.development_settings"
+export DJANGO_SETTINGS_MODULE
+
 mkvirtualenv isiscb
 workon isiscb
 
