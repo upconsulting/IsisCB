@@ -23,9 +23,9 @@ os: linux
 #   "files" section altogether. A blank or incomplete "files" section
 #   may cause associated deployments to fail.
 files:
-  - source: isiscb
+    source: isiscb
     destination: /home/ec2-user/isiscb/isiscb
-  - source: isiscb/deploy/supervisor.conf
+    source: isiscb/deploy/supervisor.conf
     destination: /etc/supervisor/conf.d/supervisor.conf
 # For deployments to Amazon Linux, Ubuntu Server, or RHEL instances,
 #   you can specify a "permissions"
@@ -89,7 +89,7 @@ files:
 # During the BeforeInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
   BeforeInstall:
-    - location: /home/ec2-user/isiscb/deploy/BeforeInstall.sh
+      location: /home/ec2-user/isiscb/deploy/BeforeInstall.sh
       timeout: 1000
 #     - location:
 #       timeout:
@@ -106,7 +106,7 @@ files:
 # # During the ApplicationInstall deployment lifecycle event, run the commands
 # #   in the script specified in "location".
   ApplicationStart:
-    - location: /home/ec2-user/isiscb/deploy/ApplicationStart.sh
+      location: /home/ec2-user/isiscb/deploy/ApplicationStart.sh
       timeout: 1000
 #     - location:
 #       timeout:
