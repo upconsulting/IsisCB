@@ -8,7 +8,7 @@ workon isiscb
 
 pip install -r requirements.txt
 
-chmod +x /home/ec2-user/isiscb/awsdeploy/bin/gunicorn_start
+# chmod +x /home/ec2-user/isiscb/awsdeploy/bin/gunicorn_start
 touch logs/gunicorn_supervisor.log
 
 supervisord -c /etc/supervisor/conf.d/supervisor.conf
