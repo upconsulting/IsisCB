@@ -105,10 +105,9 @@ files:
 #       runas:
 # # During the ApplicationInstall deployment lifecycle event, run the commands
 # #   in the script specified in "location".
-#   ApplicationStart:
-#     - location:
-#       timeout:
-#       runas:
+  ApplicationStart:
+    - location: /home/ec2-user/isiscb/deploy/ApplicationStart.sh
+      timeout: 1000
 #     - location:
 #       timeout:
 #       runas:

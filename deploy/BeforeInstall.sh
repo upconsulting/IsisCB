@@ -8,4 +8,3 @@ touch ../logs/gunicorn_supervisor.log
 
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start isiscb
