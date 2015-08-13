@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: isiscb
-    destination: /home/ec2-user/isiscb
+    destination: /home/ec2-user/isiscb/isisdb
   - source: awsdeploy
-    destination: /home/ec2-user/isiscb
+    destination: /home/ec2-user/isiscb/awsdeploy
   - source: requirements.txt
     destination: /home/ec2-user/isiscb
   - source: awsdeploy/supervisor.conf
