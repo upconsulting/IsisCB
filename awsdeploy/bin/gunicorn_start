@@ -1,3 +1,4 @@
+#!/bin/sh
 NAME="isiscb"
 DJANGODIR=/home/ec2-user/isiscb/isiscb/isiscb
 SOCKFILE=/home/ec2-user/isiscb/run/gunicorn.sock
