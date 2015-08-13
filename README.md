@@ -43,7 +43,7 @@ that you have the following packages installed:
 You can use the package manager if your choice. E.g. via
 [Homebrew](http://brew.sh/):
 
-```bash
+```shell
 $ brew install unixodbc-dev openssl postgresql_psycopg2
 ```
 
@@ -52,13 +52,13 @@ $ brew install unixodbc-dev openssl postgresql_psycopg2
 As of Python 2.7.9, pip ships along with your Python installation. To verify
 that pip is installed, try:
 
-```bash
+```shell
 $ pip -V
 ```
 
 An easy way to install pip is via the get-pip.py script:
 
-```bash
+```shell
 $ curl https://bootstrap.pypa.io/get-pip.py -o - | python
 ```
 
@@ -77,7 +77,7 @@ unpack it wherever you keep your apps.
 The file ``requirements.txt`` describes all of the Python dependencies for
 IsisCB. Install them all at once using:
 
-```bash
+```shell
 $ cd /path/to/unzipped/isiscb
 $ pip install -r requirements.txt
 ```
@@ -87,7 +87,7 @@ $ pip install -r requirements.txt
 [virtualenvwrapper](https://virtualenvwrapper.readthedocs.org/en/latest/). So
 you would first create the virtualenv, and install the dependencies therein:
 
-```bash
+```shell
 $ mkvirtualenv isiscb
 $ workon isiscb
 $ cd /path/to/unzipped/isiscb
@@ -156,7 +156,7 @@ Complete documentation for settings.py can be found
 To select your configuration, set the ``DJANGO_SETTINGS_MODULE`` environment
 variable. For example:
 
-```bash
+```shell
 $ DJANGO_SETTINGS_MODULE="isiscb.development_settings"
 $ export DJANGO_SETTINGS_MODULE
 ```
@@ -165,7 +165,7 @@ $ export DJANGO_SETTINGS_MODULE
 
 You can install nginx using your favorite package manager. For example:
 
-```bash
+```shell
 $ brew install nginx
 ```
 
@@ -236,13 +236,13 @@ http {
 
 You can start nginx with:
 
-```bash
+```shell
 $ sudo nginx
 ```
 
 To stop nginx, use:
 
-```bash
+```shell
 $ sudo nginx -s stop
 ```
 
@@ -252,7 +252,7 @@ We use a script called ``gunicorn_start`` to serve IsisCB via Gunicorn, shown
 below. You'll need to modify some lines based on the specifics of your
 deployment (e.g. file paths, location of socket file).
 
-```bash
+```shell
 #!/bin/sh
 
 cd /home/ec2-user/isiscb
@@ -309,7 +309,7 @@ upon deployment.
 Before running IsisCB for the first time, you'll need to initialize the
 database. In the folder containing ```manage.py``, run the following commands:
 
-```bash
+```shell
 $ python manage.py makemigrations
 $ python manage.py migrate
 $ python manage.py createsuperuser
@@ -325,7 +325,7 @@ supervisor. Our start-up procedure looks like this:
 
 Start supervisor:
 
-```bash
+```shell
 $ supervisord -c /etc/supervisor/conf.d/supervisor.conf
 $ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf reread
 $ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
@@ -333,20 +333,20 @@ $ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
 
 Update static files and perform any new migrations:
 
-```bash
+```shell
 $ python manage.py collectstatic --noinput
 $ python manage.py migrate
 ```
 
 Start the IsisCB app:
 
-```bash
+```shell
 $ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb
 ```
 
 You can monitor the status of the application using:
 
-```bash
+```shell
 $ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf status
 isiscb                           RUNNING   pid 7227, uptime 1:35:00
 ```
