@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'isiscb',
         'USER': 'upconsulting',
         'PASSWORD': POSTGRESQL_PASSWORD,
-        'HOST': 'isiscb-db-instance.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
+        'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
         'PORT': '5432',
     }
 }

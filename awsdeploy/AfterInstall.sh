@@ -20,3 +20,4 @@ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
 
 cd isiscb
 python manage.py collectstatic --noinput
+python manage.py migrate
