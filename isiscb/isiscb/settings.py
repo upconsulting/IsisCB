@@ -107,6 +107,7 @@ from secrets import AWS_SECRET_ACCESS_KEY
 AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
 AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_SECURE_URLS = False
 
 STATICFILES_LOCATION = 'static'
 STATICFILES_STORAGE = 'custom_storages.StaticStorage'
