@@ -76,7 +76,41 @@ class Authority(models.Model):
     description = models.TextField()
     type_controlled = models.CharField()
     alternative_names = models.TextField()
-    # todo
+    
+    date_range = models.OneToOneField(Attribute)
+    # what should be the field type for this one:
+    date_for_sorting = models.CharField()
+    
+    # controlled, values: SPW, Neu, MW, SHOT
+    classification_system = models.CharField()
+    classification_code = models.CharField()
+    classification_hierarchy = models.CharField()
+    provenance = models.TextField()
+    notes_on_content = models.TextField()
+    
+    # why are the following in orange?
+    authority_id_temp = models.CharField()
+    authority_id_2_from_thesaurus_id = models.CharField()
+    authority_id_no_longer_used = models.CharField()
+    redirect_to_no_longer_used = models.CharField()
+    authority_id_2_from_journal_id = models.CharField()
+    
+    uri = models.URLField()
+    
+    personal_name_last = models.CharField()
+    personal_name_first = models.CharField()
+    personal_name_suffix = models.CharField()
+    personal_name_preferred_form = models.CharField()
+    
+    # admin fields
+    record_status = models.CharField()
+    redirect_to = models.CharField()
+    record_history = models.CharField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField()
+    modified_on = models.DateTimeField(auto_now=True)
+    modified_by = models.CharField()
+    record_locked = models.CharField()
 
 class ACRelation(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
