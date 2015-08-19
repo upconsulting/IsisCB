@@ -10,6 +10,7 @@ env:
     - DJANGO_SETTINGS_MODULE=isiscb.local_settings
 script:
 - pip install nose
+- cd isiscb
 - nosetests
 deploy:
   provider: codedeploy
