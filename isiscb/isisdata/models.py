@@ -1,15 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
+import datetime
+import pickle
 
 class PickleField(models.TextField):
-    def get_db_prep_save(self, value):
+    def get_prep_value(self, value, *args, **kwargs):
         """Serialize and save as text"""
         if value is None:
             return
         return pickle.dumps(value)
 
-    def to_python(self, value):
+    def from_db_value(self, value, *args, **kwargs):
         """Deserialize; yields object of original type"""
+
         return pickle.loads(value)
 
 
@@ -27,10 +30,16 @@ class CuratedMixin(models.Model):
 
     # This isn't very well documented, but Django has a built-in logging system
     #  for the admin interface: https://github.com/django/django/blob/master/django/contrib/admin/models.py
-    created_on = models.DateTimeField(auto_now_add=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True)
     created_by = models.ForeignKey(User, related_name='+')
-    modified_on = models.DateTimeField(auto_now=True)
+    modified_on = models.DateTimeField(auto_now=True, null=True)
     modified_by = models.ForeignKey(User, related_name='+')
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_on = datetime.datetime.today()
+        self.modified_on = datetime.datetime.today()
+        return super(CuratedMixin, self).save(*args, **kwargs)
 
 
 class AttributeMixin(models.Model):
@@ -358,7 +367,7 @@ class Attribute(CuratedMixin, URIMixin):
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
-    date_iso = models.DateField(blank=True)
+    date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
 
 
