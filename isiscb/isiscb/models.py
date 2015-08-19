@@ -300,7 +300,43 @@ class ACRelation(models.Model, CuratedMixin, URIMixin):
 
 class CCRelation(models.Model, CuratedMixin, URIMixin):
     id = models.CharField(max_length=200, primary_key=True)
-    # todo
+    
+    '''
+    Currently not used, but crucial to development of next generation relationship tools
+    '''
+    name = models.CharField()
+    
+    '''
+    Currently not used, but crucial to development of next generation relationship tools
+    '''
+    description = models.TextField()
+    
+    INCLUDES_CHAPTER = 'IC'
+    INCLUDES_SERIES_ARTICLE = 'ISA'
+    REVIEW_OF = 'RO'
+    RESPONDS_TO = 'RE'
+    ASSOCIATED_WITH = 'AS'
+    TYPE_CHOICES = (
+        (INCLUDES_CHAPTER, 'Includes Chapter'),
+        (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (REVIEW_OF, 'Is Review Of'),
+        (RESPONDS_TO, 'Responds To'),
+        (ASSOCIATED_WITH, 'Is Associated With')
+    )
+    type_controlled = models.CharField(max_length=3, choices=TYPE_CHOICES,
+                                       help_text="""
+    Type of relationship between two citation records.""")
+    
+    type_free = models.CharField(help_text="""
+    Type of relationship as used in the citation.""")
+    
+    subject = models.ForeignKey(Citation)
+    object = models.ForeignKey(Citation)
+    
+    data_source_order_in_field = models.IntegerField(default=0, help_text="""
+    Order in which the related items should be presented. e.g. for related authors, 
+    order in which they should be presented. This field is required for some relationships 
+    and not allowed for others [to be specified]""")
 
 
 class Attribute(models.Model, CuratedMixin, URIMixin):
