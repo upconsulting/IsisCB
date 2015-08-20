@@ -12,12 +12,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
@@ -37,7 +34,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'isisdata',
+    'storages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -75,12 +72,19 @@ WSGI_APPLICATION = 'isiscb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+from secrets import POSTGRESQL_PASSWORD
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'isiscb',
+        'USER': 'upconsulting',
+        'PASSWORD': POSTGRESQL_PASSWORD,
+        'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
+
 
 
 # Internationalization
@@ -100,6 +104,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
 
-STATIC_ROOT = '../static/'
+# secrets.py should set the AWS_SECRET_ACCESS_KEY
+from secrets import AWS_SECRET_ACCESS_KEY
+
+AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
+AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
+AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
+AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
+AWS_S3_SECURE_URLS = False
+
+STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
+STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+
+MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
+MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
+DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
+
+AWS_HEADERS = {
+    'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+    'Cache-Control': 'max-age=94608000',
+}
