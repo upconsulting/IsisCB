@@ -1,4 +1,0 @@
-# For S3 access
-
-AWS_SECRET_ACCESS_KEY = 'ERiNwG+PsfRxP5ukBUf7//b8N5v8uOOYA+P7zgau'
-POSTGRESQL_PASSWORD = 'ZE&e5adR'
