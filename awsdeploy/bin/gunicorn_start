@@ -2,22 +2,20 @@
 
 cd /home/ec2-user/isiscb
 
+# This is necessary for virtualenvwrapper (mkvirtualenv, workon) to work.
 export WORKON_HOME=$HOME/.virtualenvs
 source /usr/local/bin/virtualenvwrapper.sh
 
 NAME="isiscb"
-DJANGODIR=/home/ec2-user/isiscb/isiscb
-SOCKFILE=/tmp/gunicorn.sock
+DJANGODIR=/home/ec2-user/isiscb/isiscb  # Directory that contains manage.py.
+SOCKFILE=/tmp/gunicorn.sock             # nginx connects here.
 NUM_WORKERS=3
-DJANGO_SETTINGS_MODULE=isiscb.settings
 DJANGO_WSGI_MODULE=isiscb.wsgi
 
 echo "Starting $NAME as `whoami`"
 
 cd $DJANGODIR
 workon isiscb
-
-export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 
 RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR

@@ -6,5 +6,6 @@ source /usr/local/bin/virtualenvwrapper.sh
 
 workon isiscb
 
-# Supervisor manages gunicorn. See awsdeploy/supervisor.conf.
-supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb
+# Shut down gunicorn gracefully.
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf stop isiscb
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf shutdown

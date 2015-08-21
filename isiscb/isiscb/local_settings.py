@@ -25,10 +25,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_extensions',
-    'storages',
     'simple_history',
     'isisdata',
+    'storages',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -92,5 +91,3 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-
-DOMAIN = 'isiscb-develop.aplacecalledup.com'
