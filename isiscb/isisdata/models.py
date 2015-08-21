@@ -108,7 +108,14 @@ class Citation(CuratedMixin, AttributeMixin, URIMixin):
     description = models.TextField(help_text="""
     Used for additional bibliographic description, such as content summary. For
     abstracts use the 'Abstract' field.""")
-
+    
+    # this one is missing from Stephen's list
+    additional_titles = models.TextField(help_text="""
+    Alternative names used for the resource. Use for translated titles 
+    (e.g. titles in a language different than a primary language of the work. 
+    If the work itself is a translation, than the translated title is the ‘Title’). 
+    The translated work may be linked to the original Citation.""") 
+    
     BOOK = 'BO'
     ARTICLE = 'AR'
     CHAPTER = 'CH'
@@ -120,7 +127,7 @@ class Citation(CuratedMixin, AttributeMixin, URIMixin):
     INTERACTIVE = 'IN'
     WEBSITE = 'WE'
     APPLICATION = 'AP'
-
+    
     TYPE_CHOICES = (
         (BOOK, 'Book'),
         (ARTICLE, 'Article'),
@@ -134,59 +141,38 @@ class Citation(CuratedMixin, AttributeMixin, URIMixin):
         (WEBSITE, 'Website'),
         (APPLICATION, 'Application'),
     )
-
+    
     type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
                                        help_text="""
     This list can be extended to the resource types specified by Doublin Core
     Recource Types http://dublincore.org/documents/resource-typelist/""")
-
+    
     abstract = models.TextField(help_text="""
     Abstract or detailed summaries of a work.""")
-
+    
     edition_details = models.TextField(help_text="""
     Use for describing the edition or version of the resource. Include names of
     additional contributors if necessary for clarification (such as translators,
     introduction by, etc). Always, use relationship table to list contributors
     (even if they are specified here).""")
-
+    
     physical_details = models.CharField(max_length=255, help_text="""
     For describing the physical description of the resource. Use whatever
     information is appropriate for the type of resource.""")
-
+    
     # Storing this in the model would be kind of hacky. This will make it easier
     #  to do things like sort or filter by language.
     language = models.ManyToManyField('Language', help_text="""
     Language of the resource. Multiple languages can be specified.""")
-
-
+    
+    
     part_details = models.OneToOneField('PartDetails', help_text="""
     New field: contains volume, issue, page information for works that are parts
     of larger works.""")
-
-    # url = models.URLField()   # What is this for?
-
+    
     related_citations = models.ManyToManyField('Citation', through='CCRelation', related_name='citations_related')
     related_authorities = models.ManyToManyField('Citation', through='ACRelation', related_name='authorities_related')
-
-    # Not sure if this is the right approach? The type of relationship is set
-    #  using a controlled vocabulary in the relationship model itself.
-    #  Presumably it should be extensible, so hard-coding these types here seems
-    #  limiting. If we want to display different types in different ways in our
-    #  views, we can separate them out using filters.
-
-    # associated objects:
-    # author_editor = models.ManyToManyField(Authority, through='ACRelation')
-    # publication_date = models.OneToOneField(Attribute)
-    # publisher = models.ManyToManyField(Authority, through='ACRelation')
-    # book_series = models.ManyToManyField(Citation, through='CCRelation')
-    # journal_name = models.ManyToManyField(Authority, through='ACRelation')
-    # reviewed_books = models.ManyToManyField(Citation, through='CCRelation')
-    # source_book_for_chapter = models.ManyToManyField(Citation, through='CCRelation')
-    # what is this?
-    # subject: models.ManyToManyField(Authority, through='ACRelation')
-
-    # full_citation_from_various = models.CharField(max_length=255)   # Unwanted
-
+    
     EXTERNAL_PROOF = 'EX'
     QUERY_PROOF = 'QU'
     HOLD = 'HO'
@@ -197,12 +183,12 @@ class Citation(CuratedMixin, AttributeMixin, URIMixin):
         (HOLD, 'Hold'),
         (RLG_CORRECT, 'RLG Correct')
     )
-
+    
     record_action = models.CharField(max_length=2, choices=ACTION_CHOICES)
     """
     Used to track the record through curation process.
     """
-
+    
     CONTENT_LIST = 'CL'
     SOURCE_BOOK = 'SB'
     SCOPE = 'SC'
@@ -260,10 +246,28 @@ class Authority(CuratedMixin, URIMixin):
     controlled type vocabulary.""")
 
     # QUESTION: How is this related to "tagging" that users can do?
-    # controlled, values: SPW, Neu, MW, SHOT
-    classification_system = models.CharField(max_length=255)
-    classification_code = models.CharField(max_length=255)
-    classification_hierarchy = models.CharField(max_length=255)
+    SWP = 'SWP'
+    NEU = 'NEU'
+    MW = 'MW'
+    SHOT = 'SHOT'
+    CLASS_SYSTEM_CHOICES = (
+        (SWP, 'SWP'),
+        (NEU, 'Neu'),
+        (MW, 'MW'),
+        (SHOT, 'SHOT')
+    )
+    classification_system = models.CharField(max_length=4, choices=CLASS_SYSTEM_CHOICES,
+                                             help_text="""
+    Specifies the classification system that is the source of the authority. Used to group 
+    resources by the Classification system. The system used currently is the Weldon System. 
+    All the other ones are for reference or archival purposes only.""")
+    classification_code = models.CharField(max_length=255, help_text="""
+    alphanumeric code used in previous classification systems to describe 
+    classification terms. Primarily of historical interest only. Used primarily 
+    for Codes for the classificationTerms. however, can be used for other 
+    kinds of terms as appropriate.""")
+    classification_hierarchy = models.CharField(max_length=255, help_text="""
+    Used for Classification Terms to describe where they fall in the hierarchy.""")
 
     # QUESTION: These seems specific to the PERSON type. Should we be modeling
     #  Authority types separately? E.g. each type could be a child class of
@@ -275,6 +279,8 @@ class Authority(CuratedMixin, URIMixin):
     personal_name_first = models.CharField(max_length=255)
     personal_name_suffix = models.CharField(max_length=255)
     personal_name_preferred_form = models.CharField(max_length=255)
+    
+    # what about: redirectTo, dateRange, date.for.sorting?
 
 
 # QUESTION: Can relations have attributes?
@@ -289,47 +295,69 @@ class ACRelation(CuratedMixin, URIMixin):
     type_controlled = models.CharField(max_length=255)
     type_broad_controlled = models.CharField(max_length=255)
     type_free = models.CharField(max_length=255)
-
-    data_source_field = models.CharField(max_length=255)
-    data_display_order = models.CharField(max_length=255)
+    
+    name_for_display_in_citation = models.CharField(max_length=255, help_text="""
+    Display for the authority as it is to be used when being displayed with the citation. 
+    Eg. the form of the author’s name as it appears on a publication--say, J.E. Koval-- 
+    which might be different from the name of the authority--Jenifer Elizabeth Koval.""")
+    
+    # currently not used
     # confidence_measure = models.FloatField(validators = [MinValueValidator(0), MaxValueValidator(1)])
     # relationship_weight = models.FloatField(validators = [MinValueValidator(0), MaxValueValidator(2)])
+    
+    # the following are missing from Stephen's list:
+    name_format_wester_asian_etc = models.CharField(max_length=255, help_text="""
+    Describes the format of the name (specifying the display format 
+    for the last and first names)""")
+    redirect_to = models.CharField(max_length=255, help_text="""
+    Redirect from duplicate or depreciated record to the current one.""")
 
-    # why are the following in orange?
-    journal_id_old = models.CharField(max_length=255)
-    thesaurus_id_old = models.CharField(max_length=255)
-    data_work_1 = models.CharField(max_length=255)
-    citation_8_digit_id = models.CharField(max_length=255)
-    authority_8_digit_id = models.CharField(max_length=255)
-    record_id_old = models.CharField(max_length=255)
-
-    name_format_wester_asian_etc = models.CharField(max_length=255)
-    name_as_entered = models.CharField(max_length=255)
-    name_for_display_in_citation = models.CharField(max_length=255)
-    last = models.CharField(max_length=255)
-    first = models.CharField(max_length=255)
-    suffix = models.CharField(max_length=255)
-
-    classification_code = models.CharField(max_length=255)
-
-    # AuthorityID of the record that succeeds this
-    # record if this record has become Inactive.
-    redirect_to = models.CharField(max_length=255)
-
+class AARelation(CuratedMixin, URIMixin):
+    id = models.CharField(max_length=200, primary_key=True)
+    # Currently not used, but crucial to development of next generation relationship tools:
+    name = models.CharField(max_length=255)
+    # Currently not used, but crucial to development of next generation relationship tools:
+    description = models.TextField()
+    
+    IDENTICAL_TO = 'IDTO'
+    PARENT_OF = 'PAOF'
+    PREVIOUS_TO = 'PRETO'
+    OFFICER_OF = 'OFOF'
+    ASSOCIATED_WITH = 'ASWI'
+    TYPE_CHOICES = (
+        (IDENTICAL_TO, 'Is Identical To'),
+        (PARENT_OF, 'Is Parent Of'),
+        (PREVIOUS_TO, 'Happened Previous To'),
+        (OFFICER_OF, 'Is Officer Of'),
+        (ASSOCIATED_WITH, 'Is Associated With')
+    )
+    type_controlled = models.CharField(max_length=5, choices=TYPE_CHOICES,
+                                       help_text="""
+    Controlled term specifying the nature of the relationship 
+    (the predicate between the subject and object).""")
+    
+    type_free = models.CharField(max_length=255, help_text="""
+    Free text description of the relationship.""")
+    
+    subject = models.ForeignKey('Authority', related_name='relations_from')
+    object = models.ForeignKey('Authority', related_name='relations_to')
+    
+    # missing from Stephen's list: objectType, subjectType
+    
 
 class CCRelation(CuratedMixin, URIMixin):
     id = models.CharField(max_length=200, primary_key=True)
-
+    
     '''
     Currently not used, but crucial to development of next generation relationship tools
     '''
     name = models.CharField(max_length=255)
-
+    
     '''
     Currently not used, but crucial to development of next generation relationship tools
     '''
     description = models.TextField()
-
+    
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
     REVIEW_OF = 'RO'
@@ -345,13 +373,14 @@ class CCRelation(CuratedMixin, URIMixin):
     type_controlled = models.CharField(max_length=3, choices=TYPE_CHOICES,
                                        help_text="""
     Type of relationship between two citation records.""")
-
+    
     type_free = models.CharField(max_length=255, help_text="""
     Type of relationship as used in the citation.""")
-
+    
     subject = models.ForeignKey('Citation', related_name='relations_from')
     object = models.ForeignKey('Citation', related_name='relations_to')
-
+    
+    # missing from Stephen's list
     data_source_order_in_field = models.IntegerField(default=0, help_text="""
     Order in which the related items should be presented. e.g. for related authors,
     order in which they should be presented. This field is required for some relationships
@@ -360,13 +389,15 @@ class CCRelation(CuratedMixin, URIMixin):
 
 class Attribute(CuratedMixin, URIMixin):
     id = models.CharField(max_length=200, primary_key=True)
-
+    
+    description = models.TextField()
+    
     # I'm a little unclear about how this will work with non-string data.
     value = PickleField()
     type_controlled = models.CharField(max_length=255)
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
-
+    
     date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
 
@@ -386,7 +417,7 @@ class PartDetails(models.Model):
     pages_free_text = models.CharField(max_length=255, blank=True)
     page_begin = models.IntegerField(blank=True, null=True)
     page_end = models.IntegerField(blank=True, null=True)
-
+    
     sort_order = models.IntegerField(default=0, help_text="""
     New field: provides a sort order for works that are part of a larger work.
     """)
@@ -402,7 +433,7 @@ class LocationSchema(models.Model):
     """
     Represents an SRID.
     """
-
+    
     name = models.CharField(max_length=255)
 
 
@@ -410,7 +441,7 @@ class Location(models.Model):
     """
     SRID-agnostic decimal coordinate.
     """
-
+    
     NORTH = 'N'
     SOUTH = 'S'
     EAST = 'E'
@@ -425,6 +456,6 @@ class Location(models.Model):
     )
     latitude = models.FloatField()
     latitude_direction = models.CharField(max_length=1, choices=LAT_CARDINAL)
-
+    
     longitude = models.FloatField()
     longitude_direction = models.CharField(max_length=1, choices=LON_CARDINAL)
