@@ -268,20 +268,20 @@ class Authority(CuratedMixin, URIMixin):
     kinds of terms as appropriate.""")
     classification_hierarchy = models.CharField(max_length=255, help_text="""
     Used for Classification Terms to describe where they fall in the hierarchy.""")
+    
+    # what about: redirectTo, dateRange, date.for.sorting?
 
+class Person(Authority):
     # QUESTION: These seems specific to the PERSON type. Should we be modeling
     #  Authority types separately? E.g. each type could be a child class of
     #  Authority, and we can preserve generic relations to Attributes using
     #  multi-table inheritance. Another reason to do this is that we want
     #  users to be able to "claim" their PERSON record -- this is much more
     #  straightforward with separate models.
+    # are those calculated?
     personal_name_last = models.CharField(max_length=255)
     personal_name_first = models.CharField(max_length=255)
     personal_name_suffix = models.CharField(max_length=255)
-    personal_name_preferred_form = models.CharField(max_length=255)
-    
-    # what about: redirectTo, dateRange, date.for.sorting?
-
 
 # QUESTION: Can relations have attributes?
 class ACRelation(CuratedMixin, URIMixin):
@@ -291,10 +291,60 @@ class ACRelation(CuratedMixin, URIMixin):
 
     name = models.CharField(max_length=255)
     description = models.TextField()
-    # the following two should come from a controlled vocabulary
-    type_controlled = models.CharField(max_length=255)
-    type_broad_controlled = models.CharField(max_length=255)
-    type_free = models.CharField(max_length=255)
+    
+    # Allowed values depend on the value of the Type.Broad,controlled
+    # if Type.Broad.controlled = ‘HasPersonalResponsibilityFor’
+    AUTHOR = 'AU'
+    EDITOR = 'ED'
+    ADVISOR = 'AD'
+    CONTRIBUTOR = 'CO'
+    TRANSLATOR = 'TR'
+    # if Type.Broad.controlled = ‘ProvidesSubjectContentAbout’
+    SUBJECT = 'SU'
+    CATEGORY = 'CA'
+    # if Type.Broad.controlled = ‘IsInstitutionalHostOf’
+    PUBLISHER = 'PU'
+    SCHOOL = 'SC'
+    INSTITUTION = 'IN'
+    MEETING = 'ME'
+    # if Type.Broad.controlled = ‘IsPublicationHostOf’
+    PERIODICAL = 'PE'
+    BOOK_SERIES = 'BS'
+    TYPE_CHOICES = (
+        (AUTHOR, 'Author'),
+        (EDITOR, 'Editor'),
+        (ADVISOR, 'Advisor'),
+        (CONTRIBUTOR, 'Contributor'),
+        (TRANSLATOR, 'Translator'),
+        (SUBJECT, 'Subject'),
+        (CATEGORY, 'Category'),
+        (PUBLISHER, 'Publisher'),
+        (SCHOOL, 'School'),
+        (INSTITUTION, 'Institution'),
+        (MEETING, 'Meeting'),
+        (PERIODICAL, 'Periodical'),
+        (BOOK_SERIES, 'Book Series')
+    )
+    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES, help_text="""
+    Used to specify the nature of the relationship between authority (as the subject) 
+    and the citation (as the object) more specifically than Type.Broad.controlled.""")
+    
+    PERSONAL_RESPONS = 'PR'
+    SUBJECT_CONTENT = 'SC'
+    INSTITUTIONAL_HOST = 'IH'
+    PUBLICATION_HOST = 'PH'
+    BROAD_TYPE_CHOICES = (
+        (PERSONAL_RESPONS, 'Has Personal Responsibility For'),
+        (SUBJECT_CONTENT, 'Provides Subject Content About'),
+        (INSTITUTIONAL_HOST, 'Is Institutional Host Of'),
+        (PUBLICATION_HOST, 'IsPublicationHostOf')
+    )
+    type_broad_controlled = models.CharField(max_length=2, choices=BROAD_TYPE_CHOICES, help_text="""
+    Used to specify the nature of the relationship between authority (as the subject) 
+    and the citation (as the object) more broadly than Type.controlled""")
+    type_free = models.CharField(max_length=255, help_text="""
+    Free text description of the role that the authority plays in the 
+    citation (e.g. ‘introduction by’, ‘dissertation supervisor’, etc)""")
     
     name_for_display_in_citation = models.CharField(max_length=255, help_text="""
     Display for the authority as it is to be used when being displayed with the citation. 
