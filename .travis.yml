@@ -11,7 +11,8 @@ env:
 script:
 - pip install nose
 - cd isiscb
-- nosetests
+- python manage.py migrate
+- python manage.py test
 deploy:
   provider: codedeploy
   access_key_id: AKIAIVNDMWM77W3N2KTA
