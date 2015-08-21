@@ -205,6 +205,9 @@ class Citation(CuratedMixin, AttributeMixin, URIMixin):
     """
     Used to control printing in the paper volume of the CB.
     """
+    
+    # I turned the relationship around, ok?
+    linked_data = models.OneToOneField('LinkedData')
 
 
 class Authority(CuratedMixin, URIMixin):
@@ -270,6 +273,9 @@ class Authority(CuratedMixin, URIMixin):
     Used for Classification Terms to describe where they fall in the hierarchy.""")
     
     # what about: redirectTo, dateRange, date.for.sorting?
+    
+    # I turned the relationship around, ok?
+    linked_data = models.OneToOneField('LinkedData')
 
 class Person(Authority):
     # QUESTION: These seems specific to the PERSON type. Should we be modeling
@@ -509,3 +515,26 @@ class Location(models.Model):
     
     longitude = models.FloatField()
     longitude_direction = models.CharField(max_length=1, choices=LON_CARDINAL)
+
+# not sure how this class fits
+class LinkedData(CuratedMixin, URIMixin)
+    id = models.CharField(max_length=200, primary_key=True)
+    description = models.TextField()
+    
+    DOI = 'DOI'
+    ISBN = 'ISBN'
+    ISSN = 'ISSN'
+    VIAF = 'VIAF'
+    # more to come
+    TYPE_CHOICES = (
+        (DOI, 'DOI'),
+        (ISBN, 'ISBN'),
+        (ISSN, 'ISSN'),
+        (VIAF, 'VIAF')
+    )
+    type_controlled = models.CharField(max_length=4, choices=TYPE_CHOICES,
+                                       help_text="""
+    Type of linked resource.""")
+    # is this being used?
+    type_controlled_broad = models.CharField(max_length=255, blank=True)
+    type_free = models.CharField(max_length=255, blank=True)
