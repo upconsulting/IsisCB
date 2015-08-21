@@ -13,7 +13,7 @@ class TestAttributeValue(unittest.TestCase):
             username = 'test',
         )[0]
 
-    def test_pickle_string(self):
+    def test_value_string(self):
         instance = Attribute(
             id='testattribute1',
             value = 'string',
@@ -30,7 +30,7 @@ class TestAttributeValue(unittest.TestCase):
         query = Attribute.objects.filter(value='string')
         self.assertEqual(query.count(), 1)
 
-    def test_pickle_int(self):
+    def test_value_int(self):
         instance = Attribute(
             id='testattribute1',
             value = 1,
@@ -46,7 +46,7 @@ class TestAttributeValue(unittest.TestCase):
         query = Attribute.objects.filter(value=1)
         self.assertEqual(query.count(), 1)
 
-    def test_pickle_float(self):
+    def test_value_float(self):
         instance = Attribute(
             id='testattribute1',
             value = 2.2,
@@ -62,7 +62,7 @@ class TestAttributeValue(unittest.TestCase):
         query = Attribute.objects.filter(value=2.2)
         self.assertEqual(query.count(), 1)
 
-    def test_pickle_list(self):
+    def test_value_list(self):
         instance = Attribute(
             id='testattribute1',
             value = ['list', 1, 2.2],
@@ -77,7 +77,7 @@ class TestAttributeValue(unittest.TestCase):
         query = Attribute.objects.filter(value=['list', 1, 2.2])
         self.assertEqual(query.count(), 1)
 
-    def test_pickle_datetime(self):
+    def test_value_datetime(self):
         now = datetime.datetime.now()
         instance = Attribute(
             id='testattribute1',
