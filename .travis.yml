@@ -11,7 +11,7 @@ env:
 script:
 - pip install nose
 - cd isiscb
-- python migrate
+- python manage.py migrate
 - nosetests
 deploy:
   provider: codedeploy
