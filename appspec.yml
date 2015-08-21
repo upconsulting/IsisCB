@@ -10,10 +10,10 @@ files:
   - source: awsdeploy/supervisor.conf
     destination: /etc/supervisor/conf.d
 hooks:
-  ApplicationStop:
-    - location: awsdeploy/ApplicationStop.sh
-      timeout: 1000
-      runas: ec2-user
+  # ApplicationStop:
+  #   - location: awsdeploy/ApplicationStop.sh
+  #     timeout: 1000
+  #     runas: ec2-user
   AfterInstall:
     - location: awsdeploy/AfterInstall.sh
       timeout: 1000
