@@ -7,5 +7,5 @@ source /usr/local/bin/virtualenvwrapper.sh
 workon isiscb
 
 # Shut down gunicorn gracefully.
-supervisorctl -c /etc/supervisor/conf.d/supervisor.conf stop isiscb
-supervisorctl -c /etc/supervisor/conf.d/supervisor.conf shutdown
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf stop isiscb || true
+supervisorctl -c /etc/supervisor/conf.d/supervisor.conf shutdown || true
