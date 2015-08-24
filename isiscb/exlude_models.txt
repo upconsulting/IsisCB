@@ -1,9 +1,0 @@
-HistoricalCitation
-HistoricalAuthority
-HistoricalACRelation
-HistoricalAARelation
-HistoricalCCRelation
-HistoricalAttribute
-HistoricalLinkedData
-HistoricalTracking
-HistoricalPerson
