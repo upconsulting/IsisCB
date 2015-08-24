@@ -5,6 +5,14 @@ from isisdata.models import *
 import datetime
 import xml.etree.ElementTree as ET
 import os
+import copy
+
+def fast_iter(context, func):
+    for event, e in context:
+        func(e)
+        # e.clear()
+    del context
+
 
 fm_namespace = '{http://www.filemaker.com/fmpdsoresult}'
 
@@ -104,22 +112,38 @@ authorityTypes = {
     'ClassificationTerm': 'CT',
     'Concept': 'CO',
     'CreativeWork': 'CW',
-    'Event': 'EV'
+    'Event': 'EV',
+    'Cross-reference': ''
 }
 
 # Translates fields from FM Authority:RecordStatus to Authority.record_status
 recordStatusTypes = {
-    'Active': 'AC',
-    'Duplicate': 'DU',
-    'Redirect': 'RD',
+    'ACTIVE': 'AC',
+    'DUPLICATE': 'DU',
+    'REDIRECT': 'RD',
+    'DELETE': 'DL',
+    'NEEDSTOBEFIXED': 'NF'
+}
+
+classificationSystems = {
+    'WELDON THESAURUS TERMS (2002-PRESENT)': 'SWP',
+    'SWP': 'SWP',
+    'NEU': 'NEU',
+    'MW': 'MW',
+    'SHOT': 'SHOT',
+    'SHOT THESAURUS TERMS': 'SHOT',
+    'GUERLAC COMMITTEE CLASSIFICATION SYSTEM (1953-2001)': 'GUE',
+    'WHITROW CLASSIFICATION SYSTEM (1913-1999)': 'MW',
+    'WELDON CLASSIFICATION SYSTEM (2002-PRESENT)': 'SWP',
+    'FORUM FOR THE HISTORY OF SCIENCE IN AMERICA': 'FHSA',
 }
 
 # Translates fields from FM Authority to Authority model.
 authorityFields = {
     'ID': ('id', passthrough),
     'Name': ('name', passthrough),
-    'Type.controlled': ('type_controlled', lambda x: authorityTypes[x]),
-    'ClassificationSystem': ('classification_system', as_upper),
+    'Type.controlled': ('type_controlled', lambda x: authorityTypes.get(x, None)),
+    'ClassificationSystem': ('classification_system', lambda x: classificationSystems[x.upper()]),
     'ClassificationCode': ('classification_code', passthrough),
     'ClassificationHierarchy': ('classification_hierarchy', passthrough),
     'NotesOnContent': ('administrator_notes', passthrough),
@@ -130,7 +154,7 @@ authorityFields = {
     'ModifiedBy': ('modified_by_fm', passthrough),
     'ModifiedOn': ('modified_on_fm', as_datetime),
     'Record Action': ('record_action', lambda x: recordActionTypes[x]),
-    'RecordStatus': ('record_status', lambda x: recordStatusTypes[x]),
+    'RecordStatus': ('record_status', lambda x: recordStatusTypes[x.upper()]),
     'RecordHistory': ('record_history', passthrough),
     'PersonalNameFirst': ('personal_name_first', passthrough),
     'PersonalNameLast': ('personal_name_last', passthrough),
@@ -296,58 +320,73 @@ class Command(BaseCommand):
 
         datapath = options['datapath'][0]
 
-        print 'Loading citations...',
-        self.handle_citations(datapath)
-        print 'done'
-        print 'Loading authorities...',
-        self.handle_authorities(datapath)
-        print 'done'
+        # print 'Loading citations...',
+        # self.handle_citations(datapath)
+        # print 'done'
+        # print 'Loading authorities...',
+        # self.handle_authorities(datapath)
+        # print 'done'
         print 'Loading AC relations...',
         self.handle_ac_relations(datapath)
         print 'done'
-        print 'Loading CC relations...',
-        self.handle_cc_relations(datapath)
-        print 'done'
-        print 'Loading attributes...',
-        self.handle_attributes(datapath)
-        print 'done'
-        print 'Loading linkeddata...',
-        self.handle_linkeddata(datapath)
-        print 'done'
-        print 'Loading tracking...',
-        self.handle_tracking(datapath)
-        print 'done'
-
-        print 'The following data could not be inserted:'
-        print self.failed
+        # print 'Loading CC relations...',
+        # self.handle_cc_relations(datapath)
+        # print 'done'
+        # print 'Loading attributes...',
+        # self.handle_attributes(datapath)
+        # print 'done'
+        # print 'Loading linkeddata...',
+        # self.handle_linkeddata(datapath)
+        # print 'done'
+        # print 'Loading tracking...',
+        # self.handle_tracking(datapath)
+        # print 'done'
+        #
+        # print 'The following data could not be inserted:'
+        # print self.failed
 
     def handle_citations(self, datapath):
         citationspath = os.path.join(datapath, 'citations.xml')
 
-        for event, r in ET.iterparse(citationspath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             partDetails = {}
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
+
                 if field in citationFields:
                     dj_field, method = citationFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         try:
                             value = method(value)
-                        except KeyError:
+                        except KeyError as E:
                             value = ''
+                            if dj_field == 'status_of_record':
+                                for k, v in statusOfRecordTypes.iteritems():
+                                    if k.lower() in value.lower():
+                                        value = v
                             pass    # TODO: need better handling of bad data.
                         values[dj_field] = value
                 if field in partFields:
                     pd_field, method = partFields[field]
-                    if value is not None:
-                        value = method(value)
+                    if value is not None and value != 'None':
+                        try:
+                            value = method(value)
+                        except ValueError:
+                            # TODO: In some records, integer-only fields contain
+                            #  non-integer data.
+                            print pd_field, value
+                            if 'volume' in pd_field:
+                                pd_field = 'volume_free_text'
+                            if 'issue' in pd_field:
+                                pd_field = 'issue_free_text'
+                            if 'page' in pd_field:
+                                pd_field = 'pages_free_text'
                         partDetails[pd_field] = value
-
             try:
                 instance = Citation(**values)
                 pd_instance = PartDetails(**partDetails)
@@ -355,25 +394,29 @@ class Command(BaseCommand):
                 instance.part_details = pd_instance
                 instance.save()
             except Exception as E:
+                self.failed.append((values, E.message))
                 print values
                 raise E
+            r.clear()
 
+        context = ET.iterparse(citationspath)
+        fast_iter(context, process_elem)
 
     def handle_authorities(self, datapath):
         authoritiespath = os.path.join(datapath, 'authorities.xml')
-
         missed_relations = []
-        for event, r in ET.iterparse(authoritiespath):
+
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
                 if field in authorityFields:
                     dj_field, method = authorityFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
@@ -387,8 +430,16 @@ class Command(BaseCommand):
                     missed_relations.append((values['id'], values['redirect_to']))
                     del values['redirect_to']
 
-            instance = Authority(**values)
-            instance.save()
+            try:
+                instance = Authority(**values)
+                instance.save()
+            except Exception as E:
+                print values
+                raise E
+            r.clear()
+
+        context = ET.iterparse(authoritiespath)
+        fast_iter(context, process_elem)
 
         # Go back and attempt to add in redirects that were missed the first
         #  time around.
@@ -406,17 +457,18 @@ class Command(BaseCommand):
     def handle_ac_relations(self, datapath):
         acrelationspath = os.path.join(datapath, 'ac_relations.xml')
 
-        for event, r in ET.iterparse(acrelationspath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
                 if field in ACRelationFields:
                     dj_field, method = ACRelationFields[field]
-                    if value is not None:
+
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
@@ -424,18 +476,21 @@ class Command(BaseCommand):
             #  This is an attempt to salvage the record...
             if 'authority_alt' in values:
                 if 'authority' not in values:
-                    values['authority'] = values['authority_alt']
+                    values['authority'] = copy.copy(values['authority_alt'])
                 del values['authority_alt']
 
             if 'citation_alt' in values:
                 if 'citation' not in values:
-                    values['citation'] = values['citation_alt']
+                    values['citation'] = copy.copy(values['citation_alt'])
                 del values['citation_alt']
 
             # But ultimately if we are missing either an authority or citation
             #  id there is no way to create a valid ACRelation.
             if 'authority' not in values or 'citation' not in values:
-                continue
+                self.failed.append((values, 'missing citation or relation'))
+                print '!', values
+                print '\r', len(self.failed),
+                return
 
             try:
                 authority = Authority.objects.get(id=values['authority'])
@@ -456,26 +511,33 @@ class Command(BaseCommand):
                 values['citation'] = citation
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append(values)
-                continue
+                print values
+                print E.message
+                self.failed.append((values, E.message))
+                return
 
             instance = ACRelation(**values)
             instance.save()
+            r.clear()
+
+        context = ET.iterparse(acrelationspath)
+        fast_iter(context, process_elem)
 
     def handle_cc_relations(self, datapath):
         ccrelationspath = os.path.join(datapath, 'cc_relations.xml')
 
-        for event, r in ET.iterparse(ccrelationspath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
+
                 if field in CCRelationFields:
                     dj_field, method = CCRelationFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
@@ -483,18 +545,19 @@ class Command(BaseCommand):
             #  This is an attempt to salvage the record...
             if 'subject_alt' in values:
                 if 'subject' not in values:
-                    values['subject'] = values['subject_alt']
+                    values['subject'] = copy.copy(values['subject_alt'])
                 del values['subject_alt']
 
             if 'object_alt' in values:
                 if 'object' not in values:
-                    values['object'] = values['object_alt']
+                    values['object'] = copy.copy(values['object_alt'])
                 del values['object_alt']
 
             # But ultimately if we are missing either an authority or citation
             #  id there is no way to create a valid ACRelation.
             if 'subject' not in values or 'object' not in values:
-                continue
+                self.failed.append((values, 'missing subject or object'))
+                return
 
             try:
                 subject_instance = Citation.objects.get(id=values['subject'])
@@ -515,31 +578,36 @@ class Command(BaseCommand):
                 values['object'] = object_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append(values)
-                continue
+                self.failed.append((values, E.message))
+                return
 
             instance = CCRelation(**values)
             instance.save()
+            r.clear()
+
+        context = ET.iterparse(ccrelationspath)
+        fast_iter(context, process_elem)
 
     def handle_attributes(self, datapath):
         attributesspath = os.path.join(datapath, 'attributes.xml')
 
-        for event, r in ET.iterparse(attributesspath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
                 if field in attributeFields:
                     dj_field, method = attributeFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
             if 'subject' not in values:
-                continue
+                self.failed.append((values, 'missing subject'))
+                return
 
             try:
                 subject_instance = ReferencedEntity.objects.get(id=values['subject'])
@@ -552,34 +620,38 @@ class Command(BaseCommand):
                 del values['subject']
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append(values)
-                continue
+                self.failed.append((values, E.message))
+                return
 
             instance = Attribute(**values)
             instance.save()
             subject_instance.attributes.add(instance)
             subject_instance.save()
+            r.clear()
+
+        context = ET.iterparse(attributesspath)
+        fast_iter(context, process_elem)
 
     def handle_tracking(self, datapath):
         trackingpath = os.path.join(datapath, 'tracking.xml')
 
-        for event, r in ET.iterparse(trackingpath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
                 if field in trackingFields:
                     dj_field, method = trackingFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
             if 'subject' not in values:
-
-                continue
+                self.failed.append((values, 'missing subject'))
+                return
 
             try:
                 subject_instance = ReferencedEntity.objects.get(id=values['subject'])
@@ -592,31 +664,36 @@ class Command(BaseCommand):
                 values['subject'] = subject_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append(values)
-                continue
+                self.failed.append((values, E.message))
+                return
 
             instance = Tracking(**values)
             instance.save()
+            r.clear()
+
+        context = ET.iterparse(trackingpath)
+        fast_iter(context, process_elem)
 
     def handle_linkeddata(self, datapath):
         linkeddatapath = os.path.join(datapath, 'linked_data.xml')
 
-        for event, r in ET.iterparse(linkeddatapath):
+        def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
-                continue
+                return
 
             values = {}
             for elem in r.getchildren():
-                field = elem.tag.replace(fm_namespace, '')
-                value = elem.text
+                field = copy.deepcopy(elem.tag.replace(fm_namespace, ''))
+                value = copy.deepcopy(elem.text)
                 if field in linkedDataFields:
                     dj_field, method = linkedDataFields[field]
-                    if value is not None:
+                    if value is not None and value != 'None':
                         value = method(value)
                         values[dj_field] = value
 
             if 'subject' not in values:
-                continue
+                self.failed.append((values, 'missing subject'))
+                return
 
             try:
                 subject_instance = ReferencedEntity.objects.get(id=values['subject'])
@@ -629,8 +706,12 @@ class Command(BaseCommand):
                 values['subject'] = subject_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append(values)
-                continue
+                self.failed.append((values, E.message))
+                return
 
             instance = LinkedData(**values)
             instance.save()
+            r.clear()
+
+        context = ET.iterparse(linkeddatapath)
+        fast_iter(context, process_elem)

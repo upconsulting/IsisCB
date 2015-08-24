@@ -208,7 +208,8 @@ class Citation(ReferencedEntity, CuratedMixin):
         (APPLICATION, 'Application'),
     )
 
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     This list can be extended to the resource types specified by Doublin Core
     Recource Types http://dublincore.org/documents/resource-typelist/""")
@@ -280,7 +281,7 @@ class Citation(ReferencedEntity, CuratedMixin):
 class Authority(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
-    name = models.CharField(max_length=255, help_text="""
+    name = models.CharField(max_length=1000, help_text="""
     Name, title, or other main term for the authority as will be displayed.""")
 
     description = models.TextField(blank=True, null=True, help_text="""
@@ -308,7 +309,8 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event')
     )
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.""")
@@ -416,7 +418,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series')
     )
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more specifically than
@@ -486,6 +489,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
         (ASSOCIATED_WITH, 'Is Associated With')
     )
     type_controlled = models.CharField(max_length=5, choices=TYPE_CHOICES,
+                                       null=True, blank=True,
                                        help_text="""
     Controlled term specifying the nature of the relationship
     (the predicate between the subject and object).""")
@@ -520,7 +524,8 @@ class CCRelation(ReferencedEntity, CuratedMixin):
         (ASSOCIATED_WITH, 'Is Associated With'),
         (REVIEWED_BY, 'Is Reviewed By')
     )
-    type_controlled = models.CharField(max_length=3, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=3, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Type of relationship between two citation records.""")
 
@@ -540,7 +545,7 @@ class Attribute(ReferencedEntity, CuratedMixin):
 
     # Question: need acceptable values for type_controlled and
     #  type_controlled_broad
-    type_controlled = models.CharField(max_length=255)
+    type_controlled = models.CharField(max_length=255, null=True, blank=True)
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
@@ -634,7 +639,8 @@ class LinkedData(ReferencedEntity, CuratedMixin):
         (ISSN, 'ISSN'),
         (VIAF, 'VIAF')
     )
-    type_controlled = models.CharField(max_length=4, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=4, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""Type of linked resource.""")
     # Question: is this being used?
     type_controlled_broad = models.CharField(max_length=255, blank=True)
@@ -659,7 +665,8 @@ class Tracking(ReferencedEntity, CuratedMixin):
         (FULLY_ENTERED, 'Fully Entered'),
     )
 
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES)
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES)
 
     subject = models.ForeignKey('ReferencedEntity',
                                 related_name='tracking_entries')
