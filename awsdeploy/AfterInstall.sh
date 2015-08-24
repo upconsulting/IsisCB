@@ -25,4 +25,5 @@ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
 #  to the appropriate bucket (see development_settings.py).
 cd isiscb
 python manage.py collectstatic --noinput
+python manage.py migrate auth
 python manage.py migrate
