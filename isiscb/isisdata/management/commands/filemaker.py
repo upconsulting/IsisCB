@@ -38,6 +38,14 @@ def as_datetime(x):
             except ValueError:
                 return datetime.datetime.strptime(x, date_format_2)
 
+
+def try_int(v):
+    try:
+        return int(v)
+    except ValueError:
+        return v
+
+
 # Translates values from FM Citation:Type.controlled to Citation.type_controlled
 citationTypes = {
     'Book': 'BO',
@@ -248,7 +256,7 @@ CCRelationFields = {
 attributeFields = {
     'ID': ('id', passthrough),
     'ID.Subject.link': ('subject', passthrough),
-    'DateAttribute.free': ('value', as_int),    # TODO: this is temporary.
+    'DateAttribute.free': ('value', try_int),    # TODO: this is temporary.
     'DateBegin': ('date_iso', as_datetime),
     'CreatedBy': ('created_by_fm', passthrough),
     'CreatedOn': ('created_on_fm', as_datetime),
@@ -326,21 +334,21 @@ class Command(BaseCommand):
         # print 'Loading authorities...',
         # self.handle_authorities(datapath)
         # print 'done'
-        print 'Loading AC relations...',
-        self.handle_ac_relations(datapath)
-        print 'done'
+        # print 'Loading AC relations...',
+        # self.handle_ac_relations(datapath)
+        # print 'done'
         # print 'Loading CC relations...',
         # self.handle_cc_relations(datapath)
         # print 'done'
-        # print 'Loading attributes...',
-        # self.handle_attributes(datapath)
-        # print 'done'
-        # print 'Loading linkeddata...',
-        # self.handle_linkeddata(datapath)
-        # print 'done'
-        # print 'Loading tracking...',
-        # self.handle_tracking(datapath)
-        # print 'done'
+        print 'Loading attributes...',
+        self.handle_attributes(datapath)
+        print 'done'
+        print 'Loading linkeddata...',
+        self.handle_linkeddata(datapath)
+        print 'done'
+        print 'Loading tracking...',
+        self.handle_tracking(datapath)
+        print 'done'
         #
         # print 'The following data could not be inserted:'
         # print self.failed
