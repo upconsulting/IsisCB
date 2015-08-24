@@ -100,37 +100,37 @@ class CuratedMixin(models.Model):
         self.modified_on = value
 
 
-class AttributeMixin(models.Model):
-    """
-    Adds an ``attributes`` field, and methods for accessing related
-    :class:`.Attribute`\s.
-    """
-
-    class Meta:
-        abstract = True
-
-    # Put this here rather than in the Attribute model, since both Citations
-    #  and Authorities (and more?) should be able to have attributes.
-    attributes = models.ManyToManyField('Attribute', blank=True, null=True)
-
-    def __getattr__(self, name):
-        """
-        If an instance has no attribute called ``name``, checks the
-        ``attributes`` field for matching related :class:`.Attribute`\s.
-        """
-
-        # try:    # Give the base class the first shot.
-        return super(AttributeMixin, self).__getattr__(name)
-        # except AttributeError as E:
-            # Look for ``name`` among related Attributes.
-        if not self.pk:
-            raise E
-        queryset = self.attributes.filter(type_controlled=name)
-        if queryset.count() == 1:
-            return queryset[0].value
-        elif querset.count() > 1:
-            return [a.value for a in queryset]
-            # raise E     # No such attribute found.
+# class AttributeMixin(models.Model):
+#     """
+#     Adds an ``attributes`` field, and methods for accessing related
+#     :class:`.Attribute`\s.
+#     """
+#
+#     class Meta:
+#         abstract = True
+#
+#     # Put this here rather than in the Attribute model, since both Citations
+#     #  and Authorities (and more?) should be able to have attributes.
+#     attributes = models.ManyToManyField('Attribute', blank=True, null=True)
+#
+#     def __getattr__(self, name):
+#         """
+#         If an instance has no attribute called ``name``, checks the
+#         ``attributes`` field for matching related :class:`.Attribute`\s.
+#         """
+#
+#         # try:    # Give the base class the first shot.
+#         return super(AttributeMixin, self).__getattr__(name)
+#         # except AttributeError as E:
+#             # Look for ``name`` among related Attributes.
+#         if not self.pk:
+#             raise E
+#         queryset = self.attributes.filter(type_controlled=name)
+#         if queryset.count() == 1:
+#             return queryset[0].value
+#         elif querset.count() > 1:
+#             return [a.value for a in queryset]
+#             # raise E     # No such attribute found.
 
 
 class ReferencedEntity(models.Model):
@@ -170,10 +170,10 @@ class Language(models.Model):
     name = models.CharField(max_length=255)
 
 
-class Citation(ReferencedEntity, CuratedMixin, AttributeMixin):
+class Citation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
-    title = models.CharField(max_length=255, help_text="""
+    title = models.CharField(max_length=2000, help_text="""
     The name to be used to identify the resource. For reviews that traditionally
     have no title, this should be added as something like "[Review of Title
     (Year) by Author]".""")
@@ -208,7 +208,8 @@ class Citation(ReferencedEntity, CuratedMixin, AttributeMixin):
         (APPLICATION, 'Application'),
     )
 
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     This list can be extended to the resource types specified by Doublin Core
     Recource Types http://dublincore.org/documents/resource-typelist/""")
@@ -277,13 +278,13 @@ class Citation(ReferencedEntity, CuratedMixin, AttributeMixin):
     """)
 
 
-class Authority(ReferencedEntity, CuratedMixin, AttributeMixin):
+class Authority(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
-    name = models.CharField(max_length=255, help_text="""
+    name = models.CharField(max_length=1000, help_text="""
     Name, title, or other main term for the authority as will be displayed.""")
 
-    description = models.TextField(help_text="""
+    description = models.TextField(blank=True, null=True, help_text="""
     A brief description that will be displayed to help identify the authority.
     Such as, brief bio or a scope note. For classification terms will be text
     like "Classification term from the XXX classification schema.'""")
@@ -308,7 +309,8 @@ class Authority(ReferencedEntity, CuratedMixin, AttributeMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event')
     )
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.""")
@@ -324,7 +326,8 @@ class Authority(ReferencedEntity, CuratedMixin, AttributeMixin):
         (MW, 'MW'),
         (SHOT, 'SHOT')
     )
-    classification_system = models.CharField(max_length=4,
+    classification_system = models.CharField(max_length=4, blank=True,
+                                             null=True,
                                              choices=CLASS_SYSTEM_CHOICES,
                                              help_text="""
     Specifies the classification system that is the source of the authority.
@@ -332,17 +335,30 @@ class Authority(ReferencedEntity, CuratedMixin, AttributeMixin):
     currently is the Weldon System. All the other ones are for reference or
     archival purposes only.""")
 
-    classification_code = models.CharField(max_length=255, help_text="""
+    classification_code = models.CharField(max_length=255, blank=True,
+                                           null=True, help_text="""
     alphanumeric code used in previous classification systems to describe
     classification terms. Primarily of historical interest only. Used primarily
     for Codes for the classificationTerms. however, can be used for other
     kinds of terms as appropriate.""")
 
-    classification_hierarchy = models.CharField(max_length=255, help_text="""
+    classification_hierarchy = models.CharField(max_length=255, blank=True,
+                                                null=True, help_text="""
     Used for Classification Terms to describe where they fall in the
     hierarchy.""")
 
-    # what about: redirectTo, dateRange, date.for.sorting?
+    ACTIVE = 'AC'
+    DUPLICATE = 'DU'
+    REDIRECT = 'RD'
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (DUPLICATE, 'Duplicate'),
+        (REDIRECT, 'Redirect'),     # Question: is this desired?
+    )
+    record_status = models.CharField(max_length=2, choices=STATUS_CHOICES,
+                                     blank=True, null=True)
+
+    redirect_to = models.ForeignKey('Authority', blank=True, null=True)
 
 
 class Person(Authority):
@@ -360,7 +376,7 @@ class Person(Authority):
     personal_name_suffix = models.CharField(max_length=255)
 
 
-class ACRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
+class ACRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     citation = models.ForeignKey('Citation')
@@ -402,7 +418,8 @@ class ACRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series')
     )
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more specifically than
@@ -416,7 +433,7 @@ class ACRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
         (PERSONAL_RESPONS, 'Has Personal Responsibility For'),
         (SUBJECT_CONTENT, 'Provides Subject Content About'),
         (INSTITUTIONAL_HOST, 'Is Institutional Host Of'),
-        (PUBLICATION_HOST, 'IsPublicationHostOf')
+        (PUBLICATION_HOST, 'Is Publication Host Of')
     )
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
@@ -453,7 +470,7 @@ class ACRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
     be used mostly in marking subjects.""")
 
 
-class AARelation(ReferencedEntity, CuratedMixin, AttributeMixin):
+class AARelation(ReferencedEntity, CuratedMixin):
     # Currently not used, but crucial to development of next generation relationship tools:
     name = models.CharField(max_length=255, blank=True)
     # Currently not used, but crucial to development of next generation relationship tools:
@@ -472,6 +489,7 @@ class AARelation(ReferencedEntity, CuratedMixin, AttributeMixin):
         (ASSOCIATED_WITH, 'Is Associated With')
     )
     type_controlled = models.CharField(max_length=5, choices=TYPE_CHOICES,
+                                       null=True, blank=True,
                                        help_text="""
     Controlled term specifying the nature of the relationship
     (the predicate between the subject and object).""")
@@ -485,7 +503,7 @@ class AARelation(ReferencedEntity, CuratedMixin, AttributeMixin):
     # missing from Stephen's list: objectType, subjectType
 
 
-class CCRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
+class CCRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, blank=True)
@@ -495,6 +513,7 @@ class CCRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
     REVIEW_OF = 'RO'
+    REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
     ASSOCIATED_WITH = 'AS'
     TYPE_CHOICES = (
@@ -502,9 +521,11 @@ class CCRelation(ReferencedEntity, CuratedMixin, AttributeMixin):
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
         (REVIEW_OF, 'Is Review Of'),
         (RESPONDS_TO, 'Responds To'),
-        (ASSOCIATED_WITH, 'Is Associated With')
+        (ASSOCIATED_WITH, 'Is Associated With'),
+        (REVIEWED_BY, 'Is Reviewed By')
     )
-    type_controlled = models.CharField(max_length=3, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=3, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""
     Type of relationship between two citation records.""")
 
@@ -519,12 +540,16 @@ class Attribute(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
-
+    source = models.ForeignKey('ReferencedEntity', blank=True, null=True, related_name='attributes')
     value = FlexField()
-    type_controlled = models.CharField(max_length=255)
+
+    # Question: need acceptable values for type_controlled and
+    #  type_controlled_broad
+    type_controlled = models.CharField(max_length=255, null=True, blank=True)
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
+    # Question: why is this a separate field?
     date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
 
@@ -588,7 +613,7 @@ class Location(models.Model):
     longitude_direction = models.CharField(max_length=1, choices=LON_CARDINAL)
 
 
-class LinkedData(ReferencedEntity, CuratedMixin, AttributeMixin):
+class LinkedData(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
@@ -614,14 +639,15 @@ class LinkedData(ReferencedEntity, CuratedMixin, AttributeMixin):
         (ISSN, 'ISSN'),
         (VIAF, 'VIAF')
     )
-    type_controlled = models.CharField(max_length=4, choices=TYPE_CHOICES,
+    type_controlled = models.CharField(max_length=4, null=True, blank=True,
+                                       choices=TYPE_CHOICES,
                                        help_text="""Type of linked resource.""")
-    # is this being used?
+    # Question: is this being used?
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
 
-class Tracking(CuratedMixin):
+class Tracking(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     tracking_info = models.CharField(max_length=255, blank=True)
@@ -639,9 +665,10 @@ class Tracking(CuratedMixin):
         (FULLY_ENTERED, 'Fully Entered'),
     )
 
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES)
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES)
 
     subject = models.ForeignKey('ReferencedEntity',
-                                related_name='tracking_info')
+                                related_name='tracking_entries')
 
     notes = models.TextField(blank=True)
