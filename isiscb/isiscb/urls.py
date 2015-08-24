@@ -16,6 +16,23 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from rest_framework import routers
+
+from isisdata import views
+
+router = routers.SimpleRouter()
+router.register('authority', views.AuthorityViewSet)
+router.register('citation', views.CitationViewSet)
+router.register('acrelation', views.ACRelationViewSet)
+router.register('ccrelation', views.CCRelationViewSet)
+router.register('aarelation', views.AARelationViewSet)
+router.register('attribute', views.AttributeViewSet)
+router.register('linkeddata', views.LinkedDataViewSet)
+router.register('user', views.UserViewSet)
+
 urlpatterns = [
+    url(r'^rest/$', views.api_root),
+    url(r'^rest/', include(router.urls)),
+    url(r'^rest/auth/$', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', include(admin.site.urls)),
 ]
