@@ -315,7 +315,6 @@ class Authority(ReferencedEntity, CuratedMixin):
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.""")
 
-    # QUESTION: How is this related to "tagging" that users can do?
     SWP = 'SWP'
     NEU = 'NEU'
     MW = 'MW'
@@ -385,6 +384,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
 
+    # TODO: conditional validation on these fields.
     # Allowed values depend on the value of the Type.Broad,controlled
     # if Type.Broad.controlled = 'HasPersonalResponsibilityFor'
     AUTHOR = 'AU'
@@ -629,9 +629,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     subject = models.ForeignKey('ReferencedEntity',
                                 related_name='linkeddata_entries')
 
-    DOI = 'DOI'         # TODO: Should we represent these choices as a separate
-    ISBN = 'ISBN'       #  model, so that they can be extended from the admin
-    ISSN = 'ISSN'       #  interface?
+    DOI = 'DOI'         # Question: Should we represent these choices as a
+    ISBN = 'ISBN'       #  separate model, so that they can be extended from
+    ISSN = 'ISSN'       #  the admin interface?
     VIAF = 'VIAF'
     TYPE_CHOICES = (
         (DOI, 'DOI'),

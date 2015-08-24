@@ -7,4 +7,11 @@ class CitationAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Attribute, SimpleHistoryAdmin)
+admin.site.register(Authority, SimpleHistoryAdmin)
+admin.site.register(ACRelation, SimpleHistoryAdmin)
+admin.site.register(CCRelation, SimpleHistoryAdmin)
+admin.site.register(Attribute, SimpleHistoryAdmin)
+admin.site.register(LinkedData, SimpleHistoryAdmin)
+admin.site.register(PartDetails, SimpleHistoryAdmin)
+admin.site.register(AARelation, SimpleHistoryAdmin)
 # Register your models here.
