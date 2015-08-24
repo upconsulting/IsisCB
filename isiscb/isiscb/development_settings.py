@@ -34,8 +34,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'simple_history',
-    'isisdata',
     'storages',
 )
 
@@ -128,5 +126,3 @@ AWS_HEADERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
     'Cache-Control': 'max-age=94608000',
 }
-
-DOMAIN = 'isiscb-develop.aplacecalledup.com'

@@ -25,8 +25,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'simple_history',
-    'isisdata',
     'storages',
 )
 
@@ -39,7 +37,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
 )
 
 ROOT_URLCONF = 'isiscb.urls'
@@ -91,6 +88,3 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-
-
-DOMAIN = 'isiscb-develop.aplacecalledup.com'
