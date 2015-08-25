@@ -49,6 +49,11 @@ class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
         model = LinkedData
 
 
+class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = PartDetails
+
+
 class AuthorityViewSet(viewsets.ModelViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
@@ -89,6 +94,11 @@ class LinkedDataViewSet(viewsets.ModelViewSet):
     serializer_class = LinkedDataSerializer
 
 
+class PartDetailsViewSet(viewsets.ModelViewSet):
+    queryset = PartDetails.objects.all()
+    serializer_class = PartDetailsSerializer
+
+
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -99,5 +109,5 @@ def api_root(request, format=None):
         'ccrelation': reverse('ccrelation-list', request=request, format=format),
         'aarelation': reverse('aarelation-list', request=request, format=format),
         'attribute': reverse('attribute-list', request=request, format=format),
-        'linkeddata': reverse('linkeddata-list', request=request, format=format),                
+        'linkeddata': reverse('linkeddata-list', request=request, format=format),
     })
