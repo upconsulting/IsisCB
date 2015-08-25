@@ -328,18 +328,18 @@ class Command(BaseCommand):
 
         datapath = options['datapath'][0]
 
-        # print 'Loading citations...',
-        # self.handle_citations(datapath)
-        # print 'done'
-        # print 'Loading authorities...',
-        # self.handle_authorities(datapath)
-        # print 'done'
-        # print 'Loading AC relations...',
-        # self.handle_ac_relations(datapath)
-        # print 'done'
-        # print 'Loading CC relations...',
-        # self.handle_cc_relations(datapath)
-        # print 'done'
+        print 'Loading citations...',
+        self.handle_citations(datapath)
+        print 'done'
+        print 'Loading authorities...',
+        self.handle_authorities(datapath)
+        print 'done'
+        print 'Loading AC relations...',
+        self.handle_ac_relations(datapath)
+        print 'done'
+        print 'Loading CC relations...',
+        self.handle_cc_relations(datapath)
+        print 'done'
         print 'Loading attributes...',
         self.handle_attributes(datapath)
         print 'done'
@@ -350,8 +350,8 @@ class Command(BaseCommand):
         self.handle_tracking(datapath)
         print 'done'
         #
-        # print 'The following data could not be inserted:'
-        # print self.failed
+        print 'The following data could not be inserted:'
+        print self.failed
 
     def handle_citations(self, datapath):
         citationspath = os.path.join(datapath, 'citations.xml')
