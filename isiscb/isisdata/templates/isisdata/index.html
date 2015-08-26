@@ -1,5 +1,11 @@
-{% if test %}
-    <p>This works.</p>
-{% else %}
-    <p>No data is available.</p>
-{% endif %}
+{% extends "isisdata/__base.html" %}
+
+{% block title %}Test title{% endblock %}
+
+{% block content %}
+<div class="row">
+<h1>Test X</h1>
+
+Whoohoo
+</div>
+{% endblock %}
