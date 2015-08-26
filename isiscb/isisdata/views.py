@@ -8,6 +8,9 @@ from rest_framework.reverse import reverse
 
 from isisdata.models import *
 
+from django.template import RequestContext, loader
+from django.http import HttpResponse
+
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -99,5 +102,12 @@ def api_root(request, format=None):
         'ccrelation': reverse('ccrelation-list', request=request, format=format),
         'aarelation': reverse('aarelation-list', request=request, format=format),
         'attribute': reverse('attribute-list', request=request, format=format),
-        'linkeddata': reverse('linkeddata-list', request=request, format=format),                
+        'linkeddata': reverse('linkeddata-list', request=request, format=format),
     })
+
+def index(request):
+    template = loader.get_template('isisdata/index.html')
+    context = RequestContext(request, {
+        'test': False,
+    })
+    return HttpResponse(template.render(context))
