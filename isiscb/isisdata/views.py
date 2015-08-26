@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.db import connection
+from django.http import HttpResponse
 
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import api_view
@@ -7,6 +9,9 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from isisdata.models import *
+
+def ackview(request, id, *args, **kwargs):
+    return HttpResponse(Authority.objects.get(pk=id).name)
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,6 +22,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Authority
+        fields = ('uri', 'id', 'url', 'name', 'description', 'type_controlled',
+                  'classification_system', 'classification_code',
+                  'classification_hierarchy')
 
 
 class CitationSerializer(serializers.HyperlinkedModelSerializer):
@@ -57,6 +65,12 @@ class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
 class AuthorityViewSet(viewsets.ModelViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
+
+    def get_object(self, *args, **kwargs):
+        result = super(AuthorityViewSet, self).get_object(*args, **kwargs)
+        print connection.queries
+        return result
+
 
 
 class UserViewSet(viewsets.ModelViewSet):

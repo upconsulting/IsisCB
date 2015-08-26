@@ -69,7 +69,6 @@ class CuratedMixin(models.Model):
         """
         return self.history.get(history_type='+').history_user
 
-    # These should be jettisoned after the project moves away from FileMaker.
     created_on_fm = models.DateTimeField(null=True, help_text="""
     Value of CreatedOn from the original FM database.""")
 
@@ -77,10 +76,13 @@ class CuratedMixin(models.Model):
                                     help_text="""
     Value of CreatedBy from the original FM database.""")
 
-    modified_on_fm = models.DateTimeField(null=True, help_text="""
+    modified_on_fm = models.DateTimeField(null=True,
+                                          verbose_name="modified on (FM)",
+                                          help_text="""
     Value of ModifiedBy from the original FM database.""")
 
-    modified_by_fm = models.CharField(max_length=255, blank=True, help_text="""
+    modified_by_fm = models.CharField(max_length=255, blank=True,
+                                      verbose_name="modified by (FM)", help_text="""
     Value of ModifiedOn from the original FM database.""")
 
     @property
@@ -169,6 +171,9 @@ class Language(models.Model):
 
     name = models.CharField(max_length=255)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Citation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
@@ -209,6 +214,7 @@ class Citation(ReferencedEntity, CuratedMixin):
     )
 
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='type',
                                        choices=TYPE_CHOICES,
                                        help_text="""
     This list can be extended to the resource types specified by Doublin Core
@@ -233,6 +239,8 @@ class Citation(ReferencedEntity, CuratedMixin):
     language = models.ManyToManyField('Language', help_text="""
     Language of the resource. Multiple languages can be specified.""")
 
+    # TODO: This relation should be from PartDetails to Citation, to support
+    #  inlines in the Admin.
     part_details = models.OneToOneField('PartDetails', null=True, blank=True,
                                         help_text="""
     New field: contains volume, issue, page information for works that are parts
@@ -279,6 +287,10 @@ class Citation(ReferencedEntity, CuratedMixin):
 
 
 class Authority(ReferencedEntity, CuratedMixin):
+    class Meta:
+        verbose_name_plural = 'authority records'
+        verbose_name = 'authority record'
+
     history = HistoricalRecords()
 
     name = models.CharField(max_length=1000, help_text="""
@@ -311,6 +323,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
+                                       verbose_name="type",
                                        help_text="""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.""")
