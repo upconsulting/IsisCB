@@ -55,12 +55,29 @@ class AuthorityAdmin(SimpleHistoryAdmin):
                        'classification_hierarchy', 'modified_on_fm',
                        'modified_by_fm')
 
-
+class ACRelationAdmin(SimpleHistoryAdmin):
+    list_display = ('id', 'authority', 'type_controlled', 'citation')
+    readonly_fields = ('authority', 'citation')
+    fieldsets = [
+        (None, {
+            'fields': ('uri', 'citation', 'authority', 'name',
+                       'name_for_display_in_citation', 'description')
+        }),
+        ('Type', {
+            'fields': ('type_controlled', 'type_broad_controlled','type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes', 'record_history',
+                       'modified_by_fm', 'modified_on_fm')
+        }),
+    ]
+    readonly_fields = ('uri', 'citation', 'authority', 'modified_by_fm',
+                       'modified_on_fm')
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Attribute, SimpleHistoryAdmin)
 admin.site.register(Authority, AuthorityAdmin)
-admin.site.register(ACRelation, SimpleHistoryAdmin)
+admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, SimpleHistoryAdmin)
 admin.site.register(LinkedData, SimpleHistoryAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)

@@ -285,6 +285,9 @@ class Citation(ReferencedEntity, CuratedMixin):
     Used to control printing in the paper volume of the CB.
     """)
 
+    def __unicode__(self):
+        return self.title
+
 
 class Authority(ReferencedEntity, CuratedMixin):
     class Meta:
@@ -372,6 +375,9 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     redirect_to = models.ForeignKey('Authority', blank=True, null=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Person(Authority):
     history = HistoricalRecords()
@@ -389,6 +395,9 @@ class Person(Authority):
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
+    class Meta:
+        verbose_name = 'authority-citation relationship'
+
     history = HistoricalRecords()
 
     citation = models.ForeignKey('Citation')
@@ -433,6 +442,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
+                                       verbose_name='type',
                                        help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more specifically than
@@ -450,12 +460,15 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
+                                             verbose_name='type (broad)',
                                              help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more broadly than
     Type.controlled""")
 
-    type_free = models.CharField(max_length=255, help_text="""
+    type_free = models.CharField(max_length=255,
+                                 verbose_name="type (free text)",
+                                 help_text="""
     Free text description of the role that the authority plays in the
     citation (e.g. 'introduction by', 'dissertation supervisor', etc)""")
 
