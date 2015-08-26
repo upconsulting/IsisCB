@@ -21,6 +21,25 @@ class CCRelationInline(admin.TabularInline):
     extra = 1
 
 
+class AttributeInline(admin.TabularInline):
+    model = Attribute
+
+    can_delete = False
+    extra = 0
+    editable_fields = []
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = []
+        for field in self.model._meta.get_all_field_names():
+            if (not field == 'id'):
+                if (field not in self.editable_fields):
+                    fields.append(field)
+        return fields
+
+    def has_add_permission(self, request):
+        return False
+
+
 class CitationAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
@@ -35,6 +54,7 @@ class CitationAdmin(SimpleHistoryAdmin):
 
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
+    inlines = (AttributeInline,)
 
 
 
@@ -74,8 +94,11 @@ class ACRelationAdmin(SimpleHistoryAdmin):
     readonly_fields = ('uri', 'citation', 'authority', 'modified_by_fm',
                        'modified_on_fm')
 
+class AttributeAdmin(SimpleHistoryAdmin):
+    readonly_fields = ('uri', 'source', 'value')
+
 admin.site.register(Citation, CitationAdmin)
-admin.site.register(Attribute, SimpleHistoryAdmin)
+admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, SimpleHistoryAdmin)

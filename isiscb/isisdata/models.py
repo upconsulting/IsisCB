@@ -160,6 +160,10 @@ class ReferencedEntity(models.Model):
             self.uri = self.generate_uri()
         return super(ReferencedEntity, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        if hasattr(self, 'citation'): return self.citation.__unicode__()
+        if hasattr(self, 'authority'): return self.authority.__unicode__()
+
 
 class Language(models.Model):
     """
@@ -566,7 +570,12 @@ class Attribute(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
-    source = models.ForeignKey('ReferencedEntity', blank=True, null=True, related_name='attributes')
+
+    # TODO: We should use the ContentTypes framework instead of multi-table
+    #  inheritance. See ``Generic relations`` in:
+    #  https://docs.djangoproject.com/en/1.8/ref/contrib/contenttypes/
+    source = models.ForeignKey('ReferencedEntity', blank=True, null=True,
+                               related_name='attributes')
     value = FlexField()
 
     # Question: need acceptable values for type_controlled and
@@ -578,6 +587,9 @@ class Attribute(ReferencedEntity, CuratedMixin):
     # Question: why is this a separate field?
     date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
+
+    def __unicode__(self):
+        return u'{type}: {value}'.format(type=self.type_controlled, value=self.value)
 
 
 class PartDetails(models.Model):

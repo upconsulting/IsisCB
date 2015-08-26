@@ -10,9 +10,6 @@ from rest_framework.reverse import reverse
 
 from isisdata.models import *
 
-def ackview(request, id, *args, **kwargs):
-    return HttpResponse(Authority.objects.get(pk=id).name)
-
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -28,6 +25,9 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
 class CitationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Citation
+        fields = ('uri', 'url', 'title', 'description', 'language',
+                  'type_controlled', 'abstract', 'edition_details',
+                  'physical_details', 'attributes')
 
 
 class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
@@ -101,12 +101,27 @@ class AARelationViewSet(mixins.ListModelMixin,
     queryset = AARelation.objects.all()
     serializer_class = AARelationSerializer
 
+# class ReferencedEntityRelatedField(serializers.HyperlinkedRelatedField):
+#     view_name = ''
+#
+#     def to_representation(self, value):
+#         print self.view_name
+#         if hasattr(value, 'citation'):
+#             self.view_name = 'citation-detail'
+#             value = value.citation
+#         if hasattr(value, 'authority'):
+#             self.view_name = 'authority-detail'
+#             value = value.citation
+#         return super(ReferencedEntityRelatedField, self).to_representation(value)
+
 
 class AttributeViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
+
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
+    # source = ReferencedEntityRelatedField(read_only=True)
 
 
 class LinkedDataViewSet(mixins.ListModelMixin,

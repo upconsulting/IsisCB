@@ -34,7 +34,6 @@ router.register('user', views.UserViewSet)
 urlpatterns = [
     url(r'^rest/$', views.api_root),
     url(r'^rest/', include(router.urls)),
-    url(r'^ack/([a-zA-Z0-9]+)/', views.ackview),
     url(r'^rest/auth/$', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', include(admin.site.urls)),
 ]
