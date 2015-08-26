@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
 
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets, serializers, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -62,53 +62,47 @@ class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
         model = PartDetails
 
 
-class AuthorityViewSet(viewsets.ModelViewSet):
+class AuthorityViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
 
-    def get_object(self, *args, **kwargs):
-        result = super(AuthorityViewSet, self).get_object(*args, **kwargs)
-        print connection.queries
-        return result
 
-
-
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class CitationViewSet(viewsets.ModelViewSet):
+class CitationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Citation.objects.all()
     serializer_class = CitationSerializer
 
 
-class ACRelationViewSet(viewsets.ModelViewSet):
+class ACRelationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = ACRelation.objects.all()
     serializer_class = ACRelationSerializer
 
 
-class CCRelationViewSet(viewsets.ModelViewSet):
+class CCRelationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = CCRelation.objects.all()
     serializer_class = CCRelationSerializer
 
 
-class AARelationViewSet(viewsets.ModelViewSet):
+class AARelationViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = AARelation.objects.all()
     serializer_class = AARelationSerializer
 
 
-class AttributeViewSet(viewsets.ModelViewSet):
+class AttributeViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
 
 
-class LinkedDataViewSet(viewsets.ModelViewSet):
+class LinkedDataViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = LinkedData.objects.all()
     serializer_class = LinkedDataSerializer
 
 
-class PartDetailsViewSet(viewsets.ModelViewSet):
+class PartDetailsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = PartDetails.objects.all()
     serializer_class = PartDetailsSerializer
 
