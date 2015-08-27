@@ -1,0 +1,42 @@
+{% extends "isisdata/__base.html" %}
+
+{% block title %}Citation{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-3 col-md-2 sidebar">
+ss
+  </div>
+  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}</div>
+
+    <h3>{{ citation.title }}</h3>
+
+    <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
+    <p><strong>Description:</strong> {{ citation.description }}</p>
+
+    <table class="details">
+      <tr>
+        <td>Edition Details:</td><td>{{ citation.edition_details }}</td>
+      </tr>
+      <tr>
+        <td>Physical Details:</td><td>{{ citation.physical_details }}</td>
+      </tr>
+      <tr>
+        <td>Language:</td><td>{{ citation.language.name }}</td>
+      </tr>
+    </table>
+
+    <div></div>
+    <h4>Related Citations</h4>
+      <ul>
+      {% for rel_citation in citation.related_citations.all %}
+          <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title }}</a></li>
+      {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+
+{% endblock %}

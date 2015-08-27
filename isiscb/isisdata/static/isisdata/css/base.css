@@ -28,3 +28,19 @@
 .headerbox {
   font-size: 18px;
 }
+
+.main {
+  margin-top: 70px;
+}
+
+
+/************** isis classes *******************/
+.details td {
+  min-width: 150px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.details {
+  margin-bottom: 30px;
+}

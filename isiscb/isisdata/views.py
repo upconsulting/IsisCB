@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 
 from rest_framework import viewsets, serializers
@@ -109,5 +109,24 @@ def index(request):
     template = loader.get_template('isisdata/index.html')
     context = RequestContext(request, {
         'test': False,
+    })
+    return HttpResponse(template.render(context))
+
+def authority(request, authority_id):
+    template = loader.get_template('isisdata/authority.html')
+    authority = Authority.objects.get(id=authority_id)
+    context = RequestContext(request, {
+        'authority_id': authority_id,
+        'authority': authority
+    })
+    return HttpResponse(template.render(context))
+
+def citation(request, citation_id):
+    template = loader.get_template('isisdata/citation.html')
+    citation = get_object_or_404(Citation, pk=citation_id)
+    #citation = Citation.objects.first
+    context = RequestContext(request, {
+        'citation_id': citation_id,
+        'citation': citation
     })
     return HttpResponse(template.render(context))
