@@ -1,30 +1,93 @@
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 
 from simple_history.models import HistoricalRecords
+
 import datetime
 import pickle
 import uuid
 import urlparse
 
-class FlexField(models.TextField):
-    """
-    Accepts any pickle-able Python object, and stores its serialized
-    representation as plain text in the database.
-    """
 
-    def get_prep_value(self, value, *args, **kwargs):
-        """Serialize"""
-        if value is None:
-            return
-        return pickle.dumps(value)
+VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
+            | Q(model='datetimevalue') | Q(model='datevalue') \
+            | Q(model='floatvalue') | Q(model='locationvalue')
 
-    def from_db_value(self, value, *args, **kwargs):
-        """Deserialize"""
+class Value(models.Model):
+    attribute = models.OneToOneField('Attribute', related_name='value')
 
-        return pickle.loads(value)
+
+class TextValue(Value):
+    value = models.TextField()
+
+    class Meta:
+        verbose_name = 'text (long)'
+
+
+class CharValue(Value):
+    value = models.CharField(max_length=2000)
+
+    class Meta:
+        verbose_name = 'text (short)'
+
+
+class IntValue(Value):
+    value = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'integer'
+
+
+class DateTimeValue(Value):
+    """ISO 8601 datetime."""
+    value = models.DateTimeField()
+
+    class Meta:
+        verbose_name = 'date and time'
+
+
+class DateValue(Value):
+    value = models.DateField()
+
+    class Meta:
+        verbose_name = 'date'
+
+
+class FloatValue(Value):
+    value = models.FloatField()
+
+    class Meta:
+        verbose_name = 'floating point number'
+
+
+class LocationValue(Value):
+    value = models.ForeignKey('Location')   # TODO: One to One?
+
+    class Meta:
+        verbose_name = 'location'
+
+
+# class FlexField(models.TextField):
+#     """
+#     Accepts any pickle-able Python object, and stores its serialized
+#     representation as plain text in the database.
+#     """
+#
+#     def get_prep_value(self, value, *args, **kwargs):
+#         """Serialize"""
+#         if value is None:
+#             return
+#         return pickle.dumps(value)
+#
+#     def from_db_value(self, value, *args, **kwargs):
+#         """Deserialize"""
+#
+#         return pickle.loads(value)
 
 
 class CuratedMixin(models.Model):
@@ -102,43 +165,13 @@ class CuratedMixin(models.Model):
         self.modified_on = value
 
 
-# class AttributeMixin(models.Model):
-#     """
-#     Adds an ``attributes`` field, and methods for accessing related
-#     :class:`.Attribute`\s.
-#     """
-#
-#     class Meta:
-#         abstract = True
-#
-#     # Put this here rather than in the Attribute model, since both Citations
-#     #  and Authorities (and more?) should be able to have attributes.
-#     attributes = models.ManyToManyField('Attribute', blank=True, null=True)
-#
-#     def __getattr__(self, name):
-#         """
-#         If an instance has no attribute called ``name``, checks the
-#         ``attributes`` field for matching related :class:`.Attribute`\s.
-#         """
-#
-#         # try:    # Give the base class the first shot.
-#         return super(AttributeMixin, self).__getattr__(name)
-#         # except AttributeError as E:
-#             # Look for ``name`` among related Attributes.
-#         if not self.pk:
-#             raise E
-#         queryset = self.attributes.filter(type_controlled=name)
-#         if queryset.count() == 1:
-#             return queryset[0].value
-#         elif querset.count() > 1:
-#             return [a.value for a in queryset]
-#             # raise E     # No such attribute found.
-
-
 class ReferencedEntity(models.Model):
     """
     Provides a custom ID field and an URI field, and associated methods.
     """
+
+    class Meta:
+        abstract = True
 
     id = models.CharField(max_length=200, primary_key=True, help_text="""
     In the format CBB000000000 (CBB followed by a number padded with zeros to
@@ -159,10 +192,6 @@ class ReferencedEntity(models.Model):
         if self.uri == '':
             self.uri = self.generate_uri()
         return super(ReferencedEntity, self).save(*args, **kwargs)
-
-    def __unicode__(self):
-        if hasattr(self, 'citation'): return self.citation.__unicode__()
-        if hasattr(self, 'authority'): return self.authority.__unicode__()
 
 
 class Language(models.Model):
@@ -289,6 +318,15 @@ class Citation(ReferencedEntity, CuratedMixin):
     Used to control printing in the paper volume of the CB.
     """)
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='citations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='citations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='citations')
+
     def __unicode__(self):
         return self.title
 
@@ -378,6 +416,15 @@ class Authority(ReferencedEntity, CuratedMixin):
                                      blank=True, null=True)
 
     redirect_to = models.ForeignKey('Authority', blank=True, null=True)
+
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='authorities')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='authorities')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='authorities')
 
     def __unicode__(self):
         return self.name
@@ -499,6 +546,15 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     Currently not used: helps to assess how significant this relationship is--to
     be used mostly in marking subjects.""")
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='ac_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='ac_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='ac_relations')
+
 
 class AARelation(ReferencedEntity, CuratedMixin):
     # Currently not used, but crucial to development of next generation relationship tools:
@@ -531,6 +587,15 @@ class AARelation(ReferencedEntity, CuratedMixin):
     object = models.ForeignKey('Authority', related_name='relations_to')
 
     # missing from Stephen's list: objectType, subjectType
+
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='aa_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='aa_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='aa_relations')
 
 
 class CCRelation(ReferencedEntity, CuratedMixin):
@@ -565,22 +630,40 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     subject = models.ForeignKey('Citation', related_name='relations_from')
     object = models.ForeignKey('Citation', related_name='relations_to')
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='cc_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='cc_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='cc_relations')
+
+
+class AttributeType(models.Model):
+    name = models.CharField(max_length=255)
+
+    value_content_type = models.ForeignKey(ContentType,
+                                           limit_choices_to=VALUETYPES,
+                                           related_name='attribute_value')
+
+    def __unicode__(self):
+        return u'{0} ({1})'.format(self.name, self.value_content_type.model)
+
 
 class Attribute(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
 
-    # TODO: We should use the ContentTypes framework instead of multi-table
-    #  inheritance. See ``Generic relations`` in:
-    #  https://docs.djangoproject.com/en/1.8/ref/contrib/contenttypes/
-    source = models.ForeignKey('ReferencedEntity', blank=True, null=True,
-                               related_name='attributes')
-    value = FlexField()
+    # Generic relation.
+    source_content_type = models.ForeignKey(ContentType)
+    source_instance_id = models.CharField(max_length=200)
+    source = GenericForeignKey('source_content_type', 'source_instance_id')
 
-    # Question: need acceptable values for type_controlled and
-    #  type_controlled_broad
-    type_controlled = models.CharField(max_length=255, null=True, blank=True)
+
+    type_controlled = models.ForeignKey('AttributeType')
+    # type_controlled = models.CharField(max_length=255, null=True, blank=True)
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
@@ -664,8 +747,10 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
-    subject = models.ForeignKey('ReferencedEntity',
-                                related_name='linkeddata_entries')
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
+    subject = GenericForeignKey('subject_content_type',
+                                'subject_instance_id')
 
     DOI = 'DOI'         # Question: Should we represent these choices as a
     ISBN = 'ISBN'       #  separate model, so that they can be extended from
@@ -706,7 +791,9 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES)
 
-    subject = models.ForeignKey('ReferencedEntity',
-                                related_name='tracking_entries')
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
+    subject = GenericForeignKey('subject_content_type',
+                                'subject_instance_id')
 
     notes = models.TextField(blank=True)

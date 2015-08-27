@@ -1,5 +1,7 @@
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline, GenericStackedInline
 from django import forms
+from django.forms import widgets
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -11,7 +13,7 @@ class CCRelationForm(forms.ModelForm):
         model = CCRelation
         fields = ('object', )
 
-    object = forms.ChoiceField(required=True, choices=CCRelation.objects.values_list('id', 'name'))
+    # object = forms.ChoiceField(required=True, choices=CCRelation.objects.values_list('id', 'name'))
 
 
 class CCRelationInline(admin.TabularInline):
@@ -21,23 +23,53 @@ class CCRelationInline(admin.TabularInline):
     extra = 1
 
 
-class AttributeInline(admin.TabularInline):
+class ValueWidget(widgets.Widget):
+    def __init__(self, attrs=None):
+        super(ValueWidget, self).__init__(attrs)
+
+        self.widgets = {
+            'textvalue': widgets.TextInput(),
+            'datetimevalue': widgets.DateTimeInput(),
+            'intvalue': widgets.NumberInput(),
+            'floatvalue': widgets.NumberInput(),
+            'charvalue': widgets.TextInput(),
+            'datevalue': widgets.DateInput(),
+            'locationvalue': widgets.TextInput(), # TODO: custom location widget
+        }
+
+    def render(self, name, value, attrs=None):
+        assign = "widgets.{0} = $('{1}')[0];";
+        assignments = '\n'.join([assign.format(f,v.render(name, value, attrs))
+                                 for f, v in self.widgets.items()])
+        return "<span class='dynamicWidget'>Select an attribute type</span><script>{0}</script>".format(assignments)
+
+
+
+class AttributeInlineForm(forms.ModelForm):
+    class Media:
+        js = ('isisdata/js/jquery-1.11.1.min.js',
+              'isisdata/js/widgetmap.js')
+
+    value = forms.CharField(label='Value', widget=ValueWidget()) # TODO: add widget here.
+
+    def __init__(self, *args, **kwargs):
+        # This class allows us to watch for changes in the selected type, so
+        #  that we can dynamically change the widget for ``value``.
+        self.base_fields['type_controlled'].widget.attrs['class'] = 'attribute_type_controlled'
+        super(AttributeInlineForm, self).__init__(*args, **kwargs)
+
+
+
+class AttributeInline(GenericTabularInline):
     model = Attribute
+    form = AttributeInlineForm
+    extra = 1
 
-    can_delete = False
-    extra = 0
-    editable_fields = []
+    ct_field = 'source_content_type'
+    ct_fk_field = 'source_instance_id'
 
-    def get_readonly_fields(self, request, obj=None):
-        fields = []
-        for field in self.model._meta.get_all_field_names():
-            if (not field == 'id'):
-                if (field not in self.editable_fields):
-                    fields.append(field)
-        return fields
-
-    def has_add_permission(self, request):
-        return False
+    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'value',
+              'description')
 
 
 class CitationAdmin(SimpleHistoryAdmin):
@@ -95,7 +127,7 @@ class ACRelationAdmin(SimpleHistoryAdmin):
                        'modified_on_fm')
 
 class AttributeAdmin(SimpleHistoryAdmin):
-    readonly_fields = ('uri', 'source', 'value')
+    readonly_fields = ('uri', 'value')
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Attribute, AttributeAdmin)
@@ -105,4 +137,5 @@ admin.site.register(CCRelation, SimpleHistoryAdmin)
 admin.site.register(LinkedData, SimpleHistoryAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)
 admin.site.register(AARelation, SimpleHistoryAdmin)
+admin.site.register(AttributeType)
 # Register your models here.
