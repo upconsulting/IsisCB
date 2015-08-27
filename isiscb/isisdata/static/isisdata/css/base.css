@@ -1,0 +1,30 @@
+.navbar-inverse {
+  background-color: #3E3E3E;
+  border-color: #BFBEBE;
+}
+
+.navbar-brand {
+  height: 120px;
+}
+
+.navbar-right {
+  padding-top: 55px;
+}
+
+.sidebar {
+    position: fixed;
+    top: 121px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f5f5f5;
+    border-right: 1px solid #eee;
+}
+
+.headerbox {
+  font-size: 18px;
+}
