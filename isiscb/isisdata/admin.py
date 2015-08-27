@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline, GenericStackedInline
+from django.contrib.contenttypes.forms import BaseGenericInlineFormSet, generic_inlineformset_factory
 from django import forms
-from django.forms import widgets
+from django.forms import widgets, formsets, models
+from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineformset_factory
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -45,12 +47,19 @@ class ValueWidget(widgets.Widget):
 
 
 
+
+class ValueField(forms.Field):
+    def __init__(self, *args, **kwargs):
+        super(ValueField, self).__init__(*args, **kwargs)
+
+
 class AttributeInlineForm(forms.ModelForm):
     class Media:
+        model = Attribute
         js = ('isisdata/js/jquery-1.11.1.min.js',
               'isisdata/js/widgetmap.js')
 
-    value = forms.CharField(label='Value', widget=ValueWidget()) # TODO: add widget here.
+    value = ValueField(label='Value', widget=ValueWidget()) # TODO: add widget here.
 
     def __init__(self, *args, **kwargs):
         # This class allows us to watch for changes in the selected type, so
@@ -59,35 +68,96 @@ class AttributeInlineForm(forms.ModelForm):
         super(AttributeInlineForm, self).__init__(*args, **kwargs)
 
 
+    def full_clean(self):
+        super(AttributeInlineForm, self).full_clean()
+        if hasattr(self, 'cleaned_data'):
+            print 'form', self.cleaned_data
+
+
+
+class AttributeInlineFormSet(BaseGenericInlineFormSet):
+    def full_clean(self):
+        super(AttributeInlineFormSet, self).full_clean()
+        if hasattr(self, 'cleaned_data'):
+            print 'formset', self.cleaned_data
+
+
+
 
 class AttributeInline(GenericTabularInline):
     model = Attribute
     form = AttributeInlineForm
+    formset = generic_inlineformset_factory(Attribute, form=AttributeInlineForm,
+                                            formset=AttributeInlineFormSet,
+                                            ct_field='source_content_type',
+                                            fk_field='source_instance_id')
     extra = 1
 
     ct_field = 'source_content_type'
     ct_fk_field = 'source_instance_id'
 
-    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'value',
-              'description')
+    exclude = ('administrator_notes',
+               'record_history',
+               'modified_on_fm',
+               'modified_by_fm',
+               'modified_by',
+               'modified_on',
+               'created_on_fm',
+               'created_by_fm',
+               'place',
+               'date_iso',
+               'id',
+               'uri',
+               'description')
 
 
 class CitationAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
-        (None, {'fields': ('uri', 'title', 'description', 'language',
-                           'type_controlled')}),
-        ('Additional Details', {'fields': ('abstract', 'edition_details',
-                                           'physical_details')}),
-        ('Curation', {'fields': ('record_action', 'status_of_record',
-                                 'administrator_notes', 'record_history',
-                                 'modified_by_fm', 'modified_on_fm')}),
+        (None, {
+            'fields': ('uri',
+                       'id',
+                       'title',
+                       'description',
+                       'language',
+                       'type_controlled')
+        }),
+        ('Additional Details', {
+            'fields': ('abstract',
+                       'edition_details',
+                       'physical_details')
+        }),
+        ('Curation', {
+            'fields': ('record_action',
+                       'status_of_record',
+                       'administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
     ]
 
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
     inlines = (AttributeInline,)
 
+    def save_formset(self, request, form, formset, change):
+        return formset.save()
+
+    def save_related(self, request, form, formsets, change):
+        """
+        Generate a new ``Value`` instance for each ``Attribute``.
+        """
+
+        for formset in formsets:
+            instances = self.save_formset(request, form, formset, change=change)
+            if type(formset).__name__ == 'AttributeFormFormSet':
+                for attribute, data in zip(instances, formset.cleaned_data):
+                    attr_type, value = data['type_controlled'], data['value']
+                    value_model = attr_type.value_content_type.model_class()
+                    value_instance = value_model(value=value,
+                                                 attribute=attribute)
+                    value_instance.save()
 
 
 class AuthorityAdmin(SimpleHistoryAdmin):
@@ -95,35 +165,65 @@ class AuthorityAdmin(SimpleHistoryAdmin):
     list_filter = ('type_controlled',)
 
     fieldsets = [
-        (None, {'fields': ('uri', 'name', 'description', 'type_controlled')}),
-        ('Classification', {'fields': ('classification_system',
-                                       'classification_code',
-                                       'classification_hierarchy')}),
-        ('Curation', {'fields': ('record_status', 'administrator_notes',
-                                 'record_history', 'modified_by_fm',
-                                 'modified_on_fm')}),
-    ]
-    readonly_fields = ('uri', 'classification_system', 'classification_code',
-                       'classification_hierarchy', 'modified_on_fm',
-                       'modified_by_fm')
-
-class ACRelationAdmin(SimpleHistoryAdmin):
-    list_display = ('id', 'authority', 'type_controlled', 'citation')
-    readonly_fields = ('authority', 'citation')
-    fieldsets = [
         (None, {
-            'fields': ('uri', 'citation', 'authority', 'name',
-                       'name_for_display_in_citation', 'description')
+            'fields': ('uri',
+                       'name',
+                       'description',
+                       'type_controlled')
         }),
-        ('Type', {
-            'fields': ('type_controlled', 'type_broad_controlled','type_free')
+        ('Classification', {
+            'fields': ('classification_system',
+                       'classification_code',
+                       'classification_hierarchy')
         }),
         ('Curation', {
-            'fields': ('administrator_notes', 'record_history',
-                       'modified_by_fm', 'modified_on_fm')
+            'fields': ('record_status',
+                       'administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
         }),
     ]
-    readonly_fields = ('uri', 'citation', 'authority', 'modified_by_fm',
+    readonly_fields = ('uri',
+                       'classification_system',
+                       'classification_code',
+                       'classification_hierarchy',
+                       'modified_on_fm',
+                       'modified_by_fm')
+
+
+class ACRelationAdmin(SimpleHistoryAdmin):
+    list_display = ('id',
+                    'authority',
+                    'type_controlled',
+                    'citation')
+
+    fieldsets = [
+        (None, {
+            'fields': ('uri',
+                       'citation',
+                       'authority',
+                       'name',
+                       'name_for_display_in_citation',
+                       'description')
+        }),
+        ('Type', {
+            'fields': ('type_controlled',
+                       'type_broad_controlled',
+                       'type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
+    ]
+
+    readonly_fields = ('uri',
+                       'citation',
+                       'authority',
+                       'modified_by_fm',
                        'modified_on_fm')
 
 class AttributeAdmin(SimpleHistoryAdmin):

@@ -671,8 +671,8 @@ class Attribute(ReferencedEntity, CuratedMixin):
     date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
 
-    def __unicode__(self):
-        return u'{type}: {value}'.format(type=self.type_controlled, value=self.value)
+    # def __unicode__(self):
+    #     return u'{type}: {value}'.format(type=self.type_controlled, value=self.value)
 
 
 class PartDetails(models.Model):
