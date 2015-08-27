@@ -12,8 +12,13 @@ ss
 
     <h3>{{ citation.title }}</h3>
 
+    <p><strong>Authors & Contributors:</strong> {% for author in authors %} author.authority.name {% endfor %}
     <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
     <p><strong>Description:</strong> {{ citation.description }}</p>
+
+    {% for attribute in citation.attributes.all %}
+    <p><strong>{{ attribute.name }}:</strong> {{ attribute.value }}</p>
+    {% endfor %}
 
     <table class="details">
       <tr>
@@ -25,6 +30,26 @@ ss
       <tr>
         <td>Language:</td><td>{{ citation.language.name }}</td>
       </tr>
+    </table>
+
+    <table class="details">
+      <tr>
+        <td>Volume:</td><td>{{ citation.part_details.volume }}</td>
+      </tr>
+      <tr>
+        <td>Issue:</td><td>{{ citation.part_details.issue_free_text }}</td>
+      </tr>
+      <tr>
+        <td>Pages:</td><td>{{ citation.part_details.pages_free_text }}</td>
+      </tr>
+
+      {% for related_auth in citation.acrelation_set.all %}
+      {# I know there must be a better way, but I couldn't figure it out yet #}
+      {% if related_auth.type_controlled != 'AU' and related_auth.type_controlled != 'CO' %}
+      <tr><td>{{ related_auth.get_type_controlled_display }}:</td><td> {{ related_auth.authority.name }}</td></tr>
+      {% endif %}
+      {% endfor %}
+
     </table>
 
     <div></div>

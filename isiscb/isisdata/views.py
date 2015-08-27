@@ -124,9 +124,10 @@ def authority(request, authority_id):
 def citation(request, citation_id):
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
-    #citation = Citation.objects.first
+    #authors = citation.acrelation_set.filter(type_controlled in ['AU', 'CO'])
     context = RequestContext(request, {
         'citation_id': citation_id,
-        'citation': citation
+        'citation': citation,
+        #'authors': authors
     })
     return HttpResponse(template.render(context))
