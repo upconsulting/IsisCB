@@ -1,5 +1,10 @@
 # IsisCB
 
+## License
+
+This software is licensed under the terms of the The MIT License. For more
+information, see ``LICENSE.md`` in this repository.
+
 ## Deployment
 
 IsisCB is designed to run in the Amazon Web Services environment. The file
