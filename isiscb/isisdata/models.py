@@ -5,12 +5,15 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 from simple_history.models import HistoricalRecords
 
 import datetime
+import iso8601
 import pickle
 import uuid
+from random import randint
 import urlparse
 
 
@@ -18,8 +21,33 @@ VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue')
 
+
 class Value(models.Model):
     attribute = models.OneToOneField('Attribute', related_name='value')
+    child_class = models.CharField(max_length=255, help_text="""
+    Name of the child model for this instance.""")
+
+    @classmethod
+    def is_valid(model, value):
+        try:
+            if hasattr(model, 'convert'):
+                model.convert(value)
+        except ValidationError as E:
+            raise E
+
+    def save(self, *args, **kwargs):
+        if hasattr(self, 'convert') and self.value is not None:
+            self.value = self.convert(self.value)
+        if self.child_class == '' or self.child_class is None:
+            self.child_class = type(self).__name__
+        return super(Value, self).save(*args, **kwargs)
+
+    def get_child_class(self):
+        return getattr(self, self.child_class.lower())
+
+    @property
+    def cvalue(self):
+        return self.get_child_class().value
 
 
 class TextValue(Value):
@@ -32,12 +60,25 @@ class TextValue(Value):
 class CharValue(Value):
     value = models.CharField(max_length=2000)
 
+    @staticmethod
+    def convert(value):
+        if len(value) > 2000:
+            raise ValidationError('Must be 2,000 characters or less')
+        return value
+
     class Meta:
         verbose_name = 'text (short)'
 
 
 class IntValue(Value):
     value = models.IntegerField(default=0)
+
+    @staticmethod
+    def convert(value):
+        try:
+            return int(value)
+        except ValueError:
+            raise ValidationError('Must be an integer')
 
     class Meta:
         verbose_name = 'integer'
@@ -47,6 +88,13 @@ class DateTimeValue(Value):
     """ISO 8601 datetime."""
     value = models.DateTimeField()
 
+    @staticmethod
+    def convert(value):
+        try:
+            return iso8601.parse_date(value)
+        except iso8601.ParseError:
+            raise ValidationError('Not a valid ISO8601 date')
+
     class Meta:
         verbose_name = 'date and time'
 
@@ -54,12 +102,26 @@ class DateTimeValue(Value):
 class DateValue(Value):
     value = models.DateField()
 
+    @staticmethod
+    def convert(value):
+        try:
+            return iso8601.parse_date(value).date()
+        except iso8601.ParseError:
+            raise ValidationError('Not a valid ISO8601 date')
+
     class Meta:
         verbose_name = 'date'
 
 
 class FloatValue(Value):
     value = models.FloatField()
+
+    @staticmethod
+    def convert(value):
+        try:
+            return float(value)
+        except ValueError:
+            raise ValidationError('Must be a floating point number')
 
     class Meta:
         verbose_name = 'floating point number'
@@ -70,24 +132,6 @@ class LocationValue(Value):
 
     class Meta:
         verbose_name = 'location'
-
-
-# class FlexField(models.TextField):
-#     """
-#     Accepts any pickle-able Python object, and stores its serialized
-#     representation as plain text in the database.
-#     """
-#
-#     def get_prep_value(self, value, *args, **kwargs):
-#         """Serialize"""
-#         if value is None:
-#             return
-#         return pickle.dumps(value)
-#
-#     def from_db_value(self, value, *args, **kwargs):
-#         """Deserialize"""
-#
-#         return pickle.loads(value)
 
 
 class CuratedMixin(models.Model):
@@ -671,8 +715,15 @@ class Attribute(ReferencedEntity, CuratedMixin):
     date_iso = models.DateField(blank=True, null=True)
     place = models.ForeignKey('Place', blank=True, null=True)
 
-    # def __unicode__(self):
-    #     return u'{type}: {value}'.format(type=self.type_controlled, value=self.value)
+    def save(self, *args, **kwargs):
+        if self.id is None or self.id == '':
+            while True:
+                id = 'ATT{0}'.format("%09d" % randint(0,999999999))
+                print id
+                if Attribute.objects.filter(id=id).count() == 0:
+                    break
+            self.id = id
+        super(Attribute, self).save(*args, **kwargs)
 
 
 class PartDetails(models.Model):

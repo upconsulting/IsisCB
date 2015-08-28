@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.admin import GenericTabularInline, GenericStackedInline
 from django.contrib.contenttypes.forms import BaseGenericInlineFormSet, generic_inlineformset_factory
 from django import forms
@@ -7,6 +8,9 @@ from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineforms
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
+
+
+
 # TODO: The Choice widget cannot handle this many choices. Consider using an
 #  autocomplete, or some other widget that loads ``object`` choices dynamically
 #  via AJAX.
@@ -14,8 +18,6 @@ class CCRelationForm(forms.ModelForm):
     class Meta:
         model = CCRelation
         fields = ('object', )
-
-    # object = forms.ChoiceField(required=True, choices=CCRelation.objects.values_list('id', 'name'))
 
 
 class CCRelationInline(admin.TabularInline):
@@ -43,14 +45,13 @@ class ValueWidget(widgets.Widget):
         assign = "widgets.{0} = $('{1}')[0];";
         assignments = '\n'.join([assign.format(f,v.render(name, value, attrs))
                                  for f, v in self.widgets.items()])
-        return "<span class='dynamicWidget'>Select an attribute type</span><script>{0}</script>".format(assignments)
-
-
+        if value is None:
+            value = ''
+        return "<span class='dynamicWidget' value='{0}'>Select an attribute type</span><script>{1}</script>".format(value, assignments)
 
 
 class ValueField(forms.Field):
-    def __init__(self, *args, **kwargs):
-        super(ValueField, self).__init__(*args, **kwargs)
+    pass
 
 
 class AttributeInlineForm(forms.ModelForm):
@@ -59,34 +60,47 @@ class AttributeInlineForm(forms.ModelForm):
         js = ('isisdata/js/jquery-1.11.1.min.js',
               'isisdata/js/widgetmap.js')
 
-    value = ValueField(label='Value', widget=ValueWidget()) # TODO: add widget here.
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    value = ValueField(label='Value', widget=ValueWidget())
 
     def __init__(self, *args, **kwargs):
-        # This class allows us to watch for changes in the selected type, so
+        # This CSS class allows us to watch for changes in the selected type, so
         #  that we can dynamically change the widget for ``value``.
-        self.base_fields['type_controlled'].widget.attrs['class'] = 'attribute_type_controlled'
+        css_class = 'attribute_type_controlled'
+        self.base_fields['type_controlled'].widget.attrs['class'] = css_class
+
         super(AttributeInlineForm, self).__init__(*args, **kwargs)
 
+        # Populate value and id fields.
+        instance = kwargs.get('instance', None)
+        if instance is not None:
+            value_initial = instance.value.get_child_class().value
+            self.fields['value'].initial = value_initial
+            self.fields['id'].initial = instance.id
 
-    def full_clean(self):
-        super(AttributeInlineForm, self).full_clean()
-        if hasattr(self, 'cleaned_data'):
-            print 'form', self.cleaned_data
 
+    def is_valid(self):
+        val = super(AttributeInlineForm, self).is_valid()
+
+        if all(x in self.cleaned_data for x in ['value', 'type_controlled']):
+            value = self.cleaned_data['value']
+            attr_type = self.cleaned_data['type_controlled']
+            value_model = attr_type.value_content_type.model_class()
+            try:
+                value_model.is_valid(value)
+            except ValidationError as E:
+                self.add_error('value', E)
+        return super(AttributeInlineForm, self).is_valid()
 
 
 class AttributeInlineFormSet(BaseGenericInlineFormSet):
-    def full_clean(self):
-        super(AttributeInlineFormSet, self).full_clean()
-        if hasattr(self, 'cleaned_data'):
-            print 'formset', self.cleaned_data
-
-
+    model = Attribute
 
 
 class AttributeInline(GenericTabularInline):
     model = Attribute
     form = AttributeInlineForm
+    # formset = AttributeInlineFormSet
     formset = generic_inlineformset_factory(Attribute, form=AttributeInlineForm,
                                             formset=AttributeInlineFormSet,
                                             ct_field='source_content_type',
@@ -111,7 +125,41 @@ class AttributeInline(GenericTabularInline):
                'description')
 
 
-class CitationAdmin(SimpleHistoryAdmin):
+class AttributeInlineMixin(admin.ModelAdmin):
+    inlines = (AttributeInline,)
+
+    def save_formset(self, request, form, formset, change):
+        """
+        Given an inline formset save it to the database.
+        """
+        return formset.save()
+
+    def save_related(self, request, form, formsets, change):
+        """
+        Generate a new ``Value`` instance for each ``Attribute``.
+        """
+        form.save_m2m()     # Does not include Attributes.
+
+        for formset in formsets:
+            instances = self.save_formset(request, form, formset, change=change)
+            print 'instances', instances
+            # Look only at the Attribute formset.
+            if type(formset).__name__ == 'AttributeFormFormSet':
+                for attribute, data in zip(instances, formset.cleaned_data):
+                    attr_type, value = data['type_controlled'], data['value']
+                    value_model = attr_type.value_content_type.model_class()
+                    value_instance, created = value_model.objects.get_or_create(
+                        attribute=attribute,
+                        defaults={
+                            'value': value
+                        })
+
+                    if not created and value_instance.value != value:
+                        value_instance.value = value
+                        value_instance.save()
+
+
+class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
         (None, {
@@ -139,34 +187,15 @@ class CitationAdmin(SimpleHistoryAdmin):
 
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
-    inlines = (AttributeInline,)
 
-    def save_formset(self, request, form, formset, change):
-        return formset.save()
-
-    def save_related(self, request, form, formsets, change):
-        """
-        Generate a new ``Value`` instance for each ``Attribute``.
-        """
-
-        for formset in formsets:
-            instances = self.save_formset(request, form, formset, change=change)
-            if type(formset).__name__ == 'AttributeFormFormSet':
-                for attribute, data in zip(instances, formset.cleaned_data):
-                    attr_type, value = data['type_controlled'], data['value']
-                    value_model = attr_type.value_content_type.model_class()
-                    value_instance = value_model(value=value,
-                                                 attribute=attribute)
-                    value_instance.save()
-
-
-class AuthorityAdmin(SimpleHistoryAdmin):
+class AuthorityAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
     list_display = ('id', 'name', 'type_controlled')
     list_filter = ('type_controlled',)
 
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'name',
                        'description',
                        'type_controlled')
@@ -192,7 +221,7 @@ class AuthorityAdmin(SimpleHistoryAdmin):
                        'modified_by_fm')
 
 
-class ACRelationAdmin(SimpleHistoryAdmin):
+class ACRelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
     list_display = ('id',
                     'authority',
                     'type_controlled',
@@ -226,16 +255,36 @@ class ACRelationAdmin(SimpleHistoryAdmin):
                        'modified_by_fm',
                        'modified_on_fm')
 
+
+class CCRelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+    pass
+
+
+class AARelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+    pass
+
+
+class LinkedDataAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+    pass
+
+
+class ValueInline(admin.TabularInline):
+    model = Value
+    fields = ('cvalue',)
+    readonly_fields = ('cvalue', )
+
+
 class AttributeAdmin(SimpleHistoryAdmin):
-    readonly_fields = ('uri', 'value')
+    readonly_fields = ('uri', )
+    inlines = (ValueInline,)
+
 
 admin.site.register(Citation, CitationAdmin)
-admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
-admin.site.register(CCRelation, SimpleHistoryAdmin)
-admin.site.register(LinkedData, SimpleHistoryAdmin)
+admin.site.register(CCRelation, CCRelationAdmin)
+admin.site.register(AARelation, AARelationAdmin)
+admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)
-admin.site.register(AARelation, SimpleHistoryAdmin)
 admin.site.register(AttributeType)
 # Register your models here.
