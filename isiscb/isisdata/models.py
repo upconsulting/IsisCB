@@ -23,6 +23,7 @@ VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='floatvalue') | Q(model='locationvalue')
 
 
+
 class Value(models.Model):
     attribute = models.OneToOneField('Attribute', related_name='value')
     child_class = models.CharField(max_length=255, help_text="""
@@ -91,6 +92,8 @@ class DateTimeValue(Value):
 
     @staticmethod
     def convert(value):
+        if type(value) is datetime.datetime:
+            return value
         try:
             return iso8601.parse_date(value)
         except iso8601.ParseError:
@@ -105,6 +108,8 @@ class DateValue(Value):
 
     @staticmethod
     def convert(value):
+        if type(value) is datetime.date:
+            return value
         try:
             return iso8601.parse_date(value).date()
         except iso8601.ParseError:
@@ -133,6 +138,16 @@ class LocationValue(Value):
 
     class Meta:
         verbose_name = 'location'
+
+
+VALUE_MODELS = [
+    (int,               IntValue),
+    (float,             FloatValue),
+    (datetime.datetime, DateTimeValue),
+    (datetime.date,     DateValue),
+    (str,               CharValue),
+    (unicode,           CharValue),
+]
 
 
 class CuratedMixin(models.Model):
@@ -700,7 +715,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
 class LinkedDataType(models.Model):
 
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     pattern = models.CharField(max_length=255, blank=True)
 
     def is_valid(self, value):

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- This grammar has been deprecated - use FMPXMLRESULT instead -->
+<FMPDSORESULT xmlns="http://www.filemaker.com/fmpdsoresult">
+	<ERRORCODE>0</ERRORCODE>
+	<DATABASE>IsisCBData.fmp12</DATABASE>
+	<LAYOUT></LAYOUT>
+	<ROW>
+		<ID>CBC000000001</ID>
+		<Title>Test Citation</Title>
+		<Type.controlled>Book</Type.controlled>
+		<Abstract>This is the abstract. It is very abstract.</Abstract>
+		<Description>This is a description, not an abstract.</Description>
+		<EditionDetails>Edition details!</EditionDetails>
+		<PhysicalDetails>Physical details!</PhysicalDetails>
+		<NotesOnContent.notpublished>These notes on content are not published</NotesOnContent.notpublished>
+		<NotesOnProvenance>This citation had to come from somewhere!</NotesOnProvenance>
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+		<RecordAction>ExternalProof</RecordAction>
+		<StatusOfRecord>Scope</StatusOfRecord>
+		<Language>English</Language>
+	</ROW>
+	<ROW>
+		<ID>CBC000000002</ID>
+		<Title>Test Citation 2</Title>
+		<Type.controlled>Article</Type.controlled>
+		<Abstract>This is the abstract. It is very abstract.</Abstract>
+		<Description>This is a description, not an abstract.</Description>
+		<EditionDetails>Edition details!</EditionDetails>
+		<PhysicalDetails>Physical details!</PhysicalDetails>
+		<NotesOnContent.notpublished>These notes on content are not published</NotesOnContent.notpublished>
+		<NotesOnProvenance>This citation had to come from somewhere!</NotesOnProvenance>
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/14/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/21/2015 9:17:59 PM</ModifiedOn>
+		<RecordAction>Hold</RecordAction>
+		<StatusOfRecord>Scope</StatusOfRecord>
+		<Language>German</Language>
+	</ROW>	
+</FMPDSORESULT>
