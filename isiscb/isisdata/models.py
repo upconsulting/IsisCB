@@ -15,6 +15,7 @@ import pickle
 import uuid
 from random import randint
 import urlparse
+import re
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -233,9 +234,22 @@ class ReferencedEntity(models.Model):
         """
         If ``uri`` is not set, generate a new one.
         """
+
+        return super(ReferencedEntity, self).save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.id is None or self.id == '':
+            # Ensure that this ID is unique.
+            while True:
+                id = '{0}{1}'.format(self.ID_PREFIX, "%09d" % randint(0,999999999))
+                if self.__class__.objects.filter(id=id).count() == 0:
+                    break   # TODO: find a better/simpler way?
+            self.id = id
+
         if self.uri == '':
             self.uri = self.generate_uri()
-        return super(ReferencedEntity, self).save(*args, **kwargs)
+        super(ReferencedEntity, self).save(*args, **kwargs)
+
 
 
 class Language(models.Model):
@@ -684,6 +698,23 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                        related_query_name='cc_relations')
 
 
+class LinkedDataType(models.Model):
+
+    name = models.CharField(max_length=255)
+    pattern = models.CharField(max_length=255, blank=True)
+
+    def is_valid(self, value):
+        if self.pattern is None or self.pattern == '':
+            return
+
+        if re.match(self.pattern, value) is None:
+            message = 'Does not match pattern for {0}'.format(self.name)
+            raise ValidationError(message)
+
+    def __unicode__(self):
+        return self.name
+
+
 class AttributeType(models.Model):
     name = models.CharField(max_length=255)
 
@@ -696,6 +727,7 @@ class AttributeType(models.Model):
 
 
 class Attribute(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'ATT'
     history = HistoricalRecords()
 
     description = models.TextField(blank=True, help_text="""
@@ -703,15 +735,14 @@ class Attribute(ReferencedEntity, CuratedMixin):
 
     value_freeform = models.CharField(max_length=255,
                                       verbose_name="freeform value",
+                                      blank=True,
                                       help_text="""
     Non-normalized value, e.g. an approximate date, or a date range.""")
 
     # Generic relation.
     source_content_type = models.ForeignKey(ContentType)
     source_instance_id = models.CharField(max_length=200)
-    source = GenericForeignKey('source_content_type', 'source_instance_id',
-                               help_text="""
-    The object (e.g. citation) described by this attribute.""")
+    source = GenericForeignKey('source_content_type', 'source_instance_id')
 
     # The selected AttributeType determines the type of Value (i.e. Value
     #  subclass) that can be related to this Attribute.
@@ -724,17 +755,6 @@ class Attribute(ReferencedEntity, CuratedMixin):
     #  a mechanism for grouping/ranking AttributeTypes.
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
-
-    # TODO: this mechanism should be in place for all models with custom IDs.
-    def save(self, *args, **kwargs):
-        if self.id is None or self.id == '':
-            # Ensure that this ID is unique.
-            while True:
-                id = 'ATT{0}'.format("%09d" % randint(0,999999999))
-                if Attribute.objects.filter(id=id).count() == 0:
-                    break   # TODO: find a better/simpler way?
-            self.id = id
-        super(Attribute, self).save(*args, **kwargs)
 
 
 class PartDetails(models.Model):
@@ -797,6 +817,12 @@ class Location(models.Model):
 
 
 class LinkedData(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = "LED"
+
+    class Meta:
+        verbose_name = 'linked data entry'
+        verbose_name_plural = 'linked data entries'
+
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
@@ -814,20 +840,12 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
 
-    DOI = 'DOI'         # Question: Should we represent these choices as a
-    ISBN = 'ISBN'       #  separate model, so that they can be extended from
-    ISSN = 'ISSN'       #  the admin interface?
-    VIAF = 'VIAF'
-    TYPE_CHOICES = (
-        (DOI, 'DOI'),
-        (ISBN, 'ISBN'),
-        (ISSN, 'ISSN'),
-        (VIAF, 'VIAF')
-    )
-    type_controlled = models.CharField(max_length=4, null=True, blank=True,
-                                       choices=TYPE_CHOICES,
-                                       help_text="""Type of linked resource.""")
-    # Question: is this being used?
+    type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
+                                        help_text="""
+    The "type" field determines what kinds of values are acceptable for this
+    linked data entry.""")
+
+
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 

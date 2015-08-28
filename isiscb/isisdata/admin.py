@@ -95,6 +95,49 @@ class AttributeInlineFormSet(BaseGenericInlineFormSet):
     model = Attribute
 
 
+class LinkedDataInlineForm(forms.ModelForm):
+    class Media:
+        model = LinkedData
+        js = ('isisdata/js/jquery-1.11.1.min.js',
+              'isisdata/js/widgetmap.js')
+
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+
+class LinkedDataInline(GenericTabularInline):
+    model = LinkedData
+    form = LinkedDataInlineForm
+    ct_field = 'subject_content_type'
+    ct_fk_field = 'subject_instance_id'
+
+    extra = 1
+
+    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'universal_resource_name', 'id')
+    exclude = ('administrator_notes',
+               'record_history',
+               'modified_on_fm',
+               'modified_by_fm',
+               'modified_by',
+               'modified_on',
+               'created_on_fm',
+               'created_by_fm',
+               'place',
+               'date_iso',
+               'id',
+               'uri',
+               'description')
+
+
+class LinkedDataInlineMixin(admin.ModelAdmin):
+    def __init__(self, *args, **kwargs):
+        if hasattr(self, 'inlines'):
+            if LinkedDataInline not in self.inlines:
+                self.inlines += (LinkedDataInline,)
+        else:
+            self.inlines = (LinkedDataInline,)
+        super(LinkedDataInlineMixin, self).__init__(*args, **kwargs)
+
+
 class AttributeInline(GenericTabularInline):
     model = Attribute
     form = AttributeInlineForm
@@ -108,6 +151,7 @@ class AttributeInline(GenericTabularInline):
     ct_field = 'source_content_type'
     ct_fk_field = 'source_instance_id'
 
+    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'value', 'value_freeform', 'id')
     exclude = ('administrator_notes',
                'record_history',
                'modified_on_fm',
@@ -124,7 +168,13 @@ class AttributeInline(GenericTabularInline):
 
 
 class AttributeInlineMixin(admin.ModelAdmin):
-    inlines = (AttributeInline,)
+    def __init__(self, *args, **kwargs):
+        if hasattr(self, 'inlines'):
+            if AttributeInline not in self.inlines:
+                self.inlines += (AttributeInline,)
+        else:
+            self.inlines = (AttributeInline,)
+        super(AttributeInlineMixin, self).__init__(*args, **kwargs)
 
     def save_formset(self, request, form, formset, change):
         """
@@ -157,7 +207,7 @@ class AttributeInlineMixin(admin.ModelAdmin):
                         value_instance.save()
 
 
-class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMixin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
         (None, {
@@ -263,7 +313,30 @@ class AARelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
 
 
 class LinkedDataAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
-    pass
+    fieldsets = [
+        (None, {
+            'fields': ('uri',
+                       'universal_resource_name',
+                       'description',
+                       'subject_content_type',
+                       'subject_instance_id')
+        }),
+        ('Type', {
+            'fields': ('type_controlled',
+                       'type_controlled_broad',
+                       'type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
+    ]
+
+    readonly_fields = ('uri',
+                       'modified_by_fm',
+                       'modified_on_fm')
 
 
 class ValueInline(admin.TabularInline):
