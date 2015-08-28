@@ -9,8 +9,6 @@ from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
 
-
-
 # TODO: The Choice widget cannot handle this many choices. Consider using an
 #  autocomplete, or some other widget that loads ``object`` choices dynamically
 #  via AJAX.

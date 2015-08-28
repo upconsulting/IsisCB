@@ -698,30 +698,41 @@ class AttributeType(models.Model):
 class Attribute(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, help_text="""
+    Additional information about this attribute.""")
+
+    value_freeform = models.CharField(max_length=255,
+                                      verbose_name="freeform value",
+                                      help_text="""
+    Non-normalized value, e.g. an approximate date, or a date range.""")
 
     # Generic relation.
     source_content_type = models.ForeignKey(ContentType)
     source_instance_id = models.CharField(max_length=200)
-    source = GenericForeignKey('source_content_type', 'source_instance_id')
+    source = GenericForeignKey('source_content_type', 'source_instance_id',
+                               help_text="""
+    The object (e.g. citation) described by this attribute.""")
 
+    # The selected AttributeType determines the type of Value (i.e. Value
+    #  subclass) that can be related to this Attribute.
+    type_controlled = models.ForeignKey('AttributeType', verbose_name='type',
+                                        help_text="""
+    The "type" field determines what kinds of values are acceptable for this
+    attribute.""")
 
-    type_controlled = models.ForeignKey('AttributeType')
-    # type_controlled = models.CharField(max_length=255, null=True, blank=True)
+    # TODO: Instead of saving this in the Attribute model, we may want to create
+    #  a mechanism for grouping/ranking AttributeTypes.
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
-    # Question: why is this a separate field?
-    date_iso = models.DateField(blank=True, null=True)
-    place = models.ForeignKey('Place', blank=True, null=True)
-
+    # TODO: this mechanism should be in place for all models with custom IDs.
     def save(self, *args, **kwargs):
         if self.id is None or self.id == '':
+            # Ensure that this ID is unique.
             while True:
                 id = 'ATT{0}'.format("%09d" % randint(0,999999999))
-                print id
                 if Attribute.objects.filter(id=id).count() == 0:
-                    break
+                    break   # TODO: find a better/simpler way?
             self.id = id
         super(Attribute, self).save(*args, **kwargs)
 
