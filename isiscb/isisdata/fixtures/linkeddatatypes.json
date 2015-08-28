@@ -23,7 +23,7 @@
         "model": "isisdata.linkeddatatype",
         "fields": {
             "name": "VIAF",
-            "pattern": "'^http://viaf\\.org/viaf/[0-9]+$'"
+            "pattern": "^http://viaf\\.org/viaf/[0-9]+$"
         }
     }
 ]
