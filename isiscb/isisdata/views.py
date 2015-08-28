@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.db import connection
@@ -28,6 +29,19 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('uri', 'url', 'title', 'description', 'language',
                   'type_controlled', 'abstract', 'edition_details',
                   'physical_details', 'attributes')
+
+
+class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = ('url', 'id', 'app_label', 'model')
+
+class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
+    value_content_type = ContentTypeSerializer()
+
+    class Meta:
+        model = AttributeType
+        fields = ('url', 'id', 'name', 'value_content_type')
 
 
 class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
@@ -100,6 +114,20 @@ class AARelationViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = AARelation.objects.all()
     serializer_class = AARelationSerializer
+
+
+class AttributeTypeViewSet(mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           viewsets.GenericViewSet):
+    queryset = AttributeType.objects.all()
+    serializer_class = AttributeTypeSerializer
+
+
+class ContentTypeViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
+    queryset = ContentType.objects.all()
+    serializer_class = ContentTypeSerializer
 
 # class ReferencedEntityRelatedField(serializers.HyperlinkedRelatedField):
 #     view_name = ''

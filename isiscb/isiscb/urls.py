@@ -29,6 +29,8 @@ router.register('aarelation', views.AARelationViewSet)
 router.register('attribute', views.AttributeViewSet)
 router.register('linkeddata', views.LinkedDataViewSet)
 router.register('partdetails', views.PartDetailsViewSet)
+router.register('attributetype', views.AttributeTypeViewSet)
+router.register('contenttype', views.ContentTypeViewSet)
 router.register('user', views.UserViewSet)
 
 urlpatterns = [
