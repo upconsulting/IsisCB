@@ -117,9 +117,11 @@ def index(request):
 def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
     authority = Authority.objects.get(id=authority_id)
+    citations = ACRelation.objects.get(authority_id=authority_id)
     context = RequestContext(request, {
         'authority_id': authority_id,
-        'authority': authority
+        'authority': authority,
+        'citations': citations
     })
     return HttpResponse(template.render(context))
 

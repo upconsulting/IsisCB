@@ -12,7 +12,7 @@ ss
 
     <h3>{{ citation.title }}</h3>
 
-    <p><strong>Authors & Contributors:</strong> {% for author in authors %} {{ author.authority.name }} {% endfor %}
+    <p><strong>Authors & Contributors:</strong> {% for author in authors %} <a href="{% url 'authority' author.authority.id %}">{{ author.authority.name }}</a> {% endfor %}
     <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
     <p><strong>Description:</strong> {{ citation.description }}</p>
 
