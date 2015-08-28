@@ -11,6 +11,8 @@ from isisdata.models import *
 from django.template import RequestContext, loader
 from django.http import HttpResponse
 
+from collections import defaultdict
+
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
@@ -124,10 +126,17 @@ def authority(request, authority_id):
 def citation(request, citation_id):
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
-    #authors = citation.acrelation_set.filter(type_controlled in ['AU', 'CO'])
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+
+    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO'])
+    properties_map = defaultdict(list)
+    for prop in properties:
+        properties_map[prop.type_controlled] += [prop]
+
     context = RequestContext(request, {
         'citation_id': citation_id,
         'citation': citation,
-        #'authors': authors
+        'authors': authors,
+        'properties_map': properties
     })
     return HttpResponse(template.render(context))
