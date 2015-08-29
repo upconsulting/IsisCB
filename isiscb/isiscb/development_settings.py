@@ -24,6 +24,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MIGRATION_MODULES = {
+    'isisdata': 'isisdata.migrations'
+}
 
 # Application definition
 
@@ -120,11 +123,12 @@ AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
+STATICFILES_DIRS = ['isisdata/static']
+STATICFILES_LOCATION = 'static' # % AWS_STORAGE_BUCKET_NAME
 STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 
-MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
+MEDIAFILES_LOCATION = 'media' #% AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 

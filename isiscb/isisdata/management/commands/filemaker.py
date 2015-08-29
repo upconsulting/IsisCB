@@ -438,6 +438,7 @@ class Command(BaseCommand):
                 pd_instance = PartDetails(**partDetails)
                 pd_instance.save()
                 instance.part_details = pd_instance
+                instance.save()
                 if language_instance is not None:
                     instance.language.add(language_instance)
                 instance.save()
