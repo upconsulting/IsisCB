@@ -15,6 +15,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MIGRATION_MODULES = {
+    'isisdata': 'isisdata.migrations'
+}
 
 # Application definition
 
