@@ -117,7 +117,7 @@ def index(request):
 def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
     authority = Authority.objects.get(id=authority_id)
-    citations = ACRelation.objects.get(authority_id=authority_id)
+    citations = ACRelation.objects.filter(authority__id=authority_id)
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
@@ -129,8 +129,10 @@ def citation(request, citation_id):
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+    subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO'])
+    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU'])
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
@@ -139,6 +141,8 @@ def citation(request, citation_id):
         'citation_id': citation_id,
         'citation': citation,
         'authors': authors,
-        'properties_map': properties
+        'properties_map': properties,
+        'subjects': subjects,
+        'persons': persons
     })
     return HttpResponse(template.render(context))

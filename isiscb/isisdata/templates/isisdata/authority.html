@@ -17,7 +17,7 @@ ss
     <h4>Related Citations</h4>
       <ul>
       {% for rel_citation in citations.all %}
-          <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title }}</a></li>
+          <li><a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title }}</a></li>
       {% endfor %}
       </ul>
     </div>

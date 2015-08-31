@@ -5,14 +5,26 @@
 {% block content %}
 <div class="row">
   <div class="col-sm-3 col-md-2 sidebar">
-ss
+    <h4>Topics:</h4>
+    <ul>
+      {% for subject in subjects %}
+      <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <h4>Persons</h4>
+    <ul>
+      {% for person in persons %}
+      <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
   </div>
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
     <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}</div>
 
     <h3>{{ citation.title }}</h3>
 
-    <p><strong>Authors & Contributors:</strong> {% for author in authors %} <a href="{% url 'authority' author.authority.id %}">{{ author.authority.name }}</a> {% endfor %}
+    <p><strong>Authors & Contributors:</strong> {% for author in authors %} <a href="{% url 'authority' author.authority.id %}">{{ author.authority.name }};</a> {% endfor %}
     <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
     <p><strong>Description:</strong> {{ citation.description }}</p>
 
@@ -42,11 +54,9 @@ ss
       <tr>
         <td>Pages:</td><td>{{ citation.part_details.pages_free_text }}</td>
       </tr>
-
       {% for prop in properties_map %}
       <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {{ prop.authority.name }}</td></tr>
       {% endfor %}
-
     </table>
 
     <div></div>
