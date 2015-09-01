@@ -11,13 +11,29 @@
       <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
       {% endfor %}
     </ul>
+    {% if not subjects.all %}
+    <i>There are no subjects.</i>
+    {% endif %}
 
-    <h4>Persons</h4>
+    <h4>Persons:</h4>
     <ul>
       {% for person in persons %}
       <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
       {% endfor %}
     </ul>
+    {% if not persons.all %}
+    <i>There are no persons.</i>
+    {% endif %}
+
+    <h4>Categories:</h4>
+    <ul>
+      {% for category in categories %}
+      <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not categories.all %}
+    <i>There are no categories.</i>
+    {% endif %}
   </div>
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
     <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}</div>
@@ -29,7 +45,7 @@
     <p><strong>Description:</strong> {{ citation.description }}</p>
 
     {% for attribute in citation.attributes.all %}
-    <p><strong>{{ attribute.name }}:</strong> {{ attribute.value }}</p>
+    <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value }}</p>
     {% endfor %}
 
     <table class="details">
@@ -66,6 +82,9 @@
           <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title }}</a></li>
       {% endfor %}
       </ul>
+      {% if not citation.related_citations.all %}
+      <i>There are no related citations.</i>
+      {% endif %}
     </div>
 
   </div>

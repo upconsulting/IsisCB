@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row">
   <div class="col-sm-3 col-md-2 sidebar">
-ss
+Move on, there is nothing to see here.
   </div>
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
     <div class="alert alert-info headerbox" role="alert">{{ authority.get_type_controlled_display }}</div>
@@ -14,12 +14,36 @@ ss
 
     <p><strong>Description:</strong> {{ authority.description }}</p>
 
-    <h4>Related Citations</h4>
+    {% for attribute in authority.attributes.all %}
+    <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value }}</p>
+    {% endfor %}
+
+    {% if citations_by.all %}
+    <h4>Resources by {{ authority.name }}</h4>
       <ul>
-      {% for rel_citation in citations.all %}
+      {% for rel_citation in citations_by.all %}
           <li><a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title|default:"No title specified" }}</a></li>
       {% endfor %}
       </ul>
+    {% endif %}
+
+    {% if citations_about.all %}
+    <h4>Resources about {{ authority.name }}</h4>
+      <ul>
+      {% for rel_citation in citations_about.all %}
+          <li><a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if citations_other.all %}
+    <h4>Resources about {{ authority.name }}</h4>
+      <ul>
+      {% for rel_citation in citations_other.all %}
+          <li><a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
     </div>
 
   </div>

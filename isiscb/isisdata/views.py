@@ -117,11 +117,15 @@ def index(request):
 def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
     authority = Authority.objects.get(id=authority_id)
-    citations = ACRelation.objects.filter(authority__id=authority_id)
+    citations_by = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
+    citations_about = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
+    citations_other = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
-        'citations': citations
+        'citations_by': citations_by,
+        'citations_about': citations_about,
+        'citations_other': citations_other
     })
     return HttpResponse(template.render(context))
 
@@ -131,8 +135,9 @@ def citation(request, citation_id):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
     subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
+    categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU'])
+    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU', 'CA'])
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
@@ -143,6 +148,7 @@ def citation(request, citation_id):
         'authors': authors,
         'properties_map': properties,
         'subjects': subjects,
-        'persons': persons
+        'persons': persons,
+        'categories': categories,
     })
     return HttpResponse(template.render(context))
