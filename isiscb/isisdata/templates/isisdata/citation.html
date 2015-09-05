@@ -15,6 +15,16 @@
     <i>There are no subjects.</i>
     {% endif %}
 
+    <h4>Time Periods:</h4>
+    <ul>
+      {% for time in time_periods.all %}
+      <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not time_periods.all %}
+    <i>There are no time periods.</i>
+    {% endif %}
+
     <h4>Persons:</h4>
     <ul>
       {% for person in persons %}

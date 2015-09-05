@@ -120,6 +120,7 @@ def authority(request, authority_id):
     citations_by = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
     citations_about = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
     citations_other = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
+
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
@@ -136,6 +137,7 @@ def citation(request, citation_id):
     subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
     categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
+    time_periods = citation.acrelation_set.filter(type_controlled__in=['TI'])
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU', 'CA'])
     properties_map = defaultdict(list)
@@ -150,5 +152,6 @@ def citation(request, citation_id):
         'subjects': subjects,
         'persons': persons,
         'categories': categories,
+        'time_periods': time_periods,
     })
     return HttpResponse(template.render(context))
