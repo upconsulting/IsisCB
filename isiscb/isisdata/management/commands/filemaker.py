@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationError
+from django.contrib.contenttypes.models import ContentType
 from isisdata.models import *
 
 import datetime
@@ -92,7 +93,8 @@ citationFields = {
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
     'ModifiedOn': ('modified_on_fm', as_datetime),
-    'Record Action': ('record_action', lambda x: recordActionTypes[x]),
+    'Language': ('language', passthrough),
+    'RecordAction': ('record_action', lambda x: recordActionTypes[x]),
     'StatusOfRecord': ('status_of_record', lambda x: statusOfRecordTypes[x])
 }
 
@@ -161,7 +163,6 @@ authorityFields = {
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
     'ModifiedOn': ('modified_on_fm', as_datetime),
-    'Record Action': ('record_action', lambda x: recordActionTypes[x]),
     'RecordStatus': ('record_status', lambda x: recordStatusTypes[x.upper()]),
     'RecordHistory': ('record_history', passthrough),
     'PersonalNameFirst': ('personal_name_first', passthrough),
@@ -256,8 +257,8 @@ CCRelationFields = {
 attributeFields = {
     'ID': ('id', passthrough),
     'ID.Subject.link': ('subject', passthrough),
-    'DateAttribute.free': ('value', try_int),    # TODO: this is temporary.
-    'DateBegin': ('date_iso', as_datetime),
+    'DateAttribute.free': ('value_freeform', try_int),    # TODO: this is temporary.
+    'DateBegin': ('value', as_datetime),
     'CreatedBy': ('created_by_fm', passthrough),
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
@@ -288,7 +289,7 @@ trackingFields = {
     'ModifiedOn': ('modified_on_fm', as_datetime),
     'Type.controlled': ('type_controlled', lambda x: trackingTypes[x]),
     'TrackingInfo': ('tracking_info', passthrough),
-    'Notes': ('administrator_notes', passthrough)
+    'Notes': ('notes', passthrough)
 }
 
 
@@ -305,7 +306,8 @@ linkedDataFields = {
     'Type.Broad.controlled': ('type_controlled_broad', passthrough),
     'Type.free': ('type_free', passthrough),
     'RecordHistory': ('record_history', passthrough),
-    'Notes': ('administrator_notes', passthrough)
+    'Notes': ('administrator_notes', passthrough),
+    'UniversalResourceName.link': ('universal_resource_name', passthrough)
 }
 
 
@@ -321,37 +323,64 @@ class Command(BaseCommand):
         self.failed = []
         return super(Command, self).__init__(*args, **kwargs)
 
+    def _get_subject(self, subject_id):
+        subject_instance = None
+        subject_ctype = None
+        for ctype in ContentType.objects.all():
+            if ctype.model.startswith('historical'):    # e.g. HistoricalRecord.
+                continue
+
+            model = ctype.model_class()
+            try:
+                subject_instance = model.objects.get(id=subject_id)
+                subject_ctype = ctype
+                break   # Found.
+            except (ValueError, FieldError, ObjectDoesNotExist):
+                pass
+        return subject_instance, subject_ctype
+
     def add_arguments(self, parser):
         parser.add_argument('datapath', nargs=1, type=str)
+        parser.add_argument('table', nargs='*', type=str)
 
     def handle(self, *args, **options):
 
         datapath = options['datapath'][0]
+        tables = options['table']
 
-        print 'Loading citations...',
-        self.handle_citations(datapath)
-        print 'done'
-        print 'Loading authorities...',
-        self.handle_authorities(datapath)
-        print 'done'
-        print 'Loading AC relations...',
-        self.handle_ac_relations(datapath)
-        print 'done'
-        print 'Loading CC relations...',
-        self.handle_cc_relations(datapath)
-        print 'done'
-        print 'Loading attributes...',
-        self.handle_attributes(datapath)
-        print 'done'
-        print 'Loading linkeddata...',
-        self.handle_linkeddata(datapath)
-        print 'done'
-        print 'Loading tracking...',
-        self.handle_tracking(datapath)
-        print 'done'
-        #
-        print 'The following data could not be inserted:'
-        print self.failed
+        if tables is not None and len(tables) > 0:
+            for table in tables:
+                methodname = 'handle_{0}'.format(table)
+                if hasattr(self, methodname):
+                    method = getattr(self, methodname)
+                    print 'Running', methodname,
+                    method(datapath)
+                    print '...done.'
+        else:
+            print 'Loading citations...',
+            self.handle_citations(datapath)
+            print 'done'
+            print 'Loading authorities...',
+            self.handle_authorities(datapath)
+            print 'done'
+            print 'Loading AC relations...',
+            self.handle_ac_relations(datapath)
+            print 'done'
+            print 'Loading CC relations...',
+            self.handle_cc_relations(datapath)
+            print 'done'
+            print 'Loading attributes...',
+            self.handle_attributes(datapath)
+            print 'done'
+            print 'Loading linkeddata...',
+            self.handle_linkeddata(datapath)
+            print 'done'
+            print 'Loading tracking...',
+            self.handle_tracking(datapath)
+            print 'done'
+            #
+            print 'The following data could not be inserted:'
+            print self.failed
 
     def handle_citations(self, datapath):
         citationspath = os.path.join(datapath, 'citations.xml')
@@ -387,7 +416,6 @@ class Command(BaseCommand):
                         except ValueError:
                             # TODO: In some records, integer-only fields contain
                             #  non-integer data.
-                            print pd_field, value
                             if 'volume' in pd_field:
                                 pd_field = 'volume_free_text'
                             if 'issue' in pd_field:
@@ -395,15 +423,27 @@ class Command(BaseCommand):
                             if 'page' in pd_field:
                                 pd_field = 'pages_free_text'
                         partDetails[pd_field] = value
+
+            language = copy.deepcopy(values['language'])
+            del values['language']
+            try:
+                language_instance = Language.objects.get(name=language)
+            except ObjectDoesNotExist:
+                print "couldn't find language {0}".format(language)
+                language_instance = None
+                pass
+
             try:
                 instance = Citation(**values)
                 pd_instance = PartDetails(**partDetails)
                 pd_instance.save()
                 instance.part_details = pd_instance
                 instance.save()
+                if language_instance is not None:
+                    instance.language.add(language_instance)
+                instance.save()
             except Exception as E:
-                self.failed.append((values, E.message))
-                print values
+                self.failed.append((values['id'], E.message))
                 raise E
             r.clear()
 
@@ -438,11 +478,15 @@ class Command(BaseCommand):
                     missed_relations.append((values['id'], values['redirect_to']))
                     del values['redirect_to']
 
+            if values['type_controlled'] == 'PE':
+                model = Person
+            else:
+                model = Authority
+
             try:
-                instance = Authority(**values)
+                instance = model(**values)
                 instance.save()
             except Exception as E:
-                print values
                 raise E
             r.clear()
 
@@ -495,33 +539,17 @@ class Command(BaseCommand):
             # But ultimately if we are missing either an authority or citation
             #  id there is no way to create a valid ACRelation.
             if 'authority' not in values or 'citation' not in values:
-                self.failed.append((values, 'missing citation or relation'))
-                print '!', values
-                print '\r', len(self.failed),
+                self.failed.append((values['id'], 'missing citation or relation'))
                 return
 
             try:
                 authority = Authority.objects.get(id=values['authority'])
-                # TODO: remove this; for testing only.
-                # authority, c = Authority.objects.get_or_create(id=values['authority'], defaults={
-                #     'type_controlled': 'PE',
-                #     'name': 'test',
-                #     'description': 'a test instance',
-                # })
                 values['authority'] = authority
                 citation = Citation.objects.get(id=values['citation'])
-                # TODO: remove this; for testing only.
-                # citation, c = Citation.objects.get_or_create(id=values['citation'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
                 values['citation'] = citation
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                print values
-                print E.message
-                self.failed.append((values, E.message))
+                self.failed.append((values['id'], E.message))
                 return
 
             instance = ACRelation(**values)
@@ -564,29 +592,17 @@ class Command(BaseCommand):
             # But ultimately if we are missing either an authority or citation
             #  id there is no way to create a valid ACRelation.
             if 'subject' not in values or 'object' not in values:
-                self.failed.append((values, 'missing subject or object'))
+                self.failed.append((values['id'], 'missing subject or object'))
                 return
 
             try:
                 subject_instance = Citation.objects.get(id=values['subject'])
-                # TODO: remove this; for testing only.
-                # subject_instance, c = Citation.objects.get_or_create(id=values['subject'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
                 values['subject'] = subject_instance
                 object_instance = Citation.objects.get(id=values['object'])
-                # TODO: remove this; for testing only.
-                # object_instance, c = Citation.objects.get_or_create(id=values['object'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
                 values['object'] = object_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append((values, E.message))
+                self.failed.append((values['id'], E.message))
                 return
 
             instance = CCRelation(**values)
@@ -614,27 +630,39 @@ class Command(BaseCommand):
                         values[dj_field] = value
 
             if 'subject' not in values:
-                self.failed.append((values, 'missing subject'))
+                self.failed.append((values['id'], 'missing subject'))
                 return
 
-            try:
-                subject_instance = ReferencedEntity.objects.get(id=values['subject'])
-                # TODO: remove this; for testing only.
-                # subject_instance, c = Citation.objects.get_or_create(id=values['subject'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
-                del values['subject']
-            except ObjectDoesNotExist as E:
-                # TODO: this should fail quietly and move on?
-                self.failed.append((values, E.message))
+            vtype = dict(VALUE_MODELS)[type(values['value'])]
+            value_value = copy.deepcopy(values['value'])
+            del values['value']     # Not accepted by Attribute constructor.
+
+            vctype = ContentType.objects.get(model=vtype.__name__.lower())
+            type_controlled = values['type_controlled']
+            defaults = {'value_content_type': vctype}
+            atype = AttributeType.objects.get_or_create(name=type_controlled,
+                                                        defaults=defaults)[0]
+            values['type_controlled'] = atype
+
+            subject_id = copy.deepcopy(values['subject'])
+            del values['subject']   # Not accepted by Attribute constructor.
+
+            subject_instance, subject_ctype = self._get_subject(subject_id)
+
+            if subject_instance is None:
+                self.failed.append((values['id'], 'no such subject'))
                 return
+
+            values['source_content_type'] = subject_ctype
+            values['source_instance_id'] = subject_instance.id
 
             instance = Attribute(**values)
             instance.save()
-            subject_instance.attributes.add(instance)
-            subject_instance.save()
+            # subject_instance.attributes.add(instance)
+            # subject_instance.save()
+            value = vtype(value=value_value, attribute=instance)
+            value.save()
+
             r.clear()
 
         context = ET.iterparse(attributesspath)
@@ -658,22 +686,22 @@ class Command(BaseCommand):
                         values[dj_field] = value
 
             if 'subject' not in values:
-                self.failed.append((values, 'missing subject'))
+                self.failed.append((values['id'], 'missing subject'))
                 return
 
+            subject_id = copy.deepcopy(values['subject'])
+            del values['subject']
+
             try:
-                subject_instance = ReferencedEntity.objects.get(id=values['subject'])
-                # TODO: remove this; for testing only.
-                # subject_instance, c = Citation.objects.get_or_create(id=values['subject'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
+                subject_instance, subject_ctype = self._get_subject(subject_id)
                 values['subject'] = subject_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append((values, E.message))
+                self.failed.append((values['id'], E.message))
                 return
+
+            values['subject_content_type'] = subject_ctype
+            values['subject_instance_id'] = subject_instance.id
 
             instance = Tracking(**values)
             instance.save()
@@ -699,27 +727,43 @@ class Command(BaseCommand):
                         value = method(value)
                         values[dj_field] = value
 
-            if 'subject' not in values:
-                self.failed.append((values, 'missing subject'))
+            type_controlled = copy.deepcopy(values['type_controlled'])
+            del values['type_controlled']
+            try:
+                ltype = LinkedDataType.objects.get(name=type_controlled)
+            except ObjectDoesNotExist:
+                self.failed.append((values['id'], 'No such LinkedDataType.'))
                 return
 
             try:
-                subject_instance = ReferencedEntity.objects.get(id=values['subject'])
-                # TODO: remove this; for testing only.
-                # subject_instance, c = Citation.objects.get_or_create(id=values['subject'], defaults={
-                #     'type_controlled': 'BO',
-                #     'title': 'test title',
-                #     'description': 'a test instance'
-                # })
-                values['subject'] = subject_instance
+                ltype.is_valid(values['universal_resource_name'])
+            except ValidationError:
+                self.failed.append((values['id'], 'Invalid value.'))
+                return
+            values['type_controlled'] = ltype
+
+            if 'subject' not in values:
+                self.failed.append((values['id'], 'missing subject'))
+                return
+
+            subject_id = copy.deepcopy(values['subject'])
+            del values['subject']
+
+            try:
+                subject_instance, subject_ctype = self._get_subject(subject_id)
+                # values['subject'] = subject_instance
             except ObjectDoesNotExist as E:
                 # TODO: this should fail quietly and move on?
-                self.failed.append((values, E.message))
+                self.failed.append((values['id'], E.message))
                 return
+
+            values['subject_content_type'] = subject_ctype
+            values['subject_instance_id'] = subject_instance.id
 
             instance = LinkedData(**values)
             instance.save()
             r.clear()
+
 
         context = ET.iterparse(linkeddatapath)
         fast_iter(context, process_elem)

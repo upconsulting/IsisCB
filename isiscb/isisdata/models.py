@@ -1,30 +1,153 @@
 from django.db import models
+from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 
 from simple_history.models import HistoricalRecords
+
 import datetime
+import iso8601
 import pickle
 import uuid
+from random import randint
 import urlparse
+import re
 
-class FlexField(models.TextField):
-    """
-    Accepts any pickle-able Python object, and stores its serialized
-    representation as plain text in the database.
-    """
 
-    def get_prep_value(self, value, *args, **kwargs):
-        """Serialize"""
-        if value is None:
-            return
-        return pickle.dumps(value)
+VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
+            | Q(model='datetimevalue') | Q(model='datevalue') \
+            | Q(model='floatvalue') | Q(model='locationvalue')
 
-    def from_db_value(self, value, *args, **kwargs):
-        """Deserialize"""
 
-        return pickle.loads(value)
+
+class Value(models.Model):
+    attribute = models.OneToOneField('Attribute', related_name='value')
+    child_class = models.CharField(max_length=255, help_text="""
+    Name of the child model for this instance.""")
+
+    @classmethod
+    def is_valid(model, value):
+        try:
+            if hasattr(model, 'convert'):
+                model.convert(value)
+        except ValidationError as E:
+            raise E
+
+    def save(self, *args, **kwargs):
+        if hasattr(self, 'convert') and self.value is not None:
+            self.value = self.convert(self.value)
+        if self.child_class == '' or self.child_class is None:
+            self.child_class = type(self).__name__
+        return super(Value, self).save(*args, **kwargs)
+
+    def get_child_class(self):
+        return getattr(self, self.child_class.lower())
+
+    @property
+    def cvalue(self):
+        return self.get_child_class().value
+
+
+class TextValue(Value):
+    value = models.TextField()
+
+    class Meta:
+        verbose_name = 'text (long)'
+
+
+class CharValue(Value):
+    value = models.CharField(max_length=2000)
+
+    @staticmethod
+    def convert(value):
+        if len(value) > 2000:
+            raise ValidationError('Must be 2,000 characters or less')
+        return value
+
+    class Meta:
+        verbose_name = 'text (short)'
+
+
+class IntValue(Value):
+    value = models.IntegerField(default=0)
+
+    @staticmethod
+    def convert(value):
+        try:
+            return int(value)
+        except ValueError:
+            raise ValidationError('Must be an integer')
+
+    class Meta:
+        verbose_name = 'integer'
+
+
+class DateTimeValue(Value):
+    """ISO 8601 datetime."""
+    value = models.DateTimeField()
+
+    @staticmethod
+    def convert(value):
+        if type(value) is datetime.datetime:
+            return value
+        try:
+            return iso8601.parse_date(value)
+        except iso8601.ParseError:
+            raise ValidationError('Not a valid ISO8601 date')
+
+    class Meta:
+        verbose_name = 'date and time'
+
+
+class DateValue(Value):
+    value = models.DateField()
+
+    @staticmethod
+    def convert(value):
+        if type(value) is datetime.date:
+            return value
+        try:
+            return iso8601.parse_date(value).date()
+        except iso8601.ParseError:
+            raise ValidationError('Not a valid ISO8601 date')
+
+    class Meta:
+        verbose_name = 'date'
+
+
+class FloatValue(Value):
+    value = models.FloatField()
+
+    @staticmethod
+    def convert(value):
+        try:
+            return float(value)
+        except ValueError:
+            raise ValidationError('Must be a floating point number')
+
+    class Meta:
+        verbose_name = 'floating point number'
+
+
+class LocationValue(Value):
+    value = models.ForeignKey('Location')   # TODO: One to One?
+
+    class Meta:
+        verbose_name = 'location'
+
+
+VALUE_MODELS = [
+    (int,               IntValue),
+    (float,             FloatValue),
+    (datetime.datetime, DateTimeValue),
+    (datetime.date,     DateValue),
+    (str,               CharValue),
+    (unicode,           CharValue),
+]
 
 
 class CuratedMixin(models.Model):
@@ -69,7 +192,6 @@ class CuratedMixin(models.Model):
         """
         return self.history.get(history_type='+').history_user
 
-    # These should be jettisoned after the project moves away from FileMaker.
     created_on_fm = models.DateTimeField(null=True, help_text="""
     Value of CreatedOn from the original FM database.""")
 
@@ -77,10 +199,13 @@ class CuratedMixin(models.Model):
                                     help_text="""
     Value of CreatedBy from the original FM database.""")
 
-    modified_on_fm = models.DateTimeField(null=True, help_text="""
+    modified_on_fm = models.DateTimeField(null=True,
+                                          verbose_name="modified on (FM)",
+                                          help_text="""
     Value of ModifiedBy from the original FM database.""")
 
-    modified_by_fm = models.CharField(max_length=255, blank=True, help_text="""
+    modified_by_fm = models.CharField(max_length=255, blank=True,
+                                      verbose_name="modified by (FM)", help_text="""
     Value of ModifiedOn from the original FM database.""")
 
     @property
@@ -100,43 +225,13 @@ class CuratedMixin(models.Model):
         self.modified_on = value
 
 
-# class AttributeMixin(models.Model):
-#     """
-#     Adds an ``attributes`` field, and methods for accessing related
-#     :class:`.Attribute`\s.
-#     """
-#
-#     class Meta:
-#         abstract = True
-#
-#     # Put this here rather than in the Attribute model, since both Citations
-#     #  and Authorities (and more?) should be able to have attributes.
-#     attributes = models.ManyToManyField('Attribute', blank=True, null=True)
-#
-#     def __getattr__(self, name):
-#         """
-#         If an instance has no attribute called ``name``, checks the
-#         ``attributes`` field for matching related :class:`.Attribute`\s.
-#         """
-#
-#         # try:    # Give the base class the first shot.
-#         return super(AttributeMixin, self).__getattr__(name)
-#         # except AttributeError as E:
-#             # Look for ``name`` among related Attributes.
-#         if not self.pk:
-#             raise E
-#         queryset = self.attributes.filter(type_controlled=name)
-#         if queryset.count() == 1:
-#             return queryset[0].value
-#         elif querset.count() > 1:
-#             return [a.value for a in queryset]
-#             # raise E     # No such attribute found.
-
-
 class ReferencedEntity(models.Model):
     """
     Provides a custom ID field and an URI field, and associated methods.
     """
+
+    class Meta:
+        abstract = True
 
     id = models.CharField(max_length=200, primary_key=True, help_text="""
     In the format CBB000000000 (CBB followed by a number padded with zeros to
@@ -154,9 +249,22 @@ class ReferencedEntity(models.Model):
         """
         If ``uri`` is not set, generate a new one.
         """
+
+        return super(ReferencedEntity, self).save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.id is None or self.id == '':
+            # Ensure that this ID is unique.
+            while True:
+                id = '{0}{1}'.format(self.ID_PREFIX, "%09d" % randint(0,999999999))
+                if self.__class__.objects.filter(id=id).count() == 0:
+                    break   # TODO: find a better/simpler way?
+            self.id = id
+
         if self.uri == '':
             self.uri = self.generate_uri()
-        return super(ReferencedEntity, self).save(*args, **kwargs)
+        super(ReferencedEntity, self).save(*args, **kwargs)
+
 
 
 class Language(models.Model):
@@ -168,6 +276,9 @@ class Language(models.Model):
                           help_text="""Language code (e.g. ``en``).""")
 
     name = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Citation(ReferencedEntity, CuratedMixin):
@@ -209,6 +320,7 @@ class Citation(ReferencedEntity, CuratedMixin):
     )
 
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='type',
                                        choices=TYPE_CHOICES,
                                        help_text="""
     This list can be extended to the resource types specified by Doublin Core
@@ -233,6 +345,8 @@ class Citation(ReferencedEntity, CuratedMixin):
     language = models.ManyToManyField('Language', help_text="""
     Language of the resource. Multiple languages can be specified.""")
 
+    # TODO: This relation should be from PartDetails to Citation, to support
+    #  inlines in the Admin.
     part_details = models.OneToOneField('PartDetails', null=True, blank=True,
                                         help_text="""
     New field: contains volume, issue, page information for works that are parts
@@ -277,8 +391,24 @@ class Citation(ReferencedEntity, CuratedMixin):
     Used to control printing in the paper volume of the CB.
     """)
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='citations', content_type_field='source_content_type', object_id_field="source_instance_id")
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='citations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='citations')
+
+    def __unicode__(self):
+        return self.title
+
 
 class Authority(ReferencedEntity, CuratedMixin):
+    class Meta:
+        verbose_name_plural = 'authority records'
+        verbose_name = 'authority record'
+
     history = HistoricalRecords()
 
     name = models.CharField(max_length=1000, help_text="""
@@ -311,6 +441,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
+                                       verbose_name="type",
                                        help_text="""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.""")
@@ -359,6 +490,18 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     redirect_to = models.ForeignKey('Authority', blank=True, null=True)
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='authorities')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='authorities')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='authorities')
+
+    def __unicode__(self):
+        return self.name
+
 
 class Person(Authority):
     history = HistoricalRecords()
@@ -376,6 +519,9 @@ class Person(Authority):
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
+    class Meta:
+        verbose_name = 'authority-citation relationship'
+
     history = HistoricalRecords()
 
     citation = models.ForeignKey('Citation')
@@ -420,6 +566,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
+                                       verbose_name='type',
                                        help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more specifically than
@@ -437,12 +584,15 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
+                                             verbose_name='type (broad)',
                                              help_text="""
     Used to specify the nature of the relationship between authority (as the
     subject) and the citation (as the object) more broadly than
     Type.controlled""")
 
-    type_free = models.CharField(max_length=255, help_text="""
+    type_free = models.CharField(max_length=255,
+                                 verbose_name="type (free text)",
+                                 help_text="""
     Free text description of the role that the authority plays in the
     citation (e.g. 'introduction by', 'dissertation supervisor', etc)""")
 
@@ -468,6 +618,15 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                                             help_text="""
     Currently not used: helps to assess how significant this relationship is--to
     be used mostly in marking subjects.""")
+
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='ac_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='ac_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='ac_relations')
 
 
 class AARelation(ReferencedEntity, CuratedMixin):
@@ -502,6 +661,15 @@ class AARelation(ReferencedEntity, CuratedMixin):
 
     # missing from Stephen's list: objectType, subjectType
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='aa_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='aa_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='aa_relations')
+
 
 class CCRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
@@ -535,23 +703,73 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     subject = models.ForeignKey('Citation', related_name='relations_from')
     object = models.ForeignKey('Citation', related_name='relations_to')
 
+    # Generic reverse relations. These do not create new fields on the model.
+    #  Instead, they provide an API for lookups back onto their respective
+    #  target models via those models' GenericForeignKey relations.
+    attributes = GenericRelation('Attribute', related_query_name='cc_relations')
+    linkeddata_entries = GenericRelation('LinkedData',
+                                         related_query_name='cc_relations')
+    tracking_entries = GenericRelation('Tracking',
+                                       related_query_name='cc_relations')
+
+
+class LinkedDataType(models.Model):
+
+    name = models.CharField(max_length=255, unique=True)
+    pattern = models.CharField(max_length=255, blank=True)
+
+    def is_valid(self, value):
+        if self.pattern is None or self.pattern == '':
+            return
+
+        if re.match(self.pattern, value) is None:
+            message = 'Does not match pattern for {0}'.format(self.name)
+            raise ValidationError(message)
+
+    def __unicode__(self):
+        return self.name
+
+
+class AttributeType(models.Model):
+    name = models.CharField(max_length=255)
+
+    value_content_type = models.ForeignKey(ContentType,
+                                           limit_choices_to=VALUETYPES,
+                                           related_name='attribute_value')
+
+    def __unicode__(self):
+        return u'{0} ({1})'.format(self.name, self.value_content_type.model)
+
 
 class Attribute(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'ATT'
     history = HistoricalRecords()
 
-    description = models.TextField(blank=True)
-    source = models.ForeignKey('ReferencedEntity', blank=True, null=True, related_name='attributes')
-    value = FlexField()
+    description = models.TextField(blank=True, help_text="""
+    Additional information about this attribute.""")
 
-    # Question: need acceptable values for type_controlled and
-    #  type_controlled_broad
-    type_controlled = models.CharField(max_length=255, null=True, blank=True)
+    value_freeform = models.CharField(max_length=255,
+                                      verbose_name="freeform value",
+                                      blank=True,
+                                      help_text="""
+    Non-normalized value, e.g. an approximate date, or a date range.""")
+
+    # Generic relation.
+    source_content_type = models.ForeignKey(ContentType)
+    source_instance_id = models.CharField(max_length=200)
+    source = GenericForeignKey('source_content_type', 'source_instance_id')
+
+    # The selected AttributeType determines the type of Value (i.e. Value
+    #  subclass) that can be related to this Attribute.
+    type_controlled = models.ForeignKey('AttributeType', verbose_name='type',
+                                        help_text="""
+    The "type" field determines what kinds of values are acceptable for this
+    attribute.""")
+
+    # TODO: Instead of saving this in the Attribute model, we may want to create
+    #  a mechanism for grouping/ranking AttributeTypes.
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
-
-    # Question: why is this a separate field?
-    date_iso = models.DateField(blank=True, null=True)
-    place = models.ForeignKey('Place', blank=True, null=True)
 
 
 class PartDetails(models.Model):
@@ -614,6 +832,12 @@ class Location(models.Model):
 
 
 class LinkedData(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = "LED"
+
+    class Meta:
+        verbose_name = 'linked data entry'
+        verbose_name_plural = 'linked data entries'
+
     history = HistoricalRecords()
 
     description = models.TextField(blank=True)
@@ -626,23 +850,17 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
-    subject = models.ForeignKey('ReferencedEntity',
-                                related_name='linkeddata_entries')
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
+    subject = GenericForeignKey('subject_content_type',
+                                'subject_instance_id')
 
-    DOI = 'DOI'         # Question: Should we represent these choices as a
-    ISBN = 'ISBN'       #  separate model, so that they can be extended from
-    ISSN = 'ISSN'       #  the admin interface?
-    VIAF = 'VIAF'
-    TYPE_CHOICES = (
-        (DOI, 'DOI'),
-        (ISBN, 'ISBN'),
-        (ISSN, 'ISSN'),
-        (VIAF, 'VIAF')
-    )
-    type_controlled = models.CharField(max_length=4, null=True, blank=True,
-                                       choices=TYPE_CHOICES,
-                                       help_text="""Type of linked resource.""")
-    # Question: is this being used?
+    type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
+                                        help_text="""
+    The "type" field determines what kinds of values are acceptable for this
+    linked data entry.""")
+
+
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
@@ -668,7 +886,9 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES)
 
-    subject = models.ForeignKey('ReferencedEntity',
-                                related_name='tracking_entries')
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
+    subject = GenericForeignKey('subject_content_type',
+                                'subject_instance_id')
 
     notes = models.TextField(blank=True)

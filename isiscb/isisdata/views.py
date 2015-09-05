@@ -1,7 +1,11 @@
 from django.shortcuts import get_object_or_404, render
-from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 
-from rest_framework import viewsets, serializers
+from django.contrib.auth.models import User
+from django.db import connection
+from django.http import HttpResponse
+
+from rest_framework import viewsets, serializers, mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -24,9 +28,26 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
         model = Authority
 
 
+
 class CitationSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Citation
+        fields = ('uri', 'url', 'title', 'description', 'language',
+                  'type_controlled', 'abstract', 'edition_details',
+                  'physical_details', 'attributes')
+
+
+class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ContentType
+        fields = ('url', 'id', 'app_label', 'model')
+
+class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
+    value_content_type = ContentTypeSerializer()
+
+    class Meta:
+        model = AttributeType
+        fields = ('url', 'id', 'name', 'value_content_type')
 
 
 class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,44 +75,101 @@ class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
         model = LinkedData
 
 
-class AuthorityViewSet(viewsets.ModelViewSet):
+class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = PartDetails
+
+
+class AuthorityViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class CitationViewSet(viewsets.ModelViewSet):
+class CitationViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      viewsets.GenericViewSet):
     queryset = Citation.objects.all()
     serializer_class = CitationSerializer
 
 
-class ACRelationViewSet(viewsets.ModelViewSet):
+class ACRelationViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
     queryset = ACRelation.objects.all()
     serializer_class = ACRelationSerializer
 
 
-class CCRelationViewSet(viewsets.ModelViewSet):
+class CCRelationViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
     queryset = CCRelation.objects.all()
     serializer_class = CCRelationSerializer
 
 
-class AARelationViewSet(viewsets.ModelViewSet):
+class AARelationViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
     queryset = AARelation.objects.all()
     serializer_class = AARelationSerializer
 
 
-class AttributeViewSet(viewsets.ModelViewSet):
+class AttributeTypeViewSet(mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           viewsets.GenericViewSet):
+    queryset = AttributeType.objects.all()
+    serializer_class = AttributeTypeSerializer
+
+
+class ContentTypeViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
+    queryset = ContentType.objects.all()
+    serializer_class = ContentTypeSerializer
+
+# class ReferencedEntityRelatedField(serializers.HyperlinkedRelatedField):
+#     view_name = ''
+#
+#     def to_representation(self, value):
+#         print self.view_name
+#         if hasattr(value, 'citation'):
+#             self.view_name = 'citation-detail'
+#             value = value.citation
+#         if hasattr(value, 'authority'):
+#             self.view_name = 'authority-detail'
+#             value = value.citation
+#         return super(ReferencedEntityRelatedField, self).to_representation(value)
+
+
+class AttributeViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       viewsets.GenericViewSet):
+
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
+    # source = ReferencedEntityRelatedField(read_only=True)
 
 
-class LinkedDataViewSet(viewsets.ModelViewSet):
+class LinkedDataViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
     queryset = LinkedData.objects.all()
     serializer_class = LinkedDataSerializer
+
+
+class PartDetailsViewSet(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         viewsets.GenericViewSet):
+    queryset = PartDetails.objects.all()
+    serializer_class = PartDetailsSerializer
 
 
 

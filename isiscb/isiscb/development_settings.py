@@ -14,6 +14,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 import os
 import sys
 
+sys.path.append('..')
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -24,6 +26,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MIGRATION_MODULES = {
+    'isisdata': 'isisdata.migrations'
+}
 
 # Application definition
 
@@ -120,6 +125,7 @@ AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
+STATICFILES_DIRS = ['isisdata/static']
 STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
 STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)

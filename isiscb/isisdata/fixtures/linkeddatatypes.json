@@ -1,0 +1,29 @@
+[
+    {
+        "model": "isisdata.linkeddatatype",
+        "fields": {
+            "name": "DOI"
+        }
+    },
+    {
+        "model": "isisdata.linkeddatatype",
+        "fields": {
+            "name": "ISBN",
+            "pattern": "^(?:ISBN(?:-1[03])?:?●)?(?=[0-9X]{10}$|(?=(?:[0-9]+[-●]){3})[-●0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[-●]){4})[-●0-9]{17}$)(?:97[89][-●]?)?[0-9]{1,5}[-●]?[0-9]+[-●]?[0-9]+[-●]?[0-9X]$"
+        }
+    },
+    {
+        "model": "isisdata.linkeddatatype",
+        "fields": {
+            "name": "ISSN",
+            "pattern": "^\\d{4}-\\d{3}[\\dxX]$"
+        }
+    },
+    {
+        "model": "isisdata.linkeddatatype",
+        "fields": {
+            "name": "VIAF",
+            "pattern": "^http://viaf\\.org/viaf/[0-9]+$"
+        }
+    }
+]

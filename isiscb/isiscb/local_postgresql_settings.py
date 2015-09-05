@@ -24,6 +24,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MIGRATION_MODULES = {
+    'isisdata': 'isisdata.migrations'
+}
 
 # Application definition
 
@@ -49,6 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'isisdata.middleware.ProfileMiddleware',
 )
 
 ROOT_URLCONF = 'isiscb.urls'

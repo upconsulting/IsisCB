@@ -32,7 +32,7 @@ class ProfileMiddleware(object):
     WARNING: It uses hotshot profiler which is not thread safe.
     """
     def process_request(self, request):
-        if (settings.DEBUG or request.user.is_superuser) and 'prof' in request.GET: 
+        if (settings.DEBUG or request.user.is_superuser) and 'prof' in request.GET:
             self.tmpfile = tempfile.mktemp()
             self.prof = hotshot.Profile(self.tmpfile)
 
