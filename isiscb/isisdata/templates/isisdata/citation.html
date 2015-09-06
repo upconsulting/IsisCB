@@ -89,7 +89,7 @@
     <h4>Related Citations</h4>
       <ul>
       {% for rel_citation in citation.related_citations.all %}
-          <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title }}</a></li>
+          <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title|default:"No title specified" }}</a></li>
       {% endfor %}
       </ul>
       {% if not citation.related_citations.all %}

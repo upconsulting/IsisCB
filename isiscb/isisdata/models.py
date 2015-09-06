@@ -493,7 +493,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='authorities')
+    attributes = GenericRelation('Attribute', related_query_name='authorities', content_type_field='source_content_type', object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation('LinkedData',
                                          related_query_name='authorities')
     tracking_entries = GenericRelation('Tracking',

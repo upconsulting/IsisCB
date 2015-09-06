@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 
 from django.contrib.auth.models import User
@@ -191,6 +191,22 @@ def index(request):
         'test': False,
     })
     return HttpResponse(template.render(context))
+
+def index(request, obj_id):
+    template = loader.get_template('isisdata/index.html')
+    try:
+        object = Authority.objects.get(id=obj_id)
+    except Authority.DoesNotExist:
+        object = None
+    if object != None:
+        return redirect('authority', authority_id = obj_id)
+
+    return redirect('citation', citation_id = obj_id)
+
+    #context = RequestContext(request, {
+    #    'test': False,
+    #})
+    #return HttpResponse(template.render(context))
 
 def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
