@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.contrib.auth.models import User
 from django.db import connection
@@ -211,9 +212,39 @@ def index(request, obj_id):
 def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
     authority = Authority.objects.get(id=authority_id)
-    citations_by = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
-    citations_about = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
-    citations_other = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
+    citations_by_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
+    citations_about_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
+    citations_other_list = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
+
+    citations_by_paginator = Paginator(citations_by_list, 30)
+    citations_about_paginator = Paginator(citations_about_list, 30)
+    citations_other_paginator = Paginator(citations_other_list, 30)
+
+    page = request.GET.get('page-about')
+    try:
+        citations_about = citations_about_paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        citations_about = citations_about_paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        citations_about = citations_about_paginator.page(paginator.num_pages)
+
+    page_other = request.GET.get('page-other')
+    try:
+        citations_other = citations_other_paginator.page(page_other)
+    except PageNotAnInteger:
+        citations_other = citations_other_paginator.page(1)
+    except EmptyPage:
+        citations_other = citations_other_paginator.page(paginator.num_pages)
+
+    page_by = request.GET.get('page-by')
+    try:
+        citations_by = citations_by_paginator.page(page_other)
+    except PageNotAnInteger:
+        citations_by = citations_by_paginator.page(1)
+    except EmptyPage:
+        citations_by = citations_by_paginator.page(paginator.num_pages)
 
     context = RequestContext(request, {
         'authority_id': authority_id,

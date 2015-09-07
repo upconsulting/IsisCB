@@ -5,6 +5,15 @@
 {% block content %}
 <div class="row">
   <div class="col-sm-3 col-md-2 sidebar">
+    <div class="menu">
+      <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+
     <h4>Topics:</h4>
     <ul>
       {% for subject in subjects %}
@@ -55,7 +64,7 @@
     <p><strong>Description:</strong> {{ citation.description }}</p>
 
     {% for attribute in citation.attributes.all %}
-    <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value }}</p>
+    <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value_freeform }}</p>
     {% endfor %}
 
     <table class="details">

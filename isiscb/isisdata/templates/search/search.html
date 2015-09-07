@@ -1,9 +1,40 @@
 {% extends "isisdata/__base.html" %}
+{% load app_filters %}
 {% block title %}Search{% endblock %}
 
 {% block content %}
 <div class="row">
   <div class="col-sm-3 col-md-2 sidebar">
+    <div class="menu">
+      <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+
+    {% if query %}
+      {% if facets.fields.authors %}
+              <dt>Author</dt>
+              {# Provide only the top 5 authors #}
+              {% for author in facets.fields.authors|slice:":5" %}
+                  <dd><a href="{{ request.get_full_path }}&amp;selected_facets=author_exact:{{ author.0|urlencode }}">{{ author.0 }}</a> ({{ author.1 }})</dd>
+              {% endfor %}
+      {% else %}
+              <p>No author facets.</p>
+      {% endif %}
+
+      {% if facets.fields.subjects %}
+              <dt>Subject</dt>
+              {% for subject in facets.fields.subjects|slice:":5" %}
+                  <dd><a href="{{ request.get_full_path }}&amp;selected_facets=subject_exact:{{ author.0|urlencode }}">{{ subject.0 }}</a> ({{ subject.1 }})</dd>
+              {% endfor %}
+      {% else %}
+              <p>No subject facets.</p>
+      {% endif %}
+
+    {% endif %}
 
   </div>
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -26,7 +57,8 @@
 
             {% for result in page.object_list %}
                 <p>
-                  <a href="{% url 'index' result.object.id %}">{{ result.object.title }}</a>
+                  {{ result.authors | joinby:", " }}
+                  <br><a href="{% url 'index' result.object.id %}">{{ result.object.title }}</a>
 
                 </p>
             {% empty %}
