@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.views.generic.base import RedirectView
 
 from rest_framework import routers
 
@@ -42,5 +43,8 @@ urlpatterns = [
     url(r'^rest/auth/$', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^isis/', include('isisdata.urls')),
+    url(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
+    url(r'^', include('registration.backends.simple.urls')),
+    # url('^', include('django.contrib.auth.urls'))
 ]
