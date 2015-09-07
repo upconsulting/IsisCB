@@ -23,10 +23,12 @@ class ProfileMiddleware(object):
     """
     Displays hotshot profiling for any view.
     http://yoursite.com/yourview/?prof
+
     Add the "prof" key to query string by appending ?prof (or &prof=)
     and you'll see the profiling results in your browser.
     It's set up to only be available in django's debug mode, is available for superuser otherwise,
     but you really shouldn't add this middleware to any production configuration.
+
     WARNING: It uses hotshot profiler which is not thread safe.
     """
     def process_request(self, request):

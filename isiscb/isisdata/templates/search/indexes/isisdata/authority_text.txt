@@ -1,0 +1,6 @@
+{{ object.name }}
+{{ object.description }}
+
+{% for attr in object.attributes.all %}
+    {{ attr.value_freeform }}
+{% endfor %}

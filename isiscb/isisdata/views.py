@@ -1,5 +1,7 @@
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
@@ -10,6 +12,11 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from isisdata.models import *
+
+from django.template import RequestContext, loader
+from django.http import HttpResponse
+
+from collections import defaultdict
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -178,3 +185,98 @@ def api_root(request, format=None):
         'attribute': reverse('attribute-list', request=request, format=format),
         'linkeddata': reverse('linkeddata-list', request=request, format=format),
     })
+
+def index(request):
+    template = loader.get_template('isisdata/index.html')
+    context = RequestContext(request, {
+        'test': False,
+    })
+    return HttpResponse(template.render(context))
+
+def index(request, obj_id):
+    template = loader.get_template('isisdata/index.html')
+    try:
+        object = Authority.objects.get(id=obj_id)
+    except Authority.DoesNotExist:
+        object = None
+    if object != None:
+        return redirect('authority', authority_id = obj_id)
+
+    return redirect('citation', citation_id = obj_id)
+
+    #context = RequestContext(request, {
+    #    'test': False,
+    #})
+    #return HttpResponse(template.render(context))
+
+def authority(request, authority_id):
+    template = loader.get_template('isisdata/authority.html')
+    authority = Authority.objects.get(id=authority_id)
+    citations_by_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
+    citations_about_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
+    citations_other_list = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
+
+    citations_by_paginator = Paginator(citations_by_list, 30)
+    citations_about_paginator = Paginator(citations_about_list, 30)
+    citations_other_paginator = Paginator(citations_other_list, 30)
+
+    page = request.GET.get('page-about')
+    try:
+        citations_about = citations_about_paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        citations_about = citations_about_paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        citations_about = citations_about_paginator.page(paginator.num_pages)
+
+    page_other = request.GET.get('page-other')
+    try:
+        citations_other = citations_other_paginator.page(page_other)
+    except PageNotAnInteger:
+        citations_other = citations_other_paginator.page(1)
+    except EmptyPage:
+        citations_other = citations_other_paginator.page(paginator.num_pages)
+
+    page_by = request.GET.get('page-by')
+    try:
+        citations_by = citations_by_paginator.page(page_other)
+    except PageNotAnInteger:
+        citations_by = citations_by_paginator.page(1)
+    except EmptyPage:
+        citations_by = citations_by_paginator.page(paginator.num_pages)
+
+    context = RequestContext(request, {
+        'authority_id': authority_id,
+        'authority': authority,
+        'citations_by': citations_by,
+        'citations_about': citations_about,
+        'citations_other': citations_other
+    })
+    return HttpResponse(template.render(context))
+
+def citation(request, citation_id):
+    template = loader.get_template('isisdata/citation.html')
+    citation = get_object_or_404(Citation, pk=citation_id)
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+    subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
+    categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
+    time_periods = citation.acrelation_set.filter(type_controlled__in=['TI'])
+
+    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU', 'CA'])
+    properties_map = defaultdict(list)
+    for prop in properties:
+        properties_map[prop.type_controlled] += [prop]
+
+    context = RequestContext(request, {
+        'citation_id': citation_id,
+        'citation': citation,
+        'authors': authors,
+        'properties_map': properties,
+        'subjects': subjects,
+        'persons': persons,
+        'categories': categories,
+        'time_periods': time_periods,
+    })
+    return HttpResponse(template.render(context))

@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'simple_history',
     'isisdata',
     'storages',
+    'haystack',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -79,7 +80,7 @@ WSGI_APPLICATION = 'isiscb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-from secrets import POSTGRESQL_PASSWORD
+#from secrets import POSTGRESQL_PASSWORD
 
 DATABASES = {
     'default': {
@@ -92,7 +93,14 @@ DATABASES = {
     }
 }
 
-
+# Haystack
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
