@@ -96,19 +96,45 @@ class AttributeInlineFormSet(BaseGenericInlineFormSet):
 
 
 class LinkedDataInlineForm(forms.ModelForm):
+    model = LinkedData
     class Media:
         model = LinkedData
         js = ('isisdata/js/jquery-1.11.1.min.js',
               'isisdata/js/widgetmap.js')
 
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    subject_instance_id = forms.CharField(widget=forms.HiddenInput())
+    subject_content_type_id = forms.IntegerField(widget=forms.HiddenInput())
 
+    def __init__(self, *args, **kwargs):
+
+        super(LinkedDataInlineForm, self).__init__(*args, **kwargs)
+        print kwargs
+        # Populate value and id fields.
+        instance = kwargs.get('instance', None)
+        if instance is not None:
+            self.fields['subject_instance_id'].initial = instance.subject_instance_id
+            self.fields['subject_content_type_id'].initial = instance.subject_content_type.id
+
+    def is_valid(self):
+        val = super(LinkedDataInlineForm, self).is_valid()
+        print self.errors
+        return val
+
+class LinkedDataInlineFormSet(BaseGenericInlineFormSet):
+    model = LinkedData
 
 class LinkedDataInline(GenericTabularInline):
     model = LinkedData
     form = LinkedDataInlineForm
     ct_field = 'subject_content_type'
     ct_fk_field = 'subject_instance_id'
+
+    formset = generic_inlineformset_factory(LinkedData,
+                                            form=LinkedDataInlineForm,
+                                            formset=LinkedDataInlineFormSet,
+                                            ct_field='subject_content_type',
+                                            fk_field='subject_instance_id')
 
     extra = 1
 
@@ -136,6 +162,7 @@ class LinkedDataInlineMixin(admin.ModelAdmin):
         else:
             self.inlines = (LinkedDataInline,)
         super(LinkedDataInlineMixin, self).__init__(*args, **kwargs)
+
 
 
 class AttributeInline(GenericTabularInline):
@@ -176,11 +203,13 @@ class AttributeInlineMixin(admin.ModelAdmin):
             self.inlines = (AttributeInline,)
         super(AttributeInlineMixin, self).__init__(*args, **kwargs)
 
+
+class UberInlineMixin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         """
         Given an inline formset save it to the database.
         """
-        return formset.save()
+        return formset.save(commit=False)
 
     def save_related(self, request, form, formsets, change):
         """
@@ -189,10 +218,9 @@ class AttributeInlineMixin(admin.ModelAdmin):
         form.save_m2m()     # Does not include Attributes.
 
         for formset in formsets:
-            instances = self.save_formset(request, form, formset, change=change)
-            print 'instances', instances
             # Look only at the Attribute formset.
             if type(formset).__name__ == 'AttributeFormFormSet':
+                instances = self.save_formset(request, form, formset, change=change)
                 for attribute, data in zip(instances, formset.cleaned_data):
                     attr_type, value = data['type_controlled'], data['value']
                     value_model = attr_type.value_content_type.model_class()
@@ -205,9 +233,17 @@ class AttributeInlineMixin(admin.ModelAdmin):
                     if not created and value_instance.value != value:
                         value_instance.value = value
                         value_instance.save()
+                    attribute.save()
+            elif type(formset).__name__ == 'LinkedDataFormFormSet':
+                instances = self.save_formset(request, form, formset, change=change)
+                for instance in instances:
+                    print instance.__dict__
+
+                formset.save_m2m()
+                formset.save()
 
 
-class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMixin):
+class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMixin, UberInlineMixin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
         (None, {
@@ -236,7 +272,7 @@ class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMi
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
 
-class AuthorityAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+class AuthorityAdmin(SimpleHistoryAdmin, AttributeInlineMixin, UberInlineMixin):
     list_display = ('id', 'name', 'type_controlled')
     list_filter = ('type_controlled',)
 
