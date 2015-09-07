@@ -229,13 +229,6 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
         return repr
 
 
-class CCNestedField(serializers.HyperlinkedRelatedField):
-    view_name = 'cc-nested'
-
-    def to_representation(self, obj):
-        print obj, type(obj), '!'
-        return super(CCNestedField, self).to_representation(obj)
-
 class CitationSerializer(serializers.HyperlinkedModelSerializer):
     language = LanguageSerializer(many=True, read_only=True)
     attributes = AttributeSerializer(many=True, read_only=True)
