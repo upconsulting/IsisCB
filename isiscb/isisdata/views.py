@@ -329,19 +329,6 @@ class LanguageViewSet(mixins.ListModelMixin,
     queryset = Language.objects.all()
     serializer_class = LanguageSerializer
 
-# class ReferencedEntityRelatedField(serializers.HyperlinkedRelatedField):
-#     view_name = ''
-#
-#     def to_representation(self, value):
-#         print self.view_name
-#         if hasattr(value, 'citation'):
-#             self.view_name = 'citation-detail'
-#             value = value.citation
-#         if hasattr(value, 'authority'):
-#             self.view_name = 'authority-detail'
-#             value = value.citation
-#         return super(ReferencedEntityRelatedField, self).to_representation(value)
-
 
 class AttributeViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
@@ -349,7 +336,6 @@ class AttributeViewSet(mixins.ListModelMixin,
 
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
-    # source = ReferencedEntityRelatedField(read_only=True)
 
 
 class LinkedDataViewSet(mixins.ListModelMixin,
