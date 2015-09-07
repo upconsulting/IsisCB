@@ -246,7 +246,9 @@ class ReferencedEntity(models.Model):
         """
         Create a new Unique Resource Identifier.
         """
-        return urlparse.urlunparse(('http', settings.DOMAIN, 'entities/{0}'.format(uuid.uuid1()), '', '', ''))
+        values = type(self).__name__.lower(), self.id
+        return urlparse.urlunparse(('http', settings.DOMAIN,
+                                    'isis/{0}/{1}'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
         """
