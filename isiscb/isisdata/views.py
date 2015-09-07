@@ -212,6 +212,22 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
                   'related_citations',
                   'related_authorities')
 
+    def to_representation(self, obj):
+        """
+        Add Person-specific fields to the instance representation.
+
+        TODO: make this more general.
+        """
+
+        repr = super(AuthoritySerializer, self).to_representation(obj)
+        if hasattr(obj, 'person'):
+            obj = obj.person
+            for fname in ['personal_name_last',
+                          'personal_name_first',
+                          'personal_name_suffix']:
+                repr[fname] = getattr(obj, fname)
+        return repr
+
 
 class CCNestedField(serializers.HyperlinkedRelatedField):
     view_name = 'cc-nested'
