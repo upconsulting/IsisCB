@@ -8,6 +8,8 @@ from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineforms
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
+import autocomplete_light
+
 
 # TODO: The Choice widget cannot handle this many choices. Consider using an
 #  autocomplete, or some other widget that loads ``object`` choices dynamically
@@ -55,8 +57,7 @@ class ValueField(forms.Field):
 class AttributeInlineForm(forms.ModelForm):
     class Media:
         model = Attribute
-        js = ('isisdata/js/jquery-1.11.1.min.js',
-              'isisdata/js/widgetmap.js')
+        js = ('isisdata/js/widgetmap.js', )
 
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
     value = ValueField(label='Value', widget=ValueWidget())
@@ -100,8 +101,7 @@ class LinkedDataInlineForm(forms.ModelForm):
 
     class Media:
         model = LinkedData
-        js = ('isisdata/js/jquery-1.11.1.min.js',
-              'isisdata/js/widgetmap.js')
+        js = ('isisdata/js/widgetmap.js', )
 
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
@@ -255,6 +255,12 @@ class UberInlineMixin(admin.ModelAdmin):
                 formset.save()
 
 
+class CitationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = Citation
+        fields = '__all__'
+
+
 class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMixin, UberInlineMixin):
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
@@ -283,12 +289,14 @@ class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMi
 
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
+    form = CitationForm
+
 
 class AuthorityAdmin(SimpleHistoryAdmin,
                      AttributeInlineMixin,
                      LinkedDataInlineMixin,
                      UberInlineMixin):
-    list_display = ('id', 'name', 'type_controlled')
+    list_display = ('name', 'type_controlled', 'id',)
     list_filter = ('type_controlled',)
 
     fieldsets = [
@@ -318,6 +326,12 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                        'classification_hierarchy',
                        'modified_on_fm',
                        'modified_by_fm')
+
+
+class ACRelationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = ACRelation
+        fields = '__all__'
 
 
 class ACRelationAdmin(SimpleHistoryAdmin,
@@ -353,27 +367,111 @@ class ACRelationAdmin(SimpleHistoryAdmin,
     ]
 
     readonly_fields = ('uri',
-                       'citation',
-                       'authority',
+                    #    'citation',
+                    #    'authority',
                        'modified_by_fm',
                        'modified_on_fm')
+
+    form = ACRelationForm
+
+
+class CCRelationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = CCRelation
+        fields = '__all__'
 
 
 class CCRelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
                       UberInlineMixin):
-    pass
 
+    list_display = ('id',
+                    'subject',
+                    '_render_type_controlled',
+                    'object')
+
+    fieldsets = [
+        (None, {
+            'fields': ('uri',
+                       'subject',
+                       'object',
+                       'name',
+                       'description')
+        }),
+        ('Type', {
+            'fields': ('type_controlled',
+                       'type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
+    ]
+
+    readonly_fields = ('uri',
+                    #    'subject',
+                    #    'object',
+                       'modified_by_fm',
+                       'modified_on_fm')
+
+    form = CCRelationForm
+
+
+class AARelationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = AARelation
+        fields = '__all__'
 
 class AARelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
                       UberInlineMixin):
-    pass
+
+    list_display = ('id',
+                    'subject',
+                    'type_controlled',
+                    'object')
+
+    fieldsets = [
+        (None, {
+            'fields': ('uri',
+                       'subject',
+                       'object',
+                       'name',
+                       'description')
+        }),
+        ('Type', {
+            'fields': ('type_controlled',
+                       'type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
+    ]
+
+    readonly_fields = ('uri',
+                    #    'subject',
+                    #    'object',
+                       'modified_by_fm',
+                       'modified_on_fm')
+
+    form = AARelationForm
 
 
-class LinkedDataAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+
+class LinkedDataAdmin(SimpleHistoryAdmin):
+
+    list_display = ('id',
+                    'subject',
+                    'type_controlled',
+                    'universal_resource_name')
+
     fieldsets = [
         (None, {
             'fields': ('uri',
@@ -396,21 +494,48 @@ class LinkedDataAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
     ]
 
     readonly_fields = ('uri',
+                       'subject_instance_id',
+                       'subject_content_type',
                        'modified_by_fm',
                        'modified_on_fm')
 
+    inlines = []
 
-class ValueInline(admin.TabularInline):
+
+class ValueInline(admin.StackedInline):
+    can_delete = False
     model = Value
     fields = ('cvalue',)
     readonly_fields = ('cvalue', )
 
 
 class AttributeAdmin(SimpleHistoryAdmin):
-    readonly_fields = ('uri', )
+    fieldsets = [
+        (None, {
+            'fields': ('uri',
+                       'description',
+                       'source_content_type',
+                       'source_instance_id')
+        }),
+        ('Type', {
+            'fields': ('type_controlled',
+                       'type_controlled_broad',
+                       'type_free')
+        }),
+        ('Curation', {
+            'fields': ('administrator_notes',
+                       'record_history',
+                       'modified_by_fm',
+                       'modified_on_fm')
+        }),
+    ]
+    readonly_fields = ('uri', 'id', 'source_content_type', 'source_instance_id')
+    list_display = ('id', 'source', 'type_controlled', 'value')
     inlines = (ValueInline,)
 
 class AttributeTypeAdmin(SimpleHistoryAdmin):
+    list_display = ('id', 'name', 'value_content_type')
+    list_display_links = ('id', 'name')
     inlines = []
 
 

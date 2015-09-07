@@ -2,7 +2,6 @@ var widgets = {};
 var attributeTypes = {};
 
 var swapWidgets = function(event) {
-    console.log(event);
     var inlineFormID = event.currentTarget.id.split('-')[4];   // e.g. 0
     var parentID = $('#'+event.currentTarget.id).parent().parent().parent().attr('id');
 
@@ -21,7 +20,7 @@ var swapWidgets = function(event) {
     // Attempt to get the current value from the existing widget.
     var oldWidget = $('#'+parentID+' .dynamicWidget');
     var oldValue = oldWidget.attr('value'); // If ValueWidget
-    console.log(oldValue);
+
     if (oldValue.length < 1) oldValue = oldWidget.val();
     if (oldValue.length > 0) widget.val(oldValue);
 
@@ -40,7 +39,7 @@ var bindFields = function() {
 var updateTypes = function(callback) {
     $.get('/rest/attributetype/').done(function(data) {
         data.forEach(function(a) {
-            attributeTypes[a.id] = a.value_content_type.model;
+            attributeTypes[a.id] = a.content_type.model;
         });
         if (callback) callback();
     });

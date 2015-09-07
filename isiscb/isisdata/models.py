@@ -47,9 +47,12 @@ class Value(models.Model):
     def get_child_class(self):
         return getattr(self, self.child_class.lower())
 
-    @property
     def cvalue(self):
         return self.get_child_class().value
+    cvalue.short_description = 'value'
+
+    def __unicode__(self):
+        return unicode(self.get_child_class().value)
 
 
 class TextValue(Value):
@@ -548,8 +551,11 @@ class Person(Authority):
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'ACR'
+
     class Meta:
         verbose_name = 'authority-citation relationship'
+        verbose_name_plural = 'authority-citation relationships'
 
     history = HistoricalRecords()
 
@@ -662,8 +668,24 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='ac_relations')
 
+    def _render_type_controlled(self):
+        try:
+            return dict(self.TYPE_CHOICES)[self.type_controlled]
+        except KeyError:
+            return u'None'
+
+    def __unicode__(self):
+        values = (self.citation, self._render_type_controlled(), self.authority)
+        return u'{0} - {1} - {2}'.format(*values)
+
 
 class AARelation(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'AAR'
+
+    class Meta:
+        verbose_name = 'authority-authority relationship'
+        verbose_name_plural = 'authority-authority relationships'
+
     # Currently not used, but crucial to development of next generation relationship tools:
     name = models.CharField(max_length=255, blank=True)
     # Currently not used, but crucial to development of next generation relationship tools:
@@ -708,8 +730,25 @@ class AARelation(ReferencedEntity, CuratedMixin):
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='aa_relations')
 
+    def _render_type_controlled(self):
+        try:
+            return dict(self.TYPE_CHOICES)[self.type_controlled]
+        except KeyError:
+            return u'None'
+
+
+    def __unicode__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
+
 
 class CCRelation(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'CCR'
+
+    class Meta:
+        verbose_name = 'citation-citation relationship'
+        verbose_name_plural = 'citation-citation relationships'
+
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, blank=True)
@@ -754,9 +793,22 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='cc_relations')
 
+    def _render_type_controlled(self):
+        try:
+            return dict(self.TYPE_CHOICES)[self.type_controlled]
+        except KeyError:
+            return u'None'
+
+
+    def __unicode__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
 
 
 class LinkedDataType(models.Model):
+    class Meta:
+        verbose_name = 'linked data type'
+        verbose_name_plural = 'linked data types'
 
     name = models.CharField(max_length=255, unique=True)
     pattern = models.CharField(max_length=255, blank=True)
@@ -814,12 +866,22 @@ class Attribute(ReferencedEntity, CuratedMixin):
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
+    def __unicode__(self):
+        return u'{0}: {1}'.format(self.type_controlled.name,
+                                  self.value.get_child_class().value)
+
 
 class PartDetails(models.Model):
     """
     New field: contains volume, issue, page information for works that are parts
     of larger works.
     """
+
+    class Meta:
+        verbose_name = 'part detail'
+        verbose_name_plural = 'part details'
+
+
     volume = models.CharField(max_length=255, blank=True)
     volume_free_text = models.CharField(max_length=255, blank=True)
     volume_begin = models.IntegerField(blank=True, null=True)
@@ -906,6 +968,11 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
+
+    def __unicode__(self):
+        values = (self.subject, self.type_controlled,
+                  self.universal_resource_name)
+        return u'{0} - {1} - {2}'.format(*values)
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
