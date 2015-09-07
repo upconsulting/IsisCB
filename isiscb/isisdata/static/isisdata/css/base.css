@@ -48,3 +48,11 @@
 .menu {
   text-align: center;
 }
+
+.nav-stacked li a {
+  border: 1px solid;
+}
+
+li {
+    padding-bottom: 4px;
+}

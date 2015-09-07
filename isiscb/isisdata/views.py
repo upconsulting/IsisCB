@@ -193,8 +193,13 @@ def index(request):
     })
     return HttpResponse(template.render(context))
 
-def index(request, obj_id):
+def index(request, obj_id=None):
     template = loader.get_template('isisdata/index.html')
+    if (obj_id == None):
+        context = RequestContext(request, {
+
+        })
+        return HttpResponse(template.render(context))
     try:
         object = Authority.objects.get(id=obj_id)
     except Authority.DoesNotExist:

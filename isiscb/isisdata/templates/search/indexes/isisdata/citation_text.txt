@@ -5,5 +5,9 @@
 {{ object.physical_details }}
 
 {% for attr in object.attributes.all %}
-    {{ attr.value }}
+    {{ attr.value_freeform }}
+{% endfor %}
+
+{% for ac_rel in object.acrelation_set.all %}
+  {{ ac_rel.authority.name }}
 {% endfor %}
