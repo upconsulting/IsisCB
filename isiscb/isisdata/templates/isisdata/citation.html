@@ -1,4 +1,5 @@
 {% extends "isisdata/__base.html" %}
+{% load app_filters %}
 
 {% block title %}Citation{% endblock %}
 
@@ -8,7 +9,7 @@
     <div class="menu">
       <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-home"></span></a>
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
       &nbsp; &nbsp;
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
@@ -94,11 +95,26 @@
       {% endfor %}
     </table>
 
+    <table class="details">
+      <tr>
+        <td>Linked Data:</td>
+        <td>{% for entry in citation.linkeddata_entries.all %}{{ entry.universal_resource_name }} ({{ entry.type_controlled }})<br/> {% endfor %}</td>
+      </tr>
+    </table>
+
     <div></div>
     <h4>Related Citations</h4>
       <ul>
       {% for rel_citation in citation.related_citations.all %}
-          <li><a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title|default:"No title specified" }}</a></li>
+          <li>
+            {% if rel_citation|get_authors %}
+            {% for author in rel_citation|get_authors %}
+            {{ author.name }};
+            {% endfor %}
+            {% else %}
+            Author missing;
+            {% endif %}
+            <a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title|default:"No title specified" }}</a></li>
       {% endfor %}
       </ul>
       {% if not citation.related_citations.all %}

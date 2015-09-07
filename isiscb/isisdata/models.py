@@ -404,7 +404,8 @@ class Citation(ReferencedEntity, CuratedMixin):
     linkeddata_entries = GenericRelation('LinkedData',
                                          related_query_name='citations',
                                          content_type_field='subject_content_type',
-                                         object_id_field='subject_instance_id')
+                                         object_id_field="subject_instance_id")
+
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='citations')
 
@@ -518,6 +519,7 @@ class Authority(ReferencedEntity, CuratedMixin):
                                          related_query_name='authorities',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
+
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='authorities')
 

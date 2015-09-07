@@ -9,7 +9,7 @@
     <div class="menu">
       <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-home"></span></a>
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
       &nbsp; &nbsp;
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
@@ -25,6 +25,13 @@
     {% for attribute in authority.attributes.all %}
     <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value }}</p>
     {% endfor %}
+
+    <table class="details">
+      <tr>
+        <td>Linked Data:</td>
+        <td>{% for entry in authority.linkeddata_entries.all %}{{ entry.universal_resource_name }} ({{ entry.type_controlled }})<br/> {% endfor %}</td>
+      </tr>
+    </table>
 
     {% if citations_by %}
     <h4>Resources by {{ authority.name }}</h4>

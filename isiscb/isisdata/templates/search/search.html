@@ -8,28 +8,32 @@
     <div class="menu">
       <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-home"></span></a>
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
       &nbsp; &nbsp;
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
     </div>
 
     {% if query %}
+    <h4>Author</h4>
       {% if facets.fields.authors %}
-              <dt>Author</dt>
+              <ul >
               {# Provide only the top 5 authors #}
-              {% for author in facets.fields.authors|slice:":5" %}
-                  <dd><a href="{{ request.get_full_path }}&amp;selected_facets=author_exact:{{ author.0|urlencode }}">{{ author.0 }}</a> ({{ author.1 }})</dd>
+              {% for author in facets.fields.authors|slice:":7" %}
+                  <li><a href="{{ request.get_full_path }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
               {% endfor %}
+            </ul>
       {% else %}
               <p>No author facets.</p>
       {% endif %}
 
+      <h4>Subject</h4>
       {% if facets.fields.subjects %}
-              <dt>Subject</dt>
-              {% for subject in facets.fields.subjects|slice:":5" %}
-                  <dd><a href="{{ request.get_full_path }}&amp;selected_facets=subject_exact:{{ author.0|urlencode }}">{{ subject.0 }}</a> ({{ subject.1 }})</dd>
+        <ul>
+              {% for subject in facets.fields.subjects|slice:":7" %}
+                  <li ><a href="{{ request.get_full_path }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
               {% endfor %}
+        </ul>
       {% else %}
               <p>No subject facets.</p>
       {% endif %}
@@ -57,8 +61,20 @@
 
             {% for result in page.object_list %}
                 <p>
-                  {{ result.authors | joinby:", " }}
-                  <br><a href="{% url 'index' result.object.id %}">{{ result.object.title }}</a>
+                  {% if result.object|to_class_name = 'Citation' %}
+                  <span class="glyphicon glyphicon-book"></span>
+                    {% if result.authors|joinby:", " %}
+                    {{ result.authors | joinby:", " }}
+                    {% else %}
+                    Author missing
+                    {% endif %}
+                    <br><a href="{% url 'index' result.object.id %}">{{ result.object.title }}</a>
+
+                  {% endif %}
+                  {% if result.object|to_class_name = 'Authority' %}
+                  <span class="glyphicon glyphicon-bookmark"></span>
+                  <a href="{% url 'index' result.object.id %}">{{ result.name }}</a>
+                  {% endif %}
 
                 </p>
             {% empty %}
