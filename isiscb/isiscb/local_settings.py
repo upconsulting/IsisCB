@@ -32,6 +32,7 @@ INSTALLED_APPS = (
     'simple_history',
     'isisdata',
     'storages',
+    'haystack'
 )
 
 MIDDLEWARE_CLASSES = (

@@ -97,24 +97,21 @@ class AttributeInlineFormSet(BaseGenericInlineFormSet):
 
 class LinkedDataInlineForm(forms.ModelForm):
     model = LinkedData
+
     class Media:
         model = LinkedData
         js = ('isisdata/js/jquery-1.11.1.min.js',
               'isisdata/js/widgetmap.js')
 
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    subject_instance_id = forms.CharField(widget=forms.HiddenInput())
-    subject_content_type_id = forms.IntegerField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
 
         super(LinkedDataInlineForm, self).__init__(*args, **kwargs)
-        print kwargs
         # Populate value and id fields.
         instance = kwargs.get('instance', None)
         if instance is not None:
-            self.fields['subject_instance_id'].initial = instance.subject_instance_id
-            self.fields['subject_content_type_id'].initial = instance.subject_content_type.id
+            self.fields['id'].initial = instance.id
 
     def is_valid(self):
         val = super(LinkedDataInlineForm, self).is_valid()
@@ -127,8 +124,6 @@ class LinkedDataInlineFormSet(BaseGenericInlineFormSet):
 class LinkedDataInline(GenericTabularInline):
     model = LinkedData
     form = LinkedDataInlineForm
-    ct_field = 'subject_content_type'
-    ct_fk_field = 'subject_instance_id'
 
     formset = generic_inlineformset_factory(LinkedData,
                                             form=LinkedDataInlineForm,
@@ -136,9 +131,17 @@ class LinkedDataInline(GenericTabularInline):
                                             ct_field='subject_content_type',
                                             fk_field='subject_instance_id')
 
+    ct_field = 'subject_content_type'
+    ct_fk_field = 'subject_instance_id'
+
     extra = 1
 
-    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'universal_resource_name', 'id')
+    fields = ('type_controlled',
+              'type_controlled_broad',
+              'type_free',
+              'universal_resource_name',
+              'id')
+
     exclude = ('administrator_notes',
                'record_history',
                'modified_on_fm',
@@ -169,7 +172,8 @@ class AttributeInline(GenericTabularInline):
     model = Attribute
     form = AttributeInlineForm
     # formset = AttributeInlineFormSet
-    formset = generic_inlineformset_factory(Attribute, form=AttributeInlineForm,
+    formset = generic_inlineformset_factory(Attribute,
+                                            form=AttributeInlineForm,
                                             formset=AttributeInlineFormSet,
                                             ct_field='source_content_type',
                                             fk_field='source_instance_id')
@@ -178,7 +182,13 @@ class AttributeInline(GenericTabularInline):
     ct_field = 'source_content_type'
     ct_fk_field = 'source_instance_id'
 
-    fields = ('type_controlled', 'type_controlled_broad', 'type_free', 'value', 'value_freeform', 'id')
+    fields = ('type_controlled',
+              'type_controlled_broad',
+              'type_free',
+              'value',
+              'value_freeform',
+              'id')
+
     exclude = ('administrator_notes',
                'record_history',
                'modified_on_fm',
@@ -220,25 +230,27 @@ class UberInlineMixin(admin.ModelAdmin):
         for formset in formsets:
             # Look only at the Attribute formset.
             if type(formset).__name__ == 'AttributeFormFormSet':
-                instances = self.save_formset(request, form, formset, change=change)
+                instances = self.save_formset(request, form, formset,
+                                              change=change)
                 for attribute, data in zip(instances, formset.cleaned_data):
                     attr_type, value = data['type_controlled'], data['value']
                     value_model = attr_type.value_content_type.model_class()
-                    value_instance, created = value_model.objects.get_or_create(
-                        attribute=attribute,
-                        defaults={
-                            'value': value
-                        })
-
-                    if not created and value_instance.value != value:
-                        value_instance.value = value
+                    attribute.save()
+                    if hasattr(attribute, 'value'):   # Modifying existing attr.
+                        value_instance = attribute.value.get_child_class()
+                        if value_instance.value != value:
+                            value_instance.value = value
+                            value_instance.save()
+                    else:                             # Creating a new attr.
+                        value_instance = value_model(attribute=attribute,
+                                                     value=value)
                         value_instance.save()
                     attribute.save()
-            elif type(formset).__name__ == 'LinkedDataFormFormSet':
-                instances = self.save_formset(request, form, formset, change=change)
-                for instance in instances:
-                    print instance.__dict__
 
+
+            elif type(formset).__name__ == 'LinkedDataFormFormSet':
+                instances = self.save_formset(request, form, formset,
+                                              change=change)
                 formset.save_m2m()
                 formset.save()
 
@@ -272,7 +284,10 @@ class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMi
     readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
 
 
-class AuthorityAdmin(SimpleHistoryAdmin, AttributeInlineMixin, UberInlineMixin):
+class AuthorityAdmin(SimpleHistoryAdmin,
+                     AttributeInlineMixin,
+                     LinkedDataInlineMixin,
+                     UberInlineMixin):
     list_display = ('id', 'name', 'type_controlled')
     list_filter = ('type_controlled',)
 
@@ -305,7 +320,11 @@ class AuthorityAdmin(SimpleHistoryAdmin, AttributeInlineMixin, UberInlineMixin):
                        'modified_by_fm')
 
 
-class ACRelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+class ACRelationAdmin(SimpleHistoryAdmin,
+                      AttributeInlineMixin,
+                      LinkedDataInlineMixin,
+                      UberInlineMixin):
+
     list_display = ('id',
                     'authority',
                     'type_controlled',
@@ -340,11 +359,17 @@ class ACRelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
                        'modified_on_fm')
 
 
-class CCRelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+class CCRelationAdmin(SimpleHistoryAdmin,
+                      AttributeInlineMixin,
+                      LinkedDataInlineMixin,
+                      UberInlineMixin):
     pass
 
 
-class AARelationAdmin(SimpleHistoryAdmin, AttributeInlineMixin):
+class AARelationAdmin(SimpleHistoryAdmin,
+                      AttributeInlineMixin,
+                      LinkedDataInlineMixin,
+                      UberInlineMixin):
     pass
 
 
@@ -385,6 +410,9 @@ class AttributeAdmin(SimpleHistoryAdmin):
     readonly_fields = ('uri', )
     inlines = (ValueInline,)
 
+class AttributeTypeAdmin(SimpleHistoryAdmin):
+    inlines = []
+
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
@@ -393,5 +421,6 @@ admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)
-admin.site.register(AttributeType)
+admin.site.register(Attribute, AttributeAdmin)
+admin.site.register(AttributeType, AttributeTypeAdmin)
 # Register your models here.
