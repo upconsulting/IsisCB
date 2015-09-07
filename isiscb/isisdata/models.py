@@ -394,14 +394,29 @@ class Citation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='citations', content_type_field='source_content_type', object_id_field="source_instance_id")
+    attributes = GenericRelation('Attribute', related_query_name='citations',
+                                 content_type_field='source_content_type',
+                                 object_id_field="source_instance_id")
+
     linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='citations')
+                                         related_query_name='citations',
+                                         content_type_field='subject_content_type',
+                                         object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='citations')
 
     def __unicode__(self):
         return self.title
+
+    @property
+    def ccrelations(self):
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return CCRelation.objects.filter(query)
+
+    @property
+    def acrelations(self):
+        query = Q(citation_id=self.id)
+        return ACRelation.objects.filter(query)
 
 
 class Authority(ReferencedEntity, CuratedMixin):
@@ -493,14 +508,28 @@ class Authority(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='authorities', content_type_field='source_content_type', object_id_field="source_instance_id")
+    attributes = GenericRelation('Attribute', related_query_name='authorities',
+                                 content_type_field='source_content_type',
+                                 object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='authorities')
+                                         related_query_name='authorities',
+                                         content_type_field='subject_content_type',
+                                         object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='authorities')
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def aarelations(self):
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return AARelation.objects.filter(query)
+
+    @property
+    def acrelations(self):
+        query = Q(authority_id=self.id)
+        return ACRelation.objects.filter(query)
 
 
 class Person(Authority):
@@ -622,9 +651,14 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='ac_relations')
+    attributes = GenericRelation('Attribute', related_query_name='ac_relations',
+                                 content_type_field='source_content_type',
+                                 object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='ac_relations')
+                                         related_query_name='ac_relations',
+                                         content_type_field='subject_content_type',
+                                         object_id_field='subject_instance_id')
+
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='ac_relations')
 
@@ -664,9 +698,13 @@ class AARelation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='aa_relations')
+    attributes = GenericRelation('Attribute', related_query_name='aa_relations',
+                                 content_type_field='source_content_type',
+                                 object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='aa_relations')
+                                         related_query_name='aa_relations',
+                                         content_type_field='subject_content_type',
+                                         object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='aa_relations')
 
@@ -706,11 +744,16 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='cc_relations')
+    attributes = GenericRelation('Attribute', related_query_name='cc_relations',
+                                 content_type_field='source_content_type',
+                                 object_id_field="source_instance_id")
     linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='cc_relations')
+                                         related_query_name='cc_relations',
+                                         content_type_field='subject_content_type',
+                                         object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
                                        related_query_name='cc_relations')
+
 
 
 class LinkedDataType(models.Model):

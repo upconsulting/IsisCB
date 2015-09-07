@@ -19,61 +19,231 @@ from django.http import HttpResponse
 from collections import defaultdict
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class ReadOnlyLowerField(serializers.ReadOnlyField):
+    """
+    Coerces value to lowercase.
+    """
+    def to_representation(self, obj):
+        return obj.lower()
+
+
+class GenericHyperlink(serializers.HyperlinkedRelatedField):
+    """
+    Handles generic relations.
+    """
+    view_name = 'generic-detail'
+
+    def get_url(self, obj, v, request, format):
+        view_name = type(obj).__name__.lower() + '-detail'
+        return super(GenericHyperlink, self).get_url(obj, view_name,
+                                                     request, format)
+
+# class ValueHyperlink(serializers.HyperlinkedRelatedField):
+#     view_name = 'value-detail'
+#
+#     def get_url(self, obj, v, request, format):
+#         view_name = obj.child_class.lower() + '-detail'
+#         print view_name
+#         return super(ValueHyperlink, self).get_url(obj, view_name,
+#                                                    request, format)
+
+
+class ValueSerializer(serializers.HyperlinkedModelSerializer):
+    value = serializers.ReadOnlyField(source='cvalue')
+    value_type = ReadOnlyLowerField(source='child_class')
+
     class Meta:
-        model = User
-
-
-class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Authority
-
-
-
-class CitationSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Citation
-        fields = ('uri', 'url', 'title', 'description', 'language',
-                  'type_controlled', 'abstract', 'edition_details',
-                  'physical_details', 'attributes')
+        model = Value
+        fields = ('value', 'value_type')
 
 
 class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ContentType
-        fields = ('url', 'id', 'app_label', 'model')
+        fields = ('url', 'model')
+
 
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
-    value_content_type = ContentTypeSerializer()
+    content_type = ContentTypeSerializer(source='value_content_type')
 
     class Meta:
         model = AttributeType
-        fields = ('url', 'id', 'name', 'value_content_type')
-
-
-class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = ACRelation
-
-
-class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = CCRelation
-
-
-class AARelationSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = AARelation
+        fields = ('url', 'id', 'name', 'content_type')
 
 
 class AttributeSerializer(serializers.HyperlinkedModelSerializer):
+    type_controlled = AttributeTypeSerializer(many=False)
+    source = GenericHyperlink(many=False, read_only=True)
+    value = ValueSerializer(many=False, read_only=True)
+
     class Meta:
         model = Attribute
+        fields = ('uri', 'url', 'id',
+                  'type_controlled',
+                  'type_controlled_broad',
+                  'source',
+                  'value',
+                  'value_freeform')
+
+
+class LanguageSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Language
+        fields = ('url', 'id', 'name')
+
+
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+
+
+class LinkedDataTypeSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = LinkedDataType
 
 
 class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
+    type_controlled = LinkedDataTypeSerializer(many=False)
     class Meta:
         model = LinkedData
+        fields = ('universal_resource_name', 'description', 'type_controlled')
+
+
+class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
+    attributes = AttributeSerializer(many=True, read_only=True)
+    linked_data = LinkedDataSerializer(many=True, read_only=True,
+                                       source='linkeddata_entries')
+
+    class Meta:
+        model = CCRelation
+
+        fields = ('uri', 'url', 'id',
+                  'subject', 'object',
+                  'name',
+                  'description',
+                  'type_controlled',
+                  'attributes',
+                  'linked_data')
+
+class CCRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = CCRelation
+
+        fields = ('uri', 'url', 'id',
+                  'subject', 'object',
+                  'name',
+                  'type_controlled')
+
+
+class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
+    attributes = AttributeSerializer(many=True, read_only=True)
+    linked_data = LinkedDataSerializer(many=True, read_only=True,
+                                       source='linkeddata_entries')
+
+    class Meta:
+        model = ACRelation
+
+        fields = ('uri', 'url', 'id',
+                  'citation', 'authority',
+                  'name',
+                  'description',
+                  'type_controlled',
+                  'attributes',
+                  'linked_data')
+
+
+class ACRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = ACRelation
+
+        fields = ('uri', 'url', 'id',
+                  'citation', 'authority',
+                  'name',
+                  'type_controlled')
+
+
+class AARelationSerializer(serializers.HyperlinkedModelSerializer):
+    attributes = AttributeSerializer(many=True, read_only=True)
+    linked_data = LinkedDataSerializer(many=True, read_only=True,
+                                       source='linkeddata_entries')
+
+    class Meta:
+        model = AARelation
+
+        fields = ('uri', 'url', 'id',
+                  'subject', 'object',
+                  'name',
+                  'description',
+                  'type_controlled',
+                  'attributes',
+                  'linked_data')
+
+
+class AARelationSparseSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = AARelation
+
+        fields = ('uri', 'url', 'id',
+                  'subject', 'object',
+                  'name',
+                  'type_controlled')
+
+
+class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
+    attributes = AttributeSerializer(many=True, read_only=True)
+    linked_data = LinkedDataSerializer(many=True, read_only=True,
+                                       source='linkeddata_entries')
+    related_citations = ACRelationSparseSerializer(read_only=True, many=True,
+                                                   source='acrelations')
+    related_authorities = AARelationSparseSerializer(read_only=True, many=True,
+                                                     source='aarelations')
+
+    class Meta:
+        model = Authority
+        fields = ('uri', 'url', 'name',
+                  'description',
+                  'type_controlled',
+                  'classification_system',
+                  'classification_code',
+                  'classification_hierarchy',
+                  'redirect_to',
+                  'attributes',
+                  'linked_data',
+                  'related_citations',
+                  'related_authorities')
+
+
+class CCNestedField(serializers.HyperlinkedRelatedField):
+    view_name = 'cc-nested'
+
+    def to_representation(self, obj):
+        print obj, type(obj), '!'
+        return super(CCNestedField, self).to_representation(obj)
+
+class CitationSerializer(serializers.HyperlinkedModelSerializer):
+    language = LanguageSerializer(many=True, read_only=True)
+    attributes = AttributeSerializer(many=True, read_only=True)
+    linked_data = LinkedDataSerializer(many=True, read_only=True,
+                                       source='linkeddata_entries')
+    related_citations = CCRelationSparseSerializer(read_only=True, many=True,
+                                                   source='ccrelations')
+    related_authorities = ACRelationSparseSerializer(read_only=True, many=True,
+                                               source='acrelations')
+
+    class Meta:
+        model = Citation
+        fields = ('uri', 'url', 'id',
+                  'title',
+                  'description',
+                  'language',
+                  'type_controlled',
+                  'abstract',
+                  'edition_details',
+                  'physical_details',
+                  'attributes',
+                  'linked_data',
+                  'related_citations',
+                  'related_authorities')
 
 
 class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
@@ -136,6 +306,20 @@ class ContentTypeViewSet(mixins.ListModelMixin,
     queryset = ContentType.objects.all()
     serializer_class = ContentTypeSerializer
 
+
+class ValueViewSet(mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Value.objects.all()
+    serializer_class = ValueSerializer
+
+
+class LanguageViewSet(mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Language.objects.all()
+    serializer_class = LanguageSerializer
+
 # class ReferencedEntityRelatedField(serializers.HyperlinkedRelatedField):
 #     view_name = ''
 #
@@ -164,6 +348,13 @@ class LinkedDataViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = LinkedData.objects.all()
     serializer_class = LinkedDataSerializer
+
+
+class LinkedDataTypeViewSet(mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
+    queryset = LinkedDataType.objects.all()
+    serializer_class = LinkedDataTypeSerializer
 
 
 class PartDetailsViewSet(mixins.ListModelMixin,
