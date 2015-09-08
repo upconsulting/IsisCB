@@ -46,15 +46,18 @@
     <h3>Search</h3>
 
     <form method="get" action=".">
-        <table>
-            {{ form.as_table }}
-            <tr>
-                <td>&nbsp;</td>
-                <td>
-                    <input type="submit" value="Search">
-                </td>
-            </tr>
-        </table>
+      <div class="input-group">
+        <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="submit">Search!</button>
+        </span>
+      </div>
+      <div style="padding-top: 15px;">
+      Search in:
+        {% for model in form.models %}
+            {{ model }}
+          {% endfor %}
+      </div>
 
         {% if query %}
             <h3>Results</h3>
@@ -68,7 +71,7 @@
                     {% else %}
                     Author missing
                     {% endif %}
-                    <br><a href="{% url 'index' result.object.id %}">{{ result.object.title }}</a>
+                    <br><a href="{% url 'index' result.object.id %}">{% if result.object.title %}{{ result.object.title }}{% else %}Missing title{% endif %}</a>
 
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}
