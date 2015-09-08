@@ -1,0 +1,50 @@
+{% load staticfiles %}
+
+<div class="panel panel-success" ng-controller="CommentController">
+    <div class="panel-heading">Comments</div>
+    <div class="panel-body comment-body">
+        {% verbatim %}
+        <p ng-show="comments.length == 0">Be the first to comment!</p>
+        {% endverbatim %}
+        <div class="row" class="comment" ng-repeat="comment in comments">
+
+            <div class="col-xs-12">
+                <div class="comment-arrow">
+                    <div class="">
+                    {% verbatim %}
+                    {{ comment.text }}
+                    {% endverbatim %}
+                    </div><!-- /panel-body -->
+                </div>
+                <div class="comment-user row">
+                    <div class="col-xs-2">
+                        <div class="img-nopadding">
+                            <img class="img-responsive img-circle" src="{% static "isisdata/images/avatar_2x.png" %}">
+                        </div><!-- /thumbnail -->
+                    </div><!-- /col-sm-1 -->
+                    <div class="col-xs-10">
+                        <span class="text-muted">{% verbatim %}{{ comment.created_by.username }} @ {{ comment.created_on }}{% endverbatim %}</span>
+                    </div>
+                </div><!-- /panel panel-default -->
+            </div><!-- /col-sm-5 -->
+        </div>
+
+    </div>
+    <div class="panel-footer">
+        {% if user.is_authenticated %}
+        <form name="form">
+            <div class="form-group">
+                <label for="comment">Comment on this {{ authority.get_type_controlled_display }} entry</label>
+                <textarea class="form-control" rows="3" name="comment" ng-model="commentText" required=""></textarea>
+            </div>
+            <div class="form-group clearfix">
+                <span class="btn-group pull-right">
+                    <button class="btn btn-success" ng-click="submitComment(form)" ng-disabled="form.$invalid">Submit</button>
+                </span>
+            </div>
+        </form>
+        {% else %}
+        <p><a href="/login/?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
+        {% endif %}
+    </div>
+</div>

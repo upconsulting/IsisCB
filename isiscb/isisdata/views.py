@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
 
-from rest_framework import viewsets, serializers, mixins
+from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -95,6 +95,56 @@ class LanguageSerializer(serializers.HyperlinkedModelSerializer):
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
+        fields = ('url', 'id', 'username', 'date_joined')
+
+
+class ContentTypeRelatedField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.id
+
+    def to_internal_value(self, data):
+
+        return ContentType.objects.get(pk=data)
+
+class UserRelatedSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+    def to_representation(self, value):
+        return super(UserRelatedSerializer, self).to_representation(value)
+
+    def to_internal_value(self, data):
+        return User.objects.get(pk=data)
+        return super(UserRelatedSerializer, self).to_internal_value(data)
+
+class CommentSerializer(serializers.HyperlinkedModelSerializer):
+    subject_content_type = ContentTypeRelatedField(queryset=ContentType.objects.all(), many=False)
+    created_by = UserRelatedSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Comment
+
+    def create(self, *args, **kwargs):
+        """
+        Create a new ``Comment`` instance.
+        """
+
+        subject_field = args[0].get('subject_field', None)
+        subject_content_type = args[0].get('subject_content_type', None)
+        subject_instance_id = args[0].get('subject_instance_id', None)
+        text = args[0].get('text', None)
+        if text and subject_content_type and subject_instance_id:
+            instance = Comment(
+                text=text,
+                subject_field=subject_field,
+                subject_content_type=subject_content_type,
+                subject_instance_id=subject_instance_id,
+                created_by=self._context['request'].user
+            )
+            instance.save()
+        return instance
+        # return super(CommentSerializer, self).create(*args, **kwargs)
 
 
 class LinkedDataTypeSerializer(serializers.HyperlinkedModelSerializer):
@@ -359,6 +409,20 @@ class PartDetailsViewSet(mixins.ListModelMixin,
     serializer_class = PartDetailsSerializer
 
 
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = super(CommentViewSet, self).get_queryset()
+        subject_instance_id = self.request.query_params.get('subject_instance_id', None)
+        subject_content_type = self.request.query_params.get('subject_content_type', None)
+        if subject_instance_id and subject_content_type:
+            queryset = queryset.filter(subject_instance_id=subject_instance_id,
+                                       subject_content_type_id=subject_content_type)
+        return queryset
+
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -442,7 +506,9 @@ def authority(request, authority_id):
         'authority': authority,
         'citations_by': citations_by,
         'citations_about': citations_about,
-        'citations_other': citations_other
+        'citations_other': citations_other,
+        'source_instance_id': authority_id,
+        'source_content_type': ContentType.objects.get(model='authority').id,
     })
     return HttpResponse(template.render(context))
 
@@ -469,5 +535,7 @@ def citation(request, citation_id):
         'persons': persons,
         'categories': categories,
         'time_periods': time_periods,
+        'source_instance_id': citation_id,
+        'source_content_type': ContentType.objects.get(model='citation').id,
     })
     return HttpResponse(template.render(context))

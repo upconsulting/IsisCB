@@ -36,6 +36,7 @@ router.register('partdetails', views.PartDetailsViewSet)
 router.register('attributetype', views.AttributeTypeViewSet)
 router.register('contenttype', views.ContentTypeViewSet)
 router.register('user', views.UserViewSet)
+router.register('comment', views.CommentViewSet)
 
 urlpatterns = [
     url(r'^rest/$', views.api_root),

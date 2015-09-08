@@ -1,10 +1,27 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
+{% load staticfiles %}
+
+{% block extra_head %}
+<script>
+{% if source_instance_id %}
+var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
+{% endif %}
+
+{% if source_content_type %}
+var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
+{% endif %}
+</script>
+
+<script src="{% static "isisdata/js/comments.js" %}"></script>
+{% endblock %}
+
+
 
 {% block title %}Authority{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row" ng-app="commentsApp">
   <div class="col-sm-3 col-md-2 sidebar">
     <div class="menu">
       <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
@@ -15,7 +32,7 @@
       <hr>
     </div>
   </div>
-  <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
     <div class="alert alert-info headerbox" role="alert">{{ authority.get_type_controlled_display }}</div>
 
     <h3>{{ authority.name }}</h3>
@@ -139,6 +156,10 @@
     {% endif %}
     </div>
 
+
+    <div class="col-sm-4 col-md-3 main">
+        {% include "isisdata/comments.html" %}
+    </div>
   </div>
 
 

@@ -111,6 +111,6 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 
-LOGIN_REDIRECT_URL = '/'
+# LOGIN_REDIRECT_URL = '/'
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'

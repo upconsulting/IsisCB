@@ -31,7 +31,7 @@
 
     	{% else %}
             <div class="navbar-right">
-            	<a href="/login/">
+            	<a href="/login/?next={{ request.path }}">
             		<button class="btn btn-primary" type="button" id="loginButton">
             			Log In
             		</button>

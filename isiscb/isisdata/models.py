@@ -251,13 +251,6 @@ class ReferencedEntity(models.Model):
                                     'isis/{0}/{1}'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
-        """
-        If ``uri`` is not set, generate a new one.
-        """
-
-        return super(ReferencedEntity, self).save(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
         if self.id is None or self.id == '':
             # Ensure that this ID is unique.
             while True:
@@ -1006,3 +999,56 @@ class Tracking(ReferencedEntity, CuratedMixin):
                                 'subject_instance_id')
 
     notes = models.TextField(blank=True)
+
+
+class Annotation(models.Model):
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
+    subject = GenericForeignKey('subject_content_type',
+                                'subject_instance_id')
+
+    subject_field = models.CharField(max_length=255, blank=True, null=True,
+                                     help_text="""
+    The name of the field in ``subject`` to which this annotation refers. For
+    example, ``title``.""")
+
+    created_by = models.ForeignKey(User, related_name='annotations', null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+
+    child_class = models.CharField(max_length=255, blank=True, help_text="""
+    Name of the child model for this instance.""")
+
+    def save(self, *args, **kwargs):
+        if self.child_class == '' or self.child_class is None:
+            self.child_class = type(self).__name__
+        return super(Annotation, self).save(*args, **kwargs)
+
+    def get_child_class(self):
+        return getattr(self, self.child_class.lower())
+
+
+class Comment(Annotation):
+    text = models.TextField()
+
+
+class TagAppellation(Annotation):
+    tag = models.ForeignKey('Tag')
+
+
+class Tag(models.Model):
+    schema = models.ForeignKey('TaggingSchema', related_name='tags')
+    value = models.CharField(max_length=255)
+    description = models.TextField()
+
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
+
+
+class TaggingSchema(models.Model):
+    name = models.CharField(max_length=255)
+
+    created_by = models.ForeignKey(User, related_name='tagging_schemas')
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
