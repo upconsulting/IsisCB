@@ -424,14 +424,15 @@ class Command(BaseCommand):
                                 pd_field = 'pages_free_text'
                         partDetails[pd_field] = value
 
-            language = copy.deepcopy(values['language'])
-            del values['language']
-            try:
-                language_instance = Language.objects.get(name=language)
-            except ObjectDoesNotExist:
-                print "couldn't find language {0}".format(language)
-                language_instance = None
-                pass
+            if 'language' in values:
+                language = copy.deepcopy(values['language'])
+                del values['language']
+                try:
+                    language_instance = Language.objects.get(name=language)
+                except ObjectDoesNotExist:
+                    print "couldn't find language {0}".format(language)
+                    language_instance = None
+                    pass
 
             try:
                 instance = Citation(**values)
