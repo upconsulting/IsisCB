@@ -33,6 +33,7 @@ MIGRATION_MODULES = {
 # Application definition
 
 INSTALLED_APPS = (
+    'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,6 +44,7 @@ INSTALLED_APPS = (
     'simple_history',
     'isisdata',
     'storages',
+    'haystack'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -93,6 +95,13 @@ DATABASES = {
     }
 }
 
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
 
 
 # Internationalization
@@ -109,7 +118,8 @@ USE_L10N = True
 USE_TZ = True
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
 }
 
 # Static files (CSS, JavaScript, Images)
