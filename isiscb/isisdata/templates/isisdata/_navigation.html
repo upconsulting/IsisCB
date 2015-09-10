@@ -3,7 +3,7 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#"><img height="100px" src="{% static "isisdata/images/isis_icon_white-small.png" %}" ></a>
+      <a class="navbar-brand" href="{% url 'index' %}"><img height="100px" src="{% static "isisdata/images/isis_icon_white-small.png" %}" ></a>
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
@@ -14,8 +14,8 @@
     </div>
     <div class="container-fluid">
         <!-- <div class="collapse navbar-collapse"> -->
+        <div class="navbar-right">
         {% if user.is_authenticated %}
-            <div class="navbar-right">
                 <div class="dropdown">
                 	<button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 		{{ user.username }}
@@ -27,17 +27,17 @@
                 		<li><a href="/logout/">Log Out</a></li>
                 	</ul>
                 </div>
-            </div>
 
-    	{% else %}
-            <div class="navbar-right">
+    	      {% else %}
             	<a href="/login/?next={{ request.path }}">
-            		<button class="btn btn-primary" type="button" id="loginButton">
-            			Log In
+                <button class="btn btn-primary" type="button" id="loginButton">
+                  <span class="glyphicon glyphicon-user" ></span>
+              		Log In
             		</button>
             	</a>
-            </div>
-    	{% endif %}
+    	      {% endif %}
+
+    </div>
         <!-- </div> -->
     </div>
 

@@ -24,10 +24,15 @@
         {% block extra_head %}{% endblock %}
     </head>
     <body>
-        {% include "isisdata/_navigation.html" %}
-        <div class="container-fluid main">
+          {% include "isisdata/_navigation.html" %}
+          <div class="container-fluid main">
+
             {% block content %}
-            {% endblock %}
-        </div>
+              {% endblock %}
+          </div>
+          <div class="footer">
+              {% include "isisdata/_footer.html" %}
+          </div>
+
     </body>
 </html>
