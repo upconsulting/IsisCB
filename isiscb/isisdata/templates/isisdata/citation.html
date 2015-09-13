@@ -121,30 +121,189 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </table>
 
     <div></div>
-    <h4>Related Citations</h4>
+    {% if related_citations_rb %}
+    <h4>Reviewed By</h4>
       <ul>
-      {% for rel_citation in citation.related_citations.all %}
-          <li>
-            {% if rel_citation|get_authors %}
-            {% for author in rel_citation|get_authors %}
-            {{ author.name }};
+      {% for cc_rel in related_citations_rb %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
             {% endfor %}
-            {% else %}
+          {% else %}
             Author missing;
-            {% endif %}
-            <a href="{% url 'citation' rel_citation.id %}">{{ rel_citation.title|default:"No title specified" }}</a></li>
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
       {% endfor %}
       </ul>
-      {% if not citation.related_citations.all %}
-      <i>There are no related citations.</i>
+    {% endif %}
+
+    <!-- Review of -->
+    {% if related_citations_ro or related_citations_inv_rb %}
+    <h4>Review Of</h4>
+      <ul>
+      {% for cc_rel in related_citations_ro %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+
+      {% if related_citations_inv_rb %}
+      {% for cc_rel in related_citations_inv_rb %}
+          <li>
+            {% if cc_rel.subject|get_authors %}
+              {% for author in cc_rel.subject|get_authors %}
+              {{ author.authority.name }};
+              {% endfor %}
+            {% else %}
+              Author missing;
+            {% endif %}
+            <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+        {% endfor %}
       {% endif %}
+
+      </ul>
+    {% endif %}
+
+<!-- Includes Chapter -->
+    {% if related_citations_ic %}
+    <h4>Includes Chapter</h4>
+      <ul>
+      {% for cc_rel in related_citations_ic %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if related_citations_inv_ic %}
+    <h4>Included in</h4>
+      <ul>
+      {% for cc_rel in related_citations_inv_ic %}
+        <li>
+          {% if cc_rel.subject|get_authors %}
+            {% for author in cc_rel.subject|get_authors %}
+            {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+<!-- Includes Series Article -->
+    {% if related_citations_isa %}
+    <h4>Includes Series Articles</h4>
+      <ul>
+      {% for cc_rel in related_citations_isa %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if related_citations_inv_isa %}
+    <h4>Included in</h4>
+      <ul>
+      {% for cc_rel in related_citations_inv_isa %}
+        <li>
+          {% if cc_rel.subject|get_authors %}
+            {% for author in cc_rel.subject|get_authors %}
+            {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+<!-- Response to -->
+    {% if related_citations_re %}
+    <h4>Response to</h4>
+      <ul>
+      {% for cc_rel in related_citations_re %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if related_citations_inv_re %}
+    <h4>Has Response</h4>
+      <ul>
+      {% for cc_rel in related_citations_inv_re %}
+        <li>
+          {% if cc_rel.subject|get_authors %}
+            {% for author in cc_rel.subject|get_authors %}
+            {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+  <!-- Associated with -->
+    {% if related_citations_as %}
+    <h4>Associated with</h4>
+      <ul>
+      {% for cc_rel in related_citations_as %}
+        <li>
+          {% if cc_rel.object|get_authors %}
+            {% for author in cc_rel.object|get_authors %}
+             {{ author.authority.name }};
+            {% endfor %}
+          {% else %}
+            Author missing;
+          {% endif %}
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+
+
+
     </div>
 
     <div class="col-sm-4 col-md-3 main">
         {% include "isisdata/comments.html" %}
 
     </div>
-    
+
 
   </div>
 

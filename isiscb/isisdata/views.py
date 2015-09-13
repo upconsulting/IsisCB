@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
+from django.db.models import Q
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -521,6 +522,17 @@ def citation(request, citation_id):
     categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
     time_periods = citation.acrelation_set.filter(type_controlled__in=['TI'])
 
+    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC')
+    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC')
+    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA')
+    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA')
+    related_citations_ro = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RO')
+    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB')
+    related_citations_inv_rb = CCRelation.objects.filter(object_id=citation_id, type_controlled='RB')
+    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE')
+    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE')
+    related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS')
+
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU', 'CA'])
     properties_map = defaultdict(list)
     for prop in properties:
@@ -537,5 +549,15 @@ def citation(request, citation_id):
         'time_periods': time_periods,
         'source_instance_id': citation_id,
         'source_content_type': ContentType.objects.get(model='citation').id,
+        'related_citations_ic': related_citations_ic,
+        'related_citations_inv_ic': related_citations_inv_ic,
+        'related_citations_rb': related_citations_rb,
+        'related_citations_inv_rb': related_citations_inv_rb,
+        'related_citations_isa': related_citations_isa,
+        'related_citations_inv_isa': related_citations_inv_isa,
+        'related_citations_ro': related_citations_ro,
+        'related_citations_re': related_citations_re,
+        'related_citations_inv_re': related_citations_inv_re,
+        'related_citations_as': related_citations_as,
     })
     return HttpResponse(template.render(context))
