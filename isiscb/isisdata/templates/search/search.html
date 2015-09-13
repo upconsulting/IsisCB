@@ -71,7 +71,7 @@
                     {% else %}
                     Author missing
                     {% endif %}
-                    <br><a href="{% url 'index' result.object.id %}">{% if result.object.title %}{{ result.object.title }}{% else %}Missing title{% endif %}</a>
+                    <br><a href="{% url 'index' result.object.id %}">{{ result.object|get_title }}</a>
 
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}

@@ -1,4 +1,5 @@
 from django import template
+from isisdata.models import *
 
 register = template.Library()
 
@@ -20,3 +21,30 @@ def get_authors(value):
     if value:
         return value.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
     return value
+
+@register.filter
+def get_title(citation):
+    # if citation is not a review simply return title
+    if not citation.type_controlled == 'RE':
+        if not citation.title:
+            return "Title missing"
+        return citation.title
+
+    # if citation is a review build title from reviewed citation
+    reviewed_books = CCRelation.objects.filter(subject_id=citation.id, type_controlled='RO')
+
+    # sometimes RO relationship is not specified then use inverse reviewed by
+    book = None
+    if not reviewed_books:
+        reviewed_books = CCRelation.objects.filter(object_id=citation.id, type_controlled='RB')
+        if reviewed_books:
+            book = reviewed_books[0].subject
+    else:
+        book = reviewed_books[0].object
+
+    if book == None:
+        return "Review of unknown publication"
+
+
+
+    return 'Review of "' + book.title + '"'

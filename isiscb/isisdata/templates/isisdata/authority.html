@@ -123,7 +123,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% if citations_other %}
     <h4>Resources about {{ authority.name }}</h4>
 
-      {% for rel_citation in citations_other.all %}
+      {% for rel_citation in citations_other %}
           <p>
             {% if rel_citation.citation|get_authors %}
             {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
