@@ -76,7 +76,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
     <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}</div>
 
-    <h3>{{ citation.title }}</h3>
+    <h3>{{ citation|get_title }}</h3>
 
     <p><strong>Authors & Contributors:</strong> {% for author in authors %} <a href="{% url 'authority' author.authority.id %}">{{ author.authority.name }};</a> {% endfor %}
     <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
@@ -133,7 +133,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -151,7 +151,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
 
       {% if related_citations_inv_rb %}
@@ -164,7 +164,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             {% else %}
               Author missing;
             {% endif %}
-            <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+            <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject|get_title }}</a></li>
         {% endfor %}
       {% endif %}
 
@@ -184,7 +184,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -201,7 +201,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -219,7 +219,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -236,7 +236,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -254,7 +254,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -271,7 +271,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.subject.id %}">{{ cc_rel.subject|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
@@ -289,7 +289,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% else %}
             Author missing;
           {% endif %}
-          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object.title|default:"No title specified" }}</a></li>
+          <a href="{% url 'citation' cc_rel.object.id %}">{{ cc_rel.object|get_title }}</a></li>
       {% endfor %}
       </ul>
     {% endif %}
