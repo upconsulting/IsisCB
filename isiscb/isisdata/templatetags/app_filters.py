@@ -22,6 +22,16 @@ def get_authors(value):
         return value.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
     return value
 
+# QUESTION: what URIs do we use?
+@register.filter
+def get_uri(entry):
+    host = "http://isiscb-develop.aplacecalledup.com/isis/"
+    if to_class_name(entry) == 'Authority':
+        return host + "authority/" + entry.id
+    if to_class_name(entry) == 'Citation':
+        return host + "citation/" + entry.id
+    return ""
+
 @register.filter
 def get_title(citation):
     # if citation is not a review simply return title
