@@ -1,5 +1,6 @@
 from django import template
 from isisdata.models import *
+from django.conf import settings
 
 register = template.Library()
 
@@ -21,6 +22,15 @@ def get_authors(value):
     if value:
         return value.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
     return value
+
+# QUESTION: what URIs do we use?
+@register.filter
+def get_uri(entry):
+    if to_class_name(entry) == 'Authority':
+        return settings.URI_PREFIX + "authority/" + entry.id
+    if to_class_name(entry) == 'Citation':
+        return settings.URI_PREFIX + "citation/" + entry.id
+    return ""
 
 @register.filter
 def get_title(citation):

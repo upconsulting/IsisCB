@@ -118,6 +118,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <td>Linked Data:</td>
         <td>{% for entry in citation.linkeddata_entries.all %}{{ entry.universal_resource_name }} ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
+      <tr>
+        <td>Citation URI:</td>
+        <td>{{ citation | get_uri }}</td>
+      </tr>
     </table>
 
     <div></div>
