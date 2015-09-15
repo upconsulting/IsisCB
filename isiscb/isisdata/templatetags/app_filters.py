@@ -1,5 +1,6 @@
 from django import template
 from isisdata.models import *
+from django.conf import settings
 
 register = template.Library()
 
@@ -25,11 +26,10 @@ def get_authors(value):
 # QUESTION: what URIs do we use?
 @register.filter
 def get_uri(entry):
-    host = "http://isiscb-develop.aplacecalledup.com/isis/"
     if to_class_name(entry) == 'Authority':
-        return host + "authority/" + entry.id
+        return settings.URI_PREFIX + "authority/" + entry.id
     if to_class_name(entry) == 'Citation':
-        return host + "citation/" + entry.id
+        return settings.URI_PREFIX + "citation/" + entry.id
     return ""
 
 @register.filter
