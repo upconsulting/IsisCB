@@ -1,11 +1,13 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 
 from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
 from django.db.models import Q
+
+from haystack.views import FacetedSearchView
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -424,7 +426,6 @@ class CommentViewSet(viewsets.ModelViewSet):
                                        subject_content_type_id=subject_content_type)
         return queryset
 
-
 @api_view(('GET',))
 def api_root(request, format=None):
     return Response({
@@ -561,3 +562,40 @@ def citation(request, citation_id):
         'related_citations_as': related_citations_as,
     })
     return HttpResponse(template.render(context))
+
+
+class IsisSearchView(FacetedSearchView):
+
+    def build_page(self):
+        """
+        From haystacks SearchView:
+        Paginates the results appropriately.
+        In case someone does not want to use Django's built-in pagination, it
+        should be a simple matter to override this method to do what they would
+        like.
+        """
+        try:
+            page_no = int(self.request.GET.get('page', 1))
+        except (TypeError, ValueError):
+            raise Http404("Not a valid number for page.")
+
+        if page_no < 1:
+            raise Http404("Pages should be 1 or greater.")
+
+        start_offset = (page_no - 1) * self.results_per_page
+        self.results[start_offset:start_offset + self.results_per_page]
+
+        paginator = Paginator(self.results, self.results_per_page)
+
+
+        try:
+            page = paginator.page(page_no)
+        except InvalidPage:
+            try:
+                page = paginator.page(1)
+            except InvalidPage:
+                raise Http404("No such page!")
+
+        return (paginator, page)
+
+    
