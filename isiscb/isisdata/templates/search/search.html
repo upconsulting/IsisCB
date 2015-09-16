@@ -14,6 +14,8 @@
       <hr>
     </div>
 
+    {{selected_facets}}
+
     {% if query %}
     <h4>Author</h4>
       {% if facets.fields.authors %}
@@ -85,12 +87,43 @@
             {% endfor %}
 
             {% if page.has_previous or page.has_next %}
-                <div>
-                    {% if page.has_previous %}<a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous{% if page.has_previous %}</a>{% endif %}
-                    |
-                    {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}Next &raquo;{% if page.has_next %}</a>{% endif %}
-                </div>
-            {% endif %}
+            <nav>
+              <ul class="pagination">
+
+                  {% if page.has_previous %}
+                  <li>
+                    <a href="?q={{ query }}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  {% else %}
+                  <li class="disabled">
+                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  {% if page.has_previous or page.has_next %}
+                  {% for p in page.paginator.page_range %}
+                      <li {% if page.number == p %} class="disabled" {% endif %}><a href="?q={{ query }}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
+                  {% endfor %}
+                  {% endif %}
+                  {% if page.has_next %}
+                  <li>
+                    <a href="?q={{ query }}&amp;page={{ page.next_page_number }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% else %}
+                  <li class="disabled">
+                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </nav>
+              {% endif %}
         {% else %}
             {# Show some example queries to run, maybe query syntax, something else? #}
         {% endif %}
