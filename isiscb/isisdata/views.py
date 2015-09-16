@@ -598,4 +598,20 @@ class IsisSearchView(FacetedSearchView):
 
         return (paginator, page)
 
-    
+    def extra_context(self):
+        extra = super(FacetedSearchView, self).extra_context()
+        extra['request'] = self.request
+        extra['facets'] = self.results.facet_counts()
+
+        facet_map = {}
+        for facet in self.request.GET.getlist("selected_facets"):
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+
+            if value:
+                facet_map.setdefault(field, []).append(value)
+
+        extra['selected_facets'] = facet_map
+        return extra

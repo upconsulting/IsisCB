@@ -1,6 +1,8 @@
 from django import template
 from isisdata.models import *
 from django.conf import settings
+from urllib import quote
+import codecs
 
 register = template.Library()
 
@@ -58,3 +60,11 @@ def get_title(citation):
 
 
     return 'Review of "' + book.title + '"'
+
+@register.filter
+def remove_facet(url, arg):
+    return url.replace(arg, "").replace("&&", "&")
+
+@register.filter
+def create_facet_string(facet, field):
+    return 'selected_facets=' + field + ':' + quote(codecs.encode(facet,'utf-8'))
