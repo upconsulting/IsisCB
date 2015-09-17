@@ -94,7 +94,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <td>Physical Details:</td><td>{{ citation.physical_details }}</td>
       </tr>
       <tr>
-        <td>Language:</td><td>{{ citation.language.name }}</td>
+        <td>Languages:</td><td>{% for language in citation.language.all %}{{ language.name }}{% endfor %}</td>
       </tr>
     </table>
 
