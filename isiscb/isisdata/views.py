@@ -357,6 +357,7 @@ class AttributeTypeViewSet(mixins.ListModelMixin,
                            viewsets.GenericViewSet):
     queryset = AttributeType.objects.all()
     serializer_class = AttributeTypeSerializer
+    pagination_class = None     # Angular has trouble with pagination.
 
 
 class ContentTypeViewSet(mixins.ListModelMixin,
@@ -413,6 +414,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    pagination_class = None     # Angular has trouble with pagination.
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True,
+                                           context={'request': request})
+        return Response(serializer.data)
 
     def get_queryset(self):
         queryset = super(CommentViewSet, self).get_queryset()

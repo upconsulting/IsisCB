@@ -1,11 +1,13 @@
 [
     {
+        "pk": 1,
         "model": "isisdata.linkeddatatype",
         "fields": {
             "name": "DOI"
         }
     },
     {
+        "pk": 2,
         "model": "isisdata.linkeddatatype",
         "fields": {
             "name": "ISBN",
@@ -13,6 +15,7 @@
         }
     },
     {
+        "pk": 3,
         "model": "isisdata.linkeddatatype",
         "fields": {
             "name": "ISSN",
@@ -20,6 +23,7 @@
         }
     },
     {
+        "pk": 4,
         "model": "isisdata.linkeddatatype",
         "fields": {
             "name": "VIAF",

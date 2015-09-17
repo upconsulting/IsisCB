@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'isiscb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb',
+        'NAME': 'isiscb2',
         'USER': 'upconsulting',
         'PASSWORD': 'upconsulting',
         'HOST': 'localhost',

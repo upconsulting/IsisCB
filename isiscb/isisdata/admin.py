@@ -548,4 +548,5 @@ admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
+admin.site.register(Comment)
 # Register your models here.
