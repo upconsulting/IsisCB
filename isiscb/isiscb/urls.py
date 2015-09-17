@@ -71,3 +71,8 @@ urlpatterns = [
     url(r'^', include('registration.backends.simple.urls')),
     # url('^', include('django.contrib.auth.urls'))
 ]
+
+import json
+import datetime
+with open('server_start', 'w') as f:
+    json.dump(str(datetime.datetime.now()), f)
