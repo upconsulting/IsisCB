@@ -280,6 +280,8 @@ class Language(models.Model):
 
 
 class Citation(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'CBB'
+
     history = HistoricalRecords()
 
     title = models.CharField(max_length=2000, help_text="""
@@ -419,6 +421,8 @@ class Citation(ReferencedEntity, CuratedMixin):
 
 
 class Authority(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'CBA'
+
     class Meta:
         verbose_name_plural = 'authority records'
         verbose_name = 'authority record'
@@ -973,6 +977,8 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'TRK'
+    
     history = HistoricalRecords()
 
     tracking_info = models.CharField(max_length=255, blank=True)
