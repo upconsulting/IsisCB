@@ -151,3 +151,4 @@ AWS_HEADERS = {
 }
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'
+URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
