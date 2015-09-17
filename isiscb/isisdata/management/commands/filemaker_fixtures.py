@@ -260,7 +260,7 @@ attributeFields = {
     'ID': ('id', passthrough),
     'ID.Subject.link': ('subject', passthrough),
     'DateAttribute.free': ('value_freeform', try_int),    # TODO: this is temporary.
-    'DateBegin': ('value', as_datetime),
+    'DateBegin': ('value', lambda x: as_datetime(x).date()),
     'CreatedBy': ('created_by_fm', passthrough),
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
@@ -396,6 +396,8 @@ class Command(BaseCommand):
         for k, v in values.iteritems():
             if type(v) is datetime.datetime:
                 values[k] = str(v) + '+00:00'
+            if type(v) is datetime.date:
+                values[k] = str(v)
 
         id = copy.copy(values['id'])
         del values['id']
@@ -659,6 +661,7 @@ class Command(BaseCommand):
         attributesspath = os.path.join(datapath, 'attributes.xml')
         self.attributes = []
         self.values = []
+        self.cvalues = []
         self.valuePK = 1
         self.attributeTypes = {}
 
@@ -691,8 +694,6 @@ class Command(BaseCommand):
             vtype = dict(VALUE_MODELS)[type(values['value'])]
             value_model = 'isisdata.{0}'.format(vtype.__name__.lower())
             value = copy.deepcopy(values['value'])
-            if type(value) is datetime.datetime:
-                value = str(value) + '+00:00'  # Add timezone.
 
             value_values = {
                 'id': copy.copy(self.valuePK),
@@ -703,8 +704,11 @@ class Command(BaseCommand):
                 'value': value,
             }
             del values['value']     # Not accepted by Attribute constructor.
-            self.values.append(self.to_fixture(value_values, 'isisdata.value'))
-            self.values.append(self.to_fixture(cvalue_values, value_model))
+            values['child_class'] = vtype.__name__
+            value_fixture = self.to_fixture(value_values, 'isisdata.value')
+            self.values.append(value_fixture)
+            cvalue_fixture = self.to_fixture(cvalue_values, value_model)
+            self.cvalues.append(cvalue_fixture)
             self.valuePK += 1
 
             vctype = ContentType.objects.get(model=vtype.__name__.lower())
@@ -742,11 +746,16 @@ class Command(BaseCommand):
                 self.write_fixtures(self.values, 'values')
                 self.values = []
 
+            if len(self.cvalues) == self.chunk_size:
+                self.write_fixtures(self.cvalues, 'cvalues')
+                self.cvalues = []
+
         context = ET.iterparse(attributesspath)
         fast_iter(context, process_elem)
         self.write_fixtures(self.attributes, 'attributes')
         self.write_fixtures(self.attributeTypes.values(), 'attributetypes')
         self.write_fixtures(self.values, 'values')
+        self.write_fixtures(self.cvalues, 'cvalues')
         print self.failed
 
     def handle_tracking(self, datapath):
