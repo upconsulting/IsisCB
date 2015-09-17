@@ -69,7 +69,8 @@ urlpatterns = [
                     name='password_reset_confirm'),
 
     url(r'^', include('registration.backends.simple.urls')),
-    # url('^', include('django.contrib.auth.urls'))
+    url(r'^captcha/', include('captcha.urls')),
+
 ]
 
 import json
