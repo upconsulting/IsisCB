@@ -23,7 +23,7 @@
                 	</button>
                 	<ul class="dropdown-menu" aria-labelledby="usermenu">
                 		<!-- <li><a href="/profile/">Dashboard</a></li> -->
-                		<!-- <li><a href="/settings/">Settings</a></li> -->
+                		<li><a href="/password/change/?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                 		<li><a href="/logout/?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
                 	</ul>
                 </div>

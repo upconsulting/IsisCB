@@ -152,3 +152,9 @@ AWS_HEADERS = {
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'
 URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+
+
+from secrets import SMTP_USER, SMTP_PASSWORD
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+EMAIL_HOST_USER = SMTP_USER
+EMAIL_HOST_PASSWORD = SMTP_PASSWORD
