@@ -99,7 +99,7 @@ DATABASES = {
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
+        'URL': 'ec2-52-89-8-78.us-west-2.compute.amazonaws.com:9200/',
         'INDEX_NAME': 'haystack',
     },
 }
