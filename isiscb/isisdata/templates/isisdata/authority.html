@@ -96,7 +96,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% if rel_citation.citation|get_authors %}
           {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
           {% endif %}
-          <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title|get_title }}</a></li>
+          <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a></li>
         </p>
       {% endfor %}
 
@@ -132,7 +132,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             {% if rel_citation.citation|get_authors %}
             {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
             {% endif %}
-            <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation.title|get_title }}</a>
+            <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a>
           </p>
       {% endfor %}
       <nav>
