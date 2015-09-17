@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import include, url
+from django.conf import settings
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
@@ -55,7 +56,8 @@ urlpatterns = [
                     name='password_change_done'),
       url(r'^password/reset/$',
                     auth_views.password_reset,
-                    name='password_reset'),
+                    name='password_reset',
+                    {'from_email': settings.SMTP_EMAIL}),
       url(r'^password/reset/done/$',
                     auth_views.password_reset_done,
                     name='password_reset_done'),
