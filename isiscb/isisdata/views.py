@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, Invali
 from django.contrib.auth.models import User
 from django.db import connection
 from django.http import HttpResponse
+from django.http import Http404
 from django.db.models import Q
 
 from haystack.views import FacetedSearchView
