@@ -14,15 +14,22 @@
       <hr>
     </div>
 
-    {{selected_facets}}
-
     {% if query %}
-    <h4>Author</h4>
+    <h4>Author & Contributors</h4>
       {% if facets.fields.authors %}
-              <ul >
-              {# Provide only the top 5 authors #}
+            <ul class="selected_facets">
+              {% for author in selected_facets.authors_exact %}
+              {% with author|create_facet_string:'authors_exact' as encoded_author %}
+              <li><a href="{{ request.get_full_path|remove_facet:encoded_author }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
+              {% endwith %}
+              {% endfor %}
+            </ul>
+            <ul >
+              {# Provide only the top 7 authors #}
               {% for author in facets.fields.authors|slice:":7" %}
-                  <li><a href="{{ request.get_full_path }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+              {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
+              <li><a href="{{ request.get_full_path }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+              {% endif %}
               {% endfor %}
             </ul>
       {% else %}
@@ -31,9 +38,18 @@
 
       <h4>Subject</h4>
       {% if facets.fields.subjects %}
+        <ul class="selected_facets">
+          {% for subject in selected_facets.subjects_exact %}
+          {% with subject|create_facet_string:'subjects_exact' as encoded_subject %}
+          <li><a href="{{ request.get_full_path|remove_facet:encoded_subject }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
         <ul>
               {% for subject in facets.fields.subjects|slice:":7" %}
+              {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
                   <li ><a href="{{ request.get_full_path }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+              {% endif %}
               {% endfor %}
         </ul>
       {% else %}
