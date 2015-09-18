@@ -101,38 +101,37 @@
             {% empty %}
                 <p>No results found.</p>
             {% endfor %}
-
             {% if page.has_previous or page.has_next %}
             <nav>
               <ul class="pagination">
 
                   {% if page.has_previous %}
                   <li>
-                    <a href="?q={{ query }}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
                       <span aria-hidden="true">&laquo;</span>
                     </a>
                   </li>
                   {% else %}
                   <li class="disabled">
-                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Previous">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Previous">
                       <span aria-hidden="true">&laquo;</span>
                     </a>
                   </li>
                   {% endif %}
                   {% if page.has_previous or page.has_next %}
                   {% for p in page.paginator.page_range %}
-                      <li {% if page.number == p %} class="disabled" {% endif %}><a href="?q={{ query }}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
+                      <li {% if page.number == p %} class="disabled" {% endif %}><a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
                   {% endfor %}
                   {% endif %}
                   {% if page.has_next %}
                   <li>
-                    <a href="?q={{ query }}&amp;page={{ page.next_page_number }}" aria-label="Next">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.next_page_number }}" aria-label="Next">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
                   {% else %}
                   <li class="disabled">
-                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Next">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Next">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
