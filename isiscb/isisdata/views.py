@@ -3,6 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 
 from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
+from django import forms
 from django.db import connection
 from django.http import HttpResponse
 from django.http import Http404
@@ -640,14 +642,32 @@ class IsisSearchView(FacetedSearchView):
 
 class UserRegistrationForm(RegistrationForm):
     captcha = CaptchaField()
+    next = forms.CharField(widget=forms.HiddenInput())
 
 
 class UserRegistrationView(RegistrationView):
     form_class = UserRegistrationForm
 
-    def register(self, **cleaned_data):
-        print cleaned_data
-        return
+    def get_initial(self):
+        initial = super(UserRegistrationView, self).get_initial()
+        initial.update({'next': self.request.GET.get('next', None)})
+        print initial
+        return initial
 
-    def get_success_url(self, user):
+    def register(self, **cleaned_data):
+        User.objects.create_user(cleaned_data['username'],
+                                 cleaned_data['email'],
+                                 cleaned_data['password1'])
+
+        # Automatically log the user in.
+        user = authenticate(username=cleaned_data['username'],
+                            password=cleaned_data['password1'])
+        if user.is_active:
+            login(self.request, user)
+
+        return cleaned_data['next']
+
+    def get_success_url(self, next):
+        if next is not None and next != '':
+            return next
         return '/'

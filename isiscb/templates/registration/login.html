@@ -17,22 +17,40 @@
 
 				{% if form.non_field_errors %}
 					{% for error in form.non_field_errors %}
-					<p class="errornote">
-					    {{ error }}
-					</p>
+
+
+						<div class="alert alert-danger" role="alert">
+						  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+						  <span class="sr-only">Error:</span>
+						  {{ error|escape }}
+						</div>
+
+
 					{% endfor %}
 				{% endif %}
 
 				<div id="content-main">
 						<div class="form-group">
-						{{ form.username.errors }}
+							{% for error in form.username.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
 							<label for="username" class="required control-label col-sm-4">{{ form.username.label }}:</label>
 							<div class="col-sm-6">
 								{{ form.username | addcss:"form-control" }}
 							</div>
 						</div>
 						<div class="form-group">
-						{{ form.password.errors }}
+							{% for error in form.password.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
 							<label for="password" class="required control-label col-sm-4">{% trans 'Password:' %}</label>
 							<div class="col-sm-6">
 								{{ form.password | addcss:"form-control"}}

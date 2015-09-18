@@ -17,22 +17,37 @@
 
 				{% if form.non_field_errors %}
 					{% for error in form.non_field_errors %}
-					<p class="errornote">
-					    {{ error }}
-					</p>
+					<div class="alert alert-danger" role="alert">
+					  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+					  <span class="sr-only">Error:</span>
+					  {{ error|escape }}
+					</div>
 					{% endfor %}
 				{% endif %}
 
 				<div id="content-main">
 						<div class="form-group">
-						{{ form.username.errors }}
+							{% for error in form.username.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
+
 							<label for="username" class="required control-label col-sm-4">{{ form.username.label }}:</label>
 							<div class="col-sm-6">
 								{{ form.username | addcss:"form-control" }}
 							</div>
 						</div>
                         <div class="form-group">
-						{{ form.email.errors }}
+							{% for error in form.email.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
 							<label for="email" class="required control-label col-sm-4">{{ form.email.label }}</label>
 							<div class="col-sm-6">
 								{{ form.email | addcss:"form-control"}}
@@ -40,7 +55,13 @@
 							<input type="hidden" name="next" value="{{ next }}" />
 						</div>
 						<div class="form-group">
-						{{ form.password1.errors }}
+							{% for error in form.password1.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
 							<label for="password1" class="required control-label col-sm-4">{{ form.password1.label }}</label>
 							<div class="col-sm-6">
 								{{ form.password1 | addcss:"form-control"}}
@@ -48,7 +69,13 @@
 							<input type="hidden" name="next" value="{{ next }}" />
 						</div>
                         <div class="form-group">
-						{{ form.password2.errors }}
+							{% for error in form.password2.errors %}
+	   						 <div class="alert alert-danger" role="alert">
+	   						   <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	   						   <span class="sr-only">Error:</span>
+	   						   {{ error|escape }}
+	   						 </div>
+	   						 {% endfor %}
 							<label for="password2" class="required control-label col-sm-4">{{ form.password2.label }}</label>
 							<div class="col-sm-6">
 								{{ form.password2 | addcss:"form-control"}}
@@ -56,15 +83,21 @@
 							<input type="hidden" name="next" value="{{ next }}" />
 						</div>
 						<div class="form-group">
-						{{ form.captcha.errors }}
-							<label for="captcha" class="required control-label col-sm-4">{{ form.captcha.label}}</label>
+							{% for error in form.captcha.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
+							<label for="captcha" class="required control-label col-sm-4">Calculate</label>
 							<div class="col-sm-6">
 								{{ form.captcha  | addcss:"form-control"}}
 							</div>
-							<input type="hidden" name="next" value="{{ next }}" />
+
 						</div>
 
-						<input name="next" type="hidden" value="{{next}}">
+						{{ form.next }}
 
 					<script type="text/javascript">
 					document.getElementById('id_username').focus()
