@@ -70,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'isisdata.context_processors.server_start',
             ],
         },
     },
@@ -131,3 +132,19 @@ MEDIA_URL = '/media/'
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'
 URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+try:
+    from secrets import SMTP_USER, SMTP_PASSWORD
+    EMAIL_HOST_USER = SMTP_USER
+    EMAIL_HOST_PASSWORD = SMTP_PASSWORD
+except ImportError:
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD =''
+
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+SMTP_EMAIL = 'info@aplacecalledup.com'
+
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
