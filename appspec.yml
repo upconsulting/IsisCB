@@ -22,6 +22,9 @@ hooks:
     - location: awsdeploy/AfterInstall.sh
       timeout: 1000
       runas: ec2-user
+    - location: awsdeploy/AfterInstallRoot.sh
+      timeout: 1000
+      runas: root
   ApplicationStart:
     - location: awsdeploy/ApplicationStart.sh
       timeout: 1000

@@ -1,6 +1,9 @@
 from django import template
 from isisdata.models import *
 from django.conf import settings
+from urllib import quote
+import codecs
+import re
 
 register = template.Library()
 
@@ -55,6 +58,23 @@ def get_title(citation):
     if book == None:
         return "Review of unknown publication"
 
-
-
     return 'Review of "' + book.title + '"'
+
+@register.filter
+def get_pub_year(citation):
+    dates = citation.attributes.filter(type_controlled__name='PublicationDate')
+    if dates:
+        return dates[0].value_freeform
+    return ''
+
+@register.filter
+def remove_facet(url, arg):
+    return url.replace(arg, "").replace("&&", "&")
+
+@register.filter
+def create_facet_string(facet, field):
+    return 'selected_facets=' + field + ':' + quote(codecs.encode(facet,'utf-8'))
+
+@register.filter
+def set_page_to_one(path):
+    return re.sub(r"page=[0-9]*", "page=1", path)

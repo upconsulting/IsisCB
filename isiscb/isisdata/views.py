@@ -24,6 +24,8 @@ from isisdata.models import *
 
 from django.template import RequestContext, loader
 from django.http import HttpResponse
+from urllib import quote
+import codecs
 
 from collections import defaultdict
 
@@ -511,7 +513,7 @@ def authority(request, authority_id):
 
     page_by = request.GET.get('page-by')
     try:
-        citations_by = citations_by_paginator.page(page_other)
+        citations_by = citations_by_paginator.page(page_by)
     except PageNotAnInteger:
         citations_by = citations_by_paginator.page(1)
     except EmptyPage:
@@ -612,10 +614,33 @@ class IsisSearchView(FacetedSearchView):
 
         return (paginator, page)
 
+    def extra_context(self):
+        extra = super(FacetedSearchView, self).extra_context()
+        extra['request'] = self.request
+        extra['facets'] = self.results.facet_counts()
+        extra['models'] = self.request.GET.getlist('models')
+        extra['count'] = len(self.results)
+
+        facet_map = {}
+        facets_raw = []
+        for facet in self.request.GET.getlist("selected_facets"):
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+
+            if value:
+                facet_map.setdefault(field, []).append(value)
+                facets_raw.append(field + ":" + quote(codecs.encode(value,'utf-8')))
+
+        extra['selected_facets'] = facet_map
+        extra['selected_facets_raw'] = facets_raw
+        return extra
 
 
 class UserRegistrationForm(RegistrationForm):
     captcha = CaptchaField()
+
 
 class UserRegistrationView(RegistrationView):
     form_class = UserRegistrationForm

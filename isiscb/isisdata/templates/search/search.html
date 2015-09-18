@@ -14,15 +14,22 @@
       <hr>
     </div>
 
-    {{selected_facets}}
-
     {% if query %}
-    <h4>Author</h4>
+    <h4>Author & Contributors</h4>
       {% if facets.fields.authors %}
-              <ul >
-              {# Provide only the top 5 authors #}
+            <ul class="selected_facets">
+              {% for author in selected_facets.authors_exact %}
+              {% with author|create_facet_string:'authors_exact' as encoded_author %}
+              <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
+              {% endwith %}
+              {% endfor %}
+            </ul>
+            <ul >
+              {# Provide only the top 7 authors #}
               {% for author in facets.fields.authors|slice:":7" %}
-                  <li><a href="{{ request.get_full_path }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+              {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
+              <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+              {% endif %}
               {% endfor %}
             </ul>
       {% else %}
@@ -31,9 +38,18 @@
 
       <h4>Subject</h4>
       {% if facets.fields.subjects %}
+        <ul class="selected_facets">
+          {% for subject in selected_facets.subjects_exact %}
+          {% with subject|create_facet_string:'subjects_exact' as encoded_subject %}
+          <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
         <ul>
               {% for subject in facets.fields.subjects|slice:":7" %}
-                  <li ><a href="{{ request.get_full_path }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+              {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
+                  <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+              {% endif %}
               {% endfor %}
         </ul>
       {% else %}
@@ -44,7 +60,7 @@
 
   </div>
   <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-
+    <h2>Isis Current Bibliography</h2>
     <h3>Search</h3>
 
     <form method="get" action=".">
@@ -63,17 +79,23 @@
 
         {% if query %}
             <h3>Results</h3>
+            <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
 
             {% for result in page.object_list %}
-                <p>
+            <p>
                   {% if result.object|to_class_name = 'Citation' %}
                   <span class="glyphicon glyphicon-book"></span>
-                    {% if result.authors|joinby:", " %}
-                    {{ result.authors | joinby:", " }}
+                  [{{ result.object.get_type_controlled_display }}]
+
+                  <br>
+                    {% if result.authors|joinby:"; " %}
+                    {{ result.authors | joinby:"; " }};
                     {% else %}
-                    Author missing
+                    Author missing;
                     {% endif %}
-                    <br><a href="{% url 'index' result.object.id %}">{{ result.object|get_title }}</a>
+
+                    <a href="{% url 'index' result.object.id %}">{{ result.object|get_title }}</a>
+                    {% if result.object|get_pub_year %}({{ result.object|get_pub_year }}){% endif %}
 
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}
@@ -85,38 +107,38 @@
             {% empty %}
                 <p>No results found.</p>
             {% endfor %}
-
             {% if page.has_previous or page.has_next %}
             <nav>
               <ul class="pagination">
+                <li class="disabled"><a>Go to page:</a></li>
 
                   {% if page.has_previous %}
                   <li>
-                    <a href="?q={{ query }}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
                       <span aria-hidden="true">&laquo;</span>
                     </a>
                   </li>
                   {% else %}
                   <li class="disabled">
-                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Previous">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Previous">
                       <span aria-hidden="true">&laquo;</span>
                     </a>
                   </li>
                   {% endif %}
                   {% if page.has_previous or page.has_next %}
                   {% for p in page.paginator.page_range %}
-                      <li {% if page.number == p %} class="disabled" {% endif %}><a href="?q={{ query }}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
+                      <li {% if page.number == p %} class="active" {% endif %}><a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
                   {% endfor %}
                   {% endif %}
                   {% if page.has_next %}
                   <li>
-                    <a href="?q={{ query }}&amp;page={{ page.next_page_number }}" aria-label="Next">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.next_page_number }}" aria-label="Next">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
                   {% else %}
                   <li class="disabled">
-                    <a href="?q={{ query }}&amp;page={{ page.number }}" aria-label="Next">
+                    <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Next">
                       <span aria-hidden="true">&raquo;</span>
                     </a>
                   </li>
