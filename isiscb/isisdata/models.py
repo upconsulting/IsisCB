@@ -569,8 +569,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     citation = models.ForeignKey('Citation')
     authority = models.ForeignKey('Authority')
 
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
 
     # TODO: conditional validation on these fields.
     # Allowed values depend on the value of the Type.Broad,controlled
@@ -626,6 +626,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
+                                             blank=True,
                                              verbose_name='type (broad)',
                                              help_text="""
     Used to specify the nature of the relationship between authority (as the
@@ -633,6 +634,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     Type.controlled""")
 
     type_free = models.CharField(max_length=255,
+                                 blank=True,
                                  verbose_name="type (free text)",
                                  help_text="""
     Free text description of the role that the authority plays in the
