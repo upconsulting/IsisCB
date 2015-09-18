@@ -78,46 +78,68 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <h3>{{ citation|get_title }}</h3>
 
+    {% if authors|length > 0 %}
     <p><strong>Authors & Contributors:</strong> {% for author in authors %} <a href="{% url 'authority' author.authority.id %}">{{ author.authority.name }};</a> {% endfor %}
+    {% endif %}
+    {% if citation.abstract %}
     <p><strong>Abstract:</strong> {{ citation.abstract }}</p>
+    {% endif %}
+    {% if citation.description %}
     <p><strong>Description:</strong> {{ citation.description }}</p>
+    {% endif %}
 
     {% for attribute in citation.attributes.all %}
     <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value_freeform }}</p>
     {% endfor %}
 
+    {% if citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language.all|length > 0  %}
     <table class="details">
+      {% if citation.edition_details|length > 0 %}
       <tr>
         <td>Edition Details:</td><td>{{ citation.edition_details }}</td>
       </tr>
+      {% endif %}
+      {% if citation.physical_details|length > 0 %}
       <tr>
         <td>Physical Details:</td><td>{{ citation.physical_details }}</td>
       </tr>
+      {% endif %}
+      {% if citation.language.all|length > 0 %}
       <tr>
         <td>Languages:</td><td>{% for language in citation.language.all %}{{ language.name }}{% endfor %}</td>
       </tr>
+      {% endif %}
     </table>
+    {% endif %}
 
     <table class="details">
-      <tr>
-        <td>Volume:</td><td>{{ citation.part_details.volume }}</td>
-      </tr>
-      <tr>
-        <td>Issue:</td><td>{{ citation.part_details.issue_free_text }}</td>
-      </tr>
-      <tr>
-        <td>Pages:</td><td>{{ citation.part_details.pages_free_text }}</td>
-      </tr>
       {% for prop in properties_map %}
       <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {{ prop.authority.name }}</td></tr>
       {% endfor %}
+      {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+      <tr>
+        <td>Volume:</td><td>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</td>
+      </tr>
+      {% endif %}
+      {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+      <tr>
+        <td>Issue:</td><td>{% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</td>
+      </tr>
+      {% endif %}
+      {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+      <tr>
+        <td>Pages:</td><td>{% if citation.part_details.page_begin %}{{ citation.part_details.page_begin }}{% if citation.part_details.page_end %} - {{citation.part_details.page_end}}{% endif %}{% else %}{{ citation.part_details.pages_free_text }}{% endif %}</td>
+      </tr>
+      {% endif %}
     </table>
 
     <table class="details">
+      {% if citation.linkeddata_entries.all|length > 0 %}
       <tr>
         <td>Linked Data:</td>
         <td>{% for entry in citation.linkeddata_entries.all %}{{ entry.universal_resource_name }} ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
+      {% endif %}
       <tr>
         <td>Citation URI:</td>
         <td>{{ citation | get_uri }}</td>
