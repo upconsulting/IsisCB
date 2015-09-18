@@ -56,6 +56,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 )
 
 ROOT_URLCONF = 'isiscb.urls'
@@ -71,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'isisdata.context_processors.server_start',
             ],
         },
     },
@@ -98,7 +100,7 @@ DATABASES = {
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
+        'URL': 'ec2-52-89-8-78.us-west-2.compute.amazonaws.com:9200/',
         'INDEX_NAME': 'haystack',
     },
 }
@@ -150,3 +152,12 @@ AWS_HEADERS = {
 }
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'
+URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+from secrets import SMTP_USER, SMTP_PASSWORD
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+EMAIL_HOST_USER = SMTP_USER
+EMAIL_HOST_PASSWORD = SMTP_PASSWORD
+SMTP_EMAIL = 'info@aplacecalledup.com'

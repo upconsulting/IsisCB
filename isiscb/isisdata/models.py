@@ -45,14 +45,20 @@ class Value(models.Model):
         return super(Value, self).save(*args, **kwargs)
 
     def get_child_class(self):
-        return getattr(self, self.child_class.lower())
+        cclass_name = self.child_class.lower()
+        if hasattr(self, cclass_name):
+            return getattr(self, cclass_name)
+        return None
 
     def cvalue(self):
-        return self.get_child_class().value
+        cclass = self.get_child_class()
+        if cclass is not None and cclass != '':
+            return cclass.value
+        return None
     cvalue.short_description = 'value'
 
     def __unicode__(self):
-        return unicode(self.get_child_class().value)
+        return unicode(self.cvalue())
 
 
 class TextValue(Value):
@@ -280,6 +286,8 @@ class Language(models.Model):
 
 
 class Citation(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'CBB'
+
     history = HistoricalRecords()
 
     title = models.CharField(max_length=2000, help_text="""
@@ -419,6 +427,8 @@ class Citation(ReferencedEntity, CuratedMixin):
 
 
 class Authority(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'CBA'
+
     class Meta:
         verbose_name_plural = 'authority records'
         verbose_name = 'authority record'
@@ -865,7 +875,7 @@ class Attribute(ReferencedEntity, CuratedMixin):
 
     def __unicode__(self):
         return u'{0}: {1}'.format(self.type_controlled.name,
-                                  self.value.get_child_class().value)
+                                  self.value.cvalue())
 
 
 class PartDetails(models.Model):
@@ -973,6 +983,8 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'TRK'
+
     history = HistoricalRecords()
 
     tracking_info = models.CharField(max_length=255, blank=True)

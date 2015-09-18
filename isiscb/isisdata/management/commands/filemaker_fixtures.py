@@ -7,13 +7,15 @@ import datetime
 import xml.etree.ElementTree as ET
 import os
 import copy
+import json
+import re
+
 
 def fast_iter(context, func):
     for event, e in context:
         func(e)
         # e.clear()
     del context
-
 
 fm_namespace = '{http://www.filemaker.com/fmpdsoresult}'
 
@@ -28,16 +30,16 @@ as_upper = lambda x: x.upper()
 
 # TODO: Make this more DRY.
 def as_datetime(x):
-    try:
-        return datetime.datetime.strptime(x, datetime_format)
-    except ValueError:
+    formats = [datetime_format, datetime_format_2, date_format, date_format_2]
+    val = None
+    for format in formats:
         try:
-            return datetime.datetime.strptime(x, datetime_format_2)
+            val = datetime.datetime.strptime(x, format)
         except ValueError:
-            try:
-                return datetime.datetime.strptime(x, date_format)
-            except ValueError:
-                return datetime.datetime.strptime(x, date_format_2)
+            pass
+    if val is None:
+        raise ValueError('Could not coerce value to datetime')
+    return val
 
 
 def try_int(v):
@@ -258,7 +260,7 @@ attributeFields = {
     'ID': ('id', passthrough),
     'ID.Subject.link': ('subject', passthrough),
     'DateAttribute.free': ('value_freeform', try_int),    # TODO: this is temporary.
-    'DateBegin': ('value', as_datetime),
+    'DateBegin': ('value', lambda x: as_datetime(x).date()),
     'CreatedBy': ('created_by_fm', passthrough),
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
@@ -311,11 +313,14 @@ linkedDataFields = {
 }
 
 
+
 # TODO: This could be about 10 times DRYer....
 # TODO: Add handle_aa_relations method (there are no AA Relations in the FM
 #  database right now).
 class Command(BaseCommand):
     help = 'Load FileMaker data from XML'
+
+    chunk_size = 10000  # Number of instances to include in each fixture file.
 
     namespaces = {'fm': fm_namespace}
 
@@ -324,28 +329,26 @@ class Command(BaseCommand):
         return super(Command, self).__init__(*args, **kwargs)
 
     def _get_subject(self, subject_id):
-        subject_instance = None
-        subject_ctype = None
-        for ctype in ContentType.objects.all():
-            if ctype.model.startswith('historical'):    # e.g. HistoricalRecord.
-                continue
+        model_ids = {
+            'CBB': 'citation',
+            'CBA': 'authority',
+            'ACR': 'acrelation',
+            'AAR': 'aarelation',
+            'CCR': 'ccrelation',
+        }
+        model_name = model_ids[subject_id[:3]]
+        subject_ctype = ContentType.objects.get(model=model_name).id
 
-            model = ctype.model_class()
-            try:
-                subject_instance = model.objects.get(id=subject_id)
-                subject_ctype = ctype
-                break   # Found.
-            except (ValueError, FieldError, ObjectDoesNotExist):
-                pass
-        return subject_instance, subject_ctype
+        return subject_ctype
 
     def add_arguments(self, parser):
         parser.add_argument('datapath', nargs=1, type=str)
         parser.add_argument('table', nargs='*', type=str)
 
     def handle(self, *args, **options):
-
+        self.chunk = 0
         datapath = options['datapath'][0]
+        self.datapath = datapath
         tables = options['table']
 
         if tables is not None and len(tables) > 0:
@@ -382,8 +385,39 @@ class Command(BaseCommand):
             print 'The following data could not be inserted:'
             print self.failed
 
+    def write_fixtures(self, data, name):
+        outpath = os.path.join(self.datapath,
+                               '{0}_{1}.json'.format(name, self.chunk))
+        with open(outpath, 'w') as f:
+            json.dump(data, f)
+        self.chunk += 1
+
+    def to_fixture(self, values, model):
+        for k, v in values.iteritems():
+            if type(v) is datetime.datetime:
+                values[k] = str(v) + '+00:00'
+            if type(v) is datetime.date:
+                values[k] = str(v)
+
+        id = copy.copy(values['id'])
+        del values['id']
+        instance = {
+            'pk': id,
+            'model': model,
+            'fields': values
+        }
+        return instance
+
     def handle_citations(self, datapath):
+        self.pdPK = 1    # Use for PartDetails ID.
+
+        with open('isisdata/fixtures/language.json', 'r') as f:
+            languages = json.load(f)
+        languageLookup = {l['fields']['name']: l['pk'] for l in languages}
+
         citationspath = os.path.join(datapath, 'citations.xml')
+        self.citations = []
+        self.part_details_instances = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -424,36 +458,46 @@ class Command(BaseCommand):
                                 pd_field = 'pages_free_text'
                         partDetails[pd_field] = value
 
-            language_instance = None
+            language_instances = []
             if 'language' in values:
-                language = copy.deepcopy(values['language'])
+                language_tokens = re.split('\W+', values['language'])
+                for language in language_tokens:
+                    try:    # Get PK for language. Some words may be noise.
+                        language_instances.append(languageLookup[language])
+                    except KeyError:    # Unknown language.
+                        pass
                 del values['language']
-                try:
-                    language_instance = Language.objects.get(name=language)
-                except ObjectDoesNotExist:
-                    print "couldn't find language {0}".format(language)
-                    pass
 
-            try:
-                instance = Citation(**values)
-                pd_instance = PartDetails(**partDetails)
-                pd_instance.save()
-                instance.part_details = pd_instance
-                instance.save()
-                if language_instance is not None:
-                    instance.language.add(language_instance)
-                instance.save()
-            except Exception as E:
-                self.failed.append((values['id'], E.message))
-                raise E
+            partDetails['id'] = copy.deepcopy(self.pdPK)  # PartDetails don't have an FM id.
+            pd_instance = self.to_fixture(partDetails, 'isisdata.partdetails')
+            self.part_details_instances.append(pd_instance)
+
+            values['part_details'] = copy.deepcopy(self.pdPK)
+            values['language'] = language_instances
+            cit_instance = self.to_fixture(values, 'isisdata.citation')
+            self.citations.append(cit_instance)
+
+            self.pdPK += 1
             r.clear()
+            print '\r', len(self.citations),
 
-        context = ET.iterparse(citationspath)
-        fast_iter(context, process_elem)
+            if len(self.citations) == self.chunk_size:
+                self.write_fixtures(self.citations, 'citations')
+                self.citations = []
+            if len(self.part_details_instances) == self.chunk_size:
+                self.write_fixtures(self.part_details_instances, 'part_details')
+                self.part_details_instances = []
+
+        fast_iter(ET.iterparse(citationspath), process_elem)
+        self.write_fixtures(self.citations, 'citations')
+        self.write_fixtures(self.part_details_instances, 'part_details')
+
 
     def handle_authorities(self, datapath):
         authoritiespath = os.path.join(datapath, 'authorities.xml')
-        missed_relations = []
+        self.redirect_authorities = []
+        self.authorities = []
+        self.persons = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -469,46 +513,48 @@ class Command(BaseCommand):
                         value = method(value)
                         values[dj_field] = value
 
-            if 'redirect_to' in values:
-                # The target of the redirect may not have been added yet. If
-                #  that is so, fail quietly and save the redirect information
-                #  for later.
-                try:
-                    values['redirect_to'] = Authority.objects.get(id=values['redirect_to'])
-                except ObjectDoesNotExist:
-                    missed_relations.append((values['id'], values['redirect_to']))
-                    del values['redirect_to']
-
-            model = Authority
+            model = 'isisdata.authority'
             if 'type_controlled' in values:
                 if values['type_controlled'] == 'PE':
-                    model = Person
+                    person_data = {'id': values['id']}
+                    for k in ['personal_name_last',
+                              'personal_name_first',
+                              'personal_name_suffix']:
+                        if k in values:
+                            person_data[k] = copy.deepcopy(values[k])
+                            del values[k]
+                    person_instance = self.to_fixture(person_data,
+                                                      'isisdata.person')
+                    self.persons.append(person_instance)
 
-            try:
-                instance = model(**values)
-                instance.save()
-            except Exception as E:
-                raise E
+            instance = self.to_fixture(values, model)
+            if 'redirect_to' in values:
+                self.redirect_authorities.append(instance)
+            else:
+                self.authorities.append(instance)
+
             r.clear()
+            print '\r', len(self.authorities),
+
+            if len(self.authorities) == self.chunk_size:
+                self.write_fixtures(self.authorities, 'authorities')
+                self.authorities = []
+            if len(self.persons) == self.chunk_size:
+                self.write_fixtures(self.persons, 'persons')
+                self.persons = []
 
         context = ET.iterparse(authoritiespath)
         fast_iter(context, process_elem)
 
-        # Go back and attempt to add in redirects that were missed the first
-        #  time around.
-        for id_from, id_to in missed_relations:
-            # It is possible that the target record does not exist. If so,
-            #  there's not much we can do at this point.
-            try:
-                instance = Authority.objects.get(id=id_from)
-                instance_to = Authority.objects.get(id=id_to)
-                instance.redirect_to = instance_to
-                instance.save()
-            except ObjectDoesNotExist:
-                pass
+        self.write_fixtures(self.authorities, 'authorities')
+        self.write_fixtures(self.persons, 'persons')
+        self.write_fixtures(self.redirect_authorities, 'authorities')
+
 
     def handle_ac_relations(self, datapath):
         acrelationspath = os.path.join(datapath, 'ac_relations.xml')
+
+        self.acrelations = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -543,25 +589,23 @@ class Command(BaseCommand):
                 self.failed.append((values['id'], 'missing citation or relation'))
                 return
 
-            try:
-                authority = Authority.objects.get(id=values['authority'])
-                values['authority'] = authority
-                citation = Citation.objects.get(id=values['citation'])
-                values['citation'] = citation
-            except ObjectDoesNotExist as E:
-                # TODO: this should fail quietly and move on?
-                self.failed.append((values['id'], E.message))
-                return
+            relation = self.to_fixture(values, 'isisdata.acrelation')
+            self.acrelations.append(relation)
 
-            instance = ACRelation(**values)
-            instance.save()
             r.clear()
+            print '\r', len(self.acrelations),
+
+            if len(self.acrelations) == self.chunk_size:
+                self.write_fixtures(self.acrelations, 'acrelations')
+                self.acrelations = []
 
         context = ET.iterparse(acrelationspath)
         fast_iter(context, process_elem)
+        self.write_fixtures(self.acrelations, 'acrelations')
 
     def handle_cc_relations(self, datapath):
         ccrelationspath = os.path.join(datapath, 'cc_relations.xml')
+        self.ccrelations = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -595,26 +639,31 @@ class Command(BaseCommand):
             if 'subject' not in values or 'object' not in values:
                 self.failed.append((values['id'], 'missing subject or object'))
                 return
-
-            try:
-                subject_instance = Citation.objects.get(id=values['subject'])
-                values['subject'] = subject_instance
-                object_instance = Citation.objects.get(id=values['object'])
-                values['object'] = object_instance
-            except ObjectDoesNotExist as E:
-                # TODO: this should fail quietly and move on?
-                self.failed.append((values['id'], E.message))
+            if 'CBB0' in [values['subject'], values['object']]:
+                self.failed.append((values['id'], 'bad subject or object id'))
                 return
 
-            instance = CCRelation(**values)
-            instance.save()
+            ccrelation = self.to_fixture(values, 'isisdata.ccrelation')
+            self.ccrelations.append(ccrelation)
+
             r.clear()
+            print '\r', len(self.ccrelations),
+
+            if len(self.ccrelations) == self.chunk_size:
+                self.write_fixtures(self.ccrelations, 'ccrelations')
+                self.ccrelations = []
 
         context = ET.iterparse(ccrelationspath)
         fast_iter(context, process_elem)
+        self.write_fixtures(self.ccrelations, 'ccrelations')
 
     def handle_attributes(self, datapath):
         attributesspath = os.path.join(datapath, 'attributes.xml')
+        self.attributes = []
+        self.values = []
+        self.cvalues = []
+        self.valuePK = 1
+        self.attributeTypes = {}
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -627,16 +676,40 @@ class Command(BaseCommand):
                 if field in attributeFields:
                     dj_field, method = attributeFields[field]
                     if value is not None and value != 'None':
-                        value = method(value)
+                        try:
+                            value = method(value)
+                        except ValueError as E:
+                            self.failed.append((r, E.message))
+                            return
                         values[dj_field] = value
 
             if 'subject' not in values:
                 self.failed.append((values['id'], 'missing subject'))
                 return
 
+            if 'value' not in values:
+                self.failed.append((values['id'], 'missing value'))
+                return
+
             vtype = dict(VALUE_MODELS)[type(values['value'])]
-            value_value = copy.deepcopy(values['value'])
+            value_model = 'isisdata.{0}'.format(vtype.__name__.lower())
+            value = copy.deepcopy(values['value'])
+
+            value_values = {
+                'id': copy.copy(self.valuePK),
+                'attribute': values['id']
+            }
+            cvalue_values = {
+                'id': copy.copy(self.valuePK),
+                'value': value,
+            }
             del values['value']     # Not accepted by Attribute constructor.
+            values['child_class'] = vtype.__name__
+            value_fixture = self.to_fixture(value_values, 'isisdata.value')
+            self.values.append(value_fixture)
+            cvalue_fixture = self.to_fixture(cvalue_values, value_model)
+            self.cvalues.append(cvalue_fixture)
+            self.valuePK += 1
 
             vctype = ContentType.objects.get(model=vtype.__name__.lower())
 
@@ -645,37 +718,49 @@ class Command(BaseCommand):
                 return
 
             type_controlled = values['type_controlled']
-            defaults = {'value_content_type': vctype}
-            atype = AttributeType.objects.get_or_create(name=type_controlled,
-                                                        defaults=defaults)[0]
+            if type_controlled not in self.attributeTypes:
+                self.attributeTypes[type_controlled] = self.to_fixture({
+                    'id': len(self.attributeTypes) + 1,
+                    'name': type_controlled,
+                    'value_content_type': vctype.id
+                }, 'isisdata.attributetype')
+            atype = self.attributeTypes[type_controlled]['pk']
             values['type_controlled'] = atype
 
             subject_id = copy.deepcopy(values['subject'])
+            values['source_instance_id'] = subject_id
+            values['source_content_type'] = self._get_subject(subject_id)
             del values['subject']   # Not accepted by Attribute constructor.
 
-            subject_instance, subject_ctype = self._get_subject(subject_id)
-
-            if subject_instance is None:
-                self.failed.append((values['id'], 'no such subject'))
-                return
-
-            values['source_content_type'] = subject_ctype
-            values['source_instance_id'] = subject_instance.id
-
-            instance = Attribute(**values)
-            instance.save()
-            # subject_instance.attributes.add(instance)
-            # subject_instance.save()
-            value = vtype(value=value_value, attribute=instance)
-            value.save()
+            instance = self.to_fixture(values, 'isisdata.attribute')
+            self.attributes.append(instance)
 
             r.clear()
+            print '\r', len(self.attributes),
+
+            if len(self.attributes) == self.chunk_size:
+                self.write_fixtures(self.attributes, 'attributes')
+                self.attributes = []
+
+            if len(self.values) == self.chunk_size:
+                self.write_fixtures(self.values, 'values')
+                self.values = []
+
+            if len(self.cvalues) == self.chunk_size:
+                self.write_fixtures(self.cvalues, 'cvalues')
+                self.cvalues = []
 
         context = ET.iterparse(attributesspath)
         fast_iter(context, process_elem)
+        self.write_fixtures(self.attributes, 'attributes')
+        self.write_fixtures(self.attributeTypes.values(), 'attributetypes')
+        self.write_fixtures(self.values, 'values')
+        self.write_fixtures(self.cvalues, 'cvalues')
+        print self.failed
 
     def handle_tracking(self, datapath):
         trackingpath = os.path.join(datapath, 'tracking.xml')
+        self.trackings = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -696,28 +781,29 @@ class Command(BaseCommand):
                 return
 
             subject_id = copy.deepcopy(values['subject'])
+            subject_ctype = self._get_subject(subject_id)
             del values['subject']
 
-            try:
-                subject_instance, subject_ctype = self._get_subject(subject_id)
-                values['subject'] = subject_instance
-            except ObjectDoesNotExist as E:
-                # TODO: this should fail quietly and move on?
-                self.failed.append((values['id'], E.message))
-                return
-
             values['subject_content_type'] = subject_ctype
-            values['subject_instance_id'] = subject_instance.id
+            values['subject_instance_id'] = subject_id
 
-            instance = Tracking(**values)
-            instance.save()
+            instance = self.to_fixture(values, 'isisdata.tracking')
+            self.trackings.append(instance)
+
             r.clear()
+            print '\r', len(self.trackings),
+
+            if len(self.trackings) == self.chunk_size:
+                self.write_fixtures(self.trackings, 'trackings')
+                self.trackings = []
 
         context = ET.iterparse(trackingpath)
         fast_iter(context, process_elem)
+        self.write_fixtures(self.trackings, 'trackings')
 
     def handle_linkeddata(self, datapath):
         linkeddatapath = os.path.join(datapath, 'linked_data.xml')
+        self.linkeddata = []
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -750,7 +836,7 @@ class Command(BaseCommand):
             except ValidationError:
                 self.failed.append((values['id'], 'Invalid value.'))
                 return
-            values['type_controlled'] = ltype
+            values['type_controlled'] = ltype.id
 
             if 'subject' not in values:
                 self.failed.append((values['id'], 'missing subject'))
@@ -759,21 +845,21 @@ class Command(BaseCommand):
             subject_id = copy.deepcopy(values['subject'])
             del values['subject']
 
-            try:
-                subject_instance, subject_ctype = self._get_subject(subject_id)
-                # values['subject'] = subject_instance
-            except ObjectDoesNotExist as E:
-                # TODO: this should fail quietly and move on?
-                self.failed.append((values['id'], E.message))
-                return
+            subject_ctype = self._get_subject(subject_id)
 
             values['subject_content_type'] = subject_ctype
-            values['subject_instance_id'] = subject_instance.id
+            values['subject_instance_id'] = subject_id
 
-            instance = LinkedData(**values)
-            instance.save()
+            instance = self.to_fixture(values, 'isisdata.linkeddata')
+            self.linkeddata.append(instance)
+
             r.clear()
+            print '\r', len(self.linkeddata),
 
+            if len(self.linkeddata) == self.chunk_size:
+                self.write_fixtures(self.linkeddata, 'linkeddata')
+                self.linkeddata = []
 
         context = ET.iterparse(linkeddatapath)
         fast_iter(context, process_elem)
+        self.write_fixtures(self.linkeddata, 'linkeddata')
