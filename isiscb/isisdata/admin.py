@@ -288,7 +288,7 @@ class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMi
         }),
     ]
 
-    readonly_fields = ('uri', 'modified_on_fm','modified_by_fm')
+    readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
 
     form = CitationForm
 
@@ -322,6 +322,7 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         }),
     ]
     readonly_fields = ('uri',
+                       'id',
                        'classification_system',
                        'classification_code',
                        'classification_hierarchy',
@@ -348,6 +349,7 @@ class ACRelationAdmin(SimpleHistoryAdmin,
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'citation',
                        'authority',
                        'name',
@@ -368,8 +370,7 @@ class ACRelationAdmin(SimpleHistoryAdmin,
     ]
 
     readonly_fields = ('uri',
-                    #    'citation',
-                    #    'authority',
+                       'id',
                        'modified_by_fm',
                        'modified_on_fm')
 
@@ -395,6 +396,7 @@ class CCRelationAdmin(SimpleHistoryAdmin,
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'subject',
                        'object',
                        'name',
@@ -413,8 +415,7 @@ class CCRelationAdmin(SimpleHistoryAdmin,
     ]
 
     readonly_fields = ('uri',
-                    #    'subject',
-                    #    'object',
+                       'id',
                        'modified_by_fm',
                        'modified_on_fm')
 
@@ -439,6 +440,7 @@ class AARelationAdmin(SimpleHistoryAdmin,
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'subject',
                        'object',
                        'name',
@@ -457,8 +459,7 @@ class AARelationAdmin(SimpleHistoryAdmin,
     ]
 
     readonly_fields = ('uri',
-                    #    'subject',
-                    #    'object',
+                       'id',
                        'modified_by_fm',
                        'modified_on_fm')
 
@@ -476,6 +477,7 @@ class LinkedDataAdmin(SimpleHistoryAdmin):
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'universal_resource_name',
                        'description',
                        'subject_content_type',
@@ -495,6 +497,7 @@ class LinkedDataAdmin(SimpleHistoryAdmin):
     ]
 
     readonly_fields = ('uri',
+                       'id',
                        'subject_instance_id',
                        'subject_content_type',
                        'modified_by_fm',
@@ -514,6 +517,7 @@ class AttributeAdmin(SimpleHistoryAdmin):
     fieldsets = [
         (None, {
             'fields': ('uri',
+                       'id',
                        'description',
                        'source_content_type',
                        'source_instance_id')
