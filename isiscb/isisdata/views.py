@@ -8,6 +8,11 @@ from django.http import HttpResponse
 from django.http import Http404
 from django.db.models import Q
 
+# Used by UserRegistrationView and UserRegistrationForm
+from registration.forms import RegistrationForm
+from captcha.fields import CaptchaField
+from registration.views import RegistrationView
+
 from haystack.views import FacetedSearchView
 
 from rest_framework import viewsets, serializers, mixins, permissions
@@ -607,4 +612,17 @@ class IsisSearchView(FacetedSearchView):
 
         return (paginator, page)
 
-    
+
+
+class UserRegistrationForm(RegistrationForm):
+    captcha = CaptchaField()
+
+class UserRegistrationView(RegistrationView):
+    form_class = UserRegistrationForm
+
+    def register(self, **cleaned_data):
+        print cleaned_data
+        return
+
+    def get_success_url(self, user):
+        return '/'

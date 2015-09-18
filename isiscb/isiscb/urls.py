@@ -18,7 +18,6 @@ from django.conf import settings
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
-
 from rest_framework import routers
 
 from isisdata import views
@@ -67,7 +66,7 @@ urlpatterns = [
       url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
                     auth_views.password_reset_confirm,
                     name='password_reset_confirm'),
-
+    url(r'^register/$', views.UserRegistrationView.as_view()),
     url(r'^', include('registration.backends.simple.urls')),
     url(r'^captcha/', include('captcha.urls')),
 

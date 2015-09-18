@@ -55,6 +55,14 @@
 							</div>
 							<input type="hidden" name="next" value="{{ next }}" />
 						</div>
+						<div class="form-group">
+						{{ form.captcha.errors }}
+							<label for="captcha" class="required control-label col-sm-4">{{ form.captcha.label}}</label>
+							<div class="col-sm-6">
+								{{ form.captcha  | addcss:"form-control"}}
+							</div>
+							<input type="hidden" name="next" value="{{ next }}" />
+						</div>
 
 						<input name="next" type="hidden" value="{{next}}">
 
