@@ -25,6 +25,16 @@ VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
 
 
 class Value(models.Model):
+    """
+    A :class:`.Value` represents the value of an :class:`Attribute`\.
+
+    This class should not be instantiated directly, but rather via a subclass.
+    Subclasses should have a field ``value``, which can be of any type.
+
+    Subclasses can optionally provide a staticmethd ``convert`` that yields a
+    Python object from an alphanumeric input, and raises ValidationError for
+    bad data.
+    """
     attribute = models.OneToOneField('Attribute', related_name='value')
     child_class = models.CharField(max_length=255, help_text="""
     Name of the child model for this instance.""")
@@ -62,6 +72,9 @@ class Value(models.Model):
 
 
 class TextValue(Value):
+    """
+    A long/freeform text value.
+    """
     value = models.TextField()
 
     class Meta:
@@ -69,6 +82,9 @@ class TextValue(Value):
 
 
 class CharValue(Value):
+    """
+    A string value (max 2000 characters).
+    """
     value = models.CharField(max_length=2000)
 
     @staticmethod
@@ -82,6 +98,9 @@ class CharValue(Value):
 
 
 class IntValue(Value):
+    """
+    An integer value.
+    """
     value = models.IntegerField(default=0)
 
     @staticmethod
@@ -96,7 +115,9 @@ class IntValue(Value):
 
 
 class DateTimeValue(Value):
-    """ISO 8601 datetime."""
+    """
+    ISO 8601 datetime value.
+    """
     value = models.DateTimeField()
 
     @staticmethod
@@ -113,6 +134,9 @@ class DateTimeValue(Value):
 
 
 class DateValue(Value):
+    """
+    An ISO 8601 date value.
+    """
     value = models.DateField()
 
     @staticmethod
@@ -129,6 +153,9 @@ class DateValue(Value):
 
 
 class FloatValue(Value):
+    """
+    A floating-point number value.
+    """
     value = models.FloatField()
 
     @staticmethod
@@ -143,6 +170,9 @@ class FloatValue(Value):
 
 
 class LocationValue(Value):
+    """
+    A location value. Points to an instance of :class:`.Location`\.
+    """
     value = models.ForeignKey('Location')   # TODO: One to One?
 
     class Meta:
@@ -237,6 +267,8 @@ class CuratedMixin(models.Model):
 class ReferencedEntity(models.Model):
     """
     Provides a custom ID field and an URI field, and associated methods.
+
+    TODO: implement an accession field.
     """
 
     class Meta:
@@ -270,9 +302,10 @@ class ReferencedEntity(models.Model):
         super(ReferencedEntity, self).save(*args, **kwargs)
 
 
-
 class Language(models.Model):
     """
+    Represents a contemporary human language.
+
     Populate this using fixtures/language.json to load ISO 639-1 language codes.
     """
 
@@ -286,11 +319,15 @@ class Language(models.Model):
 
 
 class Citation(ReferencedEntity, CuratedMixin):
+    """
+    A bibliographic record.
+    """
     ID_PREFIX = 'CBB'
 
     history = HistoricalRecords()
 
-    title = models.CharField(max_length=2000, help_text="""
+    # Allowing blank values is not ideal, but many existing records lack titles.
+    title = models.CharField(max_length=2000, blank=True, help_text="""
     The name to be used to identify the resource. For reviews that traditionally
     have no title, this should be added as something like "[Review of Title
     (Year) by Author]".""")
@@ -417,11 +454,17 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     @property
     def ccrelations(self):
+        """
+        Provides access to related :class:`.CCRelation` instances directly.
+        """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return CCRelation.objects.filter(query)
 
     @property
     def acrelations(self):
+        """
+        Provides access to related :class:`.ACRelation` instances directly.
+        """
         query = Q(citation_id=self.id)
         return ACRelation.objects.filter(query)
 
@@ -533,16 +576,25 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     @property
     def aarelations(self):
+        """
+        Provides access to related :class:`.AARelation` instances directly.
+        """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
         return AARelation.objects.filter(query)
 
     @property
     def acrelations(self):
+        """
+        Provides access to related :class:`.ACRelation` instances directly.
+        """
         query = Q(authority_id=self.id)
         return ACRelation.objects.filter(query)
 
 
 class Person(Authority):
+    """
+    People are special cases of authority records, with several unique fields.
+    """
     history = HistoricalRecords()
 
     # QUESTION: These seems specific to the PERSON type. Should we be modeling
@@ -554,10 +606,16 @@ class Person(Authority):
     # are those calculated?
     personal_name_last = models.CharField(max_length=255)
     personal_name_first = models.CharField(max_length=255)
-    personal_name_suffix = models.CharField(max_length=255)
+    personal_name_suffix = models.CharField(max_length=255, blank=True)
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
+    """
+    A relation between a :class:`.Authority` and a :class:`.Citaton`\.
+
+    For example, between a paper and its author(s), a book and its place of
+    publication, etc.
+    """
     ID_PREFIX = 'ACR'
 
     class Meta:
@@ -689,6 +747,12 @@ class ACRelation(ReferencedEntity, CuratedMixin):
 
 
 class AARelation(ReferencedEntity, CuratedMixin):
+    """
+    A relation between two :class:`.Authority` instances.
+
+    For example, between a teacher and a student, an employee and an
+    instutution, between two events, etc.
+    """
     ID_PREFIX = 'AAR'
 
     class Meta:
@@ -698,7 +762,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
     # Currently not used, but crucial to development of next generation relationship tools:
     name = models.CharField(max_length=255, blank=True)
     # Currently not used, but crucial to development of next generation relationship tools:
-    description = models.TextField()
+    description = models.TextField(blank=True)
 
     IDENTICAL_TO = 'IDTO'
     PARENT_OF = 'PAOF'
@@ -752,6 +816,13 @@ class AARelation(ReferencedEntity, CuratedMixin):
 
 
 class CCRelation(ReferencedEntity, CuratedMixin):
+    """
+    A relation between two :class:`.Citation` instances.
+
+    For example, between a review article and the book that it reviews,
+    between an article and an article that it cites, or between a chapter and
+    the book in which it appears.
+    """
     ID_PREFIX = 'CCR'
 
     class Meta:
@@ -908,6 +979,9 @@ class PartDetails(models.Model):
 
 
 class Place(models.Model):
+    """
+    A concept of locality associated with a particular point or region in space.
+    """
     name = models.CharField(max_length=255)
     gis_location = models.ForeignKey('Location', blank=True, null=True)
     gis_schema = models.ForeignKey('LocationSchema', blank=True, null=True)
@@ -946,6 +1020,9 @@ class Location(models.Model):
 
 
 class LinkedData(ReferencedEntity, CuratedMixin):
+    """
+    An external resource identifier or locator.
+    """
     ID_PREFIX = "LED"
 
     class Meta:
@@ -985,6 +1062,12 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
+    """
+    An audit entry for tracking the status of records in the curatorial process.
+
+    This is a higher-level concept than the History audit log, which records
+    only changes to entries.
+    """
     ID_PREFIX = 'TRK'
 
     history = HistoricalRecords()
@@ -1016,6 +1099,9 @@ class Tracking(ReferencedEntity, CuratedMixin):
 
 
 class Annotation(models.Model):
+    """
+    User-generated content associated with a specific entity.
+    """
     subject_content_type = models.ForeignKey(ContentType)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
@@ -1044,14 +1130,24 @@ class Annotation(models.Model):
 
 
 class Comment(Annotation):
+    """
+    A free-form text :class:`.Annotation`\.
+    """
     text = models.TextField()
 
 
 class TagAppellation(Annotation):
+    """
+    The appellation of an entity with a :class:`.Tag`\.
+    """
     tag = models.ForeignKey('Tag')
 
 
 class Tag(models.Model):
+    """
+    An :class:`.Annotation` from a controlled vocabulary
+    (:class:`.TaggingSchema`).
+    """
     schema = models.ForeignKey('TaggingSchema', related_name='tags')
     value = models.CharField(max_length=255)
     description = models.TextField()
@@ -1061,6 +1157,9 @@ class Tag(models.Model):
 
 
 class TaggingSchema(models.Model):
+    """
+    A named set of :class:`.Tag`\s.
+    """
     name = models.CharField(max_length=255)
 
     created_by = models.ForeignKey(User, related_name='tagging_schemas')
