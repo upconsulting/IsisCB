@@ -134,3 +134,13 @@ li {
     font-weight: bold;
     padding-left: 20px;
 }
+
+.selected_facets {
+  list-style:none;
+  margin-left:-18px;
+}
+
+.selected_facets a {
+  /*font-weight: bold;*/
+  font-style: italic;
+}
