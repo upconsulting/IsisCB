@@ -3,6 +3,7 @@ from isisdata.models import *
 from django.conf import settings
 from urllib import quote
 import codecs
+import re
 
 register = template.Library()
 
@@ -68,3 +69,7 @@ def remove_facet(url, arg):
 @register.filter
 def create_facet_string(facet, field):
     return 'selected_facets=' + field + ':' + quote(codecs.encode(facet,'utf-8'))
+
+@register.filter
+def set_page_to_one(path):
+    return re.sub(r"page=[0-9]*", "page=1", path)
