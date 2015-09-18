@@ -55,26 +55,38 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </table>
 
     {% if citations_by %}
+    {{ page_by }}
     <h4>Resources by {{ authority.name }}</h4>
+    <div class="results-info">Showing {{ citations_by.start_index }} to {{ citations_by.end_index }} of {{ citations_by.paginator.count }}.</div>
+
       {% for rel_citation in citations_by %}
         <p>
+          <span class="glyphicon glyphicon-book"></span>
           {% if rel_citation.citation|get_authors %}
           {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
           {% endif %}
           <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a></li>
         </p>
       {% endfor %}
+      {% if citations_by.has_previous or citations_by.has_next %}
       <nav>
         <ul class="pagination">
+          <li class="disabled"><a>Go to page: </a></li>
           <li>
             {% if citations_by.has_previous %}
             <a href="?page-by={{ citations_by.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% else %}
+            <li class="disabled">
+              <a href="?page-by={{ citations_by.number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
             {% endif %}
             {% if citations_by.has_previous or citations_by.has_next %}
             {% for page in citations_by.paginator.page_range %}
-                <li {% if citations_by.number == page %} class="disabled" {% endif %}><a href="?page-by={{ forloop.counter }}">{{ page }}</a></li>
+                <li {% if citations_by.number == page %} class="disabled" {% endif %}><a href="?page-by={{ page }}">{{ page }}</a></li>
             {% endfor %}
             {% endif %}
             {% if citations_by.has_next %}
@@ -83,16 +95,26 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
+            {% else %}
+            <li class="disabled">
+              <a href="?page-by={{ citations_by.number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
             {% endif %}
           </ul>
         </nav>
+    {% endif %}
     {% endif %}
 
     {% if citations_about %}
     <h4>Resources about {{ authority.name }}</h4>
 
+      <div class="results-info">Showing {{ citations_about.start_index }} to {{ citations_about.end_index }} of {{ citations_about.paginator.count }}.</div>
+
       {% for rel_citation in citations_about %}
         <p>
+          <span class="glyphicon glyphicon-book"></span>
           {% if rel_citation.citation|get_authors %}
           {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
           {% endif %}
@@ -100,13 +122,21 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         </p>
       {% endfor %}
 
+      {% if citations_about.has_previous or citations_about.has_next %}
       <nav>
         <ul class="pagination">
+          <li class="disabled"><a>Go to page: </a></li>
           <li>
             {% if citations_about.has_previous %}
             <a href="?page-about={{ citations_about.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% else %}
+            <li class="disabled">
+              <a href="?page-about={{ citations_about.number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
             {% endif %}
             {% if citations_about.has_previous or citations_about.has_next %}
             {% for page in citations_about.paginator.page_range %}
@@ -119,9 +149,16 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
+            {% else %}
+            <li class="disabled">
+              <a href="?page-about={{ citations_about.number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
             {% endif %}
           </ul>
         </nav>
+    {% endif %}
     {% endif %}
 
     {% if citations_other %}
@@ -129,19 +166,29 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
       {% for rel_citation in citations_other %}
           <p>
+            <span class="glyphicon glyphicon-book"></span>
             {% if rel_citation.citation|get_authors %}
             {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
             {% endif %}
             <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a>
           </p>
       {% endfor %}
+
+      {% if citations_other.has_previous or citations_other.has_next %}
       <nav>
         <ul class="pagination">
+          <li class="disabled"><a>Go to page</a></li>
           <li>
             {% if citations_other.has_previous %}
             <a href="?page-other={{ citations_other.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% else %}
+            <li class="disabled">
+              <a href="?page-other={{citations_other.number}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
             {% endif %}
             {% if citations_other.has_previous or citations_other.has_next %}
             {% for page in citations_other.paginator.page_range %}
@@ -154,9 +201,16 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
+            {% else %}
+            <li class="disabled">
+              <a href="?page={{ citations_other.number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
             {% endif %}
           </ul>
         </nav>
+        {% endif %}
     {% endif %}
     </div>
 

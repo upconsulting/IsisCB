@@ -508,7 +508,7 @@ def authority(request, authority_id):
 
     page_by = request.GET.get('page-by')
     try:
-        citations_by = citations_by_paginator.page(page_other)
+        citations_by = citations_by_paginator.page(page_by)
     except PageNotAnInteger:
         citations_by = citations_by_paginator.page(1)
     except EmptyPage:
@@ -614,6 +614,7 @@ class IsisSearchView(FacetedSearchView):
         extra['request'] = self.request
         extra['facets'] = self.results.facet_counts()
         extra['models'] = self.request.GET.getlist('models')
+        extra['count'] = len(self.results)
 
         facet_map = {}
         facets_raw = []
