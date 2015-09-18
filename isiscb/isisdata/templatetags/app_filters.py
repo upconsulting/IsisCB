@@ -58,9 +58,14 @@ def get_title(citation):
     if book == None:
         return "Review of unknown publication"
 
-
-
     return 'Review of "' + book.title + '"'
+
+@register.filter
+def get_pub_year(citation):
+    dates = citation.attributes.filter(type_controlled__name='PublicationDate')
+    if dates:
+        return dates[0].value_freeform
+    return ''
 
 @register.filter
 def remove_facet(url, arg):

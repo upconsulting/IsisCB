@@ -82,15 +82,20 @@
             <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
 
             {% for result in page.object_list %}
-              <p>
+            <p>
                   {% if result.object|to_class_name = 'Citation' %}
                   <span class="glyphicon glyphicon-book"></span>
-                    {% if result.authors|joinby:", " %}
-                    {{ result.authors | joinby:", " }}
+                  [{{ result.object.get_type_controlled_display }}]
+
+                  <br>
+                    {% if result.authors|joinby:"; " %}
+                    {{ result.authors | joinby:"; " }};
                     {% else %}
-                    Author missing
+                    Author missing;
                     {% endif %}
-                    <br><a href="{% url 'index' result.object.id %}">{{ result.object|get_title }}</a>
+
+                    <a href="{% url 'index' result.object.id %}">{{ result.object|get_title }}</a>
+                    {% if result.object|get_pub_year %}({{ result.object|get_pub_year }}){% endif %}
 
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}
