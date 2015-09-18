@@ -3,7 +3,7 @@ Django==1.8.3
 django-autocomplete-light==2.2.5
 django-extensions==1.5.5
 django-haystack==2.4.0
-django-registration==1.8a0
+-e git+git://github.com/ubernostrum/django-registration.git#egg=django-registration
 django-simple-captcha==0.4.6
 django-simple-history==1.6.3
 django-storages==1.1.8
