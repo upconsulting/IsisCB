@@ -100,7 +100,11 @@
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}
                   <span class="glyphicon glyphicon-bookmark"></span>
+                  [{{ result.object.get_type_controlled_display }}]
                   <a href="{% url 'index' result.object.id %}">{{ result.name }}</a>
+                  {% with result.object|get_dates as dates %}
+                  {% if dates %}({{ dates|join_attributes:', ' }}){% endif %}
+                  {% endwith %}
                   {% endif %}
 
                 </p>
