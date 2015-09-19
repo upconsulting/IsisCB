@@ -78,3 +78,11 @@ def create_facet_string(facet, field):
 @register.filter
 def set_page_to_one(path):
     return re.sub(r"page=[0-9]*", "page=1", path)
+
+@register.filter
+def get_dates(authority):
+    return authority.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue'])
+
+@register.filter
+def join_attributes(attrlist, concator):
+    return concator.join(attr.value_freeform for attr in attrlist)
