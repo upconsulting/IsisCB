@@ -33,7 +33,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
   <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
-    <div class="alert alert-info headerbox" role="alert">{{ authority.get_type_controlled_display }}</div>
+    <div class="alert alert-info headerbox" role="alert">{{ authority.get_type_controlled_display }}
+        {% if user.is_staff %}
+        <span class="btn-grp pull-right">
+            <a class="btn btn-small glyphicon glyphicon-pencil" href="{% url "admin:isisdata_authority_change" authority.id %}"></a>
+        </span>
+        {% endif %}
+    </div>
 
     <h3>{{ authority.name }}</h3>
 
