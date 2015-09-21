@@ -86,3 +86,13 @@ def get_dates(authority):
 @register.filter
 def join_attributes(attrlist, concator):
     return concator.join(attr.value_freeform for attr in attrlist)
+
+@register.filter
+def get_contributors(citation):
+    return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
+
+@register.filter
+def contributor_as_string(acrelation):
+    kwargs = {'name': acrelation.authority.name,
+              'role': acrelation.get_type_controlled_display()}
+    return u"{name} ({role})".format(**kwargs)

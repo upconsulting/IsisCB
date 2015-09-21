@@ -115,6 +115,8 @@ MEDIA_URL = '/media/'
 # LOGIN_REDIRECT_URL = '/'
 
 DOMAIN = 'isiscb-develop.aplacecalledup.com'
+URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 

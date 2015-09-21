@@ -535,7 +535,7 @@ def authority(request, authority_id):
 def citation(request, citation_id):
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
     subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
     categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
@@ -552,7 +552,7 @@ def citation(request, citation_id):
     related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE')
     related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS')
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'CO', 'SU', 'CA'])
+    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA'])
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
