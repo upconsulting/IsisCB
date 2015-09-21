@@ -22,7 +22,16 @@ def model_choices(using=DEFAULT_ALIAS):
 class MyFacetedSearchForm(FacetedSearchForm):
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
-        self.fields['models'] = forms.MultipleChoiceField(choices=model_choices(), required=False, label=_('Search In'), widget=forms.CheckboxSelectMultiple)
+        # TODO: figure out why this field is defined post-hoc, and whether it
+        #  matters.
+        scField = forms.MultipleChoiceField(choices=model_choices(),
+                                            required=False,
+                                            label=_('Search In'),
+                                            widget=forms.CheckboxSelectMultiple)
+        self.fields['models'] = scField
+        self.fields['models'].initial = ['isisdata.authority',
+                                         'isisdata.citation']
+        print self.fields['models'].__dict__
 
     def get_models(self):
         """Return an alphabetical list of model classes in the index."""
