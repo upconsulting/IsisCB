@@ -473,6 +473,8 @@ class LinkedDataAdmin(SimpleHistoryAdmin):
                     'subject',
                     'type_controlled',
                     'universal_resource_name')
+    list_filter = ('type_controlled',)
+                    
 
     fieldsets = [
         (None, {

@@ -52,7 +52,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <table class="details">
       <tr>
         <td>Linked Data:</td>
-        <td>{% for entry in authority.linkeddata_entries.all %}{{ entry.universal_resource_name }} ({{ entry.type_controlled }})<br/> {% endfor %}</td>
+        <td>{% for entry in citation.linkeddata_entries.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
       <tr>
         <td>Citation URI:</td>

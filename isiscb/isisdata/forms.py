@@ -31,7 +31,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
         self.fields['models'] = scField
         self.fields['models'].initial = ['isisdata.authority',
                                          'isisdata.citation']
-        print self.fields['models'].__dict__
 
     def get_models(self):
         """Return an alphabetical list of model classes in the index."""
