@@ -521,6 +521,9 @@ def authority(request, authority_id):
     except EmptyPage:
         citations_by = citations_by_paginator.page(paginator.num_pages)
 
+    # Location of authority in REST API
+    api_view = reverse('authority-detail', args=[authority.id], request=request)
+
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
@@ -529,6 +532,7 @@ def authority(request, authority_id):
         'citations_other': citations_other,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
+        'api_view': api_view,
     })
     return HttpResponse(template.render(context))
 
@@ -557,6 +561,9 @@ def citation(request, citation_id):
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
 
+    # Location of citation in REST API
+    api_view = reverse('citation-detail', args=[citation.id], request=request)
+
     context = RequestContext(request, {
         'citation_id': citation_id,
         'citation': citation,
@@ -578,6 +585,7 @@ def citation(request, citation_id):
         'related_citations_re': related_citations_re,
         'related_citations_inv_re': related_citations_inv_re,
         'related_citations_as': related_citations_as,
+        'api_view': api_view,
     })
     return HttpResponse(template.render(context))
 

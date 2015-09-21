@@ -75,11 +75,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
   <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
     <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}
-        {% if user.is_staff %}
         <span class="btn-grp pull-right">
-            <a class="btn btn-small glyphicon glyphicon-pencil" href="{% url "admin:isisdata_citation_change" citation.id %}"></a>
+            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "admin:isisdata_citation_change" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
+            <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
-        {% endif %}
+
+
     </div>
     {% with citation|get_pub_year as pub_year %}
     <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
