@@ -17,7 +17,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 <meta property="og:url"                content="{{ request.build_absolute_uri }}" />
 <meta property="og:site_name"          content="Isis Current Bibliography" />
-<meta property="og:type"               content="books.book" />
+<meta property="og:type"               content="article" />
 <meta property="fb:app_id"             content="{{ facebook_app_id}}" />
 <meta property="og:title"              content="{{ citation|get_title|strip_tags }}" />
 <meta property="og:description"        content="{% if citation.abstract|length > 0 %}{{ citation.abstract|strip_tags }}{% elif citation.description %}{{ citation.description|strip_tags }}{% endif %}" />
