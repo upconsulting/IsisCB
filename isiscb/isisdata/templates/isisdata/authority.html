@@ -19,7 +19,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <meta property="og:site_name"          content="Isis Current Bibliography" />
 <meta property="og:type"               content="article" />
 <meta property="fb:app_id"             content="{{ facebook_app_id}}" />
-<meta property="og:title"              content="{{ authority|get_title|strip_tags }}" />
+<meta property="og:title"              content="{{ authority.name|strip_tags }}" />
 <meta property="og:description"        content="{{ authority.description|strip_tags }}" />
 <!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
 <meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
