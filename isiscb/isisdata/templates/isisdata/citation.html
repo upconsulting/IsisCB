@@ -1,6 +1,15 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
 {% load staticfiles %}
+{% load metadata_filters %}
+
+{% block meta_tags %}
+{% with citation|get_metatag_fields as metadata %}
+{% for md_key,md_value in metadata.items %}
+<meta name="{{md_key}}" content="{{md_value}}">
+{% endfor %}
+{% endwith %}
+{% endblock %}
 
 {% block extra_head %}
 <script>
@@ -80,8 +89,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
 
-
     </div>
+
+    {% with citation|get_coins_dict as metadata %}
+<!--<span class="Z3988" title="ctx_ver=Z39.88-2004&amp;rft_val_fmt=info:ofi/fmt:kev:mtx:dc&dc.genre=book&dc.title=test"></span>
+-->
+<!--<span class="Z3988" title="ctx_ver=Z39.88-2004&amp;rft_val_fmt=info:ofi/fmt:kev:mtx:dc&dc.genre=book&dc.title=The%20Patent%20Office%20pony:%20A%20history%20of%20the%20early%20Patent%20Office&dc.creator=Dobyns,%20Kenneth%20W.%20(Author)"></span>
+    <span class="Z3988" title="ctx_ver=Z39.88-2004&amp;rft_val_fmt=info:ofi/fmt:kev:mtx:dc&{% for md_key,md_value in metadata.items %}{% if md_value %}{{md_key}}={{md_value|iriencode}}&amp;{% endif %}{% endfor %}"></span>
+-->    {% endwith %}
+
     {% with citation|get_pub_year as pub_year %}
     <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
     {% endwith %}
