@@ -7,11 +7,17 @@ register = template.Library()
 @register.filter
 def get_coins_dict(citation):
     metadata_dict = {}
-    #metadata_dict['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
-    metadata_dict['dc.genre'] = 'book'
-    metadata_dict['dc.title'] = bleach_safe(get_title(citation))
+    metadata_dict['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:journal'
+    if citation.type_controlled == 'BO':
+        metadata_dict['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
+    if citation.type_controlled == 'TH':
+        metadata_dict['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:dissertation'
+    metadata_dict['rft.genre'] = 'article'
+    metadata_dict['rft.title'] = bleach_safe(get_title(citation))
     for author in get_contributors(citation):
-        metadata_dict['dc.creator'] = contributor_as_string(author)
+        metadata_dict['rft.au'] = author.authority.name
+
+    metadata_dict['rft.date'] = get_pub_year(citation)
     return metadata_dict
 
 @register.filter
