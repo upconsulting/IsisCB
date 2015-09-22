@@ -1,5 +1,21 @@
 {% load staticfiles %}
 
+<div class="row">
+    <div style="height: 45px;">
+        <div class="col-sm-2">
+            <a id="facebookShare" class="btn btn-social-icon btn-facebook">
+                <i class="fa fa-facebook"></i>
+            </a>
+        </div>
+        <div class="col-sm-2">
+            <a id="twitterShare" class="btn btn-social-icon btn-twitter">
+                <i class="fa fa-twitter"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+
 <div class="panel panel-success" ng-controller="CommentController">
     <div class="panel-heading">Comments</div>
     <div class="panel-body comment-body">
@@ -48,3 +64,7 @@
         {% endif %}
     </div>
 </div>
+
+
+<!-- {{ request.build_absolute_uri }} -->
+<div class="fb-comments" data-href="http://isiscb-develop.aplacecalledup.com/isis/citation/CBB000050455/" data-width="100%" data-numposts="5" data-version="v2.3"></div>

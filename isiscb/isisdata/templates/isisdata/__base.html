@@ -9,7 +9,9 @@
             {% block title %}Isis{% endblock %}
         </title>
         {% block stylesheets %}
+            <link rel="stylesheet" href="{% static "isisdata/font-awesome-4.4.0/css/font-awesome.min.css" %}" type="text/css" />
             <link rel="stylesheet" href="{% static "isisdata/bootstrap-3.3.5/css/bootstrap.min.css" %}" type="text/css" />
+            <link rel="stylesheet" href="{% static "isisdata/bootstrap-social-4.10.1/bootstrap-social.css" %}" type="text/css" />
             <link rel="stylesheet" href="{% static "isisdata/css/base.css" %}" type="text/css" />
         {% endblock %}
         {% block javascript %}
@@ -24,6 +26,7 @@
         {% block extra_head %}{% endblock %}
     </head>
     <body>
+          {% include "isisdata/_social.html" %}
           {% include "isisdata/_navigation.html" %}
           <div class="container-fluid main">
 
