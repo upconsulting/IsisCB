@@ -6,7 +6,11 @@
 {% block meta_tags %}
 {% with citation|get_metatag_fields as metadata %}
 {% for md_key,md_value in metadata.items %}
-<meta name="{{md_key}}" content="{{md_value}}">
+{% for value in md_value %}
+{% if md_value %}
+<meta name="{{md_key}}" content="{{value}}">
+{% endif %}
+{% endfor %}
 {% endfor %}
 {% endwith %}
 {% endblock %}

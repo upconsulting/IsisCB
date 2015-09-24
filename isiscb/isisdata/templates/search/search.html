@@ -99,7 +99,7 @@
                     {% if result.object|get_pub_year %}({{ result.object|get_pub_year }}){% endif %}
                     <!-- Zotero -->
                     {% with result.object|get_coins_dict as metadata %}
-                    <span class="Z3988" title="ctx_ver=Z39.88-2004{% for md_key,md_value in metadata.items %}{% if md_value %}&amp;{{md_key}}={{md_value|iriencode}}{% endif %}{% endfor %}"></span>
+                    <span class="Z3988" title="ctx_ver=Z39.88-2004{% for md_key,md_value in metadata.items %}{% if md_value %}{% for value in md_value %}&amp;{{md_key}}={{value|iriencode}}{% endfor %}{% endif %}{% endfor %}"></span>
                     {% endwith %}
                   {% endif %}
                   {% if result.object|to_class_name = 'Authority' %}
