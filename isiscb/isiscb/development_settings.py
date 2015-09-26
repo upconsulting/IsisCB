@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.server_start',
+                'isisdata.context_processors.social',
             ],
         },
     },
@@ -169,3 +170,8 @@ EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 SMTP_EMAIL = 'info@aplacecalledup.com'
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
+
+
+# social
+
+FACEBOOK_APP_ID = '1694252594140628'

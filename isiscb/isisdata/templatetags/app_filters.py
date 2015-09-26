@@ -134,6 +134,11 @@ def bleach_safe(s):
 
 
 @register.filter
+def strip_tags(s):
+    return bleach.clean(s, strip=True)
+
+
+@register.filter
 def linkify(s, *args, **kwargs):
     return mark_safe(bleach.linkify(s, *args, **kwargs))
 
