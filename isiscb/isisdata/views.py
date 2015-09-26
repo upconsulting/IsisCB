@@ -31,6 +31,8 @@ import codecs
 
 from collections import defaultdict
 
+from helpers.mods_xml import initial_response, generate_mods_xml
+
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
     """
@@ -679,3 +681,14 @@ class UserRegistrationView(RegistrationView):
         if next is not None and next != '':
             return next
         return '/'
+
+def unapi_server_root(request):
+    id = request.GET.get('id', '')
+    format = request.GET.get('format', '')
+    if id and format:
+        citation = get_object_or_404(Citation, pk=id)
+        return HttpResponse(generate_mods_xml(citation), content_type="application/xml")
+    if id:
+        return HttpResponse(initial_response(id))
+
+    return HttpResponse('')

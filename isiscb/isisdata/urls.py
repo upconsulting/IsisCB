@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
     url(r'^search/', IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs), name='haystack_search'),
+    url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
 ]
