@@ -134,8 +134,8 @@ def generate_mods_xml(citation):
         publisher.appendChild(doc.createTextNode(pub.authority.name))
         origin_info.appendChild(publisher)
 
-    start_page = str(citation.part_details.page_begin)
-    end_page = str(citation.part_details.page_end)
+    start_page = citation.part_details.page_begin
+    end_page = citation.part_details.page_end
 
     if start_page or end_page:
         extent = doc.createElement('extent')
@@ -143,12 +143,22 @@ def generate_mods_xml(citation):
         part.appendChild(extent)
         if start_page:
             start = doc.createElement('start')
-            start.appendChild(doc.createTextNode(start_page))
+            start.appendChild(doc.createTextNode(str(start_page)))
             extent.appendChild(start)
         if end_page:
             end = doc.createElement('end')
-            end.appendChild(doc.createTextNode(end_page))
+            end.appendChild(doc.createTextNode(str(end_page)))
             extent.appendChild(end)
+
+    for linked_data in citation.linkeddata_entries.all():
+        if linked_data.type_controlled.name in ['DOI', 'ISBN'] :
+            identifier = doc.createElement('identifier')
+            if linked_data.type_controlled.name == 'DOI':
+                identifier.setAttribute('type', 'doi')
+            else:
+                identifier.setAttribute('type', 'isbn')
+            identifier.appendChild(doc.createTextNode(linked_data.universal_resource_name))
+            mods.appendChild(identifier)
 
     return doc.toprettyxml(indent="    ", encoding="utf-8")
 
