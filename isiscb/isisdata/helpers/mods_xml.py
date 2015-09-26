@@ -31,7 +31,7 @@ def generate_mods_xml(citation):
     mods.appendChild(titleInfo)
     title = doc.createElement('title')
     titleInfo.appendChild(title)
-    title_text = doc.createTextNode(citation.title)
+    title_text = doc.createTextNode(bleach_safe(get_title(citation)))
     title.appendChild(title_text)
 
     # add authors
