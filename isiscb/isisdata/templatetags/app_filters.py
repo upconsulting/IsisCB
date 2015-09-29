@@ -102,7 +102,6 @@ def get_dates(authority):
 def join_attributes(attrlist, concator):
     return concator.join(attr.value_freeform for attr in attrlist)
 
-
 @register.filter
 def get_contributors(citation):
     return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
@@ -156,3 +155,11 @@ def linkeddata_for_display(ldinstance):
     if ldinstance.type_controlled.name not in URN_PATTERNS:
         return value
     return URN_PATTERNS[ldinstance.type_controlled.name].format(value)
+
+@register.filter
+def get_doc_type_display(abbrev):
+    for type in Citation.TYPE_CHOICES:
+        if type[0].lower() == abbrev.lower():
+            return type[1]
+
+    return abbrev

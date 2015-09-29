@@ -8,7 +8,28 @@ from isisdata.views import IsisSearchView
 
 from . import views
 
-sqs = SearchQuerySet().facet('authors').facet('subjects')
+sqs = SearchQuerySet().facet('authors'). \
+        facet('type'). \
+        facet('persons'). \
+        facet('categories'). \
+        facet('editors'). \
+        facet('advisors'). \
+        facet('translators'). \
+        facet('publishers'). \
+        facet('schools'). \
+        facet('institutions'). \
+        facet('meetings'). \
+        facet('periodicals'). \
+        facet('book_series'). \
+        facet('time_periods'). \
+        facet('geographics'). \
+        facet('people'). \
+        facet('subject_institutions'). \
+        facet('serial_publiations'). \
+        facet('classification_terms'). \
+        facet('concepts'). \
+        facet('creative_works'). \
+        facet('events')
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
