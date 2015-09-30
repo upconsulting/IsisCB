@@ -5,7 +5,19 @@
 {% block content %}
 <div class="row col-sm-4 col-sm-offset-4" style="margin-top:105px;">
 	<div id="login" class="panel panel-default narrow center">
-		<div class="panel-heading">Log In</div>
+		<div class="panel-heading clearfix">
+			<strong>Log In</strong>
+			<div class="btn-group btn-group-sm pull-right">
+
+				<a class="btn btn-social-icon btn-facebook" href="{% url "social:begin" backend="facebook" %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Facebook">
+					<i class="fa fa-facebook"></i>
+				</a>
+
+				<a class="btn btn-social-icon btn-twitter" href="{% url "social:begin" backend="twitter" %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Twitter">
+					<i class="fa fa-twitter"></i>
+				</a>
+			</div>
+		</div>
 		<form action="{{ app_path }}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
 
 			<div class="panel-body">
@@ -60,7 +72,7 @@
 						{% url 'password_reset' as password_reset_url %}
 						{% if password_reset_url %}
 						<div class="password-reset-link">
-							<a href="{{ password_reset_url }}">{% trans 'Forgotten your password or username?' %}</a>
+							<a href="{{ password_reset_url }}">{% trans 'Forgot your password or username?' %}</a>
 						</div>
 						{% endif %}
 
