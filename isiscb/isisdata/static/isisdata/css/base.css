@@ -149,3 +149,11 @@ li {
 .results-info {
   padding-bottom: 15px;
 }
+
+.nav-tabs {
+  margin-bottom: 20px;
+}
+
+.nav-tabs>li {
+    margin-bottom: -5px;
+}
