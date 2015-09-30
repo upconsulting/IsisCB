@@ -133,9 +133,9 @@
     <h3>Search</h3>
 
     <ul class="nav nav-tabs">
-      <li role="presentation" class="active"><a href="#">Home</a></li>
-      <li role="presentation"><a href="#">Profile</a></li>
-      <li role="presentation"><a href="#">Messages</a></li>
+      <li role="presentation" class="active"><a href="#">Bibiographic Records</a></li>
+      <li role="presentation"><a href="#">Authority Records</a></li>
+      <!--<li role="presentation"><a href="#">Messages</a></li>-->
     </ul>
 
     <form method="get" action=".">
@@ -146,10 +146,7 @@
         </span>
       </div>
       <div style="padding-top: 15px;">
-      Search in:
-        {% for model in form.models %}
-            {{ model }}
-          {% endfor %}
+            {{ form.models }}
       </div>
 
         {% if query %}
