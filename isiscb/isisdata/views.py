@@ -25,7 +25,7 @@ from rest_framework.reverse import reverse
 from isisdata.models import *
 
 from django.template import RequestContext, loader
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from urllib import quote
 import codecs
 
@@ -487,8 +487,24 @@ def index(request, obj_id=None):
     #return HttpResponse(template.render(context))
 
 def authority(request, authority_id):
-    template = loader.get_template('isisdata/authority.html')
+    """
+    View for individual Authority entries.
+    """
+
     authority = Authority.objects.get(id=authority_id)
+    redirect_from_id = request.GET.get('redirect_from')
+    if redirect_from_id:
+        redirect_from = Authority.objects.get(pk=redirect_from_id)
+    else:
+        redirect_from = None
+
+    if authority.record_status == 'RD' and authority.redirect_to is not None:
+        url = reverse('authority', kwargs={'authority_id':authority.redirect_to.id})
+
+        return HttpResponseRedirect(url + '?redirect_from={0}'.format(authority.id))
+
+    template = loader.get_template('isisdata/authority.html')
+
     citations_by_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
     citations_about_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
     citations_other_list = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
@@ -535,6 +551,7 @@ def authority(request, authority_id):
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
+        'redirect_from': redirect_from,
     })
     return HttpResponse(template.render(context))
 

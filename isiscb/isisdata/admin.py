@@ -262,7 +262,11 @@ class CitationForm(autocomplete_light.ModelForm):
         fields = '__all__'
 
 
-class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMixin, UberInlineMixin):
+class CitationAdmin(SimpleHistoryAdmin,
+                    AttributeInlineMixin,
+                    LinkedDataInlineMixin,
+                    UberInlineMixin):
+
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     fieldsets = [
         (None, {
@@ -293,6 +297,12 @@ class CitationAdmin(SimpleHistoryAdmin, AttributeInlineMixin, LinkedDataInlineMi
     form = CitationForm
 
 
+class AuthorityForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = Authority
+        fields = '__all__'
+
+
 class AuthorityAdmin(SimpleHistoryAdmin,
                      AttributeInlineMixin,
                      LinkedDataInlineMixin,
@@ -315,6 +325,7 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         }),
         ('Curation', {
             'fields': ('record_status',
+                       'redirect_to',
                        'administrator_notes',
                        'record_history',
                        'modified_by_fm',
@@ -328,6 +339,8 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                        'classification_hierarchy',
                        'modified_on_fm',
                        'modified_by_fm')
+
+    form = AuthorityForm
 
 
 class ACRelationForm(autocomplete_light.ModelForm):
@@ -474,7 +487,7 @@ class LinkedDataAdmin(SimpleHistoryAdmin):
                     'type_controlled',
                     'universal_resource_name')
     list_filter = ('type_controlled',)
-                    
+
 
     fieldsets = [
         (None, {
