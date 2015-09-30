@@ -75,6 +75,7 @@ statusOfRecordTypes = {
     'Broken': 'FX',
     'Duplicate': 'DP',
     'Delete': 'DL',
+    'IsisRLG': 'RL',
 }
 
 recordActionTypes = {
