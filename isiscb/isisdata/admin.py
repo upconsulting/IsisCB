@@ -268,6 +268,8 @@ class CitationAdmin(SimpleHistoryAdmin,
                     UberInlineMixin):
 
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
+    list_filter = ('type_controlled', 'status_of_record')
+
     fieldsets = [
         (None, {
             'fields': ('uri',
@@ -308,7 +310,7 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                      LinkedDataInlineMixin,
                      UberInlineMixin):
     list_display = ('name', 'type_controlled', 'id',)
-    list_filter = ('type_controlled',)
+    list_filter = ('type_controlled', 'record_status')
 
     fieldsets = [
         (None, {
