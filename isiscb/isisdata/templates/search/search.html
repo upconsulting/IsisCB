@@ -95,12 +95,14 @@ $(document).ready(function() {
           <div>
             <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.authority">
           </div>
-          <!--<div class="col-sm-3 col-md-2">
-            {% include "search/search_facets_authorities.html" %}
-          </div>-->
-          <div class="col-sm-12 col-md-12">
-          {% include "search/search_results_authorities.html" %}
-        </div>
+          <div class="row space-top">
+              <div class="col-sm-3 col-md-2">
+                {% include "search/search_facets_authorities.html" %}
+              </div>
+              <div class="col-sm-9 col-md-10">
+                {% include "search/search_results_authorities.html" %}
+              </div>
+          </div>
       </form>
     </div>
   </div>
