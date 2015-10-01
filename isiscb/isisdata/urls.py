@@ -12,6 +12,7 @@ sqs = SearchQuerySet().facet('authors'). \
         facet('type'). \
         facet('persons'). \
         facet('categories'). \
+        facet('subjects'). \
         facet('editors'). \
         facet('advisors'). \
         facet('translators'). \

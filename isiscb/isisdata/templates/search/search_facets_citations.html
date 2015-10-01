@@ -88,24 +88,24 @@
           <p>No place facets.</p>
   {% endif %}
 
-  <h5>Categories</h5>
-  {% if facets.fields.categories %}
+  <h5>Subjects</h5>
+  {% if facets.fields.subjects %}
     <ul class="selected_facets">
-      {% for category in selected_facets.categories_exact %}
-      {% with category|create_facet_string:'categories_exact' as encoded_category %}
-      <li><a href="{{ request.get_full_path|remove_facet:encoded_category|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{category}}</a></li>
+      {% for subject in selected_facets.subjects_exact %}
+      {% with subject|create_facet_string:'subjects_exact' as encoded_subject %}
+      <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
       {% endwith %}
       {% endfor %}
     </ul>
     <ul>
-          {% for category in facets.fields.categories|slice:":7" %}
-          {% if "categories_exact" not in selected_facets.keys or category.0 not in selected_facets.categories_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=categories_exact:{{ category.0|urlencode }}">{{ category.0 }} </a>({{ category.1 }}) </li>
+          {% for subject in facets.fields.subjects|slice:":7" %}
+          {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
           {% endif %}
           {% endfor %}
     </ul>
   {% else %}
-          <p>No category facets.</p>
+          <p>No subject facets.</p>
   {% endif %}
 </div>
 </div>
