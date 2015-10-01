@@ -51,6 +51,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     </div>
 
+    {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+
     <h3>{{ authority.name }}</h3>
 
     <p><strong>Description:</strong> {{ authority.description }}</p>

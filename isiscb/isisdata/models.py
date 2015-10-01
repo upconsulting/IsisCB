@@ -275,8 +275,10 @@ class ReferencedEntity(models.Model):
         abstract = True
 
     id = models.CharField(max_length=200, primary_key=True, help_text="""
-    In the format CBB000000000 (CBB followed by a number padded with zeros to
-    be nine digits).""")
+    In the format {PRE}{ZEROS}{NN}, where PRE is a three-letter prefix
+    indicating the record type (e.g. CBA for Authority), NN is an integer,
+    and ZEROS is 0-9 zeros to pad NN such that ZEROS+NN is nine characters
+    in length.""")
 
     uri = models.URLField(blank=True)
 
@@ -411,7 +413,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         (HOLD, 'Hold'),
         (RLG_CORRECT, 'RLG Correct')
     )
-
     record_action = models.CharField(max_length=2, blank=True,
                                      choices=ACTION_CHOICES, help_text="""
     Used to track the record through curation process.
@@ -422,12 +423,16 @@ class Citation(ReferencedEntity, CuratedMixin):
     SCOPE = 'SC'
     FIX_RECORD = 'FX'
     DUPLICATE = 'DP'
+    DELETE = 'DL'
+    ISISRLG = 'RL'
     STATUS_CHOICES = (
         (CONTENT_LIST, 'Content List'),
         (SOURCE_BOOK, 'Source Book'),
         (SCOPE, 'Scope'),
         (FIX_RECORD, 'Fix Record'),
-        (DUPLICATE, 'Duplicate')
+        (DUPLICATE, 'Duplicate'),
+        (DELETE, 'Delete'),
+        (ISISRLG, 'Isis RLG'),  # TODO: What is this, precisely?
     )
     status_of_record = models.CharField(max_length=2, choices=STATUS_CHOICES,
                                         blank=True, help_text="""
@@ -495,6 +500,8 @@ class Authority(ReferencedEntity, CuratedMixin):
     CONCEPT = 'CO'
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
+    CROSSREFERENCE = 'CR'
+    PUBLISHER = 'PU'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -504,7 +511,9 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CLASSIFICATION_TERM, 'Classification Term'),
         (CONCEPT, 'Concept'),
         (CREATIVE_WORK, 'Creative Work'),
-        (EVENT, 'Event')
+        (EVENT, 'Event'),
+        (CROSSREFERENCE, 'Cross-reference'),
+        (PUBLISHER, 'Publisher'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -547,6 +556,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     ACTIVE = 'AC'
     DUPLICATE = 'DU'
     REDIRECT = 'RD'
+    DELETE = 'DL'
     STATUS_CHOICES = (
         (ACTIVE, 'Active'),
         (DUPLICATE, 'Duplicate'),

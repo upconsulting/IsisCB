@@ -65,18 +65,25 @@ citationTypes = {
 }
 
 statusOfRecordTypes = {
-    'Content List': 'CL',
+    'Contents List': 'CL',
     'Source Book': 'SB',
+    'Source Book (of Chap or Rev)': 'SB',
     'Scope': 'SC',
     'Fix Record': 'FX',
-    'Duplicate': 'DP'
+    'Fix record. No publication date.': 'FX',
+    'Fix Record. See BibliographerNotes.': 'FX',
+    'Broken': 'FX',
+    'Duplicate': 'DP',
+    'Delete': 'DL',
+    'IsisRLG': 'RL',
 }
 
 recordActionTypes = {
     'ExternalProof': 'EX',
     'QueryProof': 'QU',
+    'Query SPW': 'QU',
     'Hold': 'HO',
-    'RLGCorrect': 'RC'
+    'RLG Correct': 'RC'
 }
 
 # Translates field names in FM Citation to field names and conversion methods
@@ -125,20 +132,23 @@ authorityTypes = {
     'Concept': 'CO',
     'CreativeWork': 'CW',
     'Event': 'EV',
-    'Cross-reference': ''
+    'Publishers': 'PU',
+    'Cross-reference': 'CR',
 }
 
 # Translates fields from FM Authority:RecordStatus to Authority.record_status
 recordStatusTypes = {
-    'ACTIVE': 'AC',
-    'DUPLICATE': 'DU',
-    'REDIRECT': 'RD',
+    'Active': 'AC',
+    'Duplicate': 'DU',
+    'Redirect': 'RD',
     'DELETE': 'DL',
-    'NEEDSTOBEFIXED': 'NF'
+    'NeedsToBeFixed': 'NF'
 }
 
 classificationSystems = {
     'WELDON THESAURUS TERMS (2002-PRESENT)': 'SWP',
+    'WELDON THESAURUS': 'SWP',
+    'WELDON CLASSIFICATION SYSTEM (2002-PRESENT)': 'SWP',
     'SWP': 'SWP',
     'NEU': 'NEU',
     'MW': 'MW',
@@ -146,7 +156,6 @@ classificationSystems = {
     'SHOT THESAURUS TERMS': 'SHOT',
     'GUERLAC COMMITTEE CLASSIFICATION SYSTEM (1953-2001)': 'GUE',
     'WHITROW CLASSIFICATION SYSTEM (1913-1999)': 'MW',
-    'WELDON CLASSIFICATION SYSTEM (2002-PRESENT)': 'SWP',
     'FORUM FOR THE HISTORY OF SCIENCE IN AMERICA': 'FHSA',
 }
 
@@ -165,7 +174,7 @@ authorityFields = {
     'CreatedOn': ('created_on_fm', as_datetime),
     'ModifiedBy': ('modified_by_fm', passthrough),
     'ModifiedOn': ('modified_on_fm', as_datetime),
-    'RecordStatus': ('record_status', lambda x: recordStatusTypes[x.upper()]),
+    'RecordStatus': ('record_status', lambda x: recordStatusTypes[x]),
     'RecordHistory': ('record_history', passthrough),
     'PersonalNameFirst': ('personal_name_first', passthrough),
     'PersonalNameLast': ('personal_name_last', passthrough),
@@ -389,7 +398,7 @@ class Command(BaseCommand):
         outpath = os.path.join(self.datapath,
                                '{0}_{1}.json'.format(name, self.chunk))
         with open(outpath, 'w') as f:
-            json.dump(data, f)
+            json.dump(data, f, indent=4)
         self.chunk += 1
 
     def to_fixture(self, values, model):
