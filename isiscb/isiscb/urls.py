@@ -69,6 +69,7 @@ urlpatterns = [
     url(r'^register/$', views.UserRegistrationView.as_view()),
     url(r'^', include('registration.backends.simple.urls')),
     url(r'^captcha/', include('captcha.urls')),
+    url('', include('social.apps.django_app.urls', namespace='social')),
 
 ]
 
