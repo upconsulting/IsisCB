@@ -25,7 +25,7 @@ from rest_framework.reverse import reverse
 from isisdata.models import *
 
 from django.template import RequestContext, loader
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from urllib import quote
 import codecs
 
@@ -487,11 +487,41 @@ def index(request, obj_id=None):
     #return HttpResponse(template.render(context))
 
 def authority(request, authority_id):
-    template = loader.get_template('isisdata/authority.html')
+    """
+    View for individual Authority entries.
+    """
+
     authority = Authority.objects.get(id=authority_id)
-    citations_by_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='PR')
-    citations_about_list = ACRelation.objects.filter(authority=authority,type_broad_controlled='SC')
-    citations_other_list = ACRelation.objects.filter(authority=authority,type_broad_controlled__in=['IH', 'PH'])
+
+    # Some authority entries are deleted. These should be hidden from public
+    #  view.
+    if authority.record_status == 'DL':
+        return Http404("No such Authority")
+
+    # If the user has been redirected from another Authority entry, this should
+    #  be indicated in the view.
+    redirect_from_id = request.GET.get('redirect_from')
+    if redirect_from_id:
+        redirect_from = Authority.objects.get(pk=redirect_from_id)
+    else:
+        redirect_from = None
+
+    # There are several authority entries that redirect to other entries,
+    #  usually because the former is a duplicate of the latter.
+    if authority.record_status == 'RD' and authority.redirect_to is not None:
+        redirect_kwargs = {'authority_id': authority.redirect_to.id}
+        base_url = reverse('authority', kwargs=redirect_kwargs)
+        redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
+        return HttpResponseRedirect(redirect_url)
+
+    template = loader.get_template('isisdata/authority.html')
+
+    citations_by_list = ACRelation.objects.filter(authority=authority,
+                                                  type_broad_controlled='PR')
+    citations_about_list = ACRelation.objects.filter(authority=authority,
+                                                     type_broad_controlled='SC')
+    citations_other_list = ACRelation.objects.filter(authority=authority,
+                                                     type_broad_controlled__in=['IH', 'PH'])
 
     citations_by_paginator = Paginator(citations_by_list, 30)
     citations_about_paginator = Paginator(citations_about_list, 30)
@@ -535,12 +565,21 @@ def authority(request, authority_id):
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
+        'redirect_from': redirect_from,
     })
     return HttpResponse(template.render(context))
 
 def citation(request, citation_id):
+    """
+    View for individual citation record.
+    """
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
+
+    # Some citations are deleted. These should be hidden from public view.
+    if citation.status_of_record == 'DL':
+        return Http404("No such Citation")
+
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
     subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])

@@ -12,6 +12,7 @@ sqs = SearchQuerySet().facet('authors'). \
         facet('type'). \
         facet('persons'). \
         facet('categories'). \
+        facet('subjects'). \
         facet('editors'). \
         facet('advisors'). \
         facet('translators'). \
@@ -29,7 +30,8 @@ sqs = SearchQuerySet().facet('authors'). \
         facet('classification_terms'). \
         facet('concepts'). \
         facet('creative_works'). \
-        facet('events')
+        facet('events'). \
+        facet('authority_type')
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),

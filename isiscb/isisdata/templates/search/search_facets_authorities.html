@@ -1,0 +1,31 @@
+{% load app_filters %}
+{% load metadata_filters %}
+{% if query and 'isisdata.authority' in models %}
+
+<div class="panel panel-default">
+  <div class="panel-heading"><h3 class="panel-title">Filters</h3></div>
+  <div class="panel-body">
+
+<h5>Authority Type</h5>
+  {% if facets.fields.authority_type %}
+        <ul class="selected_facets">
+          {% for auth_type in selected_facets.authority_type %}
+          {% with auth_type|create_facet_string:'authority_type' as encoded_auth_type %}
+          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ auth_type}}</a></li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+        <ul >
+          {# Provide only the top 7 authors #}
+          {% for auth_type in facets.fields.authority_type|slice:":7" %}
+          {% if "authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_type %}
+          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authority_type:{{ auth_type.0|urlencode }}">{{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+  {% else %}
+          <p>No authority type facets.</p>
+  {% endif %}
+</div>
+</div>
+{% endif %}
