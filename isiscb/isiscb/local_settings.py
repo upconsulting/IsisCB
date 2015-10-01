@@ -29,6 +29,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social.apps.django_app.default',
     'rest_framework',
     'simple_history',
     'isisdata',
@@ -67,6 +68,17 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
+)
 
 WSGI_APPLICATION = 'isiscb.wsgi.application'
 
@@ -140,3 +152,12 @@ CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 # social
 
 FACEBOOK_APP_ID = '1694252594140628'
+SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
+
+try:
+    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
+except ImportError:
+    SOCIAL_AUTH_TWITTER_SECRET = ''
+    SOCIAL_AUTH_FACEBOOK_SECRET = ''
