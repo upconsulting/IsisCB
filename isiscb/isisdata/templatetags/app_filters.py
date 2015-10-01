@@ -163,3 +163,11 @@ def get_doc_type_display(abbrev):
             return type[1]
 
     return abbrev
+
+@register.filter
+def get_authority_type_display(abbrev):
+    for type in Authority.TYPE_CHOICES:
+        if type[0].lower() == abbrev.lower():
+            return type[1]
+
+    return abbrev
