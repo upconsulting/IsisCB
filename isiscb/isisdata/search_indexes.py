@@ -57,7 +57,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
 
     def prepare_subjects(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
 
     def prepare_persons(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['PR'])]
@@ -125,6 +125,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name')
     description = indexes.CharField(model_attr='description', null=True)
     attributes = indexes.MultiValueField()
+    authority_type = indexes.CharField(model_attr='type_controlled', null=True)
 
 
     def get_model(self):

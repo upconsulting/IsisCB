@@ -24,21 +24,24 @@ class MyFacetedSearchForm(FacetedSearchForm):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
         # TODO: figure out why this field is defined post-hoc, and whether it
         #  matters.
-        scField = forms.MultipleChoiceField(choices=model_choices(),
-                                            required=False,
-                                            label=_('Search In'),
-                                            widget=forms.CheckboxSelectMultiple)
+        #scField = forms.MultipleChoiceField(choices=model_choices(),
+        #                                    required=False,
+        #                                    label=_('Search In'),
+        #                                    widget=forms.CheckboxSelectMultiple)
+        scField = forms.CharField(max_length=255, widget=forms.HiddenInput(), initial='isisdata.citation')
         self.fields['models'] = scField
-        self.fields['models'].initial = ['isisdata.authority',
-                                         'isisdata.citation']
+        #self.fields['models'].initial = ['isisdata.authority',
+        #                                  'isisdata.citation']
 
     def get_models(self):
         """Return an alphabetical list of model classes in the index."""
         search_models = []
 
         if self.is_valid():
-            for model in self.cleaned_data['models']:
-                search_models.append(models.get_model(*model.split('.')))
+            #for model in self.cleaned_data['models']:
+            #search_models.append(models.get_model(*model.split('.')))
+            # if we want the option to select both indexes at the same time we might need above back
+            search_models.append(models.get_model(*self.cleaned_data['models'].split('.')))
 
         return search_models
 
