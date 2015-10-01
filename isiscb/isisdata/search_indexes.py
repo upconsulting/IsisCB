@@ -57,7 +57,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
 
     def prepare_subjects(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
 
     def prepare_persons(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['PR'])]
