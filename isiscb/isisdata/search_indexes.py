@@ -10,6 +10,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='description', null=True)
 
     type = indexes.CharField(model_attr='type_controlled', null=True)
+    publication_date = indexes.MultiValueField(faceted=True)
 
     abstract = indexes.CharField(model_attr='abstract', null=True)
     edition_details = indexes.CharField(model_attr='edition_details', null=True)
@@ -39,12 +40,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     creative_works = indexes.MultiValueField(faceted=True)
     events = indexes.MultiValueField(faceted=True)
 
+
+
     def get_model(self):
         return Citation
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.all()
+
+    def prepare_publication_date(self, obj):
+        return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
