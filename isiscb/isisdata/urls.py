@@ -10,6 +10,7 @@ from . import views
 
 sqs = SearchQuerySet().facet('authors'). \
         facet('type'). \
+        facet('publication_date'). \
         facet('persons'). \
         facet('categories'). \
         facet('subjects'). \
