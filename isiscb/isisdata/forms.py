@@ -47,4 +47,4 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
     def search(self):
         sqs = super(MyFacetedSearchForm, self).search()
-        return sqs.models(*self.get_models())
+        return sqs.models(*self.get_models()).order_by('title')

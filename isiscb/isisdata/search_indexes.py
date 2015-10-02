@@ -6,11 +6,12 @@ from isisdata.models import Citation, Authority
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
-    title = indexes.CharField(model_attr='title', null=True)
+    title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
     description = indexes.CharField(model_attr='description', null=True)
 
     type = indexes.CharField(model_attr='type_controlled', null=True)
     publication_date = indexes.MultiValueField(faceted=True)
+    publication_date_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
 
     abstract = indexes.CharField(model_attr='abstract', null=True)
     edition_details = indexes.CharField(model_attr='edition_details', null=True)
@@ -18,6 +19,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True)
     authors = indexes.MultiValueField(faceted=True)
+    author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
+
     subjects = indexes.MultiValueField(faceted=True)
     persons = indexes.MultiValueField(faceted=True)
     categories = indexes.MultiValueField(faceted=True)
@@ -52,6 +55,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_publication_date(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
 
+    def prepare_publication_date_for_sort(self, obj):
+        dates = obj.attributes.filter(type_controlled__name='PublicationDate')
+        if not dates:
+            return ''
+
+        date = dates[0]
+        if not date:
+            return ''
+
+        return date.value_freeform 
+
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
         return [acrel.authority.name for acrel in obj.acrelation_set.all()]
@@ -61,6 +75,16 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_authors(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
+
+    def prepare_author_for_sort(self, obj):
+        authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+        if not authors:
+            return ''
+        author = authors[0]
+        if not author:
+            return ''
+
+        return author.authority.name;
 
     def prepare_subjects(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
