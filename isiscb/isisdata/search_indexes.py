@@ -72,7 +72,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         date = dates[0]
         if not date:
             return ''
-
+            
         return date.value_freeform
 
     def prepare_authorities(self, obj):

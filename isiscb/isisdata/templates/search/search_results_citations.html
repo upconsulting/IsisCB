@@ -77,7 +77,7 @@
           </li>
           {% else %}
           <li class="disabled">
-            <a href="{{ request.get_full_path|set_page:page.page.number }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
