@@ -3,10 +3,13 @@ from haystack import indexes
 from django.forms import MultiValueField
 from isisdata.models import Citation, Authority
 
+import bleach
+
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
+    title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     description = indexes.CharField(model_attr='description', null=True)
 
     type = indexes.CharField(model_attr='type_controlled', null=True)
@@ -52,6 +55,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.all()
 
+    def prepare_type(self, obj):
+        return obj.get_type_controlled_display()
+
+    def prepare_title_for_sort(self, obj):
+        return bleach.clean(obj.title, tags=[], strip=True)
+
     def prepare_publication_date(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
 
@@ -63,8 +72,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         date = dates[0]
         if not date:
             return ''
-
-        return date.value_freeform 
+            
+        return date.value_freeform
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
@@ -167,3 +176,6 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_attributes(self, obj):
         return [attr.value_freeform for attr in obj.attributes.all()]
+
+    def prepare_authority_type(self, obj):
+        return obj.get_type_controlled_display()

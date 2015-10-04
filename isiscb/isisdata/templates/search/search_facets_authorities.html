@@ -11,7 +11,7 @@
         <ul class="selected_facets">
           {% for auth_type in selected_facets.authority_type %}
           {% with auth_type|create_facet_string:'authority_type' as encoded_auth_type %}
-          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ auth_type}}</a></li>
+          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ auth_type }}</a></li>
           {% endwith %}
           {% endfor %}
         </ul>

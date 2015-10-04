@@ -29,7 +29,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
         #                                    label=_('Search In'),
         #                                    widget=forms.CheckboxSelectMultiple)
         scField = forms.CharField(max_length=255, widget=forms.HiddenInput(), initial='isisdata.citation')
+        sort_order = forms.CharField(required=False, widget=forms.HiddenInput)
+
         self.fields['models'] = scField
+        self.fields['sort_order'] = sort_order
+        self.fields['sort_order'].initial = 'title_for_sort'
+
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
 
@@ -47,4 +52,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
     def search(self):
         sqs = super(MyFacetedSearchForm, self).search()
-        return sqs.models(*self.get_models()).order_by('title')
+        sort_order = self.cleaned_data.get('sort_order', 'title_for_sort')
+        if not sort_order and self.cleaned_data['models'] == 'isisdata.citation':
+            sort_order = 'title_for_sort'
+        if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
+            sort_order = 'name'
+        return sqs.models(*self.get_models()).order_by(sort_order)

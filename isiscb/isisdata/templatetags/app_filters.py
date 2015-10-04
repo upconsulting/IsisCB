@@ -171,3 +171,15 @@ def get_authority_type_display(abbrev):
             return type[1]
 
     return abbrev
+
+@register.filter
+def set_sort_order(link, sort_order):
+    if not "sort_order" in link:
+        return link + "&sort_order=" + sort_order
+    return re.sub(r"&sort_order=[a-z_]+&?", "&sort_order=" + sort_order + "&", link)
+
+@register.filter
+def set_page(link, page_number):
+    if not "page=" in link:
+        return link + "&page=" + str(page_number)
+    return re.sub(r"&page=[0-9]+&?", "&page=" + str(page_number) + "&", link)
