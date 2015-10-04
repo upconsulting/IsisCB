@@ -50,11 +50,19 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return search_models
 
+    def get_sort_order(self):
+        sort_order = 'text'
+
+        if self.is_valid():
+            sort_order = self.cleaned_data.get('sort_order', 'title_for_sort')
+            if not sort_order and self.cleaned_data['models'] == 'isisdata.citation':
+                sort_order = 'title_for_sort'
+            if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
+                sort_order = 'name'
+
+        return sort_order
+
     def search(self):
         sqs = super(MyFacetedSearchForm, self).search()
-        sort_order = self.cleaned_data.get('sort_order', 'title_for_sort')
-        if not sort_order and self.cleaned_data['models'] == 'isisdata.citation':
-            sort_order = 'title_for_sort'
-        if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
-            sort_order = 'name'
+        sort_order = self.get_sort_order()
         return sqs.models(*self.get_models()).order_by(sort_order)
