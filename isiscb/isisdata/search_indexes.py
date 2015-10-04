@@ -1,6 +1,7 @@
 import datetime
 from haystack import indexes
 from django.forms import MultiValueField
+from django.db.models import Prefetch
 from isisdata.models import Citation, Authority
 
 import bleach
@@ -51,6 +52,22 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Citation
 
+    def load_all_queryset(self):
+        """
+        Add pre-loading of related fields using select_related and
+        prefetch_related.
+        """
+        return Citation.objects.all().select_related(
+                'acrelation_set__authority__name',
+                'acrelation_set__authority__type_controlled',
+                'acrelation_set__type_controlled'
+            ).prefetch_related(
+                Prefetch("attributes",
+                         queryset=AttributeType.objects.select_related(
+                            "type_controlled__name",
+                            "value_freeform"))
+            )
+
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.all()
@@ -72,7 +89,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         date = dates[0]
         if not date:
             return ''
-            
+
         return date.value_freeform
 
     def prepare_authorities(self, obj):
@@ -169,6 +186,17 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def get_model(self):
         return Authority
+
+    def load_all_queryset(self):
+        """
+        Add pre-loading of related fields using select_related and
+        prefetch_related.
+        """
+        return Authority.objects.all().prefetch_related(
+                Prefetch("attributes",
+                         queryset=AttributeType.objects.select_related(
+                            "value_freeform"))
+            )
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
