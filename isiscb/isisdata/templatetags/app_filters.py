@@ -183,3 +183,13 @@ def set_page(link, page_number):
     if not "page=" in link:
         return link + "&page=" + str(page_number)
     return re.sub(r"&page=[0-9]+&?", "&page=" + str(page_number) + "&", link)
+
+@register.filter
+def get_current_sort_order(sort_field):
+    if sort_field == 'title_for_sort':
+        return "Title"
+    if sort_field == 'author_for_sort':
+        return "First Author"
+    if sort_field == 'publication_date_for_sort':
+        return "Publication Date"
+    return sort_field
