@@ -12,7 +12,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     description = indexes.CharField(model_attr='description', null=True)
 
-    type = indexes.CharField(model_attr='type_controlled', null=True)
+    type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True)
     publication_date_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
 
@@ -72,7 +72,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         date = dates[0]
         if not date:
             return ''
-            
+
         return date.value_freeform
 
     def prepare_authorities(self, obj):
@@ -164,8 +164,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name')
     description = indexes.CharField(model_attr='description', null=True)
     attributes = indexes.MultiValueField()
-    authority_type = indexes.CharField(model_attr='type_controlled', null=True)
-
+    authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
 
     def get_model(self):
         return Authority
@@ -178,4 +177,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return [attr.value_freeform for attr in obj.attributes.all()]
 
     def prepare_authority_type(self, obj):
+        return obj.get_type_controlled_display()
+
+    def prepare_xtype(self, obj):
         return obj.get_type_controlled_display()
