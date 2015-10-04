@@ -590,9 +590,11 @@ def citation(request, citation_id):
     related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC')
     related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA')
     related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA')
-    related_citations_ro = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RO')
+
+    query = Q(subject_id=citation_id, type_controlled='RO') | Q(object_id=citation_id, type_controlled='RB')
+    related_citations_ro = CCRelation.objects.filter(query)
+
     related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB')
-    related_citations_inv_rb = CCRelation.objects.filter(object_id=citation_id, type_controlled='RB')
     related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE')
     related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE')
     related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS')
@@ -619,7 +621,6 @@ def citation(request, citation_id):
         'related_citations_ic': related_citations_ic,
         'related_citations_inv_ic': related_citations_inv_ic,
         'related_citations_rb': related_citations_rb,
-        'related_citations_inv_rb': related_citations_inv_rb,
         'related_citations_isa': related_citations_isa,
         'related_citations_inv_isa': related_citations_inv_isa,
         'related_citations_ro': related_citations_ro,
