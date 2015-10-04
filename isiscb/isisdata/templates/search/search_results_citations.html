@@ -2,9 +2,27 @@
 {% load metadata_filters %}
 
 {% if query and 'isisdata.citation' in models %}
-
+<div class="row">
+  <div class="col-md-8">
     <h3>Search Results</h3>
     <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
+  </div>
+  <div class="col-md-4 menuContainer">
+    <div class="dropdown pull-right">
+      <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+        Sort by
+          <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'title_for_sort' }}">Title</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'author_for_sort' }}">First Author</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'publication_date_for_sort' }}">Publication Date</a></li>
+      </ul>
+    </div>
+    <input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">
+  </div>
+</div>
 
     {% for result in page.object_list %}
     <p>
@@ -33,34 +51,33 @@
     <nav>
       <ul class="pagination">
         <li class="disabled"><a>Go to page:</a></li>
-
           {% if page.has_previous %}
           <li>
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.previous_page_number }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:page.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           {% else %}
           <li class="disabled">
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           {% endif %}
           {% if page.has_previous or page.has_next %}
           {% for p in page.paginator.page_range %}
-              <li {% if page.number == p %} class="active" {% endif %}><a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ forloop.counter }}">{{ p }}</a></li>
+              <li {% if page.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:forloop.counter }}">{{ p }}</a></li>
           {% endfor %}
           {% endif %}
           {% if page.has_next %}
           <li>
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.next_page_number }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:page.next_page_number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
           {% else %}
           <li class="disabled">
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page={{ page.number }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:page.page.number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>

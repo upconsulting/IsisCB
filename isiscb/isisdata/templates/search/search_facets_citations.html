@@ -72,7 +72,7 @@
   {% if facets.fields.geographics %}
     <ul class="selected_facets">
       {% for geographic in selected_facets.geographics_exact %}
-      {% with time_period|create_facet_string:'geographics_exact' as encoded_geographic %}
+      {% with geographic|create_facet_string:'geographics_exact' as encoded_geographic %}
       <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{geographic}}</a></li>
       {% endwith %}
       {% endfor %}
