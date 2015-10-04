@@ -78,13 +78,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="results-info">Showing {{ citations_by.start_index }} to {{ citations_by.end_index }} of {{ citations_by.paginator.count }}.</div>
 
       {% for rel_citation in citations_by %}
-        <p>
-          <span class="glyphicon glyphicon-book"></span>
-          {% if rel_citation.citation|get_authors %}
-          {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
-          {% endif %}
-          <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a></li>
-        </p>
+        {% with rel_citation.citation as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
       {% endfor %}
       {% if citations_by.has_previous or citations_by.has_next %}
       <nav>
@@ -131,13 +127,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <div class="results-info">Showing {{ citations_about.start_index }} to {{ citations_about.end_index }} of {{ citations_about.paginator.count }}.</div>
 
       {% for rel_citation in citations_about %}
-        <p>
-          <span class="glyphicon glyphicon-book"></span>
-          {% if rel_citation.citation|get_authors %}
-          {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
-          {% endif %}
-          <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a></li>
-        </p>
+        {% with rel_citation.citation as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
       {% endfor %}
 
       {% if citations_about.has_previous or citations_about.has_next %}
@@ -180,16 +172,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if citations_other %}
-    <h4>Resources about {{ authority.name }}</h4>
+    <h4>Resources related to {{ authority.name }}</h4>
 
       {% for rel_citation in citations_other %}
-          <p>
-            <span class="glyphicon glyphicon-book"></span>
-            {% if rel_citation.citation|get_authors %}
-            {% for author in rel_citation.citation|get_authors %} {{ author.authority.name }};{% endfor %}<br>
-            {% endif %}
-            <a href="{% url 'citation' rel_citation.citation.id %}">{{ rel_citation.citation|get_title }}</a>
-          </p>
+        {% with rel_citation.citation as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
       {% endfor %}
 
       {% if citations_other.has_previous or citations_other.has_next %}

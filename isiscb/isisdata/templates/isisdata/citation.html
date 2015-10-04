@@ -187,18 +187,16 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% if related_citations_ro or related_citations_inv_rb %}
     <h4>Review Of</h4>
       {% for cc_rel in related_citations_ro %}
+      {% if cc_rel.subject.id == citation_id %}
         {% with cc_rel.object as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
-      {% endfor %}
-
-      {% if related_citations_inv_rb %}
-        {% for cc_rel in related_citations_inv_rb %}
-          {% with cc_rel.subject as citation_object %}
-            {% include "isisdata/citation_entry.html" %}
-          {% endwith %}
-        {% endfor %}
+      {% else %}
+        {% with cc_rel.subject as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
       {% endif %}
+      {% endfor %}
     {% endif %}
 
 <!-- Includes Chapter -->
