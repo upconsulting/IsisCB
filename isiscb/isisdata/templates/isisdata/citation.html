@@ -115,7 +115,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% for attribute in citation.attributes.all %}
-    <p><strong>{{ attribute.type_controlled }}:</strong> {{ attribute.value_freeform }}</p>
+    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
     {% endfor %}
 
     {% if citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language.all|length > 0  %}

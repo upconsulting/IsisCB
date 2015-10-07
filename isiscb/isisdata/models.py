@@ -60,6 +60,23 @@ class Value(models.Model):
             return getattr(self, cclass_name)
         return None
 
+    @property
+    def display(self):
+        """
+        Provides a rendered unicode representation of the value.
+        """
+        child = self.get_child_class()
+        if hasattr(child, 'render'):
+            return child.render()
+        return self.__unicode__()
+
+    def render(self):
+        """
+        Override this method in a subclass to control how it is rendered for
+        display in views.
+        """
+        return unicode(self.value)
+
     def cvalue(self):
         cclass = self.get_child_class()
         if cclass is not None and cclass != '':
@@ -917,6 +934,10 @@ class LinkedDataType(models.Model):
 
 class AttributeType(models.Model):
     name = models.CharField(max_length=255)
+    display_name = models.CharField(max_length=255, blank=True, null=True,
+                                    help_text="""
+    The "name" attribute is not always suitable for display in public views.
+    This field provides the name to be displayed to users.""")
 
     value_content_type = models.ForeignKey(ContentType,
                                            limit_choices_to=VALUETYPES,
