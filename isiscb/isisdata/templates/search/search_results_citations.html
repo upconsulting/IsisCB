@@ -8,7 +8,13 @@
     <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
   </div>
   <div class="col-md-4 menuContainer">
+
     <div class="dropdown pull-right">
+      {% if sort_order_dir == 'decend' %}
+      <a href="{{ request.get_full_path|set_sort_direction:'accend' }}" title="Current sort order: decending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      {% else %}
+      <a href="{{ request.get_full_path|set_sort_direction:'decend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
         Sort by: {{ sort_order|get_current_sort_order }}
           <span class="caret"></span>
@@ -18,6 +24,7 @@
         <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'title_for_sort' }}">Title</a></li>
         <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'author_for_sort' }}">First Author</a></li>
         <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'publication_date_for_sort' }}">Publication Date</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'_score' }}">Relevance</a></li>
       </ul>
     </div>
     <input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">
