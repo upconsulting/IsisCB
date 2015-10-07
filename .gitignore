@@ -59,3 +59,4 @@ target/
 secrets.py
 
 db.sqlite3
+server_start
