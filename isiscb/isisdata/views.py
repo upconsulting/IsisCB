@@ -672,6 +672,7 @@ class IsisSearchView(FacetedSearchView):
         extra['facets'] = self.results.facet_counts()
         extra['models'] = self.request.GET.getlist('models')
         extra['sort_order'] = self.request.GET.get('sort_order')
+        extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
         extra['count'] = len(self.results)
 
         facet_map = {}

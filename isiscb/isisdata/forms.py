@@ -30,10 +30,13 @@ class MyFacetedSearchForm(FacetedSearchForm):
         #                                    widget=forms.CheckboxSelectMultiple)
         scField = forms.CharField(max_length=255, widget=forms.HiddenInput(), initial='isisdata.citation')
         sort_order = forms.CharField(required=False, widget=forms.HiddenInput)
+        sort_order_dir = forms.CharField(required=False, widget=forms.HiddenInput)
 
         self.fields['models'] = scField
         self.fields['sort_order'] = sort_order
         self.fields['sort_order'].initial = 'title_for_sort'
+        self.fields['sort_order_dir'] = sort_order_dir
+        self.fields['sort_order_dir'].initial = 'accend'
 
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
@@ -62,7 +65,22 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sort_order
 
+    def get_sort_order_direction(self):
+        sort_order_dir = 'accend'
+
+        if self.is_valid():
+            sort_order_dir = self.cleaned_data.get('sort_order_dir', 'accend')
+            if not sort_order_dir and self.cleaned_data['models'] == 'isisdata.citation':
+                sort_order_dir = 'accend'
+
+        return sort_order_dir
+
     def search(self):
         sqs = super(MyFacetedSearchForm, self).search()
         sort_order = self.get_sort_order()
+        sort_order_dir = self.get_sort_order_direction()
+
+        if sort_order_dir == 'decend':
+            sort_order = "-" + sort_order
+
         return sqs.models(*self.get_models()).order_by(sort_order)

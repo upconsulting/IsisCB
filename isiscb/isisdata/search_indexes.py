@@ -3,6 +3,7 @@ from haystack import indexes
 from django.forms import MultiValueField
 from django.db.models import Prefetch
 from isisdata.models import Citation, Authority
+from isisdata.templatetags.app_filters import *
 
 import bleach
 
@@ -76,7 +77,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.get_type_controlled_display()
 
     def prepare_title_for_sort(self, obj):
-        return bleach.clean(obj.title, tags=[], strip=True)
+        return bleach.clean(get_title(obj), tags=[], strip=True)
 
     def prepare_publication_date(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
