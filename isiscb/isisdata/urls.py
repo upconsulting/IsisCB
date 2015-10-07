@@ -36,10 +36,19 @@ sqs = SearchQuerySet().facet('authors'). \
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
-    url(r'^$', IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs), name='index'),
+    url(r'^$',
+        IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
+        name='index'),
     url(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
-    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
-    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
-    url(r'^search/', IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs), name='haystack_search'),
+    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$',
+        views.authority,
+        name='authority'),
+    url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$',
+        views.citation,
+        name='citation'),
+    url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
+    url(r'^search/',
+        IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
+        name='haystack_search'),
     url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
 ]

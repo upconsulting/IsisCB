@@ -486,6 +486,20 @@ def index(request, obj_id=None):
     #})
     #return HttpResponse(template.render(context))
 
+
+def api_redirect(request, base_view=None, obj_id=None):
+    """
+    When '.json' is appended to a citation or authority URL, it should redirect
+    to the REST API view for that resource.
+
+    TODO: implement redirect for search results.
+    """
+
+    view_name = '{model}-detail'.format(model=base_view)
+    rest_view = reverse(view_name, args=[obj_id], request=request)
+    return HttpResponseRedirect(rest_view)
+
+
 def authority(request, authority_id):
     """
     View for individual Authority entries.
