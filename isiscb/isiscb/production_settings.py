@@ -19,7 +19,7 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -96,25 +96,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'isiscb.wsgi.application'
 
-# Database
-POSTGRESQL_PASSWORD = os.environ.get('POSTGRESQL_PASSWORD')
-POSTGRESQL_USER = os.environ.get('POSTGRESQL_USER')
-POSTGRESQL_DATABASE = os.environ.get('POSTGRESQL_DATABASE')
-POSTGRESQL_HOST = os.environ.get('POSTGRESQL_HOST')
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': POSTGRESQL_DATABASE,
-        'USER': POSTGRESQL_USER,
-        'PASSWORD': POSTGRESQL_PASSWORD,
-        'HOST': POSTGRESQL_HOST,
-        'PORT': '5432',
+        'NAME': os.environ['RDS_DB_NAME'],
+        'USER': os.environ['RDS_USERNAME'],
+        'PASSWORD': os.environ['RDS_PASSWORD'],
+        'HOST': os.environ['RDS_HOSTNAME'],
+        'PORT': os.environ['RDS_PORT'],
     }
 }
 
-ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
-ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX')
+ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
+ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
 
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -144,9 +138,9 @@ REST_FRAMEWORK = {
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME')
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+AWS_MEDIA_BUCKET_NAME = os.environ['AWS_MEDIA_BUCKET_NAME']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
@@ -164,23 +158,23 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = os.environ.get('DJANGO_DOMAIN')
-URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX')
+DOMAIN = os.environ['DJANGO_DOMAIN']
+URI_PREFIX = os.environ['DJANGO_URI_PREFIX']
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = os.environ.get('SMTP_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
-EMAIL_HOST = os.environ.get('SMTP_HOST')
-SMTP_EMAIL = os.environ.get('SMTP_EMAIL')
+EMAIL_HOST_USER = os.environ['SMTP_USER']
+EMAIL_HOST_PASSWORD = os.environ['SMTP_PASSWORD']
+EMAIL_HOST = os.environ['SMTP_HOST']
+SMTP_EMAIL = os.environ['SMTP_EMAIL']
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
 # TODO: consolidate these settings.
-FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
+FACEBOOK_APP_ID = os.environ['FACEBOOK_APP_ID']
 SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY')
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET')
-SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET')
+SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
+SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
