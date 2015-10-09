@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         if not User.objects.filter(username="admin").exists():
             password = os.environ.get('DJANGO_ADMIN_PASSWORD')
