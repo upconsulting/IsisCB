@@ -100,14 +100,14 @@ WSGI_APPLICATION = 'isiscb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-from secrets import POSTGRESQL_PASSWORD
+# from secrets import POSTGRESQL_PASSWORD
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'isiscb',
         'USER': 'upconsulting',
-        'PASSWORD': POSTGRESQL_PASSWORD,
+        'PASSWORD': '',
         'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
         'PORT': '5432',
     }
@@ -144,9 +144,8 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-# secrets.py should set the AWS_SECRET_ACCESS_KEY
-from secrets import AWS_SECRET_ACCESS_KEY
-
+# # secrets.py should set the AWS_SECRET_ACCESS_KEY
+# from secrets import AWS_SECRET_ACCESS_KEY
 AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
 AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
 AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
@@ -172,13 +171,13 @@ URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-try:
-    from secrets import SMTP_USER, SMTP_PASSWORD
-    EMAIL_HOST_USER = SMTP_USER
-    EMAIL_HOST_PASSWORD = SMTP_PASSWORD
-except ImportError:
-    EMAIL_HOST_USER = ''
-    EMAIL_HOST_PASSWORD =''
+# try:
+#     from secrets import SMTP_USER, SMTP_PASSWORD
+#     EMAIL_HOST_USER = SMTP_USER
+#     EMAIL_HOST_PASSWORD = SMTP_PASSWORD
+# except ImportError:
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD =''
 EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 SMTP_EMAIL = 'info@aplacecalledup.com'
 
@@ -193,8 +192,8 @@ SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
 
-try:
-    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
-except ImportError:
-    SOCIAL_AUTH_TWITTER_SECRET = ''
-    SOCIAL_AUTH_FACEBOOK_SECRET = ''
+# try:
+#     from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
+# except ImportError:
+SOCIAL_AUTH_TWITTER_SECRET = ''
+SOCIAL_AUTH_FACEBOOK_SECRET = ''
