@@ -25,8 +25,8 @@ SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'isiscb-staging.elasticbeanstalk.com/',
-    'isiscb.elasticbeanstalk.com/',
+    'isiscb-staging.elasticbeanstalk.com',
+    'isiscb.elasticbeanstalk.com',
     '.isiscb.org',
 ]
 
