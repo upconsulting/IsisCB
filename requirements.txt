@@ -4,7 +4,6 @@ Django==1.8.3
 django-autocomplete-light==2.2.5
 django-extensions==1.5.5
 django-haystack==2.4.0
--e git+git://github.com/ubernostrum/django-registration.git#egg=django-registration
 django-simple-captcha==0.4.6
 django-simple-history==1.6.3
 django-storages==1.1.8
@@ -20,7 +19,6 @@ psycopg2==2.6.1
 pydot==1.0.2
 pygraphviz==1.3rc2
 PyJWT==1.4.0
-pyodbc==3.0.10
 pyparsing==1.5.7
 python-openid==2.2.5
 python-social-auth==0.2.13
