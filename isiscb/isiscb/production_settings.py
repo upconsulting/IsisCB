@@ -19,10 +19,10 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -96,31 +96,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'isiscb.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-from secrets import POSTGRESQL_PASSWORD
+POSTGRESQL_PASSWORD = os.environ.get('POSTGRESQL_PASSWORD')
+POSTGRESQL_USER = os.environ.get('POSTGRESQL_USER')
+POSTGRESQL_DATABASE = os.environ.get('POSTGRESQL_DATABASE')
+POSTGRESQL_HOST = os.environ.get('POSTGRESQL_HOST')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb',
-        'USER': 'upconsulting',
+        'NAME': POSTGRESQL_DATABASE,
+        'USER': POSTGRESQL_USER,
         'PASSWORD': POSTGRESQL_PASSWORD,
-        'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
+        'HOST': POSTGRESQL_HOST,
         'PORT': '5432',
     }
 }
 
+ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST')
+ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX')
+
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'ec2-54-69-38-140.us-west-2.compute.amazonaws.com:9200/',
-        'INDEX_NAME': 'haystack',
+        'URL': ELASTICSEARCH_HOST,
+        'INDEX_NAME': ELASTICSEARCH_INDEX,
     },
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -142,14 +144,9 @@ REST_FRAMEWORK = {
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-
-# secrets.py should set the AWS_SECRET_ACCESS_KEY
-from secrets import AWS_SECRET_ACCESS_KEY
-
-AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
-AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
-AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY')
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
@@ -167,34 +164,23 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = 'isiscb-develop.aplacecalledup.com'
-URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+DOMAIN = os.environ.get('DJANGO_DOMAIN')
+URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-try:
-    from secrets import SMTP_USER, SMTP_PASSWORD
-    EMAIL_HOST_USER = SMTP_USER
-    EMAIL_HOST_PASSWORD = SMTP_PASSWORD
-except ImportError:
-    EMAIL_HOST_USER = ''
-    EMAIL_HOST_PASSWORD =''
-EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
-SMTP_EMAIL = 'info@aplacecalledup.com'
+EMAIL_HOST_USER = os.environ.get('SMTP_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD')
+EMAIL_HOST = os.environ.get('SMTP_HOST')
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
-
-# social
-
-FACEBOOK_APP_ID = '1694252594140628'
+# TODO: consolidate these settings.
+FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
 SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
-
-try:
-    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
-except ImportError:
-    SOCIAL_AUTH_TWITTER_SECRET = ''
-    SOCIAL_AUTH_FACEBOOK_SECRET = ''
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET')
