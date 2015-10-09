@@ -1,0 +1,10 @@
+branch-defaults:
+  master:
+    environment: IsisCB-staging
+global:
+  application_name: IsisCB
+  default_ec2_keyname: isiscb-eb
+  default_platform: Python 2.7
+  default_region: us-west-2
+  profile: eb-cli
+  sc: git
