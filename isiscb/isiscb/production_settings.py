@@ -24,7 +24,11 @@ SECRET_KEY = os.environ['SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'isiscb-staging.elasticbeanstalk.com/',
+    'isiscb.elasticbeanstalk.com/',
+    '.isiscb.org',
+]
 
 MIGRATION_MODULES = {
     'isisdata': 'isisdata.migrations'
