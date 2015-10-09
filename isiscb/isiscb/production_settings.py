@@ -144,10 +144,8 @@ AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
-STATIC_ROOT = os.path.join(
- os.path.dirname(
-  os.path.dirname(
-   os.path.abspath(__file__))), 'static')
+STATIC_ROOT = '/static/'
+MEDIA_ROOT = '/media/'
 
 STATICFILES_DIRS = ['isisdata/static']
 STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
