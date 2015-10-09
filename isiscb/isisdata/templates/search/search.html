@@ -1,0 +1,111 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load metadata_filters %}
+{% block title %}Search{% endblock %}
+
+{% block extra_head %}
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
+
+<script type="text/javascript">
+//# sourceURL=dynamicScript.js
+$(document).ready(function() {
+  if ('{{models.0}}' == 'isisdata.citation') {
+    $('#search_tabs li:eq(0) a').tab('show')
+  }
+  if ('{{models.0}}' == 'isisdata.authority') {
+    $('#search_tabs li:eq(1) a').tab('show')
+  }
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="row topnav-main">
+  <div class="col-sm-3 col-md-2 topnav">
+    <div class="menu">
+      <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+
+    </div>
+    </div>
+    <div class="col-sm-9 col-md-10 topnav">
+      <h2>Explore the IsisCB</h2>
+
+  </div>
+
+
+</div>
+<div class="row">
+<div class="col-sm-12 col-md-12">
+
+
+  <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
+    <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Bibiographic Records</a></li>
+    <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authority Records</a></li>
+    <!--<li role="presentation"><a href="#">Messages</a></li>-->
+  </ul>
+
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="citations">
+
+
+        <form method="get" action=".">
+            <label class="control-label" for="q">
+                Search bibliographics records for:
+              </label>
+              <div class="input-group">
+                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+                <span class="input-group-btn">
+                  <button class="btn btn-default" type="submit">Search!</button>
+                </span>
+              </div>
+              <div>
+                <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.citation">
+              </div>
+
+              <div class="row space-top">
+              <div class="col-sm-3 col-md-2 ">
+                {% include "search/search_facets_citations.html" %}
+              </div>
+
+              <div class="col-sm-9 col-md-10 ">
+                {% include "search/search_results_citations.html" %}
+              </div>
+            </div>
+        </form>
+      </div>
+
+    <div role="tabpanel" class="tab-pane" id="authorities">
+      <form method="get" action=".">
+          <label class="control-label" for="q">
+            Search authority records for:
+           </label>
+           <div class="input-group">
+              <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="submit">Search!</button>
+              </span>
+           </div>
+          <div>
+            <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.authority">
+          </div>
+          <div class="row space-top">
+              <div class="col-sm-3 col-md-2">
+                {% include "search/search_facets_authorities.html" %}
+              </div>
+              <div class="col-sm-9 col-md-10">
+                {% include "search/search_results_authorities.html" %}
+              </div>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+  </div>
+{% endblock %}

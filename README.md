@@ -1,4 +1,9 @@
-# IsisCB
+# IsisCB [![Build Status](https://travis-ci.org/upconsulting/IsisCB.svg?branch=develop)](https://travis-ci.org/upconsulting/IsisCB)
+
+## License
+
+This software is licensed under the terms of the The MIT License. For more
+information, see ``LICENSE.md`` in this repository.
 
 ## Deployment
 

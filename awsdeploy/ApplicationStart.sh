@@ -5,6 +5,8 @@ export WORKON_HOME=$HOME/.virtualenvs
 source /usr/local/bin/virtualenvwrapper.sh
 
 workon isiscb
+touch /home/ec2-user/isiscb/isiscb/server_start
+chmod 666 /home/ec2-user/isiscb/isiscb/server_start
 
 # Supervisor manages gunicorn. See awsdeploy/supervisor.conf.
 supervisorctl -c /etc/supervisor/conf.d/supervisor.conf start isiscb

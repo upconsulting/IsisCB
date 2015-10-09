@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- This grammar has been deprecated - use FMPXMLRESULT instead -->
+<FMPDSORESULT xmlns="http://www.filemaker.com/fmpdsoresult">
+	<ERRORCODE>0</ERRORCODE>
+	<DATABASE>IsisCBData.fmp12</DATABASE>
+	<LAYOUT></LAYOUT>
+	<ROW>
+		<ID>CBA000000001</ID>
+		<Name>Test Thing</Name>
+		<Type.controlled>Institution</Type.controlled>
+		<Description>This is a description of an authority record.</Description>
+		<ClassificationSystem>WELDON THESAURUS TERMS (2002-PRESENT)</ClassificationSystem>
+		<ClassificationCode>123</ClassificationCode>
+		<ClassificationHierarchy>Hmmm</ClassificationHierarchy>
+		<NotesOnContent>These notes are about content</NotesOnContent>
+		<NotesOnProvenance>This authority had to come from somewhere!</NotesOnProvenance>
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+		<RecordAction>ExternalProof</RecordAction>
+		<RecordStatus>ACTIVE</RecordStatus>	
+		<RecordHistory>This is the history</RecordHistory>
+	</ROW>	
+	<ROW>
+		<ID>CBA000000002</ID>
+		<Name>Test Thing2</Name>
+		<Type.controlled>Person</Type.controlled>
+		<Description>This is a description of an authority record.</Description>
+		<ClassificationSystem>WELDON THESAURUS TERMS (2002-PRESENT)</ClassificationSystem>
+		<ClassificationCode>123</ClassificationCode>
+		<ClassificationHierarchy>Hmmm</ClassificationHierarchy>
+		<NotesOnContent>These notes are about content</NotesOnContent>
+		<NotesOnProvenance>This authority had to come from somewhere!</NotesOnProvenance>
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+		<RecordAction>ExternalProof</RecordAction>
+		<RecordStatus>ACTIVE</RecordStatus>	
+		<RecordHistory>This is the history</RecordHistory>
+		<PersonalNameFirst>Erick</PersonalNameFirst>
+		<PersonalNameLast>Peirson</PersonalNameLast>
+		<PersonalNameSuffix>PhD</PersonalNameSuffix>
+	</ROW>	
+	<ROW>
+		<ID>CBA000000003</ID>
+		<Name>Test Thing</Name>
+		<Type.controlled>Institution</Type.controlled>
+		<Description>This is a description of an authority record.</Description>
+		<ClassificationSystem>WELDON THESAURUS TERMS (2002-PRESENT)</ClassificationSystem>
+		<ClassificationCode>123</ClassificationCode>
+		<ClassificationHierarchy>Hmmm</ClassificationHierarchy>
+		<NotesOnContent>These notes are about content</NotesOnContent>
+		<NotesOnProvenance>This authority had to come from somewhere!</NotesOnProvenance>
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+		<RecordAction>ExternalProof</RecordAction>
+		<RecordStatus>DUPLICATE</RecordStatus>	
+		<RecordHistory>This is the history</RecordHistory>
+		<RedirectTo>CBA000000001</RedirectTo>
+	</ROW>			
+</FMPDSORESULT>

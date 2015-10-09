@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- This grammar has been deprecated - use FMPXMLRESULT instead -->
+<FMPDSORESULT xmlns="http://www.filemaker.com/fmpdsoresult">
+	<ERRORCODE>0</ERRORCODE>
+	<DATABASE>IsisCBData.fmp12</DATABASE>
+	<LAYOUT></LAYOUT>
+	<ROW>
+		<ID>ACR000000001</ID>
+		<ID.Authority.link>CBA000000002</ID.Authority.link>
+		<ID.Citation.link>CBC000000002</ID.Citation.link>
+		<description>This is a description of an ac relationship.</description>
+		<Name>Test relation 1</Name>
+		
+		<Type.controlled>Author</Type.controlled>
+		<Type.Broad.controlled>HasPersonalResponsibilityFor</Type.Broad.controlled>
+		<Type.free>Types want to be free</Type.free>
+
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+
+		<RecordHistory>This is the history</RecordHistory>
+		<NameForDisplayInCitation>BRE Peirson</NameForDisplayInCitation>
+		<DataSourceField>The data came from --here--.</DataSourceField>
+		<ConfidenceMeasure>0.3</ConfidenceMeasure>
+		<RelationshipWeight>0.6</RelationshipWeight>
+	</ROW>
+	<ROW>
+		<ID>ACR000000002</ID>
+		<ID.Authority.link>CBA000000001</ID.Authority.link>
+		<Citation8DigitID>CBC000000001</Citation8DigitID>
+		<description>This is a description of an ac relationship.</description>
+		<Name>Test relation 2</Name>
+		
+		<Type.controlled>Publisher</Type.controlled>
+		<Type.Broad.controlled>IsPublicationHostOf</Type.Broad.controlled>
+		<Type.free>Types want to be free</Type.free>
+
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModifiedOn>7/20/2015 9:17:59 PM</ModifiedOn>
+
+		<RecordHistory>This is the history</RecordHistory>
+		<NameForDisplayInCitation>BRE Peirson</NameForDisplayInCitation>
+		<DataSourceField>The data came from --here--.</DataSourceField>
+		<ConfidenceMeasure>0.3</ConfidenceMeasure>
+		<RelationshipWeight>0.6</RelationshipWeight>
+	</ROW>	
+</FMPDSORESULT>

@@ -4,8 +4,8 @@ from storages.backends.s3boto import S3BotoStorage
 
 class StaticStorage(S3BotoStorage):
 	location = settings.STATICFILES_LOCATION
-	bucket_name = 'isiscb-develop-staticfiles'
+	bucket_name = ''
 
 class MediaStorage(S3BotoStorage):
 	location = settings.MEDIAFILES_LOCATION
-	bucket_name = 'isiscb-develop-media'
+	bucket_name = ''

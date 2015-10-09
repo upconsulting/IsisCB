@@ -15,17 +15,26 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MIGRATION_MODULES = {
+    'isisdata': 'isisdata.migrations'
+}
 
 # Application definition
 
 INSTALLED_APPS = (
+    'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social.apps.django_app.default',
+    'rest_framework',
+    'simple_history',
+    'isisdata',
     'storages',
+    'haystack'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -44,7 +53,7 @@ ROOT_URLCONF = 'isiscb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -52,10 +61,23 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'isisdata.context_processors.server_start',
+                'isisdata.context_processors.social',
             ],
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.twitter.TwitterOAuth',
+    'social.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
+)
 
 WSGI_APPLICATION = 'isiscb.wsgi.application'
 
@@ -68,6 +90,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+}
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
 }
 
 # Internationalization
@@ -83,8 +113,51 @@ USE_L10N = True
 
 USE_TZ = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
+
+
+# LOGIN_REDIRECT_URL = '/'
+
+DOMAIN = 'isiscb-develop.aplacecalledup.com'
+URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+try:
+    from secrets import SMTP_USER, SMTP_PASSWORD
+    EMAIL_HOST_USER = SMTP_USER
+    EMAIL_HOST_PASSWORD = SMTP_PASSWORD
+except ImportError:
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD =''
+
+EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
+SMTP_EMAIL = 'info@aplacecalledup.com'
+
+
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
+
+
+# social
+
+FACEBOOK_APP_ID = '1694252594140628'
+SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
+
+try:
+    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
+except ImportError:
+    SOCIAL_AUTH_TWITTER_SECRET = ''
+    SOCIAL_AUTH_FACEBOOK_SECRET = ''

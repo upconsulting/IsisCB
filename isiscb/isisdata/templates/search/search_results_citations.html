@@ -1,0 +1,97 @@
+{% load app_filters %}
+{% load metadata_filters %}
+
+{% if query and 'isisdata.citation' in models %}
+<div class="row">
+  <div class="col-md-8">
+    <h3>Search Results</h3>
+    <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
+  </div>
+  <div class="col-md-4 menuContainer">
+
+    <div class="dropdown pull-right">
+      {% if sort_order_dir == 'decend' %}
+      <a href="{{ request.get_full_path|set_sort_direction:'accend' }}" title="Current sort order: decending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      {% else %}
+      <a href="{{ request.get_full_path|set_sort_direction:'decend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      {% endif %}
+      <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+        Sort by: {{ sort_order|get_current_sort_order }}
+          <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'title_for_sort' }}">Title</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'author_for_sort' }}">First Author</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'publication_date_for_sort' }}">Publication Date</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'_score' }}">Relevance</a></li>
+      </ul>
+    </div>
+    <input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">
+  </div>
+</div>
+
+    {% for result in page.object_list %}
+    <p>
+          <span class="glyphicon glyphicon-book"></span>
+          [{{ result.object.get_type_controlled_display }}]
+
+          <br>
+            {% if result.authors|joinby:"; " %}
+            {{ result.authors | joinby:"; " }};
+            {% else %}
+            Author missing;
+            {% endif %}
+
+            <a href="{% url 'index' result.object.id %}">{{ result.object|get_title|bleach_safe }}</a>
+            {% if result.object|get_pub_year %}({{ result.object|get_pub_year }}){% endif %}
+            <!-- Zotero -->
+            <span style="display:none;">
+               <abbr class="unapi-id" title="{{ result.object.id }}">unapi</abbr>
+            </span>
+
+        </p>
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
+    {% if page.has_previous or page.has_next %}
+    <nav>
+      <ul class="pagination">
+        <li class="disabled"><a>Go to page:</a></li>
+          {% if page.has_previous %}
+          <li>
+            <a href="{{ request.get_full_path|set_page:page.previous_page_number }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {% else %}
+          <li class="disabled">
+            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {% endif %}
+          {% if page.has_previous or page.has_next %}
+          {% for p in page.paginator.page_range %}
+              <li {% if page.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:forloop.counter }}">{{ p }}</a></li>
+          {% endfor %}
+          {% endif %}
+          {% if page.has_next %}
+          <li>
+            <a href="{{ request.get_full_path|set_page:page.next_page_number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          {% else %}
+          <li class="disabled">
+            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+{% else %}
+    {# Show some example queries to run, maybe query syntax, something else? #}
+{% endif %}

@@ -1,0 +1,279 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load staticfiles %}
+{% load metadata_filters %}
+
+{% block meta_tags %}
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
+{% endblock %}
+
+{% block extra_head %}
+<script>
+{% if source_instance_id %}
+var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
+{% endif %}
+
+{% if source_content_type %}
+var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
+{% endif %}
+</script>
+
+<script src="{% static "isisdata/js/comments.js" %}"></script>
+
+<meta property="og:url"                content="{{ request.build_absolute_uri }}" />
+<meta property="og:site_name"          content="Isis Current Bibliography" />
+<meta property="og:type"               content="article" />
+<meta property="fb:app_id"             content="{{ facebook_app_id}}" />
+<meta property="og:title"              content="{{ citation|get_title|strip_tags }}" />
+<meta property="og:description"        content="{% if citation.abstract|length > 0 %}{{ citation.abstract|strip_tags }}{% elif citation.description %}{{ citation.description|strip_tags }}{% endif %}" />
+<!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
+<meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
+{% endblock %}
+
+
+{% block title %}Citation{% endblock %}
+
+{% block content %}
+<div class="row" ng-app="commentsApp">
+  <div class="col-sm-3 col-md-2 sidebar">
+    <div class="menu">
+      <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+
+
+    <h4>Topics:</h4>
+    <ul>
+      {% for subject in subjects %}
+      <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not subjects %}
+    <i>There are no subjects.</i>
+    {% endif %}
+
+    <h4>Time Periods:</h4>
+    <ul>
+      {% for time in time_periods %}
+      <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not time_periods %}
+    <i>There are no time periods.</i>
+    {% endif %}
+
+    <h4>Persons:</h4>
+    <ul>
+      {% for person in persons %}
+      <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not persons %}
+    <i>There are no persons.</i>
+    {% endif %}
+
+    <h4>Categories:</h4>
+    <ul>
+      {% for category in categories %}
+      <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% if not categories %}
+    <i>There are no categories.</i>
+    {% endif %}
+
+  </div>
+  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
+    <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}
+        <span class="btn-grp pull-right">
+            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "admin:isisdata_citation_change" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
+            <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
+        </span>
+    </div>
+
+    <span style="display:none;">
+       <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
+    </span>
+
+    {% with citation|get_pub_year as pub_year %}
+    <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
+    {% endwith %}
+
+    {% if authors|length > 0 %}
+    <p><strong>Authors & Contributors:</strong> {% for acrelation in citation|get_contributors %} <a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation|contributor_as_string }};</a> {% endfor %}
+    {% endif %}
+
+    {% if citation.abstract %}
+    <p><strong>Abstract:</strong> {{ citation.abstract|bleach_safe }}</p>
+    {% endif %}
+    {% if citation.description %}
+    <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
+    {% endif %}
+
+    {% for attribute in citation.attributes.all %}
+    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+    {% endfor %}
+
+    {% if citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language.all|length > 0  %}
+    <table class="details">
+      {% if citation.edition_details|length > 0 %}
+      <tr>
+        <td>Edition Details:</td><td>{{ citation.edition_details|bleach_safe }}</td>
+      </tr>
+      {% endif %}
+      {% if citation.physical_details|length > 0 %}
+      <tr>
+        <td>Physical Details:</td><td>{{ citation.physical_details|bleach_safe }}</td>
+      </tr>
+      {% endif %}
+      {% if citation.language.all|length > 0 %}
+      <tr>
+        <td>Languages:</td><td>{% for language in citation.language.all %}{{ language.name }}{% endfor %}</td>
+      </tr>
+      {% endif %}
+    </table>
+    {% endif %}
+
+    <table class="details">
+      {% for prop in properties_map %}
+      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {{ prop.authority.name }}</td></tr>
+      {% endfor %}
+      {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+      <tr>
+        <td>Volume:</td><td>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</td>
+      </tr>
+      {% endif %}
+      {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+      <tr>
+        <td>Issue:</td><td>{% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</td>
+      </tr>
+      {% endif %}
+      {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+      <tr>
+        <td>Pages:</td><td>{% if citation.part_details.page_begin %}{{ citation.part_details.page_begin }}{% if citation.part_details.page_end %} - {{citation.part_details.page_end}}{% endif %}{% else %}{{ citation.part_details.pages_free_text }}{% endif %}</td>
+      </tr>
+      {% endif %}
+    </table>
+
+    <table class="details">
+      {% if citation.linkeddata_entries.all|length > 0 %}
+      <tr>
+        <td><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
+        <td>{% for entry in citation.linkeddata_entries.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td>Citation URI:</td>
+        <td>{{ citation | get_uri | linkify }}</td>
+      </tr>
+    </table>
+
+    <div></div>
+    {% if related_citations_rb %}
+    <h4>Reviewed By</h4>
+      {% for cc_rel in related_citations_rb %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+
+    {% endif %}
+
+    <!-- Review of -->
+    {% if related_citations_ro or related_citations_inv_rb %}
+    <h4>Review Of</h4>
+      {% for cc_rel in related_citations_ro %}
+      {% if cc_rel.subject.id == citation_id %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% else %}
+        {% with cc_rel.subject as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endif %}
+      {% endfor %}
+    {% endif %}
+
+<!-- Includes Chapter -->
+    {% if related_citations_ic %}
+    <h4>Includes Chapters</h4>
+      {% for cc_rel in related_citations_ic %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+    {% if related_citations_inv_ic %}
+    <h4>Included in</h4>
+      {% for cc_rel in related_citations_inv_ic %}
+      {% with cc_rel.subject as citation_object %}
+        {% include "isisdata/citation_entry.html" %}
+      {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+<!-- Includes Series Article -->
+    {% if related_citations_isa %}
+    <h4>Includes Series Articles</h4>
+      {% for cc_rel in related_citations_isa %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+    {% if related_citations_inv_isa %}
+    <h4>Included in</h4>
+      {% for cc_rel in related_citations_inv_isa %}
+        {% with cc_rel.subject as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+<!-- Response to -->
+    {% if related_citations_re %}
+    <h4>Response to</h4>
+      {% for cc_rel in related_citations_re %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+    {% if related_citations_inv_re %}
+    <h4>Has Response</h4>
+      {% for cc_rel in related_citations_inv_re %}
+        {% with cc_rel.subject as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+
+  <!-- Associated with -->
+    {% if related_citations_as %}
+    <h4>Associated with</h4>
+      {% for cc_rel in related_citations_as %}
+        {% with cc_rel.object as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+  </div>
+
+    <div class="col-sm-4 col-md-3 main">
+        {% include "isisdata/comments.html" %}
+
+    </div>
+
+
+  </div>
+
+
+{% endblock %}

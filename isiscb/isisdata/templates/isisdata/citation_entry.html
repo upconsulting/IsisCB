@@ -1,0 +1,18 @@
+{% load app_filters %}
+
+<p>
+  <span class="glyphicon glyphicon-book"></span>
+  [{{ citation_object.get_type_controlled_display }}]
+
+  <br>
+  {% if citation_object|get_authors %}
+    {% for author in citation_object|get_authors %}
+     {{ author.authority.name }};
+    {% endfor %}
+  {% else %}
+    Author missing;
+  {% endif %}
+  <a href="{% url 'index' citation_object.id %}">{{ citation_object|get_title|bleach_safe }}</a></li>
+
+  {% if citation_object|get_pub_year %}({{ citation_object|get_pub_year }}){% endif %}
+</p>
