@@ -2,113 +2,182 @@
 {% load metadata_filters %}
 
 {% if query and 'isisdata.citation' in models %}
-<div class="panel panel-default">
-  <div class="panel-heading"><h3 class="panel-title">Filters</h3></div>
-  <div class="panel-body">
-
-<h5>Document Type</h5>
-  {% if facets.fields.type %}
-        <ul class="selected_facets">
-          {% for type in selected_facets.type %}
-          {% with type|create_facet_string:'type' as encoded_type %}
-          <li><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ type }}</a></li>
-          {% endwith %}
-          {% endfor %}
-        </ul>
-        <ul >
-          {# Provide only the top 7 authors #}
-          {% for type in facets.fields.type|slice:":7" %}
-          {% if type.0 %}
-          {% if "type" not in selected_facets.keys or type.0 not in selected_facets.type %}
-          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=type:{{ type.0|urlencode }}">{{ type.0 }} </a>({{ type.1 }})</li>
-          {% endif %}
-          {% endif %}
-          {% endfor %}
-        </ul>
-  {% else %}
-          <p>No type facets.</p>
-  {% endif %}
-
-<h5>Author & Contributors</h5>
-  {% if facets.fields.authors %}
-        <ul class="selected_facets">
-          {% for author in selected_facets.authors_exact %}
-          {% with author|create_facet_string:'authors_exact' as encoded_author %}
-          <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
-          {% endwith %}
-          {% endfor %}
-        </ul>
-        <ul >
-          {# Provide only the top 7 authors #}
-          {% for author in facets.fields.authors|slice:":7" %}
-          {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-  {% else %}
-          <p>No author facets.</p>
-  {% endif %}
-
-  <h5>Time Periods</h5>
-  {% if facets.fields.time_periods %}
-    <ul class="selected_facets">
-      {% for time_period in selected_facets.time_periods_exact %}
-      {% with time_period|create_facet_string:'time_periods_exact' as encoded_time_period %}
-      <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{time_period}}</a></li>
-      {% endwith %}
-      {% endfor %}
-    </ul>
-    <ul>
-          {% for time_period in facets.fields.time_periods|slice:":7" %}
-          {% if "time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.time_periods_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
-          {% endif %}
-          {% endfor %}
-    </ul>
-  {% else %}
-          <p>No time period facets.</p>
-  {% endif %}
-
-  <h5>Places</h5>
-  {% if facets.fields.geographics %}
-    <ul class="selected_facets">
-      {% for geographic in selected_facets.geographics_exact %}
-      {% with geographic|create_facet_string:'geographics_exact' as encoded_geographic %}
-      <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{geographic}}</a></li>
-      {% endwith %}
-      {% endfor %}
-    </ul>
-    <ul>
-          {% for geographic in facets.fields.geographics|slice:":7" %}
-          {% if "geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.geographics_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
-          {% endif %}
-          {% endfor %}
-    </ul>
-  {% else %}
-          <p>No place facets.</p>
-  {% endif %}
-
-  <h5>Subjects</h5>
-  {% if facets.fields.subjects %}
-    <ul class="selected_facets">
-      {% for subject in selected_facets.subjects_exact %}
-      {% with subject|create_facet_string:'subjects_exact' as encoded_subject %}
-      <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
-      {% endwith %}
-      {% endfor %}
-    </ul>
-    <ul>
-          {% for subject in facets.fields.subjects|slice:":7" %}
-          {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
-          {% endif %}
-          {% endfor %}
-    </ul>
-  {% else %}
-          <p>No subject facets.</p>
-  {% endif %}
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseTypes">
+          Document Type <span class="badge {% if selected_facets.type %}active{% endif %}">{{ facets.fields.type|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTypes" class="panel-collapse collapse">
+      <div class="facet_panel panel-body">
+        {% if facets.fields.type %}
+              <ul class="selected_facets">
+                {% for type in selected_facets.type %}
+                {% with type|create_facet_string:'type' as encoded_type %}
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ type }}</a></li>
+                {% endwith %}
+                {% endfor %}
+              </ul>
+              <ul >
+                {# Provide only the top 7 authors #}
+                {% for type in facets.fields.type|slice:":7" %}
+                {% if type.0 %}
+                {% if "type" not in selected_facets.keys or type.0 not in selected_facets.type %}
+                <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=type:{{ type.0|urlencode }}">{{ type.0 }} </a>({{ type.1 }})</li>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+              </ul>
+        {% else %}
+                <p>No type facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
+
+<div class="panel-group" id="author_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseAuthors">
+          Author & Contributors <span class="badge {% if selected_facets.authors_exact %}active{% endif %}">{{ facets.fields.authors|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseAuthors" class="panel-collapse collapse">
+      <div class="facet_panel panel-body">
+        {% if facets.fields.authors %}
+              <ul class="selected_facets">
+                {% for author in selected_facets.authors_exact %}
+                {% with author|create_facet_string:'authors_exact' as encoded_author %}
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
+                {% endwith %}
+                {% endfor %}
+              </ul>
+              <ul >
+                {# Provide only the top 7 authors #}
+                {% for author in facets.fields.authors|slice:":7" %}
+                {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
+                <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+                {% endif %}
+                {% endfor %}
+              </ul>
+        {% else %}
+                <p>No author facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="time_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseTime">
+          Time Periods <span class="badge {% if selected_facets.time_periods_exact %}active{% endif %}">{{ facets.fields.time_periods|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTime" class="panel-collapse collapse">
+      <div class="facet_panel panel-body">
+        {% if facets.fields.time_periods %}
+          <ul class="selected_facets">
+            {% for time_period in selected_facets.time_periods_exact %}
+            {% with time_period|create_facet_string:'time_periods_exact' as encoded_time_period %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{time_period}}</a></li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+          <ul>
+                {% for time_period in facets.fields.time_periods|slice:":7" %}
+                {% if "time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.time_periods_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+                {% endif %}
+                {% endfor %}
+          </ul>
+        {% else %}
+                <p>No time period facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="place_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapsePlaces">
+          Places <span class="badge {% if selected_facets.geographics_exact %}active{% endif %}">{{ facets.fields.geographics|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapsePlaces" class="panel-collapse collapse">
+      <div class="facet_panel panel-body">
+        {% if facets.fields.geographics %}
+          <ul class="selected_facets">
+            {% for geographic in selected_facets.geographics_exact %}
+            {% with geographic|create_facet_string:'geographics_exact' as encoded_geographic %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{geographic}}</a></li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+          <ul>
+                {% for geographic in facets.fields.geographics|slice:":7" %}
+                {% if "geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.geographics_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+                {% endif %}
+                {% endfor %}
+          </ul>
+        {% else %}
+                <p>No place facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="place_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseSubjects">
+          Subjects <span class="badge {% if selected_facets.subjects_exact  %}active{% endif %}">{{ facets.fields.subjects|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseSubjects" class="panel-collapse collapse">
+      <div class="facet_panel panel-body">
+        {% if facets.fields.subjects %}
+          <ul class="selected_facets">
+            {% for subject in selected_facets.subjects_exact %}
+            {% with subject|create_facet_string:'subjects_exact' as encoded_subject %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+          <ul>
+                {% for subject in facets.fields.subjects|slice:":7" %}
+                {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+                {% endif %}
+                {% endfor %}
+          </ul>
+        {% else %}
+                <p>No subject facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 {% endif %}

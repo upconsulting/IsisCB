@@ -191,3 +191,21 @@ li {
 .menuContainer {
     margin-top: 20px;
 }
+
+.panel-title {
+  font-size: 14px;
+}
+
+.panel-default>.panel-heading .badge {
+  background-color: #4A4A4A;
+  float: right;
+}
+
+.panel-default>.panel-heading .active {
+  background-color: #337AB7;
+  float: right;
+}
+
+div.facet_panel {
+  padding-left: 0px;
+}
