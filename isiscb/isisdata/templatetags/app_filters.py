@@ -109,7 +109,10 @@ def get_contributors(citation):
 
 @register.filter
 def contributor_as_string(acrelation):
-    kwargs = {'name': acrelation.name_for_display_in_citation,
+    name = acrelation.name_for_display_in_citation
+    if not name:
+        name = acrelation.authority.name
+    kwargs = {'name': name,
               'role': acrelation.get_type_controlled_display()}
     return u"{name} ({role})".format(**kwargs)
 
