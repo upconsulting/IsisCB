@@ -531,11 +531,11 @@ def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
 
     citations_by_list = ACRelation.objects.filter(authority=authority,
-                                                  type_broad_controlled='PR')
+                                                  type_controlled__in=['AU','CO']).distinct('citation_id')
     citations_about_list = ACRelation.objects.filter(authority=authority,
                                                      type_broad_controlled='SC')
-    citations_other_list = ACRelation.objects.filter(authority=authority,
-                                                     type_broad_controlled__in=['IH', 'PH'])
+    query = Q(authority=authority, type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
+    citations_other_list = ACRelation.objects.filter(query)
 
     citations_by_paginator = Paginator(citations_by_list, 30)
     citations_about_paginator = Paginator(citations_about_list, 30)
