@@ -209,3 +209,12 @@ li {
 div.facet_panel {
   padding-left: 0px;
 }
+
+.more-facets {
+  float: right;
+}
+
+.modal .modal-body {
+    max-height: 420px;
+    overflow-y: auto;
+}

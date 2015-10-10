@@ -23,8 +23,7 @@
                 {% endfor %}
               </ul>
               <ul >
-                {# Provide only the top 7 authors #}
-                {% for type in facets.fields.type|slice:":7" %}
+                {% for type in facets.fields.type %}
                 {% if type.0 %}
                 {% if "type" not in selected_facets.keys or type.0 not in selected_facets.type %}
                 <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=type:{{ type.0|urlencode }}">{{ type.0 }} </a>({{ type.1 }})</li>
@@ -68,6 +67,14 @@
                 {% endif %}
                 {% endfor %}
               </ul>
+              {% if facets.fields.authors|length > 7 %}
+              <div class="more-facets">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
+                  More...
+                </button>
+              </div>
+              {% endif %}
         {% else %}
                 <p>No author facets.</p>
         {% endif %}
@@ -103,6 +110,14 @@
                 {% endif %}
                 {% endfor %}
           </ul>
+          {% if facets.fields.time_periods|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timeModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
         {% else %}
                 <p>No time period facets.</p>
         {% endif %}
@@ -138,6 +153,14 @@
                 {% endif %}
                 {% endfor %}
           </ul>
+          {% if facets.fields.geographics|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#placeModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
         {% else %}
                 <p>No place facets.</p>
         {% endif %}
@@ -173,6 +196,14 @@
                 {% endif %}
                 {% endfor %}
           </ul>
+          {% if facets.fields.subjects|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
         {% else %}
                 <p>No subject facets.</p>
         {% endif %}
@@ -181,3 +212,99 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Author</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+          {% for author in facets.fields.authors %}
+          {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
+          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- time period Modal -->
+<div class="modal fade" id="timeModal" tabindex="-1" role="dialog" aria-labelledby="timeModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Time Period</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+          {% for time_period in facets.fields.time_periods %}
+          {% if "time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.time_periods_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placeModal" tabindex="-1" role="dialog" aria-labelledby="placeModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Place</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+          {% for geographic in facets.fields.geographics %}
+          {% if "geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.geographics_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- subject Modal -->
+<div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Subject</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+          {% for subject in facets.fields.subjects %}
+          {% if "subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.subjects_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
