@@ -68,6 +68,12 @@
                 {% endif %}
                 {% endfor %}
               </ul>
+              <div class="more-facets">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#typeModal">
+                  More...
+                </button>
+              </div>
         {% else %}
                 <p>No author facets.</p>
         {% endif %}
@@ -181,3 +187,27 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Modal -->
+<div class="modal fade" id="typeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Author</h4>
+      </div>
+      <div class="modal-body">
+        <ul>
+          {% for author in facets.fields.authors %}
+          {% if "authors_exact" not in selected_facets.keys or author.0 not in selected_facets.authors_exact %}
+          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
