@@ -595,10 +595,14 @@ def citation(request, citation_id):
         return Http404("No such Citation")
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
-    #subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU']) & ~Q(authority__type_controlled__in=['GE']))
+
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU']) & ~Q(authority__type_controlled__in=['GE', 'TI']))
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']))
-    time_periods = citation.acrelation_set.filter(type_controlled__in=['TI'])
+
+    query_time = Q(type_controlled__in=['TI']) | (Q(type_controlled__in=['SU']) & Q(authority__type_controlled__in=['TI']))
+    time_periods = citation.acrelation_set.filter(query_time)
+
     query_places = Q(type_controlled__in=['SU']) & Q(authority__type_controlled__in=['GE'])
     places = citation.acrelation_set.filter(query_places)
 
@@ -628,7 +632,7 @@ def citation(request, citation_id):
         'citation': citation,
         'authors': authors,
         'properties_map': properties,
-        #'subjects': subjects,
+        'subjects': subjects,
         'persons': persons,
         'categories': categories,
         'time_periods': time_periods,
