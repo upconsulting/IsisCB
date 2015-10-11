@@ -45,46 +45,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <hr>
     </div>
 
+    {% include "isisdata/citation_nav.html" %}
 
-    <h4>Topics:</h4>
-    <ul>
-      {% for subject in subjects %}
-      <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
-      {% endfor %}
-    </ul>
-    {% if not subjects %}
-    <i>There are no subjects.</i>
-    {% endif %}
 
-    <h4>Time Periods:</h4>
-    <ul>
-      {% for time in time_periods %}
-      <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }}</a></li>
-      {% endfor %}
-    </ul>
-    {% if not time_periods %}
-    <i>There are no time periods.</i>
-    {% endif %}
-
-    <h4>Persons:</h4>
-    <ul>
-      {% for person in persons %}
-      <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
-      {% endfor %}
-    </ul>
-    {% if not persons %}
-    <i>There are no persons.</i>
-    {% endif %}
-
-    <h4>Categories:</h4>
-    <ul>
-      {% for category in categories %}
-      <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
-      {% endfor %}
-    </ul>
-    {% if not categories %}
-    <i>There are no categories.</i>
-    {% endif %}
 
   </div>
   <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">

@@ -595,10 +595,12 @@ def citation(request, citation_id):
         return Http404("No such Citation")
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
-    subjects = citation.acrelation_set.filter(type_controlled__in=['SU'])
+    #subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU']) & ~Q(authority__type_controlled__in=['GE']))
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
-    categories = citation.acrelation_set.filter(type_controlled__in=['CA'])
+    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']))
     time_periods = citation.acrelation_set.filter(type_controlled__in=['TI'])
+    query_places = Q(type_controlled__in=['SU']) & Q(authority__type_controlled__in=['GE'])
+    places = citation.acrelation_set.filter(query_places)
 
     related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC')
     related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC')
@@ -626,10 +628,11 @@ def citation(request, citation_id):
         'citation': citation,
         'authors': authors,
         'properties_map': properties,
-        'subjects': subjects,
+        #'subjects': subjects,
         'persons': persons,
         'categories': categories,
         'time_periods': time_periods,
+        'places': places,
         'source_instance_id': citation_id,
         'source_content_type': ContentType.objects.get(model='citation').id,
         'related_citations_ic': related_citations_ic,
