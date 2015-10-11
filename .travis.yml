@@ -29,7 +29,7 @@ deploy:
     region: us-west-2
     app: isiscb
     env: isiscb-staging
-    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    bucket_name: elasticbeanstalk-us-west-2-655333410217/IsisCB
     on:
       repo: upconsulting/IsisCB
       branch: master
