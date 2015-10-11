@@ -107,7 +107,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'isiscb',
         'USER': 'upconsulting',
-        'PASSWORD': '',
+        'PASSWORD': os.environ['RDS_PASSWORD'],
         'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
         'PORT': '5432',
     }
