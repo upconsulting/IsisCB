@@ -40,14 +40,24 @@
           <br>
             {% if result.authors %}
             {{ result.authors|joinby:"; " }}
+            {% elif  result.editors %}
+              {{ result.editors|join_names_with_postfix:" (Ed.)" }}
             {% else %}
-            Author missing
+              Author missing
             {% endif %}
             {% if result.object|get_pub_year %}
               ({{ result.object|get_pub_year }})
             {% endif %}
-            <a href="{% url 'index' result.object.id %}">{{ result.object|get_title|bleach_safe }}</a>{% if result.object|get_page_string %},
-            {{ result.object|get_page_string }}{% endif %}.
+            <a href="{% url 'index' result.object.id %}">{{ result.object|get_title|bleach_safe }}.</a>
+            <!-- book title and page numbers -->
+            {% if result.object|get_book_title %}
+              In: <em>{{ result.object|get_book_title }}</em>{% if not result.object|get_page_string %}.{% endif %}
+            {% endif %}
+
+            {% if result.object|get_page_string %}({{ result.object|get_page_string }}).{% endif %}
+
+
+
 
             <!-- Zotero -->
             <span style="display:none;">

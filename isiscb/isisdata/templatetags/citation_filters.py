@@ -19,8 +19,31 @@ def get_page_string(citation):
     return ""
 
 @register.filter
-def join_authors(authors):
+def join_authors(authors, postfix):
     author_names = []
     for author in authors:
-        author_names.append(author.authority.name)
+        author_names.append(author.authority.name + postfix)
     return "; ".join(author_names)
+
+@register.filter
+def get_editors(citation):
+    if citation:
+        return citation.acrelation_set.filter(type_controlled__in=['ED'])
+    return citation
+
+@register.filter
+def join_names_with_postfix(name_list, postfix):
+    names = []
+    for name in name_list:
+        names.append(name + postfix)
+    return "; ".join(names)
+
+@register.filter
+def get_book_title(citation):
+    if citation.type_controlled in ['CH']:
+        parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+        # we assume there is just one
+        if parent_relation:
+            return parent_relation[0].subject.title
+
+    return ""
