@@ -207,7 +207,16 @@ li {
 }
 
 div.facet_panel {
-  padding-left: 0px;
+  padding-left: 10px;
+  padding-bottom: 0px;
+}
+
+div.facet_panel > ul {
+  margin-left: -15px;
+}
+
+.panel-group {
+  margin-bottom: 10px;
 }
 
 .more-facets {

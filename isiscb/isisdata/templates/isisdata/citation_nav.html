@@ -1,49 +1,126 @@
-<h4>Topics:</h4>
-<ul>
-  {% for subject in subjects %}
-  <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
-  {% endfor %}
-</ul>
-{% if not subjects %}
-<i>There are no subjects.</i>
-{% endif %}
 
-<h4>Time Periods:</h4>
-<ul>
-  {% for time in time_periods %}
-  <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }}</a></li>
-  {% endfor %}
-</ul>
-{% if not time_periods %}
-<i>There are no time periods.</i>
-{% endif %}
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseTopics">
+          Topics <span class="badge">{{ subjects|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTopics" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+        <ul >
+          {% for subject in subjects %}
+          <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }}</a></li>
+          {% endfor %}
+        </ul>
+        {% if not subjects %}
+            <p>There are no topics.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
-<h4>Persons:</h4>
-<ul>
-  {% for person in persons %}
-  <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
-  {% endfor %}
-</ul>
-{% if not persons %}
-<i>There are no persons.</i>
-{% endif %}
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseTimes">
+          Time Periods <span class="badge">{{ time_periods|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseTimes" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+          <ul >
+            {% for time in time_periods %}
+            <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }}</a></li>
+            {% endfor %}
+          </ul>
 
-<h4>Categories:</h4>
-<ul>
-  {% for category in categories %}
-  <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
-  {% endfor %}
-</ul>
-{% if not categories %}
-<i>There are no categories.</i>
-{% endif %}
+          {% if not time_periods %}
+          <p>There are no time periods.</p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 
-<h4>Places:</h4>
-<ul>
-  {% for category in places %}
-  <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
-  {% endfor %}
-</ul>
-{% if not places %}
-<i>There are no places.</i>
-{% endif %}
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapsePersons">
+          Persons <span class="badge">{{ persons|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapsePersons" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+          <ul>
+          {% for person in persons %}
+            <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
+          {% endfor %}
+          </ul>
+          {% if not persons %}
+            <p>There are no persons.</p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseCategories">
+          Categories <span class="badge">{{ categories|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseCategories" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+          <ul>
+            {% for category in categories %}
+            <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }}</a></li>
+            {% endfor %}
+          </ul>
+          {% if not categories %}
+          <p>There are no categories.</p>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-group" id="type_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapsePlaces">
+          Places <span class="badge">{{ places|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapsePlaces" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+        <ul>
+          {% for place in places %}
+          <li><a href="{% url 'authority' place.authority.id %}">{{ place.authority.name }}</a></li>
+          {% endfor %}
+        </ul>
+        {% if not places %}
+        <p>There are no places.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
