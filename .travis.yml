@@ -31,5 +31,5 @@ deploy:
     env: isiscb-staging
     bucket_name: elasticbeanstalk-us-west-2-655333410217
     on:
-      repo: isiscb
+      repo: upconsulting/IsisCB 
       branch: master
