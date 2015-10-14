@@ -75,8 +75,34 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sort_order_dir
 
+    def has_specified_field(self, query_string):
+        query_parameters = query_string.split(':')
+        # no field specified
+        if len(query_parameters) <= 1:
+            return (query_string, 'content')
+
+        # field might be specified but with preceeding blank
+        # so we ignore it
+        if query_parameters[1].startswith(' '):
+            return (query_string, 'content')
+
+        return (query_string[len(query_parameters[0]) + 1:], query_parameters[0])
+
     def search(self):
-        sqs = super(MyFacetedSearchForm, self).search()
+
+        if not self.is_valid():
+            return self.no_query_found()
+
+        if not self.cleaned_data.get('q'):
+            return self.no_query_found()
+
+        #sqs = super(MyFacetedSearchForm, self).search()
+        query_tuple = self.has_specified_field(self.cleaned_data['q'])
+        sqs = self.searchqueryset.auto_query(query_tuple[0], query_tuple[1])
+
+        if self.load_all:
+            sqs = sqs.load_all()
+
         sort_order = self.get_sort_order()
         sort_order_dir = self.get_sort_order_direction()
 
