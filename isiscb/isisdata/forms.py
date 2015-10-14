@@ -103,6 +103,15 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if self.load_all:
             sqs = sqs.load_all()
 
+        for facet in self.selected_facets:
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+
+            if value:
+                sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
+
         sort_order = self.get_sort_order()
         sort_order_dir = self.get_sort_order_direction()
 
