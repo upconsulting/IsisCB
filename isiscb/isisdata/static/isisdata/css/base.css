@@ -197,12 +197,14 @@ li {
 }
 
 .panel-default>.panel-heading .badge {
-  background-color: #4A4A4A;
+  background-color: #F5F5F5;
+  color: #5A5959;
   float: right;
 }
 
 .panel-default>.panel-heading .active {
-  background-color: #337AB7;
+  background-color: #F5F5F5;
+  color: #3274AB;
   float: right;
 }
 
