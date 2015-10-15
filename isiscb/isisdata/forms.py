@@ -34,9 +34,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         self.fields['models'] = scField
         self.fields['sort_order'] = sort_order
-        self.fields['sort_order'].initial = 'title_for_sort'
+        self.fields['sort_order'].initial = 'publication_date_for_sort'
         self.fields['sort_order_dir'] = sort_order_dir
-        self.fields['sort_order_dir'].initial = 'accend'
+        self.fields['sort_order_dir'].initial = 'descend'
 
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
@@ -57,16 +57,16 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sort_order = 'text'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order', 'title_for_sort')
+            sort_order = self.cleaned_data.get('sort_order', 'publication_date_for_sort')
             if not sort_order and self.cleaned_data['models'] == 'isisdata.citation':
-                sort_order = 'title_for_sort'
+                sort_order = 'publication_date_for_sort'
             if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
                 sort_order = 'name'
 
         return sort_order
 
     def get_sort_order_direction(self):
-        sort_order_dir = 'accend'
+        sort_order_dir = 'descend'
 
         if self.is_valid():
             sort_order_dir = self.cleaned_data.get('sort_order_dir', 'accend')
@@ -115,7 +115,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sort_order = self.get_sort_order()
         sort_order_dir = self.get_sort_order_direction()
 
-        if sort_order_dir == 'decend':
+        if sort_order_dir == 'descend':
             sort_order = "-" + sort_order
 
         return sqs.models(*self.get_models()).order_by(sort_order)

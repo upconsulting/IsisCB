@@ -11,10 +11,10 @@
   <div class="col-md-4 menuContainer">
 
     <div class="dropdown pull-right">
-      {% if sort_order_dir == 'decend' %}
-      <a href="{{ request.get_full_path|set_sort_direction:'accend' }}" title="Current sort order: decending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      {% if sort_order_dir == 'descend' %}
+      <a href="{{ request.get_full_path|set_sort_direction:'accend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
       {% else %}
-      <a href="{{ request.get_full_path|set_sort_direction:'decend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'descend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
       {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
         Sort by: {{ sort_order|get_current_sort_order }}
