@@ -531,41 +531,18 @@ def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
 
     citations_by_list = ACRelation.objects.filter(authority=authority,
-                                                  type_controlled__in=['AU','CO']).distinct('citation_id')
+                                                  type_controlled__in=['AU','CO']).distinct('citation_id')[:5]
+    citations_by_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['AU','CO']).distinct('citation_id').count()
+
     citations_about_list = ACRelation.objects.filter(authority=authority,
-                                                     type_broad_controlled='SC')
+                                                     type_broad_controlled='SC')[:5]
+    citations_about_count = ACRelation.objects.filter(authority=authority,
+                                                     type_broad_controlled='SC').count()
+
     query = Q(authority=authority, type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-    citations_other_list = ACRelation.objects.filter(query)
-
-    citations_by_paginator = Paginator(citations_by_list, 30)
-    citations_about_paginator = Paginator(citations_about_list, 30)
-    citations_other_paginator = Paginator(citations_other_list, 30)
-
-    page = request.GET.get('page-about')
-    try:
-        citations_about = citations_about_paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        citations_about = citations_about_paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        citations_about = citations_about_paginator.page(paginator.num_pages)
-
-    page_other = request.GET.get('page-other')
-    try:
-        citations_other = citations_other_paginator.page(page_other)
-    except PageNotAnInteger:
-        citations_other = citations_other_paginator.page(1)
-    except EmptyPage:
-        citations_other = citations_other_paginator.page(paginator.num_pages)
-
-    page_by = request.GET.get('page-by')
-    try:
-        citations_by = citations_by_paginator.page(page_by)
-    except PageNotAnInteger:
-        citations_by = citations_by_paginator.page(1)
-    except EmptyPage:
-        citations_by = citations_by_paginator.page(paginator.num_pages)
+    citations_other_list = ACRelation.objects.filter(query)[:5]
+    citations_other_count = ACRelation.objects.filter(query).count()
 
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
@@ -573,9 +550,12 @@ def authority(request, authority_id):
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
-        'citations_by': citations_by,
-        'citations_about': citations_about,
-        'citations_other': citations_other,
+        'citations_by': citations_by_list,
+        'citations_by_count': citations_by_count,
+        'citations_about': citations_about_list,
+        'citations_about_count': citations_about_count,
+        'citations_other': citations_other_list,
+        'citations_other_count': citations_other_count,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
