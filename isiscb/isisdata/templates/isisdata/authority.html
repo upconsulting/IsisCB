@@ -74,56 +74,22 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     {% if citations_by %}
     <h4>Resources by {{ authority.name }}</h4>
-    <div class="results-info">Showing {{ citations_by.start_index }} to {{ citations_by.end_index }} of {{ citations_by.paginator.count }}.</div>
 
       {% for rel_citation in citations_by %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-      {% if citations_by.has_previous or citations_by.has_next %}
-      <nav>
-        <ul class="pagination">
-          <li class="disabled"><a>Go to page: </a></li>
-          <li>
-            {% if citations_by.has_previous %}
-            <a href="?page-by={{ citations_by.previous_page_number }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% else %}
-            <li class="disabled">
-              <a href="?page-by={{ citations_by.number }}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            {% endif %}
-            {% if citations_by.has_previous or citations_by.has_next %}
-            {% for page in citations_by.paginator.page_range %}
-                <li {% if citations_by.number == page %} class="disabled" {% endif %}><a href="?page-by={{ page }}">{{ page }}</a></li>
-            {% endfor %}
-            {% endif %}
-            {% if citations_by.has_next %}
-            <li>
-              <a href="?page-by={{ citations_by.next_page_number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% else %}
-            <li class="disabled">
-              <a href="?page-by={{ citations_by.number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
-    {% endif %}
+
+    <div class="pull-right">
+      {% if citations_by_count > 5 %}
+      <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_by_count }} citations by {{ authority.name }}...</a>
+      {% endif %}
+    </div>
     {% endif %}
 
     {% if citations_about %}
-    <h4>Resources about {{ authority.name }}</h4>
-
-      <div class="results-info">Showing {{ citations_about.start_index }} to {{ citations_about.end_index }} of {{ citations_about.paginator.count }}.</div>
+    <h4 style="clear: both; padding-top: 10px">Resources about {{ authority.name }}</h4>
 
       {% for rel_citation in citations_about %}
         {% with rel_citation.citation as citation_object %}
@@ -131,47 +97,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-      {% if citations_about.has_previous or citations_about.has_next %}
-      <nav>
-        <ul class="pagination">
-          <li class="disabled"><a>Go to page: </a></li>
-          <li>
-            {% if citations_about.has_previous %}
-            <a href="?page-about={{ citations_about.previous_page_number }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% else %}
-            <li class="disabled">
-              <a href="?page-about={{ citations_about.number }}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            {% endif %}
-            {% if citations_about.has_previous or citations_about.has_next %}
-            {% for page in citations_about.paginator.page_range %}
-                <li {% if citations_about.number == page %} class="active" {% endif %}><a href="?page-about={{ forloop.counter }}">{{ page }}</a></li>
-            {% endfor %}
-            {% endif %}
-            {% if citations_about.has_next %}
-            <li>
-              <a href="?page-about={{ citations_about.next_page_number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% else %}
-            <li class="disabled">
-              <a href="?page-about={{ citations_about.number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
-    {% endif %}
+      <div class="pull-right">
+        {% if citations_about_count > 5 %}
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=about_person_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_about_count }} citations about {{ authority.name }}...</a>
+        {% endif %}
+      </div>
     {% endif %}
 
     {% if citations_other %}
-    <h4>Resources related to {{ authority.name }}</h4>
+    <h4 style="clear: both; padding-top: 10px">Resources related to {{ authority.name }}</h4>
 
       {% for rel_citation in citations_other %}
         {% with rel_citation.citation as citation_object %}
@@ -179,43 +113,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-      {% if citations_other.has_previous or citations_other.has_next %}
-      <nav>
-        <ul class="pagination">
-          <li class="disabled"><a>Go to page</a></li>
-          <li>
-            {% if citations_other.has_previous %}
-            <a href="?page-other={{ citations_other.previous_page_number }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% else %}
-            <li class="disabled">
-              <a href="?page-other={{citations_other.number}}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            {% endif %}
-            {% if citations_other.has_previous or citations_other.has_next %}
-            {% for page in citations_other.paginator.page_range %}
-                <li><a href="?page-other={{ forloop.counter }}">{{ page }}</a></li>
-            {% endfor %}
-            {% endif %}
-            {% if citations_other.has_next %}
-            <li>
-              <a href="?page-other={{ citations_other.next_page_number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% else %}
-            <li class="disabled">
-              <a href="?page={{ citations_other.number }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
+      <div class="pull-right">
+        {% if citations_other_count > 5 %}
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=other_person_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_other_count }} citations related to {{ authority.name }}...</a>
         {% endif %}
+      </div>
+
     {% endif %}
     </div>
 
