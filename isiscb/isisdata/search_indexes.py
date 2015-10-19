@@ -48,7 +48,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     creative_works = indexes.MultiValueField(faceted=True)
     events = indexes.MultiValueField(faceted=True)
 
-
+    # the following fields are for searching by author, contributor, etc.
+    author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
     def get_model(self):
         return Citation
@@ -176,6 +179,15 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_events(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
 
+    def prepare_author_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
+
+    def prepare_about_person_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(type_broad_controlled='SC')]
+
+    def prepare_other_person_ids(self, obj):
+        query = Q(type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(query)]
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)

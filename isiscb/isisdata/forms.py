@@ -34,9 +34,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         self.fields['models'] = scField
         self.fields['sort_order'] = sort_order
-        self.fields['sort_order'].initial = 'title_for_sort'
+        self.fields['sort_order'].initial = 'publication_date_for_sort'
         self.fields['sort_order_dir'] = sort_order_dir
-        self.fields['sort_order_dir'].initial = 'accend'
+        self.fields['sort_order_dir'].initial = 'descend'
 
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
@@ -57,16 +57,16 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sort_order = 'text'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order', 'title_for_sort')
+            sort_order = self.cleaned_data.get('sort_order', 'publication_date_for_sort')
             if not sort_order and self.cleaned_data['models'] == 'isisdata.citation':
-                sort_order = 'title_for_sort'
+                sort_order = 'publication_date_for_sort'
             if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
                 sort_order = 'name'
 
         return sort_order
 
     def get_sort_order_direction(self):
-        sort_order_dir = 'accend'
+        sort_order_dir = 'descend'
 
         if self.is_valid():
             sort_order_dir = self.cleaned_data.get('sort_order_dir', 'accend')
@@ -75,12 +75,47 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sort_order_dir
 
+    def has_specified_field(self, query_string):
+        query_parameters = query_string.split(':')
+        # no field specified
+        if len(query_parameters) <= 1:
+            return (query_string, 'content')
+
+        # field might be specified but with preceeding blank
+        # so we ignore it
+        if query_parameters[1].startswith(' '):
+            return (query_string, 'content')
+
+        return (query_string[len(query_parameters[0]) + 1:], query_parameters[0])
+
     def search(self):
-        sqs = super(MyFacetedSearchForm, self).search()
+
+        if not self.is_valid():
+            return self.no_query_found()
+
+        if not self.cleaned_data.get('q'):
+            return self.no_query_found()
+
+        #sqs = super(MyFacetedSearchForm, self).search()
+        query_tuple = self.has_specified_field(self.cleaned_data['q'])
+        sqs = self.searchqueryset.auto_query(query_tuple[0], query_tuple[1])
+
+        if self.load_all:
+            sqs = sqs.load_all()
+
+        for facet in self.selected_facets:
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+
+            if value:
+                sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
+
         sort_order = self.get_sort_order()
         sort_order_dir = self.get_sort_order_direction()
 
-        if sort_order_dir == 'decend':
+        if sort_order_dir == 'descend':
             sort_order = "-" + sort_order
 
         return sqs.models(*self.get_models()).order_by(sort_order)

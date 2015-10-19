@@ -191,3 +191,41 @@ li {
 .menuContainer {
     margin-top: 20px;
 }
+
+.panel-title {
+  font-size: 14px;
+}
+
+.panel-default>.panel-heading .badge {
+  background-color: #F5F5F5;
+  color: #5A5959;
+  float: right;
+}
+
+.panel-default>.panel-heading .active {
+  background-color: #F5F5F5;
+  color: #3274AB;
+  float: right;
+}
+
+div.facet_panel {
+  padding-left: 10px;
+  padding-bottom: 0px;
+}
+
+div.facet_panel > ul {
+  margin-left: -15px;
+}
+
+.panel-group {
+  margin-bottom: 10px;
+}
+
+.more-facets {
+  float: right;
+}
+
+.modal .modal-body {
+    max-height: 420px;
+    overflow-y: auto;
+}

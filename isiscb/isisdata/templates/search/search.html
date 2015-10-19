@@ -62,11 +62,13 @@ $(document).ready(function() {
               <div class="input-group">
                 <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
                 <span class="input-group-btn">
-                  <button class="btn btn-default" type="submit">Search!</button>
+                  <button class="btn btn-default" type="submit">Search</button>
                 </span>
               </div>
               <div>
                 <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.citation">
+                <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
+                <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
               </div>
 
               <div class="row space-top">
@@ -89,7 +91,7 @@ $(document).ready(function() {
            <div class="input-group">
               <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
               <span class="input-group-btn">
-                <button class="btn btn-default" type="submit">Search!</button>
+                <button class="btn btn-default" type="submit">Search</button>
               </span>
            </div>
           <div>
