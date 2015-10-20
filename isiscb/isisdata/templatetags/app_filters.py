@@ -104,7 +104,7 @@ def join_attributes(attrlist, concator):
 
 @register.filter
 def get_contributors(citation):
-    return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
+    return citation.acrelation_set.filter(type_controlled__in=['AU', 'ED'])
 
 
 @register.filter
