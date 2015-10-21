@@ -104,7 +104,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return [attr.value_freeform for attr in obj.attributes.all()]
 
     def prepare_authors(self, obj):
-        authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
+        #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
+        authors = obj.get_all_contributors()
         names = []
         for author in authors:
             name = author.name_for_display_in_citation
@@ -115,13 +116,14 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     # TODO: this method needs to be changed to include author order
     def prepare_author_for_sort(self, obj):
-        editors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        if obj.type_controlled == 'BO' and editors:
-            authors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        else:
-            authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
-        if not authors:
-            return ''
+        #editors = obj.acrelation_set.filter(type_controlled__in=['ED'])
+        #if obj.type_controlled == 'BO' and editors:
+        #    authors = obj.acrelation_set.filter(type_controlled__in=['ED'])
+        #else:
+        #    authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
+        #if not authors:
+        #    return ''
+        authors = obj.get_all_contributors()
         author = authors[0]
         if not author:
             return ''

@@ -104,7 +104,7 @@ def join_attributes(attrlist, concator):
 
 @register.filter
 def get_contributors(citation):
-    return citation.acrelation_set.filter(type_controlled__in=['AU', 'ED'])
+    return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
 
 
 @register.filter
@@ -114,7 +114,7 @@ def contributor_as_string(acrelation):
         name = acrelation.authority.name
     kwargs = {'name': name,
               'role': acrelation.get_type_controlled_display()}
-    return u"{name} ({role})".format(**kwargs)
+    return u"{name}".format(**kwargs)
 
 
 SAFE_TAGS = ['em', 'b', 'i', 'strong', 'a']
