@@ -741,8 +741,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     Display for the authority as it is has been used in a publication.""")
 
     data_display_order = models.FloatField(default=1.0, help_text="""
-    Position on which the authority should be displayed.""")
-
+    Position at which the authority should be displayed.""")
+    
     # currently not used
     confidence_measure = models.FloatField(default=1.0,
                                            validators = [MinValueValidator(0),

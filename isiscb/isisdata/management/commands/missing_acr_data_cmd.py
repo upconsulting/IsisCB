@@ -25,9 +25,9 @@ class Command(BaseCommand):
 
                 try:
                     acrelation = ACRelation.objects.get(pk=acr_id)
-                    if not acrelation.name_as_entered:
+                    if name:
                         acrelation.name_as_entered = name
-                    if not acrelation.data_display_order:
+                    if order:
                         acrelation.data_display_order = order
                     acrelation.save()
                 except ObjectDoesNotExist:
