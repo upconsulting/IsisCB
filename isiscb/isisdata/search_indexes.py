@@ -124,6 +124,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         #if not authors:
         #    return ''
         authors = obj.get_all_contributors
+        if not authors:
+            return ""
         author = authors[0]
         if not author:
             return ''
