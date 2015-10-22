@@ -492,7 +492,7 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     @property
     def get_all_contributors(self):
-        query = Q(citation_id=self.id) & Q(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30)
+        query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
         return ACRelation.objects.filter(query).order_by('data_display_order')
 
 
@@ -742,7 +742,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
 
     data_display_order = models.FloatField(default=1.0, help_text="""
     Position at which the authority should be displayed.""")
-    
+
     # currently not used
     confidence_measure = models.FloatField(default=1.0,
                                            validators = [MinValueValidator(0),
