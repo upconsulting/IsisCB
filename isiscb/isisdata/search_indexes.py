@@ -105,7 +105,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_authors(self, obj):
         #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
-        authors = obj.get_all_contributors()
+        authors = obj.get_all_contributors
         names = []
         for author in authors:
             name = author.name_for_display_in_citation
@@ -123,7 +123,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         #    authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
         #if not authors:
         #    return ''
-        authors = obj.get_all_contributors()
+        authors = obj.get_all_contributors
         author = authors[0]
         if not author:
             return ''
