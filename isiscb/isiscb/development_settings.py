@@ -120,6 +120,19 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+ELASTICSEARCH_INDEX_SETTINGS = {
+    "index" : {
+        "analysis" : {
+            "analyzer" : {
+                "default" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["standard", "asciifolding"]
+                }
+            }
+        }
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
