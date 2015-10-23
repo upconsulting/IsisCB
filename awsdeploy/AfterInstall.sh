@@ -14,19 +14,15 @@ workon isiscb
 # Install (new) Python dependencies.
 pip install -r requirements.txt
 
+# Populate environment variables from EC2 instance tags.
+awsdeploy/bin/set_environ.sh
+
 # Supervisor manages Gunicorn, and perhaps other services down the road.
 #  supervisor.conf is updated (overwritten) on each deploy, so this loads
 #  the new configuration.
 supervisord -c /etc/supervisor/conf.d/supervisor.conf
 supervisorctl -c /etc/supervisor/conf.d/supervisor.conf reread
 supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
-
-
-INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id);
-aws ec2 describe-tags --filters "Name=resource-id,Values=i-a5accd63" "Name=key,Values=RDS_USER" > rds_user.json
-aws ec2 describe-tags --filters "Name=resource-id,Values=i-a5accd63" "Name=key,Values=RDS_PASSWORD" > rds_password.json
-export RDS_USER=$(python awsdeploy/bin/get_environ.py rds_user.json);
-export RDS_PASSWORD=$(python awsdeploy/bin/get_environ.py rds_password.json);
 
 # Static files are hosted on S3. This will push any new or updated static files
 #  to the appropriate bucket (see development_settings.py).
