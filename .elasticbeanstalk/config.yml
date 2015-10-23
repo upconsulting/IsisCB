@@ -1,10 +1,10 @@
 branch-defaults:
-  master:
-    environment: IsisCB-staging
+  ISIS-018:
+    environment: IsisCB-production
 global:
   application_name: IsisCB
   default_ec2_keyname: isiscb-eb
-  default_platform: Python 2.7
+  default_platform: 64bit Amazon Linux 2015.03 v2.0.1 running Python 2.7
   default_region: us-west-2
   profile: eb-cli
   sc: git

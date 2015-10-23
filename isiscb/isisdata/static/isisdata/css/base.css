@@ -154,12 +154,11 @@ li {
 .footer {
   background-color: #f5f5f5;
     bottom: 0;
-    min-height: 55px;
+    min-height: 25px;
     position: fixed;
     width: 100%;
     font-weight: bold;
     padding-left: 20px;
-    margin-left: -15px;
 }
 
 .selected_facets {

@@ -72,8 +72,3 @@ urlpatterns = [
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 ]
-
-import json
-import datetime
-with open('server_start', 'w') as f:
-    json.dump(str(datetime.datetime.now()), f)
