@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'isisdata',
     'storages',
     'haystack',
+    "elasticstack",
     'captcha',
 
 )
@@ -114,7 +115,7 @@ DATABASES = {
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': 'ec2-54-69-38-140.us-west-2.compute.amazonaws.com:9200/',
         'INDEX_NAME': 'haystack',
     },
