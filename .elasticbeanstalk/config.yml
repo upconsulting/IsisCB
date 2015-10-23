@@ -1,5 +1,5 @@
 branch-defaults:
-  ISIS-018:
+  master:
     environment: IsisCB-production
 global:
   application_name: IsisCB
