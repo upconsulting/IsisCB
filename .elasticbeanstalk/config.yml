@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: IsisCB-production
+    environment: production
 global:
   application_name: IsisCB
   default_ec2_keyname: isiscb-eb
