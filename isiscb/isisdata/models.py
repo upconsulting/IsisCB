@@ -492,6 +492,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         query = Q(citation_id=self.id)
         return ACRelation.objects.filter(query)
 
+    @property
+    def get_all_contributors(self):
+        query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
+        return ACRelation.objects.filter(query).order_by('data_display_order')
+
 
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
@@ -733,6 +738,12 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     citation. Eg. the form of the author's name as it appears on a
     publication--say, J.E. Koval--which might be different from the name of the
     authority--Jenifer Elizabeth Koval.""")
+
+    name_as_entered = models.CharField(max_length=255, blank=True, help_text="""
+    Display for the authority as it is has been used in a publication.""")
+
+    data_display_order = models.FloatField(default=1.0, help_text="""
+    Position at which the authority should be displayed.""")
 
     # currently not used
     confidence_measure = models.FloatField(default=1.0,

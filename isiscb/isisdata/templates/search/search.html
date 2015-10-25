@@ -24,84 +24,85 @@ $(document).ready(function() {
 
 <div class="row">
     <div class="col-sm-12 col-md-12">
-      <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
-        <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Bibiographic Records</a></li>
-        <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authority Records</a></li>
-        <!--<li role="presentation"><a href="#">Messages</a></li>-->
-      </ul>
+        <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
+            <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Bibiographic Records</a></li>
+            <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authority Records</a></li>
+            <!--<li role="presentation"><a href="#">Messages</a></li>-->
+        </ul>
 
 
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane active" id="citations">
+            <div role="tabpanel" class="tab-pane active" id="citations">
+                <form method="get" action=".">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-3 topnav text-center">
+                            {% include "isisdata/navbuttons.html" %}
+                        </div>
+                        <div class="col-sm-8 col-md-9">
 
+                            <label class="control-label" for="q">
+                                Search bibliographics records for:
+                            </label>
+                            <div class="input-group">
+                                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit">Search</button>
+                                </span>
+                            </div>
+                            <div>
+                                <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.citation">
+                                <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
+                                <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
+                            </div>
 
-            <form method="get" action=".">
-                <label class="control-label" for="q">
-                    Search bibliographics records for:
-                  </label>
-                  <div class="input-group">
-                    <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
-                    <span class="input-group-btn">
-                      <button class="btn btn-default" type="submit">Search</button>
-                    </span>
-                  </div>
-                  <div>
-                    <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.citation">
-                    <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
-                    <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
-                  </div>
-
-                  <div class="row space-top">
-                  <div class="col-sm-3 col-md-2 ">
-                    {% include "search/search_facets_citations.html" %}
-                  </div>
-
-                  <div class="col-sm-9 col-md-10 ">
-                    {% include "search/search_results_citations.html" %}
-                  </div>
-                </div>
-            </form>
-          </div>
-
-        <div role="tabpanel" class="tab-pane" id="authorities">
-            <div class="row">
-                <div class="col-sm-3 col-md-2 topnav">
-
-                <a href="javascript:window.history.back()" class=""><span class="glyphicon glyphicon-arrow-left nav-button">&nbsp;</span></a>
-                <a href="{% url 'index' %}" class=""><span class="glyphicon glyphicon-home nav-button">&nbsp;</span></a>
-                <a href="{% url 'haystack_search' %}" class=""><span class="glyphicon glyphicon-search nav-button">&nbsp;</span></a>
-
-                </div>
-                <div class="col-sm-9 col-md-10">
-                    <form method="get" action=".">
-                        <label class="control-label" for="q">
-                          Search authority records for:
-                         </label>
-                         <div class="input-group">
-                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
-                            <span class="input-group-btn">
-                              <button class="btn btn-default" type="submit">Search</button>
-                            </span>
-                         </div>
-                        <div>
-                          <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.authority">
+                        </div>
+                    </div>
+                    <div class="row space-top">
+                        <div class="col-sm-4 col-md-3 ">
+                            {% include "search/search_facets_citations.html" %}
                         </div>
 
-                    </form>
-                </div>
-
-            </div>
-            <div class="row space-top">
-                <div class="col-sm-3 col-md-2">
-                  {% include "search/search_facets_authorities.html" %}
-                </div>
-                <div class="col-sm-9 col-md-10">
-                  {% include "search/search_results_authorities.html" %}
-                </div>
+                        <div class="col-sm-8 col-md-9 ">
+                            {% include "search/search_results_citations.html" %}
+                        </div>
+                    </div>
+                </form>
             </div>
 
+            <div role="tabpanel" class="tab-pane" id="authorities">
+                <form method="get" action=".">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-3 topnav text-center">
+                            {% include "isisdata/navbuttons.html" %}
+                        </div>
+                        <div class="col-sm-8 col-md-9">
+                            <label class="control-label" for="q">
+                                Search authority records for:
+                            </label>
+                            <div class="input-group">
+                                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" type="submit">Search</button>
+                                </span>
+                            </div>
+                            <div>
+                                <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.authority">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row space-top">
+                        <div class="col-sm-4 col-md-3">
+                            {% include "search/search_facets_authorities.html" %}
+                        </div>
+                        <div class="col-sm-8 col-md-9">
+                            {% include "search/search_results_authorities.html" %}
+                        </div>
+                    </div>
+
+                </div>
+            </form>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 {% endblock %}

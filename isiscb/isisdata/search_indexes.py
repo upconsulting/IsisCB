@@ -104,17 +104,36 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return [attr.value_freeform for attr in obj.attributes.all()]
 
     def prepare_authors(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
+        #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
+        authors = obj.get_all_contributors
+        names = []
+        for author in authors:
+            name = author.name_for_display_in_citation
+            if not name:
+                name = author.authority.name
+            names.append(name)
+        return names
 
+    # TODO: this method needs to be changed to include author order
     def prepare_author_for_sort(self, obj):
-        authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])
+        #editors = obj.acrelation_set.filter(type_controlled__in=['ED'])
+        #if obj.type_controlled == 'BO' and editors:
+        #    authors = obj.acrelation_set.filter(type_controlled__in=['ED'])
+        #else:
+        #    authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
+        #if not authors:
+        #    return ''
+        authors = obj.get_all_contributors
         if not authors:
-            return ''
+            return ""
         author = authors[0]
         if not author:
             return ''
 
-        return author.authority.name;
+        name = author.name_for_display_in_citation
+        if not name:
+            name = author.authority.name
+        return name;
 
     def prepare_subjects(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]

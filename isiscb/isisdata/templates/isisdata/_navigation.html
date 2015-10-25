@@ -1,55 +1,59 @@
 {% load staticfiles %}
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="{% url 'index' %}"><img height="100px" src="{% static "isisdata/images/isis_icon_white-small.png" %}" ></a>
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-
-    </div>
     <div class="container-fluid">
-        <!-- <div class="collapse navbar-collapse"> -->
-        <div class="navbar-right">
-        {% if user.is_authenticated %}
-                <div class="dropdown">
-                	<button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                		{{ user.username }}
-                		<span class="caret"></span>
-                	</button>
-                	<ul class="dropdown-menu" aria-labelledby="usermenu">
-                		<!-- <li><a href="/profile/">Dashboard</a></li> -->
-                		<li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
-                		<li><a href="{% url 'django.contrib.auth.views.logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
-                	</ul>
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'index' %}"><img height="100px" src="{% static "isisdata/images/isis_icon_white-small.png" %}" ></a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+        </div>
+
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse">
+                <span class="text">asdf</span>
+                <div class="navbar-right">
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            {{ user.username }}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="usermenu">
+                            <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                            <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                            <li><a href="{% url 'django.contrib.auth.views.logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
+                        </ul>
+                    </div>
+
+                    {% else %}
+                    <a href="{% url 'django.contrib.auth.views.login' %}?next={{ request.get_full_path|urlencode }}">
+                        <button class="btn btn-primary" type="button" id="loginButton">
+                            <span class="glyphicon glyphicon-user" ></span>
+                            Log In
+                        </button>
+                    </a>
+                    {% endif %}
+
                 </div>
+            </div>
 
-    	      {% else %}
-            	<a href="{% url 'django.contrib.auth.views.login' %}?next={{ request.get_full_path|urlencode }}">
-                <button class="btn btn-primary" type="button" id="loginButton">
-                  <span class="glyphicon glyphicon-user" ></span>
-              		Log In
-            		</button>
-            	</a>
-    	      {% endif %}
-
-    </div>
-        <!-- </div> -->
-    </div>
-
-      <!-- <form class="navbar-form navbar-right">
-        <div class="form-group">
-          <input type="text" placeholder="Email" class="form-control">
+            <!-- </div> -->
         </div>
+
+        <!-- <form class="navbar-form navbar-right">
         <div class="form-group">
-          <input type="password" placeholder="Password" class="form-control">
-        </div>
-        <button type="submit" class="btn btn-primary">Sign in</button>
-      </form> -->
-    <!--/.navbar-collapse -->
-  
+        <input type="text" placeholder="Email" class="form-control">
+    </div>
+    <div class="form-group">
+    <input type="password" placeholder="Password" class="form-control">
+</div>
+<button type="submit" class="btn btn-primary">Sign in</button>
+</form> -->
+<!--/.navbar-collapse -->
+
 </nav>

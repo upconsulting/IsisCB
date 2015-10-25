@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('isisdata', '0002_attributetype_display_name'),
+        ('isisdata', '0004_auto_20151025_2110'),
     ]
 
     operations = [

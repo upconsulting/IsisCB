@@ -27,6 +27,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     'isiscb-staging.elasticbeanstalk.com',
     'isiscb.elasticbeanstalk.com',
+    'isiscb-production.elasticbeanstalk.com',
     '.isiscb.org',
 ]
 
