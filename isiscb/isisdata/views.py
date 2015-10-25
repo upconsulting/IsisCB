@@ -25,7 +25,6 @@ from rest_framework.reverse import reverse
 
 from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 
-
 from isisdata.models import *
 
 from django.template import RequestContext, loader

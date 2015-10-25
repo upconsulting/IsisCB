@@ -142,12 +142,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.ext.rest_framework.OAuth2Authentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ),
+    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata'
 }
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -176,9 +179,7 @@ except ImportError:
 EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 SMTP_EMAIL = 'info@aplacecalledup.com'
 
-
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
-
 
 # social
 
@@ -192,3 +193,6 @@ try:
 except ImportError:
     SOCIAL_AUTH_TWITTER_SECRET = ''
     SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+
+LICENSE = 'This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.'
