@@ -4,6 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, Invali
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django import forms
 from django.db import connection
 from django.http import HttpResponse
@@ -385,7 +386,7 @@ class AttributeTypeViewSet(mixins.ListModelMixin,
     queryset = AttributeType.objects.all()
     serializer_class = AttributeTypeSerializer
     pagination_class = None     # Angular has trouble with pagination.
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes = [permissions.AllowAny,]
 
 
 class ContentTypeViewSet(mixins.ListModelMixin,
@@ -584,6 +585,7 @@ def authority(request, authority_id):
     })
     return HttpResponse(template.render(context))
 
+
 def citation(request, citation_id):
     """
     View for individual citation record.
@@ -654,7 +656,103 @@ def citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 
+@login_required
+def search_saved(request):
+    """
+    Provides saved searches for a logged-in user.
+    """
+
+    # If the user is Anonymous, redirect them to the login view.
+    if not type(request.user._wrapped) is User:
+        return HttpResponseRedirect(reverse('login'))
+
+    save = request.GET.get('save', None)
+    remove = request.GET.get('remove', None)
+    if save:
+        instance = SearchQuery.objects.get(pk=save)
+        instance.saved = True
+        instance.save()
+    if remove:
+        instance = SearchQuery.objects.get(pk=remove)
+        instance.saved = False
+        instance.save()
+
+
+
+    template = loader.get_template('isisdata/search_saved.html')
+    searchqueries = request.user.searches.filter(saved=True).order_by('-created_on')
+
+    paginator = Paginator(searchqueries, 10)
+
+    page = request.GET.get('page')
+    try:
+        searchqueries = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        searchqueries = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        searchqueries = paginator.page(paginator.num_pages)
+
+    context = RequestContext(request, {
+        'searchqueries': searchqueries,
+    })
+    return HttpResponse(template.render(context))
+
+
+
+@login_required
+def search_history(request):
+    """
+    Provides the search history for a logged-in user.
+    """
+
+    # If the user is Anonymous, redirect them to the login view.
+    if not type(request.user._wrapped) is User:
+        return HttpResponseRedirect(reverse('login'))
+
+    template = loader.get_template('isisdata/search_history.html')
+    searchqueries = request.user.searches.order_by('-created_on')
+
+    paginator = Paginator(searchqueries, 10)
+
+    page = request.GET.get('page')
+    try:
+        searchqueries = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        searchqueries = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        searchqueries = paginator.page(paginator.num_pages)
+
+    context = RequestContext(request, {
+        'searchqueries': searchqueries,
+    })
+    return HttpResponse(template.render(context))
+
+
 class IsisSearchView(FacetedSearchView):
+    def __call__(self, request):
+        """
+        Overridden to provide search history log functionality.
+        """
+
+        # If the user is logged in, record the search in their history.
+        log = request.GET.get('log', 'True') != 'False'
+        parameters = request.GET.get('q', None)
+        search_models = request.GET.get('models', None)
+        selected_facets = request.GET.get('selected_facets', None)
+        if log and parameters and request.user.id > 0:
+            searchquery = SearchQuery(
+                user = request.user._wrapped,
+                parameters = parameters,
+                search_models = search_models,
+                selected_facets = selected_facets,
+            )
+            searchquery.save()
+
+        return super(IsisSearchView, self).__call__(request)
 
     def build_page(self):
         """
@@ -725,7 +823,6 @@ class UserRegistrationView(RegistrationView):
     def get_initial(self):
         initial = super(UserRegistrationView, self).get_initial()
         initial.update({'next': self.request.GET.get('next', None)})
-        print initial
         return initial
 
     def register(self, **cleaned_data):

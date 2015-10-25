@@ -1198,3 +1198,15 @@ class TaggingSchema(models.Model):
     created_by = models.ForeignKey(User, related_name='tagging_schemas')
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
+
+
+class SearchQuery(models.Model):
+    user = models.ForeignKey(User, related_name='searches')
+    created_on = models.DateTimeField(auto_now_add=True)
+    parameters = models.CharField(max_length=500)
+    search_models = models.CharField(max_length=500, null=True, blank=True)
+    selected_facets = models.CharField(max_length=500, null=True, blank=True)
+    name = models.CharField(max_length=255, blank=True, null=True, help_text="""
+    Provide a memorable name so that you can find this search later.""")
+
+    saved = models.BooleanField(default=False)
