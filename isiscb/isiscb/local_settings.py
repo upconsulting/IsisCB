@@ -34,7 +34,11 @@ INSTALLED_APPS = (
     'simple_history',
     'isisdata',
     'storages',
-    'haystack'
+    'haystack',
+    "elasticstack",
+    'oauth2_provider',
+    'captcha',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -47,7 +51,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 )
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'isiscb.urls'
 
@@ -62,7 +69,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'isisdata.context_processors.server_start',
                 'isisdata.context_processors.social',
             ],
         },
@@ -95,10 +101,23 @@ DATABASES = {
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': 'http://127.0.0.1:9200/',
         'INDEX_NAME': 'haystack',
     },
+}
+
+ELASTICSEARCH_INDEX_SETTINGS = {
+    "settings" : {
+        "analysis" : {
+            "analyzer" : {
+                "default" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["standard", "asciifolding"]
+                }
+            }
+        }
+    }
 }
 
 # Internationalization
@@ -114,9 +133,20 @@ USE_L10N = True
 
 USE_TZ = True
 
+
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -124,6 +154,7 @@ REST_FRAMEWORK = {
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
 
 
 # LOGIN_REDIRECT_URL = '/'

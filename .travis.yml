@@ -1,27 +1,47 @@
 language: python
 python:
 - '2.7'
-addons:
-  apt:
-    packages:
-    - unixodbc-dev
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.local_settings
 script:
 - pip install nose
 - cd isiscb
+- git clone http://github.com/ubernostrum/django-registration.git --depth 2
 - python manage.py migrate
 - python -Wi manage.py test
+- cd ..
 deploy:
-  provider: codedeploy
-  access_key_id: AKIAIVNDMWM77W3N2KTA
-  region: us-west-2
-  bucket: S3 Bucket
-  revision_type: github
-  application: "isiscb-develop-app"
-  deployment_group: "isiscb-develop-deploymentgroup"
-  secret_access_key:
+  - provider: codedeploy
+    access_key_id: AKIAIVNDMWM77W3N2KTA
+    region: us-west-2
+    bucket: S3 Bucket
+    revision_type: github
+    application: "isiscb-develop-app"
+    deployment_group: "isiscb-develop-deploymentgroup"
+    secret_access_key:
       secure: "osQ5jCPZsn/RasLViriEYTNElAwIKFkkG5fmurDeeV/PrtUuk/u4Bi5mXDw5LLp8RCggEQAExTiAcJKvERUGkNrkRB4p7ExeoTzEf8YaBfwwXotZ4YtdiEt/iIa53aIAZz2pVLpDeJ3pK1OyK/jQPLE5yCwHEDLZVWMNtjXE1fmPVsQWX5p+5VK5ntEeZjMunZBgZFa6B2uvGNJFVhK5ymFREkoJT3lqH4cavD1ddf5lP1wjf0YtAqmuVaRZzyOIN/zdPMEsj5G38na7p/d89kCfSr6X9+0EMOso3l0MXztKoBiY9x0REV9GH8UGoJV2pltljw/CNRcE2BZg7x4SamZRmeLNx2409Xk5JAQ2AQ7/rCQweCEmIPCLZMmMz99i5UzsZ8Y/pgNBRLS9qwugXssvQd7ypJnce0iRueCndX1C2Al4XnomTwlHWamwvtC/CszMlT1zFLvi0DiUOyX0dYm1MzpBDPB/Gy8T7JJ9zRigZ9QzqapDi6mZ2D2Dt7rT0CQL6kdZIy7upFReEs5pNaNn64hlK5PVTa9dn7hO8O2T6J9gvbTi0xXhefPGaHnOUtQeOtJBe/xStbz8RKSn7XIXt9VYtgiJ4RfW2YAiofnGhnwQYy5HKJgbrPGC1uCHAeNpR5uq5AQEVbET8lghuoqm97lw1VtbVMYuB17AWnQ="
-  on:
-    branch: develop
+    on:
+      branch: develop
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: isiscb-staging
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      branch: master
+  - provider: elasticbeanstalk
+    access_key_id: AKIAI3SRBWU3O3X5S7CQ
+    secret_access_key:
+      secure: "LtRgo+nPOgpOzAj2WBTJm5LhymiSOlkUQQ4xoLpo0lbUxXAJR64ma0VK31XuPDzT8wAW9K5UpELZVI7uyeh/iz/8Al5cV53TCuKlEYeKhSauoCfEexRdCQp0qe9/F9DjOVPU+yO3e/ADou6dc7e7SyvS9zalafRn/rms8Qko6iiu88Bi1JFggCYiubisyzHPfT8bLhE/pB9efxkgiP5m8kbuXLzTKBfK5nAP4W0LcA7ATA0Urk9FF+fT/fZoZsDAHvF62i6h5zxoi7+FR9dSCITTuJBsyYvLErhlAB5vlEL5deAvJvJUKv1rrhPWfoO2PW++BWNdE+DMUqDP6FVd7sAgMXRM/yqZO5n6DFYQJQHjyPRK2HLDHjIPFqfeokvq8JnuBcXpa3ajln8+Zz2YlCl0ZPLFj1q5hHGiwhp3+BwG/LTzza9heMlPDwdD5MdOXNpclzw/xEp/ffE/boriDyq2wrDRKOseeoY8ts3yByLqhqigzufei4Yj/4CxnEX9SZnF2O+nPzaMih6mf5+KTqTM6s5GENNR//w233WS62lNxF2rJhvNES3i3OCzb+cVwY5kQgELiLWgUb4hLOy1NJttVHFFB/xLATG3nditXq5TN2XFEkcVt2nlUOyCd5Nay0aNH2Qbo2iGhcBBjCetdjgmqBd/fv7PTo+YRWZWkx4="
+    region: us-west-2
+    app: IsisCB
+    env: isiscb-production
+    bucket_name: elasticbeanstalk-us-west-2-655333410217
+    on:
+      repo: upconsulting/IsisCB
+      tags: true

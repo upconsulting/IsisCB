@@ -1,17 +1,5 @@
 #!/bin/sh
 
-cd /home/ec2-user/isiscb
-
-# This is necessary for virtualenvwrapper (mkvirtualenv, workon) to work.
-export WORKON_HOME=$HOME/.virtualenvs
-source /usr/local/bin/virtualenvwrapper.sh
-
-NAME="isiscb"
-DJANGODIR=/home/ec2-user/isiscb/isiscb  # Directory that contains manage.py.
-SOCKFILE=/tmp/gunicorn.sock             # nginx connects here.
-NUM_WORKERS=3
-DJANGO_WSGI_MODULE=isiscb.wsgi
-
 INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id);
 aws ec2 describe-tags --filters "Name=resource-id,Values=i-a5accd63" "Name=key,Values=RDS_USER" > rds_user.json
 aws ec2 describe-tags --filters "Name=resource-id,Values=i-a5accd63" "Name=key,Values=RDS_PASSWORD" > rds_password.json
@@ -21,18 +9,3 @@ export RDS_USER=$(python awsdeploy/bin/get_environ.py rds_user.json);
 export RDS_PASSWORD=$(python awsdeploy/bin/get_environ.py rds_password.json);
 export AWS_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py rds_access.json);
 export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py rds_secret.json);
-
-echo "Starting $NAME as `whoami`"
-
-cd $DJANGODIR
-workon isiscb
-
-RUNDIR=$(dirname $SOCKFILE)
-test -d $RUNDIR || mkdir -p $RUNDIR
-
-exec gunicorn ${DJANGO_WSGI_MODULE}:application \
-  --name $NAME \
-  --workers $NUM_WORKERS \
-  --bind=unix:$SOCKFILE \
-  --log-level=debug \
-  --log-file=-

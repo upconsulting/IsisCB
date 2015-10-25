@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 
 from simple_history.models import HistoricalRecords
 
+from oauth2_provider.models import AbstractApplication
+
 import datetime
 import iso8601
 import pickle

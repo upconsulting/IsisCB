@@ -24,14 +24,11 @@ $(document).ready(function() {
 
 <div class="row topnav-main">
   <div class="col-sm-3 col-md-2 topnav">
-    <div class="menu">
-      <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
 
-    </div>
+      <a href="javascript:window.history.back()" class=""><span class="glyphicon glyphicon-arrow-left nav-button">&nbsp;</span></a>
+      <a href="{% url 'index' %}" class=""><span class="glyphicon glyphicon-home nav-button">&nbsp;</span></a>
+      <a href="{% url 'haystack_search' %}" class=""><span class="glyphicon glyphicon-search nav-button">&nbsp;</span></a>
+
     </div>
     <div class="col-sm-9 col-md-10 topnav">
       <h2>Explore the IsisCB</h2>

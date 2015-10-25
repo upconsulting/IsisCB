@@ -19,12 +19,16 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'isiscb-staging.elasticbeanstalk.com',
+    'isiscb.elasticbeanstalk.com',
+    '.isiscb.org',
+]
 
 MIGRATION_MODULES = {
     'isisdata': 'isisdata.migrations'
@@ -47,8 +51,12 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     'captcha',
-
+    "elasticstack",
+    'oauth2_provider',
+    'corsheaders',
 )
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -60,6 +68,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -87,7 +96,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'isisdata.context_processors.server_start',
                 'isisdata.context_processors.social',
             ],
         },
@@ -96,31 +104,40 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'isiscb.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-from secrets import POSTGRESQL_PASSWORD
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb',
-        'USER': 'upconsulting',
-        'PASSWORD': POSTGRESQL_PASSWORD,
-        'HOST': 'isiscb-develop-db-alt.cjicxluc6l0j.us-west-2.rds.amazonaws.com',
-        'PORT': '5432',
+        'NAME': os.environ['RDS_DB_NAME'],
+        'USER': os.environ['RDS_USERNAME'],
+        'PASSWORD': os.environ['RDS_PASSWORD'],
+        'HOST': os.environ['RDS_HOSTNAME'],
+        'PORT': os.environ['RDS_PORT'],
     }
 }
 
+ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
+ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
+
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'ec2-54-69-38-140.us-west-2.compute.amazonaws.com:9200/',
-        'INDEX_NAME': 'haystack',
+        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'URL': ELASTICSEARCH_HOST,
+        'INDEX_NAME': ELASTICSEARCH_INDEX,
     },
 }
 
+ELASTICSEARCH_INDEX_SETTINGS = {
+    "settings" : {
+        "analysis" : {
+            "analyzer" : {
+                "default" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["standard", "asciifolding"]
+                }
+            }
+        }
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -135,21 +152,26 @@ USE_L10N = True
 
 USE_TZ = True
 
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-
-# secrets.py should set the AWS_SECRET_ACCESS_KEY
-from secrets import AWS_SECRET_ACCESS_KEY
-
-AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
-AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
-AWS_ACCESS_KEY_ID = 'AKIAIL2MMPDWFF576XUQ'
+AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+AWS_MEDIA_BUCKET_NAME = os.environ['AWS_MEDIA_BUCKET_NAME']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
@@ -157,6 +179,8 @@ STATICFILES_DIRS = ['isisdata/static']
 STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
 STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+# STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+# STATIC_URL = '/static/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
@@ -167,34 +191,23 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = 'isiscb-develop.aplacecalledup.com'
-URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+DOMAIN = os.environ['DJANGO_DOMAIN']
+URI_PREFIX = os.environ['DJANGO_URI_PREFIX']
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-try:
-    from secrets import SMTP_USER, SMTP_PASSWORD
-    EMAIL_HOST_USER = SMTP_USER
-    EMAIL_HOST_PASSWORD = SMTP_PASSWORD
-except ImportError:
-    EMAIL_HOST_USER = ''
-    EMAIL_HOST_PASSWORD =''
-EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
-SMTP_EMAIL = 'info@aplacecalledup.com'
+EMAIL_HOST_USER = os.environ['SMTP_USER']
+EMAIL_HOST_PASSWORD = os.environ['SMTP_PASSWORD']
+EMAIL_HOST = os.environ['SMTP_HOST']
+SMTP_EMAIL = os.environ['SMTP_EMAIL']
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
-
-# social
-
-FACEBOOK_APP_ID = '1694252594140628'
+# TODO: consolidate these settings.
+FACEBOOK_APP_ID = os.environ['FACEBOOK_APP_ID']
 SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
-
-try:
-    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
-except ImportError:
-    SOCIAL_AUTH_TWITTER_SECRET = ''
-    SOCIAL_AUTH_FACEBOOK_SECRET = ''
+SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
+SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
