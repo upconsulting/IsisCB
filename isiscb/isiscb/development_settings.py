@@ -47,8 +47,8 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     "elasticstack",
+    'oauth2_provider',
     'captcha',
-
 )
 
 MIDDLEWARE_CLASSES = (
@@ -122,7 +122,7 @@ HAYSTACK_CONNECTIONS = {
 }
 
 ELASTICSEARCH_INDEX_SETTINGS = {
-    "index" : {
+    "settings" : {
         "analysis" : {
             "analyzer" : {
                 "default" : {

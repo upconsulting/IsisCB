@@ -34,7 +34,10 @@ INSTALLED_APPS = (
     'simple_history',
     'isisdata',
     'storages',
-    'haystack'
+    'haystack',
+    "elasticstack",
+    'oauth2_provider',
+    'captcha',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -93,10 +96,23 @@ DATABASES = {
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': 'http://127.0.0.1:9200/',
         'INDEX_NAME': 'haystack',
     },
+}
+
+ELASTICSEARCH_INDEX_SETTINGS = {
+    "settings" : {
+        "analysis" : {
+            "analyzer" : {
+                "default" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["standard", "asciifolding"]
+                }
+            }
+        }
+    }
 }
 
 # Internationalization

@@ -51,6 +51,8 @@ INSTALLED_APPS = (
     'storages',
     'haystack',
     'captcha',
+    "elasticstack",
+    'oauth2_provider',
 
 )
 
@@ -115,10 +117,23 @@ ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
     },
+}
+
+ELASTICSEARCH_INDEX_SETTINGS = {
+    "settings" : {
+        "analysis" : {
+            "analyzer" : {
+                "default" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["standard", "asciifolding"]
+                }
+            }
+        }
+    }
 }
 
 # Internationalization
