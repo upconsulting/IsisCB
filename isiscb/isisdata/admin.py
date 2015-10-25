@@ -572,4 +572,5 @@ admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(Comment)
 admin.site.register(SearchQuery)
+admin.site.register(Language)
 # Register your models here.
