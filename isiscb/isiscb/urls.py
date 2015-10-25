@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.views.generic.base import RedirectView
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
+from oauth2_provider import views as oauth_views
 
 from isisdata import views
 
@@ -47,29 +48,41 @@ urlpatterns = [
     url(r'^isis/', include('isisdata.urls')),
     url(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-      url(r'^password/change/$',
-                    auth_views.password_change,
-                    name='password_change'),
-      url(r'^password/change/done/$',
-                    auth_views.password_change_done,
-                    name='password_change_done'),
-      url(r'^password/reset/$',
-                    auth_views.password_reset,
-                    {'from_email': settings.SMTP_EMAIL},
-                    name='password_reset'),
-      url(r'^password/reset/done/$',
-                    auth_views.password_reset_done,
-                    name='password_reset_done'),
-      url(r'^password/reset/complete/$',
-                    auth_views.password_reset_complete,
-                    name='password_reset_complete'),
-      url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-                    auth_views.password_reset_confirm,
-                    name='password_reset_confirm'),
+    url(r'^password/change/$',  # TODO: can we simplify this?
+                auth_views.password_change,
+                name='password_change'),
+    url(r'^password/change/done/$',
+                auth_views.password_change_done,
+                name='password_change_done'),
+    url(r'^password/reset/$',
+                auth_views.password_reset,
+                {'from_email': settings.SMTP_EMAIL},
+                name='password_reset'),
+    url(r'^password/reset/done/$',
+                auth_views.password_reset_done,
+                name='password_reset_done'),
+    url(r'^password/reset/complete/$',
+                auth_views.password_reset_complete,
+                name='password_reset_complete'),
+    url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+                auth_views.password_reset_confirm,
+                name='password_reset_confirm'),
     url(r'^register/$', views.UserRegistrationView.as_view()),
-    url(r'^', include('registration.backends.simple.urls')),
+    url(r'^accounts/', include('registration.backends.simple.urls')),
     url(r'^captcha/', include('captcha.urls')),
-    url(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+
+    # We define the following oauth2 views explicitly to disable insecure
+    #  features. See https://github.com/evonove/django-oauth-toolkit/issues/196
+    url(r'^o/authorize/$',
+                oauth_views.AuthorizationView.as_view(),
+                name="authorize"),
+    url(r'^o/token/$', oauth_views.TokenView.as_view(),
+                name="token"),
+    url(r'^o/revoke_token/$',
+                oauth_views.RevokeTokenView.as_view(),
+                name="revoke-token"),
+
+    # Social authentication views.
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 ]

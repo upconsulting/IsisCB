@@ -22,6 +22,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
+
+
 from isisdata.models import *
 
 from django.template import RequestContext, loader
@@ -331,7 +334,9 @@ class AuthorityViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
-    permission_classes = [permissions.IsAuthenticated,]
+    # permission_classes = [permissions.IsAuthenticated, TokenHasScope]
+    # authentication_classes = [OAuth2Authentication]
+    # required_scopes = ['groups']
 
 
 class UserViewSet(mixins.ListModelMixin,

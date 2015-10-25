@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     "elasticstack",
     'oauth2_provider',
     'captcha',
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -49,7 +50,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 )
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'isiscb.urls'
 
@@ -127,6 +131,11 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'api': 'API scope'}
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
