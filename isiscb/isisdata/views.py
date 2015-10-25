@@ -678,7 +678,6 @@ def search_saved(request):
         instance.save()
 
 
-
     template = loader.get_template('isisdata/search_saved.html')
     searchqueries = request.user.searches.filter(saved=True).order_by('-created_on')
 
@@ -733,6 +732,9 @@ def search_history(request):
 
 
 class IsisSearchView(FacetedSearchView):
+    """
+    Provides the search view at /isis/
+    """
     def __call__(self, request):
         """
         Overridden to provide search history log functionality.
@@ -794,6 +796,7 @@ class IsisSearchView(FacetedSearchView):
         extra['sort_order'] = self.request.GET.get('sort_order')
         extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
         extra['count'] = len(self.results)
+        extra['active'] = 'home'
 
         facet_map = {}
         facets_raw = []

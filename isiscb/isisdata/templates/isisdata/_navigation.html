@@ -15,8 +15,20 @@
 
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
-                <span class="text">asdf</span>
-                <div class="navbar-right">
+                <div class="navbar-left text-left" style="display: inline-block;">
+                    <a href="/isis/" style="text-decoration: none;">
+                        <span class="text text-white large-text text-left">IsisCB Search</span>
+                    </a>
+                </div>
+                <div class="navbar-center text-center" style="display: inline-block;">
+                    <ul class="nav navbar-nav">
+                        <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
+                        <li class="{% if active == 'about' %}active{% endif %}"><a href="#">About</a></li>
+                        <li class="{% if active == 'help' %}active{% endif %}"><a href="#">Help</a></li>
+                        <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#">Feedback</a></li>
+                    </ul>
+                </div>
+                <div class="navbar-right" style="display: inline-block;">
                     {% if user.is_authenticated %}
                     <div class="dropdown">
                         <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
