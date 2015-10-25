@@ -103,7 +103,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <table class="details">
       {% for prop in properties_map %}
-      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {{ prop.authority.name }}</td></tr>
+      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> <a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a></td></tr>
       {% endfor %}
       {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
       <tr>
