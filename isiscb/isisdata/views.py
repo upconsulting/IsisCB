@@ -133,6 +133,7 @@ class UserRelatedSerializer(serializers.HyperlinkedModelSerializer):
         return User.objects.get(pk=data)
         return super(UserRelatedSerializer, self).to_internal_value(data)
 
+
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     subject_content_type = ContentTypeRelatedField(queryset=ContentType.objects.all(), many=False)
     created_by = UserRelatedSerializer(many=False, read_only=True)
@@ -330,6 +331,7 @@ class AuthorityViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class UserViewSet(mixins.ListModelMixin,
@@ -337,6 +339,7 @@ class UserViewSet(mixins.ListModelMixin,
                   viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class CitationViewSet(mixins.ListModelMixin,
@@ -344,6 +347,7 @@ class CitationViewSet(mixins.ListModelMixin,
                       viewsets.GenericViewSet):
     queryset = Citation.objects.all()
     serializer_class = CitationSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class ACRelationViewSet(mixins.ListModelMixin,
@@ -351,6 +355,7 @@ class ACRelationViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = ACRelation.objects.all()
     serializer_class = ACRelationSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class CCRelationViewSet(mixins.ListModelMixin,
@@ -358,6 +363,7 @@ class CCRelationViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = CCRelation.objects.all()
     serializer_class = CCRelationSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class AARelationViewSet(mixins.ListModelMixin,
@@ -365,6 +371,7 @@ class AARelationViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = AARelation.objects.all()
     serializer_class = AARelationSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class AttributeTypeViewSet(mixins.ListModelMixin,
@@ -373,6 +380,7 @@ class AttributeTypeViewSet(mixins.ListModelMixin,
     queryset = AttributeType.objects.all()
     serializer_class = AttributeTypeSerializer
     pagination_class = None     # Angular has trouble with pagination.
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class ContentTypeViewSet(mixins.ListModelMixin,
@@ -380,6 +388,7 @@ class ContentTypeViewSet(mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = ContentType.objects.all()
     serializer_class = ContentTypeSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class ValueViewSet(mixins.ListModelMixin,
@@ -387,6 +396,7 @@ class ValueViewSet(mixins.ListModelMixin,
                    viewsets.GenericViewSet):
     queryset = Value.objects.all()
     serializer_class = ValueSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class LanguageViewSet(mixins.ListModelMixin,
@@ -394,6 +404,7 @@ class LanguageViewSet(mixins.ListModelMixin,
                       viewsets.GenericViewSet):
     queryset = Language.objects.all()
     serializer_class = LanguageSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class AttributeViewSet(mixins.ListModelMixin,
@@ -402,6 +413,7 @@ class AttributeViewSet(mixins.ListModelMixin,
 
     queryset = Attribute.objects.all()
     serializer_class = AttributeSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class LinkedDataViewSet(mixins.ListModelMixin,
@@ -409,6 +421,7 @@ class LinkedDataViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = LinkedData.objects.all()
     serializer_class = LinkedDataSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class LinkedDataTypeViewSet(mixins.ListModelMixin,
@@ -416,6 +429,7 @@ class LinkedDataTypeViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     queryset = LinkedDataType.objects.all()
     serializer_class = LinkedDataTypeSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class PartDetailsViewSet(mixins.ListModelMixin,
@@ -423,6 +437,7 @@ class PartDetailsViewSet(mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     queryset = PartDetails.objects.all()
     serializer_class = PartDetailsSerializer
+    permission_classes = [permissions.IsAuthenticated,]
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -445,6 +460,7 @@ class CommentViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(subject_instance_id=subject_instance_id,
                                        subject_content_type_id=subject_content_type)
         return queryset
+
 
 @api_view(('GET',))
 def api_root(request, format=None):
