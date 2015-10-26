@@ -7,7 +7,11 @@ app.config(function($httpProvider, $resourceProvider){
 });
 
 app.factory('Comment', function($resource) {
-    return $resource('/rest/comment/:id/', { id: '@_id' }, {
+    return $resource('/rest/comment/:id/', {
+        id: '@_id',
+        subject_content_type: SUBJECT_CONTENT_TYPE,
+        subject_instance_id: SUBJECT_INSTANCE_ID
+     }, {
         list: {
             method: 'GET',
             cache: true,
