@@ -19,7 +19,7 @@ from random import randint
 import urlparse
 import re
 
-from isisdata.templatetags.app_filters import linkify
+#from isisdata.templatetags.app_filters import linkify
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -1188,6 +1188,9 @@ class Comment(Annotation):
     @property
     def linkified(self):
         return linkify(self.text)
+
+    def linkify(s, *args, **kwargs):
+        return mark_safe(bleach.linkify(s, *args, **kwargs))
 
 
 class TagAppellation(Annotation):
