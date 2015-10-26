@@ -22,7 +22,7 @@ def get_page_string(citation):
 def join_authors(authors, postfix):
     author_names = []
     for author in authors:
-        author_names.append(author.authority.name + postfix)
+        author_names.append(contributor_as_string(author) + postfix)
     return "; ".join(author_names)
 
 @register.filter
