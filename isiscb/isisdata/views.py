@@ -7,8 +7,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django import forms
 from django.db import connection
-from django.http import HttpResponse
-from django.http import Http404
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.db.models import Q
 
 # Used by UserRegistrationView and UserRegistrationForm
@@ -140,6 +139,9 @@ class UserRelatedSerializer(serializers.HyperlinkedModelSerializer):
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     subject_content_type = ContentTypeRelatedField(queryset=ContentType.objects.all(), many=False)
     created_by = UserRelatedSerializer(many=False, read_only=True)
+    byline = serializers.ReadOnlyField()
+    linkified = serializers.ReadOnlyField()
+    id = serializers.ReadOnlyField()
 
     class Meta:
         model = Comment
@@ -149,10 +151,12 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         Create a new ``Comment`` instance.
         """
 
+        id = args[0].get('id', None)
         subject_field = args[0].get('subject_field', None)
         subject_content_type = args[0].get('subject_content_type', None)
         subject_instance_id = args[0].get('subject_instance_id', None)
         text = args[0].get('text', None)
+
         if text and subject_content_type and subject_instance_id:
             instance = Comment(
                 text=text,
@@ -450,6 +454,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = None     # Angular has trouble with pagination.
+
+    def update(self, request, *args, **kwargs):
+        """
+        Don't allow users to edit other users' comments.
+        """
+
+        pk = kwargs.get('pk', None)
+        if pk:
+            instance = Comment.objects.get(pk=pk)
+            if request.user.id != instance.created_by.id:
+                return HttpResponseForbidden()
+        return super(CommentViewSet, self).update(request, *args, **kwargs)
 
     def list(self, request):
         queryset = self.get_queryset()

@@ -19,6 +19,8 @@ from random import randint
 import urlparse
 import re
 
+from isisdata.templatetags.app_filters import linkify
+
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
@@ -1172,12 +1174,20 @@ class Annotation(models.Model):
     def get_child_class(self):
         return getattr(self, self.child_class.lower())
 
+    @property
+    def byline(self):
+        return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
+
 
 class Comment(Annotation):
     """
     A free-form text :class:`.Annotation`\.
     """
     text = models.TextField()
+
+    @property
+    def linkified(self):
+        return linkify(self.text)
 
 
 class TagAppellation(Annotation):

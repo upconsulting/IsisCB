@@ -1,5 +1,6 @@
 {% load staticfiles %}
 
+<script>var USER_ID = {{user.id}};</script>
 <div class="row">
     <div style="height: 45px;">
         <div class="col-sm-2">
@@ -22,26 +23,25 @@
         {% verbatim %}
         <p ng-show="comments.length == 0">Be the first to comment!</p>
         {% endverbatim %}
-        <div class="row" class="comment" ng-repeat="comment in comments">
-
+        <div class="row comment" ng-repeat="comment in comments">
             <div class="col-xs-12">
-                <div class="comment-arrow">
-                    <div class="">
-                    {% verbatim %}
-                    {{ comment.text }}
-                    {% endverbatim %}
-                    </div><!-- /panel-body -->
-                </div>
                 <div class="comment-user row">
-                    <div class="col-xs-2">
-                        <div class="img-nopadding">
-                            <img class="img-responsive img-circle" src="{% static "isisdata/images/avatar_2x.png" %}">
-                        </div><!-- /thumbnail -->
-                    </div><!-- /col-sm-1 -->
-                    <div class="col-xs-10">
-                        <span class="text-muted">{% verbatim %}{{ comment.created_by.username }} @ {{ comment.created_on }}{% endverbatim %}</span>
+                    <div class="col-xs-12">
+                        <span class="text-muted text-small">{% verbatim %}{{ comment.byline }}{% endverbatim %}</span>
+                        <div class="btn btn-xs pull-right" ng-hide="!canEdit(comment)">
+                            <span class="glyphicon glyphicon-pencil" aria-hidden="true" ng-click="edit(comment)"></span>
+                        </div>
                     </div>
-                </div><!-- /panel panel-default -->
+                </div>
+                <div class="comment-bubble clearfix">
+                    {% verbatim %}
+                    <div ng-hide="comment.editing" ng-bind-html="comment.linkified | unsafe" ng-model="comment.text"></div>
+                    <form ng-show="comment.editing" ng-submit="updateComment(comment)">
+                        <textarea class="form-control" type="text" ng-model="comment.text" value="{{comment.text}}" ng-required></textarea>
+                        <div class="btn-group pull-right"><button class="btn btn-primary btn-xs" style="margin-top: 5px;" type="submit">Save</button></div>
+                    </form>
+                    {% endverbatim %}
+                </div>
             </div><!-- /col-sm-5 -->
         </div>
 

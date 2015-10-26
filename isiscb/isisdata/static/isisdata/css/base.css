@@ -147,49 +147,23 @@ li {
     overflow: scroll;
 }
 
-.comment-arrow
+.comment {
+    margin-bottom: 20px;
+}
+
+.comment-bubble
 {
     position: relative;
-    padding: 15px;
+    padding: 5px;
 
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
     border: #d6e9c6 solid 1px;
 }
 
-.comment-arrow:after {
-    content: '';
-    position: absolute;
-    border-style: solid;
-    border-width: 15px 15px 0;
-    border-color: #d6e9c6 transparent;
-    display: block;
-    width: 0;
-    z-index: 1;
-    margin-left: -15px;
-    bottom: -15px;
-    left: 16%;
-}
-
-.comment-arrow:before {
-    content: '';
-    position: absolute;
-    border-style: solid;
-    border-width: 15px 15px 0;
-    border-color: #d6e9c6 transparent;
-    display: block;
-    width: 0;
-    z-index: 0;
-    margin-left: -15px;
-    bottom: -16px;
-    left: 16%;
-}
-
 .comment-user {
-    margin-top: 20px;
-    margin-bottom: 25px;
-    margin-left: 8%;
+
 }
 
 
@@ -289,4 +263,8 @@ div.facet_panel > ul {
 .modal .modal-body {
     max-height: 420px;
     overflow-y: auto;
+}
+
+.text-small {
+    font-size: 9pt;
 }
