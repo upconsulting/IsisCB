@@ -265,6 +265,20 @@ div.facet_panel > ul {
     overflow-y: auto;
 }
 
+
 .text-small {
     font-size: 9pt;
+
+li>a.no-tab:hover, li>a.no-tab:active, li>a.no-tab:link {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+span.help {
+  background-color: #5690C3;
+}
+
+.tooltip-inner {
+    width: 150px;
+    background-color: #333333;
 }

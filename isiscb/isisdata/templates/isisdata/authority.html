@@ -83,7 +83,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div class="pull-right">
       {% if citations_by_count > 5 %}
-      <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_by_count }} citations by {{ authority.name }}...</a>
+      <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ citations_by_count }} citations by {{ authority.name }}...</a>
       {% endif %}
     </div>
     {% endif %}
@@ -99,7 +99,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
       <div class="pull-right">
         {% if citations_about_count > 5 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=about_person_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_about_count }} citations about {{ authority.name }}...</a>
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=about_person_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ citations_about_count }} citations about {{ authority.name }}...</a>
         {% endif %}
       </div>
     {% endif %}
@@ -115,7 +115,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
       <div class="pull-right">
         {% if citations_other_count > 5 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=other_person_ids:{{ authority.id }}&models=isisdata.citation">See all {{ citations_other_count }} citations related to {{ authority.name }}...</a>
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=other_person_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ citations_other_count }} citations related to {{ authority.name }}...</a>
         {% endif %}
       </div>
 

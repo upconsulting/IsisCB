@@ -38,9 +38,7 @@
           [{{ result.object.get_type_controlled_display }}]
 
           <br>
-            {% if result.editors and result.type == 'Book' %}
-               {{ result.editors|join_names_with_postfix:" (Ed.)" }}
-            {% elif result.authors %}
+            {% if result.authors %}
                {{ result.authors|joinby:"; " }}
             {% else %}
               Author missing
