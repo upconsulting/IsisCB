@@ -80,12 +80,15 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.get_type_controlled_display()
 
     def prepare_title_for_sort(self, obj):
-        return bleach.clean(get_title(obj), tags=[], strip=True)
+        return obj.normalized_title
 
     def prepare_publication_date(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
 
     def prepare_publication_date_for_sort(self, obj):
+        if obj.publication_date:
+            return obj.publication_date
+
         dates = obj.attributes.filter(type_controlled__name='PublicationDate')
         if not dates:
             return ''
@@ -94,7 +97,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if not date:
             return ''
 
-        return date.value_freeform
+        return date.value.value
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering

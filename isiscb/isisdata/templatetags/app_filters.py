@@ -1,5 +1,6 @@
 from django import template
 from isisdata.models import *
+from isisdata import helpers
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
@@ -137,7 +138,7 @@ def bleach_safe(s):
 
 @register.filter
 def strip_tags(s):
-    return bleach.clean(s, strip=True)
+    return helpers.strip_tags(s)
 
 
 @register.filter

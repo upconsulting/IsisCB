@@ -1,13 +1,7 @@
-{{ object.title }}
+{{ object.normalized_title }}
 {{ object.description }}
-{{ object.abstract }}
-{{ object.edition_details }}
-{{ object.physical_details }}
-
-{% for attr in object.attributes.all %}
-    {{ attr.value_freeform }}
-{% endfor %}
+{{ object.normalized_abstract }}
 
 {% for ac_rel in object.acrelation_set.all %}
-  {{ ac_rel.authority.name }}
+  {{ ac_rel.authority.normalized_name }}
 {% endfor %}

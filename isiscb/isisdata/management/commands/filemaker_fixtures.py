@@ -238,7 +238,9 @@ ACRelationFields = {
     'RelationshipWeight': ('relationship_weight', passthrough),
     'RecordHistory': ('record_history', passthrough),
     'NameForDisplayInCitation': ('name_for_display_in_citation', passthrough),
-    'DataSourceField': ('administrator_notes', passthrough)
+    'DataSourceField': ('administrator_notes', passthrough),
+    'NameAsEntered': ('name_as_entered', passthrough),
+    'DataDisplayOrder': ('data_display_order', lambda x: float(x)),
 }
 
 # Maps fields from FM CC_Relationship to CCRelation model.
@@ -268,7 +270,8 @@ CCRelationFields = {
 attributeFields = {
     'ID': ('id', passthrough),
     'ID.Subject.link': ('subject', passthrough),
-    'DateAttribute.free': ('value_freeform', try_int),    # TODO: this is temporary.
+    'DateAttribute.free': ('value_freeform',
+                           lambda x: try_int(x.replace('[', '').replace(']', ''))),
     'DateBegin': ('value', lambda x: as_datetime(x).date()),
     'CreatedBy': ('created_by_fm', passthrough),
     'CreatedOn': ('created_on_fm', as_datetime),

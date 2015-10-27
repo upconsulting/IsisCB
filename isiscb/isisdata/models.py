@@ -11,6 +11,8 @@ from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
 
+from isisdata.helpers import normalize
+
 import datetime
 import iso8601
 import pickle
@@ -172,7 +174,7 @@ class DateValue(Value):
         to an Attribute of type "PublicationDate".
         """
         super(DateValue, self).save(*args, **kwargs)    # Save first.
-        
+
         if self.attribute.type_controlled.name is 'PublicationDate':
             self.attribute.source.publication_date = self.value
             self.attribute.source.publication_date.save()
@@ -372,6 +374,20 @@ class Citation(ReferencedEntity, CuratedMixin):
     have no title, this should be added as something like "[Review of Title
     (Year) by Author]".""")
 
+    @property
+    def normalized_title(self):
+        """
+        Title stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return normalize(self.title)
+
+    @property
+    def normalized_abstract(self):
+        """
+        Abstract stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return normalize(self.abstract)
+
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
     abstracts use the 'Abstract' field.""")
@@ -532,6 +548,20 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     name = models.CharField(max_length=1000, help_text="""
     Name, title, or other main term for the authority as will be displayed.""")
+
+    @property
+    def normalized_name(self):
+        """
+        Title stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return normalize(self.name)
+
+    @property
+    def normalized_description(self):
+        """
+        Description stripped of HTML, punctuation, and normalized to ASCII.
+        """
+        return normalize(self.description)
 
     description = models.TextField(blank=True, null=True, help_text="""
     A brief description that will be displayed to help identify the authority.

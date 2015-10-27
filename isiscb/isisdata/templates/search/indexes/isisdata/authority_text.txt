@@ -1,5 +1,5 @@
-{{ object.name }}
-{{ object.description }}
+{{ object.normalized_name }}
+{{ object.normalized_description }}
 
 {% for attr in object.attributes.all %}
     {{ attr.value_freeform }}
