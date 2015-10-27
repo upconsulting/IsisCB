@@ -104,7 +104,8 @@ citationFields = {
     'ModifiedOn': ('modified_on_fm', as_datetime),
     'Language': ('language', passthrough),
     'RecordAction': ('record_action', lambda x: recordActionTypes[x]),
-    'StatusOfRecord': ('status_of_record', lambda x: statusOfRecordTypes[x])
+    'StatusOfRecord': ('status_of_record', lambda x: statusOfRecordTypes[x]),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 # Translates fields from FM Citation to PartDetails model.
@@ -179,7 +180,7 @@ authorityFields = {
     'PersonalNameFirst': ('personal_name_first', passthrough),
     'PersonalNameLast': ('personal_name_last', passthrough),
     'PersonalNameSuffix': ('personal_name_suffix', passthrough),
-    'RedirectTo': ('redirect_to', passthrough)
+    'RedirectTo': ('redirect_to', passthrough),
 }
 
 # Maps FM AC_Relationship:Type.controlled to ACRelation.type_controlled
@@ -241,6 +242,7 @@ ACRelationFields = {
     'DataSourceField': ('administrator_notes', passthrough),
     'NameAsEntered': ('name_as_entered', passthrough),
     'DataDisplayOrder': ('data_display_order', lambda x: float(x)),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 # Maps fields from FM CC_Relationship to CCRelation model.
@@ -261,7 +263,8 @@ CCRelationFields = {
     'ConfidenceMeasure': ('confidence_measure', passthrough),
     'RelationshipWeight': ('relationship_weight', passthrough),
     'RecordHistory': ('record_history', passthrough),
-    'AdministratorNotes': ('administrator_notes', passthrough)
+    'AdministratorNotes': ('administrator_notes', passthrough),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 # Maps fields from FM Attributes to Attribute model.
@@ -281,7 +284,8 @@ attributeFields = {
     'Type.Broad.controlled': ('type_controlled_broad', passthrough),
     'Type.free': ('type_free', passthrough),
     'RecordHistory': ('record_history', passthrough),
-    'Notes': ('administrator_notes', passthrough)
+    'Notes': ('administrator_notes', passthrough),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 # Maps FM Tracking.Type.controlled to Tracking.type_controlled field.
@@ -303,7 +307,8 @@ trackingFields = {
     'ModifiedOn': ('modified_on_fm', as_datetime),
     'Type.controlled': ('type_controlled', lambda x: trackingTypes[x]),
     'TrackingInfo': ('tracking_info', passthrough),
-    'Notes': ('notes', passthrough)
+    'Notes': ('notes', passthrough),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 
@@ -321,7 +326,8 @@ linkedDataFields = {
     'Type.free': ('type_free', passthrough),
     'RecordHistory': ('record_history', passthrough),
     'Notes': ('administrator_notes', passthrough),
-    'UniversalResourceName.link': ('universal_resource_name', passthrough)
+    'UniversalResourceName.link': ('universal_resource_name', passthrough),
+    'RecordStatus': ('public', lambda x: x.lower() == 'public'),
 }
 
 
@@ -544,6 +550,10 @@ class Command(BaseCommand):
                 self.redirect_authorities.append(instance)
             else:
                 self.authorities.append(instance)
+
+            # Set public field based on RecordStatus.
+            if 'record_status' in values:
+                values['public'] = values['record_status'] == 'AC'
 
             r.clear()
             print '\r', len(self.authorities),

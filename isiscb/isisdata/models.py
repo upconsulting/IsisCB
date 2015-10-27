@@ -11,7 +11,7 @@ from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
 
-from isisdata.helpers import normalize
+from isisdata import helpers
 
 import datetime
 import iso8601
@@ -251,6 +251,9 @@ class CuratedMixin(models.Model):
     modified_by = models.ForeignKey(User, null=True, blank=True, help_text="""
     The most recent user to modify this object.""")
 
+    public = models.BooleanField(default=True, help_text="""
+    Controls whether this instance can be viewed by end users.""")
+
     @property
     def created_on(self):
         """
@@ -379,14 +382,14 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return normalize(self.title)
+        return helpers.normalize(self.title)
 
     @property
     def normalized_abstract(self):
         """
         Abstract stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return normalize(self.abstract)
+        return helpers.normalize(self.abstract)
 
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
@@ -554,7 +557,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return normalize(self.name)
+        return helpers.normalize(self.name)
 
     @property
     def normalized_description(self):

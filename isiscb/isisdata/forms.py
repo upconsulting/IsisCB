@@ -118,4 +118,4 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if sort_order_dir == 'descend':
             sort_order = "-" + sort_order
 
-        return sqs.models(*self.get_models()).order_by(sort_order)
+        return sqs.models(*self.get_models()).filter(public=True).order_by(sort_order)
