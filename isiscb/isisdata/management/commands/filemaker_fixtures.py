@@ -712,12 +712,19 @@ class Command(BaseCommand):
                 'id': copy.copy(self.valuePK),
                 'value': value,
             }
-            del values['value']     # Not accepted by Attribute constructor.
-            values['child_class'] = vtype.__name__
+
+            # 'value' is not accepted by the Attribute constructor.
+            del values['value']
+
+            # Build fixture for Value parent instance.
+            value_values['child_class'] = vtype.__name__
             value_fixture = self.to_fixture(value_values, 'isisdata.value')
             self.values.append(value_fixture)
+
+            # Build fixture for Value child instance.
             cvalue_fixture = self.to_fixture(cvalue_values, value_model)
             self.cvalues.append(cvalue_fixture)
+
             self.valuePK += 1
 
             vctype = ContentType.objects.get(model=vtype.__name__.lower())

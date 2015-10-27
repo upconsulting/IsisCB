@@ -39,7 +39,10 @@ class Value(models.Model):
     Python object from an alphanumeric input, and raises ValidationError for
     bad data.
     """
-    attribute = models.OneToOneField('Attribute', related_name='value')
+    attribute = models.OneToOneField('Attribute', related_name='value',
+                                     help_text="""
+    The Attribute to which this Value belongs.""")
+
     child_class = models.CharField(max_length=255, help_text="""
     Name of the child model for this instance.""")
 
@@ -59,6 +62,9 @@ class Value(models.Model):
         return super(Value, self).save(*args, **kwargs)
 
     def get_child_class(self):
+        """
+        Retrieve the instance of the child class for this Value.
+        """
         cclass_name = self.child_class.lower()
         if hasattr(self, cclass_name):
             return getattr(self, cclass_name)
@@ -159,6 +165,17 @@ class DateValue(Value):
     An ISO 8601 date value.
     """
     value = models.DateField()
+
+    def save(self, *args, **kwargs):
+        """
+        Override to update Citation.publication_date, if this DateValue belongs
+        to an Attribute of type "PublicationDate".
+        """
+        super(DateValue, self).save(*args, **kwargs)    # Save first.
+        
+        if self.attribute.type_controlled.name is 'PublicationDate':
+            self.attribute.source.publication_date = self.value
+            self.attribute.source.publication_date.save()
 
     @staticmethod
     def convert(value):
@@ -417,6 +434,10 @@ class Citation(ReferencedEntity, CuratedMixin):
                                         help_text="""
     New field: contains volume, issue, page information for works that are parts
     of larger works.""")
+
+    publication_date = models.DateField(blank=True, null=True, help_text="""
+    Used for search and sort functionality. Does not replace Attribute
+    functionality.""")
 
     related_citations = models.ManyToManyField('Citation', through='CCRelation',
                                                related_name='citations_related')
