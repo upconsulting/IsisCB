@@ -26,6 +26,7 @@ from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authenticati
 
 from isisdata.models import *
 
+
 from django.template import RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
 from urllib import quote
@@ -611,7 +612,7 @@ def citation(request, citation_id):
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    if not authority.public:
+    if not citation.public:
         return HttpResponseForbidden()
 
     # Some citations are deleted. These should be hidden from public view.

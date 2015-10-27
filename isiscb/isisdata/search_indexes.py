@@ -101,10 +101,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
-        return [acrel.authority.name for acrel in obj.acrelation_set.all()]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True)]
 
     def prepare_attributes(self, obj):
-        return [attr.value_freeform for attr in obj.attributes.all()]
+        return [attr.value_freeform for attr in obj.attributes.filter(public=True)]
 
     def prepare_authors(self, obj):
         #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
@@ -139,77 +139,78 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return name;
 
     def prepare_subjects(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
 
     def prepare_persons(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['PR'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PR'])]
 
     def prepare_categories(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['CA'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
 
     def prepare_editors(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['ED'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
 
     def prepare_advisors(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['AD'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
 
     def prepare_translators(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['TR'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
 
     def prepare_publishers(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['PU'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
 
     def prepare_schools(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SC'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
 
     def prepare_institutions(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['IN'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
 
     def prepare_meetings(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['ME'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
 
     def prepare_periodicals(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['PE'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
 
     def prepare_book_series(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['BS'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
 
     def prepare_time_periods(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
 
     def prepare_geographics(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
 
     def prepare_people(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['PE'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['PE'])]
 
     def prepare_subject_institutions(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['IN'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['IN'])]
 
     def prepare_serial_publications(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['SE'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['SE'])]
 
     def prepare_classification_terms(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['CT'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CT'])]
 
     def prepare_concepts(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['CO'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CO'])]
 
     def prepare_creative_works(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['CW'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CW'])]
 
     def prepare_events(self, obj):
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
+        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
 
     def prepare_author_ids(self, obj):
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(type_controlled__in=['AU', 'CO'])]
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AU', 'CO'])]
 
     def prepare_about_person_ids(self, obj):
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(type_broad_controlled='SC')]
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_broad_controlled='SC')]
 
     def prepare_other_person_ids(self, obj):
         query = Q(type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(query)]
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(query)]
+
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
@@ -234,10 +235,11 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
-        return self.get_model().objects.all()
+        return self.get_model().objects.filter(public=True)
 
     def prepare_attributes(self, obj):
-        return [attr.value_freeform for attr in obj.attributes.all()]
+        return [attr.value_freeform for attr
+                in obj.attributes.filter(public=True)]
 
     def prepare_authority_type(self, obj):
         return obj.get_type_controlled_display()

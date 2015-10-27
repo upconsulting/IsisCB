@@ -20,6 +20,7 @@ import uuid
 from random import randint
 import urlparse
 import re
+import bleach
 
 #from isisdata.templatetags.app_filters import linkify
 
@@ -524,7 +525,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         Provides access to related :class:`.CCRelation` instances directly.
         """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
-        return CCRelation.objects.filter(query)
+        return CCRelation.objects.filter(public=True).filter(query)
 
     @property
     def acrelations(self):
@@ -532,12 +533,12 @@ class Citation(ReferencedEntity, CuratedMixin):
         Provides access to related :class:`.ACRelation` instances directly.
         """
         query = Q(citation_id=self.id)
-        return ACRelation.objects.filter(query)
+        return ACRelation.objects.filter(public=True).filter(query)
 
     @property
     def get_all_contributors(self):
         query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
-        return ACRelation.objects.filter(query).order_by('data_display_order')
+        return ACRelation.objects.filter(public=True).filter(query).order_by('data_display_order')
 
 
 class Authority(ReferencedEntity, CuratedMixin):
@@ -670,7 +671,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         Provides access to related :class:`.AARelation` instances directly.
         """
         query = Q(subject_id=self.id) | Q(object_id=self.id)
-        return AARelation.objects.filter(query)
+        return AARelation.objects.filter(public=True).filter(query)
 
     @property
     def acrelations(self):
@@ -678,7 +679,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         Provides access to related :class:`.ACRelation` instances directly.
         """
         query = Q(authority_id=self.id)
-        return ACRelation.objects.filter(query)
+        return ACRelation.objects.filter(public=True).filter(query)
 
 
 class Person(Authority):
@@ -1233,6 +1234,10 @@ class Annotation(models.Model):
         return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
 
 
+def linkify(s, *args, **kwargs):
+    return bleach.linkify(s, *args, **kwargs)
+
+
 class Comment(Annotation):
     """
     A free-form text :class:`.Annotation`\.
@@ -1242,9 +1247,6 @@ class Comment(Annotation):
     @property
     def linkified(self):
         return linkify(self.text)
-
-    def linkify(s, *args, **kwargs):
-        return mark_safe(bleach.linkify(s, *args, **kwargs))
 
 
 class TagAppellation(Annotation):
