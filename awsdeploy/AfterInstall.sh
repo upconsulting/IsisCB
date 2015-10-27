@@ -35,7 +35,7 @@ supervisorctl -c /etc/supervisor/conf.d/supervisor.conf update
 
 # Static files are hosted on S3. This will push any new or updated static files
 #  to the appropriate bucket (see development_settings.py).
-cd isiscb
-python manage.py collectstatic --noinput
-python manage.py migrate auth --fake-initial
-python manage.py migrate --fake-initial
+# cd isiscb
+# python manage.py collectstatic --noinput
+# python manage.py migrate auth --fake-initial
+# python manage.py migrate --fake-initial

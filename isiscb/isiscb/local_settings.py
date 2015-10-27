@@ -195,4 +195,5 @@ except ImportError:
     SOCIAL_AUTH_FACEBOOK_SECRET = ''
 
 
-LICENSE = 'This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.'
+LICENSE = """This work is licensed under a Creative Commons 
+             Attribution-NonCommercial 4.0 International License."""

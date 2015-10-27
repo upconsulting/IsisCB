@@ -61,6 +61,8 @@ secrets.py
 db.sqlite3
 server_start
 
+isiscb/isisdata/fixtures/*
+
 # Elastic Beanstalk Files
 #.elasticbeanstalk/*
 #!.elasticbeanstalk/*.cfg.yml
