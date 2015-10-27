@@ -37,8 +37,8 @@ def as_datetime(x):
             val = datetime.datetime.strptime(x, format)
         except ValueError:
             pass
-    if val is None:
-        raise ValueError('Could not coerce value to datetime')
+    # if val is None:
+    #     raise ValueError('Could not coerce value to datetime')
     return val
 
 
@@ -701,7 +701,7 @@ class Command(BaseCommand):
                     if value is not None and value != 'None':
                         try:
                             value = method(value)
-                        except ValueError as E:
+                        except (AttributeError, ValueError) as E:
                             self.failed.append((r, E.message))
                             return
                         values[dj_field] = value

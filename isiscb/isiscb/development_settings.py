@@ -223,3 +223,7 @@ SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
 # except ImportError:
 SOCIAL_AUTH_TWITTER_SECRET = ''
 SOCIAL_AUTH_FACEBOOK_SECRET = ''
+
+
+LICENSE = """This work is licensed under a Creative Commons
+             Attribution-NonCommercial 4.0 International License."""
