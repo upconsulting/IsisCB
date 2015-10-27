@@ -143,6 +143,7 @@ recordStatusTypes = {
     'Duplicate': 'DU',
     'Redirect': 'RD',
     'DELETE': 'DL',
+    'Delete': 'DL',
     'NeedsToBeFixed': 'NF'
 }
 

@@ -1,5 +1,6 @@
 import string
 import unidecode
+import re
 
 
 def strip_punctuation(s):
@@ -30,3 +31,7 @@ def normalize(s):
     """
 
     return strip_punctuation(strip_tags(unidecode(s))).lower()
+
+
+def filter_abstract(s):
+    return re.match("{AbstractBegin}(.*){AbstractEnd}", s).group(1)

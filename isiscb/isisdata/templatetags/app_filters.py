@@ -146,6 +146,12 @@ def linkify(s, *args, **kwargs):
     return mark_safe(bleach.linkify(s, *args, **kwargs))
 
 
+@register.filter
+def filter_abstract(s):
+    return re.match("{AbstractBegin}(.*){AbstractEnd}", s).group(1)
+
+
+
 URN_PATTERNS = {
     'DOI': u'http://doi.org/{0}',
     'ISBN': u'http://www.worldcat.org/search?q=bn%3A{0}',
