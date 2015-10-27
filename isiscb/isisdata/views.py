@@ -544,6 +544,9 @@ def authority(request, authority_id):
 
     authority = Authority.objects.get(id=authority_id)
 
+    if not authority.public:
+        return HttpResponseForbidden()
+
     # Some authority entries are deleted. These should be hidden from public
     #  view.
     if authority.record_status == 'DL':
@@ -607,6 +610,9 @@ def citation(request, citation_id):
     """
     template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
+
+    if not authority.public:
+        return HttpResponseForbidden()
 
     # Some citations are deleted. These should be hidden from public view.
     if citation.status_of_record == 'DL':
