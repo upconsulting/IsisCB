@@ -210,7 +210,7 @@ class DateValue(Value):
 
         if self.attribute.type_controlled.name == 'PublicationDate':
             self.attribute.source.publication_date = self.value
-            self.attribute.source.publication_date.save()
+            self.attribute.source.save()
 
     @staticmethod
     def convert(value):
