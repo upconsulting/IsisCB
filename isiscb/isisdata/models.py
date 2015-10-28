@@ -11,7 +11,7 @@ from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
 
-from isisdata import helpers
+from isisdata import helper_methods
 
 import datetime
 import iso8601
@@ -383,14 +383,14 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.title)
+        return helper_methods.normalize(self.title)
 
     @property
     def normalized_abstract(self):
         """
         Abstract stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.abstract)
+        return helper_methods.normalize(self.abstract)
 
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
@@ -558,7 +558,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.name)
+        return helper_methods.normalize(self.name)
 
     @property
     def normalized_description(self):

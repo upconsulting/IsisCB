@@ -97,7 +97,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if not date:
             return ''
 
-        return date.value.value
+        return date.value_freeform
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
