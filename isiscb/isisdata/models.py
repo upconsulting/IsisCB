@@ -54,7 +54,7 @@ def normalize(s):
     Lowercase.
     """
 
-    return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower()
+    return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower().replace('\n', ' ').replace('\r', ' ')
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
