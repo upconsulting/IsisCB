@@ -208,7 +208,7 @@ class DateValue(Value):
         """
         super(DateValue, self).save(*args, **kwargs)    # Save first.
 
-        if self.attribute.type_controlled.name is 'PublicationDate':
+        if self.attribute.type_controlled.name == 'PublicationDate':
             self.attribute.source.publication_date = self.value
             self.attribute.source.publication_date.save()
 
