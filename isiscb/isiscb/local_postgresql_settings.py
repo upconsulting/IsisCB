@@ -120,7 +120,7 @@ DATABASES = {
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-        'URL': 'ec2-54-69-38-140.us-west-2.compute.amazonaws.com:9200/',
+        'URL': 'localhost:9200/',
         'INDEX_NAME': 'haystack',
     },
 }
@@ -129,15 +129,10 @@ ELASTICSEARCH_INDEX_SETTINGS = {
      'settings': {
          "analysis": {
              "analyzer": {
-                 "synonym_analyzer" : {
-                     "type": "custom",
-                     "tokenizer" : "standard",
-                     "filter" : ["synonym", "asciifolding"]
-                 },
                  "ngram_analyzer": {
                      "type": "custom",
                      "tokenizer": "lowercase",
-                     "filter": ["haystack_ngram", "synonym", "asciifolding"]
+                     "filter": ["haystack_ngram", "asciifolding"]
                  },
                  "edgengram_analyzer": {
                      "type": "custom",
@@ -169,11 +164,6 @@ ELASTICSEARCH_INDEX_SETTINGS = {
                      "min_gram": 2,
                      "max_gram": 15
                  },
-                 "synonym" : {
-                     "type" : "synonym",
-                     "ignore_case": "true",
-                     "synonyms_path" : "synonyms.txt"
-                 }
              }
          }
      }

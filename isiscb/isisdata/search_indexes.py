@@ -137,7 +137,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         name = author.name_for_display_in_citation
         if not name:
             name = author.authority.name
-        return name;
+        return name
 
     def prepare_subjects(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
