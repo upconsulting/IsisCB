@@ -13,6 +13,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     description = indexes.CharField(model_attr='description', null=True)
+    public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
 
     type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True)
