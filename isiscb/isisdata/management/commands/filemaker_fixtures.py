@@ -730,6 +730,10 @@ class Command(BaseCommand):
             # 'value' is not accepted by the Attribute constructor.
             del values['value']
 
+            if 'type_controlled' not in values:
+                self.failed.append((values['id'], 'missing type'))
+                return
+
             # Build fixture for Value parent instance.
             value_values['child_class'] = vtype.__name__
             value_fixture = self.to_fixture(value_values, 'isisdata.value')
@@ -742,10 +746,6 @@ class Command(BaseCommand):
             self.valuePK += 1
 
             vctype = ContentType.objects.get(model=vtype.__name__.lower())
-
-            if 'type_controlled' not in values:
-                self.failed.append((values['id'], 'missing type'))
-                return
 
             type_controlled = values['type_controlled']
             if type_controlled not in self.attributeTypes:

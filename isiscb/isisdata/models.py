@@ -11,8 +11,6 @@ from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
 
-from isisdata import helpers
-
 import datetime
 import iso8601
 import pickle
@@ -21,8 +19,42 @@ from random import randint
 import urlparse
 import re
 import bleach
+import unidecode
+import string
 
 #from isisdata.templatetags.app_filters import linkify
+
+# TODO: remove this later.
+def strip_punctuation(s):
+    """
+    Removes all punctuation characters from a string.
+    """
+    if type(s) is str:    # Bytestring (default in Python 2.x).
+        return s.translate(string.maketrans("",""), string.punctuation)
+    else:                 # Unicode string (default in Python 3.x).
+        translate_table = dict((ord(char), u'') for char
+                                in u'!"#%\'()*+,-./:;<=>?@[\]^_`{|}~')
+        return s.translate(translate_table)
+
+
+# TODO: remove this later.
+def strip_tags(s):
+    """
+    Remove all tags without remorse.
+    """
+    return bleach.clean(s, tags={}, attributes={}, strip=True)
+
+
+# TODO: remove this later.
+def normalize(s):
+    """
+    Convert to ASCII.
+    Remove HTML.
+    Remove punctuation.
+    Lowercase.
+    """
+
+    return strip_punctuation(strip_tags(unidecode(s))).lower()
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -383,14 +415,14 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.title)
+        return normalize(self.title)
 
     @property
     def normalized_abstract(self):
         """
         Abstract stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.abstract)
+        return normalize(self.abstract)
 
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
@@ -558,7 +590,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         Title stripped of HTML, punctuation, and normalized to ASCII.
         """
-        return helpers.normalize(self.name)
+        return normalize(self.name)
 
     @property
     def normalized_description(self):

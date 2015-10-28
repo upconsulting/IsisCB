@@ -74,7 +74,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
-        return self.get_model().objects.all()
+        return self.get_model().objects.filter(public=True)
 
     def prepare_type(self, obj):
         return obj.get_type_controlled_display()
@@ -97,7 +97,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if not date:
             return ''
 
-        return date.value.value
+        return date.value.cvalue()
 
     def prepare_authorities(self, obj):
         # Store a list of id's for filtering
