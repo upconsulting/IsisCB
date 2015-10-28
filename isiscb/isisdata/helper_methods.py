@@ -1,6 +1,7 @@
 import string
 import unidecode
 import re
+import bleach
 
 
 def strip_punctuation(s):
@@ -30,7 +31,7 @@ def normalize(s):
     Lowercase.
     """
 
-    return strip_punctuation(strip_tags(unidecode(s))).lower()
+    return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower()
 
 
 def filter_abstract(s):

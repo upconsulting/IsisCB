@@ -422,6 +422,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         Abstract stripped of HTML, punctuation, and normalized to ASCII.
         """
+
         return normalize(self.abstract)
 
     description = models.TextField(null=True, blank=True, help_text="""
