@@ -20,10 +20,18 @@ aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key
 aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=RDS_PASSWORD" > rds_password.json
 aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=AWS_ACCESS_KEY" > rds_access.json
 aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=AWS_SECRET_ACCESS_KEY" > rds_secret.json
+aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=SOCIAL_AUTH_FACEBOOK_KEY" > facebook_key.json
+aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=SOCIAL_AUTH_FACEBOOK_SECRET" > facebook_secret.json
+aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=SOCIAL_AUTH_TWITTER_KEY" > twitter_key.json
+aws ec2 describe-tags --filters "Name=resource-id,Values="$INSTANCE_ID "Name=key,Values=SOCIAL_AUTH_TWITTER_SECRET" > twitter_secret.json
 export RDS_USER=$(python awsdeploy/bin/get_environ.py rds_user.json);
 export RDS_PASSWORD=$(python awsdeploy/bin/get_environ.py rds_password.json);
 export AWS_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py rds_access.json);
 export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py rds_secret.json);
+export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py facebook_key.json);
+export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py facebook_secret.json);
+export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py twitter_key.json);
+export AWS_SECRET_ACCESS_KEY=$(python awsdeploy/bin/get_environ.py twitter_secret.json);
 
 
 # Supervisor manages Gunicorn, and perhaps other services down the road.
