@@ -2,7 +2,7 @@
 {% load metadata_filters %}
 {% load citation_filters %}
 
-{% if query and 'isisdata.citation' in models %}
+{% if query %}
 <div class="row">
   <div class="col-md-8">
     <h3>Search Results</h3>
@@ -17,7 +17,7 @@
       <a href="{{ request.get_full_path|set_sort_direction:'descend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
       {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
-        Sort by: {{ sort_order|get_current_sort_order }}
+        Sort by: {{ sort_order|get_current_sort_order_citation }}
           <span class="caret"></span>
       </button>
 

@@ -22,6 +22,32 @@ $(document).ready(function() {
 
 {% block content %}
 
+<form method="get" action=".">
+    <div class="row">
+        <div class="col-sm-4 col-md-3 topnav text-center">
+            {% include "isisdata/navbuttons.html" %}
+        </div>
+        <div class="col-sm-8 col-md-9">
+
+            <label class="control-label" for="q">
+                Search bibliographics records for:
+            </label>
+            <div class="input-group">
+                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit">Search</button>
+                </span>
+            </div>
+            <div>
+                <!--<input id="id_models_0" name="models" type="hidden" value="isisdata.citation">
+                <input id="id_models_1" name="models" type="hidden" value="isisdata.authority">-->
+                <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
+                <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
+            </div>
+
+        </div>
+    </div>
+
 <div class="row">
 
     <div class="col-sm-12 col-md-12">
@@ -34,65 +60,23 @@ $(document).ready(function() {
 
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="citations">
-                <form method="get" action=".">
-                    <div class="row">
-                        <div class="col-sm-4 col-md-3 topnav text-center">
-                            {% include "isisdata/navbuttons.html" %}
-                        </div>
-                        <div class="col-sm-8 col-md-9">
 
-                            <label class="control-label" for="q">
-                                Search bibliographics records for:
-                            </label>
-                            <div class="input-group">
-                                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="submit">Search</button>
-                                </span>
-                            </div>
-                            <div>
-                                <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.citation">
-                                <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
-                                <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
-                            </div>
-
-                        </div>
-                    </div>
                     <div class="row space-top">
-                        <div class="col-sm-4 col-md-3 ">
-                            {% include "search/search_facets_citations.html" %}
-                        </div>
 
                         <div class="col-sm-8 col-md-9 ">
                             {% include "search/search_results_citations.html" %}
                         </div>
+
+                        <div class="col-sm-4 col-md-3 ">
+                            {% include "search/search_facets_citations.html" %}
+                        </div>
+
                     </div>
                 </form>
 
             </div>
 
             <div role="tabpanel" class="tab-pane" id="authorities">
-                <form method="get" action=".">
-                    <div class="row">
-                        <div class="col-sm-4 col-md-3 topnav text-center">
-                            {% include "isisdata/navbuttons.html" %}
-                        </div>
-                        <div class="col-sm-8 col-md-9">
-                            <label class="control-label" for="q">
-                                Search authority records for:
-                            </label>
-                            <div class="input-group">
-                                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" type="submit">Search</button>
-                                </span>
-                            </div>
-                            <div>
-                                <input id="id_models" maxlength="255" name="models" type="hidden" value="isisdata.authority">
-                            </div>
-                        </div>
-
-                    </div>
                     <div class="row space-top">
                         <div class="col-sm-4 col-md-3">
                             {% include "search/search_facets_authorities.html" %}
@@ -103,7 +87,7 @@ $(document).ready(function() {
                     </div>
 
                 </div>
-            </form>
+
         </div>
     </div>
 </div>

@@ -204,13 +204,15 @@ def set_page(link, page_number):
     return re.sub(r"&page=[0-9]+&?", "&page=" + str(page_number) + "&", link)
 
 @register.filter
-def get_current_sort_order(sort_field):
-    if sort_field == 'title_for_sort':
-        return "Title"
-    if sort_field == 'author_for_sort':
-        return "First Author"
-    if sort_field == 'publication_date_for_sort':
+def get_current_sort_order_citation(sort_field):
+    if not sort_field:
         return "Publication Date"
-    if sort_field == '_score':
+    if 'title_for_sort' in sort_field:
+        return "Title"
+    if 'author_for_sort' in sort_field:
+        return "First Author"
+    if 'publication_date_for_sort' in sort_field:
+        return "Publication Date"
+    if '_score' in sort_field:
         return 'Relevance'
     return sort_field
