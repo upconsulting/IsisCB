@@ -550,7 +550,7 @@ class Citation(ReferencedEntity, CuratedMixin):
                                        related_query_name='citations')
 
     def __unicode__(self):
-        return self.title
+        return strip_tags(self.title)
 
     @property
     def ccrelations(self):
@@ -1276,6 +1276,10 @@ class Comment(Annotation):
     A free-form text :class:`.Annotation`\.
     """
     text = models.TextField()
+
+    @property
+    def snippet(self):
+        return self.text[:min(100, len(self.text))] + u'...'
 
     @property
     def linkified(self):

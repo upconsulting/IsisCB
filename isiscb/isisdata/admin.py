@@ -119,8 +119,10 @@ class LinkedDataInlineForm(forms.ModelForm):
         print self.errors
         return val
 
+
 class LinkedDataInlineFormSet(BaseGenericInlineFormSet):
     model = LinkedData
+
 
 class LinkedDataInline(GenericTabularInline):
     model = LinkedData
@@ -166,7 +168,6 @@ class LinkedDataInlineMixin(admin.ModelAdmin):
         else:
             self.inlines = (LinkedDataInline,)
         super(LinkedDataInlineMixin, self).__init__(*args, **kwargs)
-
 
 
 class AttributeInline(GenericTabularInline):
@@ -442,6 +443,7 @@ class AARelationForm(autocomplete_light.ModelForm):
         model = AARelation
         fields = '__all__'
 
+
 class AARelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
@@ -479,7 +481,6 @@ class AARelationAdmin(SimpleHistoryAdmin,
                        'modified_on_fm')
 
     form = AARelationForm
-
 
 
 class LinkedDataAdmin(SimpleHistoryAdmin):
@@ -555,9 +556,18 @@ class AttributeAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'source', 'type_controlled', 'value')
     inlines = (ValueInline,)
 
+
 class AttributeTypeAdmin(SimpleHistoryAdmin):
     list_display = ('id', 'name', 'value_content_type')
     list_display_links = ('id', 'name')
+    inlines = []
+
+
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'snippet', 'created_by', 'subject', 'created_on')
+    list_display_links = ('id', 'snippet')
+    fields = ('id', 'created_by', 'created_on', 'subject', 'text')
+    readonly_fields = ('id', 'created_by', 'created_on', 'subject', 'text')
     inlines = []
 
 
@@ -570,7 +580,7 @@ admin.site.register(LinkedData, LinkedDataAdmin)
 admin.site.register(PartDetails, SimpleHistoryAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
-admin.site.register(Comment)
+admin.site.register(Comment, CommentAdmin)
 admin.site.register(SearchQuery)
 admin.site.register(Language)
 # Register your models here.
