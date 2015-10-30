@@ -148,7 +148,10 @@ def linkify(s, *args, **kwargs):
 
 @register.filter
 def filter_abstract(s):
-    return re.match("{AbstractBegin}(.*){AbstractEnd}", s).group(1)
+    match = re.match("{AbstractBegin}(.*){AbstractEnd}", s)
+    if match:
+        return match.group(1)
+    return s
 
 
 
