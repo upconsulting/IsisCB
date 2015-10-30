@@ -339,9 +339,6 @@ class AuthorityViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
-    # permission_classes = [permissions.IsAuthenticated, TokenHasScope]
-    # authentication_classes = [OAuth2Authentication]
-    # required_scopes = ['groups']
 
 
 class UserViewSet(mixins.ListModelMixin,
@@ -777,7 +774,7 @@ class IsisSearchView(FacetedSearchView):
             searchquery.save()
 
         results = super(IsisSearchView, self).__call__(request)
-        
+
         return results
 
     def build_page(self):
