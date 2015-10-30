@@ -29,6 +29,9 @@ app.factory('Comment', function($resource) {
                 subject_instance_id: SUBJECT_INSTANCE_ID
             }
         },
+        delete: {
+            method: 'DELETE'
+        },
         get: {
             method: 'GET',
             headers: {'Content-Type': 'application/json'},
@@ -67,7 +70,7 @@ app.controller('CommentController', ['$scope', 'Comment', function($scope, Comme
         });
     };
 
-    $scope.edit = function(comment, user_id) {
+    $scope.edit = function(comment) {
         $scope.comments.forEach(function(otherComment) {
             otherComment.editing = false;
         });
@@ -76,11 +79,24 @@ app.controller('CommentController', ['$scope', 'Comment', function($scope, Comme
         }
     }
 
+    $scope.delete = function(comment) {
+        Comment.get({id:comment.id}, function(c) {
+            c.$delete({id:c.id}).then(function() {
+                $scope.noscroll = true;
+                $scope.updateComments();
+            });
+        });
+    }
+
     $scope.canEdit = function(comment) {
         if (USER_ID == undefined) {
             return false;
         }
         return (USER_ID == comment.created_by.id);
+    }
+
+    $scope.canDelete = function(comment) {
+        return $scope.canEdit(comment);
     }
 
     $scope.submitComment = function() {

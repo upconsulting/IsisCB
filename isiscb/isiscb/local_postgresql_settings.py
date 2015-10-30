@@ -202,23 +202,10 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-# # secrets.py should set the AWS_SECRET_ACCESS_KEY
-# from secrets import AWS_SECRET_ACCESS_KEY
-AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
-AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
-# AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
-AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
-AWS_S3_SECURE_URLS = False
-# AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
-STATICFILES_DIRS = ['isisdata/static']
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
-MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
-MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
 AWS_HEADERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
