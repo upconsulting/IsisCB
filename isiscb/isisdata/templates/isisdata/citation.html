@@ -69,7 +69,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if citation.abstract %}
-    <p><strong>Abstract:</strong> {{ citation.abstract|bleach_safe }}</p>
+    <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
     {% endif %}
     {% if citation.description %}
     <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
