@@ -453,6 +453,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = None     # Angular has trouble with pagination.
 
+    def delete(self, request, *args, **kwargs):
+        """
+        Users can only delete comments that they themselves have created.
+        """
+        pk = kwargs.get('pk', None)
+        if pk:
+            instance = Comment.objects.get(pk=pk)
+            if request.user.id != instance.created_by.id:
+                return HttpResponseForbidden()
+        return super(CommentViewSet, self).delete(request, *args, **kwargs)
+
     def update(self, request, *args, **kwargs):
         """
         Don't allow users to edit other users' comments.
