@@ -8,31 +8,31 @@ from isisdata.views import IsisSearchView
 
 from . import views
 
-sqs = SearchQuerySet().facet('authors', size=300). \
-        facet('type', size=300). \
-        facet('publication_date', size=300). \
-        facet('persons', size=300). \
-        facet('categories', size=300). \
-        facet('subjects', size=300). \
-        facet('editors', size=300). \
-        facet('advisors', size=300). \
-        facet('translators', size=300). \
-        facet('publishers', size=300). \
-        facet('schools', size=300). \
-        facet('institutions', size=300). \
-        facet('meetings', size=300). \
-        facet('periodicals', size=300). \
-        facet('book_series', size=300). \
-        facet('time_periods', size=300). \
-        facet('geographics', size=300). \
-        facet('people', size=300). \
-        facet('subject_institutions', size=300). \
-        facet('serial_publiations', size=300). \
-        facet('classification_terms', size=300). \
-        facet('concepts', size=300). \
-        facet('creative_works', size=300). \
-        facet('events', size=300). \
-        facet('authority_type', size=300)
+sqs = SearchQuerySet().facet('authors', size=100). \
+        facet('type', size=100). \
+        facet('publication_date', size=100). \
+        facet('persons', size=100). \
+        facet('categories', size=100). \
+        facet('subjects', size=100). \
+        facet('editors', size=100). \
+        facet('advisors', size=100). \
+        facet('translators', size=100). \
+        facet('publishers', size=100). \
+        facet('schools', size=100). \
+        facet('institutions', size=100). \
+        facet('meetings', size=100). \
+        facet('periodicals', size=100). \
+        facet('book_series', size=100). \
+        facet('time_periods', size=100). \
+        facet('geographics', size=100). \
+        facet('people', size=100). \
+        facet('subject_institutions', size=100). \
+        facet('serial_publiations', size=100). \
+        facet('classification_terms', size=100). \
+        facet('concepts', size=100). \
+        facet('creative_works', size=100). \
+        facet('events', size=100). \
+        facet('authority_type', size=100)
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
