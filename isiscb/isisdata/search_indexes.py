@@ -232,6 +232,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='description', null=True)
     attributes = indexes.MultiValueField()
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
+    public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
 
     def get_model(self):
         return Authority
