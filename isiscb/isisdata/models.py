@@ -29,6 +29,8 @@ def strip_punctuation(s):
     """
     Removes all punctuation characters from a string.
     """
+    if not s:
+        return s
     if type(s) is str:    # Bytestring (default in Python 2.x).
         return s.translate(string.maketrans("",""), string.punctuation)
     else:                 # Unicode string (default in Python 3.x).
@@ -53,6 +55,8 @@ def normalize(s):
     Remove punctuation.
     Lowercase.
     """
+    if not s:
+        return s
 
     return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower().replace('\n', ' ').replace('\r', ' ')
 

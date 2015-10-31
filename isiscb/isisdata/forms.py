@@ -9,6 +9,8 @@ from haystack.constants import DEFAULT_ALIAS
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from haystack.utils import get_model_ct
 
+from isisdata import helper_methods
+
 try:
     from django.utils.encoding import smart_text
 except ImportError:
@@ -98,7 +100,10 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         #sqs = super(MyFacetedSearchForm, self).search()
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
-        sqs = self.searchqueryset.auto_query(query_tuple[0], query_tuple[1])
+        qstring = query_tuple[0]
+        if query_tuple[1] == 'content':
+            qstring = helper_methods.normalize(qstring)
+        sqs = self.searchqueryset.auto_query(qstring, query_tuple[1])
 
         if self.load_all:
             sqs = sqs.load_all()
@@ -118,4 +123,4 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if sort_order_dir == 'descend':
             sort_order = "-" + sort_order
 
-        return sqs.models(*self.get_models()).filter(public=True).order_by(sort_order)
+        return sqs.models(*self.get_models()).order_by(sort_order)

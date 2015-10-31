@@ -31,6 +31,9 @@ def normalize(s):
     Lowercase.
     """
 
+    if not s:
+        return s
+
     return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower()
 
 
