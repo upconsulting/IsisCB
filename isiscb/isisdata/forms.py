@@ -41,15 +41,21 @@ class MyFacetedSearchForm(FacetedSearchForm):
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
 
-    def get_models(self):
+    def get_authority_model(self):
         """Return an alphabetical list of model classes in the index."""
         search_models = []
 
-        #if self.is_valid():
-        for model in ['isisdata.citation', 'isisdata.authority']:
-            #search_models.append(models.get_model(*model.split('.')))
-            # if we want the option to select both indexes at the same time we might need above back
-            search_models.append(models.get_model(*model.split('.')))
+        if self.is_valid():
+            search_models.append(models.get_model(*'isisdata.authority'.split('.')))
+
+        return search_models
+
+    def get_citation_model(self):
+        """Return an alphabetical list of model classes in the index."""
+        search_models = []
+
+        if self.is_valid():
+            search_models.append(models.get_model(*'isisdata.citation'.split('.')))
 
         return search_models
 
@@ -136,4 +142,5 @@ class MyFacetedSearchForm(FacetedSearchForm):
             sort_order_citation = "-" + sort_order_citation
             sort_order_authority = "-" + sort_order_authority
 
-        return sqs.models(*self.get_models()).filter(public=True).order_by(sort_order_citation, sort_order_authority)
+        return {'authority' : sqs.models(*self.get_authority_model()).filter(public=True),
+                    'citation': sqs.models(*self.get_citation_model()).filter(public=True)}

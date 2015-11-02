@@ -1,7 +1,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 
-{% if query and 'isisdata.authority' in models %}
+{% if query %}
     <h3>Search Results</h3>
     <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
 

@@ -797,9 +797,9 @@ class IsisSearchView(FacetedSearchView):
             raise Http404("Pages should be 1 or greater.")
 
         start_offset = (page_no - 1) * self.results_per_page
-        self.results[start_offset:start_offset + self.results_per_page]
+        self.results['authority'][start_offset:start_offset + self.results_per_page]
 
-        paginator = Paginator(self.results, self.results_per_page)
+        paginator = Paginator(self.results['authority'], self.results_per_page)
 
 
         try:
@@ -815,7 +815,7 @@ class IsisSearchView(FacetedSearchView):
     def extra_context(self):
         extra = super(FacetedSearchView, self).extra_context()
         extra['request'] = self.request
-        extra['facets'] = self.results.facet_counts()
+        extra['facets'] = self.results['authority'].facet_counts()
         extra['models'] = self.request.GET.getlist('models')
         extra['sort_order'] = self.request.GET.get('sort_order')
         extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
