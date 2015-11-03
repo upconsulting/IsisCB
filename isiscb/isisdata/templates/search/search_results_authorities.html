@@ -25,7 +25,7 @@
 
           {% if page.authority.has_previous %}
           <li>
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.previous_page_number }}" aria-label="Previous">
+            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.authority.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>

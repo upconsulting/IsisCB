@@ -2,11 +2,11 @@
 {% load metadata_filters %}
 {% load citation_filters %}
 
-{% if not query %}
+{% if query %}
 <div class="row">
   <div class="col-md-8">
     <h3>Search Results</h3>
-    <div class="results-info">Showing {{ page.start_index }} to {{ page.end_index }} of {{ count }} results.</div>
+    <div class="results-info">Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results.</div>
   </div>
   <div class="col-md-4 menuContainer">
 
@@ -32,7 +32,7 @@
   </div>
 </div>
 
-    {% for result in page.object_list %}
+    {% for result in page.citation.object_list %}
     <p>
           <span class="glyphicon glyphicon-book"></span>
           [{{ result.object.get_type_controlled_display }}]
@@ -66,37 +66,37 @@
     {% empty %}
         <p>No results found.</p>
     {% endfor %}
-    {% if page.has_previous or page.has_next %}
+    {% if page.citation.has_previous or page.citation.has_next %}
     <nav>
       <ul class="pagination">
         <li class="disabled"><a>Go to page:</a></li>
-          {% if page.has_previous %}
+          {% if page.citation.has_previous %}
           <li>
-            <a href="{{ request.get_full_path|set_page:page.previous_page_number }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:page.citation.previous_page_number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           {% else %}
           <li class="disabled">
-            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:page.citation.number }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
           {% endif %}
-          {% if page.has_previous or page.has_next %}
-          {% for p in page.paginator.page_range %}
-              <li {% if page.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:forloop.counter }}">{{ p }}</a></li>
+          {% if page.citation.has_previous or page.citation.has_next %}
+          {% for p in page.citation.paginator.page_range %}
+              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:forloop.counter }}">{{ p }}</a></li>
           {% endfor %}
           {% endif %}
-          {% if page.has_next %}
+          {% if page.citation.has_next %}
           <li>
-            <a href="{{ request.get_full_path|set_page:page.next_page_number }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:page.citation.next_page_number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
           {% else %}
           <li class="disabled">
-            <a href="{{ request.get_full_path|set_page:page.number }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:page.citation.number }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
