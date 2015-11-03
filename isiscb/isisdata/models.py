@@ -62,7 +62,7 @@ def normalize(s):
     if not s:
         return s
 
-    return remove_control_characters(trip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
+    return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
