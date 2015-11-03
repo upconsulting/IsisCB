@@ -92,7 +92,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         for k, v in self.prepared_data.iteritems():
             if type(v) is unicode:
-                self.prepared_data[k] = remove_control_characters(unidecode.unidecode(v).strip())
+                self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
         return self.prepared_data
 
     def prepare_type(self, obj):
