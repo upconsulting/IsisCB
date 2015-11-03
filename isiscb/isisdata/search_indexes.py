@@ -9,6 +9,11 @@ import bleach
 import unidecode
 import unicodedata
 
+
+def remove_control_characters(s):
+    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+
+
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
@@ -87,7 +92,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         for k, v in self.prepared_data.iteritems():
             if type(v) is unicode:
-                self.prepared_data[k] = unidecode.unidecode(v)
+                self.prepared_data[k] = remove_control_characters(unidecode.unidecode(v).strip())
         return self.prepared_data
 
     def prepare_type(self, obj):

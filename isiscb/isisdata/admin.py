@@ -73,7 +73,6 @@ class AttributeInlineForm(forms.ModelForm):
         # Populate value and id fields.
         instance = kwargs.get('instance', None)
         if instance is not None:
-            print type(instance), type(instance.value), dir(instance.value), 'cc', instance.value.child_class, 'dt', instance.value.datetimevalue
             value_initial = instance.value.cvalue()
             self.fields['value'].initial = value_initial
             self.fields['id'].initial = instance.id
