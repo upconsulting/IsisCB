@@ -1,5 +1,5 @@
 {{ object.normalized_title }}
-{{ object.description }}
+{{ object.normalized_description }}
 {{ object.normalized_abstract }}
 
 {% for ac_rel in object.acrelation_set.all %}

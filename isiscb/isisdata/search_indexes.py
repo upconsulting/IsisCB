@@ -7,6 +7,7 @@ from isisdata.templatetags.app_filters import *
 
 import bleach
 import unidecode
+import unicodedata
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
