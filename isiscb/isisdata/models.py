@@ -60,7 +60,7 @@ def normalize(s):
     Lowercase.
     """
     if not s:
-        return s
+        return ''
 
     return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
 
