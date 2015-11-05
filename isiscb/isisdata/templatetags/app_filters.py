@@ -205,7 +205,13 @@ def set_page(link, sort_str):
     if not (key + "=") in link:
         return link + "&" + key + "=" + str(page_number)
     return re.sub(r"&" + key + "=[0-9]+&?", "&" + key + "=" + str(page_number) + "&", link)
-    #return sort_str
+
+@register.filter
+def set_index_model(link, model_str):
+    [key, model] = model_str.split(':')
+    if not (key + "=") in link:
+        return link + "&" + key + "=" + model
+    return re.sub(r"&" + key + "=isisdata\.[a-z]+&?", "&" + key + "=" + model + "&", link)
 
 @register.filter
 def get_current_sort_order_citation(sort_field):

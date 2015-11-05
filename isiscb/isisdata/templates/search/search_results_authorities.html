@@ -25,33 +25,53 @@
 
           {% if page.authority.has_previous %}
           <li>
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.authority.previous_page_number }}" aria-label="Previous">
+            {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% else %}
           <li class="disabled">
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.authority.number }}" aria-label="Previous">
+            {% with pagenr=page.authority.number|stringformat:"s"  %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% endif %}
           {% if page.authority.has_previous or page.authority.has_next %}
           {% for p in page.authority.paginator.page_range %}
-              <li {% if page.authority.number == p %} class="active" {% endif %}><a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ forloop.counter }}">{{ p }}</a></li>
+          {% with pagenr=forloop.counter|stringformat:"s" %}
+          {% with ppage='page_authority:'|add:pagenr %}
+              <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
+          {% endwith %}
+          {% endwith %}
           {% endfor %}
           {% endif %}
           {% if page.authority.has_next %}
           <li>
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.authority.next_page_number }}" aria-label="Next">
+            {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% else %}
           <li class="disabled">
-            <a href="?q={{ query }}{% if selected_facets_raw %}&amp;selected_facets={{ selected_facets_raw|join:'&selected_facets=' }}{% endif %}{% if models %}&amp;models={{ models|join:'&amp;models=' }}{% endif %}&amp;page_authority={{ page.authority.number }}" aria-label="Next">
+            {% with pagenr=page.authority.number|stringformat:"s" %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% endif %}
         </ul>

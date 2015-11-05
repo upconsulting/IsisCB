@@ -18,7 +18,7 @@
               <ul class="selected_facets">
                 {% for type in selected_facets.citation_type %}
                 {% with type|create_facet_string:'citation_type' as encoded_type %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ type }}</a></li>
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{ type }}</a></li>
                 {% endwith %}
                 {% endfor %}
               </ul>
@@ -26,7 +26,7 @@
                 {% for type in facets_citation.fields.type %}
                 {% if type.0 %}
                 {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
-                <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}">{{ type.0 }} </a>({{ type.1 }})</li>
+                <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}">{{ type.0 }} </a>({{ type.1 }})</li>
                 {% endif %}
                 {% endif %}
                 {% endfor %}
@@ -55,7 +55,7 @@
               <ul class="selected_facets">
                 {% for author in selected_facets.citation_authors_exact %}
                 {% with author|create_facet_string:'citation_authors_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{author}}</a></li>
                 {% endwith %}
                 {% endfor %}
               </ul>
@@ -63,7 +63,7 @@
                 {# Provide only the top 7 authors #}
                 {% for author in facets_citation.fields.authors|slice:":7" %}
                 {% if "citation_authors_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_authors_exact %}
-                <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+                <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
                 {% endif %}
                 {% endfor %}
               </ul>
@@ -99,14 +99,14 @@
           <ul class="selected_facets">
             {% for time_period in selected_facets.citation_time_periods_exact %}
             {% with time_period|create_facet_string:'citation_time_periods_exact' as encoded_time_period %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{time_period}}</a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{time_period}}</a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul>
                 {% for time_period in facets_citation.fields.time_periods|slice:":7" %}
                 {% if "citation_time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_periods_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -142,14 +142,14 @@
           <ul class="selected_facets">
             {% for geographic in selected_facets.citation_geographics_exact %}
             {% with geographic|create_facet_string:'citation_geographics_exact' as encoded_geographic %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{geographic}}</a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{geographic}}</a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul>
                 {% for geographic in facets_citation.fields.geographics|slice:":7" %}
                 {% if "citation_geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographics_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -185,14 +185,14 @@
           <ul class="selected_facets">
             {% for subject in selected_facets.citation_subjects_exact %}
             {% with subject|create_facet_string:'citation_subjects_exact' as encoded_subject %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul>
                 {% for subject in facets_citation.fields.subjects|slice:":7" %}
                 {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -225,7 +225,7 @@
         <ul>
           {% for author in facets_citation.fields.authors %}
           {% if "citation_authors_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_authors_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}">{{ author.0 }} </a>({{ author.1 }})</li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -249,7 +249,7 @@
         <ul>
           {% for time_period in facets_citation.fields.time_periods %}
           {% if "citation_time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_periods_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}">{{ time_period.0 }} </a>({{ time_period.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -273,7 +273,7 @@
         <ul>
           {% for geographic in facets_citation.fields.geographics %}
           {% if "citation_geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographics_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}">{{ geographic.0 }} </a>({{ geographic.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -297,7 +297,7 @@
         <ul>
           {% for subject in facets_citation.fields.subjects %}
           {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>

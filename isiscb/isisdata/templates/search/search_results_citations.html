@@ -74,7 +74,7 @@
           <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
             {% with ppage="page_citation:"|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -84,7 +84,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s"  %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -95,7 +95,7 @@
           {% for p in page.citation.paginator.page_range %}
           {% with pagenr=forloop.counter|stringformat:"s" %}
           {% with ppage='page_citation:'|add:pagenr %}
-              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage }}">{{ p }}</a></li>
+              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
           {% endwith %}
           {% endwith %}
           {% endfor %}
@@ -104,7 +104,7 @@
           <li>
             {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
@@ -114,7 +114,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
