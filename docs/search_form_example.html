@@ -1,0 +1,17 @@
+<!-- Change `action` to the production URL. -->
+<form action='http://isiscb-staging.elasticbeanstalk.com/isis/search/' method='GET'>
+    <!-- The search input field. -->
+    <input type="search" name="q"></input>
+
+    <!-- `models` controls whether to search citations or authorities. To
+         search authority records, change `value` to "isisdata.authority". -->
+    <input type="hidden" name="models" value="isisdata.citation" />
+
+    <!-- Add additional `hidden` fields to pass parameters; e.g.
+            * sort_order
+            * sort_order_dir    -->
+
+    <!-- The text between the tags (`Search`) is what the user sees. You could
+         change this to `Search the IsisCB database`, or whatever you like. -->
+    <button type="submit">Search</button>
+</form>
