@@ -597,8 +597,9 @@ def authority(request, authority_id):
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
     # Provide progression through search results, if present.
+    fromsearch = request.GET.get('fromsearch', False)
     search_results = request.session.get('search_results', [])
-    if len(search_results) > 0:
+    if len(search_results) > 0 and fromsearch:
         try:
             search_index = search_results.index(authority_id) + 1   # +1 for display.
         except IndexError:
@@ -634,6 +635,7 @@ def authority(request, authority_id):
         'search_index': search_index,
         'search_next': search_next,
         'search_previous': search_previous,
+        'fromsearch': fromsearch,
     })
     return HttpResponse(template.render(context))
 
@@ -686,9 +688,9 @@ def citation(request, citation_id):
     api_view = reverse('citation-detail', args=[citation.id], request=request)
 
     # Provide progression through search results, if present.
-    # Provide progression through search results, if present.
+    fromsearch = request.GET.get('fromsearch', False)
     search_results = request.session.get('search_results', [])
-    if len(search_results) > 0:
+    if len(search_results) > 0 and fromsearch:
         try:
             search_index = search_results.index(citation_id) + 1   # +1 for display.
         except IndexError:
@@ -732,6 +734,7 @@ def citation(request, citation_id):
         'search_index': search_index,
         'search_next': search_next,
         'search_previous': search_previous,
+        'fromsearch': fromsearch,
     })
     return HttpResponse(template.render(context))
 
@@ -843,6 +846,7 @@ class IsisSearchView(FacetedSearchView):
             results = [result.split('.')[-1] for result
                        in results.values_list('id', flat=True)]
             request.session['search_results'] = results
+            request.session['search_models'] = search_models
 
         return response
 
