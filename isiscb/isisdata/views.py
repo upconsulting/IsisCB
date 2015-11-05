@@ -580,17 +580,17 @@ def authority(request, authority_id):
     template = loader.get_template('isisdata/authority.html')
 
     citations_by_list = ACRelation.objects.filter(authority=authority,
-                                                  type_controlled__in=['AU','CO']).distinct('citation_id')[:5]
+                                                  type_broad_controlled__in=['PR']).order_by('-citation__publication_date')[:5]
     citations_by_count = ACRelation.objects.filter(authority=authority,
-                                                  type_controlled__in=['AU','CO']).distinct('citation_id').count()
+                                                  type_broad_controlled__in=['PR']).distinct('citation_id').count()
 
     citations_about_list = ACRelation.objects.filter(authority=authority,
-                                                     type_broad_controlled='SC')[:5]
+                                                     type_broad_controlled='SC').order_by('-citation__publication_date')[:5]
     citations_about_count = ACRelation.objects.filter(authority=authority,
                                                      type_broad_controlled='SC').count()
 
     query = Q(authority=authority, type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-    citations_other_list = ACRelation.objects.filter(query)[:5]
+    citations_other_list = ACRelation.objects.filter(query).order_by('-citation__publication_date')[:5]
     citations_other_count = ACRelation.objects.filter(query).count()
 
     # Location of authority in REST API
@@ -850,9 +850,6 @@ class IsisSearchView(FacetedSearchView):
 
         return response
 
-    # def get_results(self):
-    #
-    #     return results
 
     def build_page(self):
         """
@@ -893,6 +890,10 @@ class IsisSearchView(FacetedSearchView):
         extra['models'] = self.request.GET.getlist('models')
         extra['sort_order'] = self.request.GET.get('sort_order')
         extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
+        # we need to change something about this, this is terrible...
+        # but it works
+        if not extra['sort_order_dir'] and (not extra['sort_order'] or 'publication_date_for_sort' in extra['sort_order']):
+            extra['sort_order_dir'] = 'descend'
         extra['count'] = len(self.results)
         extra['active'] = 'home'
 
