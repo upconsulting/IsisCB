@@ -596,6 +596,27 @@ def authority(request, authority_id):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
+    # Provide progression through search results, if present.
+    search_results = request.session.get('search_results', [])
+    if len(search_results) > 0:
+        try:
+            search_index = search_results.index(authority_id) + 1   # +1 for display.
+        except IndexError:
+            search_index = None
+        try:
+            search_next = search_results[search_index]
+        except IndexError:
+            search_next = None
+        try:
+            search_previous = search_results[search_index - 2]
+        except IndexError:
+            search_previous = None
+    else:
+        search_index = None
+        search_next = None
+        search_previous = None
+
+
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
@@ -609,6 +630,10 @@ def authority(request, authority_id):
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
         'redirect_from': redirect_from,
+        'search_results': search_results,
+        'search_index': search_index,
+        'search_next': search_next,
+        'search_previous': search_previous,
     })
     return HttpResponse(template.render(context))
 
@@ -660,6 +685,27 @@ def citation(request, citation_id):
     # Location of citation in REST API
     api_view = reverse('citation-detail', args=[citation.id], request=request)
 
+    # Provide progression through search results, if present.
+    # Provide progression through search results, if present.
+    search_results = request.session.get('search_results', [])
+    if len(search_results) > 0:
+        try:
+            search_index = search_results.index(citation_id) + 1   # +1 for display.
+        except IndexError:
+            search_index = None
+        try:
+            search_next = search_results[search_index]
+        except IndexError:
+            search_next = None
+        try:
+            search_previous = search_results[search_index - 2]
+        except IndexError:
+            search_previous = None
+    else:
+        search_index = None
+        search_next = None
+        search_previous = None
+
     context = RequestContext(request, {
         'citation_id': citation_id,
         'citation': citation,
@@ -682,6 +728,10 @@ def citation(request, citation_id):
         'related_citations_inv_re': related_citations_inv_re,
         'related_citations_as': related_citations_as,
         'api_view': api_view,
+        'search_results': search_results,
+        'search_index': search_index,
+        'search_next': search_next,
+        'search_previous': search_previous,
     })
     return HttpResponse(template.render(context))
 
@@ -784,9 +834,21 @@ class IsisSearchView(FacetedSearchView):
             )
             searchquery.save()
 
-        results = super(IsisSearchView, self).__call__(request)
+        response = super(IsisSearchView, self).__call__(request)
 
-        return results
+        if parameters:  # Store results in the session cache.
+            results = super(IsisSearchView, self).get_results()
+
+            # Store only IDs, not model names.
+            results = [result.split('.')[-1] for result
+                       in results.values_list('id', flat=True)]
+            request.session['search_results'] = results
+
+        return response
+
+    # def get_results(self):
+    #
+    #     return results
 
     def build_page(self):
         """

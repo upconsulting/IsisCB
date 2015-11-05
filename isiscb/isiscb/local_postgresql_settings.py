@@ -141,6 +141,16 @@ ELASTICSEARCH_INDEX_SETTINGS = {
 
 ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
