@@ -10,8 +10,8 @@
 <h5>Authority Type</h5>
   {% if facets_authority.fields.authority_type %}
         <ul class="selected_facets">
-          {% for auth_type in selected_facets.authority_type %}
-          {% with auth_type|create_facet_string:'authority_type' as encoded_auth_type %}
+          {% for auth_type in selected_facets.authority_authority_type %}
+          {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
           <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one }}"><span class="glyphicon glyphicon-remove"></span> {{ auth_type }}</a></li>
           {% endwith %}
           {% endfor %}
@@ -20,8 +20,8 @@
           {# Provide only the top 7 authors #}
           {% for auth_type in facets_authority.fields.authority_type|slice:":7" %}
           {% if auth_type.0 %}
-          {% if "authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_type %}
-          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authority_type:{{ auth_type.0|urlencode }}">{{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
+          {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
+          <li><a href="{{ request.get_full_path|set_page_to_one }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}">{{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
           {% endif %}
           {% endif %}
           {% endfor %}

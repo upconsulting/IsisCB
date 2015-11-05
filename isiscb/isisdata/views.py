@@ -863,6 +863,7 @@ class IsisSearchView(FacetedSearchView):
 
         extra['active'] = 'home'
 
+        # create authorities facets
         facet_map = {}
         facets_raw = []
         for facet in self.request.GET.getlist("selected_facets"):
@@ -877,6 +878,7 @@ class IsisSearchView(FacetedSearchView):
 
         extra['selected_facets'] = facet_map
         extra['selected_facets_raw'] = facets_raw
+
         return extra
 
 

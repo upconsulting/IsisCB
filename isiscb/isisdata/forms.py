@@ -9,6 +9,8 @@ from haystack.constants import DEFAULT_ALIAS
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from haystack.utils import get_model_ct
 
+import time
+
 try:
     from django.utils.encoding import smart_text
 except ImportError:
@@ -123,7 +125,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sqs = self.searchqueryset.auto_query(query_tuple[0], query_tuple[1])
 
         if self.load_all:
-            sqs = sqs.load_all()
+            sqs_citation = sqs.load_all()
+            sqs_authority = sqs_citation
 
         for facet in self.selected_facets:
             if ":" not in facet:
@@ -131,8 +134,10 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
             field, value = facet.split(":", 1)
 
-            if value:
-                sqs = sqs.narrow(u'%s:"%s"' % (field, sqs.query.clean(value)))
+            if value and field.startswith('citation_'):
+                sqs_citation = sqs_citation.narrow(u'%s:"%s"' % (field[9:], sqs.query.clean(value)))
+            if value and field.startswith('authority_'):
+                sqs_authority = sqs_authority.narrow(u'%s:"%s"' % (field[10:], sqs.query.clean(value)))
 
         sort_order_citation = self.get_sort_order_citation()
         sort_order_authority = self.get_sort_order_authority()
@@ -142,5 +147,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
             sort_order_citation = "-" + sort_order_citation
             sort_order_authority = "-" + sort_order_authority
 
-        return {'authority' : sqs.models(*self.get_authority_model()).filter(public=True),
-                    'citation': sqs.models(*self.get_citation_model()).filter(public=True)}
+        results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True)
+        results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True)
+
+        return {'authority' : results_authority,
+                    'citation': results_citation}
