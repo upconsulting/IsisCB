@@ -6,6 +6,12 @@ from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
 
 import bleach
+import unidecode
+import unicodedata
+
+
+def remove_control_characters(s):
+    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
@@ -76,6 +82,18 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(public=True)
+
+    def prepare(self, obj):
+        """
+        Coerce all unicode values to ASCII bytestrings, to avoid characters
+        that make haystack choke.
+        """
+        self.prepared_data = super(CitationIndex, self).prepare(obj)
+
+        for k, v in self.prepared_data.iteritems():
+            if type(v) is unicode:
+                self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
+        return self.prepared_data
 
     def prepare_type(self, obj):
         return obj.get_type_controlled_display()
@@ -239,6 +257,18 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(public=True)
+
+    def prepare(self, obj):
+        """
+        Coerce all unicode values to ASCII bytestrings, to avoid characters
+        that make haystack choke.
+        """
+        self.prepared_data = super(AuthorityIndex, self).prepare(obj)
+
+        for k, v in self.prepared_data.iteritems():
+            if type(v) is unicode:
+                self.prepared_data[k] = unidecode.unidecode(v)
+        return self.prepared_data
 
     def prepare_attributes(self, obj):
         return [attr.value_freeform for attr

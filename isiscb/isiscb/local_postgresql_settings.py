@@ -125,6 +125,7 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+
 ELASTICSEARCH_INDEX_SETTINGS = {
      "settings" : {
          "analysis" : {
@@ -138,7 +139,17 @@ ELASTICSEARCH_INDEX_SETTINGS = {
      }
  }
 
-#ELASTICSEARCH_DEFAULT_ANALYZER = 'edgengram_analyzer'
+ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -171,23 +182,10 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-# # secrets.py should set the AWS_SECRET_ACCESS_KEY
-# from secrets import AWS_SECRET_ACCESS_KEY
-AWS_STORAGE_BUCKET_NAME = 'isiscb-develop-staticfiles'
-AWS_MEDIA_BUCKET_NAME = 'isiscb-develop-media'
-# AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
-AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
-AWS_S3_SECURE_URLS = False
-# AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
-STATICFILES_DIRS = ['isisdata/static']
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
-MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
-MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
 AWS_HEADERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
@@ -214,17 +212,18 @@ CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
 # social
 
-FACEBOOK_APP_ID = '1694252594140628'
-SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
+SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
+SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
 
-# try:
-#     from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
-# except ImportError:
-SOCIAL_AUTH_TWITTER_SECRET = ''
-SOCIAL_AUTH_FACEBOOK_SECRET = ''
+TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
+TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
+FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
+FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
+
 
 
 LICENSE = """This work is licensed under a Creative Commons

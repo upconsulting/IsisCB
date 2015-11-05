@@ -128,50 +128,20 @@ HAYSTACK_CONNECTIONS = {
 }
 
 ELASTICSEARCH_INDEX_SETTINGS = {
-     'settings': {
-         "analysis": {
-             "analyzer": {
-                 "ngram_analyzer": {
-                     "type": "custom",
-                     "tokenizer": "lowercase",
-                     "filter": ["haystack_ngram", "asciifolding"]
-                 },
-                 "edgengram_analyzer": {
-                     "type": "custom",
-                     "tokenizer": "lowercase",
-                     "filter": ["haystack_edgengram", "asciifolding"]
+     "settings" : {
+         "analysis" : {
+             "analyzer" : {
+                 "default" : {
+                     "tokenizer" : "standard",
+                     "filter" : ["standard", "asciifolding"]
                  }
-             },
-             "tokenizer": {
-                 "haystack_ngram_tokenizer": {
-                     "type": "nGram",
-                     "min_gram": 3,
-                     "max_gram": 15,
-                 },
-                 "haystack_edgengram_tokenizer": {
-                     "type": "edgeNGram",
-                     "min_gram": 2,
-                     "max_gram": 15,
-                     "side": "front"
-                 }
-             },
-             "filter": {
-                 "haystack_ngram": {
-                     "type": "nGram",
-                     "min_gram": 3,
-                     "max_gram": 15
-                 },
-                 "haystack_edgengram": {
-                     "type": "edgeNGram",
-                     "min_gram": 2,
-                     "max_gram": 15
-                 },
              }
          }
      }
  }
 
-ELASTICSEARCH_DEFAULT_ANALYZER = 'edgengram_analyzer'
+
+ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -194,11 +164,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ),
+    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata'
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -237,14 +210,17 @@ SMTP_EMAIL = os.environ['SMTP_EMAIL']
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
-# TODO: consolidate these settings.
-FACEBOOK_APP_ID = os.environ['FACEBOOK_APP_ID']
-SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
 SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+
+TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
+TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
+FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
+FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
 
 LICENSE = """This work is licensed under a Creative Commons

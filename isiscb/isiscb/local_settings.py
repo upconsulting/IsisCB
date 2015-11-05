@@ -108,17 +108,20 @@ HAYSTACK_CONNECTIONS = {
 }
 
 ELASTICSEARCH_INDEX_SETTINGS = {
-    "settings" : {
-        "analysis" : {
-            "analyzer" : {
-                "default" : {
-                    "tokenizer" : "standard",
-                    "filter" : ["standard", "asciifolding"]
-                }
-            }
-        }
-    }
-}
+     "settings" : {
+         "analysis" : {
+             "analyzer" : {
+                 "default" : {
+                     "tokenizer" : "standard",
+                     "filter" : ["standard", "asciifolding"]
+                 }
+             }
+         }
+     }
+ }
+
+
+ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -183,17 +186,19 @@ CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 
 # social
 
-FACEBOOK_APP_ID = '1694252594140628'
-SOCIAL_AUTH_FACEBOOK_KEY = FACEBOOK_APP_ID
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-SOCIAL_AUTH_TWITTER_KEY = 'Vz6Nq70ijJYb2IOSLzetQVwJR'
 
-try:
-    from secrets import SOCIAL_AUTH_FACEBOOK_SECRET, SOCIAL_AUTH_TWITTER_SECRET
-except ImportError:
-    SOCIAL_AUTH_TWITTER_SECRET = ''
-    SOCIAL_AUTH_FACEBOOK_SECRET = ''
+SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
+SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+
+TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
+TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
+FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
+FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
 
-LICENSE = """This work is licensed under a Creative Commons 
+
+LICENSE = """This work is licensed under a Creative Commons
              Attribution-NonCommercial 4.0 International License."""

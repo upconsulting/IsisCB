@@ -10,6 +10,7 @@ from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from haystack.utils import get_model_ct
 
 import time
+from isisdata import helper_methods
 
 try:
     from django.utils.encoding import smart_text
@@ -136,7 +137,10 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         #sqs = super(MyFacetedSearchForm, self).search()
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
-        sqs = self.searchqueryset.auto_query(query_tuple[0], query_tuple[1])
+        qstring = query_tuple[0]
+        if query_tuple[1] == 'content':
+            qstring = helper_methods.normalize(qstring)
+        sqs = self.searchqueryset.auto_query(qstring, query_tuple[1])
 
         if self.load_all:
             sqs_citation = sqs.load_all()
@@ -147,6 +151,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
                 continue
 
             field, value = facet.split(":", 1)
+            field = field.strip()
+            value = value.strip()
 
             if value and field.startswith('citation_'):
                 sqs_citation = sqs_citation.narrow(u'%s:"%s"' % (field[9:], sqs.query.clean(value)))

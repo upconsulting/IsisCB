@@ -4,6 +4,10 @@ python:
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.local_settings
+    - SOCIAL_AUTH_FACEBOOK_KEY=''
+    - SOCIAL_AUTH_TWITTER_KEY=''
+    - SOCIAL_AUTH_FACEBOOK_SECRET=''
+    - SOCIAL_AUTH_TWITTER_SECRET=''
 script:
 - pip install nose
 - cd isiscb

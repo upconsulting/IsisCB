@@ -21,6 +21,7 @@ import re
 import bleach
 import unidecode
 import string
+import unicodedata
 
 #from isisdata.templatetags.app_filters import linkify
 
@@ -29,6 +30,8 @@ def strip_punctuation(s):
     """
     Removes all punctuation characters from a string.
     """
+    if not s:
+        return ''
     if type(s) is str:    # Bytestring (default in Python 2.x).
         return s.translate(string.maketrans("",""), string.punctuation)
     else:                 # Unicode string (default in Python 3.x).
@@ -45,6 +48,9 @@ def strip_tags(s):
     return bleach.clean(s, tags={}, attributes={}, strip=True)
 
 
+def remove_control_characters(s):
+    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+
 # TODO: remove this later.
 def normalize(s):
     """
@@ -53,8 +59,10 @@ def normalize(s):
     Remove punctuation.
     Lowercase.
     """
+    if not s:
+        return ''
 
-    return strip_punctuation(strip_tags(unidecode.unidecode(s))).lower().replace('\n', ' ').replace('\r', ' ')
+    return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -425,6 +433,10 @@ class Citation(ReferencedEntity, CuratedMixin):
 
         return normalize(self.abstract)
 
+    @property
+    def normalized_description(self):
+        return normalize(self.description)
+
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
     abstracts use the 'Abstract' field.""")
@@ -550,7 +562,7 @@ class Citation(ReferencedEntity, CuratedMixin):
                                        related_query_name='citations')
 
     def __unicode__(self):
-        return self.title
+        return strip_tags(self.title)
 
     @property
     def ccrelations(self):
@@ -1276,6 +1288,10 @@ class Comment(Annotation):
     A free-form text :class:`.Annotation`\.
     """
     text = models.TextField()
+
+    @property
+    def snippet(self):
+        return self.text[:min(100, len(self.text))] + u'...'
 
     @property
     def linkified(self):

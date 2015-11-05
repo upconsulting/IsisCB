@@ -148,9 +148,15 @@ def linkify(s, *args, **kwargs):
 
 @register.filter
 def filter_abstract(s):
-    matcher = re.match("{AbstractBegin}(.*){AbstractEnd}", s)
-    if matcher:
-        return matcher.group(1)
+    """
+    Some abstracts have metadata tags that should not be displayed in public
+    views. If present, only the text between {AbstractBegin} and {AbstractEnd}
+    should be displayed.
+    """
+
+    match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', s)
+    if match:
+        return match.groups()[0].strip()
     return s
 
 

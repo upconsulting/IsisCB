@@ -28,9 +28,14 @@
                 <div class="comment-user row">
                     <div class="col-xs-12">
                         <span class="text-muted text-small">{% verbatim %}{{ comment.byline }}{% endverbatim %}</span>
-                        <div class="btn btn-xs pull-right" ng-hide="!canEdit(comment)">
-                            <span class="glyphicon glyphicon-pencil" aria-hidden="true" ng-click="edit(comment)"></span>
-                        </div>
+                        <span class="pull-right">
+                            <div class="btn btn-xs" ng-hide="!canEdit(comment)">
+                                <span class="glyphicon glyphicon-pencil" aria-hidden="true" ng-click="edit(comment)"></span>
+                            </div>
+                            <div class="btn btn-xs" ng-hide="!canDelete(comment)">
+                                <span class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="delete(comment)"></span>
+                            </div>
+                        </span>
                     </div>
                 </div>
                 <div class="comment-bubble clearfix">

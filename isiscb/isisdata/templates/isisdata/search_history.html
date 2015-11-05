@@ -18,37 +18,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
 </script>
 
-<script src="{% static "isisdata/js/comments.js" %}"></script>
-
-<meta property="og:url"                content="{{ request.build_absolute_uri }}" />
-<meta property="og:site_name"          content="Isis Current Bibliography" />
-<meta property="og:type"               content="article" />
-<meta property="fb:app_id"             content="{{ facebook_app_id}}" />
-
-<!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
-<meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
 {% endblock %}
 
 
 {% block title %}Search History{% endblock %}
 
 {% block content %}
-<div class="row topnav-main">
-  <div class="col-sm-3 col-md-2 topnav">
-
-      <a href="javascript:window.history.back()" class=""><span class="glyphicon glyphicon-arrow-left nav-button">&nbsp;</span></a>
-      <a href="{% url 'index' %}" class=""><span class="glyphicon glyphicon-home nav-button">&nbsp;</span></a>
-      <a href="{% url 'haystack_search' %}" class=""><span class="glyphicon glyphicon-search nav-button">&nbsp;</span></a>
-
-    </div>
-    <div class="col-sm-9 col-md-10 topnav">
-      <h2>Explore the IsisCB</h2>
-
-  </div>
-</div>
 
 <div class="col-sm-offset-2 col-md-offset-1 main col-sm-7 col-md-9">
-    <div class="alert alert-info headerbox" role="alert">Your Recent Searches</div>
+    <div class="alert alert-info headerbox" role="alert">My Recent Searches</div>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>

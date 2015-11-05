@@ -8,31 +8,31 @@ from isisdata.views import IsisSearchView
 
 from . import views
 
-sqs = SearchQuerySet().facet('authors'). \
-        facet('type'). \
-        facet('publication_date'). \
-        facet('persons'). \
-        facet('categories'). \
-        facet('subjects'). \
-        facet('editors'). \
-        facet('advisors'). \
-        facet('translators'). \
-        facet('publishers'). \
-        facet('schools'). \
-        facet('institutions'). \
-        facet('meetings'). \
-        facet('periodicals'). \
-        facet('book_series'). \
-        facet('time_periods'). \
-        facet('geographics'). \
-        facet('people'). \
-        facet('subject_institutions'). \
-        facet('serial_publiations'). \
-        facet('classification_terms'). \
-        facet('concepts'). \
-        facet('creative_works'). \
-        facet('events'). \
-        facet('authority_type')
+sqs = SearchQuerySet().facet('authors', size=100). \
+        facet('type', size=100). \
+        facet('publication_date', size=100). \
+        facet('persons', size=100). \
+        facet('categories', size=100). \
+        facet('subjects', size=100). \
+        facet('editors', size=100). \
+        facet('advisors', size=100). \
+        facet('translators', size=100). \
+        facet('publishers', size=100). \
+        facet('schools', size=100). \
+        facet('institutions', size=100). \
+        facet('meetings', size=100). \
+        facet('periodicals', size=100). \
+        facet('book_series', size=100). \
+        facet('time_periods', size=100). \
+        facet('geographics', size=100). \
+        facet('people', size=100). \
+        facet('subject_institutions', size=100). \
+        facet('serial_publiations', size=100). \
+        facet('classification_terms', size=100). \
+        facet('concepts', size=100). \
+        facet('creative_works', size=100). \
+        facet('events', size=100). \
+        facet('authority_type', size=100)
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
