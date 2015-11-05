@@ -11,21 +11,21 @@
   <div class="col-md-4 menuContainer">
 
     <div class="dropdown pull-right">
-      {% if sort_order_dir == 'descend' %}
-      <a href="{{ request.get_full_path|set_sort_direction:'accend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      {% if sort_order_dir_citation == 'descend' %}
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:accend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
       {% else %}
-      <a href="{{ request.get_full_path|set_sort_direction:'descend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
       {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
-        Sort by: {{ sort_order|get_current_sort_order_citation }}
+        Sort by: {{ sort_order_citation|get_current_sort_order_citation }}
           <span class="caret"></span>
       </button>
 
       <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'title_for_sort' }}">Title</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'author_for_sort' }}">First Author</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'publication_date_for_sort' }}">Publication Date</a></li>
-        <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'_score' }}">Relevance</a></li>-->
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort' }}">Title</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort' }}">First Author</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort' }}">Publication Date</a></li>
+        <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
       </ul>
     </div>
     <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
@@ -72,33 +72,53 @@
         <li class="disabled"><a>Go to page:</a></li>
           {% if page.citation.has_previous %}
           <li>
-            <a href="{{ request.get_full_path|set_page:page.citation.previous_page_number }}" aria-label="Previous">
+            {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
+            {% with ppage="page_citation:"|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% else %}
           <li class="disabled">
-            <a href="{{ request.get_full_path|set_page:page.citation.number }}" aria-label="Previous">
+            {% with pagenr=page.citation.number|stringformat:"s"  %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% endif %}
           {% if page.citation.has_previous or page.citation.has_next %}
           {% for p in page.citation.paginator.page_range %}
-              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:forloop.counter }}">{{ p }}</a></li>
+          {% with pagenr=forloop.counter|stringformat:"s" %}
+          {% with ppage='page_citation:'|add:pagenr %}
+              <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage }}">{{ p }}</a></li>
+          {% endwith %}
+          {% endwith %}
           {% endfor %}
           {% endif %}
           {% if page.citation.has_next %}
           <li>
-            <a href="{{ request.get_full_path|set_page:page.citation.next_page_number }}" aria-label="Next">
+            {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% else %}
           <li class="disabled">
-            <a href="{{ request.get_full_path|set_page:page.citation.number }}" aria-label="Next">
+            {% with pagenr=page.citation.number|stringformat:"s" %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
             </a>
+            {% endwith %}
+            {% endwith %}
           </li>
           {% endif %}
         </ul>

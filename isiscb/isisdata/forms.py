@@ -32,13 +32,16 @@ class MyFacetedSearchForm(FacetedSearchForm):
         #                                    widget=forms.CheckboxSelectMultiple)
         #scField = forms.MultipleChoiceField(choices=model_choices(), widget=forms.HiddenInput())
         sort_order = forms.CharField(required=False, widget=forms.HiddenInput)
-        sort_order_dir = forms.CharField(required=False, widget=forms.HiddenInput)
+        sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput)
+        sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput)
 
         #self.fields['models'] = scField
-        self.fields['sort_order'] = sort_order
-        self.fields['sort_order'].initial = 'publication_date_for_sort'
-        self.fields['sort_order_dir'] = sort_order_dir
-        self.fields['sort_order_dir'].initial = 'descend'
+        self.fields['sort_order_citation'] = sort_order
+        self.fields['sort_order_citation'].initial = 'publication_date_for_sort'
+        self.fields['sort_order_dir_citation'] = sort_order_dir_citation
+        self.fields['sort_order_dir_authority'] = sort_order_dir_authority
+        self.fields['sort_order_dir_citation'].initial = 'descend'
+        self.fields['sort_order_dir_authority'].initial = 'ascend'
 
         #self.fields['models'].initial = ['isisdata.authority',
         #                                  'isisdata.citation']
@@ -65,7 +68,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sort_order = 'publication_date_for_sort'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order', 'publication_date_for_sort')
+            sort_order = self.cleaned_data.get('sort_order_citation', 'publication_date_for_sort')
             if not sort_order:
                 sort_order = 'publication_date_for_sort'
             #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
@@ -77,7 +80,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sort_order = 'name'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order', 'name')
+            sort_order = self.cleaned_data.get('sort_order_authority', 'name')
             if not sort_order:
                 sort_order = 'name'
             #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
@@ -85,18 +88,29 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sort_order
 
-    def get_sort_order_direction(self):
+    def get_sort_order_direction_citation(self):
         sort_order_dir = 'descend'
 
         if self.is_valid():
-            sort_order_dir = self.cleaned_data.get('sort_order_dir', 'accend')
+            sort_order_dir = self.cleaned_data.get('sort_order_dir_citation', 'ascend')
 
-            if not sort_order_dir: #and self.cleaned_data['models'] == 'isisdata.citation':
-                sort_by = self.cleaned_data.get('sort_order', 'publication_date_for_sort')
+            if not sort_order_dir:
+                sort_by = self.cleaned_data.get('sort_order_citation', 'publication_date_for_sort')
                 if (sort_by == 'publication_date_for_sort' or not sort_by):
                     sort_order_dir = 'descend'
                 else:
-                    sort_order_dir = 'accend'
+                    sort_order_dir = 'ascend'
+
+        return sort_order_dir
+
+    def get_sort_order_direction_authority(self):
+        sort_order_dir = 'ascend'
+
+        if self.is_valid():
+            sort_order_dir = self.cleaned_data.get('sort_order_dir_authority', 'ascend')
+
+            if not sort_order_dir:
+                sort_order_dir = 'ascend'
 
         return sort_order_dir
 
@@ -141,14 +155,16 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         sort_order_citation = self.get_sort_order_citation()
         sort_order_authority = self.get_sort_order_authority()
-        sort_order_dir = self.get_sort_order_direction()
+        sort_order_dir_citation = self.get_sort_order_direction_citation()
+        sort_order_dir_authority = self.get_sort_order_direction_authority()
 
-        if sort_order_dir == 'descend':
+        if sort_order_dir_citation == 'descend':
             sort_order_citation = "-" + sort_order_citation
+        if sort_order_dir_authority == 'descend':
             sort_order_authority = "-" + sort_order_authority
 
-        results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True)
-        results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True)
+        results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
+        results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 
         return {'authority' : results_authority,
                     'citation': results_citation}

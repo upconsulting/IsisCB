@@ -186,22 +186,26 @@ def get_authority_type_display(abbrev):
     return abbrev
 
 @register.filter
-def set_sort_order(link, sort_order):
-    if not "sort_order=" in link:
-        return link + "&sort_order=" + sort_order
-    return re.sub(r"&sort_order=[a-z_]+&?", "&sort_order=" + sort_order + "&", link)
+def set_sort_order(link, sort_str):
+    [key, sort_order] = sort_str.split(":")
+    if not (key + "=") in link:
+        return link + "&" + key + "=" + sort_order
+    return re.sub(r"&" + key + "=[a-z_]+&?", "&" + key + "=" + sort_order + "&", link)
 
 @register.filter
-def set_sort_direction(link, sort_dir):
-    if not "sort_order_dir=" in link:
-        return link + "&sort_order_dir=" + sort_dir
-    return re.sub(r"&sort_order_dir=[a-z_]+&?", "&sort_order_dir=" + sort_dir + "&", link)
+def set_sort_direction(link, sort_str):
+    [key, sort_dir] = sort_str.split(":")
+    if not (key + "=") in link:
+        return link + "&" + key + "=" + sort_dir
+    return re.sub(r"&"+ key +"=[a-z_]+&?", "&s" + key + "=" + sort_dir + "&", link)
 
 @register.filter
-def set_page(link, page_number):
-    if not "page=" in link:
-        return link + "&page=" + str(page_number)
-    return re.sub(r"&page=[0-9]+&?", "&page=" + str(page_number) + "&", link)
+def set_page(link, sort_str):
+    [key, page_number] = sort_str.split(":")
+    if not (key + "=") in link:
+        return link + "&" + key + "=" + str(page_number)
+    return re.sub(r"&" + key + "=[0-9]+&?", "&" + key + "=" + str(page_number) + "&", link)
+    #return sort_str
 
 @register.filter
 def get_current_sort_order_citation(sort_field):

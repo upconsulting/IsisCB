@@ -854,12 +854,18 @@ class IsisSearchView(FacetedSearchView):
             extra['count_authority'] = len(self.results['authority'])
 
         extra['models'] = self.request.GET.getlist('models')
-        extra['sort_order'] = self.request.GET.get('sort_order')
-        extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
+        extra['sort_order_citation'] = self.request.GET.get('sort_order_citation')
+        extra['sort_order_authority'] = self.request.GET.get('sort_order_authority')
+        extra['sort_order_dir_citation'] = self.request.GET.get('sort_order_dir_citation')
+        extra['sort_order_dir_authority'] = self.request.GET.get('sort_order_dir_authority')
+
         # we need to change something about this, this is terrible...
         # but it works
-        if not extra['sort_order_dir'] and (not extra['sort_order'] or 'publication_date_for_sort' in extra['sort_order']):
-            extra['sort_order_dir'] = 'descend'
+        if not extra['sort_order_dir_citation'] and (not extra['sort_order_citation'] or 'publication_date_for_sort' in extra['sort_order_citation']):
+            extra['sort_order_dir_citation'] = 'descend'
+
+        if not extra['sort_order_dir_authority'] and (not extra['sort_order_authority'] or 'publication_date_for_sort' in extra['sort_order_authority']):
+            extra['sort_order_dir_authority'] = 'ascend'
 
         extra['active'] = 'home'
 
