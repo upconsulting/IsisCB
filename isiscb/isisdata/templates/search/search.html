@@ -39,10 +39,11 @@ $(document).ready(function() {
                 </span>
             </div>
             <div>
-                <!--<input id="id_models_0" name="models" type="hidden" value="isisdata.citation">
-                <input id="id_models_1" name="models" type="hidden" value="isisdata.authority">-->
-                <input id="id_sort_order" maxlength="255" name="sort_order" type="hidden" value="publication_date_for_sort">
-                <input id="id_sort_order_dir" maxlength="255" name="sort_order_dir" type="hidden" value="descend">
+                <!--<input id="id_models_0" name="models" type="hidden" value="isisdata.citation">-->
+                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
             </div>
 
         </div>
@@ -52,8 +53,8 @@ $(document).ready(function() {
 
     <div class="col-sm-12 col-md-12">
         <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
-            <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Bibiographic Records</a></li>
-            <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authority Records</a></li>
+            <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Bibiographic Records ({{ count_citation }})</a></li>
+            <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authority Records ({{ count_authority }})</a></li>
             <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which one should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
         </ul>
 
@@ -61,16 +62,14 @@ $(document).ready(function() {
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="citations">
 
-                    <div class="row space-top">
+                   <div class="row space-top">
+                      <div class="col-sm-4 col-md-3 ">
+                          {% include "search/search_facets_citations.html" %}
+                      </div>
 
-                        <div class="col-sm-8 col-md-9 ">
-                            {% include "search/search_results_citations.html" %}
-                        </div>
-
-                        <div class="col-sm-4 col-md-3 ">
-                            {% include "search/search_facets_citations.html" %}
-                        </div>
-
+                      <div class="col-sm-8 col-md-9 ">
+                          {% include "search/search_results_citations.html" %}
+                      </div>
                     </div>
                 </form>
 

@@ -16,6 +16,7 @@ from captcha.fields import CaptchaField
 from registration.views import RegistrationView
 
 from haystack.views import FacetedSearchView
+from haystack.query import EmptySearchQuerySet
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -850,7 +851,6 @@ class IsisSearchView(FacetedSearchView):
 
         return response
 
-
     def build_page(self):
         """
         From haystacks SearchView:
@@ -860,43 +860,86 @@ class IsisSearchView(FacetedSearchView):
         like.
         """
         try:
-            page_no = int(self.request.GET.get('page', 1))
+            page_no_authority = int(self.request.GET.get('page_authority', 1))
         except (TypeError, ValueError):
             raise Http404("Not a valid number for page.")
 
-        if page_no < 1:
+        try:
+            page_no_citation= int(self.request.GET.get('page_citation', 1))
+        except (TypeError, ValueError):
+            raise Http404("Not a valid number for page.")
+
+        if page_no_authority < 1:
             raise Http404("Pages should be 1 or greater.")
 
-        start_offset = (page_no - 1) * self.results_per_page
-        self.results[start_offset:start_offset + self.results_per_page]
+        if page_no_citation < 1:
+            raise Http404("Pages should be 1 or greater.")
 
-        paginator = Paginator(self.results, self.results_per_page)
+        start_offset_authority = (page_no_authority - 1) * self.results_per_page
+        start_offset_citation = (page_no_citation - 1) * self.results_per_page
+
+        if isinstance(self.results, EmptySearchQuerySet):
+            self.results[0:self.results_per_page]
+            paginator_authority = Paginator(self.results, self.results_per_page)
+            paginator_citation = Paginator(self.results, self.results_per_page)
+
+        else:
+            self.results['citation'][start_offset_citation:start_offset_citation + self.results_per_page]
+            self.results['authority'][start_offset_authority:start_offset_authority+ self.results_per_page]
+
+            paginator_authority = Paginator(self.results['authority'], self.results_per_page)
+            paginator_citation = Paginator(self.results['citation'], self.results_per_page)
 
 
         try:
-            page = paginator.page(page_no)
+            page_authority = paginator_authority.page(page_no_authority)
         except InvalidPage:
             try:
-                page = paginator.page(1)
+                page_authority = paginator_authority.page(1)
             except InvalidPage:
                 raise Http404("No such page!")
 
-        return (paginator, page)
+        try:
+            page_citation = paginator_citation.page(page_no_citation)
+        except InvalidPage:
+            try:
+                page_citation = paginator_citation.page(1)
+            except InvalidPage:
+                raise Http404("No such page!")
+
+        return ({'authority':paginator_authority, 'citation':paginator_citation}, {'authority':page_authority, 'citation':page_citation})
 
     def extra_context(self):
         extra = super(FacetedSearchView, self).extra_context()
         extra['request'] = self.request
-        extra['facets'] = self.results.facet_counts()
+        if isinstance(self.results, EmptySearchQuerySet):
+            extra['facets_citation'] = 0
+            extra['facets_authority'] = 0
+            extra['count_citation'] = len(self.results)
+            extra['count_authority'] = len(self.results)
+        else:
+            extra['facets_authority'] = self.results['authority'].facet_counts()
+            extra['facets_citation'] = self.results['citation'].facet_counts()
+            extra['count_citation'] = len(self.results['citation'])
+            extra['count_authority'] = len(self.results['authority'])
+
         extra['models'] = self.request.GET.getlist('models')
-        extra['sort_order'] = self.request.GET.get('sort_order')
-        extra['sort_order_dir'] = self.request.GET.get('sort_order_dir')
+        extra['sort_order_citation'] = self.request.GET.get('sort_order_citation')
+        extra['sort_order_authority'] = self.request.GET.get('sort_order_authority')
+        extra['sort_order_dir_citation'] = self.request.GET.get('sort_order_dir_citation')
+        extra['sort_order_dir_authority'] = self.request.GET.get('sort_order_dir_authority')
+
         # we need to change something about this, this is terrible...
         # but it works
-        if not extra['sort_order_dir'] and (not extra['sort_order'] or 'publication_date_for_sort' in extra['sort_order']):
-            extra['sort_order_dir'] = 'descend'
-        extra['count'] = len(self.results)
+        if not extra['sort_order_dir_citation'] and (not extra['sort_order_citation'] or 'publication_date_for_sort' in extra['sort_order_citation']):
+            extra['sort_order_dir_citation'] = 'descend'
+
+        if not extra['sort_order_dir_authority'] and (not extra['sort_order_authority'] or 'publication_date_for_sort' in extra['sort_order_authority']):
+            extra['sort_order_dir_authority'] = 'ascend'
+
         extra['active'] = 'home'
 
+        # create authorities facets
         facet_map = {}
         facets_raw = []
         for facet in self.request.GET.getlist("selected_facets"):
@@ -911,6 +954,7 @@ class IsisSearchView(FacetedSearchView):
 
         extra['selected_facets'] = facet_map
         extra['selected_facets_raw'] = facets_raw
+
         return extra
 
 
