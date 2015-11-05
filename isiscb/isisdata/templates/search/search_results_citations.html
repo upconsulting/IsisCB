@@ -46,16 +46,13 @@
             {% if result.object|get_pub_year %}
               ({{ result.object|get_pub_year }})
             {% endif %}
-            <a href="{% url 'index' result.object.id %}?fromsearch=true">{{ result.object|get_title|bleach_safe }}.</a>
+            <a href="{% url 'citation' result.object.id %}?fromsearch=true">{{ result.object|get_title|bleach_safe }}.</a>
             <!-- book title and page numbers -->
             {% if result.object|get_book_title %}
               In: <em>{{ result.object|get_book_title }}</em>{% if not result.object|get_page_string %}.{% endif %}
             {% endif %}
 
             {% if result.object|get_page_string %}({{ result.object|get_page_string }}).{% endif %}
-
-
-
 
             <!-- Zotero -->
             <span style="display:none;">

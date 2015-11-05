@@ -9,7 +9,7 @@
     <p>
           <span class="glyphicon glyphicon-bookmark"></span>
           [{{ result.object.get_type_controlled_display }}]
-          <a href="{% url 'index' result.object.id %}?fromsearch=true">{{ result.name }}</a>
+          <a href="{% url 'authority' result.object.id %}?fromsearch=true">{{ result.name }}</a>
           {% with result.object|get_dates as dates %}
           {% if dates %}({{ dates|join_attributes:', ' }}){% endif %}
           {% endwith %}

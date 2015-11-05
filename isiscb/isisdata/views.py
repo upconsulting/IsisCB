@@ -599,7 +599,7 @@ def authority(request, authority_id):
 
     # Provide progression through search results, if present.
     fromsearch = request.GET.get('fromsearch', False)
-    search_results = request.session.get('search_results', [])
+    search_results = request.session.get('search_results_authority', [])
     if len(search_results) > 0 and fromsearch:
         try:
             search_index = search_results.index(authority_id) + 1   # +1 for display.
@@ -617,7 +617,6 @@ def authority(request, authority_id):
         search_index = None
         search_next = None
         search_previous = None
-
 
     context = RequestContext(request, {
         'authority_id': authority_id,
@@ -690,7 +689,7 @@ def citation(request, citation_id):
 
     # Provide progression through search results, if present.
     fromsearch = request.GET.get('fromsearch', False)
-    search_results = request.session.get('search_results', [])
+    search_results = request.session.get('search_results_citation', [])
     if len(search_results) > 0 and fromsearch:
         try:
             search_index = search_results.index(citation_id) + 1   # +1 for display.
@@ -844,10 +843,14 @@ class IsisSearchView(FacetedSearchView):
             results = super(IsisSearchView, self).get_results()
 
             # Store only IDs, not model names.
-            results = [result.split('.')[-1] for result
-                       in results.values_list('id', flat=True)]
-            request.session['search_results'] = results
-            request.session['search_models'] = search_models
+            ids_authority = results['authority'].values_list('id', flat=True)
+            ids_citation = results['citation'].values_list('id', flat=True)
+            results_authority = [result.split('.')[-1] for result
+                                 in ids_authority]
+            results_citation = [result.split('.')[-1] for result
+                                in ids_citation]
+            request.session['search_results_authority'] = results_authority
+            request.session['search_results_citation'] = results_citation
 
         return response
 

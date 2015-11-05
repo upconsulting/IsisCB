@@ -173,4 +173,4 @@ class MyFacetedSearchForm(FacetedSearchForm):
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 
         return {'authority' : results_authority,
-                    'citation': results_citation}
+                'citation': results_citation}
