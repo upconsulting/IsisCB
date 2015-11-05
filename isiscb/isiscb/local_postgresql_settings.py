@@ -141,7 +141,6 @@ ELASTICSEARCH_INDEX_SETTINGS = {
 
 ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
