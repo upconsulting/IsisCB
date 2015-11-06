@@ -12,9 +12,9 @@
 
     <div class="dropdown pull-right">
       {% if sort_order_dir_citation == 'descend' %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:accend' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
       {% else %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend' }}" title="Current sort order: accending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
       {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
         Sort by: {{ sort_order_citation|get_current_sort_order_citation }}
@@ -22,9 +22,9 @@
       </button>
 
       <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort' }}">Title</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort' }}">First Author</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort' }}">Publication Date</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
         <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
       </ul>
     </div>

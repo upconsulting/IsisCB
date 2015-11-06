@@ -937,7 +937,7 @@ class IsisSearchView(FacetedSearchView):
         if not extra['sort_order_dir_citation'] and (not extra['sort_order_citation'] or 'publication_date_for_sort' in extra['sort_order_citation']):
             extra['sort_order_dir_citation'] = 'descend'
 
-        if not extra['sort_order_dir_authority'] and (not extra['sort_order_authority'] or 'publication_date_for_sort' in extra['sort_order_authority']):
+        if not extra['sort_order_dir_authority']:
             extra['sort_order_dir_authority'] = 'ascend'
 
         extra['active'] = 'home'

@@ -203,7 +203,7 @@ def set_sort_direction(link, sort_str):
     [key, sort_dir] = sort_str.split(":")
     if not (key + "=") in link:
         return link + "&" + key + "=" + sort_dir
-    return re.sub(r"&"+ key +"=[a-z_]+&?", "&s" + key + "=" + sort_dir + "&", link)
+    return re.sub(r"&"+ key +"=[a-z_]+&?", "&" + key + "=" + sort_dir + "&", link)
 
 @register.filter
 def set_page(link, sort_str):

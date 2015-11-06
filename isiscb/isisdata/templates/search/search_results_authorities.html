@@ -2,8 +2,24 @@
 {% load metadata_filters %}
 
 {% if query %}
+<div class="row">
+  <div class="col-md-8">
     <h3>Search Results</h3>
     <div class="results-info">Showing {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results.</div>
+  </div>
+  <div class="col-md-4 menuContainer">
+    <div class="dropdown pull-right">
+        {% if sort_order_dir_authority == 'descend' %}
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+        {% else %}
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+        {% endif %}
+
+      </div>
+      <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+    </div>
+  </div>
+
 
     {% for result in page.authority.object_list %}
     <p>
