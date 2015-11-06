@@ -234,7 +234,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
-    name = indexes.CharField(model_attr='name')
+    name = indexes.CharField(model_attr='name', indexed=False)
     description = indexes.CharField(model_attr='description', null=True)
     attributes = indexes.MultiValueField()
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
