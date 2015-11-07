@@ -1,13 +1,15 @@
 {% load staticfiles %}
 {% load app_filters %}
+{% load static from staticfiles %}
 <!DOCTYPE html>
 
 <html>
     <head>
         {% block meta_tags %}{% endblock %}
         <title>
-            {% block title %}Isis{% endblock %}
+            IsisCB - Search {% block title %}{% endblock %}
         </title>
+        <link rel="shortcut icon" type="image/png" href="{% static "isisdata/favicon.png" %}"/>
         {% block stylesheets %}
             <link rel="stylesheet" href="{% static "isisdata/font-awesome-4.4.0/css/font-awesome.min.css" %}" type="text/css" />
             <link rel="stylesheet" href="{% static "isisdata/bootstrap-3.3.5/css/bootstrap.min.css" %}" type="text/css" />
