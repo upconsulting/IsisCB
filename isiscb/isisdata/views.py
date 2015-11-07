@@ -580,19 +580,71 @@ def authority(request, authority_id):
 
     template = loader.get_template('isisdata/authority.html')
 
-    citations_by_list = ACRelation.objects.filter(authority=authority,
-                                                  type_broad_controlled__in=['PR']).order_by('-citation__publication_date')[:5]
-    citations_by_count = ACRelation.objects.filter(authority=authority,
-                                                  type_broad_controlled__in=['PR']).distinct('citation_id').count()
+    show_nr = 3
+    related_citations_author = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['AU'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_author_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['AU']).distinct('citation_id').count()
 
-    citations_about_list = ACRelation.objects.filter(authority=authority,
-                                                     type_broad_controlled='SC').order_by('-citation__publication_date')[:5]
-    citations_about_count = ACRelation.objects.filter(authority=authority,
-                                                     type_broad_controlled='SC').count()
+    related_citations_editor = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['ED'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_editor_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['ED'], citation__public=True).distinct('citation_id').count()
 
-    query = Q(authority=authority, type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-    citations_other_list = ACRelation.objects.filter(query).order_by('-citation__publication_date')[:5]
-    citations_other_count = ACRelation.objects.filter(query).count()
+    related_citations_advisor = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['AD'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_advisor_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['AD'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_contributor = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['CO'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_contributor_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['CO'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_translator = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['TR'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_translator_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['TR'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_subject = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['SU'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_subject_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['SU'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_category = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['CA'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_category_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['CA'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_publisher = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['PU'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_publisher_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['PU'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_school = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['SC'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_school_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['SC'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_institution = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['IN'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_institution_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['IN'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_meeting = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['ME'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_meeting_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['ME'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_periodical = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['PE'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_periodical_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['PE'], citation__public=True).distinct('citation_id').count()
+
+    related_citations_book_series = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['BS'], citation__public=True).order_by('-citation__publication_date')[:show_nr]
+    related_citations_book_series_count = ACRelation.objects.filter(authority=authority,
+                                                  type_controlled__in=['BS'], citation__public=True).distinct('citation_id').count()
 
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
@@ -621,12 +673,32 @@ def authority(request, authority_id):
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
-        'citations_by': citations_by_list,
-        'citations_by_count': citations_by_count,
-        'citations_about': citations_about_list,
-        'citations_about_count': citations_about_count,
-        'citations_other': citations_other_list,
-        'citations_other_count': citations_other_count,
+        'related_citations_author': related_citations_author,
+        'related_citations_author_count': related_citations_author_count,
+        'related_citations_editor': related_citations_editor,
+        'related_citations_editor_count': related_citations_editor_count,
+        'related_citations_advisor': related_citations_advisor,
+        'related_citations_advisor_count': related_citations_advisor_count,
+        'related_citations_contributor': related_citations_contributor,
+        'related_citations_contributor_count': related_citations_contributor_count,
+        'related_citations_translator': related_citations_translator,
+        'related_citations_translator_count': related_citations_translator_count,
+        'related_citations_subject': related_citations_subject,
+        'related_citations_subject_count': related_citations_subject_count,
+        'related_citations_category': related_citations_category,
+        'related_citations_category_count': related_citations_category_count,
+        'related_citations_publisher': related_citations_publisher,
+        'related_citations_publisher_count': related_citations_publisher_count,
+        'related_citations_school': related_citations_school,
+        'related_citations_school_count': related_citations_school_count,
+        'related_citations_institution': related_citations_institution,
+        'related_citations_institution_count': related_citations_institution_count,
+        'related_citations_meeting': related_citations_meeting,
+        'related_citations_meeting_count': related_citations_meeting_count,
+        'related_citations_periodical': related_citations_periodical,
+        'related_citations_periodical_count': related_citations_periodical_count,
+        'related_citations_book_series': related_citations_book_series,
+        'related_citations_book_series_count': related_citations_book_series_count,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
@@ -654,30 +726,30 @@ def citation(request, citation_id):
     if citation.status_of_record == 'DL':
         return Http404("No such Citation")
 
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'])
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True)
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU']) & ~Q(authority__type_controlled__in=['GE', 'TI']))
-    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'])
-    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']))
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True) & ~Q(authority__type_controlled__in=['GE', 'TI'], citation__public=True))
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True)
+    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True)
 
-    query_time = Q(type_controlled__in=['TI']) | (Q(type_controlled__in=['SU']) & Q(authority__type_controlled__in=['TI']))
+    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['TI'], citation__public=True))
     time_periods = citation.acrelation_set.filter(query_time)
 
-    query_places = Q(type_controlled__in=['SU']) & Q(authority__type_controlled__in=['GE'])
+    query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
     places = citation.acrelation_set.filter(query_places)
 
-    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC')
-    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC')
-    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA')
-    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA')
+    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True)
+    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True)
+    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA', object__public=True)
+    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA', subject__public=True)
 
-    query = Q(subject_id=citation_id, type_controlled='RO') | Q(object_id=citation_id, type_controlled='RB')
+    query = Q(subject_id=citation_id, type_controlled='RO', object__public=True) | Q(object_id=citation_id, type_controlled='RB', subject__public=True)
     related_citations_ro = CCRelation.objects.filter(query)
 
-    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB')
-    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE')
-    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE')
-    related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS')
+    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True)
+    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True)
+    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True)
+    related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS', object__public=True)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA'])
     properties_map = defaultdict(list)

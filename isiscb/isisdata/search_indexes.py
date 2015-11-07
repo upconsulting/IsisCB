@@ -57,6 +57,19 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     # the following fields are for searching by author, contributor, etc.
     author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    editor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    advisor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    translator_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    subject_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    category_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    publisher_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    school_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    institution_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    meeting_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    periodical_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    book_series_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
     about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
@@ -222,7 +235,43 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
 
     def prepare_author_ids(self, obj):
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AU', 'CO'])]
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AU'])]
+
+    def prepare_editor_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
+
+    def prepare_advisor_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
+
+    def prepare_contributor_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CO'])]
+
+    def prepare_translator_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
+
+    def prepare_subject_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'])]
+
+    def prepare_category_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
+
+    def prepare_publisher_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
+
+    def prepare_school_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
+
+    def prepare_institution_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
+
+    def prepare_meeting_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
+
+    def prepare_periodical_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
+
+    def prepare_book_series_ids(self, obj):
+        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
 
     def prepare_about_person_ids(self, obj):
         return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_broad_controlled='SC')]
