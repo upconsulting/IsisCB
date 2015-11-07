@@ -1,5 +1,6 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
+{% load citation_filters %}
 {% load staticfiles %}
 {% load metadata_filters %}
 
@@ -82,7 +83,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endwith %}
 
     {% if authors|length > 0 %}
-    <p><strong>Authors & Contributors:</strong> {% for acrelation in citation.get_all_contributors %} <a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation|contributor_as_string }};</a> {% endfor %}
+    <p><strong>Authors & Contributors:</strong> {% for acrelation in citation.get_all_contributors %} <a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation|contributor_with_role_as_string }};</a> {% endfor %}
     {% endif %}
 
     {% if citation.abstract %}

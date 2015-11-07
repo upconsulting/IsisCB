@@ -47,3 +47,12 @@ def get_book_title(citation):
             return parent_relation[0].subject.title
 
     return ""
+
+@register.filter
+def contributor_with_role_as_string(acrelation):
+    name = acrelation.name_for_display_in_citation
+    if not name:
+        name = acrelation.authority.name
+    kwargs = {'name': name,
+              'role': acrelation.get_type_controlled_display()}
+    return u"{name} ({role})".format(**kwargs)
