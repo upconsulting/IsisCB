@@ -212,7 +212,7 @@ EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
 SMTP_EMAIL = 'info@aplacecalledup.com'
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
-
+CAPTCHA_FONT_SIZE = 36
 
 # social
 
