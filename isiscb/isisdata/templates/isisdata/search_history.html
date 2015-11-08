@@ -47,11 +47,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {{ searchquery.search_models }}
             </td>
             <td>
-                {{ searchquery.search_facets }}
+                {{ searchquery.selected_facets }}
             </td>
             <td>{{ searchquery.created_on }}</td>
             <td>
-                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&{{ searchquery.selected_facets }}{% endif %}">
+                <a href="{% url 'haystack_search' %}?log=False&q={{ searchquery.parameters }}&models={{ searchquery.search_models }}{% if searchquery.selected_facets %}&selected_facets={{ searchquery.selected_facets }}{% endif %}">
                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                 </a>
             </td>
