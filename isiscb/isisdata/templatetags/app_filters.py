@@ -13,6 +13,14 @@ import bleach
 register = template.Library()
 
 
+@register.filter(name='get_pk')
+def get_pk(value):
+    """
+    Extracts Django primary key from SearchResult.id.
+    """
+    return value.split('.')[-1]
+
+
 @register.filter(name='to_class_name')
 def to_class_name(value):
     return value.__class__.__name__

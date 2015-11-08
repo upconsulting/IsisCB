@@ -670,6 +670,8 @@ def authority(request, authority_id):
         search_next = None
         search_previous = None
 
+    last_query = rrequest.session.get('last_query', None)
+
     context = RequestContext(request, {
         'authority_id': authority_id,
         'authority': authority,
@@ -708,6 +710,7 @@ def authority(request, authority_id):
         'search_next': search_next,
         'search_previous': search_previous,
         'fromsearch': fromsearch,
+        'last_query': last_query,
     })
     return HttpResponse(template.render(context))
 
@@ -780,6 +783,8 @@ def citation(request, citation_id):
         search_next = None
         search_previous = None
 
+    last_query = request.session.get('last_query', None)
+
     context = RequestContext(request, {
         'citation_id': citation_id,
         'citation': citation,
@@ -807,6 +812,7 @@ def citation(request, citation_id):
         'search_next': search_next,
         'search_previous': search_previous,
         'fromsearch': fromsearch,
+        'last_query': last_query,
     })
     return HttpResponse(template.render(context))
 
@@ -908,6 +914,7 @@ class IsisSearchView(FacetedSearchView):
                 selected_facets = selected_facets,
             )
             searchquery.save()
+            request.session['last_query'] = request.get_full_path()
 
         response = super(IsisSearchView, self).__call__(request)
 
