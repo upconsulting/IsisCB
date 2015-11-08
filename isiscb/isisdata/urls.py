@@ -51,4 +51,6 @@ urlpatterns = [
         IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
         name='haystack_search'),
     url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
+    url(r'^help', views.help, name='help'),
+    url(r'^about', views.about, name='about'),
 ]

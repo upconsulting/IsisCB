@@ -1,0 +1,42 @@
+{% extends "isisdata/__base.html" %}
+
+{% block content %}
+
+<div class="row" ng-app="commentsApp">
+  <div class="col-sm-3 col-md-2 sidebar">
+    <div class="menu">
+      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+  </div>
+
+  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
+    <h3>About</h3>
+
+    <p>The IsisCB is a research tool for the history of science, whose core dataset comes from bibliographical citations in the Isis Bibliography of the History of Science. The IsisCB currently contains 40-years of citation data from 1974 to 2014. It will soon be expanded to include bibliographic entries going back to 1913. </p>
+
+    <p>The dataset is composed of two main types of records: Citations, items from the bibliography that have been classified and indexed, and Authorities, records that include both subject terms that classify citations as well as authors, publishers, and journals that have written and published those works.</p>
+
+    <p>We have made this search system very interactive because we want to develop this as a community resource. Users are encouraged to sign-in and provide comments to entries where they see errors and add further information where relevant. We hope that you will suggest hyperlinks and other material that will be useful for fellow scholars. </p>
+
+    <p>Soon, users will be able to add entries of their own and curate their own pages. They will be able to provide information that they can share publicly. </p>
+
+    <p>The IsisCB blends a professionally curated database with social media tools, so that the community can play a more active role in building a tool that will cater to its needs. User participation is encouraged.</p>
+
+    <p>We value your comments, both specific and general. If you have specific comments on a bibliographical citation or an authority record, please add that directly to the record itself, using the commenting function. If you have general comments, please send them to us at <isiscb@ou.edu>.</p>
+
+    <p>We are fully committed to open access. Our data is available via a < link> REST API, and source code at GitHub. All data uses the Creative Commons Attribution-NonCommercial 4.0 International License.</p>
+
+    <p>Founded for this project has been generously provided by <a href="http://www.sloan.org" >Alfred P. Sloan Foundation</a>, with additional support from the <a href="https://libraries.ou.edu/">University of Oklahoma Libraries</a> and the <a href="http://hssonline.org/">History of Science Society</a>.</p>
+
+    <p>Full list of affiliated institution can be found <a href="http://isisbibliography.org/collaborating-institutions-and-projects/">here</a>.</p>
+
+</div>
+
+</div>
+
+{% endblock %}

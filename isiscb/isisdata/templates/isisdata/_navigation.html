@@ -23,8 +23,8 @@
                 <div class="navbar-center text-center" style="display: inline-block;">
                     <ul class="nav navbar-nav">
                         <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
-                        <li class="{% if active == 'about' %}active{% endif %}"><a href="#">About</a></li>
-                        <li class="{% if active == 'help' %}active{% endif %}"><a href="#">Help</a></li>
+                        <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url 'about' %}">About</a></li>
+                        <li class="{% if active == 'help' %}active{% endif %}"><a href="{% url 'help' %}">Help</a></li>
                         <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#">Feedback</a></li>
                     </ul>
                 </div>

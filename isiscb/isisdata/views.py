@@ -546,6 +546,27 @@ def api_redirect(request, base_view=None, obj_id=None):
     rest_view = reverse(view_name, args=[obj_id], request=request)
     return HttpResponseRedirect(rest_view)
 
+def help(request):
+    """
+    View for help page
+    """
+    template = loader.get_template('isisdata/help.html')
+
+    context = RequestContext(request, {
+        'active': 'help',
+    })
+    return HttpResponse(template.render(context))
+
+def about(request):
+    """
+    View for about page
+    """
+    template = loader.get_template('isisdata/about.html')
+
+    context = RequestContext(request, {
+        'active': 'about',
+    })
+    return HttpResponse(template.render(context))
 
 def authority(request, authority_id):
     """
