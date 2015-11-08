@@ -670,7 +670,7 @@ def authority(request, authority_id):
         search_next = None
         search_previous = None
 
-    last_query = rrequest.session.get('last_query', None)
+    last_query = request.session.get('last_query', None)
 
     context = RequestContext(request, {
         'authority_id': authority_id,
