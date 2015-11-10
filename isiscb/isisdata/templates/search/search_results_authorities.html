@@ -24,10 +24,10 @@
     {% for result in page.authority.object_list %}
     <p>
           <span class="glyphicon glyphicon-bookmark"></span>
-          [{{ result.object.get_type_controlled_display }}]
-          <a href="{% url 'authority' result.object.id %}?fromsearch=true">{{ result.name }}</a>
-          {% with result.object|get_dates as dates %}
-          {% if dates %}({{ dates|join_attributes:', ' }}){% endif %}
+          [{{ result.authority_type }}]
+          <a href="{% url 'authority' result.id|get_pk %}?fromsearch=true">{{ result.name }}</a>
+          {% with result.dates as dates %}
+          {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
           {% endwith %}
 
         </p>

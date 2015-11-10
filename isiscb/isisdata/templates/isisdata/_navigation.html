@@ -1,73 +1,69 @@
 {% load staticfiles %}
 
-<nav class="navbar navbar-inverse navbar-fixed-top">
+<nav class="navbar navbar-inverse">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="{% url 'index' %}"><img height="100px" src="{% static "isisdata/images/isis_icon_white-small.png" %}" ></a>
+            <a class="navbar-brand" href="{% url 'index' %}"><img height="45px" src="{% static "isisdata/images/isis_icon_white-small.png" %}"> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-
         </div>
-
-        <div class="container-fluid">
-            <div class="collapse navbar-collapse">
-                <div class="navbar-left text-left" style="display: inline-block;">
-                    <a href="/isis/" style="text-decoration: none;">
-                        <span class="text text-white large-text text-left">IsisCB Search</span>
-                    </a>
-                </div>
-                <div class="navbar-center text-center" style="display: inline-block;">
-                    <ul class="nav navbar-nav">
-                        <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
-                        <li class="{% if active == 'about' %}active{% endif %}"><a href="#">About</a></li>
-                        <li class="{% if active == 'help' %}active{% endif %}"><a href="#">Help</a></li>
-                        <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#">Feedback</a></li>
-                    </ul>
-                </div>
-                <div class="navbar-right" style="display: inline-block;">
-                    {% if user.is_authenticated %}
-                    <div class="dropdown">
-                        <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                            {{ user.username }}
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="usermenu">
-                            <!-- <li><a href="/profile/">Dashboard</a></li> -->
-                            <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
-                            <li><a href="{% url 'search_history' %}">My Search History</a></li>
-                            <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
-                            <li><a href="{% url 'django.contrib.auth.views.logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
-                        </ul>
+        <ul class="nav navbar-nav">
+            <li style="padding: 15px;">
+                <form style="width: 325px" method="get" action=".">
+                    <div class="input-group">
+                        <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search bibliographic records for...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="submit">Search</button>
+                        </span>
                     </div>
+                    <div>
+                        <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                        <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                        <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                        <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                    </div>
+                </form>
 
-                    {% else %}
-                    <a href="{% url 'django.contrib.auth.views.login' %}?next={{ request.get_full_path|urlencode }}">
-                        <button class="btn btn-primary" type="button" id="loginButton">
-                            <span class="glyphicon glyphicon-user" ></span>
-                            Log In
-                        </button>
+            </li>
+            <li>
+                {% if not user.is_authenticated %}
+                <a style="width:150px;" href="{% url 'django.contrib.auth.views.login' %}?next={{ request.get_full_path|urlencode }}">
+                    <button class="btn btn-primary" type="button" id="loginButton">
+                        <span class="glyphicon glyphicon-user" ></span>
+                        Log In
+                    </button>
+                </a>
+                {% endif %}
+            </li>
+        </ul>
+        <div class="navbar-collapse collapse navbar-right" id="navbar">
+            <ul class="nav navbar-nav">
+                <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
+                <li class="{% if active == 'about' %}active{% endif %}"><a href="#">About</a></li>
+                <li class="{% if active == 'help' %}active{% endif %}"><a href="#">Help</a></li>
+                <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#">Feedback</a></li>
+                {% if user.is_authenticated %}
+                <li class="{% if active == 'user' %}active{% endif %}">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }} <span class="caret"></span>
+                    <!-- <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    </button> -->
                     </a>
-                    {% endif %}
-
-                </div>
-            </div>
-
-            <!-- </div> -->
+                    <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
+                        <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                        <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                        <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                        <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                        <li><a href="{% url 'django.contrib.auth.views.logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+            </ul>
         </div>
-
-        <!-- <form class="navbar-form navbar-right">
-        <div class="form-group">
-        <input type="text" placeholder="Email" class="form-control">
     </div>
-    <div class="form-group">
-    <input type="password" placeholder="Password" class="form-control">
-</div>
-<button type="submit" class="btn btn-primary">Sign in</button>
-</form> -->
-<!--/.navbar-collapse -->
 
 </nav>

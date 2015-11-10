@@ -48,15 +48,15 @@
             {% endif %}
             <a href="{% url 'citation' result.id|get_pk %}?fromsearch=true">{{ result.title|bleach_safe }}.</a>
             <!-- book title and page numbers -->
-            {% if result.object|get_book_title %}
-              In: <em>{{ result.object|get_book_title }}</em>{% if not result.object|get_page_string %}.{% endif %}
+            {% if result.book_title %}
+              In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
             {% endif %}
 
-            {% if result.object|get_page_string %}({{ result.object|get_page_string }}).{% endif %}
+            {% if result.page_string %}({{ result.page_string }}).{% endif %}
 
             <!-- Zotero -->
             <span style="display:none;">
-               <abbr class="unapi-id" title="{{ result.object.id }}">unapi</abbr>
+               <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
             </span>
 
         </p>

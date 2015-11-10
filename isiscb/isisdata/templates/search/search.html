@@ -22,97 +22,81 @@ $(document).ready(function() {
 
 {% block content %}
 
-<form method="get" action=".">
+
     <div class="row">
         <div class="col-sm-4 col-md-3 topnav text-center">
             {% include "isisdata/navbuttons.html" %}
         </div>
         <div class="col-sm-8 col-md-9">
-
-            <label class="control-label" for="q">
-                Search bibliographics records for:
-            </label>
-            <div class="input-group">
-                <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Search for...">
-                <span class="input-group-btn">
-                    <button class="btn btn-default" type="submit">Search</button>
-                </span>
-            </div>
-            <div>
-                <!--<input id="id_models_0" name="models" type="hidden" value="isisdata.citation">-->
-                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
-                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
-                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
-            </div>
+            
 
         </div>
     </div>
 
-<div class="row">
+    <div class="row">
 
-    <div class="col-sm-12 col-md-12">
-        <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
-            <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
-            <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
-            <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
-        </ul>
+        <div class="col-sm-12 col-md-12">
+            <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
+                <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
+                <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
+                <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
+            </ul>
 
 
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="citations">
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="citations">
 
-                   <div class="row space-top">
-                      <div class="col-sm-4 col-md-3 ">
-                          {% include "search/search_facets_citations.html" %}
-                      </div>
+                    <div class="row space-top">
+                        <div class="col-sm-4 col-md-3 ">
+                            {% include "search/search_facets_citations.html" %}
+                        </div>
 
-                      <div class="col-sm-8 col-md-9 ">
-                          {% include "search/search_results_citations.html" %}
-                      </div>
+                        <div class="col-sm-8 col-md-9 ">
+                            {% include "search/search_results_citations.html" %}
+                        </div>
                     </div>
-                </form>
+
 
             </div>
 
             <div role="tabpanel" class="tab-pane" id="authorities">
-                    <div class="row space-top">
-                        <div class="col-sm-4 col-md-3">
-                            {% include "search/search_facets_authorities.html" %}
-                        </div>
-                        <div class="col-sm-8 col-md-9">
-                            {% include "search/search_results_authorities.html" %}
-                        </div>
+                <div class="row space-top">
+                    <div class="col-sm-4 col-md-3">
+                        {% include "search/search_facets_authorities.html" %}
                     </div>
-
+                    <div class="col-sm-8 col-md-9">
+                        {% include "search/search_results_authorities.html" %}
+                    </div>
                 </div>
+
+            </div>
 
         </div>
     </div>
 </div>
 
-  </div>
+</div>
 
-  <!-- Modal -->
+<!-- Modal -->
 <div id="searchModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
+    <div class="modal-dialog">
 
-    <!-- Modal content-->
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Search Help</h4>
-      </div>
-      <div class="modal-body">
-        <p>Use ‘Explore Citations’ to find bibliographic resources. Think of this as a traditional citation search.</p>
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Search Help</h4>
+            </div>
+            <div class="modal-body">
+                <p>Use ‘Explore Citations’ to find bibliographic resources. Think of this as a traditional citation search.</p>
 
-        <p>Use ‘Explore Authorities  (index)’ to search for people, institutions, subject terms, and more. Think of it as an index. </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
+                <p>Use ‘Explore Authorities  (index)’ to search for people, institutions, subject terms, and more. Think of it as an index. </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
     </div>
-
-  </div>
 </div>
 {% endblock %}

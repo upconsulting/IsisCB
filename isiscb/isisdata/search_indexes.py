@@ -17,6 +17,7 @@ def remove_control_characters(s):
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
+    book_title = indexes.CharField(null=True, stored=True)
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     description = indexes.CharField(model_attr='description',indexed=False, null=True)
     public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
@@ -32,6 +33,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
     authors = indexes.MultiValueField(faceted=True, indexed=False)
     author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
+
+    page_string = indexes.CharField(null=True, stored=True)
 
     subjects = indexes.MultiValueField(faceted=True, indexed=False)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
@@ -104,8 +107,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         self.prepared_data = super(CitationIndex, self).prepare(obj)
 
         for k, v in self.prepared_data.iteritems():
-            if type(v) is unicode:
-                self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
+            if type(v) in [unicode, str]:
+                self.prepared_data[k] = v.strip()
+                # self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
         return self.prepared_data
 
     def prepare_type(self, obj):
@@ -170,6 +174,27 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if not name:
             name = author.authority.name
         return name
+
+    def prepare_page_string(self, obj):
+        if obj.type_controlled != Citation.CHAPTER:
+            return ""
+        page_start_string = obj.part_details.page_begin
+        page_end_string = obj.part_details.page_end
+        if page_start_string and page_end_string:
+            return "pp. " + str(page_start_string) + "-" + str(page_end_string)
+        if page_start_string:
+            return "p. " + str(page_start_string)
+        if page_end_string:
+            return "p. " + str(page_end_string)
+        return ""
+
+    def prepare_book_title(self, obj):
+        if obj.type_controlled in ['CH']:
+            parent_relation = CCRelation.objects.filter(object_id=obj.id, type_controlled='IC')
+            # we assume there is just one
+            if parent_relation:
+                return parent_relation[0].subject.title
+        return None
 
     def prepare_subjects(self, obj):
         return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
@@ -288,6 +313,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     attributes = indexes.MultiValueField(indexed=False)
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
+    dates = indexes.MultiValueField(indexed=False)
 
     def get_model(self):
         return Authority
@@ -307,17 +333,17 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(public=True)
 
-    def prepare(self, obj):
-        """
-        Coerce all unicode values to ASCII bytestrings, to avoid characters
-        that make haystack choke.
-        """
-        self.prepared_data = super(AuthorityIndex, self).prepare(obj)
-
-        for k, v in self.prepared_data.iteritems():
-            if type(v) is unicode:
-                self.prepared_data[k] = unidecode.unidecode(v)
-        return self.prepared_data
+    # def prepare(self, obj):
+    #     """
+    #     Coerce all unicode values to ASCII bytestrings, to avoid characters
+    #     that make haystack choke.
+    #     """
+    #     self.prepared_data = super(AuthorityIndex, self).prepare(obj)
+    #
+    #     for k, v in self.prepared_data.iteritems():
+    #         if type(v) is unicode:
+    #             self.prepared_data[k] = unidecode.unidecode(v)
+    #     return self.prepared_data
 
     def prepare_attributes(self, obj):
         return [attr.value_freeform for attr
@@ -326,5 +352,9 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_authority_type(self, obj):
         return obj.get_type_controlled_display()
 
+
     def prepare_xtype(self, obj):
         return obj.get_type_controlled_display()
+
+    def prepare_dates(self, obj):
+        return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue'])]

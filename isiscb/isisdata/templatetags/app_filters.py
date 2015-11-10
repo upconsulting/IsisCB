@@ -112,6 +112,10 @@ def join_attributes(attrlist, concator):
     return concator.join(attr.value_freeform for attr in attrlist)
 
 @register.filter
+def join_attributes_flat(attrlist, concator):
+    return concator.join(attrlist)
+
+@register.filter
 def get_contributors(citation):
     return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
 
