@@ -134,7 +134,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
       <div class="pull-right">
         {% if related_citations_advisor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
         {% endif %}
       </div>
 
