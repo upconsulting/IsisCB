@@ -65,6 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'isisdata.middleware.ProfileMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
