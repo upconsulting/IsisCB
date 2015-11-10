@@ -56,7 +56,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
@@ -192,7 +194,7 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = 'isiscb-develop.aplacecalledup.com'
+DOMAIN = 'data.isiscb.org'
 URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False

@@ -364,7 +364,10 @@ class ReferencedEntity(models.Model):
     and ZEROS is 0-9 zeros to pad NN such that ZEROS+NN is nine characters
     in length.""")
 
-    uri = models.URLField(blank=True)
+    # uri = models.URLField(blank=True)
+    @property
+    def uri(self):
+        return self.generate_uri
 
     def generate_uri(self):
         """
@@ -372,7 +375,7 @@ class ReferencedEntity(models.Model):
         """
         values = type(self).__name__.lower(), self.id
         return urlparse.urlunparse(('http', settings.DOMAIN,
-                                    'isis/{0}/{1}'.format(*values), '', '', ''))
+                                    'isis/{0}/{1}/'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
         if self.id is None or self.id == '':
@@ -436,6 +439,11 @@ class Citation(ReferencedEntity, CuratedMixin):
     @property
     def normalized_description(self):
         return normalize(self.description)
+
+
+    @property
+    def label(self):
+        return self.title
 
     description = models.TextField(null=True, blank=True, help_text="""
     Used for additional bibliographic description, such as content summary. For
@@ -611,6 +619,11 @@ class Authority(ReferencedEntity, CuratedMixin):
         Description stripped of HTML, punctuation, and normalized to ASCII.
         """
         return normalize(self.description)
+
+
+    @property
+    def label(self):
+        return self.name
 
     description = models.TextField(blank=True, null=True, help_text="""
     A brief description that will be displayed to help identify the authority.
@@ -1296,6 +1309,9 @@ class Comment(Annotation):
     @property
     def linkified(self):
         return linkify(self.text)
+
+    class Meta:
+        get_latest_by = 'created_on'
 
 
 class TagAppellation(Annotation):

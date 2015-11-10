@@ -18,6 +18,7 @@
 
 .navbar-inverse .navbar-nav>li>a {
     color: white;
+    border-radius: 5px;
     /*padding-top: 55px;*/
     /*padding-bottom: 50px;*/
 }
@@ -25,6 +26,7 @@
 .navbar-inverse .navbar-nav>li {
     padding-bottom: 0px;
 }
+
 
 .navbar-inverse .navbar-nav>li>a:hover {
     color: #1562a5;
@@ -70,8 +72,9 @@
 }
 
 .sidebar {
-    position: fixed;
-    margin-top: -10px;
+    /*position: fixed;*/
+    margin-top: -20px;
+    min-height: 400px;
     /*top: 121px;*/
     /*bottom: 55px;*/
     left: 0;
@@ -244,6 +247,11 @@ li {
   background-color: #F5F5F5;
   color: #3274AB;
   float: right;
+}
+
+.panel-isiscb>.panel-heading {
+    background-color: #012e64;
+    color: white;
 }
 
 div.facet_panel {

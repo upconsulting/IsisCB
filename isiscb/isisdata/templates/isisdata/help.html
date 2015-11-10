@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2 sidebar">
+  <div class="col-sm-3 col-md-2">
     <div class="menu">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
+  <div class="col-sm-offset-1 col-md-offset-1 main col-sm-7 col-md-7">
     <h3>Usage tips</h3>
 
     <p>One can use the IsisCB to do a standard bibliographical search. This is the mode that we expect most users will find valuable on a day-to-day basis.</p>

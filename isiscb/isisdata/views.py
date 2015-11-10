@@ -1092,6 +1092,7 @@ class UserRegistrationView(RegistrationView):
             return next
         return '/'
 
+
 def unapi_server_root(request):
     id = request.GET.get('id', '')
     format = request.GET.get('format', '')
@@ -1102,3 +1103,18 @@ def unapi_server_root(request):
         return HttpResponse(initial_response(id))
 
     return HttpResponse('')
+
+
+def home(request):
+    """
+    The landing view, at /.
+    """
+
+    template = loader.get_template('isisdata/home.html')
+
+    context = RequestContext(request, {
+        'active': 'home',
+        'comments': reversed(Comment.objects.order_by('created_on')[:10])
+    })
+
+    return HttpResponse(template.render(context))

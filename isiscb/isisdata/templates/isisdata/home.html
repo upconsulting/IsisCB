@@ -1,0 +1,54 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="jumbotron" style="background-image: url(''); background-repeat: no-repeat;">
+    <!--  -->
+        <div class="container">
+            <div class="col-md-4 col-sm-4">
+                <img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="90%" style="max-width: 400px;" />
+            </div>
+            <div class="col-md-8 col-sm-8">
+            <h1>IsisCB Explore...</h1>
+            <p>
+                IsisCB Explore... is a research tool for the history of science,
+                whose core dataset comes from bibliographical citations in the Isis
+                Bibliography of the History of Science. The IsisCB currently
+                contains 40-years of citation data from 1974 to 2014. It will soon
+                be expanded to include bibliographic entries going back to 1913.
+                <strong>
+                    Use the search bar above to start exploring the IsisCB
+                    database!
+                </strong>
+            </p>
+            <p><a class="btn btn-primary btn-lg" href="{% url "about" %}" role="button">Learn more »</a></p>
+            </div>
+
+        </div>
+
+
+</div>
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="panel panel-default panel-isiscb">
+            <div class="panel-heading">Recent Comments</div>
+            <!-- <div class="panel-body"> -->
+
+                <table class="table">
+                    {% for comment in comments %}
+                    <tr>
+                        <td class="text text-small">
+                        {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+                            <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
+                        <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </ul>
+            <!-- </div> -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}

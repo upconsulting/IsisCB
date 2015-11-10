@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2 sidebar">
+  <div class="col-sm-3 col-md-2">
     <div class="menu">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
+  <div class="col-sm-offset-1 col-md-offset-1 main col-sm-7 col-md-7">
     <h3>About</h3>
 
     <p>The IsisCB is a research tool for the history of science, whose core dataset comes from bibliographical citations in the Isis Bibliography of the History of Science. The IsisCB currently contains 40-years of citation data from 1974 to 2014. It will soon be expanded to include bibliographic entries going back to 1913. </p>

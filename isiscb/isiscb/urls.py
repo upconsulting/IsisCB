@@ -48,6 +48,7 @@ urlpatterns = [
     url(r'^isis/', include('isisdata.urls')),
     url(r'^history/$', views.search_history, name='search_history'),
     url(r'^history/saved/$', views.search_saved, name='search_saved'),
+    url(r'^$', views.home, name='home'),
     url(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^password/change/$',  # TODO: can we simplify this?

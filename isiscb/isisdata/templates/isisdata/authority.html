@@ -31,7 +31,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 {% block content %}
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2 sidebar">
+  <div class="col-sm-3 col-md-2">
     <div class="menu">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
@@ -41,7 +41,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <hr>
     </div>
   </div>
-  <div class="col-sm-offset-3 col-md-offset-2 main col-sm-5 col-md-7">
+  <div class="main col-sm-5 col-md-7">
       <!-- Progress through search results, if arriving from search view. -->
       {% if search_results|length > 0 and fromsearch %}
       <div class="alert alert-warning">

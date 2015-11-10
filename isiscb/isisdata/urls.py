@@ -1,4 +1,5 @@
 from django.conf.urls import url, include
+from django.views.decorators.cache import cache_page
 from haystack.forms import FacetedSearchForm
 from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
@@ -37,18 +38,18 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
     url(r'^$',
-        IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
+        cache_page(60 * 15)(IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs)),
         name='index'),
     url(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$',
-        views.authority,
+        cache_page(60 * 15)(views.authority),
         name='authority'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$',
-        views.citation,
+        cache_page(60 * 15)(views.citation),
         name='citation'),
     url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
     url(r'^search/',
-        IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
+        cache_page(60 * 15)(IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs)),
         name='haystack_search'),
     url(r'^unapi/+$', views.unapi_server_root, name='unapi'),
     url(r'^help', views.help, name='help'),
