@@ -72,17 +72,19 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <h3>{{ authority.name }}</h3>
 
-    <p><strong>Description:</strong> {{ authority.description }}</p>
+    {% if authority.description %}<p><strong>Description:</strong> {{ authority.description }}</p>{% endif %}
 
     {% for attribute in authority.attributes.all %}
-    <p><strong>{% if attribute.type_free %}{{ attribute.type_free }}{% else %}{{ attribute.type_controlled.display_name }}{% endif %}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
     {% endfor %}
 
     <table class="details">
+    {% if citation.linkeddata_entries.count > 0 %}
       <tr>
         <td>Linked Data:</td>
         <td>{% for entry in citation.linkeddata_entries.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
+    {% endif %}
       <tr>
         <td>Citation URI:</td>
         <td>{{ authority | get_uri }}</td>
@@ -134,7 +136,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
       <div class="pull-right">
         {% if related_citations_advisor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
+        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
         {% endif %}
       </div>
 

@@ -47,7 +47,7 @@
                 <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
                 <li class="{% if active == 'about' %}active{% endif %}"><a href="#">About</a></li>
                 <li class="{% if active == 'help' %}active{% endif %}"><a href="#">Help</a></li>
-                <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#">Feedback</a></li>
+                <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#" id="feedback">Feedback</a></li>
                 {% if user.is_authenticated %}
                 <li class="{% if active == 'user' %}active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">

@@ -57,3 +57,14 @@ $('body').ready(function() {
 
 });
 </script>
+
+<!-- JIRA issue collector -->
+<script type="text/javascript" src="https://upconsulting.atlassian.net/s/ea9c306074b9644158fcafe2a9c95eed-T/en_USl6wemp-ren-on/70107/be52f27d56187cbd5186e7f24e29938f/2.0.7/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-US&collectorId=dd0ba6f6"></script>
+<script type="text/javascript">window.ATL_JQ_PAGE_PROPS =  {
+"triggerFunction": function(showCollectorDialog) {
+    //Requires that jQuery is available!
+    jQuery("#feedback").click(function(e) {
+        e.preventDefault();
+        showCollectorDialog();
+    });
+}};</script>
