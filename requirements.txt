@@ -31,3 +31,4 @@ elasticstack
 django-oauth-toolkit
 django-cors-headers
 unidecode
+django-filter

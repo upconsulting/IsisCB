@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
-
+from django.core.cache import cache
+from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,8 @@ from django import forms
 from django.db import connection
 from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.db.models import Q
+
+import uuid
 
 # Used by UserRegistrationView and UserRegistrationForm
 from registration.forms import RegistrationForm
@@ -36,6 +39,8 @@ import codecs
 from collections import defaultdict
 
 from helpers.mods_xml import initial_response, generate_mods_xml
+
+import datetime
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -672,24 +677,36 @@ def authority(request, authority_id):
 
     # Provide progression through search results, if present.
     fromsearch = request.GET.get('fromsearch', False)
-    search_results = request.session.get('search_results_authority', [])
-    if len(search_results) > 0 and fromsearch:
+    search_key = request.session.get('search_key', None)
+    search_results = cache.get('search_results_authority_' + str(search_key))
+
+    page_authority = request.session.get('page_authority', None)
+
+    if search_results and fromsearch and page_authority:
+        search_results_page = search_results[(page_authority - 1)*20:page_authority*20]
+
         try:
-            search_index = search_results.index(authority_id) + 1   # +1 for display.
+            search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
         except IndexError:
             search_index = None
         try:
-            search_next = search_results[search_index]
+            search_next = search_results_page[search_index]
         except IndexError:
             search_next = None
         try:
-            search_previous = search_results[search_index - 2]
+            search_previous = search_results_page[search_index - 2]
         except IndexError:
             search_previous = None
+        if search_index:
+            search_current = search_index + (20* (page_authority - 1))
+        else:
+            search_current = None
     else:
         search_index = None
         search_next = None
         search_previous = None
+        search_current = None
+
 
     last_query = request.session.get('last_query', None)
 
@@ -730,6 +747,7 @@ def authority(request, authority_id):
         'search_index': search_index,
         'search_next': search_next,
         'search_previous': search_previous,
+        'search_current': search_current,
         'fromsearch': fromsearch,
         'last_query': last_query,
     })
@@ -785,24 +803,34 @@ def citation(request, citation_id):
 
     # Provide progression through search results, if present.
     fromsearch = request.GET.get('fromsearch', False)
-    search_results = request.session.get('search_results_citation', [])
-    if len(search_results) > 0 and fromsearch:
+    search_key = request.session.get('search_key', None)
+    search_results = cache.get('search_results_citation_' + str(search_key))
+    page_citation = request.session.get('page_citation', None)
+
+    if search_results and fromsearch and page_citation:
+        search_results_page = search_results[(page_citation - 1)*20:page_citation*20]
         try:
-            search_index = search_results.index(citation_id) + 1   # +1 for display.
+            search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
         except IndexError:
             search_index = None
         try:
-            search_next = search_results[search_index]
+            search_next = search_results_page[search_index]
         except IndexError:
             search_next = None
         try:
-            search_previous = search_results[search_index - 2]
+            search_previous = search_results_page[search_index - 2]
         except IndexError:
             search_previous = None
+
+        if search_index:
+            search_current = search_index + (20* (page_citation - 1))
+        else:
+            search_current = None
     else:
         search_index = None
         search_next = None
         search_previous = None
+        search_current = None
 
     last_query = request.session.get('last_query', None)
 
@@ -832,6 +860,7 @@ def citation(request, citation_id):
         'search_index': search_index,
         'search_next': search_next,
         'search_previous': search_previous,
+        'search_current': search_current,
         'fromsearch': fromsearch,
         'last_query': last_query,
     })
@@ -922,7 +951,23 @@ class IsisSearchView(FacetedSearchView):
         Overridden to provide search history log functionality.
         """
 
+        page_citation = request.GET.get('page_citation', 1)
+        page_authority = request.GET.get('page_authority', 1)
+
+        s = datetime.datetime.now()
+        self.request = request
+        print 'request', datetime.datetime.now() - s
+
+        s = datetime.datetime.now()
+        self.form = self.build_form()
+        print 'form', datetime.datetime.now() - s
+
+        s = datetime.datetime.now()
+        self.query = self.get_query()
+        print 'query', datetime.datetime.now() - s
+
         # If the user is logged in, record the search in their history.
+        s = datetime.datetime.now()
         log = request.GET.get('log', 'True') != 'False'
         parameters = request.GET.get('q', None)
         search_models = request.GET.get('models', None)
@@ -936,23 +981,33 @@ class IsisSearchView(FacetedSearchView):
             )
             searchquery.save()
             request.session['last_query'] = request.get_full_path()
+        print 'history', datetime.datetime.now() - s
+        cache_key = '{0}_{1}_{2}'.format(parameters, search_models, selected_facets)
 
-        response = super(IsisSearchView, self).__call__(request)
+        s = datetime.datetime.now()
+        self.results = cache.get(cache_key)
+        print 'getcache', datetime.datetime.now() - s
+        if not self.results:
+            s = datetime.datetime.now()
+            self.results = self.get_results()
+            print 'get_results', datetime.datetime.now() - s
+
+            s = datetime.datetime.now()
+            cache.set(cache_key, self.results, 6000)
+            print 'set_cache', datetime.datetime.now() - s
 
         if parameters:  # Store results in the session cache.
-            results = super(IsisSearchView, self).get_results()
+            s = datetime.datetime.now()
+            search_key = str(uuid.uuid4())
+            request.session['search_key'] =  search_key
+            request.session['page_citation'] = int(page_citation)
+            request.session['page_authority'] = int(page_authority)
+            cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True))
+            cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True))
 
-            # Store only IDs, not model names.
-            ids_authority = results['authority'].values_list('id', flat=True)
-            ids_citation = results['citation'].values_list('id', flat=True)
-            results_authority = [result.split('.')[-1] for result
-                                 in ids_authority]
-            results_citation = [result.split('.')[-1] for result
-                                in ids_citation]
-            request.session['search_results_authority'] = results_authority
-            request.session['search_results_citation'] = results_citation
+            print 'session cache', datetime.datetime.now() - s
 
-        return response
+        return self.create_response()
 
     def build_page(self):
         """
