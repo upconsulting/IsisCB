@@ -683,6 +683,7 @@ def authority(request, authority_id):
     page_authority = request.session.get('page_authority', None)
 
     if search_results and fromsearch and page_authority:
+        search_count = search_results.count()
         search_results_page = search_results[(page_authority - 1)*20:page_authority*20]
 
         try:
@@ -706,6 +707,7 @@ def authority(request, authority_id):
         search_next = None
         search_previous = None
         search_current = None
+        search_count = None
 
 
     last_query = request.session.get('last_query', None)
@@ -748,6 +750,7 @@ def authority(request, authority_id):
         'search_next': search_next,
         'search_previous': search_previous,
         'search_current': search_current,
+        'search_count': search_count,
         'fromsearch': fromsearch,
         'last_query': last_query,
     })
