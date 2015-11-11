@@ -11,7 +11,8 @@ import unicodedata
 
 
 def remove_control_characters(s):
-    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+    s = unicode(s)
+    return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
