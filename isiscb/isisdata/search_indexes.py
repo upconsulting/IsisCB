@@ -115,6 +115,29 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_type(self, obj):
         return obj.get_type_controlled_display()
 
+    def prepare_title(self, obj):
+        if not obj.type_controlled == 'RE':
+            if not obj.title:
+                return "Title missing"
+            return obj.title
+
+        # if citation is a review build title from reviewed citation
+        reviewed_books = CCRelation.objects.filter(subject_id=obj.id, type_controlled='RO')
+
+        # sometimes RO relationship is not specified then use inverse reviewed by
+        book = None
+        if not reviewed_books:
+            reviewed_books = CCRelation.objects.filter(object_id=obj.id, type_controlled='RB')
+            if reviewed_books:
+                book = reviewed_books[0].subject
+        else:
+            book = reviewed_books[0].object
+
+        if book == None:
+            return "Review of unknown publication"
+
+        return 'Review of "' + book.title + '"'
+
     def prepare_title_for_sort(self, obj):
         return obj.normalized_title
 
