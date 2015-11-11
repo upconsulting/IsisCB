@@ -108,7 +108,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         for k, v in self.prepared_data.iteritems():
             if type(v) in [unicode, str]:
-                self.prepared_data[k] = v.strip()
+                self.prepared_data[k] = remove_control_characters(v.strip())
                 # self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
         return self.prepared_data
 
@@ -356,17 +356,17 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(public=True)
 
-    # def prepare(self, obj):
-    #     """
-    #     Coerce all unicode values to ASCII bytestrings, to avoid characters
-    #     that make haystack choke.
-    #     """
-    #     self.prepared_data = super(AuthorityIndex, self).prepare(obj)
-    #
-    #     for k, v in self.prepared_data.iteritems():
-    #         if type(v) is unicode:
-    #             self.prepared_data[k] = unidecode.unidecode(v)
-    #     return self.prepared_data
+    def prepare(self, obj):
+        """
+        Coerce all unicode values to ASCII bytestrings, to avoid characters
+        that make haystack choke.
+        """
+        self.prepared_data = super(AuthorityIndex, self).prepare(obj)
+
+        for k, v in self.prepared_data.iteritems():
+            if type(v) is unicode:
+                self.prepared_data[k] = remove_control_characters(v.strip())
+        return self.prepared_data
 
     def prepare_attributes(self, obj):
         return [attr.value_freeform for attr
