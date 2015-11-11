@@ -808,7 +808,9 @@ def citation(request, citation_id):
     page_citation = request.session.get('page_citation', None)
 
     if search_results and fromsearch and page_citation:
+        search_count = search_results.count()
         search_results_page = search_results[(page_citation - 1)*20:page_citation*20]
+
         try:
             search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
         except IndexError:
@@ -831,6 +833,7 @@ def citation(request, citation_id):
         search_next = None
         search_previous = None
         search_current = None
+        search_count = 0
 
     last_query = request.session.get('last_query', None)
 
@@ -861,8 +864,10 @@ def citation(request, citation_id):
         'search_next': search_next,
         'search_previous': search_previous,
         'search_current': search_current,
+        'search_count': search_count,
         'fromsearch': fromsearch,
         'last_query': last_query,
+
     })
     return HttpResponse(template.render(context))
 
