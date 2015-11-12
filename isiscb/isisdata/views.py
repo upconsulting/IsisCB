@@ -990,7 +990,7 @@ class IsisSearchView(FacetedSearchView):
             searchquery.save()
             request.session['last_query'] = request.get_full_path()
         print 'history', datetime.datetime.now() - s
-        cache_key = '{0}_{1}_{2}'.format(parameters, search_models, selected_facets)
+        cache_key = u'{0}_{1}_{2}'.format(parameters, search_models, selected_facets)
 
         s = datetime.datetime.now()
         self.results = cache.get(cache_key)
