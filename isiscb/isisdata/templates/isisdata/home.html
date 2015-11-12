@@ -3,14 +3,15 @@
 {% load staticfiles %}
 
 {% block content %}
-<div class="jumbotron" style="background-image: url(''); background-repeat: no-repeat;">
+<div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat;">
     <!--  -->
         <div class="container">
-            <div class="col-md-4 col-sm-4">
-                <img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="90%" style="max-width: 400px;" />
+          <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12">
+                <img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="75%" style="padding-top:20px; max-width: 250px; min-width: 100px" />
             </div>
-            <div class="col-md-8 col-sm-8">
-            <h1>IsisCB Explore...</h1>
+            <div class="col-md-9 col-sm-9 col-xs-12">
+            <h2>IsisCB Explore...</h2>
             <p>
                 IsisCB Explore... is a research tool for the history of science,
                 whose core dataset comes from bibliographical citations in the Isis
@@ -22,9 +23,9 @@
                     database!
                 </strong>
             </p>
-            <p><a class="btn btn-primary btn-lg" href="{% url "about" %}" role="button">Learn more »</a></p>
+            <p><a class="btn btn-primary btn-md" href="{% url "about" %}" role="button">Learn more »</a></p>
             </div>
-
+          </div>
         </div>
 
 
