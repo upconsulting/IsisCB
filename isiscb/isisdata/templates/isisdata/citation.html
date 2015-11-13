@@ -55,7 +55,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="alert alert-warning">
         <div class="row">
             <div class="col-xs-3 text-center">
-                {% if search_current > 2 and search_previous %}
+                {% if search_current >= 2 and search_previous %}
                 <a href="{% url 'citation' search_previous|get_pk %}?fromsearch=true" aria-label="Previous" class="btn btn-xs">
                     <span aria-hidden="true" class="text-small">&laquo;Previous</span>
                 </a>
