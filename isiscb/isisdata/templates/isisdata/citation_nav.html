@@ -50,30 +50,30 @@
   </div>
 </div>
 
-<!--<div class="panel-group" id="type_panel">
+<div class="panel-group" id="type_panel">
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
-          href="#collapsePersons">
-          Persons <span class="badge">{{ persons|length }}</span>
+          href="#collapsePlaces">
+          Places <span class="badge">{{ places|length }}</span>
         </a>
       </h4>
     </div>
-    <div id="collapsePersons" class="panel-collapse collapse in">
+    <div id="collapsePlaces" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-          <ul>
-          {% for person in persons %}
-            <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
+        <ul>
+          {% for place in places %}
+          <li><a href="{% url 'authority' place.authority.id %}">{{ place.authority.name }}</a></li>
           {% endfor %}
-          </ul>
-          {% if not persons %}
-            <p>There are no persons.</p>
-          {% endif %}
+        </ul>
+        {% if not places %}
+        <p>There are no places.</p>
+        {% endif %}
       </div>
     </div>
   </div>
-</div>-->
+</div>
 
 <div class="panel-group" id="type_panel">
   <div class="panel panel-default">
@@ -100,27 +100,27 @@
   </div>
 </div>
 
-<div class="panel-group" id="type_panel">
+<!--<div class="panel-group" id="type_panel">
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
-          href="#collapsePlaces">
-          Places <span class="badge">{{ places|length }}</span>
+          href="#collapsePersons">
+          Persons <span class="badge">{{ persons|length }}</span>
         </a>
       </h4>
     </div>
-    <div id="collapsePlaces" class="panel-collapse collapse in">
+    <div id="collapsePersons" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        <ul>
-          {% for place in places %}
-          <li><a href="{% url 'authority' place.authority.id %}">{{ place.authority.name }}</a></li>
+          <ul>
+          {% for person in persons %}
+            <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
           {% endfor %}
-        </ul>
-        {% if not places %}
-        <p>There are no places.</p>
-        {% endif %}
+          </ul>
+          {% if not persons %}
+            <p>There are no persons.</p>
+          {% endif %}
       </div>
     </div>
   </div>
-</div>
+</div>-->
