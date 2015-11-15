@@ -93,10 +93,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <td>{% for entry in citation.linkeddata_entries.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
     {% endif %}
-      <tr>
-        <td>Citation URI:</td>
-        <td>{{ authority | get_uri }}</td>
-      </tr>
     </table>
 
     <h4>Resources in which {{ authority.name }} has the role:<h4>
@@ -309,6 +305,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endif %}
       </div>
     {% endif %}
+
+    <table  class="details" style="margin-top: 40px;">
+    <tr>
+      <td>Citation URI:</td>
+      <td>{{ authority | get_uri }}</td>
+    </tr>
+  </table>
 
     </div>
 

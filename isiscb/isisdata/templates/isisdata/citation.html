@@ -153,10 +153,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <td>{% for entry in citation.linkeddata_entries.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
       {% endif %}
-      <tr>
-        <td>Citation URI:</td>
-        <td>{{ citation.generate_uri | linkify }}</td>
-      </tr>
     </table>
 
     <div></div>
@@ -252,7 +248,16 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
     {% endif %}
+
+    <table  class="details" style="margin-top: 40px;">
+      <tr>
+        <td>Citation URI:</td>
+        <td>{{ citation.generate_uri }}</td>
+      </tr>
+    </table>
   </div>
+
+
 
     <div class="col-sm-4 col-md-3 main">
         {% include "isisdata/comments.html" %}
