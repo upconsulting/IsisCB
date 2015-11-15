@@ -980,6 +980,10 @@ class IsisSearchView(FacetedSearchView):
         parameters = request.GET.get('q', None)
         search_models = request.GET.get('models', None)
         selected_facets = request.GET.get('selected_facets', None)
+        sort_field_citation = request.GET.get('sort_order_citation', None)
+        sort_order_citation = request.GET.get('sort_order_dir_citation', None)
+        sort_field_authority = request.GET.get('sort_order_authority', None)
+        sort_order_authority = request.GET.get('sort_order_dir_authority', None)
         if log and parameters and request.user.id > 0:
             searchquery = SearchQuery(
                 user = request.user._wrapped,
@@ -990,7 +994,7 @@ class IsisSearchView(FacetedSearchView):
             searchquery.save()
             request.session['last_query'] = request.get_full_path()
         print 'history', datetime.datetime.now() - s
-        cache_key = u'{0}_{1}_{2}'.format(parameters, search_models, selected_facets)
+        cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
         s = datetime.datetime.now()
         self.results = cache.get(cache_key)
