@@ -1,4 +1,4 @@
-{% extends "isisdata/__base.html" %}
+{% extends "isisdata/__base_home.html" %}
 {% load app_filters %}
 {% load staticfiles %}
 
@@ -7,47 +7,96 @@
     <!--  -->
         <div class="container">
           <div class="row">
-            <div class="col-md-3 col-sm-3 col-xs-12">
-                <img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="75%" style="padding-top:20px; max-width: 250px; min-width: 100px" />
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <!--<img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="75%" style="padding-top:20px; max-width: 250px; min-width: 100px" />-->
+                <h1>IsisCB Explore</h1>
+                <h2>An open access discovery service for scholars worldwide.</h2>
             </div>
-            <div class="col-md-9 col-sm-9 col-xs-12">
-            <h2>IsisCB Explore...</h2>
-            <p>
-                IsisCB Explore... is a research tool for the history of science,
-                whose core dataset comes from bibliographical citations in the Isis
-                Bibliography of the History of Science. The IsisCB currently
-                contains 40-years of citation data from 1974 to 2014. It will soon
-                be expanded to include bibliographic entries going back to 1913.
-                <strong>
-                    Use the search bar above to start exploring the IsisCB
-                    database!
-                </strong>
-            </p>
-            <p><a class="btn btn-primary btn-md" href="{% url "about" %}" role="button">Learn more »</a></p>
+            <div class="col-md-6 col-sm-12 col-xs-12">
+              <ul class="search-bar">
+                  <li>
+                      <form style="max-width: 400px" method="get" action="/isis/">
+                          <div class="input-group">
+                              <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                              <span class="input-group-btn">
+                                  <button class="btn btn-default btn-lg" type="submit">Search</button>
+                              </span>
+                          </div>
+                          <div>
+                              <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                              <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                              <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                              <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+
+                          </div>
+                      </form>
+
+                  </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="row-height">
+              <div class="col-md-9 col-sm-12 col-height col-xs-12 col-bottom">
+                <p>Built on 100-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+              </div>
+              <div class="col-md-3 col-sm-12 col-xs-12 col-height">
+                <ul>
+                  <li>Save searches</li>
+                  <li>Collect citations</li>
+                  <li>Add public links and comments</li>
+                  <li>Automate tasks with the API</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
 
 
 </div>
-<div class="row">
-    <div class="col-sm-12 col-md-12">
+<div class="row comments-log">
+  <!-- citation comments -->
+    <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments</div>
-            <!-- <div class="panel-body"> -->
+            <div class="panel-heading">Recent Comments on Citation Records</div>
+            {% for comment in comments_citation %}
+              <div class="row">
+                <div class="col-md-10 col-sm-12">
+                  {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+                </div>
+                <div class="col-md-2 col-sm-12">
+                  <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
+                </div>
+              </div>
+            {% endfor %}
+        </div>
+    </div>
 
-                <table class="table">
-                    {% for comment in comments %}
-                    <tr>
-                        <td class="text text-small">
-                        {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
-                            <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
-                        <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </ul>
-            <!-- </div> -->
+<!-- authority comments -->
+    <div class="col-sm-6 col-md-6">
+        <div class="panel panel-default panel-isiscb">
+            <div class="panel-heading">Recent Comments on Authority Records</div>
+            {% for comment in comments_authority %}
+              <div class="row">
+                <div class="col-md-10 col-sm-12">
+                  {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+                </div>
+                <div class="col-md-2 col-sm-12">
+                  <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
+                </div>
+              </div>
+            {% endfor %}
         </div>
     </div>
 </div>

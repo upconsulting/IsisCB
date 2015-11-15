@@ -1,0 +1,46 @@
+{% load staticfiles %}
+
+<nav class="navbar navbar-inverse navbar-home">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'index' %}"><img height="97px" src="{% static "isisdata/images/isis_icon_white-small.png" %}"> </a>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+
+        <div class="navbar-collapse collapse navbar-right" id="navbar">
+            <ul class="nav navbar-nav navbar-nav-home">
+                <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
+                <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                <li class="{% if active == 'help' %}active{% endif %}"><a href="{% url "help" %}">Help</a></li>
+                <li class="{% if active == 'feedback' %}active{% endif %}"><a href="#" id="feedback">Feedback</a></li>
+                {% if user.is_authenticated %}
+                <li class="{% if active == 'user' %}active{% endif %}">
+                    <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }} <span class="caret"></span>
+                    <!-- <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    </button> -->
+                    </a>
+                    <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
+                        <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                        <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                        <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                        <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                        <li><a href="{% url 'django.contrib.auth.views.logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li>
+                    <a href="{% url 'django.contrib.auth.views.login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                </li>
+
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+</nav>

@@ -1,0 +1,42 @@
+{% load staticfiles %}
+{% load app_filters %}
+{% load static from staticfiles %}
+<!DOCTYPE html>
+
+<html>
+    <head>
+        {% block meta_tags %}{% endblock %}
+        <title>
+            IsisCB - Search {% block title %}{% endblock %}
+        </title>
+        <link rel="shortcut icon" type="image/png" href="{% static "isisdata/favicon.png" %}"/>
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{% static "isisdata/font-awesome-4.4.0/css/font-awesome.min.css" %}" type="text/css" />
+            <link rel="stylesheet" href="{% static "isisdata/bootstrap-3.3.5/css/bootstrap.min.css" %}" type="text/css" />
+            <link rel="stylesheet" href="{% static "isisdata/bootstrap-social-4.10.1/bootstrap-social.css" %}" type="text/css" />
+            <link rel="stylesheet" href="{% static "isisdata/css/base.css" %}" type="text/css" />
+        {% endblock %}
+        {% block javascript %}
+            <script src="{% static "isisdata/js/jquery-1.11.3.min.js" %}" type="text/javascript"></script>
+            <script src="{% static "isisdata/bootstrap-3.3.5/js/bootstrap.min.js" %}" type="text/javascript"></script>
+            <script src="{% static "isisdata/js/angular.min.js" %}" type="text/javascript"></script>
+            <script src="{% static "isisdata/js/angular-resource.min.js" %}"></script>
+            <script src="{% static "isisdata/js/angular-sanitize.min.js" %}"></script>
+            <script src="{% static "isisdata/js/ui-bootstrap-tpls-0.13.0.min.js" %}"></script>
+        {% endblock %}
+
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body>
+          {% include "isisdata/_social.html" %}
+          {% include "isisdata/_navigation_home.html" %}
+          <div class="container-fluid main">
+            {% block content %}
+            {% endblock %}
+          </div>
+          <div class="footer">
+              {% include "isisdata/_footer.html" %}
+          </div>
+
+    </body>
+</html>
