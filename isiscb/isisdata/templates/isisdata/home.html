@@ -62,10 +62,10 @@
             <div class="panel-heading">Recent Comments on Citation Records</div>
             {% for comment in comments_citation %}
               <div class="row">
-                <div class="col-md-10 col-sm-12">
+                <div class="col-md-8 col-sm-12">
                   {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
-                <div class="col-md-2 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                   <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
                 </div>
               </div>
@@ -84,10 +84,10 @@
             <div class="panel-heading">Recent Comments on Authority Records</div>
             {% for comment in comments_authority %}
               <div class="row">
-                <div class="col-md-10 col-sm-12">
+                <div class="col-md-8 col-sm-12">
                   {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
-                <div class="col-md-2 col-sm-12">
+                <div class="col-md-4 col-sm-12">
                   <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
                 </div>
               </div>
