@@ -51,6 +51,12 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     url(r'^(?i)autocomplete/', include('autocomplete_light.urls')),
+    url(r'^(?i)login/$',  # TODO: can we simplify this?
+                auth_views.login,
+                name='login'),
+    url(r'^(?i)logout/$',  # TODO: can we simplify this?
+                auth_views.logout,
+                name='logout'),
     url(r'^(?i)password/change/$',  # TODO: can we simplify this?
                 auth_views.password_change,
                 name='password_change'),
@@ -71,7 +77,8 @@ urlpatterns = [
                 auth_views.password_reset_confirm,
                 name='password_reset_confirm'),
     url(r'^(?i)register/$', views.UserRegistrationView.as_view()),
-    url(r'^(?i)accounts/', include('registration.backends.simple.urls')),
+
+    # url(r'^(?i)accounts/', include('registration.backends.simple.urls')),
     url(r'^(?i)captcha/', include('captcha.urls')),
 
     # We define the following oauth2 views explicitly to disable insecure

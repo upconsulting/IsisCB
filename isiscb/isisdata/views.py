@@ -10,13 +10,15 @@ from django import forms
 from django.db import connection
 from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.db.models import Q
+from django.views.generic.edit import FormView
 
 import uuid
 
 # Used by UserRegistrationView and UserRegistrationForm
-from registration.forms import RegistrationForm
-from captcha.fields import CaptchaField
-from registration.views import RegistrationView
+# from registration.forms import RegistrationForm
+# from registration.views import RegistrationView
+
+
 
 from haystack.views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
@@ -30,7 +32,6 @@ from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authenticati
 
 from isisdata.models import *
 
-
 from django.template import RequestContext, loader
 from django.http import HttpResponse, HttpResponseRedirect
 from urllib import quote
@@ -41,6 +42,8 @@ from collections import defaultdict
 from helpers.mods_xml import initial_response, generate_mods_xml
 
 import datetime
+
+from isisdata.forms import UserRegistrationForm
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -1128,13 +1131,15 @@ class IsisSearchView(FacetedSearchView):
         return extra
 
 
-class UserRegistrationForm(RegistrationForm):
-    captcha = CaptchaField()
-    next = forms.CharField(widget=forms.HiddenInput())
+# class UserPasswordResetView(FormView):
+#     form_class = UserPasswordResetView
+#     template_name = 'registration/password_reset_form.html'
 
 
-class UserRegistrationView(RegistrationView):
+
+class UserRegistrationView(FormView):
     form_class = UserRegistrationForm
+    template_name = 'registration/registration_form.html'
 
     def get_initial(self):
         initial = super(UserRegistrationView, self).get_initial()
@@ -1153,6 +1158,25 @@ class UserRegistrationView(RegistrationView):
             login(self.request, user)
 
         return cleaned_data['next']
+
+    def form_valid(self, form):
+        """
+        If the form is valid, register the user and proceed to the next page.
+        """
+        next = self.get_success_url(self.register(**form.cleaned_data))
+        return HttpResponseRedirect(next)
+
+    def post(self, request, *args, **kwargs):
+            """
+            Handles POST requests, instantiating a form instance with the passed
+            POST variables and then checked for validity.
+            """
+            form = self.get_form()
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                print form.errors
+                return self.form_invalid(form)
 
     def get_success_url(self, next):
         if next is not None and next != '':

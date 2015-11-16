@@ -9,6 +9,8 @@ from haystack.constants import DEFAULT_ALIAS
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from haystack.utils import get_model_ct
 
+from captcha.fields import CaptchaField
+
 import time
 from isisdata import helper_methods
 
@@ -174,3 +176,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return {'authority' : results_authority,
                 'citation': results_citation}
+
+
+class UserRegistrationForm(forms.Form):
+    username = forms.CharField()
+    email = forms.CharField(widget=forms.EmailInput())
+    password1 = forms.CharField(widget=forms.PasswordInput())
+    password2 = forms.CharField(widget=forms.PasswordInput())
+    captcha = CaptchaField()
+    next = forms.CharField(widget=forms.HiddenInput(), required=False)
