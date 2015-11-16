@@ -30,7 +30,8 @@
 
 .jumbotron .search-bar .input-group .form-control#id_q {
   font-size: 18px;
-  padding: 22px;
+
+  height: 46px;
 }
 
 @media screen and (min-width: 800px) {
