@@ -1205,7 +1205,8 @@ def home(request):
 
     context = RequestContext(request, {
         'active': 'home',
-        'comments': reversed(Comment.objects.order_by('created_on')[:10])
+        'comments_citation': reversed(Comment.objects.filter(subject_content_type__model='citation').order_by('created_on')[:10]),
+        'comments_authority': reversed(Comment.objects.filter(subject_content_type__model='authority').order_by('created_on')[:10])
     })
 
     return HttpResponse(template.render(context))
