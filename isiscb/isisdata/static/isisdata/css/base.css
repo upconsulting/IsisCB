@@ -15,6 +15,15 @@
   font-size: 16px;
 }
 
+ .navbar-nav-home .input-group {
+   margin-top: 35px;
+ }
+
+/* .navbar-nav-home .input-group .form-control#id_q {
+   font-size: 18px;
+   padding: 22px;
+ }*/
+
 .jumbotron .search-bar {
   list-style: none;
 }
