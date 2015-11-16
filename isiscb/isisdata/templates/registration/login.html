@@ -1,0 +1,99 @@
+{% extends "isisdata/__base.html" %}
+{% load i18n admin_static %}
+{% load addcss %}
+
+{% block content %}
+<div class="row col-sm-4 col-sm-offset-4" style="margin-top:105px;">
+	<div id="login" class="panel panel-default narrow center">
+		<div class="panel-heading clearfix">
+			<strong>Log In</strong>
+			<div class="btn-group btn-group-sm pull-right">
+
+				<a class="btn btn-social-icon btn-facebook" href="{% url "social:begin" backend="facebook" %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Facebook">
+					<i class="fa fa-facebook"></i>
+				</a>
+
+				<a class="btn btn-social-icon btn-twitter" href="{% url "social:begin" backend="twitter" %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Twitter">
+					<i class="fa fa-twitter"></i>
+				</a>
+			</div>
+		</div>
+		<form action="{{ app_path }}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
+
+			<div class="panel-body">
+				{% if form.errors and not form.non_field_errors %}
+				<p class="errornote">
+					{% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+				</p>
+				{% endif %}
+
+				{% if form.non_field_errors %}
+					{% for error in form.non_field_errors %}
+
+
+						<div class="alert alert-danger" role="alert">
+						  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+						  <span class="sr-only">Error:</span>
+						  {{ error|escape }}
+						</div>
+
+
+					{% endfor %}
+				{% endif %}
+
+				<div id="content-main">
+						<div class="form-group">
+							{% for error in form.username.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
+							<label for="username" class="required control-label col-sm-4">{{ form.username.label }}:</label>
+							<div class="col-sm-6">
+								{{ form.username | addcss:"form-control" }}
+							</div>
+						</div>
+						<div class="form-group">
+							{% for error in form.password.errors %}
+							<div class="alert alert-danger" role="alert">
+							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+							  <span class="sr-only">Error:</span>
+							  {{ error|escape }}
+							</div>
+							{% endfor %}
+							<label for="password" class="required control-label col-sm-4">{% trans 'Password:' %}</label>
+							<div class="col-sm-6">
+								{{ form.password | addcss:"form-control"}}
+							</div>
+							<input type="hidden" name="next" value="{{ next }}" />
+						</div>
+						{% url 'password_reset' as password_reset_url %}
+						{% if password_reset_url %}
+						<div class="password-reset-link">
+							<a href="{{ password_reset_url }}">{% trans 'Forgot your password or username?' %}</a>
+						</div>
+						{% endif %}
+
+						<input name="next" type="hidden" value="{{next}}">
+
+
+
+					<script type="text/javascript">
+					document.getElementById('id_username').focus()
+					</script>
+				</div>
+			</div>
+			<div class="panel-footer clearfix">
+                <div class="submit-row btn-group btn-group-sm">
+                    <a type="button" class="btn btn-success" href="/register/?next={{next}}">{% trans 'Register' %}</a>
+                </div>
+				<div class="submit-row btn-group btn-group-sm pull-right">
+					<input type="submit" class="btn btn-primary" value="{% trans 'Log in' %}" />
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
