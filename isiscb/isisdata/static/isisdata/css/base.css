@@ -30,12 +30,17 @@
 
 .jumbotron .search-bar .input-group .form-control#id_q {
   font-size: 18px;
-  padding: 22px;
+  height: 46px;
+}
+
+.mainjumbo .container {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
-    width: 400px;
+    width: 100%;
   }
   .jumbotron ul.search-bar li {
     padding-top: 15px;

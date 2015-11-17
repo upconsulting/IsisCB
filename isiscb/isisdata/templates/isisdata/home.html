@@ -8,14 +8,11 @@
         <div class="container">
           <div class="row">
             <div class="col-md-6 col-sm-12 col-xs-12">
-                <!--<img src='{% static "isisdata/images/isis_final_black_med.png" %}' width="75%" style="padding-top:20px; max-width: 250px; min-width: 100px" />-->
-                <h1>IsisCB Explore</h1>
-                <h2>An open access discovery service for scholars worldwide.</h2>
+                <iframe width="100%" height="315" src="https://www.youtube.com/embed/B18NbDDRhyo" frameborder="0" allowfullscreen></iframe>
             </div>
             <div class="col-md-6 col-sm-12 col-xs-12">
-              <ul class="search-bar">
-                  <li>
-                      <form style="max-width: 400px" method="get" action="/isis/">
+              <div class="search-bar">
+                      <form method="get" action="/isis/">
                           <div class="input-group">
                               <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
                               <span class="input-group-btn">
@@ -30,24 +27,21 @@
 
                           </div>
                       </form>
+                  </div>
 
-                  </li>
-              </ul>
+              <h2> An open access discovery service for the history of science.</h2>
+              <p>Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+              <p class="pull-right"><img src='{% static "isisdata/images/hss_logo.jpg" %}' style="padding-top: 30px;" /></p>
             </div>
           </div>
 
           <div class="row">
             <div class="row-height">
               <div class="col-md-9 col-sm-12 col-height col-xs-12 col-bottom">
-                <p>Built on 100-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+
               </div>
               <div class="col-md-3 col-sm-12 col-xs-12 col-height">
-                <ul>
-                  <li>Save searches</li>
-                  <li>Collect citations</li>
-                  <li>Add public links and comments</li>
-                  <li>Automate tasks with the API</li>
-                </ul>
+
               </div>
             </div>
           </div>
