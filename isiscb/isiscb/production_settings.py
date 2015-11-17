@@ -98,6 +98,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
+                'isisdata.context_processors.google',
             ],
         },
     },
@@ -231,6 +232,8 @@ TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
+
+GOOGLE_ANALYTICS_ID = os.environ['GOOGLE_ANALYTICS_ID']
 
 
 LICENSE = """This work is licensed under a Creative Commons
