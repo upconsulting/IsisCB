@@ -9,6 +9,12 @@
   min-height: 100px
 }
 
+.navbar-brand>img {
+    display: block;
+    width: 100%;
+    max-width: 342px;
+}
+
 .navbar-nav-home>li>a {
   padding-top: 33px;
   padding-bottom:33px;
@@ -163,7 +169,6 @@
 
 .input-group .form-control#id_q {
     float:right;
-    width: 250px;
 }
 
 .sidebar {
