@@ -676,11 +676,13 @@ class Authority(ReferencedEntity, CuratedMixin):
     NEU = 'NEU'
     MW = 'MW'
     SHOT = 'SHOT'
+    SEARCH = 'SAC'
     CLASS_SYSTEM_CHOICES = (
         (SWP, 'SWP'),
         (NEU, 'Neu'),
         (MW, 'MW'),
-        (SHOT, 'SHOT')
+        (SHOT, 'SHOT'),
+        (SEARCH, 'SAC')
     )
     classification_system = models.CharField(max_length=4, blank=True,
                                              null=True,

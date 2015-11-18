@@ -160,6 +160,7 @@ classificationSystems = {
     'GUERLAC COMMITTEE CLASSIFICATION SYSTEM (1953-2001)': 'GUE',
     'WHITROW CLASSIFICATION SYSTEM (1913-1999)': 'MW',
     'FORUM FOR THE HISTORY OF SCIENCE IN AMERICA': 'FHSA',
+    'SEARCH APP CONCEPT': 'SAC',
 }
 
 # Translates fields from FM Authority to Authority model.
