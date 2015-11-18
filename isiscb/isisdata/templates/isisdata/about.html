@@ -1,9 +1,10 @@
 {% extends "isisdata/__base.html" %}
+{% load staticfiles %}
 
 {% block content %}
 
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2">
+<!--  <div class="col-sm-3 col-md-2">
     <div class="menu">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
@@ -12,29 +13,75 @@
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
     </div>
+  </div>-->
+
+  <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-7 main">
+    <h3>About <i>IsisCB Explore</i></h3>
+
+    <p>
+      <i>IsisCB Explore</i> is a research tool for the history of science, whose core dataset comes from bibliographical citations in the <a href="http://isisbibliography.org/">Isis Bibliography of the History of Science</a>. The IsisCB currently contains 40 years of citation data from 1974 to 2014.
+    </p>
+    <p>
+      The dataset is composed of two main types of records: <i>Citations</i>, items from the bibliography that have been classified and indexed, and <i>Authorities</i>, records that include both subject terms that classify citations as well as authors, publishers, and journals that have written and published those works.
+    </p>
+    <p>
+      <i>IsisCB Explore</i> blends a professionally curated database with social media tools, so that the community can play a more active role in building a tool that will cater to its needs. User participation is encouraged. Please sign-in and provide comments to entries where you see errors and add further information where relevant. Suggest hyperlinks and other material that will be useful for fellow scholars.
+    </p>
+    <p>
+      If you run into problems with the tool itself, please use the Feedback link. If you have specific comments on the content of records, you can add those directly to the record itself, using the commenting function, or you can email us at <a href="mailto:isisbibliography@gmail.com">isisbibliography@gmail.com</a>.
+    </p>
+    <p>
+      We are fully committed to open access. Our data is available via a <a href="{% url 'rest_root' %}">REST API</a> (accessible through the icons on this site), and all of our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use following the Creative Commons Attribution-NonCommercial 4.0 International License.
+    </p>
+
+    <h4>Development schedule</h4>
+    <p>
+      The project is still in beta form, so development is ongoing. Among the features we will be adding in the months ahead:
+    </p>
+    <ul>
+      <li>
+        More data, including web-based resources from the World History of Science Online, all bibliographical citations from the 1913-1975 Isis Cumulative Bibliographies, and conference presentation citations from selected conferences.
+      </li>
+      <li>
+        More user account functions, such as adding entries, curating pages, saving marked sets of citations.
+      </li>
+      <li>
+        More nuanced indexing, including merging of identical authorities.
+      </li>
+      <li>
+        More information about authority records, drawn from places like DBPedia.
+      </li>
+      <li>
+        More linked resources, including authority links to places such as the Stanford Encyclopedia of Philosophy.
+      </li>
+      <li>
+        More API functionality.
+      </li>
+    </ul>
+
+    <h4>Acknowledgements</h4>
+    <p>
+       The following individuals have been especially helpful in making this project possible: Sylwester Ratowt, Colin Allen, Margaret Gaida, Amy Rodgers, Gavan McCarthy, Marco La Rosa, Ailie Smith, John Stewart, Erick Peirson, Julia Damerow, Tara Carlisle, Nathan Kapoor, Younes Mahdavi, Carolyn Scearce, Kirsty Gaither, Sam Fellows. In addition, we want to thank the many individuals associated with the sponsoring institutions listed on this page. The project could not have been completed without their help. Faculty and administrative staff in many different departments across the University of Oklahoma have been extraordinarily supportive throughout this endeavor.
+    </p>
+    <p>
+      This website was developed by <a href="http://aplacecalledup.com">A Place Called Up Consulting</a>. A Place Called Up Consulting works with academic units, teams, and individual scholars to advance excellence in digital humanities research, training, and outreach. From planning to maturity, A Place Called Up Consulting provides guidance, software and infrastructure development services, training, and support for projects of all sizes.
+    </p>
+
+</div>
+
+<div class="col-md-3 col-xs-offset-1 col-sm-offset-1 col-md-offset-0 col-sm-10">
+  <div style="margin-top: 20px;">
+    <a href="http://hssonline.org/" target="blank"><img width="350px"src="{% static "isisdata/images/hss_banner.png" %}"></a>
+  <div style="margin-top: 20px;">
+  <div>
+    <a href="http://cas.ou.edu/hsci" target="blank"><img width="350px" src="{% static "isisdata/images/hsci_banner.png" %}"></a>
   </div>
-
-  <div class="col-sm-offset-1 col-md-offset-1 main col-sm-7 col-md-7">
-    <h3>About</h3>
-
-    <p>The IsisCB is a research tool for the history of science, whose core dataset comes from bibliographical citations in the Isis Bibliography of the History of Science. The IsisCB currently contains 40-years of citation data from 1974 to 2014. It will soon be expanded to include bibliographic entries going back to 1913. </p>
-
-    <p>The dataset is composed of two main types of records: Citations, items from the bibliography that have been classified and indexed, and Authorities, records that include both subject terms that classify citations as well as authors, publishers, and journals that have written and published those works.</p>
-
-    <p>We have made this search system very interactive because we want to develop this as a community resource. Users are encouraged to sign-in and provide comments to entries where they see errors and add further information where relevant. We hope that you will suggest hyperlinks and other material that will be useful for fellow scholars. </p>
-
-    <p>Soon, users will be able to add entries of their own and curate their own pages. They will be able to provide information that they can share publicly. </p>
-
-    <p>The IsisCB blends a professionally curated database with social media tools, so that the community can play a more active role in building a tool that will cater to its needs. User participation is encouraged.</p>
-
-    <p>We value your comments, both specific and general. If you have specific comments on a bibliographical citation or an authority record, please add that directly to the record itself, using the commenting function. If you have general comments, please send them to us at <isiscb@ou.edu>.</p>
-
-    <p>We are fully committed to open access. Our data is available via a < link> REST API, and source code at GitHub. All data uses the Creative Commons Attribution-NonCommercial 4.0 International License.</p>
-
-    <p>Founded for this project has been generously provided by <a href="http://www.sloan.org" >Alfred P. Sloan Foundation</a>, with additional support from the <a href="https://libraries.ou.edu/">University of Oklahoma Libraries</a> and the <a href="http://hssonline.org/">History of Science Society</a>.</p>
-
-    <p>Full list of affiliated institution can be found <a href="http://isisbibliography.org/collaborating-institutions-and-projects/">here</a>.</p>
-
+  <div style="margin-top: 20px;">
+    <a href="https://libraries.ou.edu/" target="blank"><img width="350px" src="{% static "isisdata/images/oulib_banner.png" %}"></a>
+  </div>
+  <div style="margin-top: 20px;">
+    <a href="http://www.sloan.org/" target="blank"><img width="350px" src="{% static "isisdata/images/sloan_banner.png" %}"></a>
+  </div>
 </div>
 
 </div>
