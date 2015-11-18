@@ -858,11 +858,8 @@ class Command(BaseCommand):
 
             type_controlled = copy.deepcopy(values['type_controlled'])
             del values['type_controlled']
-            try:
-                ltype = LinkedDataType.objects.get(name=type_controlled)
-            except ObjectDoesNotExist:
-                self.failed.append((values['id'], 'No such LinkedDataType.'))
-                return
+
+            ltype = LinkedDataType.objects.get_or_create(name=type_controlled)[0]
 
             try:
                 ltype.is_valid(values['universal_resource_name'])
