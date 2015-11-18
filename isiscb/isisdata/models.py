@@ -707,10 +707,12 @@ class Authority(ReferencedEntity, CuratedMixin):
     DUPLICATE = 'DU'
     REDIRECT = 'RD'
     DELETE = 'DL'
+    INACTIVE = 'IN'
     STATUS_CHOICES = (
         (ACTIVE, 'Active'),
         (DUPLICATE, 'Duplicate'),
-        (REDIRECT, 'Redirect'),     # Question: is this desired?
+        (REDIRECT, 'Redirect'),
+        (INACTIVE, 'Inactive'),
     )
     record_status = models.CharField(max_length=2, choices=STATUS_CHOICES,
                                      blank=True, null=True)

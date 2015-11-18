@@ -144,7 +144,8 @@ recordStatusTypes = {
     'Redirect': 'RD',
     'DELETE': 'DL',
     'Delete': 'DL',
-    'NeedsToBeFixed': 'NF'
+    'NeedsToBeFixed': 'NF',
+    'Inactive': 'IN'
 }
 
 classificationSystems = {
