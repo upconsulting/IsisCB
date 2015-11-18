@@ -297,7 +297,8 @@ trackingTypes = {
     'Printed': 'PT',
     'Authorized': 'AU',
     'Proofed': 'PD',
-    'FullyEntered': 'FU'
+    'FullyEntered': 'FU',
+    'Bulk Data Update': 'BD'
 }
 
 # Maps fields from FM Tracking to Tracking model.
