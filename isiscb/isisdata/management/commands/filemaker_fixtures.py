@@ -860,6 +860,7 @@ class Command(BaseCommand):
             del values['type_controlled']
 
             ltype = LinkedDataType.objects.get_or_create(name=type_controlled)[0]
+            print ltype
 
             try:
                 ltype.is_valid(values['universal_resource_name'])
