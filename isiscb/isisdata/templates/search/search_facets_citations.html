@@ -83,6 +83,49 @@
   </div>
 </div>
 
+<div class="panel-group" id="place_panel">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion"
+          href="#collapseSubjects">
+          Subjects <span class="badge {% if selected_facets.citation_subjects_exact  %}active{% endif %}">{{ facets_citation.fields.subjects|length }}</span>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseSubjects" class="panel-collapse collapse in">
+      <div class="facet_panel panel-body">
+        {% if facets_citation.fields.subjects %}
+          <ul class="selected_facets">
+            {% for subject in selected_facets.citation_subjects_exact %}
+            {% with subject|create_facet_string:'citation_subjects_exact' as encoded_subject %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+          <ul>
+                {% for subject in facets_citation.fields.subjects|slice:":7" %}
+                {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
+                {% endif %}
+                {% endfor %}
+          </ul>
+          {% if facets_citation.fields.subjects|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
+        {% else %}
+                <p>No subject facets.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="panel-group" id="time_panel">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -169,48 +212,7 @@
   </div>
 </div>
 
-<div class="panel-group" id="place_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion"
-          href="#collapseSubjects">
-          Subjects <span class="badge {% if selected_facets.citation_subjects_exact  %}active{% endif %}">{{ facets_citation.fields.subjects|length }}</span>
-        </a>
-      </h4>
-    </div>
-    <div id="collapseSubjects" class="panel-collapse collapse in">
-      <div class="facet_panel panel-body">
-        {% if facets_citation.fields.subjects %}
-          <ul class="selected_facets">
-            {% for subject in selected_facets.citation_subjects_exact %}
-            {% with subject|create_facet_string:'citation_subjects_exact' as encoded_subject %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-remove"></span> {{subject}}</a></li>
-            {% endwith %}
-            {% endfor %}
-          </ul>
-          <ul>
-                {% for subject in facets_citation.fields.subjects|slice:":7" %}
-                {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}">{{ subject.0 }} </a>({{ subject.1 }}) </li>
-                {% endif %}
-                {% endfor %}
-          </ul>
-          {% if facets_citation.fields.subjects|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
-        {% else %}
-                <p>No subject facets.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
+
 {% endif %}
 
 <!-- Modal -->
