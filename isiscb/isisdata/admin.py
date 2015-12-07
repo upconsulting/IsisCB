@@ -20,11 +20,34 @@ class CCRelationForm(forms.ModelForm):
         fields = ('object', )
 
 
+class ACRelationForm(autocomplete_light.ModelForm):
+    class Meta:
+        model = ACRelation
+        fields = '__all__'
+
+
+class ACRelationInlineForm(autocomplete_light.ModelForm):
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    class Meta:
+        model = ACRelation
+        fields = ('type_controlled', 'authority', )
+
+
+
 class CCRelationInline(admin.TabularInline):
     fk_name = 'subject'
     model = CCRelation
     form = CCRelationForm
     extra = 1
+
+
+class ACRelationInline(admin.TabularInline):
+    fk_name = 'citation'
+    model = ACRelation
+    form = ACRelationInlineForm
+    extra = 1
+
 
 
 class ValueWidget(widgets.Widget):
@@ -254,6 +277,11 @@ class UberInlineMixin(admin.ModelAdmin):
                                               change=change)
                 formset.save_m2m()
                 formset.save()
+            else:
+                instances = self.save_formset(request, form, formset,
+                                              change=change)
+                formset.save_m2m()
+                formset.save()
 
 
 class CitationForm(autocomplete_light.ModelForm):
@@ -269,6 +297,7 @@ class CitationAdmin(SimpleHistoryAdmin,
 
     list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
     list_filter = ('type_controlled', 'status_of_record')
+    inlines = (ACRelationInline, )
 
     fieldsets = [
         (None, {
@@ -343,12 +372,6 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                        'modified_by_fm')
 
     form = AuthorityForm
-
-
-class ACRelationForm(autocomplete_light.ModelForm):
-    class Meta:
-        model = ACRelation
-        fields = '__all__'
 
 
 class ACRelationAdmin(SimpleHistoryAdmin,
