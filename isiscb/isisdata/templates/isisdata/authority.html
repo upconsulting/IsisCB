@@ -98,7 +98,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <h4>Resources in which {{ authority.name }} has the role:<h4>
 
     {% if related_citations_author %}
-    <h5>Author</h5>
+    <h4>Author</h4>
 
       {% for rel_citation in related_citations_author %}
         {% with rel_citation.citation as citation_object %}
@@ -114,7 +114,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_editor %}
-    <h5 style="clear: both; padding-top: 10px">Editor</h5>
+    <h4 style="clear: both; padding-top: 10px">Editor</h4>
 
       {% for rel_citation in related_citations_editor %}
         {% with rel_citation.citation as citation_object %}
@@ -130,7 +130,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_advisor %}
-    <h5 style="clear: both; padding-top: 10px">Advisor</h5>
+    <h4 style="clear: both; padding-top: 10px">Advisor</h4>
 
       {% for rel_citation in related_citations_advisor %}
         {% with rel_citation.citation as citation_object %}
@@ -147,7 +147,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_contributor %}
-    <h5 style="clear: both; padding-top: 10px">Contributor</h5>
+    <h4 style="clear: both; padding-top: 10px">Contributor</h4>
 
       {% for rel_citation in related_citations_contributor %}
         {% with rel_citation.citation as citation_object %}
@@ -163,7 +163,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_translator %}
-    <h5 style="clear: both; padding-top: 10px">Translator</h5>
+    <h4 style="clear: both; padding-top: 10px">Translator</h4>
 
       {% for rel_citation in related_citations_translator %}
         {% with rel_citation.citation as citation_object %}
@@ -179,7 +179,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_subject %}
-    <h5 style="clear: both; padding-top: 10px">Subject</h5>
+    <h4 style="clear: both; padding-top: 10px">Subject</h4>
 
       {% for rel_citation in related_citations_subject %}
         {% with rel_citation.citation as citation_object %}
@@ -195,7 +195,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_category %}
-    <h5 style="clear: both; padding-top: 10px">Category</h5>
+    <h4 style="clear: both; padding-top: 10px">Category</h4>
 
       {% for rel_citation in related_citations_category %}
         {% with rel_citation.citation as citation_object %}
@@ -211,7 +211,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_publisher %}
-    <h5 style="clear: both; padding-top: 10px">Publisher</h5>
+    <h4 style="clear: both; padding-top: 10px">Publisher</h4>
 
       {% for rel_citation in related_citations_publisher %}
         {% with rel_citation.citation as citation_object %}
@@ -227,7 +227,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_school %}
-    <h5 style="clear: both; padding-top: 10px">School</h5>
+    <h4 style="clear: both; padding-top: 10px">School</h4>
 
       {% for rel_citation in related_citations_school %}
         {% with rel_citation.citation as citation_object %}
@@ -243,7 +243,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_institution %}
-    <h5 style="clear: both; padding-top: 10px">Institution</h5>
+    <h4 style="clear: both; padding-top: 10px">Institution</h4>
 
       {% for rel_citation in related_citations_institution %}
         {% with rel_citation.citation as citation_object %}
@@ -259,7 +259,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_meeting %}
-    <h5 style="clear: both; padding-top: 10px">Institution</h5>
+    <h4 style="clear: both; padding-top: 10px">Institution</h4>
 
       {% for rel_citation in related_citations_meeting %}
         {% with rel_citation.citation as citation_object %}
@@ -275,7 +275,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_periodical %}
-    <h5 style="clear: both; padding-top: 10px">Periodical</h5>
+    <h4 style="clear: both; padding-top: 10px">Periodical</h4>
 
       {% for rel_citation in related_citations_periodical %}
         {% with rel_citation.citation as citation_object %}
@@ -291,7 +291,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_book_series %}
-    <h5 style="clear: both; padding-top: 10px">Book Series</h5>
+    <h4 style="clear: both; padding-top: 10px">Book Series</h4>
 
       {% for rel_citation in related_citations_book_series %}
         {% with rel_citation.citation as citation_object %}
