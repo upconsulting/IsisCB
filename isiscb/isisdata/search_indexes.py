@@ -122,6 +122,25 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 return "Title missing"
             return obj.title
 
+        book = get_reviewed_book(obj)
+
+        if book == None:
+            return "Review of unknown publication"
+
+        return 'Review of "' + book.title + '"'
+
+    def prepare_title_for_sort(self, obj):
+        if not obj.type_controlled == 'RE':
+            return obj.normalized_title
+
+        book = get_reviewed_book(obj)
+        if not book:
+            return ''
+
+        return book.normalized_title
+
+
+    def get_reviewed_book(self, obj):
         # if citation is a review build title from reviewed citation
         reviewed_books = CCRelation.objects.filter(subject_id=obj.id, type_controlled='RO')
 
@@ -134,13 +153,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         else:
             book = reviewed_books[0].object
 
-        if book == None:
-            return "Review of unknown publication"
-
-        return 'Review of "' + book.title + '"'
-
-    def prepare_title_for_sort(self, obj):
-        return obj.normalized_title
+        return book
 
     def prepare_publication_date(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
