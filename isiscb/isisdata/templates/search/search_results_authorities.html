@@ -1,5 +1,6 @@
 {% load app_filters %}
 {% load metadata_filters %}
+{% load search_filters %}
 
 {% if query %}
 <div class="row">
@@ -29,6 +30,7 @@
           {% with result.dates as dates %}
           {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
           {% endwith %}
+          ({{ result.object | get_nr_of_citations }})
 
         </p>
     {% empty %}

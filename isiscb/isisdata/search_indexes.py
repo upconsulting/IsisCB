@@ -351,6 +351,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
     dates = indexes.MultiValueField(indexed=False)
+    #citation_nr = indexes.CharField(indexed=False)
 
     def get_model(self):
         return Authority
@@ -395,3 +396,6 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_dates(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue'])]
+
+    #def prepare_citation_nr(self, obj):
+        #ACRelation.objects.filter(authority=obj, citation__public=True).distinct('citation_id').count()
