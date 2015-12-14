@@ -122,7 +122,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 return "Title missing"
             return obj.title
 
-        book = get_reviewed_book(obj)
+        book = self.get_reviewed_book(obj)
 
         if book == None:
             return "Review of unknown publication"
@@ -133,7 +133,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if not obj.type_controlled == 'RE':
             return obj.normalized_title
 
-        book = get_reviewed_book(obj)
+        book = self.get_reviewed_book(obj)
         if not book:
             return ''
 
