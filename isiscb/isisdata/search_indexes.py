@@ -37,6 +37,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     page_string = indexes.CharField(null=True, stored=True)
 
+    # Fields for COinS metadata.
+    # TODO: Populate these fields with values.
+    volume = indexes.CharField(null=True, stored=True)
+    issue = indexes.CharField(null=True, stored=True)
+    issn = indexes.CharField(null=True, stored=True)
+    doi = indexes.CharField(null=True, stored=True)
+
     subjects = indexes.MultiValueField(faceted=True, indexed=False)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
     categories = indexes.MultiValueField(faceted=True, indexed=False)
@@ -53,6 +60,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     geographics = indexes.MultiValueField(faceted=True, indexed=False)
     people = indexes.MultiValueField(faceted=True, indexed=False)
     subject_institutions = indexes.MultiValueField(faceted=True, indexed=False)
+
+    # TODO: fix typo (missing 'c' in 'serial_publications').
     serial_publiations = indexes.MultiValueField(faceted=True, indexed=False)
     classification_terms = indexes.MultiValueField(faceted=True, indexed=False)
     concepts = indexes.MultiValueField(faceted=True, indexed=False)

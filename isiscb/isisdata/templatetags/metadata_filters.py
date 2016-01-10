@@ -2,6 +2,9 @@ from django import template
 from isisdata.models import *
 from app_filters import *
 
+import urllib
+from collections import OrderedDict
+
 register = template.Library()
 
 @register.filter
@@ -88,3 +91,48 @@ def get_metatag_fields(citation):
             metadata_dict['citation_language'] = [lang.id]
 
     return metadata_dict
+
+
+@register.filter
+def get_coins(result):
+    """
+    Generate a COinS metadata string for embedding in HTML.
+    """
+
+
+    kv_pairs = OrderedDict()
+    kv_pairs['ctx_ver'] = 'Z39.88-2004'
+    kv_pairs['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
+
+
+    # if result.doi:
+    #     rft_id = 'info:doi/<the-url-encoded-doi>'
+
+    # Publication date.
+    if len(result.publication_date) > 0:
+        kv_pairs['rft.date'] = result.publication_date[0] # Year only.
+
+    # First author full name.
+    if len(result.authors) > 0:
+        kv_pairs['rft.au'] = result.authors[0].encode('utf-8')
+
+    if result.type in ['Article', 'Review']:    # Article or review.
+        kv_pairs['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:journal'
+
+        kv_pairs['rft.atitle'] = result.title.encode('utf-8')
+
+        # Journal title.
+        if len(result.periodical_ids) > 0:
+            journal = Authority.objects.get(pk=result.periodical_ids[0])
+            kv_pairs['rft.jtitle'] = journal.name
+
+        if result.page_string:
+            kv_pairs['rft.pages'] = result.page_string
+
+        for field in ['volume', 'issue', 'pages']:
+            if getattr(result, field) is not None:
+                kv_pairs['rft.' + field] = getattr(result, field)
+    else:
+        kv_pairs['rft.title'] = result.title.encode('utf-8')
+
+    return urllib.urlencode(kv_pairs)
