@@ -1214,7 +1214,7 @@ def get_linkresolver_url(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    # user_ip = get_real_ip(request)
+    user_ip = get_real_ip(request)
     user_ip = "149.169.132.43"
     response = urlopen(worldcat_registry.format(ip=user_ip)).read()
 
@@ -1222,12 +1222,17 @@ def get_linkresolver_url(request, citation_id):
     resolver = root.find('.//' + worldcat_tag + 'resolver')
     coins = get_coins_from_citation(citation)
 
-    baseURL = resolver.find(worldcat_tag + 'baseURL').text.strip()
-    linkIcon = resolver.find(worldcat_tag + 'linkIcon').text.strip()
-    linkText = resolver.find(worldcat_tag + 'linkText').text.strip()
+    if resolver:
+        url = resolver.find(worldcat_tag + 'baseURL').text.strip() + '?' + coins
+        linkIcon = resolver.find(worldcat_tag + 'linkIcon').text.strip()
+        linkText = resolver.find(worldcat_tag + 'linkText').text.strip()
+    else:
+        url = ''
+        linkIcon = ''
+        linkText = ''
 
     data = {
-        'url': baseURL + '?' + coins,
+        'url': url,
         'icon': linkIcon,
         'text': linkText,
     }

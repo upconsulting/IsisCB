@@ -244,3 +244,13 @@ def get_current_sort_order_citation(sort_field):
     if '_score' in sort_field:
         return 'Relevance'
     return sort_field
+
+
+@register.filter
+def get_user_id(user):
+    """
+    JavaScript-friendly user-id.
+    """
+    if user.id:
+        return user.id
+    return 'null'

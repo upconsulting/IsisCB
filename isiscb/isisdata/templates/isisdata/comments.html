@@ -1,6 +1,7 @@
 {% load staticfiles %}
+{% load app_filters %}
 
-<script>var USER_ID = {{user.id}};</script>
+<script>var USER_ID = {{ user|get_user_id }};</script>
 <div class="row">
     <div style="height: 45px;">
         <div class="col-sm-2">

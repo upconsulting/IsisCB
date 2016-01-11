@@ -52,7 +52,7 @@ urlpatterns = [
         IsisSearchView(form_class=MyFacetedSearchForm, searchqueryset=sqs),
         name='haystack_search'),
     url(r'^(?i)unapi/+$', views.unapi_server_root, name='unapi'),
-    url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url),
+    url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
     url(r'^(?i)help', views.help, name='help'),
     url(r'^(?i)about', views.about, name='about'),
 ]
