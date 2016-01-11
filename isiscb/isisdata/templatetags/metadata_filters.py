@@ -1,5 +1,6 @@
 from django import template
 from isisdata.models import *
+
 from app_filters import *
 
 import urllib

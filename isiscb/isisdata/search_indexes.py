@@ -148,7 +148,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         return book.normalized_title
 
-
     def get_reviewed_book(self, obj):
         # if citation is a review build title from reviewed citation
         reviewed_books = CCRelation.objects.filter(subject_id=obj.id, type_controlled='RO')

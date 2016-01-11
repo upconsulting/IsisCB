@@ -3,7 +3,6 @@ import unidecode
 import re
 import bleach
 
-
 def strip_punctuation(s):
     """
     Removes all punctuation characters from a string.

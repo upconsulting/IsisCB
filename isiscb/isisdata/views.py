@@ -1,3 +1,4 @@
+from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
@@ -6,19 +7,13 @@ from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django import forms
 from django.db import connection
-from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
+from django.template import RequestContext, loader
 
 import uuid
-
-# Used by UserRegistrationView and UserRegistrationForm
-# from registration.forms import RegistrationForm
-# from registration.views import RegistrationView
-
-
 
 from haystack.views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
@@ -30,20 +25,17 @@ from rest_framework.reverse import reverse
 
 from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 
-from isisdata.models import *
-
-from django.template import RequestContext, loader
-from django.http import HttpResponse, HttpResponseRedirect
-from urllib import quote
+from urllib import quote, urlopen
 import codecs
-
 from collections import defaultdict
-
 from helpers.mods_xml import initial_response, generate_mods_xml
-
 import datetime
+from ipware.ip import get_real_ip
+import xml.etree.ElementTree as ET
 
+from isisdata.models import *
 from isisdata.forms import UserRegistrationForm
+from isisdata.templatetags.metadata_filters import get_coins_from_citation
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -873,7 +865,6 @@ def citation(request, citation_id):
         'search_count': search_count,
         'fromsearch': fromsearch,
         'last_query': last_query,
-
     })
     return HttpResponse(template.render(context))
 
@@ -1210,3 +1201,34 @@ def home(request):
     })
 
     return HttpResponse(template.render(context))
+
+
+def get_linkresolver_url(request, citation_id):
+    """
+    Use the WorldCat registry API to get the appropriate OpenURL resolver for
+    the user, based on their IP address.
+    """
+
+    worldcat_registry = "http://www.worldcat.org/registry/lookup?IP={ip}"
+    worldcat_tag = "{http://worldcatlibraries.org/registry/resolver}"
+
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    # user_ip = get_real_ip(request)
+    user_ip = "149.169.132.43"
+    response = urlopen(worldcat_registry.format(ip=user_ip)).read()
+
+    root = ET.fromstring(response)
+    resolver = root.find('.//' + worldcat_tag + 'resolver')
+    coins = get_coins_from_citation(citation)
+
+    baseURL = resolver.find(worldcat_tag + 'baseURL').text.strip()
+    linkIcon = resolver.find(worldcat_tag + 'linkIcon').text.strip()
+    linkText = resolver.find(worldcat_tag + 'linkText').text.strip()
+
+    data = {
+        'url': baseURL + '?' + coins,
+        'icon': linkIcon,
+        'text': linkText,
+    }
+    return JsonResponse(data)
