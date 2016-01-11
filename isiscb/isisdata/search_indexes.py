@@ -165,7 +165,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return book
 
     def prepare_publication_date(self, obj):
-        return [date.value_freeform for date in obj.attributes.filter(type_controlled__name='PublicationDate')]
+        queryset = obj.attributes.filter(type_controlled__name='PublicationDate')
+        return [date.value_freeform for date in queryset]
 
     def prepare_publication_date_for_sort(self, obj):
         if obj.publication_date:
