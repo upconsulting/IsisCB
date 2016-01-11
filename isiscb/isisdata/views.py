@@ -958,15 +958,12 @@ class IsisSearchView(FacetedSearchView):
 
         s = datetime.datetime.now()
         self.request = request
-        print 'request', datetime.datetime.now() - s
 
         s = datetime.datetime.now()
         self.form = self.build_form()
-        print 'form', datetime.datetime.now() - s
 
         s = datetime.datetime.now()
         self.query = self.get_query()
-        print 'query', datetime.datetime.now() - s
 
         # If the user is logged in, record the search in their history.
         s = datetime.datetime.now()
@@ -987,20 +984,17 @@ class IsisSearchView(FacetedSearchView):
             )
             searchquery.save()
             request.session['last_query'] = request.get_full_path()
-        print 'history', datetime.datetime.now() - s
+
         cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
         s = datetime.datetime.now()
         self.results = cache.get(cache_key)
-        print 'getcache', datetime.datetime.now() - s
         if not self.results:
             s = datetime.datetime.now()
             self.results = self.get_results()
-            print 'get_results', datetime.datetime.now() - s
 
             s = datetime.datetime.now()
-            cache.set(cache_key, self.results, 6000)
-            print 'set_cache', datetime.datetime.now() - s
+            cache.set(cache_key, self.results, 3600)
 
         if parameters:  # Store results in the session cache.
             s = datetime.datetime.now()
@@ -1008,10 +1002,9 @@ class IsisSearchView(FacetedSearchView):
             request.session['search_key'] =  search_key
             request.session['page_citation'] = int(page_citation)
             request.session['page_authority'] = int(page_authority)
-            cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True))
-            cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True))
+            cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True), 3600)
+            cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True), 3600)
 
-            print 'session cache', datetime.datetime.now() - s
 
         return self.create_response()
 
@@ -1166,7 +1159,6 @@ class UserRegistrationView(FormView):
             if form.is_valid():
                 return self.form_valid(form)
             else:
-                print form.errors
                 return self.form_invalid(form)
 
     def get_success_url(self, next):
