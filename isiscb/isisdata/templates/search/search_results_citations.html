@@ -61,6 +61,21 @@
 
             <!-- http://ocoins.info/ -->
             <span class="Z3988" title="{{ result|get_coins_from_result }}"></span>
+            <!-- This tag displays an icon/link that points to the users' institution's
+                 link resolver. -->
+            <span id="linkresolver_{{ result.id|get_pk }}">
+                <script>
+                $.ajax("{% url 'linkresolver' citation_id=result.id|get_pk %}",
+                    {
+                    success: function(result) {
+                            console.log(result);
+                            if (result.url.length > 0) {
+                                $('#linkresolver_{{ result.id|get_pk }}').append('<a href="'+ result.url +'"><img src="'+ result.icon +'" alt="'+ result.text +'"></a>');
+                            }
+                        }
+                    });
+                </script>
+            </span>
 
         </p>
     {% empty %}

@@ -1215,7 +1215,7 @@ def get_linkresolver_url(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
     user_ip = get_real_ip(request)
-    user_ip = "149.169.132.43"
+    # user_ip = "149.169.132.43"
     response = urlopen(worldcat_registry.format(ip=user_ip)).read()
 
     root = ET.fromstring(response)
