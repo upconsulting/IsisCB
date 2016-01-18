@@ -14,6 +14,7 @@ from django.views.generic.edit import FormView
 from django.template import RequestContext, loader
 
 import uuid
+import base64, zlib
 
 from haystack.views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
@@ -671,8 +672,13 @@ def authority(request, authority_id):
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
     # Provide progression through search results, if present.
+    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
+    query_string = request.GET.get('query_string', None)
     fromsearch = request.GET.get('fromsearch', False)
-    search_key = request.session.get('search_key', None)
+    if query_string:
+        search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
+    else:
+        search_key = None
     search_results = cache.get('search_results_authority_' + str(search_key))
 
     page_authority = request.session.get('page_authority', None)
@@ -683,15 +689,15 @@ def authority(request, authority_id):
 
         try:
             search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
-        except IndexError:
+        except IndexError, ValueError:
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError:
+        except IndexError, ValueError:
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError:
+        except IndexError, ValueError:
             search_previous = None
         if search_index:
             search_current = search_index + (20* (page_authority - 1))
@@ -705,7 +711,6 @@ def authority(request, authority_id):
         search_count = None
 
 
-    last_query = request.session.get('last_query', None)
 
     context = RequestContext(request, {
         'authority_id': authority_id,
@@ -748,6 +753,7 @@ def authority(request, authority_id):
         'search_count': search_count,
         'fromsearch': fromsearch,
         'last_query': last_query,
+        'query_string': query_string,
     })
     return HttpResponse(template.render(context))
 
@@ -801,7 +807,14 @@ def citation(request, citation_id):
 
     # Provide progression through search results, if present.
     fromsearch = request.GET.get('fromsearch', False)
-    search_key = request.session.get('search_key', None)
+    #search_key = request.session.get('search_key', None)
+    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
+    query_string = request.GET.get('query_string', None)
+    if query_string:
+        search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
+    else:
+        search_key = None
+
     search_results = cache.get('search_results_citation_' + str(search_key))
     page_citation = request.session.get('page_citation', None)
 
@@ -810,16 +823,17 @@ def citation(request, citation_id):
         search_results_page = search_results[(page_citation - 1)*20:page_citation*20]
 
         try:
+            print search_results_page
             search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
-        except IndexError:
+        except IndexError, ValueError:
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError:
+        except IndexError, ValueError:
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError:
+        except IndexError, ValueError:
             search_previous = None
 
         if search_index:
@@ -833,7 +847,7 @@ def citation(request, citation_id):
         search_current = None
         search_count = 0
 
-    last_query = request.session.get('last_query', None)
+    #last_query = request.session.get('last_query', None)
 
     context = RequestContext(request, {
         'citation_id': citation_id,
@@ -865,6 +879,7 @@ def citation(request, citation_id):
         'search_count': search_count,
         'fromsearch': fromsearch,
         'last_query': last_query,
+        'query_string': query_string,
     })
     return HttpResponse(template.render(context))
 
@@ -998,7 +1013,9 @@ class IsisSearchView(FacetedSearchView):
 
         if parameters:  # Store results in the session cache.
             s = datetime.datetime.now()
-            search_key = str(uuid.uuid4())
+            search_key = base64.b64encode(parameters) #str(uuid.uuid4())
+            print "---------> search key "
+            print search_key
             request.session['search_key'] =  search_key
             request.session['page_citation'] = int(page_citation)
             request.session['page_authority'] = int(page_authority)

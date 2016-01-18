@@ -1,6 +1,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load citation_filters %}
+{% load search_filters %}
 
 {% if query %}
 <div class="row">
@@ -46,7 +47,7 @@
             {% if result.publication_date.0 %}
               ({{ result.publication_date.0 }})
             {% endif %}
-            <a href="{% url 'citation' result.id|get_pk %}?fromsearch=true">{{ result.title|bleach_safe }}.</a>
+            <a href="{% url 'citation' result.id|get_pk %}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
             <!-- book title and page numbers -->
             {% if result.book_title %}
               In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
