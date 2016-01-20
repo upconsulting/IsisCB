@@ -1,6 +1,7 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
 {% load staticfiles %}
+{% load search_filters %}
 
 {% block extra_head %}
 <script>
@@ -48,7 +49,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <div class="row">
               <div class="col-xs-3 text-center">
                   {% if search_current >= 2 and search_previous %}
-                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true" aria-label="Previous" class="btn btn-xs">
+                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
                       <span aria-hidden="true" class="text-small">&laquo;Previous</span>
                   </a>
                   {% endif %}
@@ -58,7 +59,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               </div>
               <div class="col-xs-3 text-center">
                   {% if search_index < search_count and search_next %}
-                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true" aria-label="Next" class="btn btn-xs">
+                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
                       <span aria-hidden="true" class="text-small">Next&raquo;</span>
                   </a>
                   {% endif %}
