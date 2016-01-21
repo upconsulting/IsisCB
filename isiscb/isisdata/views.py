@@ -1006,8 +1006,6 @@ class IsisSearchView(FacetedSearchView):
         self.results = cache.get(cache_key)
         if not self.results:
             s = datetime.datetime.now()
-            self.form = self.build_form()
-            self.query = self.get_query()
             self.results = self.get_results()
 
             s = datetime.datetime.now()
