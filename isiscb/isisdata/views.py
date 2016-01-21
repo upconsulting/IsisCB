@@ -1006,6 +1006,8 @@ class IsisSearchView(FacetedSearchView):
         self.results = cache.get(cache_key)
         if not self.results:
             s = datetime.datetime.now()
+            self.form = self.build_form()
+            self.query = self.get_query()
             self.results = self.get_results()
 
             s = datetime.datetime.now()
@@ -1014,8 +1016,6 @@ class IsisSearchView(FacetedSearchView):
         if parameters:  # Store results in the session cache.
             s = datetime.datetime.now()
             search_key = base64.b64encode(parameters) #str(uuid.uuid4())
-            print "---------> search key "
-            print search_key
             request.session['search_key'] =  search_key
             request.session['page_citation'] = int(page_citation)
             request.session['page_authority'] = int(page_authority)
