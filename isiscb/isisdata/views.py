@@ -689,15 +689,15 @@ def authority(request, authority_id):
 
         try:
             search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_previous = None
         if search_index:
             search_current = search_index + (20* (page_authority - 1))
@@ -825,15 +825,15 @@ def citation(request, citation_id):
         try:
             print search_results_page
             search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_previous = None
 
         if search_index:
@@ -1006,6 +1006,8 @@ class IsisSearchView(FacetedSearchView):
         self.results = cache.get(cache_key)
         if not self.results:
             s = datetime.datetime.now()
+            self.form = self.build_form()
+            self.query = self.get_query()
             self.results = self.get_results()
 
             s = datetime.datetime.now()
@@ -1014,8 +1016,6 @@ class IsisSearchView(FacetedSearchView):
         if parameters:  # Store results in the session cache.
             s = datetime.datetime.now()
             search_key = base64.b64encode(parameters) #str(uuid.uuid4())
-            print "---------> search key "
-            print search_key
             request.session['search_key'] =  search_key
             request.session['page_citation'] = int(page_citation)
             request.session['page_authority'] = int(page_authority)
