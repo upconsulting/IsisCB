@@ -132,10 +132,14 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
     def search(self):
         if not self.is_valid():
-            return self.no_query_found()
+            #return self.no_query_found()
+            return {'authority' : self.no_query_found(),
+                    'citation': self.no_query_found()}
 
         if not self.cleaned_data.get('q'):
-            return self.no_query_found()
+            #return self.no_query_found()
+            return {'authority' : self.no_query_found(),
+                    'citation': self.no_query_found()}
 
         #sqs = super(MyFacetedSearchForm, self).search()
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
