@@ -36,6 +36,11 @@ $(document).ready(function() {
                 </lu>
             </ul>
 
+            <div>
+              Errors:
+              {{ form.errors }}
+              {{ form.non_field_errors }}
+            </div>
 
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="citations">
