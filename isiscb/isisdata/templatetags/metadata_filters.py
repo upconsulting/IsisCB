@@ -179,7 +179,8 @@ def get_coins_from_citation(citation):
         kv_pairs['rft.title'] = bleach_safe(get_title(citation)).encode('utf-8')
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
-    kv_pairs['rft.au'] = authors[0].authority.name.encode('utf-8')
+    if authors.count() > 0:
+        kv_pairs['rft.au'] = authors[0].authority.name.encode('utf-8')
     kv_pairs['rft.date'] = get_pub_year(citation)
 
     if citation.part_details:
