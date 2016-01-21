@@ -689,15 +689,15 @@ def authority(request, authority_id):
 
         try:
             search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_previous = None
         if search_index:
             search_current = search_index + (20* (page_authority - 1))
@@ -825,15 +825,15 @@ def citation(request, citation_id):
         try:
             print search_results_page
             search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             search_previous = None
 
         if search_index:
