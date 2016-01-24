@@ -310,6 +310,7 @@ class CuratedMixin(models.Model):
     modified_on = models.DateTimeField(auto_now=True, blank=True, null=True,
                                        help_text=help_text("""
     Date and time at which this object was last updated."""))
+    
     modified_by = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
     The most recent user to modify this object."""))

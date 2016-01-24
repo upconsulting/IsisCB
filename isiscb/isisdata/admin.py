@@ -305,9 +305,11 @@ class CitationAdmin(SimpleHistoryAdmin,
                     LinkedDataInlineMixin,
                     UberInlineMixin):
 
-    list_display = ('id', 'title', 'modified_on_fm', 'modified_by_fm')
+    list_display = ('id', 'title', 'modified_on', 'modified_by',)
     list_filter = ('type_controlled', 'status_of_record')
     inlines = (ACRelationInline, )
+    search_fields = ('title', )
+    readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
 
     fieldsets = [
         (None, {
@@ -330,14 +332,12 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history',
-                       'modified_by_fm',
-                       'modified_on_fm'),
-            'classes': ('extrapretty', 'collapse'),
+                       'record_history'),
+           'classes': ('extrapretty', 'collapse'),
         }),
     ]
 
-    readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
+
 
     form = CitationForm
 
@@ -354,6 +354,7 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                      UberInlineMixin):
     list_display = ('name', 'type_controlled', 'id',)
     list_filter = ('type_controlled', 'record_status')
+    search_fields = ('name', )
 
     fieldsets = [
         (None, {
@@ -602,6 +603,42 @@ class AttributeTypeAdmin(SimpleHistoryAdmin):
     list_display_links = ('id', 'name')
     inlines = []
 
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+
+class PartDetailsAdmin(SimpleHistoryAdmin):
+    exclude = []
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+
+class SearchQueryAdmin(SimpleHistoryAdmin):
+    exclude = []
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
+
+class LanguageAdmin(SimpleHistoryAdmin):
+    exclude = []
+
+    def get_model_perms(self, request):
+        """
+        Return empty perms dict thus hiding the model from admin index.
+        """
+        return {}
+
 
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'snippet', 'created_by', 'subject', 'created_on')
@@ -617,10 +654,10 @@ admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
-admin.site.register(PartDetails, SimpleHistoryAdmin)
+admin.site.register(PartDetails, PartDetailsAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
 admin.site.register(Comment, CommentAdmin)
-admin.site.register(SearchQuery)
-admin.site.register(Language)
+admin.site.register(SearchQuery, SearchQueryAdmin)
+admin.site.register(Language, LanguageAdmin)
 # Register your models here.
