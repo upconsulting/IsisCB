@@ -31,7 +31,17 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
 
     class Meta:
         model = ACRelation
-        fields = ('type_controlled', 'authority', )
+        fields = (
+            'authority',
+            'name_for_display_in_citation',
+            'name_as_entered',
+            'type_controlled',
+            'type_broad_controlled',
+            'type_free',
+            'data_display_order',
+
+
+            )
 
 
 
@@ -42,7 +52,7 @@ class CCRelationInline(admin.TabularInline):
     extra = 1
 
 
-class ACRelationInline(admin.TabularInline):
+class ACRelationInline(admin.StackedInline):
     fk_name = 'citation'
     model = ACRelation
     form = ACRelationInlineForm
@@ -301,17 +311,20 @@ class CitationAdmin(SimpleHistoryAdmin,
 
     fieldsets = [
         (None, {
-            'fields': ('uri',
-                       'id',
+            'fields': (#'uri',
+                       #'id',
                        'title',
-                       'description',
+                       'abstract',
                        'language',
-                       'type_controlled')
+                       'type_controlled'),
+            'classes': ('extrapretty',),
+
         }),
         ('Additional Details', {
-            'fields': ('abstract',
+            'fields': ('description',
                        'edition_details',
-                       'physical_details')
+                       'physical_details'),
+            'classes': ('extrapretty', 'collapse'),
         }),
         ('Curation', {
             'fields': ('record_action',
@@ -319,7 +332,8 @@ class CitationAdmin(SimpleHistoryAdmin,
                        'administrator_notes',
                        'record_history',
                        'modified_by_fm',
-                       'modified_on_fm')
+                       'modified_on_fm'),
+            'classes': ('extrapretty', 'collapse'),
         }),
     ]
 
@@ -343,16 +357,19 @@ class AuthorityAdmin(SimpleHistoryAdmin,
 
     fieldsets = [
         (None, {
-            'fields': ('uri',
-                       'id',
+            'fields': (#'uri',
+                       #'id',
                        'name',
                        'description',
-                       'type_controlled')
+                       'type_controlled',
+                       'public'),
+            'classes': ('extrapretty',),
         }),
         ('Classification', {
             'fields': ('classification_system',
                        'classification_code',
-                       'classification_hierarchy')
+                       'classification_hierarchy'),
+            'classes': ('extrapretty', 'collapse'),
         }),
         ('Curation', {
             'fields': ('record_status',
@@ -360,7 +377,8 @@ class AuthorityAdmin(SimpleHistoryAdmin,
                        'administrator_notes',
                        'record_history',
                        'modified_by_fm',
-                       'modified_on_fm')
+                       'modified_on_fm'),
+            'classes': ('extrapretty', 'collapse'),
         }),
     ]
     readonly_fields = ('uri',
