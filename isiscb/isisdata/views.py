@@ -24,6 +24,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+import rest_framework_filters as filters
+
 from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 
 from urllib import quote, urlopen
@@ -276,7 +278,7 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Authority
-        fields = ('uri', 'url', 'name',
+        fields = ('id', 'uri', 'url', 'name',
                   'description',
                   'type_controlled',
                   'classification_system',
@@ -336,11 +338,26 @@ class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
         model = PartDetails
 
 
+class AuthorityFilterSet(filters.FilterSet):
+    name = filters.AllLookupsFilter(name='name')
+    class Meta:
+        model = Authority
+        fields = ['name', 'type_controlled']
+
+
 class AuthorityViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
+    # filter_backends = (filters.backends.DjangoFilterBackend,)
+    filter_class = AuthorityFilterSet
+    filter_fields = ('name', )
+    # def get_queryset(self):
+    #     queryset = super(AuthorityViewSet, self).get_queryset()
+    #     print self.request.query_params
+    #     return queryset
+
 
 
 class UserViewSet(mixins.ListModelMixin,

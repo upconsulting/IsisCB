@@ -20,18 +20,80 @@ class CCRelationForm(forms.ModelForm):
         fields = ('object', )
 
 
-class ACRelationForm(autocomplete_light.ModelForm):
+class AutocompleteWidget(widgets.TextInput):
+    def __init__(self, *args, **kwargs):
+        self.datatarget = kwargs.get('datatarget', None)
+        if self.datatarget:
+            del kwargs['datatarget']
+        return super(AutocompleteWidget, self).__init__(*args, **kwargs)
+
+    def _format_value(self, value):
+        if self.is_localized:
+            return formats.localize_input(value)
+        return value
+
+
+
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
+        if value != '':
+        # Only add the 'value' attribute if a value is non-empty.
+            final_attrs['value'] = widgets.force_text(self._format_value(value))
+
+        if 'class' not in final_attrs:
+            final_attrs['class'] = ''
+        final_attrs['class'] += ' autocomplete form-control'
+
+        if self.datatarget:
+            final_attrs['datatarget'] = self.datatarget
+
+        return widgets.format_html('<div class="input-group" id="'+ final_attrs['id'] +'_container"><input{} /><span class="autocomplete-status input-group-addon"></span></div>', widgets.flatatt(final_attrs))
+
+
+class AutocompleteField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.get('model', None)
+        if self.model:
+            del kwargs['model']
+
+        super(AutocompleteField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if not self.model:
+            return None
+        if value in self.empty_values:
+            return None
+        try:
+            value = self.model.objects.get(**{'pk': value})
+        except (ValueError, TypeError):
+            raise ValidationError(self.error_messages['invalid_choice'], code='invalid_choice')
+        return value
+
+
+class ACRelationForm(forms.ModelForm):
     class Meta:
         model = ACRelation
         fields = '__all__'
 
+    class Media:
+        js = ('isisdata/js/autocomplete.js',)
+        css = {
+            'all': ['isisdata/css/autocomplete.css']
+        }
 
-class ACRelationInlineForm(autocomplete_light.ModelForm):
+
+class ACRelationInlineForm(forms.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    authority = AutocompleteField(widget=forms.HiddenInput(), model=Authority)
+    authority_name = forms.CharField(widget=AutocompleteWidget(attrs={'class': 'autocomplete'}, datatarget='authority'))
 
     class Meta:
         model = ACRelation
         fields = (
+            'authority_name',
             'authority',
             'name_for_display_in_citation',
             'name_as_entered',
@@ -39,9 +101,12 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
             'type_broad_controlled',
             'type_free',
             'data_display_order',
-
-
             )
+
+    def __init__(self, *args, **kwargs):
+        super(ACRelationInlineForm, self).__init__(*args, **kwargs)
+        print self.fields['authority'].__dict__
+        # self.fields['authority_name'] =
 
 
 
@@ -294,16 +359,24 @@ class UberInlineMixin(admin.ModelAdmin):
                 formset.save()
 
 
-class CitationForm(autocomplete_light.ModelForm):
+class CitationForm(forms.ModelForm):
     class Meta:
         model = Citation
         fields = '__all__'
+
+    class Media:
+        js = ('isisdata/js/jquery-ui.min.js', 'isisdata/js/autocomplete.js',)
+        css = {
+            'all': ['isisdata/css/autocomplete.css']
+        }
 
 
 class CitationAdmin(SimpleHistoryAdmin,
                     AttributeInlineMixin,
                     LinkedDataInlineMixin,
                     UberInlineMixin):
+
+
 
     list_display = ('id', 'title', 'modified_on', 'modified_by',)
     list_filter = ('type_controlled', 'status_of_record')

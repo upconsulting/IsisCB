@@ -1,6 +1,7 @@
 from haystack.forms import FacetedSearchForm
 from django import forms
 from django.db import models
+from django.apps import apps
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,6 +24,7 @@ def model_choices(using=DEFAULT_ALIAS):
     choices = [(get_model_ct(m), capfirst(smart_text(m._meta.verbose_name_plural)))
                for m in connections[using].get_unified_index().get_indexed_models()]
     return sorted(choices, key=lambda x: x[1])
+
 
 class MyFacetedSearchForm(FacetedSearchForm):
     def __init__(self, *args, **kwargs):
@@ -54,7 +56,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
         search_models = []
 
         if self.is_valid():
-            search_models.append(models.get_model(*'isisdata.authority'.split('.')))
+            search_models.append(apps.get_model(*'isisdata.authority'.split('.')))
+            # search_models.append(models.get_model(*'isisdata.authority'.split('.')))
 
         return search_models
 
@@ -63,7 +66,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         search_models = []
 
         if self.is_valid():
-            search_models.append(models.get_model(*'isisdata.citation'.split('.')))
+            search_models.append(apps.get_model(*'isisdata.citation'.split('.')))
 
         return search_models
 
