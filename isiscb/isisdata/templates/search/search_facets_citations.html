@@ -63,7 +63,7 @@
                 {# Provide only the top 7 authors #}
                 {% for author in facets_citation.fields.authors|slice:":7" %}
                 {% if "citation_authors_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_authors_exact %}
-                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0 }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> <!--<i class="glyphicon glyphicon-circle-arrow-right"></i>--></a></li>
+                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0 }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> <!--<i class="glyphicon glyphicon-circle-arrow-right"></i>--></a></li>
                 {% endif %}
                 {% endfor %}
               </ul>
