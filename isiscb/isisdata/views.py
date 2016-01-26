@@ -680,6 +680,7 @@ def authority(request, authority_id):
     else:
         search_key = None
 
+    # This is the database cache.
     user_cache = cache.get_cache('search_results_cache')
     search_results = user_cache.get('search_results_authority_' + str(search_key))
 
@@ -689,7 +690,7 @@ def authority(request, authority_id):
         request.session.modified = True
 
     session_id = request.session.session_key
-    page_authority = user_cache.get(session_id + '_page_authority', None)#request.session.get('page_authority', None)
+    page_authority = user_cache.get(session_id + '_page_authority', None)
 
     if search_results and fromsearch and page_authority:
         search_count = search_results.count()
@@ -720,6 +721,7 @@ def authority(request, authority_id):
             if search_index - 2 == -1:
                 search_previous = prev_search_result
 
+        # !! Why are we catching all of these errors?
         except (IndexError, ValueError, AssertionError, TypeError):
             search_previous = None
         if search_index:
@@ -732,7 +734,6 @@ def authority(request, authority_id):
         search_previous = None
         search_current = None
         search_count = None
-
 
 
     context = RequestContext(request, {
@@ -1017,18 +1018,13 @@ class IsisSearchView(FacetedSearchView):
         page_citation = request.GET.get('page_citation', 1)
         page_authority = request.GET.get('page_authority', 1)
 
-        s = datetime.datetime.now()
         self.request = request
-
-        s = datetime.datetime.now()
         self.form = self.build_form()
-
-        s = datetime.datetime.now()
         self.query = self.get_query()
 
-        # If the user is logged in, record the search in their history.
-        s = datetime.datetime.now()
+        # !! Why are we using strings rather than bools?
         log = request.GET.get('log', 'True') != 'False'
+
         parameters = request.GET.get('q', None)
         search_models = request.GET.get('models', None)
         selected_facets = request.GET.get('selected_facets', None)
@@ -1036,6 +1032,9 @@ class IsisSearchView(FacetedSearchView):
         sort_order_citation = request.GET.get('sort_order_dir_citation', None)
         sort_field_authority = request.GET.get('sort_order_authority', None)
         sort_order_authority = request.GET.get('sort_order_dir_authority', None)
+
+        # If the user is logged in, attempt to save the search in their
+        #  search history.
         if log and parameters and request.user.id > 0:
             searchquery = SearchQuery(
                 user = request.user._wrapped,
@@ -1054,20 +1053,23 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_last_query', request.get_full_path())
             #request.session['last_query'] = request.get_full_path()
 
+        # Used to identify the current search for retrieval from the cache.
         cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
+        # 'search_results_cache' is the database cache
+        #  (see production_settings.py).
         user_cache = cache.get_cache('search_results_cache')
-        s = datetime.datetime.now()
         self.results = user_cache.get(cache_key)
-        if not self.results:
-            s = datetime.datetime.now()
-            self.results = self.get_results()
 
-            s = datetime.datetime.now()
+        if not self.results:
+            # Perform the search, and store the results in the cache.
+            self.results = self.get_results()
             user_cache.set(cache_key, self.results, 3600)
 
+        # This code sets up cached data to support the search result progression
+        #  feature in the citation and authority detail views. It is independent
+        #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            s = datetime.datetime.now()
             search_key = base64.b64encode(parameters)
             # make sure we have a session key
             if hasattr(request, 'session') and not request.session.session_key:
@@ -1081,7 +1083,6 @@ class IsisSearchView(FacetedSearchView):
 
             user_cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True), 3600)
-
 
         return self.create_response()
 

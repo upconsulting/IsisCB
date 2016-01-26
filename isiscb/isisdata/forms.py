@@ -24,6 +24,7 @@ def model_choices(using=DEFAULT_ALIAS):
                for m in connections[using].get_unified_index().get_indexed_models()]
     return sorted(choices, key=lambda x: x[1])
 
+
 class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
