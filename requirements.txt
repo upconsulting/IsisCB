@@ -32,3 +32,4 @@ django-cors-headers
 unidecode
 django-filter
 django-ipware
+django-rest-framework-filters
