@@ -1119,10 +1119,7 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
 
         context = self.get_context_data(**{
-            self.form_name: form,
-            'query': None,
-            # 'query': form.cleaned_data.get(self.search_field),
-            'object_list': self.queryset
+            # self.form_name: form,
         })
         return self.render_to_response(context)
         # return self.create_response()
