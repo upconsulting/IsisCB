@@ -44,7 +44,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
   <div class="main col-sm-5 col-md-7">
       <!-- Progress through search results, if arriving from search view. -->
-      {% if search_results|length > 0 and fromsearch and search_index %}
+      {% if search_results|length > 0 and fromsearch and search_current %}
       <div class="alert alert-warning">
           <div class="row">
               <div class="col-xs-3 text-center">
