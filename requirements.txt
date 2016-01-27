@@ -32,4 +32,3 @@ django-cors-headers
 unidecode
 django-filter
 django-ipware
-Status API Training Shop Blog About Pricing
