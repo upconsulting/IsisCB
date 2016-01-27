@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static "isisdata/bootstrap-3.3.5/css/bootstrap.min.css" %}" type="text/css" />
 <link rel="stylesheet" href="{% static "isisdata/bootstrap-social-4.10.1/bootstrap-social.css" %}" type="text/css" />
 
+
 <script src="{% static "isisdata/js/jquery-1.11.3.min.js" %}" type="text/javascript"></script>
 <script src="{% static "isisdata/bootstrap-3.3.5/js/bootstrap.min.js" %}" type="text/javascript"></script>
 <!-- <script src="{% static "isisdata/js/ui-bootstrap-tpls-0.13.0.min.js" %}"></script> -->
@@ -16,6 +17,8 @@
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
 {% block extrahead %}{% endblock %}
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+
+<link rel="stylesheet" href="{% static "isisdata/css/admin.css" %}" type="text/css" />
 </head>
 {% load i18n %}
 

@@ -310,7 +310,7 @@ class CuratedMixin(models.Model):
     modified_on = models.DateTimeField(auto_now=True, blank=True, null=True,
                                        help_text=help_text("""
     Date and time at which this object was last updated."""))
-    
+
     modified_by = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
     The most recent user to modify this object."""))
@@ -594,17 +594,23 @@ class Citation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='citations',
-                                 content_type_field='source_content_type',
-                                 object_id_field="source_instance_id")
+    attributes = GenericRelation(
+        'Attribute',
+        related_query_name='citations',
+        content_type_field='source_content_type',
+        object_id_field="source_instance_id")
 
-    linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='citations',
-                                         content_type_field='subject_content_type',
-                                         object_id_field="subject_instance_id")
+    linkeddata_entries = GenericRelation(
+        'LinkedData',
+        related_query_name='citations',
+        content_type_field='subject_content_type',
+        object_id_field="subject_instance_id")
 
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='citations')
+    tracking_entries = GenericRelation(
+        'Tracking',
+        related_query_name='citations',
+        content_type_field='subject_content_type',
+        object_id_field='subject_instance_id')
 
     def __unicode__(self):
         return strip_tags(self.title)
@@ -758,16 +764,22 @@ class Authority(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='authorities',
-                                 content_type_field='source_content_type',
-                                 object_id_field="source_instance_id")
-    linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='authorities',
-                                         content_type_field='subject_content_type',
-                                         object_id_field='subject_instance_id')
+    attributes = GenericRelation(
+        'Attribute',
+        related_query_name='authorities',
+        content_type_field='source_content_type',
+        object_id_field="source_instance_id")
+    linkeddata_entries = GenericRelation(
+        'LinkedData',
+        related_query_name='authorities',
+        content_type_field='subject_content_type',
+        object_id_field='subject_instance_id')
 
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='authorities')
+    tracking_entries = GenericRelation(
+        'Tracking',
+        related_query_name='authorities',
+        content_type_field='subject_content_type',
+        object_id_field='subject_instance_id')
 
     def __unicode__(self):
         return self.name
@@ -864,11 +876,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
-                                       verbose_name='type',
+                                       verbose_name='relationship type',
                                        help_text=help_text("""
     Used to specify the nature of the relationship between authority (as the
-    subject) and the citation (as the object) more specifically than
-    Type.Broad.controlled.
+    subject) and the citation (as the object).
     """))
 
     PERSONAL_RESPONS = 'PR'
@@ -884,19 +895,20 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
                                              blank=True,
-                                             verbose_name='type (broad)',
+                                             verbose_name='relationship type (broad)',
                                              help_text=help_text("""
     Used to specify the nature of the relationship between authority (as the
-    subject) and the citation (as the object) more broadly than
-    Type.controlled.
+    subject) and the citation (as the object) more broadly than the relationship
+    type.
     """))
 
     type_free = models.CharField(max_length=255,
                                  blank=True,
-                                 verbose_name="type (free text)",
+                                 verbose_name="relationship type (free-text)",
                                  help_text="""
-    Free text description of the role that the authority plays in the
-    citation (e.g. 'introduction by', 'dissertation supervisor', etc)""")
+    Free-text description of the role that the authority plays in the
+    citation (e.g. 'introduction by', 'dissertation supervisor', etc).
+    """)
 
     name_for_display_in_citation = models.CharField(max_length=255,
                                                     help_text=help_text("""
@@ -912,7 +924,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     """))
 
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
-    Position at which the authority should be displayed.
+    Position at which the authority should be displayed in the citation detail
+    view. Whole numbers or decimals can be used.
     """))
 
     # currently not used
@@ -935,16 +948,23 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
     #  target models via those models' GenericForeignKey relations.
-    attributes = GenericRelation('Attribute', related_query_name='ac_relations',
-                                 content_type_field='source_content_type',
-                                 object_id_field="source_instance_id")
-    linkeddata_entries = GenericRelation('LinkedData',
-                                         related_query_name='ac_relations',
-                                         content_type_field='subject_content_type',
-                                         object_id_field='subject_instance_id')
+    attributes = GenericRelation(
+        'Attribute',
+        related_query_name='ac_relations',
+        content_type_field='source_content_type',
+        object_id_field="source_instance_id")
 
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='ac_relations')
+    linkeddata_entries = GenericRelation(
+        'LinkedData',
+        related_query_name='ac_relations',
+        content_type_field='subject_content_type',
+        object_id_field='subject_instance_id')
+
+    tracking_entries = GenericRelation(
+        'Tracking',
+        related_query_name='ac_relations',
+        content_type_field='subject_content_type',
+        object_id_field='subject_instance_id')
 
     def _render_type_controlled(self):
         try:
@@ -1015,7 +1035,9 @@ class AARelation(ReferencedEntity, CuratedMixin):
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='aa_relations')
+                                       related_query_name='aa_relations',
+                                       content_type_field='subject_content_type',
+                                       object_id_field='subject_instance_id')
 
     def _render_type_controlled(self):
         try:
@@ -1088,7 +1110,9 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
     tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='cc_relations')
+                                       related_query_name='cc_relations',
+                                       content_type_field='subject_content_type',
+                                       object_id_field='subject_instance_id')
 
     def _render_type_controlled(self):
         try:
@@ -1108,14 +1132,18 @@ class LinkedDataType(models.Model):
         verbose_name_plural = 'linked data types'
 
     name = models.CharField(max_length=255, unique=True)
-    pattern = models.CharField(max_length=255, blank=True)
+    pattern = models.CharField(max_length=255, blank=True,
+                               help_text=help_text("""
+    Regular expression used to validate :class:`.LinkedData` values.
+    """))
 
     def is_valid(self, value):
-        if self.pattern is None or self.pattern == '':
+        if not self.pattern:
             return
 
         if re.match(self.pattern, value) is None:
             message = 'Does not match pattern for {0}'.format(self.name)
+            print 'asdf'
             raise ValidationError(message)
 
     def __unicode__(self):

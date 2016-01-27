@@ -59,9 +59,9 @@ var bindAutocomplete = function(selector) {
             });
 }
 
-
-$('body').ready(function() {
-    $('.autocomplete').each(function() {
-        bindAutocomplete('#' + this.id);
-    });
-})
+//
+// $('body').ready(function() {
+//     $('.autocomplete').each(function() {
+//         bindAutocomplete('#' + this.id);
+//     });
+// })

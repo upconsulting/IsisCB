@@ -32,8 +32,6 @@ class AutocompleteWidget(widgets.TextInput):
             return formats.localize_input(value)
         return value
 
-
-
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
@@ -77,23 +75,23 @@ class ACRelationForm(forms.ModelForm):
         model = ACRelation
         fields = '__all__'
 
-    class Media:
-        js = ('isisdata/js/autocomplete.js',)
-        css = {
-            'all': ['isisdata/css/autocomplete.css']
-        }
+    # class Media:
+        # js = ('isisdata/js/autocomplete.js',)
+        # css = {
+        #     # 'all': ['isisdata/css/autocomplete.css']
+        # }
 
 
-class ACRelationInlineForm(forms.ModelForm):
+class ACRelationInlineForm(autocomplete_light.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    authority = AutocompleteField(widget=forms.HiddenInput(), model=Authority)
-    authority_name = forms.CharField(widget=AutocompleteWidget(attrs={'class': 'autocomplete'}, datatarget='authority'))
+    # authority = AutocompleteField(widget=forms.HiddenInput(), model=Authority)
+    # authority_name = forms.CharField(widget=AutocompleteWidget(attrs={'class': 'autocomplete'}, datatarget='authority'))
 
     class Meta:
         model = ACRelation
         fields = (
-            'authority_name',
+            # 'authority_name',
             'authority',
             'name_for_display_in_citation',
             'name_as_entered',
@@ -105,9 +103,16 @@ class ACRelationInlineForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ACRelationInlineForm, self).__init__(*args, **kwargs)
-        print self.fields['authority'].__dict__
-        # self.fields['authority_name'] =
 
+        # The value of `authority` from the ACRelation is represented with a
+        #  hidden field and a separate field, ``authority_name`` is used for
+        #  collecting user input and driving the autocomplete. When displaying
+        #  an inline for an existing ACRelation, we need to automatically
+        #  populate the ``authority`` field on the form.
+        # if 'authority' in self.initial:
+        #     authority_pk = self.initial['authority']
+        #     authority = Authority.objects.get(pk=authority_pk)
+        #     self.fields['authority_name'].initial = authority.name
 
 
 class CCRelationInline(admin.TabularInline):
@@ -121,11 +126,15 @@ class ACRelationInline(admin.StackedInline):
     fk_name = 'citation'
     model = ACRelation
     form = ACRelationInlineForm
-    extra = 1
+    extra = 0
 
 
 
 class ValueWidget(widgets.Widget):
+    """
+    Supports dynamically setting input widget based on the values of other
+    fields.
+    """
     def __init__(self, attrs=None):
         super(ValueWidget, self).__init__(attrs)
 
@@ -155,6 +164,9 @@ class ValueField(forms.Field):
 class AttributeInlineForm(forms.ModelForm):
     class Media:
         model = Attribute
+
+        # widgetmap.js sets the widget for ``value`` based on the user's
+        #  selection in the ``type_controlled`` field.
         js = ('isisdata/js/widgetmap.js', )
 
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
@@ -162,7 +174,8 @@ class AttributeInlineForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         # This CSS class allows us to watch for changes in the selected type, so
-        #  that we can dynamically change the widget for ``value``.
+        #  that we can dynamically change the widget for ``value``. See
+        #  widgetmap.js, referenced above.
         css_class = 'attribute_type_controlled'
         self.base_fields['type_controlled'].widget.attrs['class'] = css_class
 
@@ -175,8 +188,10 @@ class AttributeInlineForm(forms.ModelForm):
             self.fields['value'].initial = value_initial
             self.fields['id'].initial = instance.id
 
-
     def is_valid(self):
+        """
+        Enforce validation for ``value`` based on ``type_controlled``.
+        """
         val = super(AttributeInlineForm, self).is_valid()
 
         if all(x in self.cleaned_data for x in ['value', 'type_controlled']):
@@ -211,10 +226,16 @@ class LinkedDataInlineForm(forms.ModelForm):
         if instance is not None:
             self.fields['id'].initial = instance.id
 
-    def is_valid(self):
-        val = super(LinkedDataInlineForm, self).is_valid()
-        print self.errors
-        return val
+    def clean(self):
+        cleaned_data = super(LinkedDataInlineForm, self).clean()
+
+        # Enforce LinkedDataType pattern validation.
+        value = self.cleaned_data['universal_resource_name']
+        # Raises a ValidationError if value does not match pattern for this
+        #  LinkedDataType.
+        self.cleaned_data['type_controlled'].is_valid(value)
+
+        return self.cleaned_data
 
 
 class LinkedDataInlineFormSet(BaseGenericInlineFormSet):
@@ -234,7 +255,7 @@ class LinkedDataInline(GenericTabularInline):
     ct_field = 'subject_content_type'
     ct_fk_field = 'subject_instance_id'
 
-    extra = 1
+    extra = 0
 
     fields = ('type_controlled',
               'type_controlled_broad',
@@ -276,7 +297,7 @@ class AttributeInline(GenericTabularInline):
                                             formset=AttributeInlineFormSet,
                                             ct_field='source_content_type',
                                             fk_field='source_instance_id')
-    extra = 1
+    extra = 0
 
     ct_field = 'source_content_type'
     ct_fk_field = 'source_instance_id'
@@ -359,7 +380,7 @@ class UberInlineMixin(admin.ModelAdmin):
                 formset.save()
 
 
-class CitationForm(forms.ModelForm):
+class CitationForm(autocomplete_light.ModelForm):
     class Meta:
         model = Citation
         fields = '__all__'
@@ -597,6 +618,12 @@ class AARelationAdmin(SimpleHistoryAdmin,
     form = AARelationForm
 
 
+class LinkedDataTypeAdmin(SimpleHistoryAdmin):
+    list_display = ('name', 'pattern')
+    inlines = []
+
+
+
 class LinkedDataAdmin(SimpleHistoryAdmin):
 
     list_display = ('id',
@@ -727,6 +754,7 @@ admin.site.register(ACRelation, ACRelationAdmin)
 admin.site.register(CCRelation, CCRelationAdmin)
 admin.site.register(AARelation, AARelationAdmin)
 admin.site.register(LinkedData, LinkedDataAdmin)
+admin.site.register(LinkedDataType, LinkedDataTypeAdmin)
 admin.site.register(PartDetails, PartDetailsAdmin)
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(AttributeType, AttributeTypeAdmin)
