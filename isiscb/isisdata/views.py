@@ -16,7 +16,7 @@ from django.template import RequestContext, loader
 import uuid
 import base64, zlib
 
-from haystack.views import FacetedSearchView
+from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
 
 from rest_framework import viewsets, serializers, mixins, permissions
@@ -697,6 +697,7 @@ def authority(request, authority_id):
     else:
         search_key = None
 
+    # This is the database cache.
     user_cache = cache.get_cache('search_results_cache')
     search_results = user_cache.get('search_results_authority_' + str(search_key))
 
@@ -706,7 +707,7 @@ def authority(request, authority_id):
         request.session.modified = True
 
     session_id = request.session.session_key
-    page_authority = user_cache.get(session_id + '_page_authority', None)#request.session.get('page_authority', None)
+    page_authority = user_cache.get(session_id + '_page_authority', None)
 
     if search_results and fromsearch and page_authority:
         search_count = search_results.count()
@@ -737,6 +738,7 @@ def authority(request, authority_id):
             if search_index - 2 == -1:
                 search_previous = prev_search_result
 
+        # !! Why are we catching all of these errors?
         except (IndexError, ValueError, AssertionError, TypeError):
             search_previous = None
         if search_index:
@@ -749,7 +751,6 @@ def authority(request, authority_id):
         search_previous = None
         search_current = None
         search_count = None
-
 
 
     context = RequestContext(request, {
@@ -1026,81 +1027,105 @@ class IsisSearchView(FacetedSearchView):
     """
     Provides the search view at /isis/
     """
-    def __call__(self, request):
+
+    results_per_page = 20
+
+    def get_form_kwargs(self):
+        """
+        For some reason GET data isn't getting added to form kwargs, so we do
+        it here.
+        """
+        kwargs = super(IsisSearchView, self).get_form_kwargs()
+        if 'data' not in kwargs:
+            kwargs['data'] = self.request.GET
+            kwargs['searchqueryset'] = self.queryset
+        return kwargs
+
+    def form_valid(self, form):
+    # def __call__(self, request):
         """
         Overridden to provide search history log functionality.
         """
 
-        page_citation = request.GET.get('page_citation', 1)
-        page_authority = request.GET.get('page_authority', 1)
+        page_citation = self.request.GET.get('page_citation', 1)
+        page_authority = self.request.GET.get('page_authority', 1)
 
-        s = datetime.datetime.now()
-        self.request = request
+        # self.request = request
+        # self.form = self.build_form()
+        # self.query = self.get_query()
 
-        s = datetime.datetime.now()
-        self.form = self.build_form()
+        # !! Why are we using strings rather than bools?
+        log = self.request.GET.get('log', 'True') != 'False'
 
-        s = datetime.datetime.now()
-        self.query = self.get_query()
+        parameters = self.request.GET.get('q', None)
+        search_models = self.request.GET.get('models', None)
+        selected_facets = self.request.GET.get('selected_facets', None)
+        sort_field_citation = self.request.GET.get('sort_order_citation', None)
+        sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
+        sort_field_authority = self.request.GET.get('sort_order_authority', None)
+        sort_order_authority = self.request.GET.get('sort_order_dir_authority', None)
 
-        # If the user is logged in, record the search in their history.
-        s = datetime.datetime.now()
-        log = request.GET.get('log', 'True') != 'False'
-        parameters = request.GET.get('q', None)
-        search_models = request.GET.get('models', None)
-        selected_facets = request.GET.get('selected_facets', None)
-        sort_field_citation = request.GET.get('sort_order_citation', None)
-        sort_order_citation = request.GET.get('sort_order_dir_citation', None)
-        sort_field_authority = request.GET.get('sort_order_authority', None)
-        sort_order_authority = request.GET.get('sort_order_dir_authority', None)
-        if log and parameters and request.user.id > 0:
+        # If the user is logged in, attempt to save the search in their
+        #  search history.
+        if log and parameters and self.request.user.id > 0:
             searchquery = SearchQuery(
-                user = request.user._wrapped,
+                user = self.request.user._wrapped,
                 parameters = parameters,
                 search_models = search_models,
                 selected_facets = selected_facets,
             )
             searchquery.save()
             # make sure we have a session key
-            if hasattr(request, 'session') and not request.session.session_key:
-                request.session.save()
-                request.session.modified = True
+            if hasattr(self.request, 'session') and not self.request.session.session_key:
+                self.request.session.save()
+                self.request.session.modified = True
 
-            session_id = request.session.session_key
+            session_id = self.request.session.session_key
             user_cache = cache.get_cache('search_results_cache')
-            user_cache.set(session_id + '_last_query', request.get_full_path())
+            user_cache.set(session_id + '_last_query', self.request.get_full_path())
             #request.session['last_query'] = request.get_full_path()
 
+        # Used to identify the current search for retrieval from the cache.
         cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
+        # 'search_results_cache' is the database cache
+        #  (see production_settings.py).
         user_cache = cache.get_cache('search_results_cache')
-        s = datetime.datetime.now()
-        self.results = user_cache.get(cache_key)
-        if not self.results:
-            s = datetime.datetime.now()
-            self.results = self.get_results()
+        self.queryset = user_cache.get(cache_key)
 
-            s = datetime.datetime.now()
-            user_cache.set(cache_key, self.results, 3600)
+        if not self.queryset:
+            # Perform the search, and store the results in the cache.
+            # self.results = self.get_results()
+            self.queryset = form.search()
+            user_cache.set(cache_key, self.queryset, 3600)
 
+        # self.results = self.queryset
+        # This code sets up cached data to support the search result progression
+        #  feature in the citation and authority detail views. It is independent
+        #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            s = datetime.datetime.now()
             search_key = base64.b64encode(parameters)
             # make sure we have a session key
-            if hasattr(request, 'session') and not request.session.session_key:
-                request.session.save()
-                request.session.modified = True
-            session_id = request.session.session_key
+            if hasattr(self.request, 'session') and not self.request.session.session_key:
+                self.request.session.save()
+                self.request.session.modified = True
+            session_id = self.request.session.session_key
 
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
 
-            user_cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True), 3600)
-            user_cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True), 3600)
+            user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
+            user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
 
-
-        return self.create_response()
+        context = self.get_context_data(**{
+            self.form_name: form,
+            'query': None,
+            # 'query': form.cleaned_data.get(self.search_field),
+            'object_list': self.queryset
+        })
+        return self.render_to_response(context)
+        # return self.create_response()
 
     def build_page(self):
         """
@@ -1129,17 +1154,17 @@ class IsisSearchView(FacetedSearchView):
         start_offset_authority = (page_no_authority - 1) * self.results_per_page
         start_offset_citation = (page_no_citation - 1) * self.results_per_page
 
-        if isinstance(self.results, EmptySearchQuerySet):
-            self.results[0:self.results_per_page]
-            paginator_authority = Paginator(self.results, self.results_per_page)
-            paginator_citation = Paginator(self.results, self.results_per_page)
+        if isinstance(self.queryset, EmptySearchQuerySet):
+            self.queryset[0:self.results_per_page]
+            paginator_authority = Paginator(self.queryset, self.results_per_page)
+            paginator_citation = Paginator(self.queryset, self.results_per_page)
 
         else:
-            self.results['citation'][start_offset_citation:start_offset_citation + self.results_per_page]
-            self.results['authority'][start_offset_authority:start_offset_authority+ self.results_per_page]
+            self.queryset['citation'][start_offset_citation:start_offset_citation + self.results_per_page]
+            self.queryset['authority'][start_offset_authority:start_offset_authority+ self.results_per_page]
 
-            paginator_authority = Paginator(self.results['authority'], self.results_per_page)
-            paginator_citation = Paginator(self.results['citation'], self.results_per_page)
+            paginator_authority = Paginator(self.queryset['authority'], self.results_per_page)
+            paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
 
 
         try:
@@ -1160,19 +1185,48 @@ class IsisSearchView(FacetedSearchView):
 
         return ({'authority':paginator_authority, 'citation':paginator_citation}, {'authority':page_authority, 'citation':page_citation})
 
+    def get_context_data(self, **kwargs):
+        if 'form' not in kwargs:
+            kwargs['form'] = self.get_form()
+        if 'view' not in kwargs:
+            kwargs['view'] = self
+        kwargs.update(self.extra_context())
+        return kwargs
+
+    def get_queryset(self):
+        """
+        Faceting happens (for now, at least) in the search form, and NOT in the
+        view. So we overwrite this method to prevent faceting again. Or other
+        weird things.
+
+        TODO: consider moving the faceting logic to this method? Or somewhere
+        else in the view?
+        """
+        return self.queryset
+
     def extra_context(self):
-        extra = super(FacetedSearchView, self).extra_context()
+        print 'extra_context'
+        # extra = super(FacetedSearchView, self).extra_context()
+        extra = {}
         extra['request'] = self.request
-        if isinstance(self.results, EmptySearchQuerySet):
+
+        paginator, page = self.build_page()
+        extra['page'] = page
+        extra['paginator'] = paginator
+        extra['query'] = self.request.GET.get('q', '')
+
+        if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0
             extra['facets_authority'] = 0
-            extra['count_citation'] = len(self.results)
-            extra['count_authority'] = len(self.results)
+            extra['count_citation'] = len(self.queryset)
+            extra['count_authority'] = len(self.queryset)
         else:
-            extra['facets_authority'] = self.results['authority'].facet_counts()
-            extra['facets_citation'] = self.results['citation'].facet_counts()
-            extra['count_citation'] = len(self.results['citation'])
-            extra['count_authority'] = len(self.results['authority'])
+            print self.queryset['authority'], type(self.queryset['authority'])
+            print 'facet_counts', self.queryset['authority'].facet_counts()
+            extra['facets_authority'] = self.queryset['authority'].facet_counts()
+            extra['facets_citation'] = self.queryset['citation'].facet_counts()
+            extra['count_citation'] = len(self.queryset['citation'])
+            extra['count_authority'] = len(self.queryset['authority'])
 
         extra['models'] = self.request.GET.getlist('models')
         extra['sort_order_citation'] = self.request.GET.get('sort_order_citation')

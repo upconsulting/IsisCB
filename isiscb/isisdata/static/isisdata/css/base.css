@@ -307,6 +307,10 @@ li {
   margin-left:-18px;
 }
 
+.unselected_facets {
+  list-style:none;
+}
+
 .selected_facets a {
   /*font-weight: bold;*/
   font-style: italic;

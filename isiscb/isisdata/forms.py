@@ -134,9 +134,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
             qstring = helper_methods.normalize(qstring)
         sqs = self.searchqueryset.auto_query(qstring, query_tuple[1])
 
-        if self.load_all:
-            sqs_citation = sqs.load_all()
-            sqs_authority = sqs_citation
+        # if self.load_all:
+        sqs_citation = sqs.load_all()
+        sqs_authority = sqs_citation
 
         for facet in self.selected_facets:
             if ":" not in facet:
