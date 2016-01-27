@@ -2,7 +2,7 @@ from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
-from django.core.cache import cache
+from django.core import cache
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
@@ -696,25 +696,48 @@ def authority(request, authority_id):
         search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
-    search_results = cache.get('search_results_authority_' + str(search_key))
 
-    page_authority = request.session.get('page_authority', None)
+    user_cache = cache.get_cache('search_results_cache')
+    search_results = user_cache.get('search_results_authority_' + str(search_key))
+
+    # make sure we have a session key
+    if hasattr(request, 'session') and not request.session.session_key:
+        request.session.save()
+        request.session.modified = True
+
+    session_id = request.session.session_key
+    page_authority = user_cache.get(session_id + '_page_authority', None)#request.session.get('page_authority', None)
 
     if search_results and fromsearch and page_authority:
         search_count = search_results.count()
-        search_results_page = search_results[(page_authority - 1)*20:page_authority*20]
+        prev_search_result = None
+        if (page_authority > 1):
+            prev_search_result = search_results[(page_authority - 1)*20 - 1]
+
+        # if we got to the last result of the previous page we need to count down the page number
+        if prev_search_result == 'isisdata.authority.' + authority_id:
+            page_authority = page_authority - 1
+            user_cache.set(session_id + '_page_authority', page_authority)
+
+        search_results_page = search_results[(page_authority - 1)*20:page_authority*20 + 2]
 
         try:
             search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
+            if search_index == 21:
+                user_cache.set(session_id + '_page_authority', page_authority+1)
+
         except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except (IndexError, ValueError):
+        except (IndexError, ValueError, TypeError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except (IndexError, ValueError):
+            if search_index - 2 == -1:
+                search_previous = prev_search_result
+
+        except (IndexError, ValueError, AssertionError, TypeError):
             search_previous = None
         if search_index:
             search_current = search_index + (20* (page_authority - 1))
@@ -823,6 +846,13 @@ def citation(request, citation_id):
     api_view = reverse('citation-detail', args=[citation.id], request=request)
 
     # Provide progression through search results, if present.
+
+    # make sure we have a session key
+    if hasattr(request, 'session') and not request.session.session_key:
+        request.session.save()
+        request.session.modified = True
+
+    session_id = request.session.session_key
     fromsearch = request.GET.get('fromsearch', False)
     #search_key = request.session.get('search_key', None)
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -832,27 +862,43 @@ def citation(request, citation_id):
     else:
         search_key = None
 
-    search_results = cache.get('search_results_citation_' + str(search_key))
-    page_citation = request.session.get('page_citation', None)
+    user_cache = cache.caches['search_results_cache']
+    search_results = user_cache.get('search_results_citation_' + str(search_key))
+    page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
+    print "page_citation"
+    print page_citation
 
     if search_results and fromsearch and page_citation:
         search_count = search_results.count()
-        search_results_page = search_results[(page_citation - 1)*20:page_citation*20]
+        prev_search_result = None
+        if (page_citation > 1):
+            prev_search_result = search_results[(page_citation - 1)*20 - 1]
+
+        # if we got to the last result of the previous page we need to count down the page number
+        if prev_search_result == 'isisdata.citation.' + citation_id:
+            page_citation = page_citation - 1
+            user_cache.set(session_id + '_page_citation', page_citation)
+
+        search_results_page = search_results[(page_citation - 1)*20:page_citation*20 + 2]
 
         try:
-            print search_results_page
             search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
+            if search_index == 21:
+                user_cache.set(session_id + '_page_citation', page_citation+1)
+
         except (IndexError, ValueError):
             search_index = None
         try:
             search_next = search_results_page[search_index]
-        except (IndexError, ValueError):
+        except (IndexError, ValueError, TypeError):
             search_next = None
         try:
             search_previous = search_results_page[search_index - 2]
-        except (IndexError, ValueError):
-            search_previous = None
+            if search_index - 2 == -1:
+                search_previous = prev_search_result
 
+        except (IndexError, ValueError, AssertionError, TypeError):
+            search_previous = None
         if search_index:
             search_current = search_index + (20* (page_citation - 1))
         else:
@@ -1015,27 +1061,43 @@ class IsisSearchView(FacetedSearchView):
                 selected_facets = selected_facets,
             )
             searchquery.save()
-            request.session['last_query'] = request.get_full_path()
+            # make sure we have a session key
+            if hasattr(request, 'session') and not request.session.session_key:
+                request.session.save()
+                request.session.modified = True
+
+            session_id = request.session.session_key
+            user_cache = cache.get_cache('search_results_cache')
+            user_cache.set(session_id + '_last_query', request.get_full_path())
+            #request.session['last_query'] = request.get_full_path()
 
         cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
+        user_cache = cache.get_cache('search_results_cache')
         s = datetime.datetime.now()
-        self.results = cache.get(cache_key)
+        self.results = user_cache.get(cache_key)
         if not self.results:
             s = datetime.datetime.now()
             self.results = self.get_results()
 
             s = datetime.datetime.now()
-            cache.set(cache_key, self.results, 3600)
+            user_cache.set(cache_key, self.results, 3600)
 
         if parameters:  # Store results in the session cache.
             s = datetime.datetime.now()
-            search_key = base64.b64encode(parameters) #str(uuid.uuid4())
-            request.session['search_key'] =  search_key
-            request.session['page_citation'] = int(page_citation)
-            request.session['page_authority'] = int(page_authority)
-            cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True), 3600)
-            cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True), 3600)
+            search_key = base64.b64encode(parameters)
+            # make sure we have a session key
+            if hasattr(request, 'session') and not request.session.session_key:
+                request.session.save()
+                request.session.modified = True
+            session_id = request.session.session_key
+
+            user_cache.set(session_id + '_search_key', search_key)
+            user_cache.set(session_id + '_page_citation', int(page_citation))
+            user_cache.set(session_id + '_page_authority', int(page_authority))
+
+            user_cache.set('search_results_authority_' + str(search_key), self.results['authority'].values_list('id', flat=True), 3600)
+            user_cache.set('search_results_citation_' + str(search_key), self.results['citation'].values_list('id', flat=True), 3600)
 
 
         return self.create_response()

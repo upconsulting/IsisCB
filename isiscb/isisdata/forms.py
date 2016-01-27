@@ -27,29 +27,12 @@ def model_choices(using=DEFAULT_ALIAS):
 
 
 class MyFacetedSearchForm(FacetedSearchForm):
+    sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
+    sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
+    sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
+
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
-        # TODO: figure out why this field is defined post-hoc, and whether it
-        #  matters.
-        #scField = forms.MultipleChoiceField(choices=model_choices(),
-        #                                    required=False,
-        #                                    label=_('Search In'),
-        #                                    widget=forms.CheckboxSelectMultiple)
-        #scField = forms.MultipleChoiceField(choices=model_choices(), widget=forms.HiddenInput())
-        sort_order = forms.CharField(required=False, widget=forms.HiddenInput)
-        sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput)
-        sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput)
-
-        #self.fields['models'] = scField
-        self.fields['sort_order_citation'] = sort_order
-        self.fields['sort_order_citation'].initial = 'publication_date_for_sort'
-        self.fields['sort_order_dir_citation'] = sort_order_dir_citation
-        self.fields['sort_order_dir_authority'] = sort_order_dir_authority
-        self.fields['sort_order_dir_citation'].initial = 'descend'
-        self.fields['sort_order_dir_authority'].initial = 'ascend'
-
-        #self.fields['models'].initial = ['isisdata.authority',
-        #                                  'isisdata.citation']
 
     def get_authority_model(self):
         """Return an alphabetical list of model classes in the index."""
