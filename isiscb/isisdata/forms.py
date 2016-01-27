@@ -24,6 +24,7 @@ def model_choices(using=DEFAULT_ALIAS):
                for m in connections[using].get_unified_index().get_indexed_models()]
     return sorted(choices, key=lambda x: x[1])
 
+
 class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
@@ -131,9 +132,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
             qstring = helper_methods.normalize(qstring)
         sqs = self.searchqueryset.auto_query(qstring, query_tuple[1])
 
-        if self.load_all:
-            sqs_citation = sqs.load_all()
-            sqs_authority = sqs_citation
+        # if self.load_all:
+        sqs_citation = sqs.load_all()
+        sqs_authority = sqs_citation
 
         for facet in self.selected_facets:
             if ":" not in facet:

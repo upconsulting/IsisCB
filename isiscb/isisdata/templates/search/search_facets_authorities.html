@@ -4,24 +4,23 @@
 {% if query %}
 
 <div class="panel panel-default">
-  <div class="panel-heading"><h3 class="panel-title">Filters</h3></div>
-  <div class="panel-body">
+  <div class="panel-heading"><h3 class="panel-title">Authority Type</h3></div>
+  <div class="facet_panel panel-body">
 
-<h5>Authority Type</h5>
   {% if facets_authority.fields.authority_type %}
         <ul class="selected_facets">
           {% for auth_type in selected_facets.authority_authority_type %}
           {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
-          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><span class="glyphicon glyphicon-remove"></span> {{ auth_type }}</a></li>
+          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{ auth_type }}</a></li>
           {% endwith %}
           {% endfor %}
         </ul>
-        <ul >
+        <ul class="unselected_facets">
           {# Provide only the top 7 authors #}
           {% for auth_type in facets_authority.fields.authority_type|slice:":7" %}
           {% if auth_type.0 %}
           {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}">{{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
           {% endif %}
           {% endif %}
           {% endfor %}
