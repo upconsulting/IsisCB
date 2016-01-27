@@ -9,7 +9,7 @@ information, see ``LICENSE.md`` in this repository.
 
 IsisCB is designed to run in the Amazon Web Services environment. The file
 ``appspec.yml`` defines the process for deploying to an EC2 instance via
-CodeDeploy..
+CodeDeploy.
 
 Since it's a Django app, it can be deployed as a WSGI application. We use
 [Gunicorn](http://gunicorn.org/) running behind a [nginx](https://www.nginx.com)
