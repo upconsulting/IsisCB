@@ -2,7 +2,7 @@ from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
-from django.core import cache
+from django.core.cache import caches
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
@@ -698,7 +698,7 @@ def authority(request, authority_id):
         search_key = None
 
     # This is the database cache.
-    user_cache = cache.get_cache('search_results_cache')
+    user_cache = caches['search_results_cache']
     search_results = user_cache.get('search_results_authority_' + str(search_key))
 
     # make sure we have a session key
@@ -1081,7 +1081,7 @@ class IsisSearchView(FacetedSearchView):
                 self.request.session.modified = True
 
             session_id = self.request.session.session_key
-            user_cache = cache.get_cache('search_results_cache')
+            user_cache = caches['search_results_cache']
             user_cache.set(session_id + '_last_query', self.request.get_full_path())
             #request.session['last_query'] = request.get_full_path()
 
@@ -1090,7 +1090,7 @@ class IsisSearchView(FacetedSearchView):
 
         # 'search_results_cache' is the database cache
         #  (see production_settings.py).
-        user_cache = cache.get_cache('search_results_cache')
+        user_cache = caches['search_results_cache']
         self.queryset = user_cache.get(cache_key)
 
         if not self.queryset:
