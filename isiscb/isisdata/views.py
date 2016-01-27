@@ -60,15 +60,6 @@ class GenericHyperlink(serializers.HyperlinkedRelatedField):
         return super(GenericHyperlink, self).get_url(obj, view_name,
                                                      request, format)
 
-# class ValueHyperlink(serializers.HyperlinkedRelatedField):
-#     view_name = 'value-detail'
-#
-#     def get_url(self, obj, v, request, format):
-#         view_name = obj.child_class.lower() + '-detail'
-#         print view_name
-#         return super(ValueHyperlink, self).get_url(obj, view_name,
-#                                                    request, format)
-
 
 class ValueSerializer(serializers.HyperlinkedModelSerializer):
     value = serializers.ReadOnlyField(source='cvalue')
@@ -350,14 +341,8 @@ class AuthorityViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
-    # filter_backends = (filters.backends.DjangoFilterBackend,)
     filter_class = AuthorityFilterSet
     filter_fields = ('name', )
-    # def get_queryset(self):
-    #     queryset = super(AuthorityViewSet, self).get_queryset()
-    #     print self.request.query_params
-    #     return queryset
-
 
 
 class UserViewSet(mixins.ListModelMixin,
@@ -863,11 +848,9 @@ def citation(request, citation_id):
     else:
         search_key = None
 
-    user_cache = cache.caches['search_results_cache']
+    user_cache = caches['search_results_cache']
     search_results = user_cache.get('search_results_citation_' + str(search_key))
     page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
-    print "page_citation"
-    print page_citation
 
     if search_results and fromsearch and page_citation:
         search_count = search_results.count()
@@ -1202,7 +1185,6 @@ class IsisSearchView(FacetedSearchView):
         return self.queryset
 
     def extra_context(self):
-        print 'extra_context'
         # extra = super(FacetedSearchView, self).extra_context()
         extra = {}
         extra['request'] = self.request
@@ -1218,8 +1200,6 @@ class IsisSearchView(FacetedSearchView):
             extra['count_citation'] = len(self.queryset)
             extra['count_authority'] = len(self.queryset)
         else:
-            print self.queryset['authority'], type(self.queryset['authority'])
-            print 'facet_counts', self.queryset['authority'].facet_counts()
             extra['facets_authority'] = self.queryset['authority'].facet_counts()
             extra['facets_citation'] = self.queryset['citation'].facet_counts()
             extra['count_citation'] = len(self.queryset['citation'])
