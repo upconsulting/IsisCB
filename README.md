@@ -1,6 +1,6 @@
 # IsisCB [![Build Status](https://travis-ci.org/upconsulting/IsisCB.svg?branch=develop)](https://travis-ci.org/upconsulting/IsisCB)
 
-Current version: 0.12
+Current version: 0.12.2
 
 ## License
 
