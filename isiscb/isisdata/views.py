@@ -683,7 +683,7 @@ def authority(request, authority_id):
         search_key = None
 
     # This is the database cache.
-    user_cache = caches['search_results_cache']
+    user_cache = caches['default']
     search_results = user_cache.get('search_results_authority_' + str(search_key))
 
     # make sure we have a session key
@@ -848,7 +848,7 @@ def citation(request, citation_id):
     else:
         search_key = None
 
-    user_cache = caches['search_results_cache']
+    user_cache = caches['default']
     search_results = user_cache.get('search_results_citation_' + str(search_key))
     page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
 
@@ -1064,7 +1064,7 @@ class IsisSearchView(FacetedSearchView):
                 self.request.session.modified = True
 
             session_id = self.request.session.session_key
-            user_cache = caches['search_results_cache']
+            user_cache = caches['default']
             user_cache.set(session_id + '_last_query', self.request.get_full_path())
             #request.session['last_query'] = request.get_full_path()
 
@@ -1073,8 +1073,9 @@ class IsisSearchView(FacetedSearchView):
 
         # 'search_results_cache' is the database cache
         #  (see production_settings.py).
-        user_cache = caches['search_results_cache']
-        self.queryset = user_cache.get(cache_key)
+        user_cache = caches['default']
+        # Disabling cache for the search itself, for now.
+        self.queryset = None #user_cache.get(cache_key)
 
         if not self.queryset:
             # Perform the search, and store the results in the cache.
