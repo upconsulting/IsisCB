@@ -1,5 +1,6 @@
 {% load app_filters %}
 {% load metadata_filters %}
+{% load facet_filters %}
 
 {% if query %}
 <div class="panel-group" id="type_panel">
@@ -45,29 +46,29 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseAuthors">
-          Author & Contributors <span class="badge {% if selected_facets.citation_authors_exact %}active{% endif %}">{{ facets_citation.fields.authors|length }}</span>
+          Author & Contributors <span class="badge {% if selected_facets.citation_all_contributor_ids_exact %}active{% endif %}">{{ facets_citation.fields.all_contributor_ids|length }}</span>
         </a>
       </h4>
     </div>
     <div id="collapseAuthors" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        {% if facets_citation.fields.authors %}
+        {% if facets_citation.fields.all_contributor_ids %}
               <ul class="selected_facets">
-                {% for author in selected_facets.citation_authors_exact %}
-                {% with author|create_facet_string:'citation_authors_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{author}}</a></li>
+                {% for author in selected_facets.citation_all_contributor_ids_exact %}
+                {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{author|get_author_name}}</a> <a title="Go to authority record for {{author|get_author_name}}" href="{% url 'authority' author %}?"><i class="glyphicon glyphicon-new-window"></i> </a> </li>
                 {% endwith %}
                 {% endfor %}
               </ul>
               <ul class="unselected_facets">
                 {# Provide only the top 7 authors #}
-                {% for author in facets_citation.fields.authors|slice:":7" %}
-                {% if "citation_authors_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_authors_exact %}
-                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0 }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> <!--<i class="glyphicon glyphicon-circle-arrow-right"></i>--></a></li>
+                {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
+                {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_aall_contributor_ids_exact %}
+                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{author|get_author_name}}" href="{% url 'authority' author.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ author.0|get_author_name }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> </a></li>
                 {% endif %}
                 {% endfor %}
               </ul>
-              {% if facets_citation.fields.authors|length > 7 %}
+              {% if facets_citation.fields.all_contributor_ids|length > 7 %}
               <div class="more-facets">
                 <!-- Button trigger modal -->
                 <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
@@ -215,7 +216,6 @@
 
 {% endif %}
 
-<!-- Modal -->
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -225,9 +225,9 @@
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for author in facets_citation.fields.authors %}
-          {% if "citation_authors_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_authors_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_authors_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0 }} </a>({{ author.1 }})</li>
+          {% for author in facets_citation.fields.all_contributor_ids %}
+          {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0|get_author_name }} </a>({{ author.1 }})</li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -238,6 +238,7 @@
     </div>
   </div>
 </div><!-- /modal -->
+
 
 <!-- time period Modal -->
 <div class="modal fade" id="timeModal" tabindex="-1" role="dialog" aria-labelledby="timeModalLabel">
