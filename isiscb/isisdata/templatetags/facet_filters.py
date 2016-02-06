@@ -5,10 +5,10 @@ from isisdata.templatetags.app_filters import *
 register = template.Library()
 
 @register.filter
-def get_author_name(author_id):
+def get_authority_name(id):
     try:
-        author = Authority.objects.get(id=author_id)
-        name = author.name
+        authority = Authority.objects.get(id=id)
+        name = authority.name
     except:
-        name = author_id
+        name = id
     return name

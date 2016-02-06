@@ -56,7 +56,7 @@
               <ul class="selected_facets">
                 {% for author in selected_facets.citation_all_contributor_ids_exact %}
                 {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{author|get_author_name}}</a> <a title="Go to authority record for {{author|get_author_name}}" href="{% url 'authority' author %}?"><i class="glyphicon glyphicon-new-window"></i> </a> </li>
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="glyphicon glyphicon-new-window"></i> {{author|get_authority_name}} </a> </li>
                 {% endwith %}
                 {% endfor %}
               </ul>
@@ -64,7 +64,7 @@
                 {# Provide only the top 7 authors #}
                 {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
                 {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_aall_contributor_ids_exact %}
-                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{author|get_author_name}}" href="{% url 'authority' author.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ author.0|get_author_name }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> </a></li>
+                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ author.0|get_authority_name }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> </a></li>
                 {% endif %}
                 {% endfor %}
               </ul>
@@ -90,28 +90,28 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseSubjects">
-          Subjects <span class="badge {% if selected_facets.citation_subjects_exact  %}active{% endif %}">{{ facets_citation.fields.subjects|length }}</span>
+          Subjects <span class="badge {% if selected_facets.citation_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.subject_ids|length }}</span>
         </a>
       </h4>
     </div>
     <div id="collapseSubjects" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        {% if facets_citation.fields.subjects %}
+        {% if facets_citation.fields.subject_ids %}
           <ul class="selected_facets">
-            {% for subject in selected_facets.citation_subjects_exact %}
-            {% with subject|create_facet_string:'citation_subjects_exact' as encoded_subject %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{subject}}</a></li>
+            {% for subject in selected_facets.citation_subject_ids_exact %}
+            {% with subject|create_facet_string:'citation_subject_ids_exact' as encoded_subject %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{subject|get_authority_name}}" href="{% url 'authority' subject %}?"><i class="glyphicon glyphicon-new-window"></i> {{subject|get_authority_name}}</a> </li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
-                {% for subject in facets_citation.fields.subjects|slice:":7" %}
-                {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ subject.0 }} </a>({{ subject.1 }}) </li>
+                {% for subject in facets_citation.fields.subject_ids|slice:":7" %}
+                {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
-          {% if facets_citation.fields.subjects|length > 7 %}
+          {% if facets_citation.fields.subject_ids|length > 7 %}
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
@@ -133,28 +133,28 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseTime">
-          Time Periods <span class="badge {% if selected_facets.citation_time_periods_exact %}active{% endif %}">{{ facets_citation.fields.time_periods|length }}</span>
+          Time Periods <span class="badge {% if selected_facets.citation_time_period_ids_exact %}active{% endif %}">{{ facets_citation.fields.time_period_ids|length }}</span>
         </a>
       </h4>
     </div>
     <div id="collapseTime" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        {% if facets_citation.fields.time_periods %}
+        {% if facets_citation.fields.time_period_ids %}
           <ul class="selected_facets">
-            {% for time_period in selected_facets.citation_time_periods_exact %}
-            {% with time_period|create_facet_string:'citation_time_periods_exact' as encoded_time_period %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{time_period}}</a></li>
+            {% for time_period in selected_facets.citation_time_period_ids_exact %}
+            {% with time_period|create_facet_string:'citation_time_period_ids_exact' as encoded_time_period %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a>  <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?"><i class="glyphicon glyphicon-new-window"></i> {{ time_period|get_authority_name }}</a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
-                {% for time_period in facets_citation.fields.time_periods|slice:":7" %}
-                {% if "citation_time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_periods_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+                {% for time_period in facets_citation.fields.time_period_ids|slice:":7" %}
+                {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
-          {% if facets_citation.fields.time_periods|length > 7 %}
+          {% if facets_citation.fields.time_period_ids|length > 7 %}
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timeModal">
@@ -176,28 +176,28 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapsePlaces">
-          Places <span class="badge {% if selected_facets.citation_geographics_exact %}active{% endif %}">{{ facets_citation.fields.geographics|length }}</span>
+          Places <span class="badge {% if selected_facets.citation_geographic_ids_exact %}active{% endif %}">{{ facets_citation.fields.geographic_ids|length }}</span>
         </a>
       </h4>
     </div>
     <div id="collapsePlaces" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        {% if facets_citation.fields.geographics %}
+        {% if facets_citation.fields.geographic_ids %}
           <ul class="selected_facets">
-            {% for geographic in selected_facets.citation_geographics_exact %}
-            {% with geographic|create_facet_string:'citation_geographics_exact' as encoded_geographic %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{geographic}}</a></li>
+            {% for geographic in selected_facets.citation_geographic_ids_exact %}
+            {% with geographic|create_facet_string:'citation_geographic_ids_exact' as encoded_geographic %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?"><i class="glyphicon glyphicon-new-window"></i> {{ geographic|get_authority_name }}</a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
-                {% for geographic in facets_citation.fields.geographics|slice:":7" %}
-                {% if "citation_geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographics_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+                {% for geographic in facets_citation.fields.geographic_ids|slice:":7" %}
+                {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) </li>
                 {% endif %}
                 {% endfor %}
           </ul>
-          {% if facets_citation.fields.geographics|length > 7 %}
+          {% if facets_citation.fields.geographic_ids|length > 7 %}
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#placeModal">
@@ -227,7 +227,7 @@
         <ul class="unselected_facets">
           {% for author in facets_citation.fields.all_contributor_ids %}
           {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0|get_author_name }} </a>({{ author.1 }})</li>
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }})</li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -250,9 +250,9 @@
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for time_period in facets_citation.fields.time_periods %}
-          {% if "citation_time_periods_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_periods_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_periods_exact:{{ time_period.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ time_period.0 }} </a>({{ time_period.1 }}) </li>
+          {% for time_period in facets_citation.fields.time_period_ids %}
+          {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -274,9 +274,9 @@
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for geographic in facets_citation.fields.geographics %}
-          {% if "citation_geographics_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographics_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographics_exact:{{ geographic.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ geographic.0 }} </a>({{ geographic.1 }}) </li>
+          {% for geographic in facets_citation.fields.geographic_ids %}
+          {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -298,9 +298,9 @@
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for subject in facets_citation.fields.subjects %}
-          {% if "citation_subjects_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subjects_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subjects_exact:{{ subject.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ subject.0 }} </a>({{ subject.1 }}) </li>
+          {% for subject in facets_citation.fields.subject_ids %}
+          {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) </li>
           {% endif %}
           {% endfor %}
         </ul>
