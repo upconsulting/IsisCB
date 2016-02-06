@@ -3,29 +3,60 @@
 {% block content %}
 
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2">
-    <div class="menu">
-      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
-      <hr>
-    </div>
-  </div>
 
-  <div class="col-sm-offset-1 col-md-offset-1 main col-sm-7 col-md-7">
-    <h3>Usage tips</h3>
+  <div class="col-sm-offset-1 col-md-offset-1 main col-sm-10 col-md10 col-sm-offset-1 col-md-offset-1">
 
-    <p>One can use the IsisCB Explore to do a standard bibliographical search. This is the mode that we expect most users will find valuable on a day-to-day basis.</p>
+    <h3>Current features of IsisCB Explore</h3>
 
-    <p>All searches are keyword searches. You can narrow down the results lists by either providing more search terms or by using the facet list to the left.</p>
+    <p>Before you try out explore, take a moment to familiarize yourself with what it can do:</p>
 
-    <p>Caution should be used when limiting by facets, especially subject terms that are not proper names. Subject authorities have changed over time under different bibliographers. When limiting by a term used by one bibliographer, similar citations classified with different terminology will be skipped. Try different facet limits with your searches to ensure you capture similar records tagged with slightly different subjects.</p>
+    <ul>
+      <li>
+        <i>Save your searches</i>. For logged-in users, the system automatically logs your search history and gives you the ability to bookmark and save them.
+      </li>
+      <li>
+        <i>Add public comments</i>. Once logged in, you can add public comments on any record so that you can identify missing information or suggest outside links.
+      </li>
+      <li>
+        <i>Drill down using facets</i>. The facets are indexed items that you can access directly using the Authorities tab. [<a href="https://youtu.be/ntqtn0tyy-E">See video</a>.]
+      </li>
+      <li>
+        <i>Register your own account</i>. You can register for an account or log in through Facebook or Twitter. [<a href="https://youtu.be/seKYV-Vxj8w">See video</a>.]
+      </li>
+      <li>
+        <i>Use Zotero to collect citations</i>. All bibliographic records can be saved in Zotero, either individually or in search results. [<a href="https://youtu.be/gmgcSG_mwEA">See video</a>.]
+        <ul>
+          <li>
+            <b>Note</b>: For the time being, we recommend using Zotero for collecting citations.
+          </li>
+        </ul>
+      </li>
+    </ul>
 
-    <p>The IsisCB Explore can also provide a window into the history of science community. By doing an authority search for authors, publishers, universities, or journals, one can explore the network of people and institutions that have produced history of science scholarship over the years. In this capacity, one can study such things as the topic areas of journals, the theses produced by different institutions, and similar questions.</p>
+    <p>
+      You can see all the explanatory videos on the <a href="https://www.youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g">IsisCB Explore YouTube Channel</a>.
+    </p>
 
-    <p>The tool remains young. It we anticipate adding more functionality in the next months. Please bear with us and report problems or misplaced expectations when you find them. Thank you.</p>
+    <h3>Usage Tips</h3>
+
+    <p>
+      <i>When doing a citation search, be creative and try multiple methods of drilling down.</i>
+    </p>
+
+    <p>One can use the IsisCB to do a standard bibliographical search. This is the mode that we expect most users will find valuable on a day-to-day basis. All searches are keyword searches. You can narrow down the results lists by either providing more search terms or by using the facet list to the left.</p>
+
+    <p>
+      <i>When limiting by facet, be aware that several different authority sets are in use, so similar facet selections will yield different results sets.</i>
+    </p>
+
+    <p>Limiting by facets can create artificially small results sets. This is especially true if the subject terms are not proper names. Subject authorities have changed over time under different bibliographers. When limiting by a term used by one bibliographer, similar citations classified with different terminology will be skipped. Try different facet limits with your searches to ensure you capture similar records tagged with slightly different subjects.</p>
+
+    <p>
+      <i>When using IsisCB Explore, consider using it as a Who’s Who in History of Science.</i>
+    </p>
+
+    <p>The IsisCB dataset can also provide a window into the history of science community by using the authority tab. By doing an authority search for authors, publishers, universities, or journals, one can explore the network of people and institutions that have produced history of science scholarship over the years. In this capacity, one can study such things as the topic areas of journals, the theses produced by different institutions, and similar questions.</p>
+
   </div>
 
 </div>

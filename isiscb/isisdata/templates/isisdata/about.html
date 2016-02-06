@@ -19,20 +19,42 @@
     <h3>About <i>IsisCB Explore</i></h3>
 
     <p>
-      <i>IsisCB Explore</i> is a research tool for the history of science, whose core dataset comes from bibliographical citations in the <a href="http://isisbibliography.org/">Isis Bibliography of the History of Science</a>. The IsisCB Explore currently contains 40 years of citation data from 1974 to 2014.
+      IsisCB Explore is a research tool for the history of science, whose core dataset comes from bibliographical citations in the <a href="http://isisbibliography.org/">Isis Bibliography of the History of Science</a>. The IsisCB currently contains 40 years of citation data from 1974 to 2014.
     </p>
     <p>
-      The dataset is composed of two main types of records: <i>Citations</i>, items from the bibliography that have been classified and indexed, and <i>Authorities</i>, records that include both subject terms that classify citations as well as authors, publishers, and journals that have written and published those works.
+      The dataset is composed of two main types of records:
     </p>
+    <ul>
+      <li><i>Citations</i>, items from the bibliography that have been classified and indexed, and</li>
+      <li><i>Authorities</i>, records that include both subject terms that classify citations as well as authors, publishers, and journals that have written and published those works. </li>
+    </ul>
+
     <p>
-      <i>IsisCB Explore</i> blends a professionally curated database with social media tools, so that the community can play a more active role in building a tool that will cater to its needs. User participation is encouraged. Please sign-in and provide comments to entries where you see errors and add further information where relevant. Suggest hyperlinks and other material that will be useful for fellow scholars.
+      <i>IsisCB Explore</i> blends a professionally curated database with social media tools, so that the community can play a more active role in building a tool that will cater to its needs.
     </p>
+
     <p>
-      If you run into problems with the tool itself, please use the Feedback link. If you have specific comments on the content of records, you can add those directly to the record itself, using the commenting function, or you can email us at <a href="mailto:isisbibliography@gmail.com">isisbibliography@gmail.com</a>.
+      User participation is encouraged. Please sign-in and provide comments to entries where you see errors and add further information where relevant. Suggest hyperlinks and other material that will be useful for fellow scholars.
     </p>
+
     <p>
-      We are fully committed to open access. Our data is available via a <a href="{% url 'rest_root' %}">REST API</a> (accessible through the icons on this site), and all of our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use following the Creative Commons Attribution-NonCommercial 4.0 International License.
+      We are fully committed to open access. Our data are available via a <a href="http://data.isiscb.org/rest/">REST API</a> (accessible through the icons on this site), and all of our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use following the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
     </p>
+
+    <h4>Current features</h4>
+
+    <p>One can use the IsisCB to do a standard bibliographical search. This is the mode that we expect most users will find valuable on a day-to-day basis.</p>
+
+    <ul>
+      <li><i>Account registration</i>. You can register for an account or log in through Facebook or Twitter.</li>
+      <li><i>Zotero integration</i>. All bibliographic records can be saved in Zotero, either individually or in search results. </li>
+      <li><i>Search history</i>. The system automatically logs your search history and gives you the ability to bookmark and save certain searches.</li>
+      <li><i>Public user comments</i>. Once logged in, you can add public comments on any record so that you can identify missing information or suggest outside links.</li>
+      <li><i>Faceted searching</i>. The facets are indexed items that you can access directly using the Authorities tab.</li>
+    </ul>
+
+
+
 
     <h4>Development schedule</h4>
     <p>
@@ -40,29 +62,45 @@
     </p>
     <ul>
       <li>
-        More data, including web-based resources from the World History of Science Online, all bibliographical citations from the 1913-1975 Isis Cumulative Bibliographies, and conference presentation citations from selected conferences.
+        <i>Data</i>. We will be integrating several hundred thousand new records in the next few months. These data include web-based resources from the <a href="http://www.dhst-whso.org/">World History of Science Online</a> and the 1913-1975 Isis Cumulative Bibliographies.
       </li>
       <li>
-        More user account functions, such as adding entries, curating pages, saving marked sets of citations.
+        <i>Link resolvers</i>. Library users will be able to get direct access to the full text of items in subscribed library resources.
       </li>
       <li>
-        More nuanced indexing, including merging of identical authorities.
+        <i>User account functions</i>. We will eventually make it possible for people to adding entries, curating pages, saving marked sets of citations.
       </li>
       <li>
-        More information about authority records, drawn from places like DBPedia.
+        <i>Indexing</i>. As we study the authority lists, we well be able to merge many of the identical authorities that currently exist in the system.
       </li>
       <li>
-        More linked resources, including authority links to places such as the Stanford Encyclopedia of Philosophy.
+        <i>Authority records</i>. We will be providing more information drawn from places like <a href="http://wiki.dbpedia.org/">DBPedia</a> that will help users know more about authority records that they are using to do searches.
       </li>
       <li>
-        More API functionality.
+        <i>Linked Open Data</i>. We will be adding links to many other external authority records, so that users will be able to find accurate data on records from authoritative sources, such as the Stanford Encyclopedia of Philosophy and similar projects.
+      </li>
+      <li>
+        <i>More API functionality</i>. We will be adding new ways to access our records algorithmically.
       </li>
     </ul>
 
     <h4>Acknowledgements</h4>
     <p>
        The following individuals have been especially helpful in making this project possible: Sylwester Ratowt, Colin Allen, Margaret Gaida, Amy Rodgers, Gavan McCarthy, Marco La Rosa, Ailie Smith, John Stewart, Erick Peirson, Julia Damerow, Tara Carlisle, Nathan Kapoor, Younes Mahdavi, Carolyn Scearce, Kirsty Gaither, Sam Fellows. In addition, we want to thank the many individuals associated with the sponsoring institutions listed on this page. The project could not have been completed without their help. Faculty and administrative staff in many different departments across the University of Oklahoma have been extraordinarily supportive throughout this endeavor.
+     </p>
+     <p>
+       Questions and information regarding this project can be directed to:
+     </p>
+     <p>
+        Stephen P. Weldon<br>
+        Editor, Isis Bibliography of the History of Science<br>
+        Assistant Professor of History of Science<br>
+        601 Elm Street, Physical Sciences 618<br>
+        University of Oklahoma<br>
+        Norman, Oklahoma 73019<br>
+        spweldon [at] ou [dot] edu<br>
     </p>
+
     <p>
       This website was developed by <a href="http://aplacecalledup.com">A Place Called Up Consulting</a>. A Place Called Up Consulting works with academic units, teams, and individual scholars to advance excellence in digital humanities research, training, and outreach. From planning to maturity, A Place Called Up Consulting provides guidance, software and infrastructure development services, training, and support for projects of all sizes.
     </p>

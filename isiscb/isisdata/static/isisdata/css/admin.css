@@ -1,0 +1,21 @@
+#header {
+    height: 80px;
+    padding-top: 5px;
+}
+
+.btn-delete {
+    background-color: #ba2121;
+}
+
+
+.btn-delete a {
+    color: #fff;
+}
+
+.btn-cancel {
+    color: #ccc;
+}
+
+.btn-cancel a {
+    color: #fff;
+}

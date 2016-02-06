@@ -147,6 +147,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -198,7 +199,9 @@ TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
-
+# REST_FRAMEWORK = {
+#     'DEFAULT_FILTER_BACKENDS': ('rest_framework_filters.backends.DjangoFilterBackend',)
+# }
 
 LICENSE = """This work is licensed under a Creative Commons
              Attribution-NonCommercial 4.0 International License."""

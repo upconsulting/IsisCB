@@ -1,11 +1,11 @@
 bleach==1.4.2
 boto==2.38.0
 Django==1.8.3
-django-autocomplete-light==2.2.5
+django-autocomplete-light==2.3.2
 django-extensions==1.5.5
-django-haystack==2.4.0
+django-haystack==2.4.1
 django-simple-captcha==0.4.6
-django-simple-history==1.6.3
+django-simple-history==1.7.0
 django-storages==1.1.8
 djangorestframework==3.2.3
 elasticsearch==1.6.0
@@ -23,7 +23,7 @@ python-social-auth==0.2.13
 pytz==2015.4
 requests==2.7.0
 requests-oauthlib==0.5.0
-six==1.9.0
+six==1.10.0
 urllib3==1.12
 wheel==0.24.0
 elasticstack
@@ -32,3 +32,4 @@ django-cors-headers
 unidecode
 django-filter
 django-ipware
+djangorestframework-filters

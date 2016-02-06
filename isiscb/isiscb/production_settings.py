@@ -39,6 +39,7 @@ MIGRATION_MODULES = {
 
 INSTALLED_APPS = (
     'autocomplete_light',
+    'isisdata',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,7 +49,6 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'rest_framework',
     'simple_history',
-    'isisdata',
     'storages',
     'haystack',
     'captcha',
@@ -148,6 +148,10 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
+    },
+    'search_results_cache': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'search_cache',
     }
 }
 

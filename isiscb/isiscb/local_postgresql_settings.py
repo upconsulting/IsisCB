@@ -148,6 +148,10 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
+    },
+    'search_results_cache': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'search_cache',
     }
 }
 
@@ -215,12 +219,12 @@ CAPTCHA_FONT_SIZE = 36
 
 # social
 
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
+SOCIAL_AUTH_FACEBOOK_KEY = ''#os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
-SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+SOCIAL_AUTH_TWITTER_KEY = ''#os.environ['SOCIAL_AUTH_TWITTER_KEY']
+SOCIAL_AUTH_FACEBOOK_SECRET = ''#os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
+SOCIAL_AUTH_TWITTER_SECRET = ''#os.environ['SOCIAL_AUTH_TWITTER_SECRET']
 
 TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
