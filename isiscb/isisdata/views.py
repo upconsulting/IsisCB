@@ -1313,8 +1313,8 @@ def home(request):
 
     context = RequestContext(request, {
         'active': 'home',
-        'comments_citation': Comment.objects.filter(subject_content_type__model='citation').order_by('-created_on')[:10],
-        'comments_authority': Comment.objects.filter(subject_content_type__model='authority').order_by('-created_on')[:10]
+        'comments_citation': Comment.objects.filter(subject_content_type__model='citation').order_by('-modified_on')[:10],
+        'comments_authority': Comment.objects.filter(subject_content_type__model='authority').order_by('-modified_on')[:10]
     })
 
     return HttpResponse(template.render(context))
