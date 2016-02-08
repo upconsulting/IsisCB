@@ -16,12 +16,19 @@ def help_text(s):
     return re.sub('\s+', ' ', s).strip()
 
 
+class ImportAccession(models.Model):
+    imported_on = models.DateTimeField(auto_now_add=True)
+    imported_by = models.ForeignKey(User, blank=True, null=True)
+    name = models.CharField(max_length=255)
+
+
 class ImportedData(models.Model):
     class Meta:
         abstract = True
 
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True)
+    part_of = models.ForeignKey('ImportAccession')
 
     processed = models.BooleanField(default=False, help_text=help_text("""
     Indicates whether or not a record has been inspected, and a corresponding

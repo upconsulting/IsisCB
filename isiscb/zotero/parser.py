@@ -527,7 +527,7 @@ def read(path):
     return papers
 
 
-def process_authorities(paper):
+def process_authorities(paper, instance):
     authority_fields = [
         ('PE', 'AU', 'authors_full'),
         ('PE', 'ED', 'editors'),
@@ -552,6 +552,7 @@ def process_authorities(paper):
                     name_last = last.title(),
                     name_first = first.title(),
                     type_controlled = authority_type,
+                    part_of = instance,
                 )
                 entity.save()
                 draftAuthorities.append(entity)
@@ -559,12 +560,14 @@ def process_authorities(paper):
                 relation = DraftACRelation(
                     authority = entity,
                     type_controlled = acrelation_type,
+                    part_of = instance,
                 )
                 draftACRelations.append(relation)
         else:
             entity = DraftAuthority(
                 name = field_value.title(),
                 type_controlled = authority_type,
+                part_of = instance,
             )
             entity.save()
             draftAuthorities.append(entity)
@@ -572,13 +575,14 @@ def process_authorities(paper):
             relation = DraftACRelation(
                 authority = entity,
                 type_controlled = acrelation_type,
+                part_of = instance,
             )
             draftACRelations.append(relation)
 
     return draftAuthorities, draftACRelations
 
 
-def process_linkeddata(paper):
+def process_linkeddata(paper, instance):
     linkeddata_fields = [
         (DraftCitationLinkedData, [
             ('external', 'uri'),
@@ -598,7 +602,8 @@ def process_linkeddata(paper):
             if hasattr(paper, field):
                 linkedDataEntry = model(
                     name = name,
-                    value = getattr(paper, field)
+                    value = getattr(paper, field),
+                    part_of = instance,
                 )
                 draftLinkedDataEntries.append(linkedDataEntry)
 
@@ -606,7 +611,7 @@ def process_linkeddata(paper):
     return draftLinkedDataEntries
 
 
-def process_attributes(paper):
+def process_attributes(paper, instance):
     attributeFields = [
         ('PublicationDate', 'date'),
     ]
@@ -617,12 +622,13 @@ def process_attributes(paper):
             attribute = DraftAttribute(
                 name = field,
                 value = getattr(paper, attr),
+                part_of = instance,
             )
             attributes.append(attribute)
     return attributes
 
 
-def process_paper(paper):
+def process_paper(paper, instance):
     modelFields = [
         ('title', 'title'),
         ('abstract', 'abstract'),
@@ -633,21 +639,21 @@ def process_paper(paper):
         ('volume', 'volume'),
         ('issue', 'issue'),
     ]
-    draftCitation = DraftCitation()
-    
+    draftCitation = DraftCitation(part_of = instance)
+
     for field, attr in modelFields:
         if hasattr(paper, attr):
             setattr(draftCitation, field, getattr(paper, attr))
     draftCitation.save()
 
     # Build DraftAuthority and DraftACRelation.
-    authorities, acrelations = process_authorities(paper)
+    authorities, acrelations = process_authorities(paper, instance)
     for acrelation in acrelations:
         acrelation.citation = draftCitation
         acrelation.save()
 
     # Linked Data for both the Citation and Authorities.
-    linkedData = process_linkeddata(paper)
+    linkedData = process_linkeddata(paper, instance)
     for ldEntry in linkedData:
         if type(ldEntry) is DraftCitationLinkedData:
             ldEntry.citation = draftCitation
@@ -659,7 +665,7 @@ def process_paper(paper):
                     ldEntry.save()
 
     # Build DraftAttributes.
-    attributes = process_attributes(paper)
+    attributes = process_attributes(paper, instance)
     for attribute in attributes:
         attribute.citation = draftCitation
         attribute.save()
@@ -668,9 +674,9 @@ def process_paper(paper):
     return draftCitation
 
 
-def process(papers):
+def process(papers, instance):
     """
 
     """
 
-    return [process_paper(paper) for paper in papers]
+    return [process_paper(paper, instance) for paper in papers]
