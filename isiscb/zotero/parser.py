@@ -35,6 +35,7 @@ IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
 
 
+
 class dobject(object):
     pass
 
@@ -438,6 +439,18 @@ class ZoteroParser(RDFParser):
 
             if p == VOL:        # Volume number
                 self.set_value('volume', unicode(o))
+            elif p == IDENT:
+                # Zotero (in all of its madness) makes some identifiers, like
+                #  DOIs, properties of Journals rather than the Articles to
+                #  which they belong. The predicate for these relations
+                #  is identifier, and the object contains both the identifier
+                #  type and the identifier itself, eg.
+                #       "DOI 10.1017/S0039484"
+                try:
+                    name, ident_value = tuple(unicode(o).split(' '))
+                    self.set_value(name.lower(), ident_value)
+                except ValueError:
+                    pass
             elif p == TITLE:
                 journal = unicode(o)    # Journal title.
         return journal
@@ -565,8 +578,51 @@ def process_authorities(paper):
     return draftAuthorities, draftACRelations
 
 
-def process_paper(paper):
+def process_linkeddata(paper):
+    linkeddata_fields = [
+        (DraftCitationLinkedData, [
+            ('external', 'uri'),
+            ('doi', 'doi'),
 
+        ]),
+        (DraftAuthorityLinkedData, [
+            ('isbn', 'isbn'),
+            ('issn', 'issn'),
+        ])
+    ]
+
+    draftLinkedDataEntries = []
+
+    for model, fields in linkeddata_fields:
+        for name, field in fields:
+            if hasattr(paper, field):
+                linkedDataEntry = model(
+                    name = name,
+                    value = getattr(paper, field)
+                )
+                draftLinkedDataEntries.append(linkedDataEntry)
+
+
+    return draftLinkedDataEntries
+
+
+def process_attributes(paper):
+    attributeFields = [
+        ('PublicationDate', 'date'),
+    ]
+
+    attributes = []
+    for field, attr in attributeFields:
+        if hasattr(paper, attr):
+            attribute = DraftAttribute(
+                name = field,
+                value = getattr(paper, attr),
+            )
+            attributes.append(attribute)
+    return attributes
+
+
+def process_paper(paper):
     modelFields = [
         ('title', 'title'),
         ('abstract', 'abstract'),
@@ -578,18 +634,35 @@ def process_paper(paper):
         ('issue', 'issue'),
     ]
     draftCitation = DraftCitation()
-
+    
     for field, attr in modelFields:
         if hasattr(paper, attr):
             setattr(draftCitation, field, getattr(paper, attr))
     draftCitation.save()
 
+    # Build DraftAuthority and DraftACRelation.
     authorities, acrelations = process_authorities(paper)
     for acrelation in acrelations:
         acrelation.citation = draftCitation
         acrelation.save()
 
-    # acrelations = process_acrelations(paper, authors, 'AU')
+    # Linked Data for both the Citation and Authorities.
+    linkedData = process_linkeddata(paper)
+    for ldEntry in linkedData:
+        if type(ldEntry) is DraftCitationLinkedData:
+            ldEntry.citation = draftCitation
+            ldEntry.save()
+        elif type(ldEntry) is DraftAuthorityLinkedData:
+            for authority in authorities:
+                if authority.type_controlled == 'SE':
+                    ldEntry.authority = authority
+                    ldEntry.save()
+
+    # Build DraftAttributes.
+    attributes = process_attributes(paper)
+    for attribute in attributes:
+        attribute.citation = draftCitation
+        attribute.save()
 
     draftCitation.save()
     return draftCitation

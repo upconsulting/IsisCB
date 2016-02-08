@@ -78,8 +78,14 @@ class DraftACRelation(ImportedData):
     type_broad_controlled = models.CharField(max_length=2)
 
 
-class DraftLinkedData(ImportedData):
+class DraftCitationLinkedData(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='linkeddata')
+    name = models.CharField(max_length=255)
+    value = models.CharField(max_length=255)
+
+
+class DraftAuthorityLinkedData(ImportedData):
+    authority = models.ForeignKey('DraftAuthority', related_name='linkeddata')
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
