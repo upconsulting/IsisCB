@@ -39,6 +39,7 @@ import xml.etree.ElementTree as ET
 from isisdata.models import *
 from isisdata.forms import UserRegistrationForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
+from isisdata import helper_methods
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -675,7 +676,7 @@ def authority(request, authority_id):
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None)
+    query_string = request.GET.get('query_string', None).encode('ascii','ignore')
     fromsearch = request.GET.get('fromsearch', False)
     if query_string:
         search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
@@ -842,7 +843,7 @@ def citation(request, citation_id):
     fromsearch = request.GET.get('fromsearch', False)
     #search_key = request.session.get('search_key', None)
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None)
+    query_string = request.GET.get('query_string', None).encode('ascii','ignore')
     if query_string:
         search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
@@ -1040,7 +1041,7 @@ class IsisSearchView(FacetedSearchView):
         # !! Why are we using strings rather than bools?
         log = self.request.GET.get('log', 'True') != 'False'
 
-        parameters = self.request.GET.get('q', None)
+        parameters = self.request.GET.get('q', None).encode('ascii','ignore')
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
         sort_field_citation = self.request.GET.get('sort_order_citation', None)
