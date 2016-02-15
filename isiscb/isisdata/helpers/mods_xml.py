@@ -73,7 +73,7 @@ def generate_mods_xml(citation):
         role_term.appendChild(role_term_text)
 
     # add contributors
-    contributors = citation.acrelation_set.filter(type_controlled__in=['CO'])
+    contributors = citation.acrelation_set.filter(type_controlled__in=['CO','AD'])
     for contr in contributors:
         name = doc.createElement('name')
         name.setAttribute('type', 'personal')
@@ -102,7 +102,7 @@ def generate_mods_xml(citation):
     # type of resource
     genre = doc.createElement('genre')
     genre.setAttribute('authority', 'local')
-    cit_type = citation.get_type_controlled_display().lower()
+    cit_type = get_type(citation.type_controlled) #citation.get_type_controlled_display().lower()
     genre.appendChild(doc.createTextNode(cit_type))
     mods.appendChild(genre)
 
@@ -128,14 +128,63 @@ def generate_mods_xml(citation):
         number.appendChild(doc.createTextNode(issue))
         detail.appendChild(number)
 
-    publishers = citation.acrelation_set.filter(type_controlled__in=['PU'])
+    publishers = get_publisher(citation)
     for pub in publishers:
         publisher = doc.createElement('publisher')
         publisher.appendChild(doc.createTextNode(pub.authority.name))
         origin_info.appendChild(publisher)
 
+    # Periodical
+    periodicals = citation.acrelation_set.filter(type_controlled__in=['PE'])
+    for periodical in periodicals:
+        # create <relatedItem><titleInfo><title>
+        related_item = doc.createElement('relatedItem')
+        related_item.setAttribute('type', 'host')
+        mods.appendChild(related_item)
+
+        rel_title_info = doc.createElement('titleInfo')
+        related_item.appendChild(rel_title_info)
+
+        rel_title = doc.createElement('title')
+        rel_title.appendChild(doc.createTextNode(periodical.authority.name))
+        rel_title_info.appendChild(rel_title)
+
+    # series
+    series = citation.acrelation_set.filter(type_controlled__in=['BS'])
+    for serie in series:
+        # create <relatedItem><titleInfo><title>
+        series_related_item = doc.createElement('relatedItem')
+        series_related_item.setAttribute('type', 'host')
+        mods.appendChild(series_related_item)
+
+        series_rel_title_info = doc.createElement('titleInfo')
+        series_related_item.appendChild(series_rel_title_info)
+
+        series_rel_title = doc.createElement('title')
+        series_rel_title.appendChild(doc.createTextNode(serie.authority.name))
+        series_rel_title_info.appendChild(series_rel_title)
+
+    # included in
+    included_in = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC', object__public=True)
+    for included in included_in:
+        # create <relatedItem><titleInfo><title>
+        included_in_rel_item = doc.createElement('relatedItem')
+        included_in_rel_item.setAttribute('type', 'host')
+        mods.appendChild(included_in_rel_item)
+
+        included_in_rel_item_title_info = doc.createElement('titleInfo')
+        included_in_rel_item.appendChild(included_in_rel_item_title_info)
+
+        included_in_rel_item_title = doc.createElement('title')
+        included_in_rel_item_title.appendChild(doc.createTextNode(bleach_safe(get_title(included.subject))))
+        included_in_rel_item_title_info.appendChild(included_in_rel_item_title)
+
+
     start_page = citation.part_details.page_begin
     end_page = citation.part_details.page_end
+
+    if not end_page:
+        end_page = start_page
 
     if start_page or end_page:
         extent = doc.createElement('extent')
@@ -177,3 +226,22 @@ def get_issue(citation):
         issue += " - " + str(citation.part_details.issue_end)
 
     return issue
+
+def get_publisher(citation):
+    return citation.acrelation_set.filter(type_controlled__in=['PU', 'SC', 'IN'])
+
+def get_type(citation_type):
+    type_dict = {}
+    type_dict['BO'] = 'book'
+    type_dict['AR'] = 'article'
+    type_dict['CH'] = 'bookSection'
+    type_dict['RE'] = 'journalArticle'
+    type_dict['ES'] = 'journalArticle'
+    type_dict['TH'] = 'thesis'
+    type_dict['EV'] = 'document'
+    type_dict['PR'] = 'presentation'
+    type_dict['IN'] = 'document'
+    type_dict['WE'] = 'document'
+    type_dict['AP'] = 'computerProgram'
+
+    return type_dict.get(citation_type, 'document')
