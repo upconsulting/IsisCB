@@ -676,9 +676,10 @@ def authority(request, authority_id):
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None).encode('ascii','ignore')
+    query_string = request.GET.get('query_string', None)
     fromsearch = request.GET.get('fromsearch', False)
     if query_string:
+        query_string = query_string.encode('ascii','ignore')
         search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
@@ -843,8 +844,9 @@ def citation(request, citation_id):
     fromsearch = request.GET.get('fromsearch', False)
     #search_key = request.session.get('search_key', None)
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None).encode('ascii','ignore')
+    query_string = request.GET.get('query_string', None)
     if query_string:
+        query_string = query_string.encode('ascii','ignore')
         search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
@@ -1041,7 +1043,9 @@ class IsisSearchView(FacetedSearchView):
         # !! Why are we using strings rather than bools?
         log = self.request.GET.get('log', 'True') != 'False'
 
-        parameters = self.request.GET.get('q', None).encode('ascii','ignore')
+        parameters = self.request.GET.get('q', None)
+        if (parameters):
+            parameters = parameters.encode('ascii','ignore')
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
         sort_field_citation = self.request.GET.get('sort_order_citation', None)
