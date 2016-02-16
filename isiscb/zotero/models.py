@@ -54,10 +54,10 @@ class DraftCitation(ImportedData):
     type_controlled = models.CharField(max_length=2, null=True, blank=True)
     publication_date = models.CharField(max_length=100, null=True, blank=True)
 
-    page_start = models.CharField(max_length=10, blank=True, null=True)
-    page_end = models.CharField(max_length=10, blank=True, null=True)
-    volume = models.CharField(max_length=10, blank=True, null=True)
-    issue = models.CharField(max_length=10, blank=True, null=True)
+    page_start = models.CharField(max_length=100, blank=True, null=True)
+    page_end = models.CharField(max_length=100, blank=True, null=True)
+    volume = models.CharField(max_length=100, blank=True, null=True)
+    issue = models.CharField(max_length=100, blank=True, null=True)
 
 
 class DraftAuthority(ImportedData):

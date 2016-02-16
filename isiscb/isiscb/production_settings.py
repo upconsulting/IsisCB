@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     "elasticstack",
     'oauth2_provider',
     'corsheaders',
+    'zotero',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
