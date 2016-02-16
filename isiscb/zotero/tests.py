@@ -4,6 +4,7 @@ import datetime
 
 from parser import *
 from models import *
+from suggest import *
 
 
 # Create your tests here.
@@ -75,32 +76,42 @@ AUTHOR = rdflib.URIRef("http://purl.org/net/biblio#authors")
 #             self.assertTrue(hasattr(paper, 'documentType'))
 #             self.assertEqual(len(paper.documentType), 2)
 #             self.assertIn(paper.documentType, ZoteroParser.document_types.values())
+#
+#
+# class TestIngest(TestCase):
+#     def test_process_paper(self):
+#         papers = read(datapath)
+#         for paper in papers:
+#             draftCitation = process_paper(paper)
+#             self.assertIsInstance(draftCitation, DraftCitation)
+#
+#     def test_handle_authorities(self):
+#         papers = read(datapath)
+#
+#         for paper in papers:
+#             authorities, acrelations = process_authorities(paper)
+#             self.assertGreater(len(authorities), 0)
+#             self.assertGreater(len(acrelations), 0)
+#
+#     def test_handle_linkeddata(self):
+#         papers = read(datapath)
+#         for paper in papers:
+#             ldentries = process_linkeddata(paper)
+#
+#
+#     def test_process(self):
+#         papers = read(datapath)
+#         citations = process(papers)
+#
+#         self.assertGreater(len(citations), 0)
+#         self.assertIsInstance(citations[0], DraftCitation)
 
 
-class TestIngest(TestCase):
-    def test_process_paper(self):
+class TestSuggest(TestCase):
+    def test_suggest_citation_by_linkeddata(self):
+        accession = ImportAccession(name='test')
+        accession.save()
         papers = read(datapath)
-        for paper in papers:
-            draftCitation = process_paper(paper)
-            self.assertIsInstance(draftCitation, DraftCitation)
+        citations = process(papers, accession)
 
-    def test_handle_authorities(self):
-        papers = read(datapath)
-
-        for paper in papers:
-            authorities, acrelations = process_authorities(paper)
-            self.assertGreater(len(authorities), 0)
-            self.assertGreater(len(acrelations), 0)
-
-    def test_handle_linkeddata(self):
-        papers = read(datapath)
-        for paper in papers:
-            ldentries = process_linkeddata(paper)
-
-
-    def test_process(self):
-        papers = read(datapath)
-        citations = process(papers)
-
-        self.assertGreater(len(citations), 0)
-        self.assertIsInstance(citations[0], DraftCitation)
+        print suggest_by_linkeddata(citations[0])

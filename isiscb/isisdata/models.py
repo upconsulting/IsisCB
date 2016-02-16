@@ -1312,9 +1312,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     type_free = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        values = (self.subject, self.type_controlled,
+        values = (self.type_controlled,
                   self.universal_resource_name)
-        return u'{0} - {1} - {2}'.format(*values)
+        return u'{0}: {1}'.format(*values)
 
 
 class Tracking(ReferencedEntity, CuratedMixin):

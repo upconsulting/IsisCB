@@ -1,0 +1,149 @@
+{% extends "admin/base_site.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+.suggestion-reasons {
+    margin-left: 5px;
+}
+
+.suggestion-reasons > span {
+    margin-right: 5px;
+}
+
+.acrelation {
+    margin-right: 5px;
+}
+</style>
+
+
+<form method='POST' action='.'>{% csrf_token %}
+<p class="text text-info">
+    Use this page to associate imported (draft) citations with existing citation records (in production).
+    The application will attempt to load matching citations from the production database. If suggestions
+    are found, click on the green <span class="label label-success">number</span> to the right of a draft citation to display them. If no suggestions
+    are found, a darkly-shaded <span class="label label-default">0</span> will be shown.
+</p>
+<p class="text text-info">
+    Clicking on the green <span class="label label-success">number</span> again will collapse the suggestions
+    for that draft citation.
+</p>
+<ul class="list-group">
+    {% for authority in draftAuthorities %}
+    <li class="list-group-item draft-authority" id="{{ authority.id }}"><strong>{{ authority.name }}</strong>
+        {% for acrelation in authority.citation_relations.all %}
+        <span class="label label-danger acrelation">{{ acrelation.type_controlled }}</span> <a href="" target="_blank">{{ acrelation.citation.title }}</a>
+        {% endfor %}
+        <div class="pull-right" style="text-align: center;">
+            <a class="suggestion-status" data-target="#collapse-{{ authority.id }}"></a>
+        </div>
+
+    </li>
+    <li class="collapse" id="collapse-{{ authority.id }}">
+        <div class="well suggestion-results">
+            <p><strong>Type</strong> <span class="label label-warning">{{authority.type_controlled}}</span></p>
+
+            <p class="text text-muted">
+                The following authority records (in production) are similar to the draft authority record above.
+                The basis for their similarity is indicated by the green tags to the right of each title.
+                The strength of their similarity is indicated by the blue bar, at right. Clicking on a
+                authority record title will open that record in a new window. To select a matching authority record,
+                click on one of the radio buttons. If no satisfactory match can be found, simply leave
+                the radio buttons unchecked, or select <strong>None</strong>.
+            </p>
+        </div>
+    </li>
+
+    {% endfor %}
+</ul>
+
+<div class="panel">
+    <p class="text text-info">
+        When you have finished selecting matching authority records, click "Next" to begin merging
+        draft authority records into the selected production authority records.
+    </p>
+    <div class="pull-right">
+        <button type="submit" class="btn btn-success">Next</button>
+    </div>
+</div>
+
+</form>
+
+<script src="{% static 'zotero/js/spin.min.js' %}"></script>
+<script src="{% static 'zotero/js/jquery.spin.js' %}"></script>
+
+<script>
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 4 // The length of each line
+, width: 2 // The line thickness
+, radius: 5 // The radius of the inner circle
+, scale: 1 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#297CA6' // #rgb or #rrggbb or array of colors
+, opacity: 0.5 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 62 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '7px' // Top position relative to parent
+, left: '-15px' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'relative' // Element positioning
+}
+
+    $('.draft-authority').each(function(idx) {
+        var elem = $(this);
+        $.ajax('/zotero/suggest/authority/' + elem.attr('id') + '/', {
+            beforeSend: function(response) {
+                elem.find('.suggestion-status').spin(opts);
+            },
+            success: function(response) {
+                var status = elem.find('.suggestion-status');
+                status.spin(false);
+                status.addClass('label');
+
+                status.text(response.data.length);
+                if (response.data.length > 0) {
+                    status.addClass('label-success');
+                    status.attr('data-toggle', "collapse");
+
+                    var target = $(status.attr("data-target") + ' > .suggestion-results');
+                    response.data.forEach(function(suggestion) {
+                        var suggestElem = $('<li></li>');
+                        var radioElem = $('<label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="' + suggestion.id + '"></label>');
+
+                        var suggestLink = $('<a href="/isis/authority/' + suggestion.id + '/" target="_blank"></a>');
+                        suggestLink.text('' + suggestion.name + ' (' + suggestion.id + ')');
+                        radioElem.append(suggestLink);
+                        suggestElem.append(radioElem);
+                        suggestElem.addClass('list-group-item');
+
+                        var reasonsElem = $('<span class="suggestion-reasons"></span>');
+                        suggestion.reasons.forEach(function(reason) {
+                            var reasonElem = $('<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>')
+                            reasonsElem.append(reasonElem);
+                        });
+                        suggestElem.append(reasonsElem);
+
+                        var weightElem = $('<div class="pull-right col-sm-2"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div>');
+                        suggestElem.append(weightElem);
+                        target.append(suggestElem);
+                    });
+                    var noneElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="-1" checked="checked"><strong>None</strong></label></li>');
+                    target.append(noneElem);
+                } else {
+                    status.addClass('label-default');
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

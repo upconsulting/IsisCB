@@ -59,6 +59,9 @@ class DraftCitation(ImportedData):
     volume = models.CharField(max_length=100, blank=True, null=True)
     issue = models.CharField(max_length=100, blank=True, null=True)
 
+    def __unicode__(self):
+        return self.title
+
 
 class DraftAuthority(ImportedData):
     """

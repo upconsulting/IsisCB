@@ -1,0 +1,148 @@
+{% extends "admin/base_site.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+.suggestion-reasons {
+    margin-left: 5px;
+}
+
+.suggestion-reasons > span {
+    margin-right: 5px;
+}
+
+.acrelation {
+    margin-right: 5px;
+}
+</style>
+
+
+<form method='POST' action='.'>
+    {% csrf_token %}
+<p class="text text-info">
+    Use this page to associate imported (draft) citations with existing citation records (in production).
+    The application will attempt to load matching citations from the production database. If suggestions
+    are found, click on the green <span class="label label-success">number</span> to the right of a draft citation to display them. If no suggestions
+    are found, a darkly-shaded <span class="label label-default">0</span> will be shown.
+</p>
+<p class="text text-info">
+    Clicking on the green <span class="label label-success">number</span> again will collapse the suggestions
+    for that draft citation.
+</p>
+<ul class="list-group">
+    {% for citation in draftCitations %}
+    <li class="list-group-item draft-citation" id="{{ citation.id }}">{{ citation.title }}
+        <div class="pull-right" style="text-align: center;">
+            <a class="suggestion-status" data-target="#collapse-{{ citation.id }}"></a>
+        </div>
+
+    </li>
+    <li class="collapse" id="collapse-{{ citation.id }}">
+        <div class="well suggestion-results">
+            {% if citation.page_start %}<p><strong>Pages</strong> {{citation.page_start}} - {{citation.page_end}}</p>{% endif %}
+            {% if citation.authority_relations.count %}<p><strong>Authority relations</strong>: {% for acrelation in citation.authority_relations.all %}<span class="acrelation">{{ acrelation.authority.name }} <span class="label label-warning">{{ acrelation.authority.type_controlled }}</span> <span class="label label-danger">{{ acrelation.type_controlled }}</span> </span>{% endfor %}</p>{% endif %}
+            {% if citation.attributes.count %}<p><strong>Attributes</strong>: {% for attribute in citation.attributes.all %}<span class="acrelation"><span class="label label-primary">{{ attribute.name }}</span>{{attribute.value}}</span>{% endfor %}</p>{% endif %}
+            <p class="text text-muted">
+                The following citations (in production) are similar to the draft citation above.
+                The basis for their similarity is indicated by the green tags to the right of each title.
+                The strength of their similarity is indicated by the blue bar, at right. Clicking on a
+                citation title will open that citation in a new window. To select a matching citation,
+                click on one of the radio buttons. If no satisfactory match can be found, simply leave
+                the radio buttons unchecked, or select <strong>None</strong>.
+            </p>
+        </div>
+    </li>
+
+    {% endfor %}
+</ul>
+
+<div class="panel">
+    <p class="text text-info">
+        When you have finished selecting matching citations, click "Next" to begin merging
+        draft citations into the selected production citations.
+    </p>
+    <div class="pull-right">
+        <button type="submit" class="btn btn-success">Next</button>
+    </div>
+</div>
+
+</form>
+
+<script src="{% static 'zotero/js/spin.min.js' %}"></script>
+<script src="{% static 'zotero/js/jquery.spin.js' %}"></script>
+
+<script>
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 4 // The length of each line
+, width: 2 // The line thickness
+, radius: 5 // The radius of the inner circle
+, scale: 1 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#297CA6' // #rgb or #rrggbb or array of colors
+, opacity: 0.5 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 62 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '7px' // Top position relative to parent
+, left: '-15px' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'relative' // Element positioning
+}
+
+    $('.draft-citation').each(function(idx) {
+        var elem = $(this);
+        $.ajax('/zotero/suggest/citation/' + elem.attr('id') + '/', {
+            beforeSend: function(response) {
+                elem.find('.suggestion-status').spin(opts);
+            },
+            success: function(response) {
+                var status = elem.find('.suggestion-status');
+                status.spin(false);
+                status.addClass('label');
+
+                status.text(response.data.length);
+                if (response.data.length > 0) {
+                    status.addClass('label-success');
+                    status.attr('data-toggle', "collapse");
+
+                    var target = $(status.attr("data-target") + ' > .suggestion-results');
+                    response.data.forEach(function(suggestion) {
+                        var suggestElem = $('<li></li>');
+                        var radioElem = $('<label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="' + suggestion.id + '"></label>');
+
+                        var suggestLink = $('<a href="/isis/citation/' + suggestion.id + '/" target="_blank"></a>');
+                        suggestLink.text('' + suggestion.title + ' (' + suggestion.id + ')');
+                        radioElem.append(suggestLink);
+                        suggestElem.append(radioElem);
+                        suggestElem.addClass('list-group-item');
+
+                        var reasonsElem = $('<span class="suggestion-reasons"></span>');
+                        suggestion.reasons.forEach(function(reason) {
+                            var reasonElem = $('<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>')
+                            reasonsElem.append(reasonElem);
+                        });
+                        suggestElem.append(reasonsElem);
+
+                        var weightElem = $('<div class="pull-right col-sm-2"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div>');
+                        suggestElem.append(weightElem);
+                        target.append(suggestElem);
+                    });
+                    var noneElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="-1" checked="checked"><strong>None</strong></label></li>');
+                    target.append(noneElem);
+                } else {
+                    status.addClass('label-default');
+                }
+            }
+        });
+    });
+</script>
+
+{% endblock %}

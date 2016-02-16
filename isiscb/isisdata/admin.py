@@ -627,7 +627,7 @@ class LinkedDataTypeAdmin(SimpleHistoryAdmin):
 class LinkedDataAdmin(SimpleHistoryAdmin):
 
     list_display = ('id',
-                    'subject',
+                    # 'subject',
                     'type_controlled',
                     'universal_resource_name')
     list_filter = ('type_controlled',)
