@@ -56,7 +56,7 @@
               <ul class="selected_facets">
                 {% for author in selected_facets.citation_all_contributor_ids_exact %}
                 {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="glyphicon glyphicon-new-window"></i> {{author|get_authority_name}} </a> </li>
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="glyphicon glyphicon-new-window"></i></a>  </li>
                 {% endwith %}
                 {% endfor %}
               </ul>
@@ -64,7 +64,7 @@
                 {# Provide only the top 7 authors #}
                 {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
                 {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_aall_contributor_ids_exact %}
-                <li><a title="Add Author & Contributors facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ author.0|get_authority_name }}</a> ({{ author.1 }}) <a title="See authority entry for {{ author.0 }}"> </a></li>
+                <li><a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="glyphicon glyphicon-new-window"></i></a></li>
                 {% endif %}
                 {% endfor %}
               </ul>
@@ -100,14 +100,14 @@
           <ul class="selected_facets">
             {% for subject in selected_facets.citation_subject_ids_exact %}
             {% with subject|create_facet_string:'citation_subject_ids_exact' as encoded_subject %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{subject|get_authority_name}}" href="{% url 'authority' subject %}?"><i class="glyphicon glyphicon-new-window"></i> {{subject|get_authority_name}}</a> </li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{subject|get_authority_name}}</a> <a title="Go to authority record for {{subject|get_authority_name}}" href="{% url 'authority' subject %}?"><i class="glyphicon glyphicon-new-window"></i> </a> </li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for subject in facets_citation.fields.subject_ids|slice:":7" %}
                 {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}" title="Show only results involving {{ subject.0|get_authority_name }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ subject.0|get_authority_name }}</a> ({{ subject.1 }}) <a title="Go to authority record for {{subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="glyphicon glyphicon-new-window"></i>  </a> </li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -143,14 +143,14 @@
           <ul class="selected_facets">
             {% for time_period in selected_facets.citation_time_period_ids_exact %}
             {% with time_period|create_facet_string:'citation_time_period_ids_exact' as encoded_time_period %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a>  <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?"><i class="glyphicon glyphicon-new-window"></i> {{ time_period|get_authority_name }}</a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{ time_period|get_authority_name }}</a>  <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?"><i class="glyphicon glyphicon-new-window"></i> </a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for time_period in facets_citation.fields.time_period_ids|slice:":7" %}
                 {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}" title="Show only results involving {{ time_period.0|get_authority_name }}"><i class="glyphicon glyphicon-plus-sign" ></i> {{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }}) <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="glyphicon glyphicon-new-window"></i> </a></li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -186,14 +186,14 @@
           <ul class="selected_facets">
             {% for geographic in selected_facets.citation_geographic_ids_exact %}
             {% with geographic|create_facet_string:'citation_geographic_ids_exact' as encoded_geographic %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span></a> <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?"><i class="glyphicon glyphicon-new-window"></i> {{ geographic|get_authority_name }}</a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class="glyphicon glyphicon-minus-sign"></span> {{ geographic|get_authority_name }}</a> <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?"><i class="glyphicon glyphicon-new-window"></i></a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for geographic in facets_citation.fields.geographic_ids|slice:":7" %}
                 {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="glyphicon glyphicon-plus-sign"></i></a> <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="glyphicon glyphicon-new-window"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}" title="Show only results involving {{ geographic.0|get_authority_name }}"><i class="glyphicon glyphicon-plus-sign"></i> {{ geographic.0|get_authority_name }}</a> ({{ geographic.1 }}) <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="glyphicon glyphicon-new-window"></i>  </a></li>
                 {% endif %}
                 {% endfor %}
           </ul>
