@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 import re
 
@@ -80,6 +80,11 @@ class DraftAuthority(ImportedData):
     name_suffix = models.CharField(max_length=255, null=True, blank=True)
     type_controlled = models.CharField(max_length=2, null=True, blank=True)
 
+    resolutions = GenericRelation('InstanceResolutionEvent',
+                                  related_query_name='authority_resolutions',
+                                  content_type_field='for_model',
+                                  object_id_field='for_instance_id')
+
 
 class DraftACRelation(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='authority_relations')
@@ -112,7 +117,7 @@ class InstanceResolutionEvent(models.Model):
     for_instance = GenericForeignKey('for_model', 'for_instance_id')
 
     to_model =  models.ForeignKey(ContentType, related_name='instanceresolutions_to')
-    to_instance_id = models.PositiveIntegerField()
+    to_instance_id = models.CharField(max_length=1000)
     to_instance = GenericForeignKey('to_model', 'to_instance_id')
 
 

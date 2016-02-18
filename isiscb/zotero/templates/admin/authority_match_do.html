@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+.suggestion-reasons {
+    margin-left: 5px;
+}
+
+.suggestion-reasons > span {
+    margin-right: 5px;
+}
+
+.acrelation {
+    margin-right: 5px;
+}
+</style>
+
+
+<form method='POST' action='{% url "admin:draftauthority_resolve" %}' enctype="multipart/form-data">
+    {% csrf_token %}
+<p class="text text-info">
+    You are about to merge the draft authority records (imported from Zotero) on the left into the existing
+    production authority records on the right. Click <span class="label label-success">Merge</span> to proceed.
+</p>
+
+<table class="table table-responsive">
+    <thead>
+        <th>Draft Citation</th>
+        <th>Production Citation</th>
+    </thead>
+    <tbody>
+        {% for draft, authority in chosen_suggestions %}
+        <tr>
+            <td><a href="{% url "admin:zotero_draftauthority_change" draft.id %}" target="_blank">{{ draft.name }}</a> <span class="label label-warning"> {{ draft.type_controlled }}</span></td>
+            <td><a href="{% url "admin:isisdata_authority_change" authority.id %}" target="_blank">{{ authority.name }}</a> <span class="label label-warning"> {{ authority.type_controlled }}</span></td>
+            <!-- -vv- This is the POST payload. -vv- -->
+            <input type="hidden" name="merge_{{ draft.id}}" value="{{ authority.id }}" />
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="panel">
+    <div class="pull-right">
+        <button type="submit" class="btn btn-success">Merge</button>
+    </div>
+</div>
+
+</form>
+
+
+
+{% endblock %}

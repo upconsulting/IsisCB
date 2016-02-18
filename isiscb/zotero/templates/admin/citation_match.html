@@ -19,7 +19,7 @@
 </style>
 
 
-<form method='POST' action='.'>
+<form method='POST' action='{% url "admin:draftcitation_match" %}' enctype="multipart/form-data">
     {% csrf_token %}
 <p class="text text-info">
     Use this page to associate imported (draft) citations with existing citation records (in production).
@@ -136,7 +136,12 @@ var opts = {
                         target.append(suggestElem);
                     });
                     var noneElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="-1" checked="checked"><strong>None</strong></label></li>');
+                    var customElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" id="suggestions_for_' + elem.attr('id') + '_radio" value="" checked="checked"><input size="40" type="text" name="input_for_' + elem.attr('id') + '_text" id="input_for_' + elem.attr('id') + '_text" placeholder="Enter a citation ID..." /></label></li>');
+                    target.append(customElem);
                     target.append(noneElem);
+                    $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
+                        $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
+                    });
                 } else {
                     status.addClass('label-default');
                 }
