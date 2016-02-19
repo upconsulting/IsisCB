@@ -6,12 +6,14 @@ from django.template.response import TemplateResponse
 from django.core.exceptions import ValidationError
 from django import forms
 from django.core.urlresolvers import reverse
+from django.forms import formset_factory
+from django.forms.models import modelformset_factory
 
 from zotero.models import *
 from zotero.parser import read, process
 from zotero.suggest import *
 
-from isisdata.admin import AuthorityForm, CitationForm
+from isisdata.admin import CitationForm, AttributeInlineForm, ValueField, ValueWidget
 
 import tempfile
 
@@ -19,6 +21,27 @@ import tempfile
 class BulkIngestForm(forms.ModelForm):
     zotero_rdf = forms.FileField()
 
+
+class AuthorityForm(forms.ModelForm):
+    class Meta:
+        model = Authority
+        exclude = ('uri',
+                   'id',
+                   'classification_system',
+                   'classification_code',
+                   'classification_hierarchy',
+                   'modified_on_fm',
+                   'modified_by_fm',
+                   'created_on_fm',
+                   'created_by_fm')
+    def __init__(self, *args, **kwargs):
+        super(AuthorityForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():    # bootstrappiness.
+            if key in ['public']:
+                continue
+            if key in ['administrator_notes', 'description', 'record_history']:
+                self.fields[key].widget.attrs['rows'] = 3
+            self.fields[key].widget.attrs['class'] = 'form-control'
 
 class ImportAccessionAdmin(admin.ModelAdmin):
     form = BulkIngestForm
@@ -124,6 +147,7 @@ def resolve(request, draftmodel, choicemodel):
         draftinstance.save()
 
 
+
 class DraftCitationAdmin(admin.ModelAdmin):
     class Meta:
         model = DraftCitation
@@ -177,19 +201,70 @@ class DraftCitationAdmin(admin.ModelAdmin):
         return extra_urls + urls
 
 
+class LinkedDataForm(forms.ModelForm):
+    class Meta:
+        model = LinkedData
+        fields = ['type_controlled', 'universal_resource_name']
+
+    def __init__(self, *args, **kwargs):
+        super(LinkedDataForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+            self.fields[key].widget.attrs['class'] = 'form-control'
+
+
+
+class AttributeForm(forms.ModelForm):
+    value = forms.CharField(required=False)
+
+    class Meta:
+        model = Attribute
+        fields = ['type_controlled', 'value_freeform',]
+
+    def __init__(self, *args, **kwargs):
+        super(AttributeForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+            self.fields[key].widget.attrs['class'] = 'form-control'
+
+    def is_valid(self):
+        """
+        Enforce validation for ``value`` based on ``type_controlled``.
+        """
+        val = super(AttributeForm, self).is_valid()
+
+        if all(x in self.cleaned_data for x in ['value', 'type_controlled']):
+            value = self.cleaned_data['value']
+            attr_type = self.cleaned_data['type_controlled']
+            if (value and not attr_type) or (attr_type and not value):
+                self.add_error('value', 'Missing data')
+            value_model = attr_type.value_content_type.model_class()
+            try:
+                value_model.is_valid(value)
+            except ValidationError as E:
+                self.add_error('value', E)
+        return super(AttributeForm, self).is_valid()
+
+
 class DraftAuthorityAdmin(admin.ModelAdmin):
     list_display = ('name', 'imported_on', 'processed')
-    list_filter = ('processed', )
+    # list_filter = ('processed', )
 
     actions = [match_authorities]
     inlines = []
 
-    # def get_queryset(self, *args, **kwargs):
-    #     queryset = super(DraftAuthorityAdmin, self).get_queryset(*args, **kwargs)
-    #     return queryset.filter(processed=False)
+    def get_queryset(self, *args, **kwargs):
+        """
+        Processed records are hidden.
+        """
+        queryset = super(DraftAuthorityAdmin, self).get_queryset(*args, **kwargs)
+        return queryset.filter(processed=False)
 
     def find_matches(self, request, draftauthority_id):
-        print  DraftAuthority.objects.filter(id=int(draftauthority_id))
+        """
+        We serve the match_authorities action as a view here so that we can
+        use reverse resolution in templates.
+        """
         return match_authorities(self, request, DraftAuthority.objects.filter(id=int(draftauthority_id)))
 
     def match(self, request):
@@ -230,19 +305,77 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
         draftauthority = DraftAuthority.objects.get(pk=draftauthority_id)
         context.update({'draftauthority': draftauthority})
 
+        AttributeInlineFormSet = formset_factory(AttributeForm)
+        LinkedDataInlineFormSet = formset_factory(LinkedDataForm)
+
         if request.method == 'GET':
             form = AuthorityForm(initial={
                 'name': draftauthority.name,
                 'type_controlled': draftauthority.type_controlled,
                 'record_history': u'Created from Zotero accession {0}, performed at {1} by {2}. Subsequently validated and curated by {3}.'.format(draftauthority.part_of.id, draftauthority.part_of.imported_on, draftauthority.part_of.imported_by, request.user.username),
                 })
-            for key in form.fields.keys():    # bootstrappiness.
-                if key in ['public']:
-                    continue
-                form.fields[key].widget.attrs['class'] = 'form-control'
-            context.update({'form': form})
+            attributeFormset = AttributeInlineFormSet()
+            linkeddataFormset = LinkedDataInlineFormSet()
 
-            return TemplateResponse(request, "admin/authority_create.html", context)
+
+        elif request.method == 'POST':
+            form = AuthorityForm(request.POST)
+            attributeFormset = AttributeInlineFormSet(request.POST)
+            linkeddataFormset = LinkedDataInlineFormSet(request.POST)
+
+            if form.is_valid() and attributeFormset.is_valid() and linkeddataFormset.is_valid():
+                # Create the Authority entry.
+                instance = form.save()
+
+                # Create new Attributes.
+                for attributeForm in attributeFormset:
+                    attributeType = attributeForm.cleaned_data['type_controlled']
+                    valueModel = attributeType.value_content_type.model_class()
+                    value = attributeForm.cleaned_data['value']
+
+                    attribute_instance = Attribute(
+                        source=instance,
+                        type_controlled=attributeType,
+                    )
+                    attribute_instance.save()
+                    value_instance = valueModel(
+                        attribute=attribute_instance,
+                        value=value,
+                    )
+                    value_instance.save()
+
+                # Create new LinkedData entries.
+                for linkeddataForm in linkeddataFormset:
+                    linkeddataType = linkeddataForm.cleaned_data['type_controlled']
+                    urn = linkeddataForm.cleaned_data['universal_resource_name']
+                    linkeddata_instance = LinkedData(
+                        subject=instance,
+                        universal_resource_name=urn,
+                        type_controlled=linkeddataType,
+                    )
+                    linkeddata_instance.save()
+
+                # Add a new InstanceResolutionEvent.
+                irEvent = InstanceResolutionEvent(
+                    for_instance=draftauthority,
+                    to_instance=instance
+                )
+                irEvent.save()
+
+                # Update the DraftAuthority.
+                draftauthority.processed = True
+                draftauthority.save()
+
+                # If successful, take the user to the Authority change view.
+                return HttpResponseRedirect(reverse("admin:isisdata_authority_change", args=[instance.id]))
+
+        context.update({
+            'form': form,
+            'attribute_formset': attributeFormset,
+            'linkeddata_formset': linkeddataFormset,
+            })
+        return TemplateResponse(request, "admin/authority_create.html", context)
+
 
     def get_urls(self):
         urls = super(DraftAuthorityAdmin, self).get_urls()

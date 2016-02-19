@@ -74,11 +74,36 @@ class DraftAuthority(ImportedData):
     future.
     """
 
+    PERSON = 'PE'
+    INSTITUTION = 'IN'
+    TIME_PERIOD = 'TI'
+    GEOGRAPHIC_TERM = 'GE'
+    SERIAL_PUBLICATION = 'SE'
+    CLASSIFICATION_TERM = 'CT'
+    CONCEPT = 'CO'
+    CREATIVE_WORK = 'CW'
+    EVENT = 'EV'
+    CROSSREFERENCE = 'CR'
+    PUBLISHER = 'PU'
+    TYPE_CHOICES = (
+        (PERSON, 'Person'),
+        (INSTITUTION, 'Institution'),
+        (TIME_PERIOD, 'Time Period'),
+        (GEOGRAPHIC_TERM, 'Geographic Term'),
+        (SERIAL_PUBLICATION, 'Serial Publication'),
+        (CLASSIFICATION_TERM, 'Classification Term'),
+        (CONCEPT, 'Concept'),
+        (CREATIVE_WORK, 'Creative Work'),
+        (EVENT, 'Event'),
+        (CROSSREFERENCE, 'Cross-reference'),
+        (PUBLISHER, 'Publisher'),
+    )
     name = models.CharField(max_length=1000)
     name_last = models.CharField(max_length=255, null=True, blank=True)
     name_first = models.CharField(max_length=255, null=True, blank=True)
     name_suffix = models.CharField(max_length=255, null=True, blank=True)
-    type_controlled = models.CharField(max_length=2, null=True, blank=True)
+    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
+                                       null=True, blank=True)
 
     resolutions = GenericRelation('InstanceResolutionEvent',
                                   related_query_name='authority_resolutions',

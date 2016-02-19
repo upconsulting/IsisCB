@@ -162,6 +162,10 @@ class ValueField(forms.Field):
 
 
 class AttributeInlineForm(forms.ModelForm):
+    class Meta:
+        model = Attribute
+        exclude = []
+
     class Media:
         model = Attribute
 
@@ -177,7 +181,10 @@ class AttributeInlineForm(forms.ModelForm):
         #  that we can dynamically change the widget for ``value``. See
         #  widgetmap.js, referenced above.
         css_class = 'attribute_type_controlled'
-        self.base_fields['type_controlled'].widget.attrs['class'] = css_class
+        try:
+            self.base_fields['type_controlled'].widget.attrs['class'] = css_class
+        except KeyError:
+            pass
 
         super(AttributeInlineForm, self).__init__(*args, **kwargs)
 
@@ -694,7 +701,7 @@ class AttributeAdmin(SimpleHistoryAdmin):
         }),
     ]
     readonly_fields = ('uri', 'id', 'source_content_type', 'source_instance_id')
-    list_display = ('id', 'source', 'type_controlled', 'value')
+    list_display = ('id',  'type_controlled', 'value')
     inlines = (ValueInline,)
 
 
@@ -703,11 +710,11 @@ class AttributeTypeAdmin(SimpleHistoryAdmin):
     list_display_links = ('id', 'name')
     inlines = []
 
-    def get_model_perms(self, request):
-        """
-        Return empty perms dict thus hiding the model from admin index.
-        """
-        return {}
+    # def get_model_perms(self, request):
+    #     """
+    #     Return empty perms dict thus hiding the model from admin index.
+    #     """
+    #     return {}
 
 
 class PartDetailsAdmin(SimpleHistoryAdmin):
