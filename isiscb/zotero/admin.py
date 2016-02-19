@@ -154,9 +154,29 @@ class DraftCitationAdmin(admin.ModelAdmin):
 
     list_display = ('title', 'imported_on', 'processed')
     inlines = []
-    list_filter = ('processed',)
+    # list_filter = ('processed',)
 
     actions = [match_citations]
+
+    def get_queryset(self, *args, **kwargs):
+        """
+        Processed records are hidden.
+        """
+        queryset = super(DraftCitationAdmin, self).get_queryset(*args, **kwargs)
+        return queryset.filter(processed=False)
+
+    def find_matches(self, request, draftcitation_id):
+        """
+        We serve the match_citations action as a view here so that we can
+        use reverse resolution in templates.
+        """
+        return match_citations(self, request, DraftCitation.objects.filter(id=int(draftcitation_id)))
+
+    def create_citation(self, request, draftcitation_id):
+        """
+        TODO: implement.
+        """
+        return
 
     def match(self, request):
         """
@@ -195,6 +215,8 @@ class DraftCitationAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(DraftCitationAdmin, self).get_urls()
         extra_urls = [
+            url(r'^creat_citation/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.create_citation), name="draftcitation_create_citation"),
+            url(r'^findmatches/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftcitation_findmatches"),
             url(r'^match/$', self.admin_site.admin_view(self.match), name="draftcitation_match"),
             url(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftcitation_resolve"),
         ]

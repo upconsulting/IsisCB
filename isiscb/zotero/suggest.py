@@ -112,7 +112,7 @@ def suggest_by_linkeddata(draftObject):
     return hits
 
 
-def suggest_by_field(draftObject, field, targetModel, targetField):
+def suggest_by_field(draftObject, field, targetModel, targetField, scramble=False):
     """
     Attempt to match an object based on an arbitrary field.
     """
@@ -122,9 +122,10 @@ def suggest_by_field(draftObject, field, targetModel, targetField):
     q_objects = Q()
     q_objects |= Q(**{'{0}__icontains'.format(targetField): value})
     q_objects |= Q(**{'{0}__in'.format(targetField): value})
-    for v in value.split(' '):
-        if len(v) > 2:
-            q_objects |= Q(**{'{0}__istartswith'.format(targetField): v})
+    if scramble:
+        for v in value.split(' '):
+            if len(v) > 2:
+                q_objects |= Q(**{'{0}__istartswith'.format(targetField): v})
 
     inexact_match = targetModel.objects.filter(q_objects)
 
@@ -132,7 +133,7 @@ def suggest_by_field(draftObject, field, targetModel, targetField):
     for obj in inexact_match:
         targetValue = getattr(obj, targetField)
         match = difflib.SequenceMatcher(None, value, targetValue).quick_ratio()
-        print match
+
         if match > 0.6:
             hits.append((obj.id, 'field', targetField, match))
     return hits
@@ -150,15 +151,15 @@ def suggest_authority(draftAuthority):
     hits += suggest_by_linkeddata(draftAuthority)
     hits += suggest_authority_by_resolutions(draftAuthority)
     # hits += suggest_by_attributes(draftAuthority)
-    hits += suggest_by_field(draftAuthority, 'name', Authority, 'name')
+    hits += suggest_by_field(draftAuthority, 'name', Authority, 'name', scramble=True)
     return aggregate_hits(hits)
 
 
-def suggest_citations(queryset):
-    for obj in queryset:
-        print suggest_citation(obj)
-
-
-def suggest_authorities(queryset):
-    for obj in queryset:
-        print suggest_authority(obj)
+# def suggest_citations(queryset):
+#     for obj in queryset:
+#         print suggest_citation(obj)
+#
+#
+# def suggest_authorities(queryset):
+#     for obj in queryset:
+#         print suggest_authority(obj)
