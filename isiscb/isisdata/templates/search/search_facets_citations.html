@@ -227,7 +227,7 @@
         <ul class="unselected_facets">
           {% for author in facets_citation.fields.all_contributor_ids %}
           {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }})</li>
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }}) <a title="Go to authority record for {{ author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -252,7 +252,7 @@
         <ul class="unselected_facets">
           {% for time_period in facets_citation.fields.time_period_ids %}
           {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -276,7 +276,7 @@
         <ul class="unselected_facets">
           {% for geographic in facets_citation.fields.geographic_ids %}
           {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -300,7 +300,7 @@
         <ul class="unselected_facets">
           {% for subject in facets_citation.fields.subject_ids %}
           {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) </li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) <a title="Go to authority record for {{ subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
