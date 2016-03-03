@@ -33,7 +33,11 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('concepts', size=100). \
         facet('creative_works', size=100). \
         facet('events', size=100). \
-        facet('authority_type', size=100)
+        facet('authority_type', size=100). \
+        facet('all_contributor_ids', size=100).\
+        facet('subject_ids', size=100). \
+        facet('time_period_ids', size=100). \
+        facet('geographic_ids', size=100)
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
@@ -55,4 +59,5 @@ urlpatterns = [
     url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
     url(r'^(?i)help', views.help, name='help'),
     url(r'^(?i)about', views.about, name='about'),
+    url(r'^(?i)api', views.api_documentation, name='api'),
 ]

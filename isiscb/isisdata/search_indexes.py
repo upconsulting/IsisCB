@@ -76,14 +76,16 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     advisor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     translator_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    subject_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    category_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    category_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     publisher_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     school_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     institution_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     meeting_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     periodical_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     book_series_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    time_period_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    geographic_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
     about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
@@ -353,6 +355,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_book_series_ids(self, obj):
         return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
+
+    def prepare_time_period_ids(self, obj):
+        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
+
+    def prepare_geographic_ids(self, obj):
+        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
 
     def prepare_about_person_ids(self, obj):
         return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_broad_controlled='SC')]
