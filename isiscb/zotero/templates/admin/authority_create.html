@@ -18,59 +18,59 @@
 
 
 
-                    {{ form.non_field_errors }}
-                    <div class="form-group">
-                        {{ form.name.errors }}
-                        <label for="{{ form.name.id_for_label }}">Name:</label>
-                        {{ form.name }}
-                        <span class="text text-muted">{{ form.name.help_text }}</span>
+                {{ form.non_field_errors }}
+                <div class="form-group">
+                    {{ form.name.errors }}
+                    <label for="{{ form.name.id_for_label }}">Name:</label>
+                    {{ form.name }}
+                    <span class="text text-muted">{{ form.name.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {{ form.type_controlled.errors }}
+                    <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
+                    {{ form.type_controlled }}
+                    <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {{ form.description.errors }}
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
+                    {{ form.description }}
+                    <span class="text text-muted">{{ form.description.help_text }}</span>
+                </div>
+
+
+                <div class="form-group">
+                    {{ form.public.errors }}
+
+                    <div class="checkbox">
+                        <label for="{{ form.public.id_for_label }}">
+                        {{ form.public }} {{ form.public.label }}
+                        </label>
                     </div>
+                    <span class="text text-muted">{{ form.public.help_text }}</span>
+                </div>
 
-                    <div class="form-group">
-                        {{ form.type_controlled.errors }}
-                        <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
-                        {{ form.type_controlled }}
-                        <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
+                <div class="form-group">
+                    {{ form.administrator_notes.errors }}
+                    <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
+                    {{ form.administrator_notes }}
+                    <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {{ form.record_history.errors }}
+                    <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
+                    {{ form.record_history }}
+                    <span class="text text-muted">{{ form.record_history.help_text }}</span>
+                </div>
+
+                <div class="panel">
+                    <div class="pull-right">
+                        <button type="submit" class="btn btn-success">Create</button>
                     </div>
-
-                    <div class="form-group">
-                        {{ form.description.errors }}
-                        <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
-                        {{ form.description }}
-                        <span class="text text-muted">{{ form.description.help_text }}</span>
-                    </div>
-
-
-                    <div class="form-group">
-                        {{ form.public.errors }}
-
-                        <div class="checkbox">
-                            <label for="{{ form.public.id_for_label }}">
-                            {{ form.public }} {{ form.public.label }}
-                            </label>
-                        </div>
-                        <span class="text text-muted">{{ form.public.help_text }}</span>
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.administrator_notes.errors }}
-                        <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
-                        {{ form.administrator_notes }}
-                        <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.record_history.errors }}
-                        <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
-                        {{ form.record_history }}
-                        <span class="text text-muted">{{ form.record_history.help_text }}</span>
-                    </div>
-
-                    <div class="panel">
-                        <div class="pull-right">
-                            <button type="submit" class="btn btn-success">Create</button>
-                        </div>
-                    </div>
+                </div>
 
 
             </div>
@@ -163,7 +163,7 @@
         <div class="panel">
             <div class="panel-heading">
                 <span class="h3">Linked Data
-                    <span class="btn btn-sm" id="add_liinkeddata_button">
+                    <span class="btn btn-sm" id="add_linkeddata_button">
                         <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
 
                     </span>

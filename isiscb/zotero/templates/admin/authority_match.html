@@ -16,6 +16,12 @@
 .acrelation {
     margin-right: 5px;
 }
+
+.suggestion-results-list {
+    padding-left: 0px;
+    max-height: 200px;
+    overflow-y: scroll;
+}
 </style>
 
 
@@ -34,14 +40,14 @@
     {% for authority in draftAuthorities %}
     <li class="list-group-item draft-authority" id="{{ authority.id }}"><strong>{{ authority.name }}</strong>
         {% for acrelation in authority.citation_relations.all %}
-        <span class="label label-danger acrelation">{{ acrelation.type_controlled }}</span> <a href="" target="_blank">{{ acrelation.citation.title }}</a>
+        <span class="label label-danger acrelation">{{ acrelation.type_controlled }}</span> <a href="{% url "admin:zotero_draftcitation_change" acrelation.citation.id %}" target="_blank">{{ acrelation.citation.title }}</a>
         {% endfor %}
         <div class="pull-right" style="text-align: center;">
             <a class="suggestion-status" data-target="#collapse-{{ authority.id }}"></a>
         </div>
 
     </li>
-    <li class="collapse" id="collapse-{{ authority.id }}">
+    <li{% if draftAuthorities|length > 1%} class="collapse"{% endif %} id="collapse-{{ authority.id }}">
         <div class="well suggestion-results">
             <p><strong>Type</strong> <span class="label label-warning">{{authority.type_controlled}}</span></p>
 
@@ -53,6 +59,8 @@
                 click on one of the radio buttons. If no satisfactory match can be found, simply leave
                 the radio buttons unchecked, or select <strong>None</strong>.
             </p>
+            <ul class="suggestion-results-list">
+            </ul>
         </div>
     </li>
 
@@ -114,7 +122,7 @@ var opts = {
                     status.addClass('label-success');
                     status.attr('data-toggle', "collapse");
 
-                    var target = $(status.attr("data-target") + ' > .suggestion-results');
+                    var target = $(status.attr("data-target") + ' > .suggestion-results > .suggestion-results-list');
                     response.data.forEach(function(suggestion) {
                         var suggestElem = $('<li></li>');
                         var radioElem = $('<label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="' + suggestion.id + '"></label>');

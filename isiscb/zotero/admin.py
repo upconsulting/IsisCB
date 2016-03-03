@@ -33,7 +33,8 @@ class AuthorityForm(forms.ModelForm):
                    'modified_on_fm',
                    'modified_by_fm',
                    'created_on_fm',
-                   'created_by_fm')
+                   'created_by_fm',
+                   'redirect_to')
     def __init__(self, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
         for key in self.fields.keys():    # bootstrappiness.
@@ -42,6 +43,7 @@ class AuthorityForm(forms.ModelForm):
             if key in ['administrator_notes', 'description', 'record_history']:
                 self.fields[key].widget.attrs['rows'] = 3
             self.fields[key].widget.attrs['class'] = 'form-control'
+
 
 class ImportAccessionAdmin(admin.ModelAdmin):
     form = BulkIngestForm
@@ -184,6 +186,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
         has selected citations to merge, we display a confirmation page.
         Otherwise, we just redirect the user back to the changelist view.
         """
+
         context = dict(self.admin_site.each_context(request))
         if request.method == 'POST':
             chosen = match(request, DraftCitation, Citation)
@@ -215,7 +218,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(DraftCitationAdmin, self).get_urls()
         extra_urls = [
-            url(r'^creat_citation/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.create_citation), name="draftcitation_create_citation"),
+            url(r'^create_citation/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.create_citation), name="draftcitation_create_citation"),
             url(r'^findmatches/(?P<draftcitation_id>[0-9]+)/$', self.admin_site.admin_view(self.find_matches), name="draftcitation_findmatches"),
             url(r'^match/$', self.admin_site.admin_view(self.match), name="draftcitation_match"),
             url(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftcitation_resolve"),
@@ -295,6 +298,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
         has selected citations to merge, we display a confirmation page.
         Otherwise, we just redirect the user back to the changelist view.
         """
+
         context = dict(self.admin_site.each_context(request))
         if request.method == 'POST':
             chosen = match(request, DraftAuthority, Authority)
@@ -302,7 +306,67 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
             # The user may not have chosen any production authority records, in
             #  which case we simply return to the changelist.
             if len(chosen) > 0:
-                context.update({'chosen_suggestions': chosen})
+
+                AuthorityInlineFormset = formset_factory(AuthorityForm, extra=0)
+                AttributeInlineFormSet = formset_factory(AttributeForm, extra=1)
+                LinkedDataInlineFormSet = formset_factory(LinkedDataForm, extra=1)
+
+                # Generate initial data for formsets.
+                initial_attribute = []
+                initial_linkeddata = []
+                initial_attribute_groups = []    # Associates forms in formset
+                initial_linkeddata_groups = []   #  with choices.
+                a, l = 0, 0
+                for draftauthority, authority in chosen:
+                    attribute_group = []
+                    linkeddata_group = []
+                    for attribute in authority.attributes.all():
+                        attribute_group.append(a)
+                        initial_attribute.append({
+                            'id': attribute.id,
+                            'value': attribute.value.get_child_class().value,
+                            'type_controlled': attribute.type_controlled,
+                            'value_freeform': attribute.value_freeform,
+                        })
+                        a += 1
+
+                    for linkeddata in authority.linkeddata_entries.all():
+                        linkeddata_group.append(l)
+                        initial_linkeddata.append({
+                            'id': linkeddata.id,
+                            'universal_resource_name': linkeddata.universal_resource_name,
+                            'type_controlled': linkeddata.type_controlled,
+                        })
+                        l += 1
+                    initial_attribute_groups.append(attribute_group)
+                    initial_linkeddata_groups.append(linkeddata_group)
+
+                attribute_formset = AttributeInlineFormSet(prefix='attribute', initial=initial_attribute)
+                linkeddata_formset = LinkedDataInlineFormSet(prefix='linkeddata', initial=initial_linkeddata)
+                attribute_forms = [[attribute_formset[i] for i in group] for group in initial_attribute_groups]
+                linkeddata_forms = [[linkeddata_formset[i] for i in group] for group in initial_linkeddata_groups]
+                formset = AuthorityInlineFormset(prefix='authority', initial=[
+                    {
+                        'name': authority.name,
+                        'type_controlled': authority.type_controlled,
+                        'description': authority.description,
+                        'record_status': authority.record_status,
+                        'record_history': authority.record_history,
+                        'public': authority.public,
+                    }
+                    for draftauthority, authority in chosen])
+
+                chosen = zip(zip(*chosen)[0], zip(*chosen)[1], formset, attribute_forms, linkeddata_forms)
+
+                context.update({
+                    'chosen_suggestions': chosen,
+                    'authority_formset': formset,
+                    'linkeddata_formset': linkeddata_formset,
+                    'attribute_formset': attribute_formset,
+                    'attribute_template_form': attribute_formset[-1],
+                    'linkeddata_template_form': linkeddata_formset[-1],
+
+                })
                 # But if they did choose production authority records, we want
                 #  to confirm that they wish to proceed with the merge action.
                 return TemplateResponse(request, "admin/authority_match_do.html", context)
@@ -323,6 +387,10 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:zotero_draftauthority_changelist'))
 
     def create_authority(self, request, draftauthority_id):
+        """
+        A staff user can create a new :class:`isisdata.Authority` record using
+        data from a :class:`zotero.DraftAuthority` instance.
+        """
         context = dict(self.admin_site.each_context(request))
         draftauthority = DraftAuthority.objects.get(pk=draftauthority_id)
         context.update({'draftauthority': draftauthority})
@@ -417,4 +485,5 @@ admin.site.register(ImportAccession, ImportAccessionAdmin)
 admin.site.register(DraftACRelation)
 admin.site.register(DraftAttribute)
 admin.site.register(DraftCitationLinkedData)
+admin.site.register(DraftAuthorityLinkedData)
 admin.site.register(InstanceResolutionEvent)

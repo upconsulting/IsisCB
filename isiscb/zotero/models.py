@@ -110,6 +110,9 @@ class DraftAuthority(ImportedData):
                                   content_type_field='for_model',
                                   object_id_field='for_instance_id')
 
+    def __unicode__(self):
+        return self.name
+
 
 class DraftACRelation(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='authority_relations')

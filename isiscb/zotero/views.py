@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
 
 from isisdata.models import *
 
@@ -9,6 +10,7 @@ from zotero.models import *
 from zotero.suggest import suggest_citation, suggest_authority
 
 
+@login_required
 @csrf_protect
 def suggest_citation_json(request, citation_id):
     draftCitation = get_object_or_404(DraftCitation, pk=citation_id)
@@ -24,6 +26,7 @@ def suggest_citation_json(request, citation_id):
     return JsonResponse({'data': suggestions})
 
 
+@login_required
 @csrf_protect
 def suggest_authority_json(request, authority_id):
     draftAuthority = get_object_or_404(DraftAuthority, pk=authority_id)

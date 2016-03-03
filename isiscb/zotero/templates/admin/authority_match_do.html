@@ -24,20 +24,226 @@
 <p class="text text-info">
     You are about to merge the draft authority records (imported from Zotero) on the left into the existing
     production authority records on the right. Click <span class="label label-success">Merge</span> to proceed.
+    If more than one record is being merged, click on a table row to show details about the draft and production
+    records, and update any desired values on the production record.
 </p>
 
-<table class="table table-responsive">
+{{ formset.management_form }}
+{{ linkeddata_formset.management_form }}
+{{ attribute_formset.management_form }}
+
+<div style="display: none;">
+    <table>
+    <tr id="linkeddata_template_form">
+        <td>{{ linkeddata_template_form.type_controlled }}</td>
+        <td>{{ linkeddata_template_form.universal_resource_name }}</td>
+        {% if linkeddata_formset.can_delete %}
+            <td>{{ linkeddata_template_form.DELETE }}</td>
+        {% endif %}
+    </tr>
+    </table>
+
+    <table>
+        <tr id="attribute_template_form">
+            <td>{{ attribute_template_form.type_controlled }}</td>
+            <td>{{ attribute_template_form.value }}</td>
+            {% if attribute_formset.can_delete %}
+                <td>{{ attribute_template_form.DELETE }}</td>
+            {% endif %}
+        </tr>
+    </table>
+
+</div>
+
+<table class="table table-responsive table-bordered table-condensed table-hover">
     <thead>
-        <th>Draft Citation</th>
-        <th>Production Citation</th>
+        <th>Draft Authority Record</th>
+        <th>Production Authority Record</th>
     </thead>
     <tbody>
-        {% for draft, authority in chosen_suggestions %}
-        <tr>
-            <td><a href="{% url "admin:zotero_draftauthority_change" draft.id %}" target="_blank">{{ draft.name }}</a> <span class="label label-warning"> {{ draft.type_controlled }}</span></td>
-            <td><a href="{% url "admin:isisdata_authority_change" authority.id %}" target="_blank">{{ authority.name }}</a> <span class="label label-warning"> {{ authority.type_controlled }}</span></td>
+        {% for draft, authority, form, attribute_forms, linkeddata_forms in chosen_suggestions %}
+        <tr class="clickable"  data-target="#collapse-{{ draft.id }}" data-toggle="collapse" >
+            <td class="col-xs-6"><a class="h4" href="{% url "admin:zotero_draftauthority_change" draft.id %}" target="_blank">{{ draft.name }}</a> <span class="label label-warning"> {{ draft.type_controlled }}</span></td>
+            <td class="col-xs-6"><a class="h4" href="{% url "admin:isisdata_authority_change" authority.id %}" target="_blank">{{ authority.name }}</a> <span class="label label-warning"> {{ authority.type_controlled }}</span></td>
             <!-- -vv- This is the POST payload. -vv- -->
             <input type="hidden" name="merge_{{ draft.id}}" value="{{ authority.id }}" />
+        </tr>
+        <tr{% if chosen_suggestions|length > 1 %} class="collapse"{% endif %} id="collapse-{{ draft.id }}">
+            <td colspan="2">
+                {{ form.non_field_errors }}
+                <table class="table table-responsive table-condensed">
+                    <tr>
+                        <td class="col-xs-6">
+                            <label>Name:</label>
+                            <div class="h4">{{ draft.name }}</div>
+                        </td>
+                        <td class="col-xs-6">
+
+                            <div class="form-group">
+                                {{ form.name.errors }}
+                                <label for="{{ form.name.id_for_label }}">Name:</label>
+                                {{ form.name }}
+                                <span class="text text-muted">{{ form.name.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Type:</label>
+                            <div class="h4">{{ draft.get_type_controlled_display }}</div>
+                        </td>
+                        <td>
+
+                            <div class="form-group">
+                                {{ form.type_controlled.errors }}
+                                <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
+                                {{ form.type_controlled }}
+                                <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Description:</label>
+                            <div class="h4">{{ draft.description }}</div>
+                        </td>
+                        <td>
+
+                            <div class="form-group">
+                                {{ form.description.errors }}
+                                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
+                                {{ form.description }}
+                                <span class="text text-muted">{{ form.description.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <div class="form-group">
+                                {{ form.public.errors }}
+
+                                <div class="checkbox">
+                                    <label for="{{ form.public.id_for_label }}">
+                                    {{ form.public }} {{ form.public.label }}
+                                    </label>
+                                </div>
+                                <span class="text text-muted">{{ form.public.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><!-- This is not yet implemented for DraftAuthority. -->
+                            <label>Attributes:
+                                <span class="btn btn-xs" style="visibility: hidden;"><!-- For spacing only. -->
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                                </span>
+                            </label>
+                            {% for attribute in draft.attributes.all %}
+                            <li class="list-group-item">{{ attribute.value }}</li>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div>
+                                <label>Attributes
+                                    <span class="btn btn-xs add_attributes_button" for="{{ authority.id }}">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                                    </span>
+                                </label>
+                                <table class="table attribute_table" for="{{ authority.id }}">
+                                {% for attribute_form in attribute_forms %}
+                                    {{ attribute_form.non_field_errors }}
+                                    {{ attribute_form.errors }}
+                                    <tr>
+                                        <td>{{ attribute_form.type_controlled }}</td>
+                                        <td>{{ attribute_form.value }}</td>
+                                        {% if attribute_formset.can_delete %}
+                                            <td>{{ attribute_form.DELETE }}</td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Linked Data:
+                                <span class="btn btn-xs" style="visibility: hidden;"><!-- For spacing only. -->
+                                    <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                                </span>
+                            </label>
+                            <table class="table">
+                            {% for linkeddata in draft.linkeddata.all %}
+                                <tr>
+                                    <td class="col-xs-6">
+                                        <input class="form-control" tyle="text" disabled value="{{ linkeddata.name }}">
+                                    </td>
+
+                                    <td class="col-xs-6">
+                                        <input class="form-control" tyle="text" disabled value="{{ linkeddata.value }}">
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+                            </table>
+
+                        </td>
+                        <td>
+                            <div>
+                                <label>Linked Data:
+                                    <span class="btn btn-xs add_linkeddata_button" for="{{ authority.id }}">
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                                    </span>
+                                </label>
+                                <table class="table linkeddata_table" for="{{ authority.id }}">
+                                    {% for linkeddata_form in linkeddata_forms %}
+                                        <tr>
+                                            <td>{{ linkeddata_form.type_controlled }}</td>
+                                            <td>{{ linkeddata_form.universal_resource_name }}</td>
+                                            {% if linkeddata_form.can_delete %}
+                                                <td>{{ linkeddata_form.DELETE }}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div class="form-group">
+                                {{ form.administrator_notes.errors }}
+                                <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
+                                {{ form.administrator_notes }}
+                                <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div class="form-group">
+                                {{ form.record_history.errors }}
+                                <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
+                                {{ form.record_history }}
+                                <span class="text text-muted">{{ form.record_history.help_text }}</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+
+
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -51,6 +257,69 @@
 
 </form>
 
+<script>
+
+
+$('.add_attributes_button').on('click', function() {
+    var for_authority = $(this).attr('for');
+    var lastAttributeRow = $('#attribute_template_form');
+    var newAttributeRow = lastAttributeRow.clone();
+    var totalFormsElem = $('#attribute_management_form > #id_form-TOTAL_FORMS');
+    var tForms = Number(totalFormsElem.attr("value"));
+
+    newAttributeRow.find('td').children().each(function(i, child) {
+        var last_ID = child.id;
+        var last_ID_parts = last_ID.split('-');
+        var last_name_parts = child.name.split('-');
+        var last_idx = Number(last_ID_parts[1]);
+        var new_idx = tForms;
+        var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
+        var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
+
+        var childElem = $(child);
+        childElem.val("");
+        childElem.attr('id', new_ID);
+        childElem.attr('name', new_name);
+
+    });
+
+
+    totalFormsElem.attr("value", tForms);
+    console.log(for_authority);
+    console.log($('.attribute_table[for='+ for_authority + ']'));
+    $('.attribute_table[for='+ for_authority + ']').append(newAttributeRow);
+});
+
+$('.add_linkeddata_button').on('click', function() {
+    var for_authority = $(this).attr('for');
+    var lastAttributeRow = $('#linkeddata_template_form');
+    var newAttributeRow = lastAttributeRow.clone();
+    var totalFormsElem = $('#id_linkeddata-TOTAL_FORMS');
+    var tForms = Number(totalFormsElem.attr("value")) + 1;
+
+    newAttributeRow.find('td').children().each(function(i, child) {
+        var last_ID = child.id;
+        var last_ID_parts = last_ID.split('-');
+        var last_name_parts = child.name.split('-');
+        var last_idx = Number(last_ID_parts[1]);
+        var new_idx = tForms;
+        var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
+        var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
+
+        var childElem = $(child);
+        childElem.val("");
+        childElem.attr('id', new_ID);
+        childElem.attr('name', new_name);
+
+    });
+
+
+    totalFormsElem.attr("value", tForms);
+
+    $('.linkeddata_table[for='+ for_authority + ']').append(newAttributeRow);
+});
+
+</script>
 
 
 {% endblock %}
