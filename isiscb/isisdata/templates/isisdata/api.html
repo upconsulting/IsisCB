@@ -1,0 +1,211 @@
+{% extends "isisdata/__base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="row" ng-app="commentsApp">
+    <div class="col-xs-10 col-xs-offset-1 main">
+        <div class="panel">
+            <h2>REST API</h2>
+            <p>
+                Direct access to the data in <em>IsisCB Explore</em> is available via a RESTful API at
+                <a href="{{ rest_endpoint }}">{{ rest_endpoint }}</a>.
+            </p>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <a class="h3" data-toggle="collapse" href="#credentials">Obtaining Credentials</a>
+            </div>
+            <div id="credentials" class="panel-collapse collapse">
+                <div class="panel-body">
+
+                    <p>
+                        The <em>IsisCB Explore</em> REST API is protected using <a href="http://oauth.net/2/">OAuth2</a>.
+                        There are two main types of applications, each with a distinct authorization pattern ("grant type").
+                    </p>
+                    <ol>
+                        <li>
+                            <strong>Authorization code.</strong> An application that uses this grant type can
+                            allow IsisCB users to authorize that application to access the REST API on their behalf.
+                            This involves three-legged authentication:
+                            <ol>
+                                <li>
+                                    A user initiates authorization in the client application, usually by clicking
+                                    on a link.
+                                </li>
+                                <li>
+                                    The client application forwards the user to an authorization page in the
+                                    <em>IsisCB Explore</em> web application, where they are prompted to log
+                                    in and grant access to the client application.
+                                </li>
+                                <li>The IsisCB application passes an authorization token back to the client application.</li>
+                                <li>
+                                    The client application exchanges the authorization token for an access token,
+                                    which is passed along with any subsequent requests to the REST API.
+                                </li>
+                            </ol>
+                        </li>
+                        <li>
+                            <strong>Client credentials.</strong> An application that uses this grant type can access
+                            the API using the credentials of a single IsisCB user. This is appropriate for applications
+                            that do not provide functionality on a per-user basis.
+                        </li>
+                    </ol>
+                    <p>
+                        In order to access the REST API, you must first obtain a pair of client keys. The owner of the
+                        application should have an active user account in the <em>IsisCB Explore</em> application.
+                        Send your request, including a description of your use-case and the desired authorization pattern,
+                        to <a href="mailto:info@aplacecalledup.com">info@aplacecalledup.com</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <a class="h3" data-toggle="collapse" href="#clientaccess">Access Using Client Credentials</a>
+            </div>
+            <div id="clientaccess" class="panel-collapse collapse">
+                <div class="panel-body">
+                    <p>Follow these steps to access the API using the Client Credentials grant type.</p>
+                    <ol>
+                        <li>
+                            <p>
+                                <strong>Request an authorization token.</strong> Send a POST request to the authorization
+                                endpoint with your client id and client secret.
+                            </p>
+                            <p><span class="label label-primary">Request</span></p>
+                            <pre class="pre-scrollable"><code class="language-bash">$ curl -X POST "http://data.isiscb.org/o/token/?grant_type=client_credentials&client_id=<your_client_id>&client_secret=<your_client_secret>"</code></pre>
+                            <p>You should receive a JSON response with an access token.</p>
+                            <p><span class="label label-info">Response</span></p>
+<pre class="pre-scrollable"><code class="language-json">{
+    "access_token": "jRxQv9emXKehebcmoHpJHji8KUOTEj",
+    "token_type": "Bearer",
+    "expires_in": 36000,
+    "scope": "read api"
+}</code></pre>
+                        </li>
+                        <li>
+                            <p>
+                                <strong>Pass the access token in an Authorization header with your requests</strong>
+                            </p>
+                            <p>
+                                <span class="label label-primary">Request</span>
+                            </p>
+                            <pre class="pre-scrollable"><code class="language-bash">$ curl -H "Authorization: Bearer <your_access_token>" http://data.isiscb.org/rest/citation/CBB000002822/</code></pre>
+                            <p><span class="label label-info">Response</span></p>
+                            <pre class="pre-scrollable"><code class="language-json">{
+  "uri":"http://isiscb-staging.elasticbeanstalk.com/isis/citation/CBB000002822",
+  "url":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+  "id":"CBB000002822",
+  "title":"Ampère et les lois de l'électrodynamique",
+  "description":null,
+  "language":[
+  ],
+  "type_controlled":"AR",
+  "abstract":"",
+  "edition_details":"",
+  "physical_details":"",
+  "attributes":[
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/attribute/ATT000112309/",
+      "id":"ATT000112309",
+      "type_controlled":{
+        "url":"http://isiscb-staging.elasticbeanstalk.com/rest/attributetype/1/",
+        "id":1,
+        "name":"PublicationDate",
+        "content_type":{
+          "url":"http://isiscb-staging.elasticbeanstalk.com/rest/contenttype/16/",
+          "model":"datevalue"
+        }
+      },
+      "type_controlled_broad":"\n",
+      "source":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "value":{
+        "value":"1977-01-01",
+        "value_type":"datevalue"
+      },
+      "value_freeform":"1977"
+    }
+  ],
+  "linked_data":[
+  ],
+  "related_citations":[
+  ],
+  "related_authorities":[
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR001274413/",
+      "id":"ACR001274413",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000124177/",
+      "name":"",
+      "type_controlled":"PE"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR001113432/",
+      "id":"ACR001113432",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000115816/",
+      "name":"",
+      "type_controlled":"CA"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR001054661/",
+      "id":"ACR001054661",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000130243/",
+      "name":"",
+      "type_controlled":"CA"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR000762737/",
+      "id":"ACR000762737",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000002086/",
+      "name":"",
+      "type_controlled":"SU"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR000762736/",
+      "id":"ACR000762736",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000115816/",
+      "name":"",
+      "type_controlled":"SU"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR000762735/",
+      "id":"ACR000762735",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000113709/",
+      "name":"",
+      "type_controlled":"SU"
+    },
+    {
+      "uri":"",
+      "url":"http://isiscb-staging.elasticbeanstalk.com/rest/acrelation/ACR000191794/",
+      "id":"ACR000191794",
+      "citation":"http://isiscb-staging.elasticbeanstalk.com/rest/citation/CBB000002822/",
+      "authority":"http://isiscb-staging.elasticbeanstalk.com/rest/authority/CBA000052374/",
+      "name":"",
+      "type_controlled":"AU"
+    }
+  ]
+}</code></pre>
+                        </li>
+
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

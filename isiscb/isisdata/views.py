@@ -1325,6 +1325,21 @@ def home(request):
     return HttpResponse(template.render(context))
 
 
+def api_documentation(request):
+    """
+    Information page about the REST API.
+    """
+
+    template = loader.get_template('isisdata/api.html')
+    rest_endpoint = request.build_absolute_uri(reverse('rest_root'))
+    context = RequestContext(request, {
+        'active': 'about',
+        'rest_endpoint': rest_endpoint,
+    })
+    return HttpResponse(template.render(context))
+
+
+
 def get_linkresolver_url(request, citation_id):
     """
     Use the WorldCat registry API to get the appropriate OpenURL resolver for

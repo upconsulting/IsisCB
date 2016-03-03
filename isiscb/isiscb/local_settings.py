@@ -152,7 +152,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata'
+    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata',
+    'EXCEPTION_HANDLER': 'isisdata.exceptions.custom_exception_handler'
 }
 
 
@@ -203,5 +204,4 @@ FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 #     'DEFAULT_FILTER_BACKENDS': ('rest_framework_filters.backends.DjangoFilterBackend',)
 # }
 
-LICENSE = """This work is licensed under a Creative Commons
-             Attribution-NonCommercial 4.0 International License."""
+LICENSE = """This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."""
