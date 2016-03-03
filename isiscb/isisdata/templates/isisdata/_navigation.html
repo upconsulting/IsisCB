@@ -2,9 +2,9 @@
 
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-4 navbar-header">
-            <a class="navbar-brand" href="{% url 'index' %}"><img style="padding-top:8px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
+
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'index' %}"><img style="padding-top:16px; width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -12,49 +12,47 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
+        <div class="col-sm-4 col-xs-12">
+            <div class="navbar-center" style="padding-top:16px; margin-left: 20px;">
+                <li>
+                    <form method="get" action="/isis/">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
 
-        <div class="col-md-3 col-md-offset-0 col-xs-offset-3 ">
-        <ul class="nav navbar-nav navbar-nav-home">
-            <li>
-                <form style="max-width: 325px" method="get" action="/isis/">
-                    <div class="input-group">
-                        <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
-                        <span class="input-group-btn">
-                            <button class="btn btn-default" type="submit">Search</button>
-                        </span>
-                    </div>
-                    <div>
-                        <input id="id_models" name="models" type="hidden" value="isisdata.citation">
-                        <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
-                        <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                        <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
-
-                    </div>
-                </form>
-
-            </li>
-        </ul>
+                        </div>
+                    </form>
+                </li>
+            </div>
         </div>
+        <div class="navbar-collapse collapse navbar-right" id="navbar" style="margin-bottom: 5px;">
+            <!-- <ul class="nav navbar-nav navbar-nav-home">
 
-        <div class="col-md-5">
-        <div class="navbar-collapse collapse navbar-right" id="navbar">
+        </ul> -->
             <ul class="nav navbar-nav navbar-nav-home">
+
                 <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
                 <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
                 <li class="{% if active == 'help' %}active{% endif %}"><a href="{% url "help" %}">Help</a></li>
                 <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
-                  <ul class="dropdown-menu">
-                    <li><a href="#" id="feedback">Submit Feedback</a></li>
-                    <li><a href="#" id="submitCitation">Submit Citation</a></li>
-                  </ul>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="feedback">Submit Feedback</a></li>
+                        <li><a href="#" id="submitCitation">Submit Citation</a></li>
+                    </ul>
                 </li>
                 {% if user.is_authenticated %}
                 <li class="{% if active == 'user' %}active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                         {{ user.username }} <span class="caret"></span>
-                    <!-- <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    </button> -->
                     </a>
                     <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
                         <!-- <li><a href="/profile/">Dashboard</a></li> -->
@@ -72,7 +70,5 @@
                 {% endif %}
             </ul>
         </div>
-      </div>
     </div>
-  </div>
 </nav>
