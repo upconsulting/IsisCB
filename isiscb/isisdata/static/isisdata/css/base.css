@@ -341,6 +341,11 @@ li {
   font-size: 14px;
 }
 
+ul.topics_list {
+  padding-left: 25px;
+  padding-top: 10px;
+}
+
 .panel-default>.panel-heading .badge {
   background-color: #F5F5F5;
   color: #5A5959;
