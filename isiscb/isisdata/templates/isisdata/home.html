@@ -60,7 +60,7 @@
                   {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
                 <div class="col-md-4 col-sm-12">
-                  <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
+                  <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
                 </div>
               </div>
               <div class="row">
@@ -82,7 +82,7 @@
                   {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
                 <div class="col-md-4 col-sm-12">
-                  <span class="text-small text-muted pull-right">{{ comment.created_on }}</span>
+                  <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
                 </div>
               </div>
               <div class="row">
