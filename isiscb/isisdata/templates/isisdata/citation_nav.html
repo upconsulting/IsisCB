@@ -1,87 +1,59 @@
 <!-- Topics list -->
-<div class="panel-group" id="type_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        Topics
-      </h4>
-    </div>
-  </div>
-</div>
+{% if subjects %}
+<h4 class="panel-title">
+  Topics
+</h4>
 <!-- CSS class not being applied, hence this uglyness -->
-<ul style="padding-left: 25px;">
+<ul class="topics_list">
     {% for subject in subjects %}
     <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }} <i class="fa fa-info-circle"></i></a></li>
     {% endfor %}
 </ul>
-{% if not subjects %}
-<p>There are no topics.</p>
 {% endif %}
 <!-- End Topics list -->
 
 <!-- Time Periods list -->
-<div class="panel-group" id="type_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        Time Periods
-      </h4>
-    </div>
-  </div>
-</div>
+{% if time_periods %}
+<h4 class="panel-title">
+  Time Periods
+</h4>
 <!-- CSS class not being applied, hence this uglyness -->
-<ul style="padding-left: 25px;">
+<ul class="topics_list">
     {% for time in time_periods %}
     <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }} <i class="fa fa-info-circle"></i></a></li>
     {% endfor %}
 </ul>
-{% if not time_periods %}
-<p>There are no time periods.</p>
 {% endif %}
 <!-- End Time Periods list -->
 
 <!-- Places list -->
-<div class="panel-group" id="type_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-          Places
-      </h4>
-    </div>
-  </div>
-</div>
+{% if places %}
+<h4 class="panel-title">
+    Places
+</h4>
 <!-- CSS class not being applied, hence this uglyness -->
-<ul style="padding-left: 25px;">
+<ul class="topics_list">
   {% for place in places %}
   <li><a href="{% url 'authority' place.authority.id %}">{{ place.authority.name }} <i class="fa fa-info-circle"></i></a></li>
   {% endfor %}
 </ul>
-{% if not places %}
-<p>There are no places.</p>
 {% endif %}
 <!-- End Places list -->
 
 <!-- Categories list -->
-<div class="panel-group" id="type_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion"
-          href="#collapseCategories">
-          Categories
-        </a>
-      </h4>
-    </div>
-  </div>
-</div>
+{% if categories %}
+<h4 class="panel-title">
+  <a data-toggle="collapse" data-parent="#accordion"
+    href="#collapseCategories">
+    Categories
+  </a>
+</h4>
 <!-- CSS class not being applied, hence this uglyness -->
-<ul style="padding-left: 25px;">
+<ul class="topics_list">
   {% for category in categories %}
   <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }} <i class="fa fa-info-circle"></i></a></li>
   {% endfor %}
 </ul>
-{% if not categories %}
-<p>There are no categories.</p>
 {% endif %}
 <!-- End Categories list -->
 
