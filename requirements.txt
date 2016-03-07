@@ -33,3 +33,4 @@ unidecode
 django-filter
 django-ipware
 djangorestframework-filters
+rdflib

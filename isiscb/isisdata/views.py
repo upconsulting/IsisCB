@@ -32,6 +32,7 @@ from urllib import quote, urlopen
 import codecs
 from collections import defaultdict
 from helpers.mods_xml import initial_response, generate_mods_xml
+from helpers.linked_data import generate_rdf
 import datetime
 from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
@@ -1324,6 +1325,16 @@ def home(request):
 
     return HttpResponse(template.render(context))
 
+def rdf_view(request, authority_id):
+    """
+    Get RDF for comments_citation
+    """
+
+    if authority_id:
+        authority = get_object_or_404(Authority, pk=authority_id)
+        return HttpResponse(generate_rdf(authority), content_type="text/rdf+xml")
+
+    return HttpResponse('')
 
 def api_documentation(request):
     """
