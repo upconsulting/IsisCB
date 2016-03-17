@@ -1,10 +1,11 @@
 from rdflib import Graph, URIRef, BNode, Literal
-from rdflib.namespace import RDF, FOAF, DC, Namespace, SKOS, DCTERMS, RDFS, OWL
+from rdflib.namespace import RDF, FOAF, DC, Namespace, SKOS, DCTERMS, RDFS, OWL, NamespaceManager
 import urllib
 
 isisns = Namespace('http://data.isiscb.org/vocab#')
 isisns_props = Namespace('http://data.isiscb.org/properties#')
 dbpedia = Namespace('http://dbpedia.org/ontology/')
+madsrdf = Namespace('http://www.loc.gov/mads/rdf/v1#')
 
 
 def generate_rdf(authority):
@@ -16,13 +17,19 @@ def generate_rdf(authority):
     if not type:
         return ''
     g.add( (auth, RDF.type, type) )
+    g.add( (auth, RDF.type, madsrdf.Authority) )
     g.add( (auth, RDFS.label, Literal(authority.name)) )
+    g.add( (auth, madsrdf.authoritativeLabel, Literal(authority.name)) )
 
     for attr in authority.attributes.all():
         attr_pred = get_property(attr.type_controlled.name)
         if attr_pred:
             g.add( (auth, attr_pred, Literal(attr.value_freeform)))
 
+    nsMgr = NamespaceManager(g)
+    nsMgr.bind('madsrdf', madsrdf)
+    nsMgr.bind('isiscb', isisns)
+    nsMgr.bind('isisvocab', isisns_props)
     return g.serialize(format='application/rdf+xml')
 
 def get_property(authority_attr):
