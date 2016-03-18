@@ -1,6 +1,7 @@
 {% extends "isisdata/__base_home.html" %}
 {% load app_filters %}
 {% load staticfiles %}
+{% load i18n %}
 
 {% block content %}
 <div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat;">
@@ -14,9 +15,9 @@
               <div class="search-bar">
                       <form method="get" action="/isis/">
                           <div class="input-group">
-                              <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                              <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="{% trans "Explore the IsisCB..." %}">
                               <span class="input-group-btn">
-                                  <button class="btn btn-default btn-lg" type="submit">Search</button>
+                                  <button class="btn btn-default btn-lg" type="submit">{% trans "Search" %}</button>
                               </span>
                           </div>
                           <div>
@@ -29,8 +30,8 @@
                       </form>
                   </div>
 
-              <h2> An open access discovery service for the history of science.</h2>
-              <p>Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+              <h2>{% trans "An open access discovery service for the history of science." %}</h2>
+              <p>{% trans "Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>." %}</p>
               <p class="pull-right"><img src='{% static "isisdata/images/hss_logo.jpg" %}' style="padding-top: 30px;" /></p>
             </div>
           </div>
@@ -53,11 +54,11 @@
   <!-- citation comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments on Citation Records</div>
+            <div class="panel-heading">{% trans "Recent Comments on Citation Records" %}</div>
             {% for comment in comments_citation %}
               <div class="row">
                 <div class="col-md-8 col-sm-12">
-                  {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+                  {{ comment.created_by.username }} {% trans "commented on" %}<a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
                 <div class="col-md-4 col-sm-12">
                   <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
@@ -75,11 +76,11 @@
 <!-- authority comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments on Authority Records</div>
+            <div class="panel-heading">{% trans "Recent Comments on Authority Records" %}</div>
             {% for comment in comments_authority %}
               <div class="row">
                 <div class="col-md-8 col-sm-12">
-                  {{ comment.created_by.username }} commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+                  {{ comment.created_by.username }} {% trans "commented on" %}<a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
                 </div>
                 <div class="col-md-4 col-sm-12">
                   <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
