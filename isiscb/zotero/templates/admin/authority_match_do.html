@@ -19,23 +19,13 @@
 </style>
 
 
-<form method='POST' action='{% url "admin:draftauthority_resolve" %}' enctype="multipart/form-data">
-    {% csrf_token %}
-<p class="text text-info">
-    You are about to merge the draft authority records (imported from Zotero) on the left into the existing
-    production authority records on the right. Click <span class="label label-success">Merge</span> to proceed.
-    If more than one record is being merged, click on a table row to show details about the draft and production
-    records, and update any desired values on the production record.
-</p>
-
-{{ formset.management_form }}
-{{ linkeddata_formset.management_form }}
-{{ attribute_formset.management_form }}
-
 <div style="display: none;">
     <table>
     <tr id="linkeddata_template_form">
-        <td>{{ linkeddata_template_form.type_controlled }}</td>
+        <td>{{ linkeddata_template_form.type_controlled }}
+            {{ linkeddata_template_form.id }}
+            {{ linkeddata_template_form.subject_content_type }}
+            {{ linkeddata_template_form.subject_instance_id }}</td>
         <td>{{ linkeddata_template_form.universal_resource_name }}</td>
         {% if linkeddata_formset.can_delete %}
             <td>{{ linkeddata_template_form.DELETE }}</td>
@@ -45,7 +35,10 @@
 
     <table>
         <tr id="attribute_template_form">
-            <td>{{ attribute_template_form.type_controlled }}</td>
+            <td>{{ attribute_template_form.type_controlled }}
+                {{ attribute_template_form.id }}
+                {{ attribute_template_form.source_content_type }}
+                {{ attribute_template_form.source_instance_id }}</td>
             <td>{{ attribute_template_form.value }}</td>
             {% if attribute_formset.can_delete %}
                 <td>{{ attribute_template_form.DELETE }}</td>
@@ -54,6 +47,21 @@
     </table>
 
 </div>
+
+<form method='POST' action='{% url "admin:draftauthority_resolve" %}' enctype="multipart/form-data">
+    {% csrf_token %}
+<p class="text text-info">
+    You are about to merge the draft authority records (imported from Zotero) on the left into the existing
+    production authority records on the right. Click <span class="label label-success">Merge</span> to proceed.
+    If more than one record is being merged, click on a table row to show details about the draft and production
+    records, and update any desired values on the production record.
+</p>
+
+{{ authority_formset.management_form }}
+{{ linkeddata_formset.management_form }}
+{{ attribute_formset.management_form }}
+
+
 
 <table class="table table-responsive table-bordered table-condensed table-hover">
     <thead>
@@ -67,6 +75,7 @@
             <td class="col-xs-6"><a class="h4" href="{% url "admin:isisdata_authority_change" authority.id %}" target="_blank">{{ authority.name }}</a> <span class="label label-warning"> {{ authority.type_controlled }}</span></td>
             <!-- -vv- This is the POST payload. -vv- -->
             <input type="hidden" name="merge_{{ draft.id}}" value="{{ authority.id }}" />
+            {{ form.id }}
         </tr>
         <tr{% if chosen_suggestions|length > 1 %} class="collapse"{% endif %} id="collapse-{{ draft.id }}">
             <td colspan="2">
@@ -155,10 +164,19 @@
                                 </label>
                                 <table class="table attribute_table" for="{{ authority.id }}">
                                 {% for attribute_form in attribute_forms %}
-                                    {{ attribute_form.non_field_errors }}
-                                    {{ attribute_form.errors }}
+                                    {% if attribute_form.non_field_errors or attribute_form.errors %}
                                     <tr>
-                                        <td>{{ attribute_form.type_controlled }}</td>
+                                        <td colspan="3">
+                                            {{ attribute_form.non_field_errors }}
+                                            {{ attribute_form.errors }}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <td>{{ attribute_form.type_controlled }}
+                                            {{ attribute_form.id }}
+                                            {{ attribute_form.source_content_type }}
+                                            {{ attribute_form.source_instance_id }}</td>
                                         <td>{{ attribute_form.value }}</td>
                                         {% if attribute_formset.can_delete %}
                                             <td>{{ attribute_form.DELETE }}</td>
@@ -203,8 +221,19 @@
                                 </label>
                                 <table class="table linkeddata_table" for="{{ authority.id }}">
                                     {% for linkeddata_form in linkeddata_forms %}
+                                        {% if linkeddata_form.non_field_errors or linkeddata_form.errors %}
                                         <tr>
-                                            <td>{{ linkeddata_form.type_controlled }}</td>
+                                            <td colspan="3">
+                                                {{ linkeddata_form.non_field_errors }}
+                                                {{ linkeddata_form.errors }}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <td>{{ linkeddata_form.type_controlled }}
+                                                {{ linkeddata_form.id }}
+                                                {{ linkeddata_form.subject_content_type }}
+                                                {{ linkeddata_form.subject_instance_id}}</td>
                                             <td>{{ linkeddata_form.universal_resource_name }}</td>
                                             {% if linkeddata_form.can_delete %}
                                                 <td>{{ linkeddata_form.DELETE }}</td>
@@ -264,20 +293,28 @@ $('.add_attributes_button').on('click', function() {
     var for_authority = $(this).attr('for');
     var lastAttributeRow = $('#attribute_template_form');
     var newAttributeRow = lastAttributeRow.clone();
-    var totalFormsElem = $('#attribute_management_form > #id_form-TOTAL_FORMS');
+    var totalFormsElem = $('#id_attribute-TOTAL_FORMS');
+    console.log(totalFormsElem);
     var tForms = Number(totalFormsElem.attr("value"));
 
     newAttributeRow.find('td').children().each(function(i, child) {
         var last_ID = child.id;
         var last_ID_parts = last_ID.split('-');
         var last_name_parts = child.name.split('-');
-        var last_idx = Number(last_ID_parts[1]);
-        var new_idx = tForms;
+
+        var new_idx = tForms - 1;
         var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
         var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
 
         var childElem = $(child);
-        childElem.val("");
+
+        if (last_name_parts[2] == 'source_instance_id') {
+            // Maintain the association between this form and its parent
+            //  Authority instance.
+            childElem.val(for_authority);
+        } else {
+            childElem.val("");
+        }
         childElem.attr('id', new_ID);
         childElem.attr('name', new_name);
 
@@ -295,21 +332,30 @@ $('.add_linkeddata_button').on('click', function() {
     var lastAttributeRow = $('#linkeddata_template_form');
     var newAttributeRow = lastAttributeRow.clone();
     var totalFormsElem = $('#id_linkeddata-TOTAL_FORMS');
-    var tForms = Number(totalFormsElem.attr("value")) + 1;
+    var tForms = Number(totalFormsElem.attr("value"));
 
     newAttributeRow.find('td').children().each(function(i, child) {
         var last_ID = child.id;
         var last_ID_parts = last_ID.split('-');
         var last_name_parts = child.name.split('-');
-        var last_idx = Number(last_ID_parts[1]);
-        var new_idx = tForms;
+
+        var new_idx = tForms - 1;
+
         var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
         var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
 
         var childElem = $(child);
-        childElem.val("");
+        if (last_name_parts[2] == 'subject_instance_id') {
+            // Maintain the association between this form and its parent
+            //  Authority instance.
+            childElem.val(for_authority);
+        } else {
+            childElem.val("");
+        }
         childElem.attr('id', new_ID);
         childElem.attr('name', new_name);
+
+
 
     });
 

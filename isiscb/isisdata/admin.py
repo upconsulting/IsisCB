@@ -406,7 +406,7 @@ class CitationAdmin(SimpleHistoryAdmin,
 
 
 
-    list_display = ('id', 'title', 'modified_on', 'modified_by',)
+    list_display = ('id', 'title', 'modified_on', 'modified_by', 'public', 'status_of_record')
     list_filter = ('type_controlled', 'status_of_record')
     inlines = (ACRelationInline, )
     search_fields = ('title', )
@@ -419,7 +419,8 @@ class CitationAdmin(SimpleHistoryAdmin,
                        'title',
                        'abstract',
                        'language',
-                       'type_controlled'),
+                       'type_controlled',
+                       'public'),
             'classes': ('extrapretty',),
 
         }),

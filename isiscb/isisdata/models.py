@@ -157,7 +157,10 @@ class Value(models.Model):
     cvalue.short_description = 'value'
 
     def __unicode__(self):
-        return unicode(self.cvalue())
+        try:
+            return unicode(self.cvalue())
+        except:
+            return u''
 
 
 class TextValue(Value):
@@ -774,7 +777,6 @@ class Authority(ReferencedEntity, CuratedMixin):
         related_query_name='authorities',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
-
     tracking_entries = GenericRelation(
         'Tracking',
         related_query_name='authorities',
@@ -1200,8 +1202,11 @@ class Attribute(ReferencedEntity, CuratedMixin):
     type_free = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return u'{0}: {1}'.format(self.type_controlled.name,
-                                  self.value.cvalue())
+        try:
+            return u'{0}: {1}'.format(self.type_controlled.name,
+                                      self.value.cvalue())
+        except:
+            return u''
 
 
 class PartDetails(models.Model):

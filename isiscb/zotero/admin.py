@@ -8,6 +8,7 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
+from django.contrib.contenttypes.models import ContentType
 
 from zotero.models import *
 from zotero.parser import read, process
@@ -23,10 +24,12 @@ class BulkIngestForm(forms.ModelForm):
 
 
 class AuthorityForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+
     class Meta:
         model = Authority
         exclude = ('uri',
-                   'id',
+                   'id',    # Prevent unique constraint validation.
                    'classification_system',
                    'classification_code',
                    'classification_hierarchy',
@@ -35,6 +38,7 @@ class AuthorityForm(forms.ModelForm):
                    'created_on_fm',
                    'created_by_fm',
                    'redirect_to')
+
     def __init__(self, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
         for key in self.fields.keys():    # bootstrappiness.
@@ -119,35 +123,106 @@ def match(request, draftmodel, choicemodel):
     return chosen
 
 
+def resolve_update_authority(request):
+    """
+    Process POST data from merge authority view, and update Authority,
+    Attribute, and LinkedData instances.
+    """
+    # Need these for subject_content_type field on Attribute and LinkedData.
+    authority_type = ContentType.objects.get_for_model(Authority)
+
+    AuthorityInlineFormset = formset_factory(AuthorityForm)
+    AttributeInlineFormSet = formset_factory(AttributeForm)
+    LinkedDataInlineFormSet = formset_factory(LinkedDataForm)
+
+    attribute_formset = AttributeInlineFormSet(request.POST, prefix='attribute')
+    linkeddata_formset = LinkedDataInlineFormSet(request.POST, prefix='linkeddata')
+    authority_formset = AuthorityInlineFormset(request.POST, prefix='authority')
+
+    if all([attribute_formset.is_valid(),
+            linkeddata_formset.is_valid(),
+            authority_formset.is_valid()]):
+
+        # Update fields on the target Authority instances.
+        for authority_data in authority_formset.cleaned_data:
+            instance = Authority.objects.get(pk=authority_data['id'])
+            del authority_data['id']
+            for k, v in authority_data.iteritems():
+                setattr(instance, k, v)
+            instance.save()
+
+        # Create or update LinkedData entries.
+        for datum in linkeddata_formset.cleaned_data:
+            if len(datum) == 0:   # Empty form.
+                continue
+
+            # LinkedData.subject is a generic relation.
+            datum['subject_content_type'] = authority_type
+            if not datum['id']:    # New LinkedData instance.
+                instance = LinkedData(**datum)
+            else:   # Update existing LinkedData instance.
+                instance = LinkedData.objects.get(pk=datum['id'])
+                for field, value in datum.iteritems():
+                    setattr(instance, field, value)
+            instance.save()
+
+        # Create or update Attributes.
+        for datum in attribute_formset.cleaned_data:
+            if len(datum) == 0:   # Empty form.
+                continue
+
+            datum['source_content_type'] = authority_type
+
+            # value_content_type is a ContentType instance.
+            value_class = datum['type_controlled'].value_content_type.model_class()
+            new_value = datum['value']
+            del datum['value']
+            if not datum['id']:    # New Attribute.
+                instance = Attribute(**datum)
+                instance.save()
+                value_instance = value_class(value=value, attribute=instance)
+            else:                  # Update existing attribute.
+                instance = Attribute.objects.get(pk=datum['id'])
+                for field, value in datum.iteritems():
+                    setattr(instance, field, value)
+                value_instance = instance.value
+                value_instance.value = new_value
+                instance.save()
+            value_instance.save()
+
+
 def resolve(request, draftmodel, choicemodel):
     """
     Perform a draft -> production merge for all instances indicated by the
     user. See :meth:`.DraftCitationAdmin.resolve` and
     :meth:`.DraftAuthorityAdmin.resolve`\.
     """
-    for field in request.POST.keys():
+    if draftmodel is DraftAuthority:
+        # We're doing this the hard way, and "manually" handling the cleaned
+        #  form data.
+        resolve_update_authority(request)
 
+    for field in request.POST.keys():
         if not field.startswith('merge'):
             continue
 
         draftinstance_id = int(field.split('_')[-1])
-        suggestion_choice_id = request.POST.get(field, None)
+        choice_id = request.POST.get(field, None)
 
         draftinstance = draftmodel.objects.get(pk=draftinstance_id)
 
         if draftinstance.processed:
             continue
-        suggestion_choice_instance = choicemodel.objects.get(pk=suggestion_choice_id)
+        choice_instance = choicemodel.objects.get(pk=choice_id)
 
         irEvent = InstanceResolutionEvent(
             for_instance=draftinstance,
-            to_instance=suggestion_choice_instance,
+            to_instance=choice_instance,
         )
         irEvent.save()
 
         draftinstance.processed = True
         draftinstance.save()
-
 
 
 class DraftCitationAdmin(admin.ModelAdmin):
@@ -227,6 +302,10 @@ class DraftCitationAdmin(admin.ModelAdmin):
 
 
 class LinkedDataForm(forms.ModelForm):
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    subject_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
+    subject_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = LinkedData
         fields = ['type_controlled', 'universal_resource_name']
@@ -241,6 +320,9 @@ class LinkedDataForm(forms.ModelForm):
 
 class AttributeForm(forms.ModelForm):
     value = forms.CharField(required=False)
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    source_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
+    source_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Attribute
@@ -306,6 +388,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
             # The user may not have chosen any production authority records, in
             #  which case we simply return to the changelist.
             if len(chosen) > 0:
+                authority_type = ContentType.objects.get_for_model(Authority)
 
                 AuthorityInlineFormset = formset_factory(AuthorityForm, extra=0)
                 AttributeInlineFormSet = formset_factory(AttributeForm, extra=1)
@@ -327,35 +410,55 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                             'value': attribute.value.get_child_class().value,
                             'type_controlled': attribute.type_controlled,
                             'value_freeform': attribute.value_freeform,
+                            'source_content_type': authority_type.id,
+                            'source_instance_id': authority.id,
                         })
                         a += 1
 
                     for linkeddata in authority.linkeddata_entries.all():
+
                         linkeddata_group.append(l)
                         initial_linkeddata.append({
                             'id': linkeddata.id,
                             'universal_resource_name': linkeddata.universal_resource_name,
                             'type_controlled': linkeddata.type_controlled,
+                            'subject_content_type': authority_type.id,
+                            'subject_instance_id': authority.id,
                         })
                         l += 1
                     initial_attribute_groups.append(attribute_group)
                     initial_linkeddata_groups.append(linkeddata_group)
 
+                # Generate formsets using the initial data generated above.
                 attribute_formset = AttributeInlineFormSet(prefix='attribute', initial=initial_attribute)
                 linkeddata_formset = LinkedDataInlineFormSet(prefix='linkeddata', initial=initial_linkeddata)
+
+                # Sort the formsets out into groups based on the Authority to
+                #  which they correspond.
                 attribute_forms = [[attribute_formset[i] for i in group] for group in initial_attribute_groups]
                 linkeddata_forms = [[linkeddata_formset[i] for i in group] for group in initial_linkeddata_groups]
+
+                # Formset for the Authority records themselves.
                 formset = AuthorityInlineFormset(prefix='authority', initial=[
                     {
+                        'id': authority.id,
                         'name': authority.name,
                         'type_controlled': authority.type_controlled,
                         'description': authority.description,
                         'record_status': authority.record_status,
                         'record_history': authority.record_history,
+                        'administrator_notes': authority.administrator_notes,
                         'public': authority.public,
                     }
                     for draftauthority, authority in chosen])
 
+                # Here we stitch together the formsets so that each
+                #  DraftAuthority is grouped together whith its corresponding
+                #  Authority (into which it will be merged), the Authority's
+                #  pre-filled form, and the Authority's share of the
+                #  LinkedData and Attribute formsets. This way we can separate
+                #  all of these bits out according to DraftAuthority/Authority
+                #  pairs in the template.
                 chosen = zip(zip(*chosen)[0], zip(*chosen)[1], formset, attribute_forms, linkeddata_forms)
 
                 context.update({
@@ -365,7 +468,6 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                     'attribute_formset': attribute_formset,
                     'attribute_template_form': attribute_formset[-1],
                     'linkeddata_template_form': linkeddata_formset[-1],
-
                 })
                 # But if they did choose production authority records, we want
                 #  to confirm that they wish to proceed with the merge action.
