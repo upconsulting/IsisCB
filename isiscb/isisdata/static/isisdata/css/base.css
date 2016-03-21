@@ -296,6 +296,7 @@ li {
   background-color: #f5f5f5;
     bottom: 0;
     min-height: 25px;
+    height: 40px;
     position: fixed;
     width: 100%;
     font-weight: bold;

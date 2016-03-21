@@ -1,9 +1,35 @@
+{% load i18n %}
+{% load staticfiles %}
+
 <div class="container-fluid">
-    <p class="text-muted pull-right">
-        <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a>
-        {% if user.is_staff %}<a href="/admin">Curation Interface</a>{% endif %}
-        <a href="{% url 'rest_root' %}">REST API</a>
-    </p>
+    <div class="row">
+      <div class="col-sm-6">
+        <p class="pull-left">
+          <form action="{% url 'set_language' %}" method="post" style="float:left;">{% csrf_token %}
+            <input name="next" type="hidden" value="{{ redirect_to }}" />
+            <input type="hidden" name="language" value="en"></input>
+            <button type="submit" style="border-width: 0px; background-color: transparent; margin-top: 9px;">
+              <span class="flag-icon flag-icon-us"></span>
+            </button>
+          </form>
+          <form action="{% url 'set_language' %}" method="post">{% csrf_token %}
+            <input name="next" type="hidden" value="{{ redirect_to }}" />
+            <input type="hidden" name="language" value="de"></input>
+            <button type="submit" style="border-width: 0px; background-color: transparent; margin-top: 9px;">
+              <span class="flag-icon flag-icon-de"></span>
+            </button>
+          </form>
+        </p>
+      </div>
+
+      <div class="col-sm-6">
+        <p class="text-muted pull-right">
+            <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a>
+            {% if user.is_staff %}<a href="/admin">Curation Interface</a>{% endif %}
+            <a href="{% url 'rest_root' %}">REST API</a>
+        </p>
+      </div>
+    </div>
 </div>
 <script><!-- Initialize all tooltips on the page -->
 $(function () {
