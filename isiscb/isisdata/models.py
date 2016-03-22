@@ -7,6 +7,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
+from markupfield.fields import MarkupField
+
 from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
@@ -22,6 +24,8 @@ import bleach
 import unidecode
 import string
 import unicodedata
+
+from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
@@ -1464,3 +1468,30 @@ class SearchQuery(models.Model):
     """))
 
     saved = models.BooleanField(default=False)
+
+
+class UserProfile(models.Model):
+    """
+    Supports additional self-curated information about Users.
+    """
+    user = models.OneToOneField(User, related_name='profile')
+
+    affiliation = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    bio = MarkupField(markup_type='markdown', blank=True, null=True)
+
+    share_email = models.BooleanField(default=False, help_text=help_text("""
+    A user can indicate whether or not their email address should be made
+    public."""))
+
+    resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
+                                             related_name='users',
+                                             help_text=help_text("""
+    A user can select an institution for which OpenURL links should be
+    generated while searching."""))
+
+    authority_record = models.OneToOneField(Authority, blank=True, null=True,
+                                            related_name='associated_user',
+                                            help_text=help_text("""
+    A user can 'claim' an Authority record, asserting that the record refers to
+    theirself."""))
