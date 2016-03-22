@@ -4,37 +4,47 @@
 
 {% block content %}
 
-
 <form method='POST' action='.' enctype="multipart/form-data">
     {% csrf_token %}
 <div class="row">
-
     <div class="col-sm-6">
         <div class="panel">
             <div class="panel-heading">
                 <span class="h3">New Authority Record
             </div>
             <div class="panel-body">
-
-
-
-                {{ form.non_field_errors }}
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
                 <div class="form-group">
-                    {{ form.name.errors }}
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <label for="{{ form.name.id_for_label }}">Name:</label>
                     {{ form.name }}
                     <span class="text text-muted">{{ form.name.help_text }}</span>
                 </div>
-
                 <div class="form-group">
-                    {{ form.type_controlled.errors }}
+                    {% if form.type_controlled.errors %}
+                        {% for error in form.type_controlled.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
                     {{ form.type_controlled }}
                     <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
                 </div>
 
                 <div class="form-group">
-                    {{ form.description.errors }}
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
                     {{ form.description }}
                     <span class="text text-muted">{{ form.description.help_text }}</span>
@@ -42,8 +52,11 @@
 
 
                 <div class="form-group">
-                    {{ form.public.errors }}
-
+                    {% if form.public.errors %}
+                        {% for error in form.public.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <div class="checkbox">
                         <label for="{{ form.public.id_for_label }}">
                         {{ form.public }} {{ form.public.label }}
@@ -53,26 +66,31 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form.administrator_notes.errors }}
+                    {% if form.administrator_notes.errors %}
+                        {% for error in form.administrator_notes.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
                     {{ form.administrator_notes }}
                     <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
                 </div>
 
                 <div class="form-group">
-                    {{ form.record_history.errors }}
+                    {% if form.record_history.errors %}
+                        {% for error in form.record_history.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                     <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
                     {{ form.record_history }}
                     <span class="text text-muted">{{ form.record_history.help_text }}</span>
                 </div>
-
                 <div class="panel">
                     <div class="pull-right">
                         <button type="submit" class="btn btn-success">Create</button>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
@@ -133,7 +151,6 @@
                 </tbody>
             </table>
         </div>
-
         <div class="panel">
             <div class="panel-heading">
                 <span class="h3">Attributes

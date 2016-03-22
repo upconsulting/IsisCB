@@ -14,13 +14,45 @@ from zotero.models import *
 from zotero.parser import read, process
 from zotero.suggest import *
 
-from isisdata.admin import CitationForm, AttributeInlineForm, ValueField, ValueWidget
+from isisdata.admin import AttributeInlineForm, ValueField, ValueWidget
 
 import tempfile
+
+def missing_or_empty(obj, key):
+    try:
+        if not obj[key]:
+            return True
+    except KeyError:
+        return True
+    return False
+
 
 
 class BulkIngestForm(forms.ModelForm):
     zotero_rdf = forms.FileField()
+
+
+class CitationForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    class Meta:
+        model = Citation
+        exclude = ('uri',
+                   'id',   # Prevent unique constraint validation.
+                   'modified_on_fm',
+                   'modified_by_fm',
+                   'created_on_fm',
+                   'created_by_fm',
+                   'redirect_to')
+
+    def __init__(self, *args, **kwargs):
+        super(CitationForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():    # bootstrappiness.
+            if key in ['public']:
+                continue
+            if key in ['administrator_notes', 'description', 'record_history']:
+                self.fields[key].widget.attrs['rows'] = 3
+            self.fields[key].widget.attrs['class'] = 'form-control'
 
 
 class AuthorityForm(forms.ModelForm):
@@ -64,6 +96,63 @@ class ImportAccessionAdmin(admin.ModelAdmin):
 
         papers = read(path)
         process(papers, instance=form.instance)
+
+
+class LinkedDataForm(forms.ModelForm):
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    subject_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
+    subject_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    class Meta:
+        model = LinkedData
+        fields = ['type_controlled', 'universal_resource_name']
+
+    def __init__(self, *args, **kwargs):
+        super(LinkedDataForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+            self.fields[key].widget.attrs['class'] = 'form-control'
+
+
+class AttributeForm(forms.ModelForm):
+    value = forms.CharField(required=False)
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    source_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
+    source_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    class Meta:
+        model = Attribute
+        fields = ['type_controlled', 'value_freeform',]
+
+    def __init__(self, *args, **kwargs):
+        super(AttributeForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+            self.fields[key].widget.attrs['class'] = 'form-control'
+
+    def is_valid(self):
+        """
+        Enforce validation for ``value`` based on ``type_controlled``.
+        """
+        val = super(AttributeForm, self).is_valid()
+
+        if all(x in self.cleaned_data for x in ['value', 'type_controlled']):
+            value = self.cleaned_data['value']
+            attr_type = self.cleaned_data['type_controlled']
+            if (value and not attr_type) or (attr_type and not value):
+                self.add_error('value', 'Missing data')
+            try:
+                value_model = attr_type.value_content_type.model_class()
+            except AttributeError as E:
+                self.add_error('type_controlled', 'No type selected')
+                value_model = None
+
+            if value_model:
+                try:
+                    value_model.is_valid(value)
+                except ValidationError as E:
+                    self.add_error('value', E)
+        return super(AttributeForm, self).is_valid()
 
 
 def match_citations(modeladmin, request, queryset):
@@ -123,6 +212,94 @@ def match(request, draftmodel, choicemodel):
     return chosen
 
 
+def resolve_update_related(request, instance_type, linkeddata_formset, attribute_formset):
+
+    # Create or update LinkedData entries.
+    for datum in linkeddata_formset.cleaned_data:
+        # If the row is incomplete, just ignore it.
+        if missing_or_empty(datum, 'type_controlled') or missing_or_empty(datum, 'universal_resource_name'):
+            continue
+
+        # LinkedData.subject is a generic relation.
+        datum['subject_content_type'] = instance_type
+        if not datum['id']:    # New LinkedData instance.
+            instance = LinkedData(**datum)
+        else:   # Update existing LinkedData instance.
+            instance = LinkedData.objects.get(pk=datum['id'])
+            for field, value in datum.iteritems():
+                setattr(instance, field, value)
+        instance.save()
+
+    # Create or update Attributes.
+    for datum in attribute_formset.cleaned_data:
+        # If the row is incomplete, just ignore it.
+        if missing_or_empty(datum, 'type_controlled') or missing_or_empty(datum, 'value'):
+            continue
+
+        datum['source_content_type'] = instance_type
+
+        # We select the appropriate subclass of Value based on the user's
+        #  selected AttributeType.
+        attr_type = datum['type_controlled']    # AttributeType instance.
+        # ``AttributeType.value_content_type`` is a ContentType instance.
+        value_class = attr_type.value_content_type.model_class()
+        new_value = datum['value']      # Literal (charvalue).
+        del datum['value']    # Attribute constructor won't accept this.
+
+        # ``'id'`` is only set if the Attribute already exists.
+        if not datum['id']:    # Create a new Attribute.
+            instance = Attribute(**datum)
+            instance.save()
+            value_instance = value_class(value=value, attribute=instance)
+        else:   # Update existing attribute.
+            instance = Attribute.objects.get(pk=datum['id'])
+
+            # We're trusting that only appropriate fields are left in the
+            #  form data at this point.
+            for field, value in datum.iteritems():
+                setattr(instance, field, value)
+            value_instance = instance.value
+
+            # The value literal is updated on the Value subclass instance,
+            #  not on the Attribute itself (see models.py).
+            value_instance.value = new_value
+            instance.save()
+        value_instance.save()
+
+
+def resolve_update_citation(request):
+    """
+
+    """
+
+    # Need these for subject_content_type field on Attribute and LinkedData.
+    citation_type = ContentType.objects.get_for_model(Citation)
+
+    CitationInlineFormset = formset_factory(CitationForm)
+    citation_formset = CitationInlineFormset(request.POST, prefix='citation')
+
+    AttributeInlineFormSet = formset_factory(AttributeForm)
+    LinkedDataInlineFormSet = formset_factory(LinkedDataForm)
+    attribute_formset = AttributeInlineFormSet(request.POST, prefix='attribute')
+    linkeddata_formset = LinkedDataInlineFormSet(request.POST, prefix='linkeddata')
+
+    if all([attribute_formset.is_valid(),
+            linkeddata_formset.is_valid(),
+            citation_formset.is_valid()]):
+
+        # Update fields on the target Citation instances.
+        for citation_data in citation_formset.cleaned_data:
+            instance = Citation.objects.get(pk=citation_data['id'])
+            del citation_data['id']
+            for k, v in citation_data.iteritems():
+                setattr(instance, k, v)
+            instance.save()
+
+        resolve_update_related(request, citation_type,
+                               linkeddata_formset,
+                               attribute_formset)
+
+
 def resolve_update_authority(request):
     """
     Process POST data from merge authority view, and update Authority,
@@ -132,12 +309,12 @@ def resolve_update_authority(request):
     authority_type = ContentType.objects.get_for_model(Authority)
 
     AuthorityInlineFormset = formset_factory(AuthorityForm)
+    authority_formset = AuthorityInlineFormset(request.POST, prefix='authority')
+
     AttributeInlineFormSet = formset_factory(AttributeForm)
     LinkedDataInlineFormSet = formset_factory(LinkedDataForm)
-
     attribute_formset = AttributeInlineFormSet(request.POST, prefix='attribute')
     linkeddata_formset = LinkedDataInlineFormSet(request.POST, prefix='linkeddata')
-    authority_formset = AuthorityInlineFormset(request.POST, prefix='authority')
 
     if all([attribute_formset.is_valid(),
             linkeddata_formset.is_valid(),
@@ -151,44 +328,9 @@ def resolve_update_authority(request):
                 setattr(instance, k, v)
             instance.save()
 
-        # Create or update LinkedData entries.
-        for datum in linkeddata_formset.cleaned_data:
-            if len(datum) == 0:   # Empty form.
-                continue
-
-            # LinkedData.subject is a generic relation.
-            datum['subject_content_type'] = authority_type
-            if not datum['id']:    # New LinkedData instance.
-                instance = LinkedData(**datum)
-            else:   # Update existing LinkedData instance.
-                instance = LinkedData.objects.get(pk=datum['id'])
-                for field, value in datum.iteritems():
-                    setattr(instance, field, value)
-            instance.save()
-
-        # Create or update Attributes.
-        for datum in attribute_formset.cleaned_data:
-            if len(datum) == 0:   # Empty form.
-                continue
-
-            datum['source_content_type'] = authority_type
-
-            # value_content_type is a ContentType instance.
-            value_class = datum['type_controlled'].value_content_type.model_class()
-            new_value = datum['value']
-            del datum['value']
-            if not datum['id']:    # New Attribute.
-                instance = Attribute(**datum)
-                instance.save()
-                value_instance = value_class(value=value, attribute=instance)
-            else:                  # Update existing attribute.
-                instance = Attribute.objects.get(pk=datum['id'])
-                for field, value in datum.iteritems():
-                    setattr(instance, field, value)
-                value_instance = instance.value
-                value_instance.value = new_value
-                instance.save()
-            value_instance.save()
+        resolve_update_related(request, autority_type,
+                               linkeddata_formset,
+                               attribute_formset)
 
 
 def resolve(request, draftmodel, choicemodel):
@@ -201,6 +343,8 @@ def resolve(request, draftmodel, choicemodel):
         # We're doing this the hard way, and "manually" handling the cleaned
         #  form data.
         resolve_update_authority(request)
+    elif draftmodel is DraftCitation:
+        resolve_update_citation(request)
 
     for field in request.POST.keys():
         if not field.startswith('merge'):
@@ -266,12 +410,93 @@ class DraftCitationAdmin(admin.ModelAdmin):
         if request.method == 'POST':
             chosen = match(request, DraftCitation, Citation)
 
-            # The user may not have chosen any production citations, in which
-            #  case we simply return to the changelist.
-            if len(chosen) > 0:
-                context.update({'chosen_suggestions': chosen})
-                # But if they did choose production citations, we want to
-                #  confirm that they wish to proceed with the merge action.
+            # The user may not have chosen any production citation records, in
+            #  which case we simply return to the changelist.
+            if len(chosen) > 0:    # But otherwise....
+                citation_type = ContentType.objects.get_for_model(Citation)
+
+                CitationInlineFormset = formset_factory(CitationForm, extra=0)
+                AttributeInlineFormSet = formset_factory(AttributeForm, extra=1)
+                LinkedDataInlineFormSet = formset_factory(LinkedDataForm, extra=1)
+
+                # Generate initial data for formsets.
+                initial_attribute = []
+                initial_linkeddata = []
+                initial_attribute_groups = []    # Associates forms in formset
+                initial_linkeddata_groups = []   #  with choices.
+                a, l = 0, 0
+                for draftcitation, citation in chosen:
+                    attribute_group = []
+                    linkeddata_group = []
+                    for attribute in citation.attributes.all():
+                        attribute_group.append(a)
+                        initial_attribute.append({
+                            'id': attribute.id,
+                            'value': attribute.value.get_child_class().value,
+                            'type_controlled': attribute.type_controlled,
+                            'value_freeform': attribute.value_freeform,
+                            'source_content_type': citation_type.id,
+                            'source_instance_id': citation.id,
+                        })
+                        a += 1
+
+                    for linkeddata in citation.linkeddata_entries.all():
+                        linkeddata_group.append(l)
+                        initial_linkeddata.append({
+                            'id': linkeddata.id,
+                            'universal_resource_name': linkeddata.universal_resource_name,
+                            'type_controlled': linkeddata.type_controlled,
+                            'subject_content_type': citation_type.id,
+                            'subject_instance_id': citation.id,
+                        })
+                        l += 1
+                    initial_attribute_groups.append(attribute_group)
+                    initial_linkeddata_groups.append(linkeddata_group)
+
+                # Generate formsets using the initial data generated above.
+                attribute_formset = AttributeInlineFormSet(prefix='attribute', initial=initial_attribute)
+                linkeddata_formset = LinkedDataInlineFormSet(prefix='linkeddata', initial=initial_linkeddata)
+
+                # Sort the formsets out into groups based on the Citation to
+                #  which they correspond.
+                attribute_forms = [[attribute_formset[i] for i in group] for group in initial_attribute_groups]
+                linkeddata_forms = [[linkeddata_formset[i] for i in group] for group in initial_linkeddata_groups]
+
+                # Formset for the Citation records themselves.
+                formset = CitationInlineFormset(prefix='citation', initial=[{
+                        'id': citation.id,
+                        'title': citation.title,
+                        'type_controlled': citation.type_controlled,
+                        'description': citation.description,
+                        'status_of_record': citation.status_of_record,
+                        'record_history': citation.record_history,
+                        'administrator_notes': citation.administrator_notes,
+                        'public': citation.public,
+                    } for draftcitation, citation in chosen])
+
+                # Here we stitch together the formsets so that each
+                #  DraftCitation is grouped together whith its corresponding
+                #  Citation (into which it will be merged), the Citation's
+                #  pre-filled form, and the Citation's share of the
+                #  LinkedData and Attribute formsets. This way we can separate
+                #  all of these bits out according to DraftCitation/Citation
+                #  pairs in the template.
+                chosen = zip(zip(*chosen)[0],
+                             zip(*chosen)[1],
+                             formset,
+                             attribute_forms,
+                             linkeddata_forms)
+
+                context.update({
+                    'chosen_suggestions': chosen,
+                    'citation_formset': formset,
+                    'linkeddata_formset': linkeddata_formset,
+                    'attribute_formset': attribute_formset,
+                    'attribute_template_form': attribute_formset[-1],
+                    'linkeddata_template_form': linkeddata_formset[-1],
+                })
+                # But if they did choose production citation records, we want
+                #  to confirm that they wish to proceed with the merge action.
                 return TemplateResponse(request, "admin/citation_match_do.html", context)
 
         # Non-POST requests should take the user back to the changelist.
@@ -299,58 +524,6 @@ class DraftCitationAdmin(admin.ModelAdmin):
             url(r'^resolve/$', self.admin_site.admin_view(self.resolve), name="draftcitation_resolve"),
         ]
         return extra_urls + urls
-
-
-class LinkedDataForm(forms.ModelForm):
-    id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    subject_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
-    subject_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
-
-    class Meta:
-        model = LinkedData
-        fields = ['type_controlled', 'universal_resource_name']
-
-    def __init__(self, *args, **kwargs):
-        super(LinkedDataForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():
-            self.fields[key].required = False
-            self.fields[key].widget.attrs['class'] = 'form-control'
-
-
-
-class AttributeForm(forms.ModelForm):
-    value = forms.CharField(required=False)
-    id = forms.CharField(widget=forms.HiddenInput(), required=False)
-    source_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
-    source_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
-
-    class Meta:
-        model = Attribute
-        fields = ['type_controlled', 'value_freeform',]
-
-    def __init__(self, *args, **kwargs):
-        super(AttributeForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():
-            self.fields[key].required = False
-            self.fields[key].widget.attrs['class'] = 'form-control'
-
-    def is_valid(self):
-        """
-        Enforce validation for ``value`` based on ``type_controlled``.
-        """
-        val = super(AttributeForm, self).is_valid()
-
-        if all(x in self.cleaned_data for x in ['value', 'type_controlled']):
-            value = self.cleaned_data['value']
-            attr_type = self.cleaned_data['type_controlled']
-            if (value and not attr_type) or (attr_type and not value):
-                self.add_error('value', 'Missing data')
-            value_model = attr_type.value_content_type.model_class()
-            try:
-                value_model.is_valid(value)
-            except ValidationError as E:
-                self.add_error('value', E)
-        return super(AttributeForm, self).is_valid()
 
 
 class DraftAuthorityAdmin(admin.ModelAdmin):
@@ -439,8 +612,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                 linkeddata_forms = [[linkeddata_formset[i] for i in group] for group in initial_linkeddata_groups]
 
                 # Formset for the Authority records themselves.
-                formset = AuthorityInlineFormset(prefix='authority', initial=[
-                    {
+                formset = AuthorityInlineFormset(prefix='authority', initial=[{
                         'id': authority.id,
                         'name': authority.name,
                         'type_controlled': authority.type_controlled,
@@ -449,8 +621,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                         'record_history': authority.record_history,
                         'administrator_notes': authority.administrator_notes,
                         'public': authority.public,
-                    }
-                    for draftauthority, authority in chosen])
+                    } for draftauthority, authority in chosen])
 
                 # Here we stitch together the formsets so that each
                 #  DraftAuthority is grouped together whith its corresponding

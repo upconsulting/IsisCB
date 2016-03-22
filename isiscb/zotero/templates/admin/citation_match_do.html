@@ -1,56 +1,296 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/base_match_do.html" %}
 
 {% load staticfiles %}
 
-{% block content %}
 
-<style>
-.suggestion-reasons {
-    margin-left: 5px;
-}
-
-.suggestion-reasons > span {
-    margin-right: 5px;
-}
-
-.acrelation {
-    margin-right: 5px;
-}
-</style>
+{% block form %}
 
 
 <form method='POST' action='{% url "admin:draftcitation_resolve" %}' enctype="multipart/form-data">
     {% csrf_token %}
-<p class="text text-info">
-    You are about to merge the draft citations (imported from Zotero) on the left into the existing
-    production citations on the right. Click <span class="label label-success">Merge</span> to proceed.
-</p>
+    <p class="text text-info">
+        You are about to merge the draft citations (imported from Zotero) on the left into the existing
+        production citations on the right. Click <span class="label label-success">Merge</span> to proceed.
+    </p>
 
-<table class="table table-responsive">
-    <thead>
-        <th>Draft Citation</th>
-        <th>Production Citation</th>
-    </thead>
-    <tbody>
-        {% for draft, citation in chosen_suggestions %}
-        <tr>
-            <td><a href="{% url "admin:zotero_draftcitation_change" draft.id %}" target="_blank">{{ draft.title }}</a> <span class="label label-warning"> {{ draft.type_controlled }}</span></td>
-            <td><a href="{% url "admin:isisdata_citation_change" citation.id %}" target="_blank">{{ citation.title }}</a> <span class="label label-warning"> {{ citation.type_controlled }}</span></td>
-            <!-- -vv- This is the POST payload. -vv- -->
-            <input type="hidden" name="merge_{{ draft.id}}" value="{{ citation.id }}" />
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    {{ citation_formset.management_form }}
 
-<div class="panel">
-    <div class="pull-right">
-        <button type="submit" class="btn btn-success">Merge</button>
+    <!-- These get updated when new LinkedData and Attribute formset rows are added. -->
+    {{ linkeddata_formset.management_form }}
+    {{ attribute_formset.management_form }}
+
+    <table class="table table-responsive">
+        <thead>
+            <th>Draft Citation</th>
+            <th>Production Citation</th>
+        </thead>
+        <tbody>
+            <!-- For > 1 merge actions, clicking on an odd row (with names) opens the even row below (with content). -->
+            {% for draft, citation, form, attribute_forms, linkeddata_forms in chosen_suggestions %}
+            <tr class="clickable"  data-target="#collapse-{{ draft.id }}" data-toggle="collapse" >
+                <td class="col-xs-6">
+                    <a class="h4" href="{% url "admin:zotero_draftcitation_change" draft.id %}" target="_blank">{{ draft.title }}</a>&nbsp;<span class="label label-warning">&nbsp;{{ draft.type_controlled }}</span>
+                </td>
+                <td class="col-xs-6">
+                    <a class="h4" href="{% url "admin:isisdata_citation_change" citation.id %}" target="_blank">{{ citation.title }}</a>&nbsp;<span class="label label-warning">&nbsp;{{ citation.type_controlled }}</span>
+                </td>
+                <!-- -vv- This is the POST payload. -vv- -->
+                <input type="hidden" name="merge_{{ draft.id}}" value="{{ citation.id }}" />
+                {{ form.id }}    <!-- The ``id`` field is hidden. -->
+            </tr>
+            <!-- If only one merge action, leave the content row open. -->
+            <tr{% if chosen_suggestions|length > 1 %} class="collapse"{% endif %} id="collapse-{{ draft.id }}">
+                <td colspan="2">
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <table class="table table-responsive table-condensed">
+                        <tr>
+                            <td class="col-xs-6">
+                                <label>Name:</label>
+                                <div class="h4">{{ draft.name }}</div>
+                            </td>
+                            <td class="col-xs-6">
+                                <div class="form-group">
+                                    {% if form.name.errors %}
+                                        {% for error in form.name.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <label for="{{ form.name.id_for_label }}">Name:</label>
+                                    {{ form.name }}
+                                    <span class="text text-muted">{{ form.name.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Type:</label>
+                                <div class="h4">{{ draft.get_type_controlled_display }}</div>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    {% if form.type_controlled.errors %}
+                                        {% for error in form.type_controlled.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
+                                    {{ form.type_controlled }}
+                                    <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Description:</label>
+                                <div class="h4">{{ draft.description }}</div>
+                            </td>
+                            <td>
+
+                                <div class="form-group">
+                                    {% if form.description.errors %}
+                                        {% for error in form.description.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
+                                    {{ form.description }}
+                                    <span class="text text-muted">{{ form.description.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                <div class="form-group">
+                                    {% if form.public.errors %}
+                                        {% for error in form.public.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <div class="checkbox">
+                                        <label for="{{ form.public.id_for_label }}">
+                                        {{ form.public }} {{ form.public.label }}
+                                        </label>
+                                    </div>
+                                    <span class="text text-muted">{{ form.public.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><!-- This is not yet implemented for Draftcitation. -->
+                                <label>Attributes:
+                                    <span class="btn btn-xs" style="visibility: hidden;"><!-- For spacing only. -->
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+                                    </span>
+                                </label>
+                                {% for attribute in draft.attributes.all %}
+                                <li class="list-group-item">{{ attribute.value }}</li>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div>
+                                    <label>Attributes
+                                        <span class="btn btn-xs add_attributes_button" for="{{ citation.id }}">
+                                            <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+                                        </span>
+                                    </label>
+                                    <table class="table attribute_table" for="{{ citation.id }}">
+                                    {% for attribute_form in attribute_forms %}
+                                        {% if attribute_form.non_field_errors or attribute_form.errors %}
+                                        <tr>
+                                            <td colspan="3">
+                                                {% for error in attribute_form.non_field_errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                                {% endfor %}
+                                                {% for error in attribute_form.errors %}
+                                                <div class="alert alert-danger">{{ error }}</div>
+                                                {% endfor %}
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <td>{% if attribute_form.type_controlled.errors %}
+                                                    {% for error in attribute_form.type_controlled.errors %}
+                                                    <div class="alert alert-danger">{{ error }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                                {{ attribute_form.type_controlled }}
+                                                {{ attribute_form.id }}
+                                                {{ attribute_form.source_content_type }}
+                                                {{ attribute_form.source_instance_id }}
+                                            </td>
+                                            <td>{% if attribute_form.value.errors %}
+                                                    {% for error in attribute_form.value.errors %}
+                                                    <div class="alert alert-danger">{{ error }}</div>
+                                                    {% endfor %}
+                                                {% endif %}
+                                                {{ attribute_form.value }}</td>
+                                            {% if attribute_formset.can_delete %}
+                                                <td>{{ attribute_form.DELETE }}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Linked Data:
+                                    <span class="btn btn-xs" style="visibility: hidden;"><!-- For spacing only. -->
+                                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+                                    </span>
+                                </label>
+                                <table class="table">
+                                {% for linkeddata in draft.linkeddata.all %}
+                                    <tr>
+                                        <td class="col-xs-6">
+                                            <input class="form-control" tyle="text" disabled value="{{ linkeddata.name }}">
+                                        </td>
+
+                                        <td class="col-xs-6">
+                                            <input class="form-control" tyle="text" disabled value="{{ linkeddata.value }}">
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+                                </table>
+                            </td>
+                            <td>
+                                <div>
+                                    <label>Linked Data:
+                                        <span class="btn btn-xs add_linkeddata_button" for="{{ citation.id }}">
+                                            <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                                        </span>
+                                    </label>
+                                    <table class="table linkeddata_table" for="{{ citation.id }}">
+                                        {% for linkeddata_form in linkeddata_forms %}
+                                            {% if linkeddata_form.non_field_errors or linkeddata_form.errors %}
+                                            <tr>
+                                                <td colspan="3">
+                                                    {% for error in linkeddata_form.non_field_errors %}
+                                                    <div class="alert alert-danger">{{ error }}</div>
+                                                    {% endfor %}
+                                                    {% for error in linkeddata_form.errors %}
+                                                    <div class="alert alert-danger">{{ error }}</div>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                            <tr>
+                                                <td>{% if linkeddata_form.type_controlled.errors %}
+                                                        {% for error in linkeddata_form.type_controlled.errors %}
+                                                        <div class="alert alert-danger">{{ error }}</div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                    {{ linkeddata_form.type_controlled }}
+                                                    {{ linkeddata_form.id }}
+                                                    {{ linkeddata_form.subject_content_type }}
+                                                    {{ linkeddata_form.subject_instance_id}}</td>
+                                                <td>{% if linkeddata_form.universal_resource_name.errors %}
+                                                        {% for error in linkeddata_form.universal_resource_name.errors %}
+                                                        <div class="alert alert-danger">{{ error }}</div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                    {{ linkeddata_form.universal_resource_name }}</td>
+                                                {% if linkeddata_form.can_delete %}
+                                                    <td>{{ linkeddata_form.DELETE }}</td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <div class="form-group">
+                                    {% if form.administrator_notes.errors %}
+                                        {% for error in form.administrator_notes.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
+                                    {{ form.administrator_notes }}
+                                    <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <div class="form-group">
+                                    {% if form.record_history.errors %}
+                                        {% for error in form.record_history.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
+                                    {{ form.record_history }}
+                                    <span class="text text-muted">{{ form.record_history.help_text }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="panel">
+        <div class="pull-right">
+            <button type="submit" class="btn btn-success">Merge</button>
+        </div>
     </div>
-</div>
 
 </form>
-
-
 
 {% endblock %}
