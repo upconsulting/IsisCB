@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'captcha',
     'corsheaders',
     'zotero',
+    'openurl',
 )
 
 MIDDLEWARE_CLASSES = (

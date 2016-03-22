@@ -23,6 +23,8 @@ import unidecode
 import string
 import unicodedata
 
+from openurl.models import Institution
+
 #from isisdata.templatetags.app_filters import linkify
 
 def help_text(s):
@@ -1464,3 +1466,19 @@ class SearchQuery(models.Model):
     """))
 
     saved = models.BooleanField(default=False)
+
+
+class UserProfile(models.Model):
+    """
+    Supports additional self-curated information about Users.
+    """
+    user = models.OneToOneField(User, related_name='profile')
+
+    affiliation = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+
+    share_email = models.BooleanField(default=False)
+
+    resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
+                                             related_name='users')
