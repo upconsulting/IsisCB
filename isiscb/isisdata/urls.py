@@ -48,7 +48,7 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$',
         views.authority,
         name='authority'),
-    url(r'^(?i)user/(?P<username>[A-Za-z0-9]+)/$',
+    url(r'^(?i)user/(?P<username>[^/]+)/$',
         views.user_profile,
         name='user_profile'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)/$',
