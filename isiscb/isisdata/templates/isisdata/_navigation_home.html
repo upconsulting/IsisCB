@@ -33,6 +33,7 @@
                     </a>
                     <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
                         <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                        <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
                         <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                         <li><a href="{% url 'search_history' %}">My Search History</a></li>
                         <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
