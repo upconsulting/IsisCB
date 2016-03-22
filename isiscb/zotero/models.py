@@ -139,6 +139,10 @@ class DraftAuthority(ImportedData):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'draft authority record'
+        verbose_name_plural = 'draft authority records'
+
 
 class DraftACRelation(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='authority_relations')

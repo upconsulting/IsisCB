@@ -18,6 +18,7 @@ from isisdata.admin import AttributeInlineForm, ValueField, ValueWidget
 
 import tempfile
 
+
 def missing_or_empty(obj, key):
     try:
         if not obj[key]:
@@ -210,6 +211,7 @@ def match_citations(modeladmin, request, queryset):
         admin.site.each_context(request),
         draftCitations=queryset.filter(processed=False),
         )
+    context.update({'title': 'Match citation records'})
 
     return TemplateResponse(request, "admin/citation_match.html", context)
 
@@ -219,7 +221,7 @@ def match_authorities(modeladmin, request, queryset):
         admin.site.each_context(request),
         draftAuthorities=queryset.filter(processed=False),
         )
-
+    context.update({'title': 'Match authority records'})
     return TemplateResponse(request, "admin/authority_match.html", context)
 
 
@@ -485,6 +487,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
 
     list_display = ('title', 'imported_on', 'processed')
     inlines = []
+    readonly_fields = ('imported_by', 'processed', 'part_of')
     # list_filter = ('processed',)
 
     actions = [match_citations]
@@ -510,6 +513,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
         """
         citation_type = ContentType.objects.get_for_model(Citation)
         context = dict(self.admin_site.each_context(request))
+        context.update({'title': 'Create new citation'})
         draftcitation = DraftCitation.objects.get(pk=draftcitation_id)
         context.update({'draftcitation': draftcitation})
 
@@ -574,6 +578,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
         """
 
         context = dict(self.admin_site.each_context(request))
+        context.update({'title': 'Match citation records'})
         if request.method == 'POST':
             chosen = match(request, DraftCitation, Citation)
 
@@ -722,6 +727,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
         """
 
         context = dict(self.admin_site.each_context(request))
+        context.update({'title': 'Match authority records'})
         if request.method == 'POST':
             chosen = match(request, DraftAuthority, Authority)
 
@@ -832,6 +838,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
         data from a :class:`zotero.DraftAuthority` instance.
         """
         context = dict(self.admin_site.each_context(request))
+        context.update({'title': 'Create new authority record'})
         draftauthority = DraftAuthority.objects.get(pk=draftauthority_id)
         context.update({'draftauthority': draftauthority})
 

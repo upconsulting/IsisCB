@@ -104,15 +104,19 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ACRelationInlineForm, self).__init__(*args, **kwargs)
 
+        for key, field in self.fields.iteritems():
+            if 'class' not in field.widget.attrs:
+                field.widget.attrs['class'] = ''
+            field.widget.attrs['class'] += ' form-control'
         # The value of `authority` from the ACRelation is represented with a
         #  hidden field and a separate field, ``authority_name`` is used for
         #  collecting user input and driving the autocomplete. When displaying
         #  an inline for an existing ACRelation, we need to automatically
         #  populate the ``authority`` field on the form.
-        # if 'authority' in self.initial:
-        #     authority_pk = self.initial['authority']
-        #     authority = Authority.objects.get(pk=authority_pk)
-        #     self.fields['authority_name'].initial = authority.name
+        if 'authority' in self.initial:
+            authority_pk = self.initial['authority']
+            authority = Authority.objects.get(pk=authority_pk)
+            self.fields['authority_name'].initial = authority.name
 
 
 class CCRelationInline(admin.TabularInline):
@@ -397,6 +401,13 @@ class CitationForm(autocomplete_light.ModelForm):
         css = {
             'all': ['isisdata/css/autocomplete.css']
         }
+
+    def __init__(self, *args, **kwargs):
+        super(CitationForm, self).__init__(*args, **kwargs)
+        for key, field in self.fields.iteritems():
+            if 'class' not in field.widget.attrs:
+                field.widget.attrs['class'] = ''
+            field.widget.attrs['class'] += ' form-control'
 
 
 class CitationAdmin(SimpleHistoryAdmin,
