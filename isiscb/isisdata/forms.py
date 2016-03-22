@@ -172,7 +172,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
 class UserRegistrationForm(forms.Form):
     username = forms.CharField()
     email = forms.CharField(widget=forms.EmailInput())
-    password1 = forms.CharField(widget=forms.PasswordInput())
-    password2 = forms.CharField(widget=forms.PasswordInput())
+    password1 = forms.CharField(widget=forms.PasswordInput(), label='Password')
+    password2 = forms.CharField(widget=forms.PasswordInput(), label='Password (again)')
     captcha = CaptchaField()
     next = forms.CharField(widget=forms.HiddenInput(), required=False)

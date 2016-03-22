@@ -1,5 +1,7 @@
 # IsisCB [![Build Status](https://travis-ci.org/upconsulting/IsisCB.svg?branch=develop)](https://travis-ci.org/upconsulting/IsisCB)
 
+Current version: 0.12.3.2
+
 ## License
 
 This software is licensed under the terms of the The MIT License. For more
