@@ -29,7 +29,16 @@ def missing_or_empty(obj, key):
 
 
 class BulkIngestForm(forms.ModelForm):
+    """
+    Used to create a :class:`.ImportAccession`\.
+    """
     zotero_rdf = forms.FileField()
+
+
+class ImportAccessionForm(forms.ModelForm):
+    class Meta:
+        model = ImportAccession
+        fields = '__all__'
 
 
 class CitationForm(forms.ModelForm):
@@ -43,7 +52,9 @@ class CitationForm(forms.ModelForm):
                    'modified_by_fm',
                    'created_on_fm',
                    'created_by_fm',
-                   'redirect_to')
+                   'redirect_to',
+                   'related_citations',
+                   'related_authorities')
 
     def __init__(self, *args, **kwargs):
         super(CitationForm, self).__init__(*args, **kwargs)
@@ -96,6 +107,36 @@ class ImportAccessionAdmin(admin.ModelAdmin):
 
         papers = read(path)
         process(papers, instance=form.instance)
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:
+            kwargs['form'] = ImportAccessionForm
+        return super(ImportAccessionAdmin, self).get_form(request, obj, **kwargs)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields + ('name',)
+        return self.readonly_fields
+
+
+class ACRelationForm(forms.ModelForm):
+    """
+    """
+    id = forms.CharField(widget=forms.HiddenInput(), required=False)
+    citation = forms.CharField(widget=forms.HiddenInput(), required=False)
+    authority = forms.CharField(required=False)
+    authority_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    class Meta:
+        model = ACRelation
+        fields = ['type_controlled']
+
+    def __init__(self, *args, **kwargs):
+        super(ACRelationForm, self).__init__(*args, **kwargs)
+        for key in self.fields.keys():
+            self.fields[key].required = False
+            self.fields[key].widget.attrs['class'] = 'form-control'
+            self.fields[key].widget.attrs['disabled'] = 'true'
 
 
 class LinkedDataForm(forms.ModelForm):
@@ -369,6 +410,75 @@ def resolve(request, draftmodel, choicemodel):
         draftinstance.save()
 
 
+def process_create_instance(draftinstance, form, attributeFormset,
+                            linkeddataFormset, acrelationFormset=None):
+    # Create the Citation entry.
+    instance = form.save()
+
+    # Create new Attributes.
+    for attributeForm in attributeFormset:
+
+        attributeType = attributeForm.cleaned_data.get('type_controlled')
+        value = attributeForm.cleaned_data.get('value')
+        if not attributeType or not value:
+            continue
+        valueModel = attributeType.value_content_type.model_class()
+
+
+        attribute_instance = Attribute(
+            source=instance,
+            type_controlled=attributeType,
+        )
+        attribute_instance.save()
+        value_instance = valueModel(
+            attribute=attribute_instance,
+            value=value,
+        )
+        value_instance.save()
+
+    # Create new LinkedData entries.
+    for linkeddataForm in linkeddataFormset:
+        linkeddataType = linkeddataForm.cleaned_data.get('type_controlled')
+        urn = linkeddataForm.cleaned_data.get('universal_resource_name')
+        if not urn or not linkeddataType:
+            continue
+
+        linkeddata_instance = LinkedData(
+            subject=instance,
+            universal_resource_name=urn,
+            type_controlled=linkeddataType,
+        )
+        linkeddata_instance.save()
+
+    if acrelationFormset:
+        for acrelationForm in acrelationFormset:
+            authority_id = acrelationForm.cleaned_data.get('authority_id')
+            authority_type = acrelationForm.cleaned_data.get('type_controlled')
+            if not authority_id or not authority_type:
+                continue
+
+            acrelation_instance = ACRelation(
+                citation=instance,
+                authority=Authority.objects.get(pk=authority_id),
+                type_controlled=authority_type,
+            )
+            acrelation_instance.save()
+
+
+    # Add a new InstanceResolutionEvent.
+    irEvent = InstanceResolutionEvent(
+        for_instance=draftinstance,
+        to_instance=instance
+    )
+    irEvent.save()
+
+    # Update the DraftAuthority.
+    draftinstance.processed = True
+    draftinstance.save()
+
+    return instance
+
+
 class DraftCitationAdmin(admin.ModelAdmin):
     class Meta:
         model = DraftCitation
@@ -395,9 +505,66 @@ class DraftCitationAdmin(admin.ModelAdmin):
 
     def create_citation(self, request, draftcitation_id):
         """
-        TODO: implement.
+        A staff user can create a new :class:`isisdata.Authority` record using
+        data from a :class:`zotero.DraftAuthority` instance.
         """
-        return
+        citation_type = ContentType.objects.get_for_model(Citation)
+        context = dict(self.admin_site.each_context(request))
+        draftcitation = DraftCitation.objects.get(pk=draftcitation_id)
+        context.update({'draftcitation': draftcitation})
+
+        AttributeInlineFormSet = formset_factory(AttributeForm)
+        LinkedDataInlineFormSet = formset_factory(LinkedDataForm)
+        ACRelationInlineFormSet = formset_factory(ACRelationForm, extra=0)
+
+        if request.method == 'GET':
+            form = CitationForm(initial={
+                'title': draftcitation.title,
+                'type_controlled': draftcitation.type_controlled,
+                'record_history': u'Created from Zotero accession {0}, performed at {1} by {2}. Subsequently validated and curated by {3}.'.format(draftcitation.part_of.id, draftcitation.part_of.imported_on, draftcitation.part_of.imported_by, request.user.username),
+                })
+            attributeFormset = AttributeInlineFormSet(prefix='attribute', initial=[{
+                'value': attribute.value,
+                'type_controlled': AttributeType.objects.get(name=attribute.name),
+                'subject_content_type': citation_type.id,
+                } for attribute in draftcitation.attributes.all()])
+            linkeddataFormset = LinkedDataInlineFormSet(prefix='linkeddata', initial=[{
+                'universal_resource_name': linkeddata.value,
+                'type_controlled': LinkedDataType.objects.get_or_create(name=linkeddata.name.upper())[0],
+                'subject_content_type': citation_type.id,
+                } for linkeddata in draftcitation.linkeddata.all()])
+            acrelationFormset = ACRelationInlineFormSet(prefix='acrelation', initial=[{
+                'type_controlled': acrelation.type_controlled,
+                'authority': acrelation.authority.resolutions.first().to_instance.name,
+                'authority_id': acrelation.authority.resolutions.first().to_instance.id,
+            } for acrelation in draftcitation.authority_relations.all() if acrelation.authority.processed])
+
+
+        elif request.method == 'POST':
+            form = CitationForm(request.POST)
+            attributeFormset = AttributeInlineFormSet(request.POST, prefix='attribute')
+            linkeddataFormset = LinkedDataInlineFormSet(request.POST, prefix='linkeddata')
+            acrelationFormset = ACRelationInlineFormSet(request.POST, prefix='acrelation')
+            print form.errors
+            print attributeFormset.errors
+            print linkeddataFormset.errors
+            print acrelationFormset.errors
+            if all([form.is_valid(),
+                    attributeFormset.is_valid(),
+                    linkeddataFormset.is_valid(),
+                    acrelationFormset.is_valid()]):
+                instance = process_create_instance(draftcitation, form, attributeFormset, linkeddataFormset, acrelationFormset)
+
+                # If successful, take the user to the Citation change view.
+                return HttpResponseRedirect(reverse("admin:isisdata_citation_change", args=[instance.id]))
+
+        context.update({
+            'form': form,
+            'attribute_formset': attributeFormset,
+            'linkeddata_formset': linkeddataFormset,
+            'acrelation_formset': acrelationFormset,
+        })
+        return TemplateResponse(request, "admin/citation_create.html", context)
 
     def match(self, request):
         """
@@ -755,8 +922,3 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
 admin.site.register(DraftCitation, DraftCitationAdmin)
 admin.site.register(DraftAuthority, DraftAuthorityAdmin)
 admin.site.register(ImportAccession, ImportAccessionAdmin)
-admin.site.register(DraftACRelation)
-admin.site.register(DraftAttribute)
-admin.site.register(DraftCitationLinkedData)
-admin.site.register(DraftAuthorityLinkedData)
-admin.site.register(InstanceResolutionEvent)

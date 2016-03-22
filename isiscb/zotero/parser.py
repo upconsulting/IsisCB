@@ -578,16 +578,14 @@ def process_authorities(paper, instance):
                 part_of = instance,
             )
             draftACRelations.append(relation)
-
     return draftAuthorities, draftACRelations
 
 
 def process_linkeddata(paper, instance):
-    linkeddata_fields = [
+    linkeddata_fields = [    # Maps LD.type_controlled.name -> Zotero field.
         (DraftCitationLinkedData, [
-            ('external', 'uri'),
+            ('uri', 'uri'),
             ('doi', 'doi'),
-
         ]),
         (DraftAuthorityLinkedData, [
             ('isbn', 'isbn'),

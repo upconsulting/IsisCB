@@ -51,7 +51,33 @@ class DraftCitation(ImportedData):
     title = models.CharField(max_length=1000, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     abstract = models.TextField(null=True, blank=True)
-    type_controlled = models.CharField(max_length=2, null=True, blank=True)
+
+    BOOK = 'BO'
+    ARTICLE = 'AR'
+    CHAPTER = 'CH'
+    REVIEW = 'RE'
+    ESSAY_REVIEW = 'ES'
+    THESIS = 'TH'
+    EVENT = 'EV'
+    PRESENTATION = 'PR'
+    INTERACTIVE = 'IN'
+    WEBSITE = 'WE'
+    APPLICATION = 'AP'
+
+    TYPE_CHOICES = (
+        (BOOK, 'Book'),
+        (ARTICLE, 'Article'),
+        (CHAPTER, 'Chapter'),
+        (REVIEW, 'Review'),
+        (ESSAY_REVIEW, 'Essay Review'),
+        (THESIS, 'Thesis'),
+        (EVENT, 'Event'),
+        (PRESENTATION, 'Presentation'),
+        (INTERACTIVE, 'Interactive Resource'),
+        (WEBSITE, 'Website'),
+        (APPLICATION, 'Application'),
+    )
+    type_controlled = models.CharField(choices=TYPE_CHOICES, max_length=2, null=True, blank=True)
     publication_date = models.CharField(max_length=100, null=True, blank=True)
 
     page_start = models.CharField(max_length=100, blank=True, null=True)
@@ -117,7 +143,39 @@ class DraftAuthority(ImportedData):
 class DraftACRelation(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='authority_relations')
     authority = models.ForeignKey('DraftAuthority', related_name='citation_relations')
-    type_controlled = models.CharField(max_length=2)
+
+    AUTHOR = 'AU'
+    EDITOR = 'ED'
+    ADVISOR = 'AD'
+    CONTRIBUTOR = 'CO'
+    TRANSLATOR = 'TR'
+    # if Type.Broad.controlled = 'ProvidesSubjectContentAbout'
+    SUBJECT = 'SU'
+    CATEGORY = 'CA'
+    # if Type.Broad.controlled = 'IsInstitutionalHostOf'
+    PUBLISHER = 'PU'
+    SCHOOL = 'SC'
+    INSTITUTION = 'IN'
+    MEETING = 'ME'
+    # if Type.Broad.controlled = 'IsPublicationHostOf'
+    PERIODICAL = 'PE'
+    BOOK_SERIES = 'BS'
+    TYPE_CHOICES = (
+        (AUTHOR, 'Author'),
+        (EDITOR, 'Editor'),
+        (ADVISOR, 'Advisor'),
+        (CONTRIBUTOR, 'Contributor'),
+        (TRANSLATOR, 'Translator'),
+        (SUBJECT, 'Subject'),
+        (CATEGORY, 'Category'),
+        (PUBLISHER, 'Publisher'),
+        (SCHOOL, 'School'),
+        (INSTITUTION, 'Institution'),
+        (MEETING, 'Meeting'),
+        (PERIODICAL, 'Periodical'),
+        (BOOK_SERIES, 'Book Series')
+    )
+    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES)
     type_broad_controlled = models.CharField(max_length=2)
 
 
