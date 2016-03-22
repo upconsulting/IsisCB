@@ -15,6 +15,7 @@ from captcha.fields import CaptchaField
 import time
 from isisdata import helper_methods
 from isisdata.models import Citation, Authority
+from openurl.models import *
 
 try:
     from django.utils.encoding import smart_text
@@ -176,3 +177,15 @@ class UserRegistrationForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput(), label='Password (again)')
     captcha = CaptchaField()
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+
+
+class UserProfileForm(forms.Form):
+    email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    affiliation = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    location = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
+    share_email = forms.BooleanField()
+    resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))

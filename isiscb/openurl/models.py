@@ -29,6 +29,9 @@ class Institution(CuratedMixin):
     name = models.CharField(max_length=255)
     notes = models.TextField(null=True, blank=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 
 class Resolver(CuratedMixin):
@@ -41,3 +44,6 @@ class Resolver(CuratedMixin):
     The address to which CoINS metadata will be appended to create an OpenURL
     link."""))
     notes = models.TextField(null=True, blank=True)
+
+    def __unicode__(self):
+        return self.belongs_to.name

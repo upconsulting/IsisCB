@@ -22,9 +22,6 @@ class ResolverInline(admin.StackedInline):
     exclude = ['added_by']
 
 
-
-
-
 class InstitutionAdmin(CuratedAdminMixin):
     class Meta:
         model = Institution

@@ -767,6 +767,13 @@ class CommentAdmin(admin.ModelAdmin):
     inlines = []
 
 
+class UserProfileAdmin(admin.ModelAdmin):
+    class Meta:
+        model = UserProfile
+
+    readonly_fields = ['authority_record',]
+
+
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
 admin.site.register(ACRelation, ACRelationAdmin)
@@ -781,3 +788,4 @@ admin.site.register(Comment, CommentAdmin)
 admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Language, LanguageAdmin)
 # Register your models here.
+admin.site.register(UserProfile, UserProfileAdmin)

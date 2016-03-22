@@ -37,7 +37,7 @@ from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
 from isisdata.models import *
-from isisdata.forms import UserRegistrationForm
+from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 
@@ -1378,12 +1378,50 @@ def get_linkresolver_url(request, citation_id):
 
 
 
+
 def user_profile(request, username):
     user = get_object_or_404(User, username=username)
-    template = loader.get_template('isisdata/userprofile.html')
+    edit = request.GET.get('edit')
+
+    # Only the owner of the profile can change it.
+    if request.method == 'POST' and request.user.id == user.id:
+        form = UserProfileForm(request.POST)
+        if form.is_valid():
+            user.first_name = form.cleaned_data.get('first_name')
+            user.last_name = form.cleaned_data.get('last_name')
+            user.email = form.cleaned_data.get('email')
+            user.profile.affiliation = form.cleaned_data.get('affiliation')
+            user.profile.location = form.cleaned_data.get('location')
+            user.profile.bio = form.cleaned_data.get('bio')
+            user.profile.share_email = form.cleaned_data.get('share_email')
+            user.profile.resolver_institution = form.cleaned_data.get('resolver_institution')
+            user.save()
+            user.profile.save()
+
     context = RequestContext(request, {
         'active': '',
-        'user': user,
+        'username': user.username,
+        'full_name': '%s %s' % (user.first_name, user.last_name),
+        'is_staff': user.is_staff,
+        'email': user.email,
         'profile': user.profile,
+        'usercomments': Comment.objects.filter(created_by=user).order_by('-created_on')
     })
+    if edit and user.id == request.user.id:
+        template = loader.get_template('isisdata/userprofile_edit.html')
+        form = UserProfileForm(initial={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'affiliation': getattr(user.profile, 'affiliation', None),
+            'location': getattr(user.profile, 'location', None),
+            'bio': user.profile.bio.raw,
+            'share_email': user.profile.share_email,
+            'resolver_institution': user.profile.resolver_institution,
+        })
+        context.update({'form': form})
+    else:
+        template = loader.get_template('isisdata/userprofile.html')
+
+
     return HttpResponse(template.render(context))
