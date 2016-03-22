@@ -1478,7 +1478,18 @@ class UserProfile(models.Model):
     location = models.CharField(max_length=255, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
 
-    share_email = models.BooleanField(default=False)
+    share_email = models.BooleanField(default=False, help_text=help_text("""
+    A user can indicate whether or not their email address should be made
+    public."""))
 
     resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
-                                             related_name='users')
+                                             related_name='users',
+                                             help_text=help_text("""
+    A user can select an institution for which OpenURL links should be
+    generated while searching."""))
+
+    authority_record = models.OneToOneField(Authority, blank=True, null=True,
+                                            related_name='associated_user',
+                                            help_text=help_text("""
+    A user can 'claim' an Authority record, asserting that the record refers to
+    theirself."""))
