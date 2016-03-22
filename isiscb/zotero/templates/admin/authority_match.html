@@ -47,7 +47,7 @@
         </div>
 
     </li>
-    <li{% if draftAuthorities|length > 1%} class="collapse"{% endif %} id="collapse-{{ authority.id }}">
+    <div class="{% if draftAuthorities|length > 1%} collapse{% endif %}" id="collapse-{{ authority.id }}">
         <div class="well suggestion-results">
             <p><strong>Type</strong> <span class="label label-warning">{{authority.type_controlled}}</span></p>
 
@@ -62,7 +62,7 @@
             <ul class="suggestion-results-list">
             </ul>
         </div>
-    </li>
+    </div>
 
     {% endfor %}
 </ul>

@@ -45,7 +45,7 @@
         </div>
 
     </li>
-    <li class="collapse" id="collapse-{{ citation.id }}">
+    <div class="{% if draftCitations|length > 1%} collapse{% endif %}" id="collapse-{{ citation.id }}">
         <div class="well suggestion-results">
             {% if citation.page_start %}<p><strong>Pages</strong> {{citation.page_start}} - {{citation.page_end}}</p>{% endif %}
             {% if citation.authority_relations.count %}<p><strong>Authority relations</strong>: {% for acrelation in citation.authority_relations.all %}<span class="acrelation">{{ acrelation.authority.name }} <span class="label label-warning">{{ acrelation.authority.type_controlled }}</span> <span class="label label-danger">{{ acrelation.type_controlled }}</span> </span>{% endfor %}</p>{% endif %}
@@ -58,8 +58,10 @@
                 click on one of the radio buttons. If no satisfactory match can be found, simply leave
                 the radio buttons unchecked, or select <strong>None</strong>.
             </p>
+            <ul class="suggestion-results-list">
+            </ul>
         </div>
-    </li>
+    </div>
 
     {% endfor %}
 </ul>
@@ -119,7 +121,7 @@ var opts = {
                     status.addClass('label-success');
                     status.attr('data-toggle', "collapse");
 
-                    var target = $(status.attr("data-target") + ' > .suggestion-results');
+                    var target = $(status.attr("data-target") + ' > .suggestion-results > .suggestion-results-list');
                     response.data.forEach(function(suggestion) {
                         var suggestElem = $('<li></li>');
                         var radioElem = $('<label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="' + suggestion.id + '"></label>');

@@ -369,7 +369,7 @@ def resolve_update_authority(request):
                 setattr(instance, k, v)
             instance.save()
 
-        resolve_update_related(request, autority_type,
+        resolve_update_related(request, authority_type,
                                linkeddata_formset,
                                attribute_formset)
 
