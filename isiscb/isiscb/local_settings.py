@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'oauth2_provider',
     'captcha',
     'corsheaders',
+    'zotero',
 )
 
 MIDDLEWARE_CLASSES = (

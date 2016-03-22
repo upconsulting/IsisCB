@@ -14,6 +14,7 @@ from captcha.fields import CaptchaField
 
 import time
 from isisdata import helper_methods
+from isisdata.models import Citation, Authority
 
 try:
     from django.utils.encoding import smart_text

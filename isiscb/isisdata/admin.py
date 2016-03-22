@@ -104,15 +104,19 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ACRelationInlineForm, self).__init__(*args, **kwargs)
 
+        for key, field in self.fields.iteritems():
+            if 'class' not in field.widget.attrs:
+                field.widget.attrs['class'] = ''
+            field.widget.attrs['class'] += ' form-control'
         # The value of `authority` from the ACRelation is represented with a
         #  hidden field and a separate field, ``authority_name`` is used for
         #  collecting user input and driving the autocomplete. When displaying
         #  an inline for an existing ACRelation, we need to automatically
         #  populate the ``authority`` field on the form.
-        # if 'authority' in self.initial:
-        #     authority_pk = self.initial['authority']
-        #     authority = Authority.objects.get(pk=authority_pk)
-        #     self.fields['authority_name'].initial = authority.name
+        if 'authority' in self.initial:
+            authority_pk = self.initial['authority']
+            authority = Authority.objects.get(pk=authority_pk)
+            self.fields['authority_name'].initial = authority.name
 
 
 class CCRelationInline(admin.TabularInline):
@@ -162,6 +166,10 @@ class ValueField(forms.Field):
 
 
 class AttributeInlineForm(forms.ModelForm):
+    class Meta:
+        model = Attribute
+        exclude = []
+
     class Media:
         model = Attribute
 
@@ -177,7 +185,10 @@ class AttributeInlineForm(forms.ModelForm):
         #  that we can dynamically change the widget for ``value``. See
         #  widgetmap.js, referenced above.
         css_class = 'attribute_type_controlled'
-        self.base_fields['type_controlled'].widget.attrs['class'] = css_class
+        try:
+            self.base_fields['type_controlled'].widget.attrs['class'] = css_class
+        except KeyError:
+            pass
 
         super(AttributeInlineForm, self).__init__(*args, **kwargs)
 
@@ -391,6 +402,13 @@ class CitationForm(autocomplete_light.ModelForm):
             'all': ['isisdata/css/autocomplete.css']
         }
 
+    def __init__(self, *args, **kwargs):
+        super(CitationForm, self).__init__(*args, **kwargs)
+        for key, field in self.fields.iteritems():
+            if 'class' not in field.widget.attrs:
+                field.widget.attrs['class'] = ''
+            field.widget.attrs['class'] += ' form-control'
+
 
 class CitationAdmin(SimpleHistoryAdmin,
                     AttributeInlineMixin,
@@ -399,7 +417,7 @@ class CitationAdmin(SimpleHistoryAdmin,
 
 
 
-    list_display = ('id', 'title', 'modified_on', 'modified_by',)
+    list_display = ('id', 'title', 'modified_on', 'modified_by', 'public', 'status_of_record')
     list_filter = ('type_controlled', 'status_of_record')
     inlines = (ACRelationInline, )
     search_fields = ('title', )
@@ -412,7 +430,8 @@ class CitationAdmin(SimpleHistoryAdmin,
                        'title',
                        'abstract',
                        'language',
-                       'type_controlled'),
+                       'type_controlled',
+                       'public'),
             'classes': ('extrapretty',),
 
         }),
@@ -627,7 +646,7 @@ class LinkedDataTypeAdmin(SimpleHistoryAdmin):
 class LinkedDataAdmin(SimpleHistoryAdmin):
 
     list_display = ('id',
-                    'subject',
+                    # 'subject',
                     'type_controlled',
                     'universal_resource_name')
     list_filter = ('type_controlled',)
@@ -694,7 +713,7 @@ class AttributeAdmin(SimpleHistoryAdmin):
         }),
     ]
     readonly_fields = ('uri', 'id', 'source_content_type', 'source_instance_id')
-    list_display = ('id', 'source', 'type_controlled', 'value')
+    list_display = ('id',  'type_controlled', 'value')
     inlines = (ValueInline,)
 
 
@@ -703,11 +722,11 @@ class AttributeTypeAdmin(SimpleHistoryAdmin):
     list_display_links = ('id', 'name')
     inlines = []
 
-    def get_model_perms(self, request):
-        """
-        Return empty perms dict thus hiding the model from admin index.
-        """
-        return {}
+    # def get_model_perms(self, request):
+    #     """
+    #     Return empty perms dict thus hiding the model from admin index.
+    #     """
+    #     return {}
 
 
 class PartDetailsAdmin(SimpleHistoryAdmin):

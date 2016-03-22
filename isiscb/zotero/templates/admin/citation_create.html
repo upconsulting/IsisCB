@@ -1,0 +1,287 @@
+{% extends "admin/base_site.html" %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+<form method='POST' action='.' enctype="multipart/form-data">
+    {% csrf_token %}
+<div class="row">
+    <div class="col-sm-6">
+        <div class="panel">
+            <div class="panel-body">
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Title:</label>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.title }}
+                    <span class="text text-muted">{{ form.title.help_text }}</span>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.type_controlled.id_for_label }}">{{ form.type_controlled.label }}:</label>
+                    {% if form.type_controlled.errors %}
+                        {% for error in form.type_controlled.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.type_controlled }}
+                    <span class="text text-muted">{{ form.type_controlled.help_text }}</span>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.language.id_for_label }}">{{ form.language.label }}:</label>
+                    {% if form.language.errors %}
+                        {% for error in form.language.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {{ form.language }}
+                    <span class="text text-muted">{{ form.language.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <label for="{{ form.description.id_for_label }}">{{ form.description.label }}:</label>
+                    {{ form.description }}
+                    <span class="text text-muted">{{ form.description.help_text }}</span>
+                </div>
+
+
+                <div class="form-group">
+                    {% if form.public.errors %}
+                        {% for error in form.public.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <div class="checkbox">
+                        <label for="{{ form.public.id_for_label }}">
+                        {{ form.public }} {{ form.public.label }}
+                        </label>
+                    </div>
+                    <span class="text text-muted">{{ form.public.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {% if form.administrator_notes.errors %}
+                        {% for error in form.administrator_notes.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <label for="{{ form.administrator_notes.id_for_label }}">{{ form.administrator_notes.label }}:</label>
+                    {{ form.administrator_notes }}
+                    <span class="text text-muted">{{ form.administrator_notes.help_text }}</span>
+                </div>
+
+                <div class="form-group">
+                    {% if form.record_history.errors %}
+                        {% for error in form.record_history.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <label for="{{ form.record_history.id_for_label }}">{{ form.record_history.label }}:</label>
+                    {{ form.record_history }}
+                    <span class="text text-muted">{{ form.record_history.help_text }}</span>
+                </div>
+                <div class="panel">
+                    <div class="pull-right">
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="h3">Imported Citation Record
+            </div>
+            <div class="panel-body">
+                <span class="text text-info">The following data were imported from a Zotero record.</span>
+            </div>
+            <table class="table table-responsive table-bordered">
+                <thead>
+                    <th class="col-sm-4">Field</th>
+                    <th>Value</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><label>Title:</label></td>
+                        <td>{{ draftcitation.title }}</td>
+                    </tr>
+                    <tr>
+                        <td><label>Type:</label></td>
+                        <td>{{ draftcitation.get_type_controlled_display }}</td>
+                    </tr>
+
+                    {% if draftcitation.authority_relations %}
+                    <tr>
+                        <td><label>Associated with:</label></td>
+                        <td>
+                            {% for relation in draftcitation.authority_relations.all %}
+                            <li>
+                                <span class="label label-primary">{{ relation.get_type_controlled_display }}</span>
+                                <a href="{% url "admin:zotero_draftauthority_change" relation.authority.id %}" target="_blank">{{relation.authority.name}}</a>
+                                {% if relation.authority.processed %}<span class="text text-success glyphicon glyphicon-ok"></span>{% endif %}
+                            </li>
+                            {% endfor %}
+
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <div class="panel">
+            <div class="panel-heading">
+                <span class="h3">Authority Relations</span>
+                <p class="text text-muted">
+                    Authority records from the imported citation that have already been resolved will be
+                    included in the new citation record. Additional authority relations can be added
+                    once the citation is created.
+                </p>
+
+            </div>
+            <div id="acrelation_management_form">
+            {{ acrelation_formset.management_form }}
+            </div>
+            <table class="table" id="acrelation_table">
+                {% for acrelation_form in acrelation_formset %}
+                    {{ acrelation_form.non_field_errors }}
+                    {{ acrelation_form.errors }}
+                    <tr>
+                        <td>{{ acrelation_form.type_controlled }}</td>
+                        <td>{{ acrelation_form.authority }}{{ acrelation_form.authority_id }}</td>
+                        {% if acrelation_form.can_delete %}
+                            <td>{{ acrelation_form.DELETE }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="panel">
+            <div class="panel-heading">
+                <span class="h3">Attributes
+                    <span class="btn btn-sm" id="add_attribute_button">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                    </span>
+                </span>
+            </div>
+            <div id="attribute_management_form">
+            {{attribute_formset.management_form}}
+            </div>
+            <table class="table" id="attribute_table">
+                {% for attribute_form in attribute_formset %}
+                    {{ attribute_form.non_field_errors }}
+                    {{ attribute_form.errors }}
+                    <tr>
+                        <td>{{ attribute_form.type_controlled }}</td>
+                        <td>{{ attribute_form.value }}</td>
+                        {% if attribute_formset.can_delete %}
+                            <td>{{ attribute_form.DELETE }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="panel">
+            <div class="panel-heading">
+                <span class="h3">Linked Data
+                    <span class="btn btn-sm" id="add_linkeddata_button">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true" style="color: green;"></span>
+
+                    </span>
+                </span>
+            </div>
+            <div id="linkeddata_management_form">
+            {{linkeddata_formset.management_form}}
+            </div>
+            <table class="table" id="linkeddata_table">
+                {% for linkeddata_form in linkeddata_formset %}
+                    <tr>
+                        <td>{{ linkeddata_form.type_controlled }}</td>
+                        <td>{{ linkeddata_form.universal_resource_name }}</td>
+                        {% if linkeddata_form.can_delete %}
+                            <td>{{ linkeddata_form.DELETE }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+</div>
+</form>
+
+<script>
+$('#add_attribute_button').on('click', function() {
+    var lastAttributeRow = $('#attribute_table > tbody > tr').last();
+    var newAttributeRow = lastAttributeRow.clone();
+
+    newAttributeRow.find('td').children().each(function(i, child) {
+        var last_ID = child.id;
+        var last_ID_parts = last_ID.split('-');
+        var last_name_parts = child.name.split('-');
+        var last_idx = Number(last_ID_parts[1]);
+        var new_idx = last_idx + 1;
+        var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
+        var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
+
+        var childElem = $(child);
+        childElem.val("");
+        childElem.attr('id', new_ID);
+        childElem.attr('name', new_name);
+        console.log(childElem);
+        // console.log(currentID)
+    });
+
+    var totalFormsElem = $('#attribute_management_form > #id_form-TOTAL_FORMS');
+    var tForms = Number(totalFormsElem.attr("value"));
+    totalFormsElem.attr("value", tForms + 1);
+
+    $('#attribute_table > tbody').append(newAttributeRow);
+});
+
+$('#add_linkeddata_button').on('click', function() {
+    var lastAttributeRow = $('#linkeddata_table > tbody > tr').last();
+    var newAttributeRow = lastAttributeRow.clone();
+
+    newAttributeRow.find('td').children().each(function(i, child) {
+        var last_ID = child.id;
+        var last_ID_parts = last_ID.split('-');
+        var last_name_parts = child.name.split('-');
+        var last_idx = Number(last_ID_parts[1]);
+        var new_idx = last_idx + 1;
+        var new_ID = [last_ID_parts[0], new_idx, last_ID_parts[2]].join('-');
+        var new_name = [last_name_parts[0], new_idx, last_name_parts[2]].join('-');
+
+        var childElem = $(child);
+        childElem.val("");
+        childElem.attr('id', new_ID);
+        childElem.attr('name', new_name);
+        console.log(childElem);
+        // console.log(currentID)
+    });
+
+    var totalFormsElem = $('#linkeddata_management_form > #id_form-TOTAL_FORMS');
+    var tForms = Number(totalFormsElem.attr("value"));
+    totalFormsElem.attr("value", tForms + 1);
+
+    $('#linkeddata_table > tbody').append(newAttributeRow);
+});
+
+</script>
+
+
+{% endblock %}

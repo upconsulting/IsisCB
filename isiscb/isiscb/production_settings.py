@@ -28,6 +28,7 @@ ALLOWED_HOSTS = [
     'isiscb-staging.elasticbeanstalk.com',
     'isiscb.elasticbeanstalk.com',
     'isiscb-production.elasticbeanstalk.com',
+    'isiscb-develop.elasticbeanstalk.com',
     '.isiscb.org',
 ]
 
@@ -55,6 +56,7 @@ INSTALLED_APPS = (
     "elasticstack",
     'oauth2_provider',
     'corsheaders',
+    'zotero',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -197,12 +199,14 @@ AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = False
 
-STATICFILES_DIRS = ['isisdata/static']
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
-# STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
-# STATIC_URL = '/static/'
+# STATICFILES_DIRS = ['isisdata/static']
+# STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
+# STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+# STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
