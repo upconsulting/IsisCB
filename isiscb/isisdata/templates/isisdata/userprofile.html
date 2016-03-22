@@ -1,0 +1,25 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load staticfiles %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-8">
+        <div class="panel">
+            <div class="panel-heading">
+                <span class="h2">{{ user.username }}</span>
+            </div>
+            <div class="panel-body">
+                <div class="h4">{{ user.full_name }}</div>
+                <div>{{ user.profile.affiliation }}</div>
+                <div>{{ user.profile.location }}</div>
+                <div>{{ user.profile.bio }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

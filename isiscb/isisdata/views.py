@@ -1375,3 +1375,15 @@ def get_linkresolver_url(request, citation_id):
         'text': linkText,
     }
     return JsonResponse(data)
+
+
+
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    template = loader.get_template('isisdata/userprofile.html')
+    context = RequestContext(request, {
+        'active': '',
+        'user': user,
+        'profile': user.profile,
+    })
+    return HttpResponse(template.render(context))

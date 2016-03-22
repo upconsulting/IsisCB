@@ -7,6 +7,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
+from markupfield.fields import MarkupField
+
 from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
@@ -1476,7 +1478,7 @@ class UserProfile(models.Model):
 
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
-    bio = models.TextField(blank=True, null=True)
+    bio = MarkupField(markup_type='markdown', blank=True, null=True)
 
     share_email = models.BooleanField(default=False, help_text=help_text("""
     A user can indicate whether or not their email address should be made
