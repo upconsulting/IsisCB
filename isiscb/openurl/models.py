@@ -33,7 +33,6 @@ class Institution(CuratedMixin):
         return self.name
 
 
-
 class Resolver(CuratedMixin):
     """
     An OpenURL resolver.

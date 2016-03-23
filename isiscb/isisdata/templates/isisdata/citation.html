@@ -92,9 +92,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endwith %}
 
     <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
-    <!-- This tag provides data for latent OpenURL functionality (e.g. browser
-          plugins, etc). -->
-    <span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>
 
     <!-- This tag displays an icon/link that points to the users' institution's
          link resolver. -->
@@ -102,11 +99,22 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <script>
         $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
             {
-            success: function(result) {
-                    if (result.url.length > 0) {
-                        $('#linkresolver').append('<a href="'+ result.url +'"><img src="'+ result.icon +'" alt="'+ result.text +'"></a>');
-                    }
-                }
+                success: function(result) {
+                        if (result.url.length > 0) {
+                            var linkElem = '<a href="'+ result.url +'" class="text-warnging">';
+                            // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
+                            if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
+                            linkElem += '</a>';
+                            $('#linkresolver').append(linkElem);
+                        } else {
+                            // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                            $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                        }
+                },
+                error: function() {
+                    // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                    $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                },
             });
         </script>
     </span>
