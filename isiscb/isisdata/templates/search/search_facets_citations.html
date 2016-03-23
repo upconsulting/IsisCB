@@ -1,6 +1,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load facet_filters %}
+{% load i18n %}
 
 {% if query %}
 <div class="panel-group" id="type_panel">
@@ -9,7 +10,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseTypes">
-          Document Type <span class="badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
+          {% trans "Document Type" %} <span class="badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
         </a>
       </h4>
     </div>
@@ -33,7 +34,7 @@
                 {% endfor %}
               </ul>
         {% else %}
-                <p>No type facets.</p>
+                <p>{% trans "No type facets." %}</p>
         {% endif %}
       </div>
     </div>
@@ -46,7 +47,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseAuthors">
-          Author & Contributors <span class="badge {% if selected_facets.citation_all_contributor_ids_exact %}active{% endif %}">{{ facets_citation.fields.all_contributor_ids|length }}</span>
+          {% trans "Author & Contributors" %} <span class="badge {% if selected_facets.citation_all_contributor_ids_exact %}active{% endif %}">{{ facets_citation.fields.all_contributor_ids|length }}</span>
         </a>
       </h4>
     </div>
@@ -56,7 +57,7 @@
               <ul class="selected_facets">
                 {% for author in selected_facets.citation_all_contributor_ids_exact %}
                 {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>  </li>
+                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="{% blocktrans with auth=author|get_authority_name %}Go to authority record for {{auth}} {% endblocktrans %}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>  </li>
                 {% endwith %}
                 {% endfor %}
               </ul>
@@ -64,7 +65,7 @@
                 {# Provide only the top 7 authors #}
                 {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
                 {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_aall_contributor_ids_exact %}
-                <li><a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a></li>
+                <li><a title="{% blocktrans with authorname=author.0|get_authority_name %}Show only results involving {{ authorname }}. {% endblocktrans %}" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="{% blocktrans with authorname=author.0|get_authority_name %} Go to authority record for {{authorname}}. {% endblocktrans %}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a></li>
                 {% endif %}
                 {% endfor %}
               </ul>
@@ -72,12 +73,12 @@
               <div class="more-facets">
                 <!-- Button trigger modal -->
                 <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
-                  More...
+                  {% trans "More..." %}
                 </button>
               </div>
               {% endif %}
         {% else %}
-                <p>No author facets.</p>
+                <p>{% trans "No author facets." %}</p>
         {% endif %}
       </div>
     </div>
@@ -90,7 +91,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseSubjects">
-          Subjects <span class="badge {% if selected_facets.citation_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.subject_ids|length }}</span>
+          {% trans "Subjects" %} <span class="badge {% if selected_facets.citation_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.subject_ids|length }}</span>
         </a>
       </h4>
     </div>
@@ -100,14 +101,14 @@
           <ul class="selected_facets">
             {% for subject in selected_facets.citation_subject_ids_exact %}
             {% with subject|create_facet_string:'citation_subject_ids_exact' as encoded_subject %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{subject|get_authority_name}}</a> <a title="Go to authority record for {{subject|get_authority_name}}" href="{% url 'authority' subject %}?"><i class="fa fa-info-circle"></i> </a> </li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_subject|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{subject|get_authority_name}}</a> <a title="{% blocktrans with subjectname=subject|get_authority_name %} Go to authority record for {{subjectname}}. {% endblocktrans %}" href="{% url 'authority' subject %}?"><i class="fa fa-info-circle"></i> </a> </li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for subject in facets_citation.fields.subject_ids|slice:":7" %}
                 {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}" title="Show only results involving {{ subject.0|get_authority_name }}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }}</a> ({{ subject.1 }}) <a title="Go to authority record for {{subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i>  </a> </li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}" title="{% blocktrans with subjectname=subject.0|get_authority_name %} Show only results involving {{ subjectname }}. {% endblocktrans %}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }}</a> ({{ subject.1 }}) <a title="{% blocktrans with subjectname=subject.0|get_authority_name %} Go to authority record for {{subjectname}}. {% endblocktrans %}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i>  </a> </li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -115,12 +116,12 @@
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
-              More...
+              {% trans "More..." %}
             </button>
           </div>
           {% endif %}
         {% else %}
-                <p>No subject facets.</p>
+                <p>{% trans "No subject facets." %}</p>
         {% endif %}
       </div>
     </div>
@@ -133,7 +134,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseTime">
-          Time Periods <span class="badge {% if selected_facets.citation_time_period_ids_exact %}active{% endif %}">{{ facets_citation.fields.time_period_ids|length }}</span>
+          {% trans "Time Periods" %} <span class="badge {% if selected_facets.citation_time_period_ids_exact %}active{% endif %}">{{ facets_citation.fields.time_period_ids|length }}</span>
         </a>
       </h4>
     </div>
@@ -143,14 +144,14 @@
           <ul class="selected_facets">
             {% for time_period in selected_facets.citation_time_period_ids_exact %}
             {% with time_period|create_facet_string:'citation_time_period_ids_exact' as encoded_time_period %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ time_period|get_authority_name }}</a>  <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?"><i class="fa fa-info-circle"></i> </a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ time_period|get_authority_name }}</a>  <a title="{% blocktrans with time_period_name=time_period|get_authority_name %} Go to authority record for {{time_period_name}}. {% endblocktrans %}" href="{% url 'authority' time_period %}?"><i class="fa fa-info-circle"></i> </a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for time_period in facets_citation.fields.time_period_ids|slice:":7" %}
                 {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}" title="Show only results involving {{ time_period.0|get_authority_name }}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }}) <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}" title="{% blocktrans with time_period_name=time_period.0|get_authority_name %} Show only results involving {{time_period_name}}. {% endblocktrans %}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }}) <a title="{% blocktrans with time_period_name=time_period.0|get_authority_name %} Go to authority record for {{ time_period_name}}. {% endblocktrans %}" href="{% url 'authority' time_period.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -158,12 +159,12 @@
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timeModal">
-              More...
+              {% trans "More..." %}
             </button>
           </div>
           {% endif %}
         {% else %}
-                <p>No time period facets.</p>
+                <p>{% trans "No time period facets." %}</p>
         {% endif %}
       </div>
     </div>
@@ -176,7 +177,7 @@
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapsePlaces">
-          Places <span class="badge {% if selected_facets.citation_geographic_ids_exact %}active{% endif %}">{{ facets_citation.fields.geographic_ids|length }}</span>
+          {% trans "Places" %} <span class="badge {% if selected_facets.citation_geographic_ids_exact %}active{% endif %}">{{ facets_citation.fields.geographic_ids|length }}</span>
         </a>
       </h4>
     </div>
@@ -186,14 +187,14 @@
           <ul class="selected_facets">
             {% for geographic in selected_facets.citation_geographic_ids_exact %}
             {% with geographic|create_facet_string:'citation_geographic_ids_exact' as encoded_geographic %}
-            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ geographic|get_authority_name }}</a> <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?"><i class="fa fa-info-circle"></i></a></li>
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ geographic|get_authority_name }}</a> <a title="{% blocktrans with geoname=geographic|get_authority_name %} Go to authority record for {{ geoname }}. {% endblocktrans %}" href="{% url 'authority' geographic %}?"><i class="fa fa-info-circle"></i></a></li>
             {% endwith %}
             {% endfor %}
           </ul>
           <ul class="unselected_facets">
                 {% for geographic in facets_citation.fields.geographic_ids|slice:":7" %}
                 {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
-                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}" title="Show only results involving {{ geographic.0|get_authority_name }}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }}</a> ({{ geographic.1 }}) <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="fa fa-info-circle"></i>  </a></li>
+                    <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}" title="{% blocktrans with geoname=geographic.0|get_authority_name %} Show only results involving {{ geoname }}. {% endblocktrans %}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }}</a> ({{ geographic.1 }}) <a title="{% blocktrans with geoname=geographic.0|get_authority_name %} Go to authority record for {{ geoname}}. {% endblocktrans %}" href="{% url 'authority' geographic.0 %}?"><i class="fa fa-info-circle"></i>  </a></li>
                 {% endif %}
                 {% endfor %}
           </ul>
@@ -201,12 +202,12 @@
           <div class="more-facets">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-link" data-toggle="modal" data-target="#placeModal">
-              More...
+              {% trans "More..." %}
             </button>
           </div>
           {% endif %}
         {% else %}
-                <p>No place facets.</p>
+                <p>{% trans "No place facets." %}</p>
         {% endif %}
       </div>
     </div>
@@ -221,19 +222,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Author</h4>
+        <h4 class="modal-title" id="myModalLabel">{% trans "Select Author" %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
           {% for author in facets_citation.fields.all_contributor_ids %}
           {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }}) <a title="Go to authority record for {{ author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }}) <a title="{% blocktrans with authorname=author.0|get_authority_name %} Go to authority record for {{ authorname }}. {% endblocktrans %}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
       </div>
     </div>
   </div>
@@ -246,19 +247,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Time Period</h4>
+        <h4 class="modal-title" id="myModalLabel">{% trans "Select Time Period" %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
           {% for time_period in facets_citation.fields.time_period_ids %}
           {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="fa fa-square-o"></i> {{ time_period.0|get_authority_name }} </a>({{ time_period.1 }}) <a title="{% blocktrans with time_name=time_period.0|get_authority_name %} Go to authority record for {{time_name}}. {% endblocktrans %}" href="{% url 'authority' time_period.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
       </div>
     </div>
   </div>
@@ -270,19 +271,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Place</h4>
+        <h4 class="modal-title" id="myModalLabel">{% trans "Select Place"}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
           {% for geographic in facets_citation.fields.geographic_ids %}
           {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}"><i class="fa fa-square-o"></i> {{ geographic.0|get_authority_name }} </a>({{ geographic.1 }}) <a title="{% blocktrans with geoname=geographic.0|get_authority_name %} Go to authority record for {{geoname}}. {% endblocktrans %}" href="{% url 'authority' geographic.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
       </div>
     </div>
   </div>
@@ -294,19 +295,19 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Subject</h4>
+        <h4 class="modal-title" id="myModalLabel">{% trans "Select Subject" %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
           {% for subject in facets_citation.fields.subject_ids %}
           {% if "citation_subject_ids_exact" not in selected_facets.keys or subject.0 not in selected_facets.citation_subject_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) <a title="Go to authority record for {{ subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_subject_ids_exact:{{ subject.0|urlencode }}"><i class="fa fa-square-o"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }}) <a title="{% blocktrans with subjectname=subject.0|get_authority_name %} Go to authority record for {{subjectname}}. {% endblocktrans %}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i> </a></li>
           {% endif %}
           {% endfor %}
         </ul>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
       </div>
     </div>
   </div>

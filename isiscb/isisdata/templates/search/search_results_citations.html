@@ -2,30 +2,31 @@
 {% load metadata_filters %}
 {% load citation_filters %}
 {% load search_filters %}
+{% load i18n %}
 
 {% if query %}
 <div class="row">
   <div class="col-md-8">
-    <h3>Search Results</h3>
-    <div class="results-info">Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results.</div>
+    <h3>{% trans "Search Results" %}</h3>
+    <div class="results-info">{% blocktrans with start=page.citation.start_index end=page.citation.end_index count=count_citation %} Showing {{ start }} to {{ end }} of {{ count }} results. {% endblocktrans %} </div>
   </div>
   <div class="col-md-4 menuContainer">
 
     <div class="dropdown pull-right">
       {% if sort_order_dir_citation == 'descend' %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="{% trans "Current sort order: descending" %}" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
       {% else %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="{% trans "Current sort order: ascending" %}" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
       {% endif %}
       <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
-        Sort by: {{ sort_order_citation|get_current_sort_order_citation }}
+        {% trans "Sort by: %" %} {{ sort_order_citation|get_current_sort_order_citation }}
           <span class="caret"></span>
       </button>
 
       <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">{% trans "Title" %}</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">{% trans "First Author" %}</a></li>
+        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">{% trans "Publication Date" %}</a></li>
         <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
       </ul>
     </div>
@@ -42,7 +43,7 @@
             {% if result.authors %}
                {{ result.authors|joinby:"; " }}
             {% else %}
-              Author missing
+              {% trans "Author missing" %}
             {% endif %}
             {% if result.publication_date.0 %}
               ({{ result.publication_date.0 }})
@@ -50,7 +51,7 @@
             <a href="{% url 'citation' result.id|get_pk %}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
             <!-- book title and page numbers -->
             {% if result.book_title %}
-              In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
+              {% trans "In:" %} <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
             {% endif %}
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
@@ -80,17 +81,17 @@
 
         </p>
     {% empty %}
-        <p>No results found.</p>
+        <p>{% trans "No results found." %}</p>
     {% endfor %}
     {% if page.citation.has_previous or page.citation.has_next %}
     <nav>
       <ul class="pagination">
-        <li class="disabled"><a>Go to page:</a></li>
+        <li class="disabled"><a>{% trans "Go to page:" %}</a></li>
           {% if page.citation.has_previous %}
           <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
             {% with ppage="page_citation:"|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="{% trans "Previous" %}">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -100,7 +101,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s"  %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="{% trans "Previous" %}">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -120,7 +121,7 @@
           <li>
             {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="{% trans "Next" %}">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
@@ -130,7 +131,7 @@
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="{% trans "Next" %}">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}

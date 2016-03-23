@@ -1,19 +1,20 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load search_filters %}
+{% load i18n %}
 
 {% if query %}
 <div class="row">
   <div class="col-md-8">
-    <h3>Search Results</h3>
-    <div class="results-info">Showing {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results.</div>
+    <h3>{% trans "Search Results" %}</h3>
+    <div class="results-info">{% blocktrans with start=page.authority.start_index end=page.authority.end_index count=count_authority %} Showing {{ start }} to {{ end }} of {{ count }} results. {% endblocktrans %}</div>
   </div>
   <div class="col-md-4 menuContainer">
     <div class="dropdown pull-right">
         {% if sort_order_dir_authority == 'descend' %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="{% trans "Current sort order: descending" %}" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
         {% else %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="{% trans "Current sort order: ascending" %}" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
         {% endif %}
 
       </div>
@@ -34,18 +35,18 @@
 
         </p>
     {% empty %}
-        <p>No results found.</p>
+        <p>{% trans "No results found." %}</p>
     {% endfor %}
     {% if page.authority.has_previous or page.authority.has_next %}
     <nav>
       <ul class="pagination">
-        <li class="disabled"><a>Go to page:</a></li>
+        <li class="disabled"><a>{% trans "Go to page:" %}</a></li>
 
           {% if page.authority.has_previous %}
           <li>
             {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="{% trans "Previous" %}">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -55,7 +56,7 @@
           <li class="disabled">
             {% with pagenr=page.authority.number|stringformat:"s"  %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="{% trans "Previous" %}">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -75,7 +76,7 @@
           <li>
             {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="{% trans "Next" %}">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}
@@ -85,7 +86,7 @@
           <li class="disabled">
             {% with pagenr=page.authority.number|stringformat:"s" %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="{% trans "Next" %}">
               <span aria-hidden="true">&raquo;</span>
             </a>
             {% endwith %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-03-18 04:11+0000\n"
+"POT-Creation-Date: 2016-03-22 19:24-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -257,4 +257,236 @@ msgstr ""
 #: templates/registration/registration_form.html:109
 #: templates/registration0/registration_form.html:109
 msgid "Submit"
+msgstr ""
+
+#: templates/search/search.html:30
+msgid "Citations"
+msgstr ""
+
+#: templates/search/search.html:31
+msgid "Authorities"
+msgstr ""
+
+#: templates/search/search.html:83
+msgid "Search Help"
+msgstr ""
+
+#: templates/search/search.html:86
+msgid ""
+"Use the 'Citations' tab to find bibliographic records. Think of this as a "
+"traditional citation search."
+msgstr ""
+
+#: templates/search/search.html:88
+msgid ""
+"Use the 'Authorities' tab to search for people, institutions, subject terms, "
+"and more. Think of it as an index."
+msgstr ""
+
+#: templates/search/search.html:91
+#: templates/search/search_facets_citations.html:237
+#: templates/search/search_facets_citations.html:262
+#: templates/search/search_facets_citations.html:286
+#: templates/search/search_facets_citations.html:310
+msgid "Close"
+msgstr ""
+
+#: templates/search/search_facets_authorities.html:8
+msgid "Authority Type"
+msgstr ""
+
+#: templates/search/search_facets_authorities.html:30
+msgid "No authority type facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:13
+msgid "Document Type"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:37
+msgid "No type facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:50
+msgid "Author & Contributors"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:60
+#, python-format
+msgid "Go to authority record for %(auth)s "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:68
+#, python-format
+msgid "Show only results involving %(authorname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:68
+#: templates/search/search_facets_citations.html:231
+#, python-format
+msgid " Go to authority record for %(authorname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:76
+#: templates/search/search_facets_citations.html:119
+#: templates/search/search_facets_citations.html:162
+#: templates/search/search_facets_citations.html:205
+msgid "More..."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:81
+msgid "No author facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:94
+msgid "Subjects"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:104
+#: templates/search/search_facets_citations.html:111
+#: templates/search/search_facets_citations.html:304
+#, python-format
+msgid " Go to authority record for %(subjectname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:111
+#, python-format
+msgid " Show only results involving %(subjectname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:124
+msgid "No subject facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:137
+msgid "Time Periods"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:147
+#: templates/search/search_facets_citations.html:154
+#, python-format
+msgid " Go to authority record for %(time_period_name)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:154
+#, python-format
+msgid " Show only results involving %(time_period_name)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:167
+msgid "No time period facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:180
+msgid "Places"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:190
+#: templates/search/search_facets_citations.html:197
+#: templates/search/search_facets_citations.html:280
+#, python-format
+msgid " Go to authority record for %(geoname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:197
+#, python-format
+msgid " Show only results involving %(geoname)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:210
+msgid "No place facets."
+msgstr ""
+
+#: templates/search/search_facets_citations.html:225
+msgid "Select Author"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:250
+msgid "Select Time Period"
+msgstr ""
+
+#: templates/search/search_facets_citations.html:256
+#, python-format
+msgid " Go to authority record for %(time_name)s. "
+msgstr ""
+
+#: templates/search/search_facets_citations.html:298
+msgid "Select Subject"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:9
+#: templates/search/search_results_citations.html:10
+msgid "Search Results"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:10
+#: templates/search/search_results_citations.html:11
+#, python-format
+msgid " Showing %(start)s to %(end)s of %(count)s results. "
+msgstr ""
+
+#: templates/search/search_results_authorities.html:15
+#: templates/search/search_results_citations.html:17
+msgid "Current sort order: descending"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:17
+#: templates/search/search_results_citations.html:19
+msgid "Current sort order: ascending"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:38
+#: templates/search/search_results_citations.html:84
+msgid "No results found."
+msgstr ""
+
+#: templates/search/search_results_authorities.html:43
+#: templates/search/search_results_citations.html:89
+msgid "Go to page:"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:49
+#: templates/search/search_results_authorities.html:59
+#: templates/search/search_results_citations.html:94
+#: templates/search/search_results_citations.html:104
+msgid "Previous"
+msgstr ""
+
+#: templates/search/search_results_authorities.html:79
+#: templates/search/search_results_authorities.html:89
+#: templates/search/search_results_citations.html:124
+#: templates/search/search_results_citations.html:134
+msgid "Next"
+msgstr ""
+
+#: templates/search/search_results_citations.html:22
+#, python-format
+msgid "Sort by: %%"
+msgstr ""
+
+#: templates/search/search_results_citations.html:27
+#: templatetags/app_filters.py:241
+msgid "Title"
+msgstr ""
+
+#: templates/search/search_results_citations.html:28
+#: templatetags/app_filters.py:243
+msgid "First Author"
+msgstr ""
+
+#: templates/search/search_results_citations.html:29
+#: templatetags/app_filters.py:239 templatetags/app_filters.py:245
+msgid "Publication Date"
+msgstr ""
+
+#: templates/search/search_results_citations.html:46
+msgid "Author missing"
+msgstr ""
+
+#: templates/search/search_results_citations.html:54
+msgid "In:"
+msgstr ""
+
+#: templatetags/app_filters.py:247
+msgid "Relevance"
 msgstr ""

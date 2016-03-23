@@ -10,6 +10,8 @@ import re
 
 import bleach
 
+from django.utils.translation import ugettext_lazy as _
+
 register = template.Library()
 
 
@@ -234,15 +236,15 @@ def set_index_model(link, model_str):
 @register.filter
 def get_current_sort_order_citation(sort_field):
     if not sort_field:
-        return "Publication Date"
+        return _("Publication Date")
     if 'title_for_sort' in sort_field:
-        return "Title"
+        return _("Title")
     if 'author_for_sort' in sort_field:
-        return "First Author"
+        return _("First Author")
     if 'publication_date_for_sort' in sort_field:
-        return "Publication Date"
+        return _("Publication Date")
     if '_score' in sort_field:
-        return 'Relevance'
+        return _('Relevance')
     return sort_field
 
 

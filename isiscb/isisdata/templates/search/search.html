@@ -2,6 +2,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% block title %}Search{% endblock %}
+{% load i18n %}
 
 {% block extra_head %}
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
@@ -26,8 +27,8 @@ $(document).ready(function() {
 
         <div class="col-sm-12 col-md-12">
             <ul id="search_tabs" class="nav nav-tabs space-top" role="tablist">
-                <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
-                <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
+                <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">{% trans "Citations" %} ({{ count_citation }})</a></li>
+                <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">{% trans "Authorities" %} ({{ count_authority }})</a></li>
                 <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
                 <li class="no-tab pull-right">
                     <div class="topnav text-center">
@@ -79,15 +80,15 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Search Help</h4>
+        <h4 class="modal-title">{% trans "Search Help" %}</h4>
       </div>
       <div class="modal-body">
-        <p>Use the 'Citations' tab to find bibliographic records. Think of this as a traditional citation search.</p>
+        <p>{% trans "Use the 'Citations' tab to find bibliographic records. Think of this as a traditional citation search." %}</p>
 
-        <p>Use the 'Authorities' tab to search for people, institutions, subject terms, and more. Think of it as an index. </p>
+        <p>{% trans "Use the 'Authorities' tab to search for people, institutions, subject terms, and more. Think of it as an index." %} </p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
       </div>
     </div>
 

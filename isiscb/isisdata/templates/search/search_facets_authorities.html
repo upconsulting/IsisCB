@@ -1,10 +1,11 @@
 {% load app_filters %}
 {% load metadata_filters %}
+{% load i18n %}
 
 {% if query %}
 
 <div class="panel panel-default">
-  <div class="panel-heading"><h3 class="panel-title">Authority Type</h3></div>
+  <div class="panel-heading"><h3 class="panel-title">{% trans "Authority Type" %}</h3></div>
   <div class="facet_panel panel-body">
 
   {% if facets_authority.fields.authority_type %}
@@ -26,7 +27,7 @@
           {% endfor %}
         </ul>
   {% else %}
-          <p>No authority type facets.</p>
+          <p>{% trans "No authority type facets." %}</p>
   {% endif %}
 </div>
 </div>
