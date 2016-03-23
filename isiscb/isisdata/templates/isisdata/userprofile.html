@@ -12,8 +12,8 @@
             <div class="panel-heading clearfix">
                 <span class="h2">{{ username }}</span>
                 {% if is_staff %}<span class="label label-danger">Admin</span>{% endif %}
-                {% if profile.authority_record %}
                 {% if username == user.username %}<span class="pull-right"><a class="btn" href="?edit=true">Edit my profile&nbsp;<span class="fa fa-pencil"></span></a></span>{% endif %}
+                {% if profile.authority_record %}
                 <div>
                     <a class="btn" href="{% url 'authority' profile.authority_record.id %}"><span class="fa fa-user"></span> View authority record</a>
                 </div>

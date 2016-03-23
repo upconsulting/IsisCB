@@ -1340,8 +1340,12 @@ def api_documentation(request):
     return HttpResponse(template.render(context))
 
 
+def build_openurl(endpoint, citation):
+    coins = get_coins_from_citation(citation)
+    return  endpoint + '?' + coins
 
-def get_linkresolver_url(request, citation_id):
+
+def get_linkresolver_url_by_ip(request, citation):
     """
     Use the WorldCat registry API to get the appropriate OpenURL resolver for
     the user, based on their IP address.
@@ -1350,7 +1354,6 @@ def get_linkresolver_url(request, citation_id):
     worldcat_registry = "http://www.worldcat.org/registry/lookup?IP={ip}"
     worldcat_tag = "{http://worldcatlibraries.org/registry/resolver}"
 
-    citation = get_object_or_404(Citation, pk=citation_id)
 
     user_ip = get_real_ip(request)
     # user_ip = "149.169.132.43"
@@ -1358,46 +1361,71 @@ def get_linkresolver_url(request, citation_id):
 
     root = ET.fromstring(response)
     resolver = root.find('.//' + worldcat_tag + 'resolver')
-    coins = get_coins_from_citation(citation)
 
     if resolver:
-        url = resolver.find(worldcat_tag + 'baseURL').text.strip() + '?' + coins
+        url = build_openurl(resolver.find(worldcat_tag + 'baseURL').text.strip(), citation)
         linkIcon = resolver.find(worldcat_tag + 'linkIcon').text.strip()
         linkText = resolver.find(worldcat_tag + 'linkText').text.strip()
-    else:
-        url = ''
-        linkIcon = ''
-        linkText = ''
+        return {
+            'url': url,
+            'icon': linkIcon,
+            'text': linkText,
+        }
+    return
 
-    data = {
-        'url': url,
-        'icon': linkIcon,
-        'text': linkText,
-    }
+
+def get_linkresolver_url(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    data = None
+    if request.user.id > 0:
+        if request.user.profile.resolver_institution:
+            resolver = request.user.profile.resolver_institution.resolver
+            data = {
+                'url':  build_openurl(resolver.endpoint, citation),
+                'icon': resolver.link_icon,
+                'text': resolver.link_text,
+            }
+    else:
+        # If the user is not logged in, or has not selected a link resolver, we can
+        #  attempt to find their resolver by IP address.
+        data = get_linkresolver_url_by_ip(request, citation)
+    if not data:
+        data = {'url': '', 'icon': '', 'text': ''}
     return JsonResponse(data)
 
 
-
-
 def user_profile(request, username):
+    """
+    Each user has a profile page that displays some basic information about
+    them, as well as their recent comments. Eventually this will display
+    other related content (shared bookmarks, claimed authority record, etc).
+    """
     user = get_object_or_404(User, username=username)
     edit = request.GET.get('edit')
 
-    # Only the owner of the profile can change it.
+    # Only the owner of the profile can change it. We use a regular Form rather
+    #  than a ModelForm because some fields belong to User and other fields
+    #  belong to UserProfile.
+    print request.user.id, user.id, request.method
+    form_error = False
     if request.method == 'POST' and request.user.id == user.id:
         form = UserProfileForm(request.POST)
         if form.is_valid():
-            user.first_name = form.cleaned_data.get('first_name')
-            user.last_name = form.cleaned_data.get('last_name')
-            user.email = form.cleaned_data.get('email')
-            user.profile.affiliation = form.cleaned_data.get('affiliation')
-            user.profile.location = form.cleaned_data.get('location')
-            user.profile.bio = form.cleaned_data.get('bio')
-            user.profile.share_email = form.cleaned_data.get('share_email')
-            user.profile.resolver_institution = form.cleaned_data.get('resolver_institution')
+            data = form.cleaned_data    # Easier to write.
+            user.first_name = data.get('first_name')
+            user.last_name = data.get('last_name')
+            user.email = data.get('email')
+            user.profile.affiliation = data.get('affiliation')
+            user.profile.location = data.get('location')
+            user.profile.bio = data.get('bio')    # Assings to bio.raw.
+            user.profile.share_email = data.get('share_email')
+            user.profile.resolver_institution = data.get('resolver_institution')
             user.save()
             user.profile.save()
+        else:
+            form_error = True
 
+    comments = Comment.objects.filter(created_by=user).order_by('-created_on')
     context = RequestContext(request, {
         'active': '',
         'username': user.username,
@@ -1405,9 +1433,13 @@ def user_profile(request, username):
         'is_staff': user.is_staff,
         'email': user.email,
         'profile': user.profile,
-        'usercomments': Comment.objects.filter(created_by=user).order_by('-created_on')
+        'usercomments': comments,
     })
+
+    # User has elected to edit their own profile.
     if edit and user.id == request.user.id:
+        # This template has an almost identical layout to userprofile.html,
+        #  except that display fields are replaced with input fields.
         template = loader.get_template('isisdata/userprofile_edit.html')
         form = UserProfileForm(initial={
             'first_name': user.first_name,
@@ -1415,13 +1447,14 @@ def user_profile(request, username):
             'email': user.email,
             'affiliation': getattr(user.profile, 'affiliation', None),
             'location': getattr(user.profile, 'location', None),
-            'bio': user.profile.bio.raw,
+            'bio': user.profile.bio.raw,    # Raw markdown.
             'share_email': user.profile.share_email,
             'resolver_institution': user.profile.resolver_institution,
         })
         context.update({'form': form})
+    elif form_error:
+        context.update({'form': form})
+        template = loader.get_template('isisdata/userprofile_edit.html')
     else:
         template = loader.get_template('isisdata/userprofile.html')
-
-
     return HttpResponse(template.render(context))

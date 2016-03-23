@@ -182,10 +182,10 @@ class UserRegistrationForm(forms.Form):
 
 class UserProfileForm(forms.Form):
     email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    affiliation = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    location = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}))
-    share_email = forms.BooleanField()
-    resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    affiliation = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    location = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
+    share_email = forms.BooleanField(required=False)
+    resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), required=False)

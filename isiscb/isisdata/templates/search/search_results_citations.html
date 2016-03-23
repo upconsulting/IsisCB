@@ -60,20 +60,27 @@
                <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
             </span>
 
-            <!-- http://ocoins.info/ -->
-            <span class="Z3988" title="{{ result|get_coins_from_result }}"></span>
-            <!-- This tag displays an icon/link that points to the users' institution's
-                 link resolver. -->
+
             <span id="linkresolver_{{ result.id|get_pk }}">
                 <script>
                 $.ajax("{% url 'linkresolver' citation_id=result.id|get_pk %}",
                     {
-                    success: function(result) {
-                            console.log(result);
+                        success: function(result) {
+
                             if (result.url.length > 0) {
-                                $('#linkresolver_{{ result.id|get_pk }}').append('<a href="'+ result.url +'"><img src="'+ result.icon +'" alt="'+ result.text +'"></a>');
+                                var linkElem = '<a href="'+ result.url +'">';
+                                if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; }
+                                linkElem += '</a>';
+                                $('#linkresolver_{{ result.id|get_pk }}').append(linkElem);
+                            } else {
+                                // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                $('#linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
                             }
-                        }
+                        },
+                        error: function() {
+                            // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                            $('#linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                        },
                     });
                 </script>
             </span>
