@@ -1380,21 +1380,29 @@ def get_linkresolver_url(request, citation_id):
 
 
 def user_profile(request, username):
+    """
+    Each user has a profile page that displays some basic information about
+    them, as well as their recent comments. Eventually this will display
+    other related content (shared bookmarks, claimed authority record, etc).
+    """
     user = get_object_or_404(User, username=username)
     edit = request.GET.get('edit')
 
-    # Only the owner of the profile can change it.
+    # Only the owner of the profile can change it. We use a regular Form rather
+    #  than a ModelForm because some fields belong to User and other fields
+    #  belong to UserProfile.
     if request.method == 'POST' and request.user.id == user.id:
         form = UserProfileForm(request.POST)
         if form.is_valid():
-            user.first_name = form.cleaned_data.get('first_name')
-            user.last_name = form.cleaned_data.get('last_name')
-            user.email = form.cleaned_data.get('email')
-            user.profile.affiliation = form.cleaned_data.get('affiliation')
-            user.profile.location = form.cleaned_data.get('location')
-            user.profile.bio = form.cleaned_data.get('bio')
-            user.profile.share_email = form.cleaned_data.get('share_email')
-            user.profile.resolver_institution = form.cleaned_data.get('resolver_institution')
+            data = form.cleaned_data    # Easier to write.
+            user.first_name = data.get('first_name')
+            user.last_name = data.get('last_name')
+            user.email = data.get('email')
+            user.profile.affiliation = data.get('affiliation')
+            user.profile.location = data.get('location')
+            user.profile.bio = data.get('bio')    # Assings to bio.raw.
+            user.profile.share_email = data.get('share_email')
+            user.profile.resolver_institution = data.get('resolver_institution')
             user.save()
             user.profile.save()
 
@@ -1407,7 +1415,11 @@ def user_profile(request, username):
         'profile': user.profile,
         'usercomments': Comment.objects.filter(created_by=user).order_by('-created_on')
     })
+
+    # User has elected to edit their own profile.
     if edit and user.id == request.user.id:
+        # This template has an almost identical layout to userprofile.html,
+        #  except that display fields are replaced with input fields.
         template = loader.get_template('isisdata/userprofile_edit.html')
         form = UserProfileForm(initial={
             'first_name': user.first_name,
@@ -1415,13 +1427,11 @@ def user_profile(request, username):
             'email': user.email,
             'affiliation': getattr(user.profile, 'affiliation', None),
             'location': getattr(user.profile, 'location', None),
-            'bio': user.profile.bio.raw,
+            'bio': user.profile.bio.raw,    # Raw markdown.
             'share_email': user.profile.share_email,
             'resolver_institution': user.profile.resolver_institution,
         })
         context.update({'form': form})
     else:
         template = loader.get_template('isisdata/userprofile.html')
-
-
     return HttpResponse(template.render(context))

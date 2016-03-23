@@ -45,5 +45,14 @@ class Resolver(CuratedMixin):
     link."""))
     notes = models.TextField(null=True, blank=True)
 
+    link_icon = models.URLField(max_length=1000, blank=True, null=True,
+                                help_text=help_text("""
+    Location of an image that will be rendered as a link next to search results.
+    """))
+    link_text = models.CharField(max_length=1000, blank=True, null=True,
+                                 help_text=help_text("""
+    Text that will be rendered as a link next to search results if
+    ``link_icon`` is not available."""))
+
     def __unicode__(self):
         return self.belongs_to.name
