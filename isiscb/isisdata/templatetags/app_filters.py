@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 from urllib import quote
 import codecs
 import re
+import urlparse
 
 import bleach
 
@@ -172,18 +173,20 @@ def filter_abstract(s):
     return s
 
 
-
-URN_PATTERNS = {
-    'DOI': u'http://doi.org/{0}',
-    'ISBN': u'http://www.worldcat.org/search?q=bn%3A{0}',
-    'ISSN': u'http://www.worldcat.org/search?q=n2%3A{0}',
-}
-
-
 @register.filter
 def linkeddata_for_display(ldinstance):
-    value = ldinstance.universal_resource_name
+    URN_PATTERNS = {
+        'DOI': u'http://doi.org/{0}',
+        'ISBN': u'http://www.worldcat.org/search?q=bn%3A{0}',
+        'ISSN': u'http://www.worldcat.org/search?q=n2%3A{0}',
+    }
+
+    value = ldinstance.universal_resource_name.strip()
     if ldinstance.type_controlled.name not in URN_PATTERNS:
+        return value
+
+    # Make sure that the DOI is not already an URL.
+    if urlparse.urlsplit(value).scheme:
         return value
     return URN_PATTERNS[ldinstance.type_controlled.name].format(value)
 

@@ -1,0 +1,19 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{% load admin_tags %}
+{% block object-tools-items %}
+    <li>
+        <a href="{% url opts|admin_urlname:'history' original.pk|admin_urlquote %}" class="historylink">{% trans "History" %}</a>
+    </li>
+    <li>
+        <a href="{% url "admin:draftcitation_findmatches" original.pk %}" class="historylink">Match</a>
+    </li>
+    <li>
+        <a href="{% url "admin:draftcitation_create_citation" original.pk %}" class="historylink">Create</a>
+    </li>
+    {% if has_absolute_url %}
+        <li>
+            <a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a>
+        </li>
+    {% endif %}
+{% endblock %}

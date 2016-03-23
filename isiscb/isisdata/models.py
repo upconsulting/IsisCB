@@ -7,6 +7,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 
+from markupfield.fields import MarkupField
+
 from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
@@ -22,6 +24,9 @@ import bleach
 import unidecode
 import string
 import unicodedata
+from urlparse import urlsplit
+
+from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
@@ -157,7 +162,10 @@ class Value(models.Model):
     cvalue.short_description = 'value'
 
     def __unicode__(self):
-        return unicode(self.cvalue())
+        try:
+            return unicode(self.cvalue())
+        except:
+            return u''
 
 
 class TextValue(Value):
@@ -774,7 +782,6 @@ class Authority(ReferencedEntity, CuratedMixin):
         related_query_name='authorities',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
-
     tracking_entries = GenericRelation(
         'Tracking',
         related_query_name='authorities',
@@ -1200,8 +1207,11 @@ class Attribute(ReferencedEntity, CuratedMixin):
     type_free = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return u'{0}: {1}'.format(self.type_controlled.name,
-                                  self.value.cvalue())
+        try:
+            return u'{0}: {1}'.format(self.type_controlled.name,
+                                      self.value.cvalue())
+        except:
+            return u''
 
 
 class PartDetails(models.Model):
@@ -1312,9 +1322,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     type_free = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        values = (self.subject, self.type_controlled,
+        values = (self.type_controlled,
                   self.universal_resource_name)
-        return u'{0} - {1} - {2}'.format(*values)
+        return u'{0}: {1}'.format(*values)
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
@@ -1395,6 +1405,21 @@ class Annotation(models.Model):
 
 
 def linkify(s, *args, **kwargs):
+    def shorten_display(attrs, new=False):
+        """
+        Remove characters from the middle of the link, and strip protocol.
+        """
+        parse_result = urlsplit(attrs['_text'])
+        attrs['_text'] = parse_result.netloc + parse_result.path
+        if parse_result.query:
+            attrs['_text'] += '?' + parse_result.query
+        attrs['_text'] = attrs['_text'][:10] + u'...' + attrs['_text'][-10:]
+        return attrs
+
+    # Just in case we want to add other callbacks from outside...
+    if 'callbacks' not in kwargs:
+        kwargs.update({'callbacks': []})
+    kwargs['callbacks'].append(shorten_display)
     return bleach.linkify(s, *args, **kwargs)
 
 
@@ -1459,3 +1484,30 @@ class SearchQuery(models.Model):
     """))
 
     saved = models.BooleanField(default=False)
+
+
+class UserProfile(models.Model):
+    """
+    Supports additional self-curated information about Users.
+    """
+    user = models.OneToOneField(User, related_name='profile')
+
+    affiliation = models.CharField(max_length=255, blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
+    bio = MarkupField(markup_type='markdown', blank=True, null=True)
+
+    share_email = models.BooleanField(default=False, help_text=help_text("""
+    A user can indicate whether or not their email address should be made
+    public."""))
+
+    resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
+                                             related_name='users',
+                                             help_text=help_text("""
+    A user can select an institution for which OpenURL links should be
+    generated while searching."""))
+
+    authority_record = models.OneToOneField(Authority, blank=True, null=True,
+                                            related_name='associated_user',
+                                            help_text=help_text("""
+    A user can 'claim' an Authority record, asserting that the record refers to
+    theirself."""))

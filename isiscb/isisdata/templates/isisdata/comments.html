@@ -28,7 +28,7 @@
             <div class="col-xs-12">
                 <div class="comment-user row">
                     <div class="col-xs-12">
-                        <span class="text-muted text-small">{% verbatim %}{{ comment.created_by.username }} on {{ comment.created_on | date:'medium' }}{% endverbatim %}</span>
+                        <span class="text-info text-small">{% verbatim %}<a href="/isis/user/{{comment.created_by.username}}/">{{ comment.created_by.username }}</a> on {{ comment.created_on | date:'medium' }}{% endverbatim %}</span>
                         <span class="pull-right">
                             <div class="btn btn-xs" ng-hide="!canEdit(comment)">
                                 <span class="glyphicon glyphicon-pencil" aria-hidden="true" ng-click="edit(comment)"></span>
@@ -41,7 +41,7 @@
                 </div>
                 <div class="comment-bubble clearfix">
                     {% verbatim %}
-                    <div ng-hide="comment.editing" ng-bind-html="comment.linkified | unsafe" ng-model="comment.text"></div>
+                    <div ng-hide="comment.editing" class="text-small" ng-bind-html="comment.linkified | unsafe" ng-model="comment.text"></div>
                     <form ng-show="comment.editing" ng-submit="updateComment(comment)">
                         <textarea class="form-control" type="text" ng-model="comment.text" value="{{comment.text}}" ng-required></textarea>
                         <div class="btn-group pull-right"><button class="btn btn-primary btn-xs" style="margin-top: 5px;" type="submit">Save</button></div>
