@@ -24,6 +24,7 @@ import bleach
 import unidecode
 import string
 import unicodedata
+from urlparse import urlsplit
 
 from openurl.models import Institution
 
@@ -1404,6 +1405,21 @@ class Annotation(models.Model):
 
 
 def linkify(s, *args, **kwargs):
+    def shorten_display(attrs, new=False):
+        """
+        Remove characters from the middle of the link, and strip protocol.
+        """
+        parse_result = urlsplit(attrs['_text'])
+        attrs['_text'] = parse_result.netloc + parse_result.path
+        if parse_result.query:
+            attrs['_text'] += '?' + parse_result.query
+        attrs['_text'] = attrs['_text'][:10] + u'...' + attrs['_text'][-10:]
+        return attrs
+
+    # Just in case we want to add other callbacks from outside...
+    if 'callbacks' not in kwargs:
+        kwargs.update({'callbacks': []})
+    kwargs['callbacks'].append(shorten_display)
     return bleach.linkify(s, *args, **kwargs)
 
 
