@@ -391,6 +391,26 @@ class UberInlineMixin(admin.ModelAdmin):
                 formset.save()
 
 
+class CitationAdvancedSearchForm(forms.Form):
+    """
+    Provides advanced search fields in the Citation changelist view.
+    """
+    # Search by __icontains:
+    title = forms.CharField(required=False)
+    abstract = forms.CharField(required=False)
+    description = forms.CharField(required=False)
+    edition_details = forms.CharField(required=False)
+    physical_details = forms.CharField(required=False)
+
+    # Discrete choices:
+    language = forms.ModelChoiceField(queryset=Language.objects.all(), required=False)
+    type_controlled = forms.ChoiceField(choices=Citation.TYPE_CHOICES, required=False)
+
+    # Limit by range.
+    published_after = forms.DateField(required=False)
+    published_before = forms.DateField(required=False)
+
+
 class CitationForm(autocomplete_light.ModelForm):
     class Meta:
         model = Citation
@@ -416,11 +436,13 @@ class CitationAdmin(SimpleHistoryAdmin,
                     UberInlineMixin):
 
 
-
+    form = CitationForm
     list_display = ('id', 'title', 'modified_on', 'modified_by', 'public', 'status_of_record')
     list_filter = ('type_controlled', 'status_of_record')
     inlines = (ACRelationInline, )
     search_fields = ('title', )
+    advanced_search_form = CitationAdvancedSearchForm
+    advanced_search_template = 'admin/advanced_search_form_citation.html'
     readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
 
     fieldsets = [
@@ -451,8 +473,16 @@ class CitationAdmin(SimpleHistoryAdmin,
     ]
 
 
+    def changelist_view(self, request, **kwargs):
+        extra_context = kwargs.get('extra_context', {})
 
-    form = CitationForm
+        # TODO: initial data?
+        extra_context = {
+            'advanced_search_form': self.advanced_search_form(),
+            'advanced_search_form_template': self.advanced_search_form_template
+        }
+
+        return super(CitationAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
 class AuthorityForm(autocomplete_light.ModelForm):
