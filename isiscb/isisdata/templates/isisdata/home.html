@@ -2,94 +2,99 @@
 {% load app_filters %}
 {% load staticfiles %}
 
+
 {% block content %}
 <div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat;">
-    <!--  -->
-        <div class="container">
-          <div class="row">
+
+    <div class="container">
+        <div class="row">
             <div class="col-md-6 col-sm-12 col-xs-12">
                 <iframe width="100%" height="315" src="https://www.youtube.com/embed/ntqtn0tyy-E" frameborder="0" allowfullscreen></iframe>
             </div>
             <div class="col-md-6 col-sm-12 col-xs-12">
-              <div class="search-bar">
-                      <form method="get" action="/isis/">
-                          <div class="input-group">
-                              <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
-                              <span class="input-group-btn">
-                                  <button class="btn btn-default btn-lg" type="submit">Search</button>
-                              </span>
-                          </div>
-                          <div>
-                              <input id="id_models" name="models" type="hidden" value="isisdata.citation">
-                              <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
-                              <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                              <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                <div class="search-bar">
+                    <form method="get" action="/isis/">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default btn-lg" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
 
-                          </div>
-                      </form>
-                  </div>
+                        </div>
+                    </form>
+                </div>
 
-              <h2> An open access discovery service for the history of science.</h2>
-              <p>Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
-              <p class="pull-right"><img src='{% static "isisdata/images/hss_logo.jpg" %}' style="padding-top: 30px;" /></p>
+                <h2> An open access discovery service for the history of science.</h2>
+                <p>Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+                <p class="pull-right"><img src='{% static "isisdata/images/hss_logo.jpg" %}' style="padding-top: 30px;" /></p>
             </div>
-          </div>
-
-          <div class="row">
-            <div class="row-height">
-              <div class="col-md-9 col-sm-12 col-height col-xs-12 col-bottom">
-
-              </div>
-              <div class="col-md-3 col-sm-12 col-xs-12 col-height">
-
-              </div>
-            </div>
-          </div>
         </div>
 
+        <div class="row">
+            <div class="row-height">
+                <div class="col-md-9 col-sm-12 col-height col-xs-12 col-bottom">
 
+                </div>
+                <div class="col-md-3 col-sm-12 col-xs-12 col-height">
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <div class="row comments-log">
-  <!-- citation comments -->
+    <!-- citation comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
             <div class="panel-heading">Recent Comments on Citation Records</div>
+            <ul class="list-group">
             {% for comment in comments_citation %}
-              <div class="row">
-                <div class="col-md-8 col-sm-12">
-                  <a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a> commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+            <li class="list-group-item">
+                <div>
+                    <strong><a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a></strong>
                 </div>
-                <div class="col-md-4 col-sm-12">
-                  <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
+                <div>
+                     <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
+                 </div>
+                 <div>
+                     {{ comment.linkified|safe }}
+                 </div>
+                <div>
+                    <a href="/isis/{{comment.subject.id}}" class="text-warning" style="font-size: 9pt;">{{ comment.subject }}</a>
+
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
-                </div>
-              </div>
+
+            </li>
             {% endfor %}
+            </ul>
         </div>
     </div>
 
-<!-- authority comments -->
+    <!-- authority comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
             <div class="panel-heading">Recent Comments on Authority Records</div>
             {% for comment in comments_authority %}
-              <div class="row">
-                <div class="col-md-8 col-sm-12">
-                   <a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a> commented on <a href="/isis/{{comment.subject.id}}">{{comment.subject.label|bleach_safe}}</a>:
+            <li class="list-group-item">
+                <div>
+                    <strong><a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a></strong>
                 </div>
-                <div class="col-md-4 col-sm-12">
-                  <span class="text-small text-muted pull-right"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
+                <div>
+                     <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
+                 </div>
+                 <div>
+                     {{ comment.linkified|safe }}
+                 </div>
+                <div>
+                    <a href="/isis/{{comment.subject.id}}" class="text-warning" style="font-size: 9pt;">{{ comment.subject }}</a>
                 </div>
-              </div>
-              <div class="row">
-                <div class="col-md-12">
-                  <div class="comment-bubble" style="margin-top: 5px; margin-bottom: 5px;">"{{ comment.text }}"</div>
-                </div>
-              </div>
+            </li>
             {% endfor %}
         </div>
     </div>

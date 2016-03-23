@@ -104,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                 'django.template.context_processors.tz'
             ],
         },
     },
