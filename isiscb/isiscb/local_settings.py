@@ -1,5 +1,6 @@
 import os
 import sys
+import markdown
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -32,6 +33,7 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'rest_framework',
     'simple_history',
+    'markupfield',
     'isisdata',
     'storages',
     'haystack',
@@ -39,6 +41,8 @@ INSTALLED_APPS = (
     'oauth2_provider',
     'captcha',
     'corsheaders',
+    'zotero',
+    'openurl',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -205,3 +209,8 @@ FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 # }
 
 LICENSE = """This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."""
+
+
+MARKUP_FIELD_TYPES = (
+    ('markdown', markdown.markdown),
+)

@@ -1,0 +1,219 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/"
+ xmlns:vcard="http://nwalsh.com/rdf/vCard#">
+    <bib:Article rdf:about="http://journals.cambridge.org/article_S0009838800031001">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1471-6844"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Roisman</foaf:surname>
+                        <foaf:givenname>Joseph</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:translators>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bloggs</foaf:surname>
+                        <foaf:givenname>Jordan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:translators>
+        <link:link rdf:resource="#item_30"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/article_S0009838800031001</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>373–385</bib:pages>
+        <dc:date>December 1984</dc:date>
+        <dcterms:dateSubmitted>2016-02-08 13:56:33</dcterms:dateSubmitted>
+        <z:libraryCatalog>Cambridge Journals Online</z:libraryCatalog>
+        <dcterms:abstract>Scholarly opinion about Ptolemy Soter's history of Alexander has been far from unanimous. Not long ago Ptolemy was held to stand in the first rank of ancient historians. His history was described as brilliant, rational, straightforward, and exhaustive, while he himself was proclaimed a ‘second Thucydides’. In recent years, however, Ptolemy's reputation has seriously declined. His shortcomings, acknowledged also by his admirers, have been stressed and extensively analysed. Fritz Schachermeyr clearly reflected current opinion when he equated a ‘version from the Hauptquartier's circles’ with a lie, a fraud, and an intentional omission. The purpose of this paper is to examine the recent reassessment of the nature and the aims of Ptolemy's work.</dcterms:abstract>
+        <dc:title>Ptolemy and His Rivals in His History of Alexander</dc:title>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1471-6844">
+        <prism:volume>34</prism:volume>
+        <prism:number>02</prism:number>
+        <dc:title>The Classical Quarterly (New Series)</dc:title>
+        <dc:identifier>ISSN 1471-6844</dc:identifier>
+        <dc:identifier>DOI 10.1017/S0009838800031001</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_30">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="storage:displayAbstract.html"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/action/displayAbstract?fromPage=online&amp;aid=3641956&amp;fileId=S0009838800031001</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-02-08 13:56:33</dcterms:dateSubmitted>
+        <dc:title>Cambridge Journals Snapshot</dc:title>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.jstor.org/stable/40802744">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0022-5010"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>PAUL D. BRINKMAN</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://www.jstor.org/stable/40802744</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>363-399</bib:pages>
+        <dc:date>2010</dc:date>
+        <dcterms:dateSubmitted>2016-02-08 13:57:06</dcterms:dateSubmitted>
+        <z:libraryCatalog>JSTOR</z:libraryCatalog>
+        <dcterms:abstract>The prevailing view among historians of science holds that Charles Darwin became a convinced transmutationist only in the early spring of 1837, after his Beagle collections had been examined by expert British naturalists. With respect to the fossil vertebrate evidence, some historians believe that Darwin was incapable of seeing or understanding the transmutationist implications of his specimens without the help of Richard Owen. There is ample evidence, however, that he clearly recognized the similarities between several of the fossil vertebrates he collected and some of the extant fauna of South America before he returned to Britain. These comparisons, recorded in his correspondence, his diary and his notebooks during the voyage, were instances of a phenomenon that he later called the &quot;law of the succession of types.&quot; Moreover, on the Beagle, he was following a geological research agenda outlined in the second volume of Charles Lyell's Principles of Geology, which implies that paleontological data alone could provide an insight into the laws which govern the appearance of new species. Since Darwin claims in On the Origin of Species that fossil vertebrate succession was one of the key lines of evidence that led him to question the fixity of species, it seems certain that he was seriously contemplating transmutation during the Beagle voyage. If so, historians of science need to reconsider both the role of Britain's expert naturalists and the importance of the fossil vertebrate evidence in the development of Darwin's ideas on transmutation.</dcterms:abstract>
+        <dc:title>Charles Darwin's Beagle Voyage, Fossil Vertebrate Succession, and &quot;The Gradual Birth &amp; Death of Species&quot;</dc:title>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0022-5010">
+        <prism:volume>43</prism:volume>
+        <prism:number>2</prism:number>
+        <dc:title>Journal of the History of Biology</dc:title>
+        <dc:identifier>ISSN 0022-5010</dc:identifier>
+        <dcterms:alternative>Journal of the History of Biology</dcterms:alternative>
+    </bib:Journal>
+    <bib:Book rdf:about="urn:isbn:978-0-8057-6797-1">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Boston, MA</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Twayne Publishers</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fichman</foaf:surname>
+                        <foaf:givenname>Martin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:seriesEditors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Jackson</foaf:surname>
+                        <foaf:givenname>Jack</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:seriesEditors>
+        <dc:identifier>ISBN 978-0-8057-6797-1</dc:identifier>
+        <dc:date>1981</dc:date>
+        <z:libraryCatalog>Open WorldCat</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Alfred Russel Wallace</dc:title>
+    </bib:Book>
+    <bib:Thesis rdf:about="#item_98">
+        <z:itemType>thesis</z:itemType>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Malinchak</foaf:surname>
+                        <foaf:givenname>Michele</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:contributors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Doe</foaf:surname>
+                        <foaf:givenname>Janus</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:contributors>
+        <dc:date>1987</dc:date>
+        <z:libraryCatalog>Open WorldCat</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Spiritualism and the philosophy of Alfred Russel Wallace</dc:title>
+    </bib:Thesis>
+    <bib:BookSection rdf:about="#item_99">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Book><dc:title>Great naturalists.</dc:title></bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Knapp</foaf:surname>
+                        <foaf:givenname>Sandra</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wright</foaf:surname>
+                        <foaf:givenname>K. H.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>277-285</bib:pages>
+        <dc:date>2007</dc:date>
+        <z:libraryCatalog>Open WorldCat</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Alfred Russel Wallace: the problem of the origin of species (1823-1913)</dc:title>
+        <z:shortTitle>Alfred Russel Wallace</z:shortTitle>
+    </bib:BookSection>
+    <bib:Document rdf:about="http://people.wku.edu/charles.smith/index1.htm">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Smith</foaf:surname>
+                        <foaf:givenname>Charles H</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://people.wku.edu/charles.smith/index1.htm</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dc:date>1998</dc:date>
+        <dcterms:dateSubmitted>2016-02-08 15:33:51</dcterms:dateSubmitted>
+        <z:language>English</z:language>
+        <dcterms:abstract>A website dedicated to celebrating the life and work of the English naturalist, evolutionist, and social critic Alfred Russel Wallace (1823-1913). Provides the full text of some of Wallace's published writings and interviews. Includes a biography, a chronology of main events in Wallace's life, and bibliographies of works by and about Wallace.</dcterms:abstract>
+        <dc:title>The Alfred Russel Wallace page</dc:title>
+    </bib:Document>
+</rdf:RDF>

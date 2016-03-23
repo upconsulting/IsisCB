@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^(?i)rest/auth/$', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^(?i)admin/', include(admin.site.urls)),
     url(r'^(?i)isis/', include('isisdata.urls')),
+    url(r'^(?i)zotero/', include('zotero.urls')),
     url(r'^(?i)history/$', views.search_history, name='search_history'),
     url(r'^(?i)history/saved/$', views.search_saved, name='search_saved'),
     url(r'^$', views.home, name='home'),
