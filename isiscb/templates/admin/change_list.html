@@ -71,7 +71,17 @@
         {{ cl.formset.non_form_errors }}
     {% endif %}
     <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
-      {% block search %}{% search_form cl %} {% include advanced_search_form_template %}{% endblock %}
+        {% block search %}
+
+            {% if advanced_search_form_template %}
+                {% with template_name=advanced_search_form_template|stringformat:"s"|add:".html" %}
+                    {% include "admin/"|add:template_name %}
+                {% endwith %}
+            {% else %}
+                {% search_form cl %}
+            {% endif %}
+
+        {% endblock %}
       {% block date_hierarchy %}{% date_hierarchy cl %}{% endblock %}
 
       {% block filters %}

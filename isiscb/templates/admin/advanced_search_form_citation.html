@@ -1,19 +1,126 @@
 {% load i18n static %}
+{% load addcss %}
+
 {% if cl.search_fields %}
-<div id="toolbar"><form id="changelist-search" method="get">
-    <div><!-- DIV needed for valid HTML -->
-        <label for="searchbar"><img src="{% static "admin/img/search.svg" %}" alt="Advanced Search" /></label>
-        {% for field in advanced_search_form %}
-        {{ field }}
-        {% endfor %}
-        <input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" autofocus />
-        <input type="submit" value="{% trans 'Search' %}" />
-        {% if show_result_count %}
-        <span class="small quiet">{% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %} (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">{% if cl.show_full_result_count %}{% blocktrans with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktrans %}{% else %}{% trans "Show all" %}{% endif %}</a>)</span>
-        {% endif %}
-        {% for pair in cl.params.items %}
-        {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}"/>{% endif %}
-        {% endfor %}
-    </div>
-</form></div>
+<style>
+.form-group-full {
+    width: 100% !important;
+}
+.input-full {
+    width: 70% !important;
+}
+.input-label {
+    display: inline-block;
+    width: 25% !important;
+}
+</style>
+<!-- <div id="toolbar"> -->
+    <div class="panel panel-primary">
+        <div class="panel-heading"  style="cursor: pointer;" data-toggle="collapse" data-target="#advanced-search-body">
+            <span class="h4">Advanced search</span>
+        </div>
+        <div id="advanced-search-body" class="panel-collapse{% if searching%}{% else %} collapse{% endif %}">
+        <div class="panel-body">
+    <form id="changelist-advanced-search" method="get" class="form form-inline" action="">
+        <div class="row"><!-- DIV needed for valid HTML -->
+            <div class="col-sm-6">
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.title.label }}</label>
+                    {{ advanced_search_form.title|addcss:"form-control input-full"}}
+                    <!-- <input type="text" class="" name="advanced-title" id="advanced-title" value="{{ cl.advanced_title }}"> -->
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.abstract.label }}</label>
+                    {{ advanced_search_form.abstract|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.description.label }}</label>
+                    {{ advanced_search_form.description|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.edition_details.label }}</label>
+                    {{ advanced_search_form.edition_details|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.physical_details.label }}</label>
+                    {{ advanced_search_form.physical_details|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.status_of_record.label }}</label>
+                    {{ advanced_search_form.status_of_record|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.record_action.label }}</label>
+                    {{ advanced_search_form.record_action|addcss:"form-control input-full"}}
+                </div>
+            </div>
+            <div class="col-sm-6">
+
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.language.label }}</label>
+                    {{ advanced_search_form.language|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.type_controlled.label }}</label>
+                    {{ advanced_search_form.type_controlled|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.published_after.label }}</label>
+                    {{ advanced_search_form.published_after|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.published_before.label }}</label>
+                    {{ advanced_search_form.published_before|addcss:"form-control input-full"}}
+                </div>
+                <div class="well well-sm">
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.relation_type.label }}</label>
+                            {{ advanced_search_form.relation_type|addcss:"form-control input-full"}}
+                        </div>
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.authority_name.label }}</label>
+                            {{ advanced_search_form.authority_name|addcss:"form-control input-full"}}
+                        </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-12 clearfix">
+
+                <div class="pull-right">
+                    <input type="submit" id="advancedreset" class="btn" value="{% trans 'Clear' %}" />
+                    <input type="submit" class="btn" value="{% trans 'Search' %}" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+
+<script>
+$.fn.clearForm = function() {
+    return this.each(function() {
+        var type = this.type, tag = this.tagName.toLowerCase();
+        if (tag == 'form') {
+            return $(':input',this).clearForm();
+        }
+        if (type == 'text' || type == 'password' || tag == 'textarea') {
+            $(this).val('');
+            $(this).attr("value", "");
+        } else if (type == 'checkbox' || type == 'radio') {
+            this.checked = false;
+        }    else if (tag == 'select') {
+            this.selectedIndex = -1;
+        }
+    });
+};
+$('#advancedreset').click(function(){
+    $('#changelist-advanced-search').clearForm();
+
+});
+</script>
 {% endif %}
