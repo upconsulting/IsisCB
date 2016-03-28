@@ -2,6 +2,7 @@ from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, FOAF, DC, Namespace, SKOS, DCTERMS, RDFS, OWL, NamespaceManager
 import urllib
 from isisdata.templatetags.app_filters import *
+from mods_helper import *
 
 isisns = Namespace('http://data.isiscb.org/vocab#')
 isisns_props = Namespace('http://data.isiscb.org/properties#')
@@ -16,7 +17,7 @@ def generate_authority_rdf(authority):
 
     auth = URIRef("http://data.isiscb.org/authority/" + authority.id) #urllib.quote(authority.name.replace(" ", "_")))
 
-    type = get_type(authority.type_controlled)
+    type = get_auth_type(authority.type_controlled)
     if not type:
         return ''
     g.add( (auth, RDF.type, type) )
@@ -41,28 +42,68 @@ def generate_citation_rdf(citation):
     citation_uri = URIRef("http://data.isiscb.org/authority/" + citation.id)
     g.add( (citation_uri, RDF.type, modsrdf.ModsResource) )
 
-    titleBNode = BNode()
-    g.add( (citation_uri, modsrdf.titlePrincipal, titleBNode) )
-    g.add( (titleBNode, RDF.type, madsrdf.Title))
-    g.add( (titleBNode, RDFS.label, Literal(bleach_safe(get_title(citation)))) )
+    title_BNode = BNode()
+    g.add( (citation_uri, modsrdf.titlePrincipal, title_BNode) )
+    g.add( (title_BNode, RDF.type, madsrdf.Title))
+    g.add( (title_BNode, RDFS.label, Literal(bleach_safe(get_title(citation)))) )
 
     # add authors and contributors
     authors = citation.get_all_contributors
     first = True
     for author in authors:
-        authorBNode = BNode()
+        author_BNode = BNode()
 
         # only the first author should be principalName, so after the first
         # we set this to false
         if first:
-            g.add( (citation_uri, modsrdf.principalName, authorBNode) )
+            g.add( (citation_uri, modsrdf.principalName, author_BNode) )
             first = False
         else:
-            g.add( (citation_uri, modsrdf.name, authorBNode) )
-        g.add( (authorBNode, RDF.type, madsrdf.Name) )
-        g.add( (authorBNode, RDFS.label, Literal(author.authority.name)) )
+            g.add( (citation_uri, modsrdf.name, author_BNode) )
+        g.add( (author_BNode, RDF.type, madsrdf.Name) )
+        g.add( (author_BNode, RDFS.label, Literal(author.authority.name)) )
 
-        g.add( (citation_uri, get_relator(author.type_controlled), authorBNode) )
+        g.add( (citation_uri, get_relator(author.type_controlled), author_BNode) )
+
+    # publication Date
+    date = get_pub_year(citation)
+    g.add( (citation_uri, modsrdf.dateCreated, Literal(date)) )
+
+    # add genre
+    citation_type = get_type(citation.type_controlled)
+    genre_BNode = BNode()
+    g.add( (citation_uri, modsrdf.genre, genre_BNode) )
+    g.add( (genre_BNode, RDFS.label, Literal(citation_type)) )
+    g.add( (genre_BNode, RDF.type, madsrdf.GenreForm) )
+
+    # add part info (volume, page number, etc)
+    # there should only be one?
+    periodicals = citation.acrelation_set.filter(type_controlled__in=['PE'])
+    for periodical in periodicals:
+        host_BNode = BNode()
+        g.add( (citation_uri, modsrdf.relatedHost, host_BNode) )
+
+        # title of jounral
+        host_title_BNode = BNode()
+        g.add( (host_BNode, modsrdf.titlePrincipal, host_title_BNode) )
+        g.add( (host_title_BNode, RDF.type, madsrdf.Title))
+        g.add( (host_title_BNode, RDFS.label, Literal(bleach_safe(periodical.authority.name))) )
+
+        # create part node to add volume nr etc.
+        part_BNode = BNode()
+        g.add( (host_BNode, modsrdf.part, part_BNode) )
+        g.add( (part_BNode, RDF.type, modsrdf.Part) )
+
+        # add volume
+        volume = get_volume(citation)
+        g.add( (part_BNode, modsrdf.partLevel, Literal(volume)) )
+
+        # add issue
+        # TODO: this is very confusing. do we have 2 part entries here?
+        issue = get_issue(citation)
+        if issue:
+            g.add( (part_BNode, modsrdf.partDetailType, Literal("issue")) )
+            g.add( (part_BNode, modsrdf.partNumber, Literal(issue)) )
 
 
     # bind namespace prefixes
@@ -92,7 +133,7 @@ def get_property(authority_attr):
 
     return attr_dict[authority_attr]
 
-def get_type(authority_type):
+def get_auth_type(authority_type):
     mesh = Namespace('http://id.nlm.nih.gov/mesh/vocab#')
     dcmitype = Namespace('http://purl.org/dc/dcmitype/')
 
