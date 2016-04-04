@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
+import markdown
 
 sys.path.append('..')
 
@@ -28,6 +29,7 @@ ALLOWED_HOSTS = [
     'isiscb-staging.elasticbeanstalk.com',
     'isiscb.elasticbeanstalk.com',
     'isiscb-production.elasticbeanstalk.com',
+    'isiscb-develop.elasticbeanstalk.com',
     '.isiscb.org',
 ]
 
@@ -48,6 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'social.apps.django_app.default',
     'rest_framework',
+    'markupfield',
     'simple_history',
     'storages',
     'haystack',
@@ -55,6 +58,8 @@ INSTALLED_APPS = (
     "elasticstack",
     'oauth2_provider',
     'corsheaders',
+    'zotero',
+    'openurl',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -99,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                 'django.template.context_processors.tz'
             ],
         },
     },
@@ -201,8 +207,10 @@ STATICFILES_DIRS = ['isisdata/static']
 STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
 STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
-# STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+
 # STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, MEDIAFILES_LOCATION)
@@ -242,3 +250,8 @@ GOOGLE_ANALYTICS_ID = os.environ['GOOGLE_ANALYTICS_ID']
 
 
 LICENSE = """This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."""
+
+
+MARKUP_FIELD_TYPES = (
+    ('markdown', markdown.markdown),
+)
