@@ -217,6 +217,3 @@ def generate_mods_xml(citation):
             mods.appendChild(identifier)
 
     return doc.toprettyxml(indent="    ", encoding="utf-8")
-
-def get_publisher(citation):
-    return citation.acrelation_set.filter(type_controlled__in=['PU', 'SC', 'IN'])

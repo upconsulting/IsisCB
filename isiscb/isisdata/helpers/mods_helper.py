@@ -31,3 +31,6 @@ def get_issue(citation):
         issue += " - " + str(citation.part_details.issue_end)
 
     return issue
+
+def get_publisher(citation):
+    return citation.acrelation_set.filter(type_controlled__in=['PU', 'SC', 'IN'])
