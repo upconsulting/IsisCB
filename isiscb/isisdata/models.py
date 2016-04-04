@@ -1075,7 +1075,6 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, blank=True)
-
     description = models.TextField(blank=True)
 
     INCLUDES_CHAPTER = 'IC'

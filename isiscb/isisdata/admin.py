@@ -784,6 +784,25 @@ class ACRelationAdmin(SimpleHistoryAdmin,
         return super(ACRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
 
+class CCRelationAdvancedSearchForm(forms.Form):
+    """
+    Provides advanced search fields in the Citation changelist view.
+    """
+    # Search by __icontains:
+    name = forms.CharField(required=False)
+    description = forms.CharField(required=False)
+    type_free = forms.CharField(required=False)
+
+    # Discrete choices:
+    type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(CCRelation.TYPE_CHOICES), required=False)
+
+    # Related fields.
+    source_type = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
+    source_title = forms.CharField(required=False)
+    object_type = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
+    object_title = forms.CharField(required=False)
+
+
 class CCRelationForm(autocomplete_light.ModelForm):
     class Meta:
         model = CCRelation
@@ -793,11 +812,12 @@ class CCRelationForm(autocomplete_light.ModelForm):
 class CCRelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
-                      UberInlineMixin):
+                      UberInlineMixin,
+                      AdvancedSearchMixin):
 
     list_display = ('id',
                     'subject',
-                    '_render_type_controlled',
+                    'type_controlled',
                     'object')
 
     fieldsets = [
@@ -827,6 +847,34 @@ class CCRelationAdmin(SimpleHistoryAdmin,
                        'modified_on_fm')
 
     form = CCRelationForm
+    search_fields = ('name',)
+
+    advanced_search_form = CCRelationAdvancedSearchForm
+    advanced_search_form_template = 'advanced_search_form_ccrelation'
+    advanced_search_icontains_fields = ['name', 'description', 'type_free']
+    advanced_search_exact_fields = ['type_controlled',]
+
+    advanced_search_related_direct = {
+        'subject_type': 'subject__type_controlled',
+        'subject_title': 'subject__title__icontains',
+        'object_type': 'object__type_controlled',
+        'object_title': 'object__title__icontains',
+    }
+
+    def get_queryset(self, request):
+        queryset = super(CCRelationAdmin, self).get_queryset(request)
+
+        return self.apply_advanced_search(request, queryset)
+
+    def changelist_view(self, request, **kwargs):
+        extra_context = self.advanced_search_extra_context(request, **kwargs)
+
+        return super(CCRelationAdmin, self).changelist_view(request, extra_context=extra_context)
+
+    def lookup_allowed(self, lookup, *args, **kwargs):
+        if lookup in self.advanced_search_form().fields.keys():
+            return True
+        return super(CCRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
 
 class AARelationForm(autocomplete_light.ModelForm):

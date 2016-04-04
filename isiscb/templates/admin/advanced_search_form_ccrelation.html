@@ -1,0 +1,108 @@
+{% load i18n static %}
+{% load addcss %}
+
+{% if cl.search_fields %}
+<style>
+.form-group-full {
+    width: 100% !important;
+}
+.input-full {
+    width: 70% !important;
+}
+.input-label {
+    display: inline-block;
+    width: 25% !important;
+}
+</style>
+<!-- <div id="toolbar"> -->
+    <div class="panel panel-primary">
+        <div class="panel-heading"  style="cursor: pointer;" data-toggle="collapse" data-target="#advanced-search-body">
+            <span class="h4">Advanced search</span>
+        </div>
+        <div id="advanced-search-body" class="panel-collapse{% if searching%}{% else %} collapse{% endif %}">
+        <div class="panel-body">
+    <form id="changelist-advanced-search" method="get" class="form form-inline" action="">
+        <div class="row"><!-- DIV needed for valid HTML -->
+            <div class="col-sm-6">
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.name.label }}</label>
+                    {{ advanced_search_form.name|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.description.label }}</label>
+                    {{ advanced_search_form.description|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.type_controlled.label }}</label>
+                    {{ advanced_search_form.type_controlled|addcss:"form-control input-full"}}
+                </div>
+                <div class="form-group form-group-sm form-group-full">
+                    <label class="input-label">{{ advanced_search_form.type_free.label }}</label>
+                    {{ advanced_search_form.type_free|addcss:"form-control input-full"}}
+                </div>
+            </div>
+            <div class="col-sm-6">
+
+                <div class="well well-sm">
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.source_type.label }}</label>
+                            {{ advanced_search_form.source_type|addcss:"form-control input-full"}}
+                        </div>
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.source_title.label }}</label>
+                            {{ advanced_search_form.source_title|addcss:"form-control input-full"}}
+                        </div>
+
+                </div>
+                <div class="well well-sm">
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.object_type.label }}</label>
+                            {{ advanced_search_form.object_type|addcss:"form-control input-full"}}
+                        </div>
+                        <div class="form-group form-group-sm form-group-full">
+                            <label class="input-label">{{ advanced_search_form.object_title.label }}</label>
+                            {{ advanced_search_form.object_title|addcss:"form-control input-full"}}
+                        </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-12 clearfix">
+
+                <div class="pull-right">
+                    <input type="submit" id="advancedreset" class="btn" value="{% trans 'Clear' %}" />
+                    <input type="submit" class="btn" value="{% trans 'Search' %}" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+
+<script>
+$.fn.clearForm = function() {
+    return this.each(function() {
+        var type = this.type, tag = this.tagName.toLowerCase();
+        if (tag == 'form') {
+            return $(':input',this).clearForm();
+        }
+        if (type == 'text' || type == 'password' || tag == 'textarea') {
+            $(this).val('');
+            $(this).attr("value", "");
+        } else if (type == 'checkbox' || type == 'radio') {
+            this.checked = false;
+        }    else if (tag == 'select') {
+            this.selectedIndex = -1;
+        }
+    });
+};
+$('#advancedreset').click(function(){
+    $('#changelist-advanced-search').clearForm();
+
+});
+</script>
+{% endif %}
