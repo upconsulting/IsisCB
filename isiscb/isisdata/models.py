@@ -6,6 +6,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse as core_reverse
 
 from markupfield.fields import MarkupField
 
@@ -644,6 +645,13 @@ class Citation(ReferencedEntity, CuratedMixin):
         query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
         return ACRelation.objects.filter(public=True).filter(query).order_by('data_display_order')
 
+    def get_absolute_url(self):
+        """
+        The absolute URL of a Citation is the citation detail view.
+        """
+        return core_reverse("citation", args=(self.id,))
+
+
 
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
@@ -806,6 +814,12 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         query = Q(authority_id=self.id)
         return ACRelation.objects.filter(public=True).filter(query)
+
+    def get_absolute_url(self):
+        """
+        The absolute URL of an Authority is the authority detail view.
+        """
+        return core_reverse("authority", args=(self.id,))
 
 
 class Person(Authority):
@@ -1430,7 +1444,10 @@ class Comment(Annotation):
 
     @property
     def snippet(self):
-        return self.text[:min(100, len(self.text))] + u'...'
+        snip = self.text[:min(100, len(self.text))]
+        if len(self.text) > 100:
+            snip += u'...'
+        return snip
 
     @property
     def linkified(self):

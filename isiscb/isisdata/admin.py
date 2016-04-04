@@ -5,6 +5,10 @@ from django.contrib.contenttypes.forms import BaseGenericInlineFormSet, generic_
 from django import forms
 from django.forms import widgets, formsets, models
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineformset_factory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+
+
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -1045,11 +1049,17 @@ class LanguageAdmin(SimpleHistoryAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'snippet', 'created_by', 'subject', 'created_on')
+    list_display = ('id', 'snippet', 'created_by', 'subject', 'view_record', 'created_on')
     list_display_links = ('id', 'snippet')
     fields = ('id', 'created_by', 'created_on', 'subject', 'text')
     readonly_fields = ('id', 'created_by', 'created_on', 'subject', 'text')
     inlines = []
+
+    def view_record(self, obj, *args, **kwargs):
+        return format_html('<a href="{}" target="_blank">View record</a>',
+                           mark_safe(obj.subject.get_absolute_url()))
+
+
 
 
 class UserProfileAdmin(admin.ModelAdmin):
