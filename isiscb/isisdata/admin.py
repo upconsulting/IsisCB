@@ -422,7 +422,7 @@ class CitationAdvancedSearchForm(forms.Form):
     language = forms.ModelChoiceField(queryset=Language.objects.all(), required=False)
     type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
 
-    # Limit by range.
+    # Limit by range. TODO: add field validation for date format.
     published_after = forms.DateField(required=False, widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}))
     published_before = forms.DateField(required=False, widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}))
 
@@ -457,8 +457,8 @@ class CitationAdmin(SimpleHistoryAdmin,
 
 
     form = CitationForm
-    list_display = ('id', 'title', 'modified_on', 'modified_by', 'public',
-                    'status_of_record')
+    list_display = ('id', 'title', 'type_controlled', 'modified_on',
+                    'modified_by', 'public', 'status_of_record',)
 
     # Filters in the changelist interfere with the advanced search. We can add
     #  it back, but we will need to find a way to pass the advanced search GET
@@ -489,7 +489,7 @@ class CitationAdmin(SimpleHistoryAdmin,
     ])
 
     # These class attributes control the change view.
-    readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
+    readonly_fields = ('uri', 'id', 'modified_on_fm', 'modified_by_fm')
     inlines = (ACRelationInline, )
 
     fieldsets = [
