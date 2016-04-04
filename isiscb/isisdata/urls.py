@@ -53,7 +53,7 @@ urlpatterns = [
         name='citation'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)\.rdf/$',
         views.rdf_authority_view,
-        name='authroity_rdf'),
+        name='authority_rdf'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$',
         views.rdf_citation_view,
         name='citation_rdf'),
