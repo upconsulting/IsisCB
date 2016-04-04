@@ -7,7 +7,8 @@ from django.forms import widgets, formsets, models
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineformset_factory
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
@@ -1060,13 +1061,18 @@ class CommentAdmin(admin.ModelAdmin):
                            mark_safe(obj.subject.get_absolute_url()))
 
 
-
-
 class UserProfileAdmin(admin.ModelAdmin):
     class Meta:
         model = UserProfile
 
     readonly_fields = ['authority_record',]
+
+
+class IsisCBUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined')
+
+    # def joined(self, obj, *args, **kwargs):
+    #     return obj.date_joined
 
 
 admin.site.register(Citation, CitationAdmin)
@@ -1084,3 +1090,7 @@ admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Language, LanguageAdmin)
 # Register your models here.
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+admin.site.unregister(User)
+admin.site.register(User, IsisCBUserAdmin)
