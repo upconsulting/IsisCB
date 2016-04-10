@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-07 20:09-0700\n"
+"POT-Creation-Date: 2016-04-10 13:29-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -472,6 +472,140 @@ msgid ""
 "infrastructure development services, training, and support for projects of "
 "all sizes.\n"
 "        "
+msgstr ""
+
+#: templates/isisdata/help.html:10
+msgid "Current features of IsisCB Explore"
+msgstr ""
+
+#: templates/isisdata/help.html:13
+msgid ""
+"\n"
+"      Before you try out explore, take a moment to familiarize yourself with "
+"what it can do:</p>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:18
+msgid ""
+"\n"
+"        <i>Save your searches</i>. For logged-in users, the system "
+"automatically logs your search history and gives you the ability to bookmark "
+"and save them.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:23
+msgid ""
+"\n"
+"        <i>Add public comments</i>. Once logged in, you can add public "
+"comments on any record so that you can identify missing information or "
+"suggest outside links.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:28
+msgid ""
+"\n"
+"        <i>Drill down using facets</i>. The facets are indexed items that "
+"you can access directly using the Authorities tab. [<a href=\"https://youtu."
+"be/ntqtn0tyy-E\">See video</a>.]\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:33
+msgid ""
+"\n"
+"        <i>Register your own account</i>. You can register for an account or "
+"log in through Facebook or Twitter. [<a href=\"https://youtu.be/seKYV-Vxj8w"
+"\">See video</a>.]\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:38
+msgid ""
+"\n"
+"        <i>Use Zotero to collect citations</i>. All bibliographic records "
+"can be saved in Zotero, either individually or in search results. [<a href="
+"\"https://youtu.be/gmgcSG_mwEA\">See video</a>.]\n"
+"        <ul>\n"
+"          <li>\n"
+"            <b>Note</b>: For the time being, we recommend using Zotero for "
+"collecting citations.\n"
+"          </li>\n"
+"        </ul>\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:50
+msgid ""
+"\n"
+"      You can see all the explanatory videos on the <a href=\"https://www."
+"youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g\">IsisCB Explore YouTube "
+"Channel</a>.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:58
+msgid ""
+"\n"
+"      <i>When doing a citation search, be creative and try multiple methods "
+"of drilling down.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:64
+msgid ""
+"\n"
+"      One can use the IsisCB to do a standard bibliographical search. This "
+"is the mode that we expect most users will find valuable on a day-to-day "
+"basis. All searches are keyword searches. You can narrow down the results "
+"lists by either providing more search terms or by using the facet list to "
+"the left.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:70
+msgid ""
+"\n"
+"      <i>When limiting by facet, be aware that several different authority "
+"sets are in use, so similar facet selections will yield different results "
+"sets.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:76
+msgid ""
+"\n"
+"      Limiting by facets can create artificially small results sets. This is "
+"especially true if the subject terms are not proper names. Subject "
+"authorities have changed over time under different bibliographers. When "
+"limiting by a term used by one bibliographer, similar citations classified "
+"with different terminology will be skipped. Try different facet limits with "
+"your searches to ensure you capture similar records tagged with slightly "
+"different subjects.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:82
+msgid ""
+"\n"
+"      <i>When using IsisCB Explore, consider using it as a Who’s Who in "
+"History of Science.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:88
+msgid ""
+"\n"
+"      The IsisCB dataset can also provide a window into the history of "
+"science community by using the authority tab. By doing an authority search "
+"for authors, publishers, universities, or journals, one can explore the "
+"network of people and institutions that have produced history of science "
+"scholarship over the years. In this capacity, one can study such things as "
+"the topic areas of journals, the theses produced by different institutions, "
+"and similar questions.\n"
+"      "
 msgstr ""
 
 #: templates/isisdata/home.html:33

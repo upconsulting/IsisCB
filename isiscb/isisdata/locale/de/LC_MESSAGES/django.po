@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-07 19:49-0700\n"
+"POT-Creation-Date: 2016-04-10 13:29-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -249,6 +249,365 @@ msgstr "Abmelden"
 #: templates/isisdata/_navigation_home.html:45
 msgid "Log In"
 msgstr "Anmelden"
+
+#: templates/isisdata/about.html:20
+msgid "About <i>IsisCB Explore</i>"
+msgstr "Über die <i>IsisCB Explore</i>"
+
+#: templates/isisdata/about.html:23
+msgid ""
+"\n"
+"        IsisCB Explore is a research tool for the history of science, whose "
+"core dataset comes from bibliographical citations in the <a href=\"http://"
+"isisbibliography.org/\">Isis Bibliography of the History of Science</a>. The "
+"IsisCB currently contains 40 years of citation data from 1974 to 2014.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:28
+msgid ""
+"\n"
+"        The dataset is composed of two main types of records:\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:33
+msgid ""
+"\n"
+"        <li><i>Citations</i>, items from the bibliography that have been "
+"classified and indexed, and</li>\n"
+"        <li><i>Authorities</i>, records that include both subject terms that "
+"classify citations as well as authors, publishers, and journals that have "
+"written and published those works. </li>\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:40
+msgid ""
+"\n"
+"        <i>IsisCB Explore</i> blends a professionally curated database with "
+"social media tools, so that the community can play a more active role in "
+"building a tool that will cater to its needs.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:46
+msgid ""
+"\n"
+"        User participation is encouraged. Please sign-in and provide "
+"comments to entries where you see errors and add further information where "
+"relevant. Suggest hyperlinks and other material that will be useful for "
+"fellow scholars.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:52
+msgid ""
+"\n"
+"        We are fully committed to open access. Our data are available via a "
+"<a href=\"http://data.isiscb.org/rest/\">REST API</a> (accessible through "
+"the icons on this site), and all of our source code is at <a href=\"https://"
+"github.com/upconsulting/IsisCB\">GitHub</a>. Our data is open for use "
+"following the <a href=\"https://creativecommons.org/licenses/by-nc/4.0/"
+"\">Creative Commons Attribution-NonCommercial 4.0 International License</"
+"a>.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:57
+msgid "Current features"
+msgstr ""
+
+#: templates/isisdata/about.html:59
+msgid ""
+"\n"
+"        One can use the IsisCB to do a standard bibliographical search. This "
+"is the mode that we expect most users will find valuable on a day-to-day "
+"basis.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:64
+msgid ""
+"\n"
+"        <li><i>Account registration</i>. You can register for an account or "
+"log in through Facebook or Twitter.</li>\n"
+"        <li><i>Zotero integration</i>. All bibliographic records can be "
+"saved in Zotero, either individually or in search results. </li>\n"
+"        <li><i>Search history</i>. The system automatically logs your search "
+"history and gives you the ability to bookmark and save certain searches.</"
+"li>\n"
+"        <li><i>Public user comments</i>. Once logged in, you can add public "
+"comments on any record so that you can identify missing information or "
+"suggest outside links.</li>\n"
+"        <li><i>Faceted searching</i>. The facets are indexed items that you "
+"can access directly using the Authorities tab.</li>\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:76
+msgid "Development schedule"
+msgstr ""
+
+#: templates/isisdata/about.html:78
+msgid ""
+"\n"
+"        The project is still in beta form, so development is ongoing. Among "
+"the features we will be adding in the months ahead:\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/about.html:84
+msgid ""
+"\n"
+"          <i>Data</i>. We will be integrating several hundred thousand new "
+"records in the next few months. These data include web-based resources from "
+"the <a href=\"http://www.dhst-whso.org/\">World History of Science Online</"
+"a> and the 1913-1975 Isis Cumulative Bibliographies.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:89
+msgid ""
+"\n"
+"          <i>Link resolvers</i>. Library users will be able to get direct "
+"access to the full text of items in subscribed library resources.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:94
+msgid ""
+"\n"
+"          <i>User account functions</i>. We will eventually make it possible "
+"for people to adding entries, curating pages, saving marked sets of "
+"citations.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:99
+msgid ""
+"\n"
+"          <i>Indexing</i>. As we study the authority lists, we well be able "
+"to merge many of the identical authorities that currently exist in the "
+"system.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:104
+msgid ""
+"\n"
+"          <i>Authority records</i>. We will be providing more information "
+"drawn from places like <a href=\"http://wiki.dbpedia.org/\">DBPedia</a> that "
+"will help users know more about authority records that they are using to do "
+"searches.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:109
+msgid ""
+"\n"
+"          <i>Linked Open Data</i>. We will be adding links to many other "
+"external authority records, so that users will be able to find accurate data "
+"on records from authoritative sources, such as the Stanford Encyclopedia of "
+"Philosophy and similar projects.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:114
+msgid ""
+"\n"
+"          <i>More API functionality</i>. We will be adding new ways to "
+"access our records algorithmically.\n"
+"          "
+msgstr ""
+
+#: templates/isisdata/about.html:120
+msgid "Acknowledgements"
+msgstr ""
+
+#: templates/isisdata/about.html:122
+msgid ""
+"\n"
+"         The following individuals have been especially helpful in making "
+"this project possible: Sylwester Ratowt, Colin Allen, Margaret Gaida, Amy "
+"Rodgers, Gavan McCarthy, Marco La Rosa, Ailie Smith, John Stewart, Erick "
+"Peirson, Julia Damerow, Tara Carlisle, Nathan Kapoor, Younes Mahdavi, "
+"Carolyn Scearce, Kirsty Gaither, Sam Fellows. In addition, we want to thank "
+"the many individuals associated with the sponsoring institutions listed on "
+"this page. The project could not have been completed without their help. "
+"Faculty and administrative staff in many different departments across the "
+"University of Oklahoma have been extraordinarily supportive throughout this "
+"endeavor.\n"
+"         "
+msgstr ""
+
+#: templates/isisdata/about.html:127
+msgid ""
+"\n"
+"         Questions and information regarding this project can be directed "
+"to:\n"
+"         "
+msgstr ""
+
+#: templates/isisdata/about.html:132
+msgid ""
+"\n"
+"          Stephen P. Weldon<br>\n"
+"          Editor, Isis Bibliography of the History of Science<br>\n"
+"          Assistant Professor of History of Science<br>\n"
+"          601 Elm Street, Physical Sciences 618<br>\n"
+"          University of Oklahoma<br>\n"
+"          Norman, Oklahoma 73019<br>\n"
+"          spweldon [at] ou [dot] edu<br>\n"
+"         "
+msgstr ""
+
+#: templates/isisdata/about.html:144
+msgid ""
+"\n"
+"        This website was developed by <a href=\"http://aplacecalledup.com"
+"\">A Place Called Up Consulting</a>. A Place Called Up Consulting works with "
+"academic units, teams, and individual scholars to advance excellence in "
+"digital humanities research, training, and outreach. From planning to "
+"maturity, A Place Called Up Consulting provides guidance, software and "
+"infrastructure development services, training, and support for projects of "
+"all sizes.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:10
+msgid "Current features of IsisCB Explore"
+msgstr "Aktuelle Features der IsisCB Explore"
+
+#: templates/isisdata/help.html:13
+msgid ""
+"\n"
+"      Before you try out explore, take a moment to familiarize yourself with "
+"what it can do:</p>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:18
+msgid ""
+"\n"
+"        <i>Save your searches</i>. For logged-in users, the system "
+"automatically logs your search history and gives you the ability to bookmark "
+"and save them.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:23
+msgid ""
+"\n"
+"        <i>Add public comments</i>. Once logged in, you can add public "
+"comments on any record so that you can identify missing information or "
+"suggest outside links.\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:28
+msgid ""
+"\n"
+"        <i>Drill down using facets</i>. The facets are indexed items that "
+"you can access directly using the Authorities tab. [<a href=\"https://youtu."
+"be/ntqtn0tyy-E\">See video</a>.]\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:33
+msgid ""
+"\n"
+"        <i>Register your own account</i>. You can register for an account or "
+"log in through Facebook or Twitter. [<a href=\"https://youtu.be/seKYV-Vxj8w"
+"\">See video</a>.]\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:38
+msgid ""
+"\n"
+"        <i>Use Zotero to collect citations</i>. All bibliographic records "
+"can be saved in Zotero, either individually or in search results. [<a href="
+"\"https://youtu.be/gmgcSG_mwEA\">See video</a>.]\n"
+"        <ul>\n"
+"          <li>\n"
+"            <b>Note</b>: For the time being, we recommend using Zotero for "
+"collecting citations.\n"
+"          </li>\n"
+"        </ul>\n"
+"        "
+msgstr ""
+
+#: templates/isisdata/help.html:50
+msgid ""
+"\n"
+"      You can see all the explanatory videos on the <a href=\"https://www."
+"youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g\">IsisCB Explore YouTube "
+"Channel</a>.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:58
+msgid ""
+"\n"
+"      <i>When doing a citation search, be creative and try multiple methods "
+"of drilling down.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:64
+msgid ""
+"\n"
+"      One can use the IsisCB to do a standard bibliographical search. This "
+"is the mode that we expect most users will find valuable on a day-to-day "
+"basis. All searches are keyword searches. You can narrow down the results "
+"lists by either providing more search terms or by using the facet list to "
+"the left.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:70
+msgid ""
+"\n"
+"      <i>When limiting by facet, be aware that several different authority "
+"sets are in use, so similar facet selections will yield different results "
+"sets.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:76
+msgid ""
+"\n"
+"      Limiting by facets can create artificially small results sets. This is "
+"especially true if the subject terms are not proper names. Subject "
+"authorities have changed over time under different bibliographers. When "
+"limiting by a term used by one bibliographer, similar citations classified "
+"with different terminology will be skipped. Try different facet limits with "
+"your searches to ensure you capture similar records tagged with slightly "
+"different subjects.\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:82
+msgid ""
+"\n"
+"      <i>When using IsisCB Explore, consider using it as a Who’s Who in "
+"History of Science.</i>\n"
+"      "
+msgstr ""
+
+#: templates/isisdata/help.html:88
+msgid ""
+"\n"
+"      The IsisCB dataset can also provide a window into the history of "
+"science community by using the authority tab. By doing an authority search "
+"for authors, publishers, universities, or journals, one can explore the "
+"network of people and institutions that have produced history of science "
+"scholarship over the years. In this capacity, one can study such things as "
+"the topic areas of journals, the theses produced by different institutions, "
+"and similar questions.\n"
+"      "
+msgstr ""
 
 #: templates/isisdata/home.html:33
 msgid "An open access discovery service for the history of science."
