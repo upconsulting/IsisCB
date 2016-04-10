@@ -36,7 +36,7 @@ def generate_mods_xml(citation):
     title.appendChild(title_text)
 
     # add authors
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU']).order_by('data_display_order')
     for author in authors:
         name = doc.createElement('name')
         name.setAttribute('type', 'personal')
