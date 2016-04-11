@@ -5,6 +5,11 @@ from django.contrib.contenttypes.forms import BaseGenericInlineFormSet, generic_
 from django import forms
 from django.forms import widgets, formsets, models
 from django.forms.models import BaseModelFormSet, BaseInlineFormSet, inlineformset_factory
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -404,6 +409,63 @@ class UberInlineMixin(admin.ModelAdmin):
                 formset.save()
 
 
+class AdvancedSearchMixin(object):
+    """
+    Provides advanced search functionality for ModelAdmin.
+    """
+    def apply_advanced_search(self, request, queryset):
+        if not hasattr(self, 'other_search_fields'):    # No advanced search.
+            return queryset
+
+        # Apply filtering from advanced search form.
+        for key, value in self.other_search_fields.iteritems():
+            if key in getattr(self, 'advanced_search_icontains_fields', {}):
+                param = {'%s__icontains' % key : value}
+            elif key in getattr(self, 'advanced_search_exact_fields', {}):
+                param = {key : value}
+            elif key in getattr(self, 'advanced_search_date_fields', {}):
+                field = self.advanced_search_date_fields[key]
+                value = as_datetime(value).strftime('%Y-%m-%d')
+                param = {field : value}
+            elif key in getattr(self, 'advanced_search_related_fields', {}):
+                field, related_key, related_field = self.advanced_search_related_fields[key]
+                if related_key not in self.other_search_fields:
+                    continue
+                related_value = self.other_search_fields[related_key]
+                param = {field : value, related_field: related_value}
+            elif key in getattr(self, 'advanced_search_related_direct', {}):
+                field = self.advanced_search_related_direct[key]
+                param = {field: value}
+            else:
+                continue
+            queryset = queryset.filter(**param).distinct('pk')
+        return queryset
+
+    def advanced_search_extra_context(self, request, **kwargs):
+        extra_context = kwargs.get('extra_context', {})
+        self.other_search_fields = {}
+        # TODO: initial data?
+
+        request.GET._mutable=True
+        for key in self.advanced_search_form().fields.keys():
+            try:
+                temp = request.GET.pop(key)
+            except KeyError:
+                pass # there is no field of the form in the dict so we don't remove it
+            else:
+                if temp!=['']: #there is a field but it's empty so it's useless
+                    self.other_search_fields[key] = temp[0]
+
+        extra_context = {
+            'advanced_search_form': self.advanced_search_form(initial=self.other_search_fields),
+            'advanced_search_form_template': self.advanced_search_form_template,
+            'searching': len(self.other_search_fields) > 0,
+        }
+        request.GET_mutable=False
+
+        return extra_context
+
+
 class CitationAdvancedSearchForm(forms.Form):
     """
     Provides advanced search fields in the Citation changelist view.
@@ -415,14 +477,13 @@ class CitationAdvancedSearchForm(forms.Form):
     edition_details = forms.CharField(required=False)
     physical_details = forms.CharField(required=False)
 
-
     # Discrete choices:
     status_of_record = forms.ChoiceField(choices=[('', 'All')] + list(Citation.STATUS_CHOICES), required=False)
     record_action = forms.ChoiceField(choices=[('', 'All')] + list(Citation.ACTION_CHOICES), required=False)
     language = forms.ModelChoiceField(queryset=Language.objects.all(), required=False)
     type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
 
-    # Limit by range.
+    # Limit by range. TODO: add field validation for date format.
     published_after = forms.DateField(required=False, widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}))
     published_before = forms.DateField(required=False, widget=forms.DateInput(attrs={'placeholder': 'YYYY-MM-DD'}))
 
@@ -453,12 +514,13 @@ class CitationForm(autocomplete_light.ModelForm):
 class CitationAdmin(SimpleHistoryAdmin,
                     AttributeInlineMixin,
                     LinkedDataInlineMixin,
-                    UberInlineMixin):
+                    UberInlineMixin,
+                    AdvancedSearchMixin):
 
 
     form = CitationForm
-    list_display = ('id', 'title', 'modified_on', 'modified_by', 'public',
-                    'status_of_record')
+    list_display = ('id', 'title', 'type_controlled', 'modified_on',
+                    'modified_by', 'public', 'status_of_record',)
 
     # Filters in the changelist interfere with the advanced search. We can add
     #  it back, but we will need to find a way to pass the advanced search GET
@@ -489,7 +551,7 @@ class CitationAdmin(SimpleHistoryAdmin,
     ])
 
     # These class attributes control the change view.
-    readonly_fields = ('uri', 'id', 'modified_on_fm','modified_by_fm')
+    readonly_fields = ('uri', 'id', 'modified_on_fm', 'modified_by_fm')
     inlines = (ACRelationInline, )
 
     fieldsets = [
@@ -519,65 +581,44 @@ class CitationAdmin(SimpleHistoryAdmin,
         }),
     ]
 
-
     def get_queryset(self, request):
         queryset = super(CitationAdmin, self).get_queryset(request)
 
-        if not hasattr(self, 'other_search_fields'):    # No advanced search.
-            return queryset
-
-        # Apply filtering from advanced search form.
-        for key, value in self.other_search_fields.iteritems():
-            if key in self.advanced_search_icontains_fields:
-                param = {'%s__icontains' % key : value}
-            elif key in self.advanced_search_exact_fields:
-                param = {key : value}
-            elif key in self.advanced_search_date_fields:
-                field = self.advanced_search_date_fields[key]
-                value = as_datetime(value).strftime('%Y-%m-%d')
-                param = {field : value}
-            elif key in self.advanced_search_related_fields:
-                print key, 'related'
-                field, related_key, related_field = self.advanced_search_related_fields[key]
-                if related_key not in self.other_search_fields:
-                    continue
-                related_value = self.other_search_fields[related_key]
-                param = {field : value, related_field: related_value}
-            else:
-                continue
-            queryset = queryset.filter(**param)
-        return queryset
+        return self.apply_advanced_search(request, queryset)
 
     def changelist_view(self, request, **kwargs):
-        print 'changelist'
-        extra_context = kwargs.get('extra_context', {})
-        self.other_search_fields = {}
-        # TODO: initial data?
-
-        request.GET._mutable=True
-        for key in self.advanced_search_form().fields.keys():
-            try:
-                temp = request.GET.pop(key)
-            except KeyError:
-                pass # there is no field of the form in the dict so we don't remove it
-            else:
-                if temp!=['']: #there is a field but it's empty so it's useless
-                    self.other_search_fields[key] = temp[0]
-
-        extra_context = {
-            'advanced_search_form': self.advanced_search_form(initial=self.other_search_fields),
-            'advanced_search_form_template': self.advanced_search_form_template,
-            'searching': len(self.other_search_fields) > 0,
-        }
-        request.GET_mutable=False
+        extra_context = self.advanced_search_extra_context(request, **kwargs)
 
         return super(CitationAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def lookup_allowed(self, lookup, *args, **kwargs):
-        print self.advanced_search_form().fields.keys()
         if lookup in self.advanced_search_form().fields.keys():
             return True
         return super(CitationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
+
+
+class AuthorityAdvancedSearchForm(forms.Form):
+    """
+    Provides advanced search fields in the Citation changelist view.
+    """
+    # Search by __icontains:
+    name = forms.CharField(required=False)
+    description = forms.CharField(required=False)
+
+    # Discrete choices:
+    record_status = forms.ChoiceField(choices=[('', 'All')] + list(Authority.STATUS_CHOICES), required=False)
+    classification_system = forms.ChoiceField(choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES), required=False)
+    type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(Authority.TYPE_CHOICES), required=False)
+
+    # Authority
+    relation_type = forms.ChoiceField(choices=[('', 'All')] + list(ACRelation.TYPE_CHOICES), required=False)
+    citation_title = forms.CharField(required=False)
+
+    # ISISCB-392: This may require changing Value from concrete to abstract, to
+    #  allow us to directly join its children's tables. Commented pending a
+    #  decision.
+    # attribute_type = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
+    # attribute_value = forms.CharField(required=False)
 
 
 class AuthorityForm(autocomplete_light.ModelForm):
@@ -589,9 +630,10 @@ class AuthorityForm(autocomplete_light.ModelForm):
 class AuthorityAdmin(SimpleHistoryAdmin,
                      AttributeInlineMixin,
                      LinkedDataInlineMixin,
-                     UberInlineMixin):
+                     UberInlineMixin,
+                     AdvancedSearchMixin):
     list_display = ('name', 'type_controlled', 'id',)
-    list_filter = ('type_controlled', 'record_status')
+    # list_filter = ('type_controlled', 'record_status')
     search_fields = ('name', )
 
     fieldsets = [
@@ -630,15 +672,80 @@ class AuthorityAdmin(SimpleHistoryAdmin,
 
     form = AuthorityForm
 
+    advanced_search_form = AuthorityAdvancedSearchForm
+    advanced_search_form_template = 'advanced_search_form_authority'
+    advanced_search_icontains_fields = ['name', 'description']
+    advanced_search_exact_fields = ['type_controlled', 'record_status',
+                                    'classification_system']
+
+    advanced_search_related_fields = dict([
+        ('relation_type', (
+            'acrelation__type_controlled',      # This search field query.
+            'citation_title',                   # Linked search field on Form.
+            'acrelation__citation__title__icontains'    # Linked query.
+            )
+        ),
+        # ISISCB-392: This may require changing Value from concrete to abstract,
+        #  to allow us to directly join its children's tables. Commented pending
+        #  a decision.
+        # ('attribute_type', (
+        #     'attributes__type_controlled',
+        #     'attribute_value',
+        #     'attributes__value__{child_class}__value'
+        #     )
+        # )
+    ])
+
+
+
+
+    def get_queryset(self, request):
+        queryset = super(AuthorityAdmin, self).get_queryset(request)
+
+        return self.apply_advanced_search(request, queryset)
+
+    def changelist_view(self, request, **kwargs):
+        extra_context = self.advanced_search_extra_context(request, **kwargs)
+
+        return super(AuthorityAdmin, self).changelist_view(request, extra_context=extra_context)
+
+    def lookup_allowed(self, lookup, *args, **kwargs):
+        if lookup in self.advanced_search_form().fields.keys():
+            return True
+        return super(AuthorityAdmin, self).lookup_allowed(lookup, *args, **kwargs)
+
+
+class ACRelationAdvancedSearchForm(forms.Form):
+    """
+    Provides advanced search fields in the Citation changelist view.
+    """
+    # Search by __icontains:
+    name = forms.CharField(required=False)
+    description = forms.CharField(required=False)
+    type_free = forms.CharField(required=False)
+
+    # Discrete choices:
+    type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(ACRelation.TYPE_CHOICES), required=False)
+    type_broad_controlled = forms.ChoiceField(choices=[('', 'All')] + list(ACRelation.BROAD_TYPE_CHOICES), required=False)
+
+    # Related fields.
+    citation_type = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
+    citation_title = forms.CharField(required=False)
+    authority_type = forms.ChoiceField(choices=[('', 'All')] + list(Authority.TYPE_CHOICES), required=False)
+    authority_name = forms.CharField(required=False)
+
 
 class ACRelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
-                      UberInlineMixin):
+                      UberInlineMixin,
+                      AdvancedSearchMixin):
 
-    list_display = ('id',
+    list_display = ('id', 'name',
                     'authority',
                     'type_controlled',
+                    'type_broad_controlled',
+                    'type_free',
                     'citation')
 
     fieldsets = [
@@ -670,6 +777,54 @@ class ACRelationAdmin(SimpleHistoryAdmin,
                        'modified_on_fm')
 
     form = ACRelationForm
+    search_fields = ('name', )
+
+    advanced_search_form = ACRelationAdvancedSearchForm
+    advanced_search_form_template = 'advanced_search_form_acrelation'
+    advanced_search_icontains_fields = ['name', 'description', 'type_free']
+    advanced_search_exact_fields = ['type_controlled',
+                                    'type_broad_controlled',]
+
+    advanced_search_related_direct = {
+        'citation_type': 'citation__type_controlled',
+        'citation_title': 'citation__title__icontains',
+        'authority_type': 'authority__type_controlled',
+        'authority_name': 'authority__name__icontains',
+    }
+
+    def get_queryset(self, request):
+        queryset = super(ACRelationAdmin, self).get_queryset(request)
+
+        return self.apply_advanced_search(request, queryset)
+
+    def changelist_view(self, request, **kwargs):
+        extra_context = self.advanced_search_extra_context(request, **kwargs)
+
+        return super(ACRelationAdmin, self).changelist_view(request, extra_context=extra_context)
+
+    def lookup_allowed(self, lookup, *args, **kwargs):
+        if lookup in self.advanced_search_form().fields.keys():
+            return True
+        return super(ACRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
+
+
+class CCRelationAdvancedSearchForm(forms.Form):
+    """
+    Provides advanced search fields in the Citation changelist view.
+    """
+    # Search by __icontains:
+    name = forms.CharField(required=False)
+    description = forms.CharField(required=False)
+    type_free = forms.CharField(required=False)
+
+    # Discrete choices:
+    type_controlled = forms.ChoiceField(choices=[('', 'All')] + list(CCRelation.TYPE_CHOICES), required=False)
+
+    # Related fields.
+    source_type = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
+    source_title = forms.CharField(required=False)
+    object_type = forms.ChoiceField(choices=[('', 'All')] + list(Citation.TYPE_CHOICES), required=False)
+    object_title = forms.CharField(required=False)
 
 
 class CCRelationForm(autocomplete_light.ModelForm):
@@ -681,11 +836,12 @@ class CCRelationForm(autocomplete_light.ModelForm):
 class CCRelationAdmin(SimpleHistoryAdmin,
                       AttributeInlineMixin,
                       LinkedDataInlineMixin,
-                      UberInlineMixin):
+                      UberInlineMixin,
+                      AdvancedSearchMixin):
 
     list_display = ('id',
                     'subject',
-                    '_render_type_controlled',
+                    'type_controlled',
                     'object')
 
     fieldsets = [
@@ -715,6 +871,34 @@ class CCRelationAdmin(SimpleHistoryAdmin,
                        'modified_on_fm')
 
     form = CCRelationForm
+    search_fields = ('name',)
+
+    advanced_search_form = CCRelationAdvancedSearchForm
+    advanced_search_form_template = 'advanced_search_form_ccrelation'
+    advanced_search_icontains_fields = ['name', 'description', 'type_free']
+    advanced_search_exact_fields = ['type_controlled',]
+
+    advanced_search_related_direct = {
+        'subject_type': 'subject__type_controlled',
+        'subject_title': 'subject__title__icontains',
+        'object_type': 'object__type_controlled',
+        'object_title': 'object__title__icontains',
+    }
+
+    def get_queryset(self, request):
+        queryset = super(CCRelationAdmin, self).get_queryset(request)
+
+        return self.apply_advanced_search(request, queryset)
+
+    def changelist_view(self, request, **kwargs):
+        extra_context = self.advanced_search_extra_context(request, **kwargs)
+
+        return super(CCRelationAdmin, self).changelist_view(request, extra_context=extra_context)
+
+    def lookup_allowed(self, lookup, *args, **kwargs):
+        if lookup in self.advanced_search_form().fields.keys():
+            return True
+        return super(CCRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
 
 class AARelationForm(autocomplete_light.ModelForm):
@@ -732,6 +916,8 @@ class AARelationAdmin(SimpleHistoryAdmin,
                     'subject',
                     'type_controlled',
                     'object')
+
+    search_fields = ('name',)
 
     fieldsets = [
         (None, {
@@ -769,7 +955,7 @@ class LinkedDataTypeAdmin(SimpleHistoryAdmin):
 
 
 class LinkedDataAdmin(SimpleHistoryAdmin):
-
+    search_fields = ('universal_resource_name',)
     list_display = ('id',
                     # 'subject',
                     'type_controlled',
@@ -817,6 +1003,7 @@ class ValueInline(admin.StackedInline):
 
 
 class AttributeAdmin(SimpleHistoryAdmin):
+    search_fields = ('type_controlled__name',)
     fieldsets = [
         (None, {
             'fields': ('uri',
@@ -885,11 +1072,15 @@ class LanguageAdmin(SimpleHistoryAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'snippet', 'created_by', 'subject', 'created_on')
+    list_display = ('id', 'snippet', 'created_by', 'subject', 'view_record', 'created_on')
     list_display_links = ('id', 'snippet')
     fields = ('id', 'created_by', 'created_on', 'subject', 'text')
     readonly_fields = ('id', 'created_by', 'created_on', 'subject', 'text')
     inlines = []
+
+    def view_record(self, obj, *args, **kwargs):
+        return format_html('<a href="{}" target="_blank">View record</a>',
+                           mark_safe(obj.subject.get_absolute_url()))
 
 
 class UserProfileAdmin(admin.ModelAdmin):
@@ -897,6 +1088,16 @@ class UserProfileAdmin(admin.ModelAdmin):
         model = UserProfile
 
     readonly_fields = ['authority_record',]
+    search_fields = ('user__username', )
+    list_display = ('user', 'affiliation', 'location', 'resolver_institution',
+                    'share_email')
+
+
+class IsisCBUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'last_name', 'first_name', 'date_joined')
+
+    # def joined(self, obj, *args, **kwargs):
+    #     return obj.date_joined
 
 
 admin.site.register(Citation, CitationAdmin)
@@ -914,3 +1115,7 @@ admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Language, LanguageAdmin)
 # Register your models here.
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+admin.site.unregister(User)
+admin.site.register(User, IsisCBUserAdmin)
