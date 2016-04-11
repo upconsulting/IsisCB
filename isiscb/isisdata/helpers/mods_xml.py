@@ -1,5 +1,6 @@
 from xml.dom.minidom import *
 from isisdata.templatetags.app_filters import *
+from mods_helper import *
 
 def initial_response(citation_id):
     doc = xml.dom.minidom.Document()
@@ -35,7 +36,7 @@ def generate_mods_xml(citation):
     title.appendChild(title_text)
 
     # add authors
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
+    authors = citation.acrelation_set.filter(type_controlled__in=['AU']).order_by('data_display_order')
     for author in authors:
         name = doc.createElement('name')
         name.setAttribute('type', 'personal')
@@ -107,7 +108,6 @@ def generate_mods_xml(citation):
     mods.appendChild(genre)
 
     part = doc.createElement('part')
-    mods.appendChild(part)
 
     # volume
     volume = get_volume(citation)
@@ -148,6 +148,9 @@ def generate_mods_xml(citation):
         rel_title = doc.createElement('title')
         rel_title.appendChild(doc.createTextNode(periodical.authority.name))
         rel_title_info.appendChild(rel_title)
+        # add volume, etc. info
+        related_item.appendChild(part)
+
 
     # series
     series = citation.acrelation_set.filter(type_controlled__in=['BS'])
@@ -163,6 +166,10 @@ def generate_mods_xml(citation):
         series_rel_title = doc.createElement('title')
         series_rel_title.appendChild(doc.createTextNode(serie.authority.name))
         series_rel_title_info.appendChild(series_rel_title)
+
+        # add volume, etc. info
+        series_related_item.appendChild(part)
+
 
     # included in
     included_in = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC', object__public=True)
@@ -210,38 +217,3 @@ def generate_mods_xml(citation):
             mods.appendChild(identifier)
 
     return doc.toprettyxml(indent="    ", encoding="utf-8")
-
-def get_volume(citation):
-    if citation.part_details.volume:
-        return citation.part_details.volume
-    elif citation.part_details.volume_free_text:
-        return citation.part_details.volume_free_text
-    return ''
-
-def get_issue(citation):
-    issue = ''
-    if citation.part_details.issue_begin:
-        issue = str(citation.part_details.issue_begin)
-    if citation.part_details.issue_end:
-        issue += " - " + str(citation.part_details.issue_end)
-
-    return issue
-
-def get_publisher(citation):
-    return citation.acrelation_set.filter(type_controlled__in=['PU', 'SC', 'IN'])
-
-def get_type(citation_type):
-    type_dict = {}
-    type_dict['BO'] = 'book'
-    type_dict['AR'] = 'article'
-    type_dict['CH'] = 'bookSection'
-    type_dict['RE'] = 'journalArticle'
-    type_dict['ES'] = 'journalArticle'
-    type_dict['TH'] = 'thesis'
-    type_dict['EV'] = 'document'
-    type_dict['PR'] = 'presentation'
-    type_dict['IN'] = 'document'
-    type_dict['WE'] = 'document'
-    type_dict['AP'] = 'computerProgram'
-
-    return type_dict.get(citation_type, 'document')
