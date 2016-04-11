@@ -184,7 +184,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endif %}
     </table>
 
-    <div></div>
+    <!-- <div></div> -->
     {% if related_citations_rb %}
     <h4>Reviewed By</h4>
       {% for cc_rel in related_citations_rb %}
@@ -278,7 +278,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endfor %}
     {% endif %}
 
-    <table  class="details" style="margin-top: 40px;">
+    <table  class="details" style="margin-top: 0px;">
       <tr>
         <td>Citation URI:</td>
         <td>{{ citation.generate_uri }}</td>
