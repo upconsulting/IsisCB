@@ -898,6 +898,8 @@ class AARelationAdmin(SimpleHistoryAdmin,
                     'type_controlled',
                     'object')
 
+    search_fields = ('name',)
+
     fieldsets = [
         (None, {
             'fields': ('uri',
@@ -934,7 +936,7 @@ class LinkedDataTypeAdmin(SimpleHistoryAdmin):
 
 
 class LinkedDataAdmin(SimpleHistoryAdmin):
-
+    search_fields = ('universal_resource_name',)
     list_display = ('id',
                     # 'subject',
                     'type_controlled',
@@ -982,6 +984,7 @@ class ValueInline(admin.StackedInline):
 
 
 class AttributeAdmin(SimpleHistoryAdmin):
+    search_fields = ('type_controlled__name',)
     fieldsets = [
         (None, {
             'fields': ('uri',
@@ -1066,6 +1069,9 @@ class UserProfileAdmin(admin.ModelAdmin):
         model = UserProfile
 
     readonly_fields = ['authority_record',]
+    search_fields = ('user__username', )
+    list_display = ('user', 'affiliation', 'location', 'resolver_institution',
+                    'share_email')
 
 
 class IsisCBUserAdmin(UserAdmin):
