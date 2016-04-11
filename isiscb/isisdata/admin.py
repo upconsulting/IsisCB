@@ -614,6 +614,12 @@ class AuthorityAdvancedSearchForm(forms.Form):
     relation_type = forms.ChoiceField(choices=[('', 'All')] + list(ACRelation.TYPE_CHOICES), required=False)
     citation_title = forms.CharField(required=False)
 
+    # ISISCB-392: This may require changing Value from concrete to abstract, to
+    #  allow us to directly join its children's tables. Commented pending a
+    #  decision.
+    # attribute_type = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
+    # attribute_value = forms.CharField(required=False)
+
 
 class AuthorityForm(autocomplete_light.ModelForm):
     class Meta:
@@ -676,8 +682,21 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         ('relation_type', (
             'acrelation__type_controlled',      # This search field query.
             'citation_title',                   # Linked search field on Form.
-            'acrelation__citation__title__icontains')),     # Linked query.
+            'acrelation__citation__title__icontains'    # Linked query.
+            )
+        ),
+        # ISISCB-392: This may require changing Value from concrete to abstract,
+        #  to allow us to directly join its children's tables. Commented pending
+        #  a decision.
+        # ('attribute_type', (
+        #     'attributes__type_controlled',
+        #     'attribute_value',
+        #     'attributes__value__{child_class}__value'
+        #     )
+        # )
     ])
+
+
 
 
     def get_queryset(self, request):
