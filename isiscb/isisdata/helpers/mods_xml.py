@@ -100,6 +100,11 @@ def generate_mods_xml(citation):
     date_issued.appendChild(doc.createTextNode(get_pub_year(citation)))
     origin_info.appendChild(date_issued)
 
+    # add abstract
+    abstract = doc.createElement('abstract')
+    mods.appendChild(abstract)
+    abstract.appendChild(doc.createTextNode(bleach_safe(filter_abstract(citation.abstract))))
+
     # type of resource
     genre = doc.createElement('genre')
     genre.setAttribute('authority', 'local')
