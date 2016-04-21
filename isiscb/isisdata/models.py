@@ -7,6 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
+from django.utils.safestring import mark_safe
 
 from markupfield.fields import MarkupField
 
@@ -476,6 +477,21 @@ class Citation(ReferencedEntity, CuratedMixin):
     def normalized_description(self):
         return normalize(self.description)
 
+    @property
+    def human_readable_abstract(self):
+        """
+        Abstract stripped of html tags and other metadata tags
+        """
+        SAFE_TAGS = ['em', 'b', 'i', 'strong', 'a']
+        SAFE_ATTRS = {'a': ['href', 'rel']}
+        
+        no_tags = mark_safe(bleach.clean(self.abstract, tags=SAFE_TAGS, # Whitelist
+                                      attributes=SAFE_ATTRS,
+                                      strip=True))
+        match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', self.abstract)
+        if match:
+            return match.groups()[0].strip()
+        return self.abstract
 
     @property
     def label(self):

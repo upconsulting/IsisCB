@@ -103,7 +103,7 @@ def generate_mods_xml(citation):
     # add abstract
     abstract = doc.createElement('abstract')
     mods.appendChild(abstract)
-    abstract.appendChild(doc.createTextNode(bleach_safe(filter_abstract(citation.abstract))))
+    abstract.appendChild(doc.createTextNode(citation.human_readable_abstract))
 
     # type of resource
     genre = doc.createElement('genre')

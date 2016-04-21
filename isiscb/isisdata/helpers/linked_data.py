@@ -43,7 +43,12 @@ def generate_citation_rdf(citation):
     citation_uri = URIRef("http://data.isiscb.org/authority/" + citation.id)
     graph.add( (citation_uri, RDF.type, modsrdf.ModsResource) )
 
+    # add title, author, date, and type
     add_general_info(graph, citation, citation_uri)
+
+    # add Abstract
+    abstract =  citation.human_readable_abstract
+    graph.add( (citation_uri, modsrdf.abstract, Literal(abstract)) )
 
     # start/end Pages
     start_page = citation.part_details.page_begin
