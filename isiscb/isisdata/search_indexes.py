@@ -303,7 +303,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
                 if a['acrelation__type_controlled'] == ACRelation.AUTHOR:
                     multivalue_data['author_ids'].append(ident)
-                aname = a.get('acrelation__name_for_display_in_citation', name)
+
+                # Prefer the ACRelation.name_for_display_in_citation, if
+                #  present.
+                aname = a['acrelation__name_for_display_in_citation']
+                if not aname:
+                    aname = name
                 multivalue_data['authors'].append(aname)
 
         if len(multivalue_data['authors']) > 0:
