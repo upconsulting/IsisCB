@@ -344,7 +344,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
-        ] + [a['acrelation__authority__name'] for a in data['acrelations']])
+        ] + [a['acrelation__authority__name'] for a in data['acrelations']
+             if a['acrelation__authority__name']])  # Exclude blank names.
         return document
 
     def prepare_title(self, data):
