@@ -226,7 +226,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         multivalue_data = defaultdict(list)
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
-            name = remove_control_characters(a['acrelation__authority__name'].strip())
+            if a['acrelation__authority__name']:
+                name = remove_control_characters(a['acrelation__authority__name'].strip())
+            elif a['acrelation__name_for_display_in_citation']:
+                name = remove_control_characters(a['acrelation__name_for_display_in_citation'].strip())
+            else:
+                name = None
             ident = remove_control_characters(a['acrelation__authority__id'].strip())
 
             multivalue_data['authorities'].append(name)
