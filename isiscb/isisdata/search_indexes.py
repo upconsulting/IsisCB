@@ -232,7 +232,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 name = remove_control_characters(a['acrelation__name_for_display_in_citation'].strip())
             else:
                 name = None
-            ident = remove_control_characters(a['acrelation__authority__id'].strip())
+
+            try:
+                ident = remove_control_characters(a['acrelation__authority__id'].strip())
+            except AttributeError:
+                ident = None
 
             multivalue_data['authorities'].append(name)
             if a['acrelation__type_controlled'] == ACRelation.SUBJECT:
