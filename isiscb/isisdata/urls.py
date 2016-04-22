@@ -28,7 +28,7 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('geographics', size=100). \
         facet('people', size=100). \
         facet('subject_institutions', size=100). \
-        facet('serial_publiations', size=100). \
+        facet('serial_publications', size=100). \
         facet('classification_terms', size=100). \
         facet('concepts', size=100). \
         facet('creative_works', size=100). \

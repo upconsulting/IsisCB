@@ -3,7 +3,7 @@ boto==2.38.0
 Django==1.8.3
 django-autocomplete-light==2.3.2
 django-extensions==1.5.5
-django-haystack==2.4.1
+-e git://github.com/erickpeirson/django-haystack.git@optimize
 django-markupfield==1.4.0
 django-simple-captcha==0.4.6
 django-simple-history==1.7.0

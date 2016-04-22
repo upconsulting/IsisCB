@@ -1,35 +1,34 @@
 import datetime
 from haystack import indexes
+from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
 from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
+from isisdata.utils import normalize
 
 import bleach
 import unidecode
 import unicodedata
-
-
-def remove_control_characters(s):
-    s = unicode(s)
-    return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+from itertools import groupby
+import time
 
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
-    title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
+    title = indexes.CharField(null=True, indexed=False, stored=True)
     book_title = indexes.CharField(null=True, stored=True)
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
-    description = indexes.CharField(model_attr='description',indexed=False, null=True)
-    public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
+    description = indexes.CharField(indexed=False, null=True)
+    public = indexes.BooleanField(faceted=True, indexed=False)
 
-    type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
+    type = indexes.CharField(indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True, indexed=False,)
     publication_date_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
 
-    abstract = indexes.CharField(model_attr='abstract', null=True, indexed=False)
-    edition_details = indexes.CharField(model_attr='edition_details', null=True, indexed=False)
-    physical_details = indexes.CharField(model_attr='physical_details', null=True, indexed=False)
+    abstract = indexes.CharField(null=True, indexed=False)
+    edition_details = indexes.CharField(null=True, indexed=False)
+    physical_details = indexes.CharField(null=True, indexed=False)
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
     authors = indexes.MultiValueField(faceted=True, indexed=False)
@@ -37,13 +36,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     page_string = indexes.CharField(null=True, stored=True)
 
-    # Fields for COinS metadata.
-    # TODO: Populate these fields with values.
-    volume = indexes.CharField(null=True, stored=True)
-    issue = indexes.CharField(null=True, stored=True)
-    issn = indexes.CharField(null=True, stored=True)
-    doi = indexes.CharField(null=True, stored=True)
-
+    # # Fields for COinS metadata.
+    # # TODO: Populate these fields with values.
+    # volume = indexes.CharField(null=True, stored=True)
+    # issue = indexes.CharField(null=True, stored=True)
+    # issn = indexes.CharField(null=True, stored=True)
+    # doi = indexes.CharField(null=True, stored=True)
+    #
     subjects = indexes.MultiValueField(faceted=True, indexed=False)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
     categories = indexes.MultiValueField(faceted=True, indexed=False)
@@ -60,17 +59,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     geographics = indexes.MultiValueField(faceted=True, indexed=False)
     people = indexes.MultiValueField(faceted=True, indexed=False)
     subject_institutions = indexes.MultiValueField(faceted=True, indexed=False)
-
-    # TODO: fix typo (missing 'c' in 'serial_publications').
-    serial_publiations = indexes.MultiValueField(faceted=True, indexed=False)
+    #
+    # # TODO: fix typo (missing 'c' in 'serial_publications').
+    serial_publications = indexes.MultiValueField(faceted=True, indexed=False)
     classification_terms = indexes.MultiValueField(faceted=True, indexed=False)
     concepts = indexes.MultiValueField(faceted=True, indexed=False)
     creative_works = indexes.MultiValueField(faceted=True, indexed=False)
     events = indexes.MultiValueField(faceted=True, indexed=False)
 
     all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-
-    # the following fields are for searching by author, contributor, etc.
+    #
+    # # the following fields are for searching by author, contributor, etc.
     author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     editor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     advisor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
@@ -90,146 +89,288 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
+
+    data_fields = [
+        'id',
+        'title',
+        'description',
+        'public',
+        'type_controlled',
+        'publication_date',
+        'abstract',
+        'edition_details',
+        'physical_details',
+        'attributes__id',
+        'attributes__type_controlled__name',
+        'attributes__value_freeform',
+        'attributes__public',
+        'acrelation__id',
+        'acrelation__authority__public',
+        'acrelation__authority__id',
+        'acrelation__authority__name',
+        'acrelation__authority__type_controlled',
+        'acrelation__type_controlled',
+        'acrelation__type_broad_controlled',
+        'acrelation__data_display_order',
+        'acrelation__name_for_display_in_citation',
+        'part_details__page_begin',
+        'part_details__page_end',
+        'relations_to__id',
+        'relations_to__type_controlled',
+        'relations_to__subject__title',
+        'relations_from__id',
+        'relations_from__type_controlled',
+        'relations_from__object__title',
+    ]
+
     def get_model(self):
         return Citation
 
-    def load_all_queryset(self):
-        """
-        Add pre-loading of related fields using select_related and
-        prefetch_related.
-        """
-        return Citation.objects.all().select_related(
-                'acrelation_set__authority__name',
-                'acrelation_set__authority__type_controlled',
-                'acrelation_set__type_controlled'
-            ).prefetch_related(
-                Prefetch("attributes",
-                         queryset=AttributeType.objects.select_related(
-                            "type_controlled__name",
-                            "value_freeform"))
-            )
+    def build_queryset(self, **kwargs):
+        return Citation.objects.filter(public=True)
 
-    def index_queryset(self, using=None):
-        """Used when the entire index for model is updated."""
-        return self.get_model().objects.filter(public=True)
+    def preprocess_queryset(self, qs):
+        start = time.time()
+        qs = groupby(qs.values(*self.data_fields), lambda r: r['id'])
+        print 'preprocess', time.time() - start
+        return qs
 
     def prepare(self, obj):
         """
-        Coerce all unicode values to ASCII bytestrings, to avoid characters
-        that make haystack choke.
+        Fetches and adds/alters data before indexing.
         """
-        self.prepared_data = super(CitationIndex, self).prepare(obj)
 
-        for k, v in self.prepared_data.iteritems():
-            if type(v) in [unicode, str]:
-                self.prepared_data[k] = remove_control_characters(v.strip())
-                # self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
+        identifier, data = obj      # groupby yields keys and iterators.
+
+        # We need to able to __getitem__, below.
+        data = list(data)
+        self.prepared_data = {
+            ID: identifier,
+            DJANGO_CT: 'isisdata.citation',
+            DJANGO_ID: unicode(identifier),
+        }
+
+        start = time.time()
+        data_organized = {
+            'id': identifier,
+            'title': data[0]['title'],
+            'description': data[0]['description'],
+            'public': data[0]['public'],
+            'type_controlled': data[0]['type_controlled'],
+            'publication_date': data[0]['publication_date'],
+            'abstract': data[0]['abstract'],
+            'edition_details': data[0]['edition_details'],
+            'physical_details': data[0]['physical_details'],
+            'part_details': {
+                'page_begin': data[0]['part_details__page_begin'],
+                'page_end': data[0]['part_details__page_end'],
+            },
+            'attributes': [],
+            'acrelations': [],
+            'ccrelations_from': [],
+            'ccrelations_to': [],
+        }
+        for row in data:
+            if row['attributes__id']:
+                data_organized['attributes'].append(row)
+            if row['acrelation__id']:
+                data_organized['acrelations'].append(row)
+            if row['relations_from__id']:
+                data_organized['ccrelations_from'].append(row)
+            if row['relations_to__id']:
+                data_organized['ccrelations_to'].append(row)
+        # print 'sort', time.time() - start
+
+        start = time.time()
+        for field_name, field in self.fields.items():
+            # Use the possibly overridden name, which will default to the
+            # variable name of the field.
+            # self.prepared_data[field.index_fieldname] = field.prepare(data_organized)
+
+            if hasattr(self, "prepare_%s" % field_name):
+                value = getattr(self, "prepare_%s" % field_name)(data_organized)
+                self.prepared_data[field.index_fieldname] = value
+
+            exact_field = "prepare_%s_exact" % field_name
+            if hasattr(self, exact_field):
+                self.prepared_data[exact_field] = getattr(self, exact_field)(data_organized)
+
+        # print 'prepare', time.time() - start
         return self.prepared_data
 
-    def prepare_type(self, obj):
-        return obj.get_type_controlled_display()
+    def _get_reviewed_book(self, data):
+        """
+        Attempt to retrieve the title of the work reviewed by the current
+        :class:`.Citation` instance.
+        """
 
-    def prepare_title(self, obj):
-        if not obj.type_controlled == 'RE':
-            if not obj.title:
-                return "Title missing"
-            return obj.title
+        # The review - reviewed CCRelation may go in either direction.
+        for ccrelation in data['ccrelations_from']:
+            if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
+                return ccrelation['relations_from__object__title']
 
-        book = self.get_reviewed_book(obj)
+        # If we're still here, it means that there is no posessive CCRelation
+        #  from this Citation; so we check the opposite direction.
+        for ccrelation in data['ccrelations_to']:
+            if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
+                return ccrelation['relations_to__subject__title']
+
+        return None
+
+    def prepare_title(self, data):
+        """
+        Reviews are renamed to include the name of the reviewed work.
+        """
+        if data['type_controlled'] != 'RE':
+            if not data['title']:
+                return u"Title missing"
+            return data['title']
+
+        book = self._get_reviewed_book(data)
 
         if book == None:
-            return "Review of unknown publication"
+            return u"Review of unknown publication"
+        return u'Review of "' + book + u'"'
 
-        return 'Review of "' + book.title + '"'
+    def prepare_book_title(self, data):
+        """
+        If :class:`.Citation` is a chapter, keep track of the book to which it
+        belongs.
+        """
+        if data['type_controlled'] == Citation.CHAPTER:
+            for ccrelation in data['ccrelations_to']:
+                if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
+                    # we assume there is just one
+                    return ccrelation['relations_to__subject__title']
+        return None
 
-    def prepare_title_for_sort(self, obj):
-        if not obj.type_controlled == 'RE':
-            return obj.normalized_title
+    def prepare_title_for_sort(self, data):
+        """
+        We want to ignore non-ASCII characters when sorting, and group reviews
+        together with the works that they review.
+        """
+        if data['type_controlled'] != Citation.REVIEW:
+            if not data['title']:
+                return u""
+            return normalize(data['title'])
 
-        book = self.get_reviewed_book(obj)
-        if not book:
-            return ''
+        book = self._get_reviewed_book(data)
+        if book is None:
+            return u""
+        return normalize(book)
 
-        return book.normalized_title
+    def prepare_description(self, data):
+        return data['description']
 
-    def get_reviewed_book(self, obj):
-        # if citation is a review build title from reviewed citation
-        reviewed_books = CCRelation.objects.filter(subject_id=obj.id, type_controlled='RO')
+    def prepare_public(self, data):
+        return data['public']
 
-        # sometimes RO relationship is not specified then use inverse reviewed by
-        book = None
-        if not reviewed_books:
-            reviewed_books = CCRelation.objects.filter(object_id=obj.id, type_controlled='RB')
-            if reviewed_books:
-                book = reviewed_books[0].subject
-        else:
-            book = reviewed_books[0].object
+    def prepare_public_exact(self, data):
+        return self.prepare_public(data)
 
-        return book
+    def prepare_type(self, data):
+        """
+        Use the display representation of Citation.type_controlled.
+        """
+        return dict(Citation.TYPE_CHOICES).get(data['type_controlled'])
 
-    def prepare_publication_date(self, obj):
-        queryset = obj.attributes.filter(type_controlled__name='PublicationDate')
-        return [date.value_freeform for date in queryset]
+    def prepare_publication_date(self, data):
+        attributes = data.get('attributes', None)
+        return [attr['attributes__value_freeform'] for attr in attributes
+                if attr['attributes__type_controlled__name'] == 'PublicationDate']
 
-    def prepare_publication_date_for_sort(self, obj):
-        if obj.publication_date:
-            return obj.publication_date
+    def prepare_publication_date_exact(self, data):
+        return self.prepare_publication_date(data)
 
-        dates = obj.attributes.filter(type_controlled__name='PublicationDate')
-        if not dates:
-            return ''
+    def prepare_publication_date_for_sort(self, data):
+        """
+        If Citation.publication_data is not pre-filled, retrieve it from the
+        formal Attribute (if possible).
+        """
 
-        date = dates[0]
-        if not date:
-            return ''
+        if data['publication_date']:
+            return data['publication_date']
 
-        return date.value_freeform
+        for attribute in data['attributes']:
+            if attribute['attributes__type_controlled__name'] == 'PublicationDate':
+                return attribute['attributes__value_freeform']
+        return ''
 
+    def prepare_abstract(self, data):
+        return data['abstract']
 
-    def prepare_authorities(self, obj):
-        # Store a list of id's for filtering
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True)]
+    def prepare_edition_details(self, data):
+        return data['edition_details']
 
-    def prepare_attributes(self, obj):
-        return [attr.value_freeform for attr in obj.attributes.filter(public=True)]
+    def prepare_physical_details(self, data):
+        return data['physical_details']
 
-    def prepare_authors(self, obj):
-        #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
-        authors = obj.get_all_contributors
+    def prepare_attributes(self, data):
+        return [a['attributes__value_freeform'] for a in data['attributes']
+                if a['attributes__public']]
+
+    def prepare_authorities(self, data):
+        return [a['acrelation__authority__name'] for a in data['acrelations']
+                if a['acrelation__authority__public']]
+
+    def prepare_authorities_exact(self, data):
+        return [a['acrelation__authority__id'] for a in data['acrelations']
+                if a['acrelation__authority__public']]
+
+    def _prepare_author_names(self, authors):
         names = []
         for author in authors:
-            name = author.name_for_display_in_citation
-            if not name:
-                name = author.authority.name
+            # Prefer the name as stored in the ACRelation, if present.
+            name = author.get('acrelation__name_for_display_in_citation',
+                              author['acrelation__authority__name'])
             names.append(name)
         return names
 
-    # TODO: this method needs to be changed to include author order
-    def prepare_author_for_sort(self, obj):
-        #editors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        #if obj.type_controlled == 'BO' and editors:
-        #    authors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        #else:
-        #    authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
-        #if not authors:
-        #    return ''
-        authors = obj.get_all_contributors
-        if not authors:
-            return ""
-        author = authors[0]
-        if not author:
-            return ''
+    def _get_all_contributors(self, data):
+        authors = [a for a in data['acrelations']
+                   if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS
+                   and int(a['acrelation__data_display_order']) < 30]
 
-        name = author.name_for_display_in_citation
-        if not name:
-            name = author.authority.name
-        return name
+        return sorted(authors, key=lambda a: a['acrelation__data_display_order'])
 
-    def prepare_page_string(self, obj):
-        if obj.type_controlled != Citation.CHAPTER:
+    def _prepare_authorities(self, data, getter, criterion):
+        return [getter(a) for a in data['acrelations']
+                if a['acrelation__authority__public'] and criterion(a)]
+
+    def _authority_name_getter(self, datum):
+        return datum['acrelation__authority__name'].strip()
+
+    def _authority_id_getter(self, datum):
+        return datum['acrelation__authority__id'].strip()
+
+    def prepare_authors(self, data):
+        """
+        Raw names.
+        """
+        authors = self._get_all_contributors(data)
+        return self._prepare_author_names(authors)
+
+    def prepare_authors_exact(self, data):
+        return self.prepare_authors(data)
+
+    def prepare_author_for_sort(self, data):
+        """
+        Only the first author is used for sorting :class:`.Citation` search
+        results.
+        """
+        names = self.prepare_authors(data)
+        if len(names) == 0:
+            return u""
+        return names[0]
+
+    def prepare_page_string(self, data):
+        """
+        This is here just so that we can sort chapters in books.
+        """
+        if data['type_controlled'] != Citation.CHAPTER:
             return ""
-        page_start_string = obj.part_details.page_begin
-        page_end_string = obj.part_details.page_end
+        page_start_string = data['part_details']['page_begin']
+        page_end_string = data['part_details']['page_end']
         if page_start_string and page_end_string:
             return "pp. " + str(page_start_string) + "-" + str(page_end_string)
         if page_start_string:
@@ -238,136 +379,278 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             return "p. " + str(page_end_string)
         return ""
 
-    def prepare_book_title(self, obj):
-        if obj.type_controlled in ['CH']:
-            parent_relation = CCRelation.objects.filter(object_id=obj.id, type_controlled='IC')
-            # we assume there is just one
-            if parent_relation:
-                return parent_relation[0].subject.title
-        return None
+    def prepare_subjects(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT and a['acrelation__authority__type_controlled'] not in [Authority.GEOGRAPHIC_TERM, Authority.TIME_PERIOD]
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_subjects(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
+    def prepare_subjects_exact(self, data):
+        return self.prepare_subjects(data)
 
-    def prepare_persons(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PR'])]
+    def prepare_persons(self, data):
+        criterion = lambda a: a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_categories(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
+    def prepare_persons_exact(self, data):
+        return self.prepare_persons(data)
 
-    def prepare_editors(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
+    def prepare_categories(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.CATEGORY
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_advisors(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
+    def prepare_categories_exact(self, data):
+        return self.prepare_categories(data)
 
-    def prepare_translators(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
+    def prepare_editors(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.EDITOR
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_publishers(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
+    def prepare_editors_exact(self, data):
+        return self.prepare_editors(data)
 
-    def prepare_schools(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
+    def prepare_advisors(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.ADVISOR
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_institutions(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
+    def prepare_advisors_exact(self, data):
+        return self.prepare_advisors(data)
 
-    def prepare_meetings(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
+    def prepare_translators(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.TRANSLATOR
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_periodicals(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
+    def prepare_translators_exact(self, data):
+        return self.prepare_translators(data)
 
-    def prepare_book_series(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
+    def prepare_publishers(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.PUBLISHER
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_time_periods(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
+    def prepare_publishers_exact(self, data):
+        return self.prepare_publishers(data)
 
-    def prepare_geographics(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
+    def prepare_schools(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SCHOOL
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_people(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['PE'])]
+    def prepare_schools_exact(self, data):
+        return self.prepare_schools(data)
 
-    def prepare_subject_institutions(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['IN'])]
+    def prepare_institutions(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.INSTITUTION
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_serial_publications(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['SE'])]
+    def prepare_institutions_exact(self, data):
+        return self.prepare_institutions(data)
 
-    def prepare_classification_terms(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CT'])]
+    def prepare_meetings(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.MEETING
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_concepts(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CO'])]
+    def prepare_meetings_exact(self, data):
+        return self.prepare_meetings(data)
 
-    def prepare_creative_works(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CW'])]
+    def prepare_periodicals(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.PERIODICAL
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_events(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
+    def prepare_periodicals_exact(self, data):
+        return self.prepare_periodicals(data)
 
+    def prepare_book_series(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.BOOK_SERIES
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_all_contributor_ids(self, obj):
-        authors = obj.get_all_contributors
-        contrib_ids = []
-        for contrib in authors:
-            contrib_ids.append(contrib.authority.id)
-        return contrib_ids
+    def prepare_book_series_exact(self, data):
+        return self.prepare_book_series(data)
 
-    def prepare_author_ids(self, obj):
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AU'])]
+    def prepare_time_periods(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_editor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
+    def prepare_time_periods_exact(self, data):
+        return self.prepare_time_periods(data)
 
-    def prepare_advisor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
+    def prepare_geographics(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled'] == Authority.GEOGRAPHIC_TERM and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_contributor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CO'])]
+    def prepare_geographics_exact(self, data):
+        return self.prepare_geographics(data)
 
-    def prepare_translator_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
+    def prepare_people(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled'] == Authority.PERSON and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_subject_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'])]
+    def prepare_people_exact(self, data):
+        return self.prepare_people(data)
 
-    def prepare_category_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
+    def prepare_subject_institutions(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled'] == Authority.INSTITUTION and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_publisher_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
+    def prepare_subject_institutions_exact(self, data):
+        return self.prepare_subject_institutions(data)
 
-    def prepare_school_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
+    def prepare_serial_publications(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled']  == Authority.SERIAL_PUBLICATION and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_institution_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
+    def prepare_serial_publications_exact(self, data):
+        return self.prepare_serial_publications(data)
 
-    def prepare_meeting_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
+    def prepare_classification_terms(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled']  == Authority.CLASSIFICATION_TERM and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_periodical_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
+    def prepare_classification_terms_exact(self, data):
+        return self.prepare_classification_terms(data)
 
-    def prepare_book_series_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
+    def prepare_concepts(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled']  == Authority.CONCEPT and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_time_period_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
+    def prepare_concepts_exact(self, data):
+        return self.prepare_concepts(data)
 
-    def prepare_geographic_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
+    def prepare_creative_works(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled']  == Authority.CREATIVE_WORK and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
 
-    def prepare_about_person_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_broad_controlled='SC')]
+    def prepare_creative_works_exact(self, data):
+        return self.prepare_creative_works(data)
 
-    def prepare_other_person_ids(self, obj):
-        query = Q(type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(query)]
+    def prepare_events(self, data):
+        criterion = lambda a: a['acrelation__authority__type_controlled']  == Authority.EVENT and a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_name_getter, criterion)
+
+    def prepare_events_exact(self, data):
+        return self.prepare_events(data)
+
+    def prepare_all_contributor_ids(self, data):
+        authors = self._get_all_contributors(data)
+        return [a['acrelation__authority__id'] for a in authors]
+
+    def prepare_all_contributor_ids_exact(self, data):
+        return self.prepare_all_contributor_ids(data)
+
+    def prepare_author_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.AUTHOR
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_author_ids_exact(self, data):
+        return self.prepare_author_ids(data)
+
+    def prepare_editor_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.EDITOR
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_editor_ids_exact(self, data):
+        return self.prepare_editor_ids(data)
+
+    def prepare_advisor_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.ADVISOR
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_advisor_ids_exact(self, data):
+        return self.prepare_advisor_ids(data)
+
+    def prepare_contributor_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.CONTRIBUTOR
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_contributor_ids_exact(self, data):
+        return self.prepare_contributor_ids(data)
+
+    def prepare_translator_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.TRANSLATOR
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_translator_ids_exact(self, data):
+        return self.prepare_translator_ids(data)
+
+    def prepare_subject_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_subject_ids_exact(self, data):
+        return self.prepare_subject_ids(data)
+
+    def prepare_category_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.CATEGORY
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_category_ids_exact(self, data):
+        return self.prepare_category_ids(data)
+
+    def prepare_publisher_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.PUBLISHER
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_publisher_ids_exact(self, data):
+        return self.prepare_publisher_ids(data)
+
+    def prepare_school_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SCHOOL
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_school_ids_exact(self, data):
+        return self.prepare_school_ids(data)
+
+    def prepare_institution_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT and a['acrelation__authority__type_controlled'] == Authority.INSTITUTION
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_institution_ids_exact(self, data):
+        return self.prepare_institution_ids(data)
+
+    def prepare_meeting_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.MEETING
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_meeting_ids_exact(self, data):
+        return self.prepare_meeting_ids(data)
+
+    def prepare_periodical_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.PERIODICAL
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_periodical_ids_exact(self, data):
+        return self.prepare_periodical_ids(data)
+
+    def prepare_book_series_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.BOOK_SERIES
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_book_series_ids_exact(self, data):
+        return self.prepare_book_series_ids(data)
+
+    def prepare_time_period_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT and a['acrelation__authority__type_controlled'] == Authority.TIME_PERIOD
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_time_period_ids_exact(self, data):
+        return self.prepare_time_period_ids(data)
+
+    def prepare_geographic_ids(self, data):
+        criterion = lambda a: a['acrelation__type_controlled'] == ACRelation.SUBJECT and a['acrelation__authority__type_controlled'] == Authority.GEOGRAPHIC_TERM
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_geographic_ids_exact(self, data):
+        return self.prepare_geographic_ids(data)
+
+    def prepare_about_person_ids(self, data):
+        criterion = lambda a: a['acrelation__type_broad_controlled'] == ACRelation.SUBJECT_CONTENT
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_about_person_ids_exact(self, data):
+        return self.prepare_about_person_ids(data)
+
+    def prepare_other_person_ids(self, data):
+        criterion = lambda a: a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]
+        return self._prepare_authorities(data, self._authority_id_getter, criterion)
+
+    def prepare_other_person_ids_exact(self, data):
+        return self.prepare_other_person_ids(data)
 
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
