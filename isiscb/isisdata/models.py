@@ -822,7 +822,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     citation = models.ForeignKey('Citation')
-    authority = models.ForeignKey('Authority')
+    authority = models.ForeignKey('Authority', blank=True, null=True)
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)

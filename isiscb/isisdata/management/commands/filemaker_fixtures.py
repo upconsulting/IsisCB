@@ -599,20 +599,18 @@ class Command(BaseCommand):
 
             # It is possible that we are missing authority or citation id.
             #  This is an attempt to salvage the record...
-            if 'authority_alt' in values:
-                if 'authority' not in values:
+            if 'authority_alt' in values and 'authority' not in values:
                     values['authority'] = copy.copy(values['authority_alt'])
                 del values['authority_alt']
 
-            if 'citation_alt' in values:
-                if 'citation' not in values:
+            if 'citation_alt' in values and 'citation' not in values:
                     values['citation'] = copy.copy(values['citation_alt'])
                 del values['citation_alt']
 
-            # But ultimately if we are missing either an authority or citation
-            #  id there is no way to create a valid ACRelation.
-            if 'authority' not in values or 'citation' not in values:
-                self.failed.append((values['id'], 'missing citation or relation'))
+            # Only the citation is required; per ISISCB-378, we should support
+            #  "headless" ACRelations with no linked Authority record.
+            if 'citation' not in values:
+                self.failed.append((values['id'], 'missing citation'))
                 return
 
             relation = self.to_fixture(values, 'isisdata.acrelation')

@@ -226,8 +226,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         multivalue_data = defaultdict(list)
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
-            name = remove_control_characters(a['acrelation__authority__name'].strip())
-            ident = remove_control_characters(a['acrelation__authority__id'].strip())
+            if a['acrelation__authority__name']:
+                name = remove_control_characters(a['acrelation__authority__name'].strip())
+            elif a['acrelation__name_for_display_in_citation']:
+                name = remove_control_characters(a['acrelation__name_for_display_in_citation'].strip())
+            else:
+                name = None
+
+            try:
+                ident = remove_control_characters(a['acrelation__authority__id'].strip())
+            except AttributeError:
+                ident = None
 
             multivalue_data['authorities'].append(name)
             if a['acrelation__type_controlled'] == ACRelation.SUBJECT:
@@ -344,7 +353,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
-        ] + [a['acrelation__authority__name'] for a in data['acrelations']])
+        ] + [a['acrelation__authority__name'] for a in data['acrelations']
+             if a['acrelation__authority__name']])  # Exclude blank names.
         return document
 
     def prepare_title(self, data):

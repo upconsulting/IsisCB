@@ -6,7 +6,15 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
     {% for subject in subjects %}
-    <li><a href="{% url 'authority' subject.authority.id %}">{{ subject.authority.name }} <i class="fa fa-info-circle"></i></a></li>
+    <li>
+        {% if subject.authority %}
+        <a href="{% url 'authority' subject.authority.id %}">
+        {% endif %}
+            {{ subject.authority.name }} <i class="fa fa-info-circle"></i>
+        {% if subject.authority %}
+        </a>
+        {% endif %}
+    </li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -20,7 +28,15 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
     {% for time in time_periods %}
-    <li><a href="{% url 'authority' time.authority.id %}">{{ time.authority.name }} <i class="fa fa-info-circle"></i></a></li>
+    <li>
+        {% if time.authority %}
+        <a href="{% url 'authority' time.authority.id %}">
+        {% endif %}
+            {{ time.authority.name }} <i class="fa fa-info-circle"></i>
+        {% if time.authority %}
+        </a>
+        {% endif %}
+    </li>
     {% endfor %}
 </ul>
 {% endif %}
@@ -33,9 +49,17 @@
 </h4>
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
-  {% for place in places %}
-  <li><a href="{% url 'authority' place.authority.id %}">{{ place.authority.name }} <i class="fa fa-info-circle"></i></a></li>
-  {% endfor %}
+    {% for place in places %}
+    <li>
+        {% if place.authority %}
+        <a href="{% url 'authority' place.authority.id %}">
+        {% endif %}
+            {{ place.authority.name }} <i class="fa fa-info-circle"></i>
+        {% if place.authority %}
+        </a>
+        {% endif %}
+    </li>
+    {% endfor %}
 </ul>
 {% endif %}
 <!-- End Places list -->
@@ -51,12 +75,20 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
   {% for category in categories %}
-  <li><a href="{% url 'authority' category.authority.id %}">{{ category.authority.name }} <i class="fa fa-info-circle"></i></a></li>
+    <li>
+        {% if place.authority %}
+        <a href="{% url 'authority' category.authority.id %}">
+        {% endif %}
+            {{ category.authority.name }} <i class="fa fa-info-circle"></i>
+        {% if place.authority %}
+        </a>
+        {% endif %}
+    </li>
   {% endfor %}
 </ul>
 {% endif %}
 <!-- End Categories list -->
-
+{% comment %}
 <!--<div class="panel-group" id="type_panel">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -81,3 +113,4 @@
     </div>
   </div>
 </div>-->
+{% endcomment %}
