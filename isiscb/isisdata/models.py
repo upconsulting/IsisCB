@@ -15,6 +15,8 @@ from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
 
+from isisdata.utils import *
+
 import datetime
 import iso8601
 import pickle
@@ -32,63 +34,11 @@ from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
-def help_text(s):
-    """
-    Cleans up help strings so that we can write them in ways that are
-    human-readable without screwing up formatting in the admin interface.
-    """
-    return re.sub('\s+', ' ', s).strip()
 
 
-# TODO: remove this later.
-def strip_punctuation(s):
-    """
-    Removes all punctuation characters from a string.
-    """
-    if not s:
-        return ''
-    if type(s) is str:    # Bytestring (default in Python 2.x).
-        return s.translate(string.maketrans("",""), string.punctuation.replace('-', ''))
-    else:                 # Unicode string (default in Python 3.x).
-        translate_table = dict((ord(char), u'') for char
-                                in u'!"#%\'()*+,./:;<=>?@[\]^_`{|}~')
-        return s.translate(translate_table)
 
 
-# TODO: remove this later.
-def strip_tags(s):
-    """
-    Remove all tags without remorse.
-    """
-    return bleach.clean(s, tags={}, attributes={}, strip=True)
 
-
-def remove_control_characters(s):
-    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
-
-# TODO: remove this later.
-def normalize(s):
-    """
-    Convert to ASCII.
-    Remove HTML.
-    Remove punctuation.
-    Lowercase.
-    """
-    if not s:
-        return ''
-
-    return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
-
-# TODO: is that the best way to do this???
-def strip_hyphen(s):
-    """
-    Remove hyphens and replace with space.
-    Need to find hyphenated names.
-    """
-    if not s:
-        return ''
-
-    return s.replace('-', ' ')
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -484,7 +434,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         SAFE_TAGS = ['em', 'b', 'i', 'strong', 'a']
         SAFE_ATTRS = {'a': ['href', 'rel']}
-        
+
         no_tags = mark_safe(bleach.clean(self.abstract, tags=SAFE_TAGS, # Whitelist
                                       attributes=SAFE_ATTRS,
                                       strip=True))
