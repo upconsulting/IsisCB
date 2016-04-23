@@ -13,7 +13,7 @@
       content:none;
   }
 
-  p {
+  p, table, div {
     font-size: 12px;
   }
 }
