@@ -3,7 +3,7 @@
 {% block title %}Test title{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row hidden-print">
   <div class="col-sm-3 col-md-2 sidebar">
       <a href="javascript:window.history.back()"><span class="glyphicon glyphicon-arrow-left"></span></a>
       <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>

@@ -6,12 +6,12 @@
 {% if query %}
 <div class="row">
   <div class="col-md-8">
-    <h3>Search Results</h3>
+    <h3><div class="visible-print-inline">Citations </div>Search Results</h3>
     <div class="results-info">Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results.</div>
   </div>
   <div class="col-md-4 menuContainer">
 
-    <div class="dropdown pull-right">
+    <div class="dropdown pull-right hidden-print">
       {% if sort_order_dir_citation == 'descend' %}
       <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
       {% else %}
@@ -55,13 +55,15 @@
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
 
+            <span class="visible-print-inline">({% url 'citation' result.id|get_pk %})</span>
+
             <!-- Zotero -->
             <span style="display:none;">
                <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
             </span>
 
 
-            <span id="linkresolver_{{ result.id|get_pk }}">
+            <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print">
                 <script>
                 $.ajax("{% url 'linkresolver' citation_id=result.id|get_pk %}",
                     {
@@ -90,7 +92,7 @@
         <p>No results found.</p>
     {% endfor %}
     {% if page.citation.has_previous or page.citation.has_next %}
-    <nav>
+    <nav class="hidden-print">
       <ul class="pagination">
         <li class="disabled"><a>Go to page:</a></li>
           {% if page.citation.has_previous %}

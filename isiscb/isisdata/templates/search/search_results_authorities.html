@@ -8,7 +8,7 @@
     <h3>Search Results</h3>
     <div class="results-info">Showing {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results.</div>
   </div>
-  <div class="col-md-4 menuContainer">
+  <div class="col-md-4 menuContainer hidden-print">
     <div class="dropdown pull-right">
         {% if sort_order_dir_authority == 'descend' %}
         <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
@@ -32,12 +32,14 @@
           {% endwith %}
           ({{ result.object | get_nr_of_citations }})
 
+          <span class="visible-print-inline">({% url 'authority' result.id|get_pk %})</span>
+
         </p>
     {% empty %}
         <p>No results found.</p>
     {% endfor %}
     {% if page.authority.has_previous or page.authority.has_next %}
-    <nav>
+    <nav class="hidden-print">
       <ul class="pagination">
         <li class="disabled"><a>Go to page:</a></li>
 
