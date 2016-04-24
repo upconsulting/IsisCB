@@ -516,3 +516,14 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     #def prepare_citation_nr(self, obj):
         #ACRelation.objects.filter(authority=obj, citation__public=True).distinct('citation_id').count()
+
+class CommentsIndex(indexes.SearchIndex, indexes.Indexable):
+
+    text = indexes.EdgeNgramField(document=True)
+    author = indexes.CharField(model_attr='created_by', indexed=False)
+
+    def get_model(self):
+        return Comment
+
+    def prepare_author(self, obj):
+        return obj.created_by.username
