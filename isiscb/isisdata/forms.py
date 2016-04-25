@@ -22,6 +22,7 @@ try:
 except ImportError:
     from django.utils.encoding import smart_unicode as smart_text
 
+
 def model_choices(using=DEFAULT_ALIAS):
     choices = [(get_model_ct(m), capfirst(smart_text(m._meta.verbose_name_plural)))
                for m in connections[using].get_unified_index().get_indexed_models()]
@@ -129,17 +130,22 @@ class MyFacetedSearchForm(FacetedSearchForm):
             return {'authority' : self.no_query_found(),
                     'citation': self.no_query_found()}
 
-        #sqs = super(MyFacetedSearchForm, self).search()
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
-        qstring = query_tuple[0]
-        if query_tuple[1] == 'content':
-            qstring = helper_methods.normalize(qstring)
-        sqs = self.searchqueryset.auto_query(qstring, query_tuple[1])
 
-        # if self.load_all:
+        # Removed: query sanitization already occurs (by design) in the
+        #  (haystack) Query used by the SearchEngine. We're clobbering wildcards
+        #  here.  We can add it back if there is a security issue, but it seems
+        #  like this should all happen in the search backend.   -EP
+        #
+        # if query_tuple[1] == 'content':
+        #     qstring = helper_methods.normalize(qstring)
+
+        sqs = self.searchqueryset.auto_query(*query_tuple)
+
         sqs_citation = sqs.load_all()
         sqs_authority = sqs_citation
 
+        # We apply faceting ourselves.
         for facet in self.selected_facets:
             if ":" not in facet:
                 continue
@@ -177,7 +183,6 @@ class UserRegistrationForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput(), label='Password (again)')
     captcha = CaptchaField()
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
-
 
 
 class UserProfileForm(forms.Form):

@@ -2,7 +2,7 @@
 {% load app_filters %}
 
 <script>var USER_ID = {{ user|get_user_id }};</script>
-<div class="row">
+<div class="row hidden-print">
     <div style="height: 45px;">
         <div class="col-sm-2">
             <a id="facebookShare" class="btn btn-social-icon btn-facebook">
@@ -22,7 +22,7 @@
     <div class="panel-heading">Comments</div>
     <div class="panel-body comment-body">
         {% verbatim %}
-        <p ng-show="comments.length == 0">Be the first to comment!</p>
+        <p class="hidden-print" ng-show="comments.length == 0">Be the first to comment!</p>
         {% endverbatim %}
         <div class="row comment" ng-repeat="comment in comments">
             <div class="col-xs-12">
@@ -52,7 +52,7 @@
         </div>
 
     </div>
-    <div class="panel-footer">
+    <div class="panel-footer hidden-print">
         {% if user.is_authenticated %}
         <form name="form">
             <div class="form-group">

@@ -1,235 +1,456 @@
 import datetime
 from haystack import indexes
+from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
 from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
+from isisdata.utils import normalize
 
 import bleach
 import unidecode
 import unicodedata
-
-
-def remove_control_characters(s):
-    s = unicode(s)
-    return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
+from itertools import groupby
+import time
+from collections import defaultdict
 
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.CharField(document=True, use_template=True)
-    title = indexes.CharField(model_attr='title', null=True, indexed=False, stored=True)
+    text = indexes.EdgeNgramField(document=True)
+    title = indexes.CharField(null=True, indexed=False, stored=True)
     book_title = indexes.CharField(null=True, stored=True)
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
-    description = indexes.CharField(model_attr='description',indexed=False, null=True)
-    public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
+    description = indexes.CharField(indexed=False, null=True)
+    public = indexes.BooleanField(faceted=True, indexed=False)
 
-    type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
+    type = indexes.CharField(indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True, indexed=False,)
     publication_date_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
 
-    abstract = indexes.CharField(model_attr='abstract', null=True, indexed=False)
-    edition_details = indexes.CharField(model_attr='edition_details', null=True, indexed=False)
-    physical_details = indexes.CharField(model_attr='physical_details', null=True, indexed=False)
+    abstract = indexes.CharField(null=True, indexed=False)
+    edition_details = indexes.CharField(null=True, indexed=False)
+    physical_details = indexes.CharField(null=True, indexed=False)
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
+
     authors = indexes.MultiValueField(faceted=True, indexed=False)
     author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
+    author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    persons = indexes.MultiValueField(faceted=True, indexed=False)
+
+    editors = indexes.MultiValueField(faceted=True, indexed=False)
+    editor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    subjects = indexes.MultiValueField(faceted=True, indexed=False)
+    subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
     page_string = indexes.CharField(null=True, stored=True)
 
-    # Fields for COinS metadata.
-    # TODO: Populate these fields with values.
-    volume = indexes.CharField(null=True, stored=True)
-    issue = indexes.CharField(null=True, stored=True)
-    issn = indexes.CharField(null=True, stored=True)
-    doi = indexes.CharField(null=True, stored=True)
+    # # Fields for COinS metadata.
+    # # TODO: Populate these fields with values.
+    # volume = indexes.CharField(null=True, stored=True)
+    # issue = indexes.CharField(null=True, stored=True)
+    # issn = indexes.CharField(null=True, stored=True)
+    # doi = indexes.CharField(null=True, stored=True)
+    #
 
-    subjects = indexes.MultiValueField(faceted=True, indexed=False)
-    persons = indexes.MultiValueField(faceted=True, indexed=False)
-    categories = indexes.MultiValueField(faceted=True, indexed=False)
-    editors = indexes.MultiValueField(faceted=True, indexed=False)
-    advisors = indexes.MultiValueField(faceted=True, indexed=False)
-    translators = indexes.MultiValueField(faceted=True, indexed=False)
-    publishers = indexes.MultiValueField(faceted=True, indexed=False)
-    schools = indexes.MultiValueField(faceted=True, indexed=False)
     institutions = indexes.MultiValueField(faceted=True, indexed=False)
-    meetings = indexes.MultiValueField(faceted=True, indexed=False)
-    periodicals = indexes.MultiValueField(faceted=True, indexed=False)
-    book_series = indexes.MultiValueField(faceted=True, indexed=False)
-    time_periods = indexes.MultiValueField(faceted=True, indexed=False)
-    geographics = indexes.MultiValueField(faceted=True, indexed=False)
-    people = indexes.MultiValueField(faceted=True, indexed=False)
+    institution_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     subject_institutions = indexes.MultiValueField(faceted=True, indexed=False)
 
-    # TODO: fix typo (missing 'c' in 'serial_publications').
-    serial_publiations = indexes.MultiValueField(faceted=True, indexed=False)
+    categories = indexes.MultiValueField(faceted=True, indexed=False)
+    category_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    advisors = indexes.MultiValueField(faceted=True, indexed=False)
+    advisor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    translators = indexes.MultiValueField(faceted=True, indexed=False)
+    translator_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    publishers = indexes.MultiValueField(faceted=True, indexed=False)
+    publisher_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    schools = indexes.MultiValueField(faceted=True, indexed=False)
+    school_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    meetings = indexes.MultiValueField(faceted=True, indexed=False)
+    meeting_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    periodicals = indexes.MultiValueField(faceted=True, indexed=False)
+    periodical_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    book_series = indexes.MultiValueField(faceted=True, indexed=False)
+    book_series_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    time_periods = indexes.MultiValueField(faceted=True, indexed=False)
+    time_period_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    geographics = indexes.MultiValueField(faceted=True, indexed=False)
+    geographic_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    people = indexes.MultiValueField(faceted=True, indexed=False)
+    about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    serial_publications = indexes.MultiValueField(faceted=True, indexed=False)
     classification_terms = indexes.MultiValueField(faceted=True, indexed=False)
     concepts = indexes.MultiValueField(faceted=True, indexed=False)
     creative_works = indexes.MultiValueField(faceted=True, indexed=False)
     events = indexes.MultiValueField(faceted=True, indexed=False)
 
-    all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-
-    # the following fields are for searching by author, contributor, etc.
-    author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    editor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    advisor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    translator_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-    category_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-    publisher_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    school_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    institution_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    meeting_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    periodical_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    book_series_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    time_period_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-    geographic_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
-
-    about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    other_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    data_fields = [
+        'id',
+        'title',
+        'description',
+        'public',
+        'type_controlled',
+        'publication_date',
+        'abstract',
+        'edition_details',
+        'physical_details',
+        'attributes__id',
+        'attributes__type_controlled__name',
+        'attributes__value_freeform',
+        'attributes__public',
+        'acrelation__id',
+        'acrelation__authority__public',
+        'acrelation__authority__id',
+        'acrelation__authority__name',
+        'acrelation__authority__type_controlled',
+        'acrelation__type_controlled',
+        'acrelation__type_broad_controlled',
+        'acrelation__data_display_order',
+        'acrelation__name_for_display_in_citation',
+        'part_details__page_begin',
+        'part_details__page_end',
+        'relations_to__id',
+        'relations_to__type_controlled',
+        'relations_to__subject__title',
+        'relations_from__id',
+        'relations_from__type_controlled',
+        'relations_from__object__title',
+    ]
 
     def get_model(self):
         return Citation
 
-    def load_all_queryset(self):
-        """
-        Add pre-loading of related fields using select_related and
-        prefetch_related.
-        """
-        return Citation.objects.all().select_related(
-                'acrelation_set__authority__name',
-                'acrelation_set__authority__type_controlled',
-                'acrelation_set__type_controlled'
-            ).prefetch_related(
-                Prefetch("attributes",
-                         queryset=AttributeType.objects.select_related(
-                            "type_controlled__name",
-                            "value_freeform"))
-            )
+    def build_queryset(self, **kwargs):
+        return Citation.objects.filter(public=True)
 
-    def index_queryset(self, using=None):
-        """Used when the entire index for model is updated."""
-        return self.get_model().objects.filter(public=True)
+    def preprocess_queryset(self, qs):
+        return groupby(sorted(qs.values(*self.data_fields), key=lambda r: r['id']), lambda r: r['id'])
+
+    def full_prepare(self, obj):
+        self.prepared_data = self.prepare(obj)
+
+        for field_name, field in self.fields.items():
+            # Duplicate data for faceted fields.
+            if getattr(field, 'facet_for', None):
+                source_field_name = self.fields[field.facet_for].index_fieldname
+
+                # If there's data there, leave it alone. Otherwise, populate it
+                # with whatever the related field has.
+                if self.prepared_data.get(field_name, None) is None and source_field_name in self.prepared_data:
+                    self.prepared_data[field.index_fieldname] = self.prepared_data[source_field_name]
+
+            # Remove any fields that lack a value and are ``null=True``.
+            if field.null is True:
+                if self.prepared_data.get(field.index_fieldname, None) is None:
+                    try:
+                        del(self.prepared_data[field.index_fieldname])
+                    except KeyError:    # It was never there....
+                        pass
+
+        return self.prepared_data
 
     def prepare(self, obj):
         """
-        Coerce all unicode values to ASCII bytestrings, to avoid characters
-        that make haystack choke.
+        Fetches and adds/alters data before indexing.
         """
-        self.prepared_data = super(CitationIndex, self).prepare(obj)
 
-        for k, v in self.prepared_data.iteritems():
-            if type(v) in [unicode, str]:
-                self.prepared_data[k] = remove_control_characters(v.strip())
-                # self.prepared_data[k] = unidecode.unidecode(remove_control_characters(v)).strip()
+        identifier, data = obj      # groupby yields keys and iterators.
+
+        # We need to able to __getitem__, below.
+        data = [row for row in data]
+        self.prepared_data = {
+            ID: identifier,
+            DJANGO_CT: 'isisdata.citation',
+            DJANGO_ID: unicode(identifier),
+        }
+
+        data_organized = {
+            'id': identifier,
+            'title': data[0]['title'],
+            'description': data[0]['description'],
+            'public': data[0]['public'],
+            'type_controlled': data[0]['type_controlled'],
+            'publication_date': data[0]['publication_date'],
+            'abstract': data[0]['abstract'],
+            'edition_details': data[0]['edition_details'],
+            'physical_details': data[0]['physical_details'],
+            'part_details': {
+                'page_begin': data[0]['part_details__page_begin'],
+                'page_end': data[0]['part_details__page_end'],
+            },
+            'attributes': [],
+            'acrelations': [],
+            'ccrelations_from': [],
+            'ccrelations_to': [],
+        }
+
+        for row in data:
+            if row['attributes__id']:
+                data_organized['attributes'].append(row)
+            if row['acrelation__id']:
+                data_organized['acrelations'].append(row)
+            if row['relations_from__id']:
+                data_organized['ccrelations_from'].append(row)
+            if row['relations_to__id']:
+                data_organized['ccrelations_to'].append(row)
+
+        start = time.time()
+        for field_name, field in self.fields.items():
+            # Use the possibly overridden name, which will default to the
+            # variable name of the field.
+            # self.prepared_data[field.index_fieldname] = field.prepare(data_organized)
+
+            if hasattr(self, "prepare_%s" % field_name):
+                value = getattr(self, "prepare_%s" % field_name)(data_organized)
+                self.prepared_data[field.index_fieldname] = value
+
+            exact_field = "prepare_%s_exact" % field_name
+            if hasattr(self, exact_field):
+                self.prepared_data[exact_field] = getattr(self, exact_field)(data_organized)
+
+        multivalue_data = defaultdict(list)
+        for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
+            if a['acrelation__authority__name']:
+                name = remove_control_characters(a['acrelation__authority__name'].strip())
+            elif a['acrelation__name_for_display_in_citation']:
+                name = remove_control_characters(a['acrelation__name_for_display_in_citation'].strip())
+            else:
+                name = None
+
+            try:
+                ident = remove_control_characters(a['acrelation__authority__id'].strip())
+            except AttributeError:
+                ident = None
+
+            multivalue_data['authorities'].append(name)
+            if a['acrelation__type_controlled'] == ACRelation.SUBJECT:
+
+                if a['acrelation__authority__type_controlled'] == Authority.TIME_PERIOD:
+                    multivalue_data['time_periods'].append(name)
+                    multivalue_data['time_period_ids'].append(ident)
+                elif a['acrelation__authority__type_controlled'] == Authority.GEOGRAPHIC_TERM:
+                    multivalue_data['geographics'].append(name)
+                    multivalue_data['geographic_ids'].append(ident)
+                else:
+                    multivalue_data['subjects'].append(name)
+                    multivalue_data['subject_ids'].append(ident)
+
+                    if a['acrelation__authority__type_controlled'] == Authority.INSTITUTION:
+                        multivalue_data['subject_institutions'].append(name)
+                    elif a['acrelation__authority__type_controlled'] == Authority.PERSON:
+                        multivalue_data['people'].append(name)
+                    elif a['acrelation__authority__type_controlled']  == Authority.SERIAL_PUBLICATION:
+                        multivalue_data['serial_publications'].append(name)
+                    elif a['acrelation__authority__type_controlled']  == Authority.CLASSIFICATION_TERM:
+                        multivalue_data['classification_terms'].append(name)
+                    elif a['acrelation__authority__type_controlled']  == Authority.CONCEPT:
+                        multivalue_data['concepts'].append(name)
+                    elif a['acrelation__authority__type_controlled']  == Authority.CREATIVE_WORK:
+                        multivalue_data['creative_works'].append(name)
+                    elif a['acrelation__authority__type_controlled']  == Authority.EVENT:
+                        multivalue_data['events'].append(name)
+
+            elif a['acrelation__type_controlled'] == ACRelation.INSTITUTION:
+                multivalue_data['institutions'].append(name)
+                multivalue_data['institution_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.CATEGORY:
+                multivalue_data['categories'].append(name)
+                multivalue_data['category_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.ADVISOR:
+                multivalue_data['advisors'].append(name)
+                multivalue_data['advisor_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.TRANSLATOR:
+                multivalue_data['translators'].append(name)
+                multivalue_data['translator_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.PUBLISHER:
+                multivalue_data['publishers'].append(name)
+                multivalue_data['publisher_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.SCHOOL:
+                multivalue_data['schools'].append(name)
+                multivalue_data['school_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.MEETING:
+                multivalue_data['meetings'].append(name)
+                multivalue_data['meeting_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.PERIODICAL:
+                multivalue_data['periodicals'].append(name)
+                multivalue_data['periodical_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.BOOK_SERIES:
+                multivalue_data['book_series'].append(name)
+                multivalue_data['book_series_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.EDITOR:
+                multivalue_data['editors'].append(name)
+                multivalue_data['editor_ids'].append(ident)
+            elif a['acrelation__type_controlled'] == ACRelation.CONTRIBUTOR:
+                multivalue_data['contributor_ids'].append(ident)
+
+
+            elif a['acrelation__type_broad_controlled'] == ACRelation.SUBJECT_CONTENT:
+                multivalue_data['about_person_ids'].append(ident)
+            elif a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
+                multivalue_data['other_person_ids'].append(ident)
+
+            if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
+                multivalue_data['persons'].append(name)
+                if int(a['acrelation__data_display_order']) < 30:
+                    multivalue_data['all_contributor_ids'].append(ident)
+
+                if a['acrelation__type_controlled'] == ACRelation.AUTHOR:
+                    multivalue_data['author_ids'].append(ident)
+
+                # Prefer the ACRelation.name_for_display_in_citation, if
+                #  present.
+                aname = a['acrelation__name_for_display_in_citation']
+                if not aname:
+                    aname = name
+                if aname not in multivalue_data['authors']:
+                    multivalue_data['authors'].append(aname)
+
+        if len(multivalue_data['authors']) > 0:
+            self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
+        else:
+            self.prepared_data['author_for_sort'] = u""
+        self.prepared_data.update(multivalue_data)
+
         return self.prepared_data
 
-    def prepare_type(self, obj):
-        return obj.get_type_controlled_display()
+    def _get_reviewed_book(self, data):
+        """
+        Attempt to retrieve the title of the work reviewed by the current
+        :class:`.Citation` instance.
+        """
 
-    def prepare_title(self, obj):
-        if not obj.type_controlled == 'RE':
-            if not obj.title:
-                return "Title missing"
-            return obj.title
+        # The review - reviewed CCRelation may go in either direction.
+        for ccrelation in data['ccrelations_from']:
+            if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
+                return ccrelation['relations_from__object__title']
 
-        book = self.get_reviewed_book(obj)
+        # If we're still here, it means that there is no posessive CCRelation
+        #  from this Citation; so we check the opposite direction.
+        for ccrelation in data['ccrelations_to']:
+            if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
+                return ccrelation['relations_to__subject__title']
+
+        return None
+
+    def prepare_text(self, data):
+        document = u'\n'.join([
+            normalize(self.prepare_title(data)),
+            normalize(data['description']),
+            normalize(data['abstract'])
+        ] + [a['acrelation__authority__name'] for a in data['acrelations']
+             if a['acrelation__authority__name']])  # Exclude blank names.
+        return document
+
+    def prepare_title(self, data):
+        """
+        Reviews are renamed to include the name of the reviewed work.
+        """
+        if data['type_controlled'] != Citation.REVIEW:
+            if not data['title']:
+                return u"Title missing"
+            return remove_control_characters(data['title'])
+
+        book = self._get_reviewed_book(data)
 
         if book == None:
-            return "Review of unknown publication"
+            return u"Review of unknown publication"
+        return u'Review of "' + book + u'"'
 
-        return 'Review of "' + book.title + '"'
+    def prepare_book_title(self, data):
+        """
+        If :class:`.Citation` is a chapter, keep track of the book to which it
+        belongs.
+        """
+        if data['type_controlled'] == Citation.CHAPTER:
+            for ccrelation in data['ccrelations_to']:
+                if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
+                    # we assume there is just one
+                    return remove_control_characters(ccrelation['relations_to__subject__title'])
+        return None
 
-    def prepare_title_for_sort(self, obj):
-        if not obj.type_controlled == 'RE':
-            return obj.normalized_title
+    def prepare_title_for_sort(self, data):
+        """
+        We want to ignore non-ASCII characters when sorting, and group reviews
+        together with the works that they review.
+        """
+        if data['type_controlled'] != Citation.REVIEW:
+            if not data['title']:
+                return u""
+            return normalize(data['title'])
 
-        book = self.get_reviewed_book(obj)
-        if not book:
-            return ''
+        book = self._get_reviewed_book(data)
+        if book is None:
+            return u""
+        return normalize(book)
 
-        return book.normalized_title
+    def prepare_description(self, data):
+        return remove_control_characters(data['description'])
 
-    def get_reviewed_book(self, obj):
-        # if citation is a review build title from reviewed citation
-        reviewed_books = CCRelation.objects.filter(subject_id=obj.id, type_controlled='RO')
+    def prepare_public(self, data):
+        return remove_control_characters(data['public'])
 
-        # sometimes RO relationship is not specified then use inverse reviewed by
-        book = None
-        if not reviewed_books:
-            reviewed_books = CCRelation.objects.filter(object_id=obj.id, type_controlled='RB')
-            if reviewed_books:
-                book = reviewed_books[0].subject
-        else:
-            book = reviewed_books[0].object
+    def prepare_type(self, data):
+        """
+        Use the display representation of Citation.type_controlled.
+        """
+        return dict(Citation.TYPE_CHOICES).get(data['type_controlled'])
 
-        return book
+    def prepare_publication_date(self, data):
+        attributes = data.get('attributes', None)
+        return [attr['attributes__value_freeform'] for attr in attributes
+                if attr['attributes__type_controlled__name'] == 'PublicationDate']
 
-    def prepare_publication_date(self, obj):
-        queryset = obj.attributes.filter(type_controlled__name='PublicationDate')
-        return [date.value_freeform for date in queryset]
+    def prepare_publication_date_for_sort(self, data):
+        """
+        If Citation.publication_data is not pre-filled, retrieve it from the
+        formal Attribute (if possible).
+        """
 
-    def prepare_publication_date_for_sort(self, obj):
-        if obj.publication_date:
-            return obj.publication_date
+        if data['publication_date']:
+            return data['publication_date']
 
-        dates = obj.attributes.filter(type_controlled__name='PublicationDate')
-        if not dates:
-            return ''
+        for attribute in data['attributes']:
+            if attribute['attributes__type_controlled__name'] == 'PublicationDate':
+                return attribute['attributes__value_freeform']
+        return ''
 
-        date = dates[0]
-        if not date:
-            return ''
+    def prepare_abstract(self, data):
+        return remove_control_characters(data['abstract'])
 
-        return date.value_freeform
+    def prepare_edition_details(self, data):
+        return remove_control_characters(data['edition_details'])
 
+    def prepare_physical_details(self, data):
+        return remove_control_characters(data['physical_details'])
 
-    def prepare_authorities(self, obj):
-        # Store a list of id's for filtering
-        return [acrel.authority.name for acrel in obj.acrelation_set.filter(public=True)]
+    def prepare_attributes(self, data):
+        return [a['attributes__value_freeform'] for a in data['attributes']
+                if a['attributes__public']]
 
-    def prepare_attributes(self, obj):
-        return [attr.value_freeform for attr in obj.attributes.filter(public=True)]
-
-    def prepare_authors(self, obj):
-        #authors = obj.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], data_display_order__lt=30).order_by('data_display_order')
-        authors = obj.get_all_contributors
-        names = []
-        for author in authors:
-            name = author.name_for_display_in_citation
-            if not name:
-                name = author.authority.name
-            names.append(name)
-        return names
-
-    # TODO: this method needs to be changed to include author order
-    def prepare_author_for_sort(self, obj):
-        #editors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        #if obj.type_controlled == 'BO' and editors:
-        #    authors = obj.acrelation_set.filter(type_controlled__in=['ED'])
-        #else:
-        #    authors = obj.acrelation_set.filter(type_controlled__in=['AU'])
-        #if not authors:
-        #    return ''
-        authors = obj.get_all_contributors
-        if not authors:
+    def prepare_page_string(self, data):
+        """
+        This is here just so that we can sort chapters in books.
+        """
+        if data['type_controlled'] != Citation.CHAPTER:
             return ""
-        author = authors[0]
-        if not author:
-            return ''
-
-        name = author.name_for_display_in_citation
-        if not name:
-            name = author.authority.name
-        return name
-
-    def prepare_page_string(self, obj):
-        if obj.type_controlled != Citation.CHAPTER:
-            return ""
-        page_start_string = obj.part_details.page_begin
-        page_end_string = obj.part_details.page_end
+        page_start_string = data['part_details']['page_begin']
+        page_end_string = data['part_details']['page_end']
         if page_start_string and page_end_string:
             return "pp. " + str(page_start_string) + "-" + str(page_end_string)
         if page_start_string:
@@ -237,137 +458,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if page_end_string:
             return "p. " + str(page_end_string)
         return ""
-
-    def prepare_book_title(self, obj):
-        if obj.type_controlled in ['CH']:
-            parent_relation = CCRelation.objects.filter(object_id=obj.id, type_controlled='IC')
-            # we assume there is just one
-            if parent_relation:
-                return parent_relation[0].subject.title
-        return None
-
-    def prepare_subjects(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU']).exclude(authority__type_controlled__in=['GE', 'TI'])]
-
-    def prepare_persons(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PR'])]
-
-    def prepare_categories(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
-
-    def prepare_editors(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
-
-    def prepare_advisors(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
-
-    def prepare_translators(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
-
-    def prepare_publishers(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
-
-    def prepare_schools(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
-
-    def prepare_institutions(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
-
-    def prepare_meetings(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
-
-    def prepare_periodicals(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
-
-    def prepare_book_series(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
-
-    def prepare_time_periods(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
-
-    def prepare_geographics(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
-
-    def prepare_people(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['PE'])]
-
-    def prepare_subject_institutions(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['IN'])]
-
-    def prepare_serial_publications(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['SE'])]
-
-    def prepare_classification_terms(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CT'])]
-
-    def prepare_concepts(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CO'])]
-
-    def prepare_creative_works(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['CW'])]
-
-    def prepare_events(self, obj):
-        return [acrel.authority.name.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['EV'])]
-
-
-    def prepare_all_contributor_ids(self, obj):
-        authors = obj.get_all_contributors
-        contrib_ids = []
-        for contrib in authors:
-            contrib_ids.append(contrib.authority.id)
-        return contrib_ids
-
-    def prepare_author_ids(self, obj):
-        return [acrel.authority.id for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AU'])]
-
-    def prepare_editor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ED'])]
-
-    def prepare_advisor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['AD'])]
-
-    def prepare_contributor_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CO'])]
-
-    def prepare_translator_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['TR'])]
-
-    def prepare_subject_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'])]
-
-    def prepare_category_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['CA'])]
-
-    def prepare_publisher_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PU'])]
-
-    def prepare_school_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SC'])]
-
-    def prepare_institution_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['IN'])]
-
-    def prepare_meeting_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['ME'])]
-
-    def prepare_periodical_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['PE'])]
-
-    def prepare_book_series_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['BS'])]
-
-    def prepare_time_period_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['TI'])]
-
-    def prepare_geographic_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_controlled__in=['SU'], authority__type_controlled__in=['GE'])]
-
-    def prepare_about_person_ids(self, obj):
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(type_broad_controlled='SC')]
-
-    def prepare_other_person_ids(self, obj):
-        query = Q(type_broad_controlled__in=['IH', 'PH', 'PR']) & ~Q(type_controlled__in=['AU','CO'])
-        return [acrel.authority.id.strip() for acrel in obj.acrelation_set.filter(public=True).filter(query)]
 
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):

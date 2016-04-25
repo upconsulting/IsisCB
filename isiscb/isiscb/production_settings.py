@@ -127,7 +127,8 @@ ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
 
 HAYSTACK_CONNECTIONS = {
     'default': {
-        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,
         'INDEX_NAME': ELASTICSEARCH_INDEX,
     },

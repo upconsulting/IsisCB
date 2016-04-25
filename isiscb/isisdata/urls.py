@@ -28,7 +28,7 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('geographics', size=100). \
         facet('people', size=100). \
         facet('subject_institutions', size=100). \
-        facet('serial_publiations', size=100). \
+        facet('serial_publications', size=100). \
         facet('classification_terms', size=100). \
         facet('concepts', size=100). \
         facet('creative_works', size=100). \
@@ -46,6 +46,8 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
     url(r'^(?i)user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
     url(r'^(?i)(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
     url(r'^(?i)search/', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='haystack_search'),
     url(r'^(?i)unapi/+$', views.unapi_server_root, name='unapi'),

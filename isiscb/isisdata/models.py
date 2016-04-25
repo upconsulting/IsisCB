@@ -6,12 +6,16 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.urlresolvers import reverse as core_reverse
+from django.utils.safestring import mark_safe
 
 from markupfield.fields import MarkupField
 
 from simple_history.models import HistoricalRecords
 
 from oauth2_provider.models import AbstractApplication
+
+from isisdata.utils import *
 
 import datetime
 import iso8601
@@ -30,63 +34,11 @@ from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
-def help_text(s):
-    """
-    Cleans up help strings so that we can write them in ways that are
-    human-readable without screwing up formatting in the admin interface.
-    """
-    return re.sub('\s+', ' ', s).strip()
 
 
-# TODO: remove this later.
-def strip_punctuation(s):
-    """
-    Removes all punctuation characters from a string.
-    """
-    if not s:
-        return ''
-    if type(s) is str:    # Bytestring (default in Python 2.x).
-        return s.translate(string.maketrans("",""), string.punctuation.replace('-', ''))
-    else:                 # Unicode string (default in Python 3.x).
-        translate_table = dict((ord(char), u'') for char
-                                in u'!"#%\'()*+,./:;<=>?@[\]^_`{|}~')
-        return s.translate(translate_table)
 
 
-# TODO: remove this later.
-def strip_tags(s):
-    """
-    Remove all tags without remorse.
-    """
-    return bleach.clean(s, tags={}, attributes={}, strip=True)
 
-
-def remove_control_characters(s):
-    return "".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
-
-# TODO: remove this later.
-def normalize(s):
-    """
-    Convert to ASCII.
-    Remove HTML.
-    Remove punctuation.
-    Lowercase.
-    """
-    if not s:
-        return ''
-
-    return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
-
-# TODO: is that the best way to do this???
-def strip_hyphen(s):
-    """
-    Remove hyphens and replace with space.
-    Need to find hyphenated names.
-    """
-    if not s:
-        return ''
-
-    return s.replace('-', ' ')
 
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
@@ -475,6 +427,21 @@ class Citation(ReferencedEntity, CuratedMixin):
     def normalized_description(self):
         return normalize(self.description)
 
+    @property
+    def human_readable_abstract(self):
+        """
+        Abstract stripped of html tags and other metadata tags
+        """
+        SAFE_TAGS = ['em', 'b', 'i', 'strong', 'a']
+        SAFE_ATTRS = {'a': ['href', 'rel']}
+
+        no_tags = mark_safe(bleach.clean(self.abstract, tags=SAFE_TAGS, # Whitelist
+                                      attributes=SAFE_ATTRS,
+                                      strip=True))
+        match = re.search('\{AbstractBegin\}([\w\s\W\S]*)\{AbstractEnd\}', self.abstract)
+        if match:
+            return match.groups()[0].strip()
+        return self.abstract
 
     @property
     def label(self):
@@ -519,18 +486,18 @@ class Citation(ReferencedEntity, CuratedMixin):
     Recource Types http://dublincore.org/documents/resource-typelist/
     """))
 
-    abstract = models.TextField(blank=True, help_text=help_text("""
+    abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.
     """))
 
-    edition_details = models.TextField(blank=True, help_text=help_text("""
+    edition_details = models.TextField(blank=True, null=True, help_text=help_text("""
     Use for describing the edition or version of the resource. Include names of
     additional contributors if necessary for clarification (such as translators,
     introduction by, etc). Always, use relationship table to list contributors
     (even if they are specified here).
     """))
 
-    physical_details = models.CharField(max_length=255, blank=True,
+    physical_details = models.CharField(max_length=255, null=True, blank=True,
                                         help_text=help_text("""
     For describing the physical description of the resource. Use whatever
     information is appropriate for the type of resource.
@@ -538,7 +505,8 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     # Storing this in the model would be kind of hacky. This will make it easier
     #  to do things like sort or filter by language.
-    language = models.ManyToManyField('Language', help_text=help_text("""
+    language = models.ManyToManyField('Language', blank=True, null=True,
+    help_text=help_text("""
     Language of the resource. Multiple languages can be specified.
     """))
 
@@ -620,6 +588,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
 
+    resolutions = GenericRelation('zotero.InstanceResolutionEvent',
+                                  related_query_name='citation_resolutions',
+                                  content_type_field='to_model',
+                                  object_id_field='to_instance_id')
+
     def __unicode__(self):
         return strip_tags(self.title)
 
@@ -643,6 +616,13 @@ class Citation(ReferencedEntity, CuratedMixin):
     def get_all_contributors(self):
         query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
         return ACRelation.objects.filter(public=True).filter(query).order_by('data_display_order')
+
+    def get_absolute_url(self):
+        """
+        The absolute URL of a Citation is the citation detail view.
+        """
+        return core_reverse("citation", args=(self.id,))
+
 
 
 class Authority(ReferencedEntity, CuratedMixin):
@@ -729,7 +709,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (SEARCH, 'SAC')
     )
     classification_system = models.CharField(max_length=4, blank=True,
-                                             null=True,
+                                             null=True, default=SWP,
                                              choices=CLASS_SYSTEM_CHOICES,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
@@ -807,6 +787,12 @@ class Authority(ReferencedEntity, CuratedMixin):
         query = Q(authority_id=self.id)
         return ACRelation.objects.filter(public=True).filter(query)
 
+    def get_absolute_url(self):
+        """
+        The absolute URL of an Authority is the authority detail view.
+        """
+        return core_reverse("authority", args=(self.id,))
+
 
 class Person(Authority):
     """
@@ -842,7 +828,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     citation = models.ForeignKey('Citation')
-    authority = models.ForeignKey('Authority')
+    authority = models.ForeignKey('Authority', blank=True, null=True)
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
@@ -917,7 +903,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     citation (e.g. 'introduction by', 'dissertation supervisor', etc).
     """)
 
-    name_for_display_in_citation = models.CharField(max_length=255,
+    name_for_display_in_citation = models.CharField(max_length=255, blank=True,
+                                                    null=True,
                                                     help_text=help_text("""
     Display for the authority as it is to be used when being displayed with the
     citation. Eg. the form of the author's name as it appears on a
@@ -925,7 +912,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     authority--Jenifer Elizabeth Koval.
     """))
 
-    name_as_entered = models.CharField(max_length=255, blank=True,
+    name_as_entered = models.CharField(max_length=255, null=True, blank=True,
                                        help_text=help_text("""
     Display for the authority as it is has been used in a publication.
     """))
@@ -972,6 +959,11 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         related_query_name='ac_relations',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
+
+    resolutions = GenericRelation('zotero.InstanceResolutionEvent',
+                                  related_query_name='acrelation_resolutions',
+                                  content_type_field='to_model',
+                                  object_id_field='to_instance_id')
 
     def _render_type_controlled(self):
         try:
@@ -1075,7 +1067,6 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, blank=True)
-
     description = models.TextField(blank=True)
 
     INCLUDES_CHAPTER = 'IC'
@@ -1225,14 +1216,14 @@ class PartDetails(models.Model):
         verbose_name_plural = 'part details'
 
 
-    volume = models.CharField(max_length=255, blank=True)
-    volume_free_text = models.CharField(max_length=255, blank=True)
+    volume = models.CharField(max_length=255, null=True, blank=True)
+    volume_free_text = models.CharField(max_length=255, null=True, blank=True)
     volume_begin = models.IntegerField(blank=True, null=True)
     volume_end = models.IntegerField(blank=True, null=True)
-    issue_free_text = models.CharField(max_length=255, blank=True)
+    issue_free_text = models.CharField(max_length=255, null=True, blank=True)
     issue_begin = models.IntegerField(blank=True, null=True)
     issue_end = models.IntegerField(blank=True, null=True)
-    pages_free_text = models.CharField(max_length=255, blank=True)
+    pages_free_text = models.CharField(max_length=255, null=True, blank=True)
     page_begin = models.IntegerField(blank=True, null=True)
     page_end = models.IntegerField(blank=True, null=True)
 
@@ -1431,7 +1422,10 @@ class Comment(Annotation):
 
     @property
     def snippet(self):
-        return self.text[:min(100, len(self.text))] + u'...'
+        snip = self.text[:min(100, len(self.text))]
+        if len(self.text) > 100:
+            snip += u'...'
+        return snip
 
     @property
     def linkified(self):

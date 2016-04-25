@@ -459,11 +459,15 @@ class ZoteroParser(RDFParser):
         return tuple(value.split('-'))
 
     def postprocess_pages(self, entry):
-        if len(entry.pages) == 1:
+        if type(entry.pages) not in [tuple, list]:
             start = entry.pages
             end = None
         else:
-            start, end = entry.pages
+            try: # ISISCB-395: Skip malformed page numbers.
+                start, end = entry.pages
+            except ValueError:
+                del entry.pages
+                return
         setattr(entry, 'pageStart', start)
         setattr(entry, 'pageEnd', end)
         del entry.pages

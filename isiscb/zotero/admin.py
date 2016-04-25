@@ -9,14 +9,22 @@ from django.core.urlresolvers import reverse
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.decorators.http import require_http_methods
+
+from rest_framework.renderers import JSONRenderer
+from django.utils.six import BytesIO
+from rest_framework.parsers import JSONParser
 
 from zotero.models import *
 from zotero.parser import read, process
 from zotero.suggest import *
+from zotero.serializers import *
 
 from isisdata.admin import AttributeInlineForm, ValueField, ValueWidget
 
 import tempfile
+import iso8601
 
 
 def missing_or_empty(obj, key):
@@ -118,6 +126,339 @@ class ImportAccessionAdmin(admin.ModelAdmin):
         if obj:
             return self.readonly_fields + ('name',)
         return self.readonly_fields
+
+    def _get_creation_message(self, request, instance):
+        return """
+        Created from Zotero accession {0}, performed at {1} by {2}.
+        Subsequently validated and curated by {3}.
+        """.format(instance.part_of.id, instance.part_of.imported_on,
+                   instance.part_of.imported_by, request.user.username)\
+           .strip()
+
+    def _get_or_create_acrelation(self, request, draftcitation, citation, draftacrelation):
+        """
+
+        """
+        # There should be only 0 or 1, but we have a bit less control with
+        #  generic relations.
+        if draftacrelation.resolutions.count() == 1:
+            return draftacrelation.resolutions.first()
+
+        # ACRelations created here are headless -- the curator has yet to
+        #  associate a specific Authority instance with this relation.
+        acrelation = ACRelation(
+            citation=citation,
+            name_for_display_in_citation=draftacrelation.authority.name,
+            type_controlled=draftacrelation.type_controlled,
+            type_broad_controlled=draftacrelation.type_broad_controlled,
+            record_history=self._get_creation_message(request, draftcitation),
+        )
+        acrelation.save()
+
+        InstanceResolutionEvent(for_instance=draftacrelation,
+                                to_instance=acrelation).save()
+        return acrelation
+
+    def draftauthority(self, request, accession_id, draftauthority_id=None):
+        if draftauthority_id:
+            instance = get_object_or_404(DraftAuthority, pk=authority_id)
+        else:
+            instance = None
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            payload_data['part_of'] = accession_id
+            if instance:
+                serializer = DraftAuthoritySerializer(instance, data=payload_data)
+            else:
+                serializer = DraftAuthoritySerializer(data=payload_data)
+
+            if serializer.is_valid(raise_exception=True):
+                instnace = serializer.save()
+        data = {'draftauthority': DraftAuthoritySerializer(instance).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def authority(self, request, accession_id, authority_id=None):
+        """
+
+        """
+        if authority_id:
+            instance = get_object_or_404(Authority, pk=authority_id)
+        else:
+            instance = None
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            if instance:
+                serializer = AuthoritySerializer(instance, data=payload_data)
+            else:
+                serializer = AuthoritySerializer(data=payload_data)
+
+            # Will raise/return status 400 if data is not valid.
+            if serializer.is_valid(raise_exception=True):
+                instance = serializer.save()
+        data = {'authority': AuthoritySerializer(instance).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def draftacrelation(self, request, accession_id, draftacrelation_id):
+        if draftacrelation_id:
+            instance = get_object_or_404(DraftACRelation, pk=draftacrelation_id)
+        else:
+            instance = None
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            payload_data['part_of'] = accession_id
+            if instance:
+                serializer = DraftACRelationSerializer(instance, data=payload_data)
+            else:
+                serializer = DraftACRelationSerializer(data=payload_data)
+
+            if serializer.is_valid(raise_exception=True):
+                instance = serializer.save()
+        data = {'draftacrelation': DraftACRelationSerializer(instance).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+
+    def set_authority_for_relation(self, request, accession_id, acrelation_id, authority_id):
+        """
+        Associate an :class:`.Authority` instance with an "headless"
+        :class:`.ACRelation` instance.
+        """
+        acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+        authority = get_object_or_404(Authority, pk=authority_id)
+
+        acrelation.authority = authority
+        acrelation.save()
+        data = {'acrelation': ACRelationSerializer(acrelation).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def acrelation(self, request, accession_id, acrelation_id=None):
+        """
+        """
+        if acrelation_id:
+            instance = ACRelation.objects.get(pk=acrelation_id)
+        else:
+            instance = None
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            payload_data['part_of'] = accession_id
+            if instance:
+                serializer = ACRelationSerializer(instance, data=payload_data)
+            else:
+                serializer = ACRelationSerializer(data=payload_data)
+
+            if serializer.is_valid(raise_exception=True):
+                instance = serializer.save()
+
+        if instance:
+            data = {'acrelation': ACRelationSerializer(instance).data}
+            response_data = JSONRenderer().render(data)
+            return HttpResponse(response_data, content_type='application/json')
+
+    def citation(self, request, accession_id, citation_id):
+        """
+        CRUD endpoint for :class:`.Citation`.
+        """
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            citation = Citation.objects.get(pk=payload_data['id'])
+            serializer = CitationSerializer(citation, data=payload_data)
+
+            # Will raise/return status 400 if data is not valid.
+            if serializer.is_valid(raise_exception=True):
+                citation = serializer.save()
+
+        else:
+            citation = get_object_or_404(Citation, pk=citation_id)
+        data = {'citation': CitationSerializer(citation).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def get_citation_for_draft(self, request, accession_id, draftcitation_id):
+        draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+        if draftcitation.resolutions.count() == 1:
+            citation = draftcitation.resolutions.first().to_instance
+        else:
+            try:
+                iso_publication_date = iso8601.parse_date(draftcitation.publication_date).date()
+            except iso8601.ParseError:
+                iso_publication_date = None
+
+            creation_msg = self._get_creation_message(request, draftcitation)
+            pages = '%s - %s' % (draftcitation.page_start,
+                                 draftcitation.page_end)
+            part_details = PartDetails(**{
+                'pages_free_text': pages,
+                'volume': draftcitation.volume,
+                'issue_free_text': draftcitation.issue,
+            })
+            part_details.save()
+
+            citation = Citation(**{
+                'title': draftcitation.title,
+                'description': draftcitation.description,
+                'abstract': draftcitation.abstract,
+                'type_controlled': draftcitation.type_controlled,
+                'record_history': creation_msg,
+                'part_details': part_details,
+            })
+
+            if iso_publication_date:
+                citation.publication_date = iso_publication_date
+            citation.save()
+
+            InstanceResolutionEvent(for_instance=draftcitation,
+                                    to_instance=citation).save()
+
+            # If the publication date is available and parse-able, create the
+            #  Attribute and other attendant objects.
+
+
+            if iso_publication_date:
+                attribute_type, _ = AttributeType.objects.get_or_create(
+                    name='PublicationDate',
+                    defaults={
+                        'value_content_type': ContentType.objects.get(model='datevalue'),
+                        'display_name': 'Publication Date',
+                    }
+                )
+                attribute = Attribute(
+                    value_freeform=draftcitation.publication_date,
+                    source=citation,
+                    type_controlled=attribute_type,
+                )
+                attribute.save()
+                value = DateValue(
+                    value=iso_publication_date,
+                    attribute=attribute,
+                )
+                value.save()
+
+            for draftacrelation in draftcitation.authority_relations.all():
+                self._get_or_create_acrelation(request, draftcitation,
+                                               citation, draftacrelation)
+
+            # Reload the Citation instance so that we are assured to have all
+            #  of the updated fields/relations. This might be overkill, but a
+            #  small price to pay.
+            citation = Citation.objects.get(pk=citation.id)
+
+        data = {'citation': CitationSerializer(citation).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def draftcitation(self, request, draftcitation_id):
+        """
+        CRUD endpoint for :class:`.DraftCitation`.
+        """
+
+        if request.method == 'POST':
+            stream = BytesIO(request.body)
+            payload_data = JSONParser().parse(stream)
+            serializer = DraftCitationSerializer(data=payload_data)
+
+            # Will raise/return status 400 if data is not valid.
+            if serializer.is_valid(raise_exception=True):
+                draftcitation = serializer.save()
+
+        else:
+            draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+        data = {'draftcitation': DraftCitationSerializer(draftcitation).data}
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def draftcitations(self, request, accession_id):
+        """
+        Provide data about :class:`.DraftCitation` instances associated with
+        an :class:`.ImportAccession` instance.
+        """
+        instance = get_object_or_404(ImportAccession, pk=accession_id)
+        data = {
+            'citations': [DraftCitationSerializer(citation_instance).data
+                          for citation_instance
+                          in instance.draftcitation_set.all()]
+        }
+        response_data = JSONRenderer().render(data)
+        return HttpResponse(response_data, content_type='application/json')
+
+    def process(self, request, accession_id):
+        """
+        Provide an interface for resolving Zotero-ingested record sets into
+        the main IsisCB Explore database.
+        """
+        instance = get_object_or_404(ImportAccession, pk=accession_id)
+        context = {}
+        context.update({
+            'title': 'Process Zotero Accession',
+            'importaccession': instance,
+            'citation_form': CitationForm(),
+            'languages': Language.objects.all().values('id', 'name'),
+            'authority_type_options': Authority.TYPE_CHOICES,
+            'acrelation_type_options': ACRelation.TYPE_CHOICES,
+        })
+        print ACRelation.TYPE_CHOICES
+
+        return TemplateResponse(request, "admin/zotero_accession_detail.html", context)
+
+    def get_urls(self):
+        urls = super(ImportAccessionAdmin, self).get_urls()
+        extra_urls = [
+            url(r'^process/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.process),
+                name="importaccession_process"),
+            url(r'^draftcitations/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftcitations),
+                name="importaccession_draftcitations"),
+            url(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftcitation),
+                name="importaccession_draftcitation"),
+            url(r'^draftcitations/(?P<accession_id>[0-9]+)/(?P<draftcitation_id>[0-9]+)/getcitation/$',
+                self.admin_site.admin_view(self.get_citation_for_draft),
+                name="importaccession_get_citation_for_draft"),
+            url(r'^citations/(?P<accession_id>[0-9]+)/(?P<citation_id>[A-Z]+[0-9]+)',
+                self.admin_site.admin_view(self.citation),
+                name="importaccession_citation"),
+            url(r'^authorities/(?P<accession_id>[0-9]+)/(?P<authority_id>[A-Z]+[0-9]+)/$',
+                self.admin_site.admin_view(self.authority),
+                name='importaccession_authority'),
+            url(r'^authorities/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.authority),
+                name='importaccession_authorities'),
+            url(r'^acrelations/(?P<accession_id>[0-9]+)/(?P<acrelation_id>[A-Z]+[0-9]+)',
+                self.admin_site.admin_view(self.acrelation),
+                name='importaccession_acrelation'),
+
+            url(r'^acrelations/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.acrelation),
+                name='importaccession_acrelations'),
+
+            url(r'^draftauthorities/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftauthority),
+                name="importaccession_draftauthorities"),
+            url(r'^draftauthorities/(?P<accession_id>[0-9]+)/(?P<draftauthority_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftauthority),
+                name="importaccession_draftauthority"),
+
+            url(r'^draftacrelations/(?P<accession_id>[0-9]+)/(?P<draftacrelation_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftacrelation),
+                name="importaccession_draftacrelation"),
+            url(r'^draftacrelations/(?P<accession_id>[0-9]+)/$',
+                self.admin_site.admin_view(self.draftacrelation),
+                name="importaccession_draftacrelations"),
+        ]
+        return extra_urls + urls
 
 
 class ACRelationForm(forms.ModelForm):
@@ -549,10 +890,7 @@ class DraftCitationAdmin(admin.ModelAdmin):
             attributeFormset = AttributeInlineFormSet(request.POST, prefix='attribute')
             linkeddataFormset = LinkedDataInlineFormSet(request.POST, prefix='linkeddata')
             acrelationFormset = ACRelationInlineFormSet(request.POST, prefix='acrelation')
-            print form.errors
-            print attributeFormset.errors
-            print linkeddataFormset.errors
-            print acrelationFormset.errors
+
             if all([form.is_valid(),
                     attributeFormset.is_valid(),
                     linkeddataFormset.is_valid(),
@@ -866,7 +1204,11 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
 
                 # Create new Attributes.
                 for attributeForm in attributeFormset:
-                    attributeType = attributeForm.cleaned_data['type_controlled']
+                    try:    # ISISCB-396; some invalid forms are getting past.
+                        attributeType = attributeForm.cleaned_data['type_controlled']
+                    except KeyError:
+                        continue
+                        
                     valueModel = attributeType.value_content_type.model_class()
                     value = attributeForm.cleaned_data['value']
 

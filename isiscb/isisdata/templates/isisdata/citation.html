@@ -38,8 +38,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 {% block content %}
 <div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2">
-    <div class="menu">
+  <div class="col-sm-3 col-md-2 hidden-print">
+    <div class="menu hidden-print">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
       <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
@@ -54,7 +54,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <div class=" main col-sm-5 col-md-7">
     <!-- Progress through search results, if arriving from search view. -->
     {% if search_results|length > 0 and fromsearch and search_current %}
-    <div class="alert alert-warning">
+    <div class="alert alert-warning hidden-print">
         <div class="row">
             <div class="col-xs-3 text-center">
                 {% if search_current >= 2 and search_previous %}
@@ -96,7 +96,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <!-- This tag displays an icon/link that points to the users' institution's
          link resolver. -->
-    <span id="linkresolver">
+    <span id="linkresolver" class="hidden-print">
         <script>
         $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
             {
@@ -121,7 +121,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </span>
 
     {% if authors|length > 0 %}
-    <p><strong>Authors & Contributors:</strong> {% for acrelation in citation.get_all_contributors %} <a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation|contributor_with_role_as_string }} <i class="fa fa-info-circle"></i>;</a> {% endfor %}
+    <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }} <i class="fa fa-info-circle"></i>;{% if acrelation.authority %}</a>{% endif %} {% endfor %}
     {% endif %}
 
     {% if citation.abstract %}
@@ -157,7 +157,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <table class="details">
       {% for prop in properties_map %}
+
+      {% if prop.authority %}
       <tr><td>{{ prop.get_type_controlled_display }}:</td><td> <a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }} <i class="fa fa-info-circle"></i></a></td></tr>
+      {% endif %}
+
       {% endfor %}
       {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
       <tr>
@@ -185,7 +189,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endif %}
     </table>
 
-    <div></div>
+    <!-- <div></div> -->
     {% if related_citations_rb %}
     <h4>Reviewed By</h4>
       {% for cc_rel in related_citations_rb %}
@@ -279,10 +283,25 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endfor %}
     {% endif %}
 
+
     <div style="max-width: 100%; overflow-x: scroll;">
         <p><strong>Citation URI</strong><br />
         {{ citation.generate_uri }}</p>
     </div>
+  </div>
+
+  <!-- for printing only -->
+  <div class="col-sm-3 col-md-2 visible-print-block">
+    <div class="menu hidden-print">
+      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+
+    {% include "isisdata/citation_nav.html" %}
 
   </div>
 

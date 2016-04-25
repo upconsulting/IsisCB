@@ -115,11 +115,11 @@ def get_coins_from_result(result):
         kv_pairs['rft.isbn'] = result.isbn
 
     # Publication date.
-    if len(result.publication_date) > 0:
+    if result.publication_date:
         kv_pairs['rft.date'] = result.publication_date[0] # Year only.
 
     # First author full name.
-    if len(result.authors) > 0:
+    if result.authors:
         kv_pairs['rft.au'] = result.authors[0].encode('utf-8')
 
     if result.type in ['Article', 'Review']:    # Article or review.
@@ -129,7 +129,7 @@ def get_coins_from_result(result):
         kv_pairs['rft.atitle'] = result.title.encode('utf-8')
 
         # Journal title.
-        if len(result.periodicals) > 0:
+        if result.periodicals > 0:
             kv_pairs['rft.jtitle'] = result.periodicals[0].encode('utf-8')
 
         # Start and end pages.

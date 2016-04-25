@@ -1,0 +1,19 @@
+/********************* Print classes *********************/
+
+@media print {
+  .footer {
+      min-height: 25px;
+      position: relative;
+      width: 100%;
+      font-weight: bold;
+      padding-left: 20px;
+  }
+
+  a[href]:after {
+      content:none;
+  }
+
+  p, table, div {
+    font-size: 12px;
+  }
+}

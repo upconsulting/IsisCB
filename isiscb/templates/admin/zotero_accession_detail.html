@@ -1,0 +1,923 @@
+{% extends "admin/base_site.html" %}
+
+{% load staticfiles %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-resource.min.js"></script>
+<!-- <script src="{% static "zotero/js/angular.min.js" %}"></script>
+<script src="{% static "zotero/js/angular-resource.min.js" %}"></script> -->
+
+<style>
+.panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+.panel-heading .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+}
+
+.body {
+    min-width: 1000px;
+}
+
+.input-group-xs>.form-control,
+.input-group-xs>.input-group-addon,
+.input-group-xs>.input-group-btn>.btn {
+    height: 22px;
+    padding: 1px 5px;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.input-xs {
+    height: 22px;
+    padding: 1px 5px;
+    font-size: 10px;
+    line-height: 1.5;
+}
+</style>
+
+<script>
+var app = angular.module('zoteroIngestApp', ['ngResource']);
+
+app.config(function($httpProvider) {
+    $httpProvider.defaults.xsrfCookieName = 'csrftoken';
+    $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+});
+app.config(function($resourceProvider) {
+  $resourceProvider.defaults.stripTrailingSlashes = false;
+});
+
+
+app.factory('DraftCitation', function($resource) {
+  return $resource('/admin/zotero/importaccession/draftcitations/{{ importaccession.id}}/:id/:meth/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      },
+      getCitation: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'},
+          params: {meth: 'getcitation'}
+      }
+  });
+});
+
+app.factory('DraftAuthority', function($resource) {
+  return $resource('/admin/zotero/importaccession/draftauthorities/{{ importaccession.id}}/:id/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      },
+  });
+});
+
+app.factory('DraftACRelation', function($resource) {
+  return $resource('/admin/zotero/importaccession/draftacrelations/{{ importaccession.id}}/:id/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      },
+  });
+});
+
+
+app.factory('Citation', function($resource) {
+  return $resource('/admin/zotero/importaccession/citations/{{ importaccession.id}}/:id/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      // We aren't creating new Citations through this interface, just updating
+      //  existing ones. But Angular doesn't know that, so we'll PUT to prevent
+      //  collisions.
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      }
+  });
+});
+
+app.factory('Authority', function($resource) {
+  return $resource('/admin/zotero/importaccession/authorities/{{ importaccession.id}}/:id/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      }
+  });
+});
+
+app.factory('ACRelation', function($resource) {
+  return $resource('/admin/zotero/importaccession/acrelations/{{ importaccession.id}}/:id/', {}, {
+      list: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      get: {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+      },
+      save: {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+      }
+  });
+});
+
+app.factory('AuthoritySuggestions', function($resource) {
+    return $resource('/zotero/suggest/acrelation/:id/', {}, {
+        get: {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        }
+    });
+});
+
+app.controller('CitationListController',
+               ['$scope', 'AuthoritySuggestions',
+                'DraftCitation', 'Citation',
+                'DraftACRelation', 'ACRelation',
+                'DraftAuthority', 'Authority',
+                function($scope, AuthoritySuggestions,
+                         DraftCitation, Citation,
+                         DraftACRelation, ACRelation,
+                         DraftAuthority, Authority) {
+
+    $scope.type_options = [
+        {'value': 'AR', 'name': 'Article'},
+        {'value': 'BO', 'name': 'Book'},
+        {'value': 'CH', 'name': 'Chapter'},
+        {'value': 'RE', 'name': 'Review'},
+        {'value': 'ES', 'name': 'Essay Review'},
+        {'value': 'TH', 'name': 'Thesis'},
+        {'value': 'EV', 'name': 'Event'},
+        {'value': 'PR', 'name': 'Presentation'},
+        {'value': 'IN', 'name': 'Interactive Resource'},
+        {'value': 'WE', 'name': 'Website'},
+        {'value': 'AP', 'name': 'Application'},
+    ];
+
+    $scope.authority_type_options = [
+        {% for key, label in authority_type_options %}{'value': "{{ key }}", 'name': "{{ label }}"},{% endfor %}
+    ];
+
+    $scope.acrelation_type_options = [
+        {% for key, label in acrelation_type_options %}{'value': "{{ key }}", 'name': "{{ label }}"},{% endfor %}
+    ];
+
+    $scope.language_options = [
+        {% for language in languages %}
+        {'value': '{{language.id}}', 'name': '{{language.name}}' },
+        {% endfor %}
+    ];
+
+    $scope.draft_citations = DraftCitation.list().$promise.then(function(data) {
+        $scope.draft_citations = data.citations;
+    });
+
+    $scope.selected_citation = null;
+    $scope.selected_acrelation = null;
+    $scope.iframe_enabled = false;
+    $scope.show_authority_edit = false;
+    $scope.show_authority_suggestions = false;
+    $scope.show_authority_buttons = true;
+
+    // Maps ACRelations -> DraftAuthority.
+    $scope.acrelationMap = {};
+
+    $scope.hideIFrame = function() {
+        $scope.iframe_enabled = false;
+    }
+
+    $scope.showIFrame = function() {
+        $scope.iframe_enabled = true;
+    }
+
+    $scope.hideAuthorityButtons = function() {
+        $scope.show_authority_buttons = false;
+    }
+
+    $scope.showAuthorityButtons = function() {
+        $scope.show_authority_buttons = true;
+    }
+
+    $scope.hideAuthorityEditForm = function() {
+        $scope.show_authority_edit = false;
+        $scope.showAuthorityButtons();
+    }
+
+    $scope.showAuthorityEditForm = function() {
+        $scope.show_authority_edit = true;
+        $scope.hideAuthorityButtons()
+    }
+
+    $scope.hideAuthoritySuggestions = function() {
+        $scope.show_authority_suggestions = false;
+    }
+    $scope.showAuthoritySuggestions = function() {
+        $scope.show_authority_suggestions = true;
+    }
+
+    $scope.deselectACRelation = function() {
+        $scope.selected_authority = null;
+        $scope.selected_acrelation = null;
+        $scope.hideAuthorityEditForm();
+        $scope.hideAuthoritySuggestions();
+        $scope.hideIFrame();
+    }
+
+    $scope.saveCitation = function(data) {
+        var citation = new Citation(data);
+        citation.$save({id: data.id});
+
+        if (data.acrelation_set) {
+            data.acrelation_set.forEach($scope.saveACRelation);
+        }
+    }
+
+    $scope.saveSelectedCitation = function() {
+        $scope.saveCitation($scope.selected_citation);
+    }
+
+    $scope.saveAuthority = function(data, callback) {
+        authority = new Authority(data);
+        if (data.id) {
+            authority.$save({id: data.id}).then(callback);
+        } else {
+            authority.$save().then(callback);
+        }
+    }
+
+    $scope.saveACRelation = function(data, callback) {
+        acrelation = new ACRelation(data);
+        acrelation.$save({id: data.id}).then(callback);
+    }
+
+    /**
+      * Same as saveSelectedACRelation(), but deselects the current ACRelation,
+      *  collapsing the editing panels.
+      */
+    $scope.saveSelectedACRelationAndHide = function() {
+        $scope.saveSelectedACRelation(function() {
+            $scope.deselectACRelation();
+        });
+    }
+
+    $scope.saveSelectedACRelation = function(callback) {
+
+        if ($scope.selected_authority) {
+            $scope.saveAuthority($scope.selected_authority, function(authority_data){
+                $scope.selected_acrelation.authority =  authority_data.authority.id;
+                $scope.saveACRelation($scope.selected_acrelation, function() {
+                    if(callback) callback();
+                });
+            });
+        } else {
+            $scope.saveACRelation($scope.selected_acrelation, function() {
+                if(callback) callback();
+            });
+        }
+
+
+    }
+
+    $scope.selectDraftCitation = function(draftcitation) {
+        // Autosave when the user selects a different DraftCitation.
+        if ($scope.selected_citation) {
+            $scope.saveSelectedCitation();
+        }
+        if ($scope.selected_acrelation) {
+            $scope.saveSelectedACRelation(function() {
+                $scope.selected_acrelation = null;
+                $scope.selected_authority = null;
+            });
+        }
+
+        $scope.hideAuthorityEditForm();
+        $scope.hideAuthoritySuggestions();
+        $scope.selected_draftcitation = draftcitation;
+
+        // Get a new Citation instance from the selected DraftCitation instance.
+        DraftCitation.getCitation({id: draftcitation.id})
+            .$promise.then(function(data) {
+                $scope.selected_citation = data.citation;
+            });
+    }
+
+    /**
+      * Show a list of suggested Authorities in the center panel.
+      */
+    $scope.getSuggestedAuthorities = function(draftacrelation_id) {
+        $scope.suggested_authorities = AuthoritySuggestions.get({id: draftacrelation_id}, function(suggestions) {
+            $scope.showAuthoritySuggestions();
+            $scope.hideAuthorityEditForm();
+        });
+    }
+
+    $scope.selectACRelation = function(acrelation) {
+        // Autosave.
+        if ($scope.selected_acrelation) {
+            $scope.saveSelectedACRelation();
+        }
+        $scope.hideIFrame();
+        $scope.selected_acrelation = acrelation;
+
+        if (acrelation.authority) {
+            $scope.selected_authority = Authority.get({id: acrelation.authority}).$promise.then(function(data) {
+                $scope.selected_authority = data.authority;
+            });
+            $scope.showAuthorityEditForm();
+            $scope.hideAuthoritySuggestions();
+            $scope.hideAuthorityButtons();
+        } else {
+            // ACRelation was created in this interface, and therefore has no
+            //  resolution.
+            $scope.showAuthorityButtons();
+            if (acrelation.resolutions == undefined) {
+                if (acrelation.id == undefined) {
+                    acrelation.$save().then(function(data) {
+                        acrelation.type_controlled = data.acrelation.type_controlled;
+                        acrelation.id = data.acrelation.id;
+                        acrelation.name_for_display_in_citation = data.acrelation.name_for_display_in_citation;
+                        $scope.getSuggestedAuthorities(data.acrelation.id);
+                    });
+                } else {
+                    $scope.getSuggestedAuthorities(acrelation.id);
+                }
+            } else {
+                // This would be an odd case, but can occur if there was an
+                //  error while creating an ACRelation through this interface.
+                if (acrelation.resolutions[0] == undefined) {
+                    $scope.getSuggestedAuthorities(acrelation.id);
+                } else {
+                    $scope.getSuggestedAuthorities(acrelation.resolutions[0].for_instance_id);
+                }
+            }
+        }
+    }
+
+    $scope.selectSuggestion = function(authority) {
+        $scope.show_in_iframe(authority.id);
+        $scope.selected_authority = Authority.get({id: authority.id}).$promise.then(function(data) {
+            $scope.selected_authority = data.authority;
+        });
+    }
+
+    $scope.associateSelection = function() {
+        $scope.selected_acrelation.authority = $scope.selected_authority.id;
+        $scope.saveSelectedACRelation();
+        $scope.showAuthorityEditForm();
+        $scope.hideAuthoritySuggestions();
+        $scope.hideIFrame();
+    }
+
+    $scope.disassociateAuthority = function(acrelation) {
+        acrelation.authority = null;
+        $scope.selected_authority = null;
+        $scope.saveACRelation(acrelation);
+        $scope.selectACRelation(acrelation);
+    }
+
+    $scope.add_attribute = function(citation) {
+        citation.attributes.push({
+            id: '',
+            type_controlled: '',
+            value: '',
+        });
+    }
+
+    $scope.addACRelation = function(citation) {
+        var acrelation = new ACRelation({
+            citation: citation.id,
+        });
+        citation.acrelation_set.push(acrelation);
+    }
+
+    $scope.newAuthority = function(acrelation) {
+        // Toggle center panel to editing view.
+        $scope.showAuthorityEditForm();
+        $scope.hideAuthorityButtons();
+        $scope.selected_authority = new Authority();
+
+        $scope.hideAuthoritySuggestions();
+        $scope.showAuthorityEditForm();
+        $scope.hideIFrame();
+        // $scope.selected_authority = acrelation.authority;
+    }
+
+    $scope.show_in_iframe = function(id) {
+        $scope.iframe_target = '/isis/' + id + '/';
+        $scope.showIFrame();
+    }
+
+
+}]);
+
+</script>
+{% endblock %}
+
+{% block content %}
+<style>
+.citation-list-item {
+    cursor: pointer;
+}
+.form-control input-xs {
+    font-size: 8pt !important;
+}
+</style>
+<div ng-app="zoteroIngestApp">
+    <div class="container-fluid"  ng-controller="CitationListController">
+        <div class="row" ng-show="selected_citation">
+            <div  ng-class="{'col-xs-5': iframe_enabled, 'col-lg-4': iframe_enabled, 'col-xs-6': !iframe_enabled}">
+
+                {% verbatim %}
+                <!-- Zotero record -->
+                <!-- <div class="panel"> -->
+
+                    <div class="citation_form-group form-group">
+                        <div class="input-group">
+                            <input class="form-control"
+                                style="margin-top: 0px;"
+                                id="id_title"
+                                maxlength="2000"
+                                name="title"
+                                type="text"
+                                ng-model="selected_citation.title">
+                            <span class="input-group-btn">
+                                <a href="" ng-click="saveSelectedCitation()" class="btn">
+                                    <span class="glyphicon glyphicon-floppy-disk"></span>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                <!-- </div> -->
+
+                {% endverbatim %}
+                <div class="panel-group" id="citation-panels" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <a class="h4 accordion-toggle" data-toggle="collapse" data-parent="#citation-panels" href="#bibliographic-fields">Bibliographic Fields</a>
+
+                        </div>
+                        <div class="panel-collapse collapse in" role="tabpanel" id="bibliographic-fields">
+                            <div class="panel-body">
+
+                                <div class="citation_form-group form-group">
+                                    <label for="id_publication_date">Publication date:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.publication_date.help_text }}" class="fa fa-info-circle"></a></label>
+                                    <input class="form-control input-xs" id="id_publication_date" maxlength="2000" name="publication_date" type="text" ng-model="selected_citation.publication_date">
+                                </div>
+                                <div class="citation_form-group form-group">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <label for="id_page_start">Start page:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.page_start.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_page_start" maxlength="2000" name="page_start" type="text" ng-model="selected_citation.page_start"></input>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <label for="id_page_end">End page:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.page_end.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_page_end" maxlength="2000" name="page_end" type="text" ng-model="selected_citation.page_end"></input>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="citation_form-group form-group">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <label for="id_volume">Volume:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.volume.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_volume" maxlength="2000" name="volume" type="text" ng-model="selected_citation.volume"></input>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <label for="id_issue">Issue:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.issue.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_issue" maxlength="2000" name="page_end" type="text" ng-model="selected_citation.issue"></input>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="citation_form-group form-group">
+                                    <label for="{{ citation_form.type_controlled.id_for_label }}">{{ citation_form.type_controlled.label }}: <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.type_controlled.help_text }}" class="fa fa-info-circle"></a></label>
+                                    <select
+                                        class="form-control input-xs"
+                                        id="id_type_controlled"
+                                        name="type_controlled"
+                                        ng-model="selected_citation.type_controlled">
+                                        {% verbatim %}
+                                        <option
+                                            ng-repeat="option in type_options"
+                                            value="{{option.value}}"
+                                            label="{{option.name}}"
+                                            ng-selected="option.value == selected_citation.type_controlled"></option>
+                                        {% endverbatim %}
+                                    </select>
+                                </div>
+                                <div class="citation_form-group form-group">
+                                    <label for="{{ citation_form.language.id_for_label }}">{{ citation_form.language.label }}: <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.language.help_text }}" class="fa fa-info-circle"></a></label>
+                                    <select
+                                        multiple="multiple"
+                                        class="form-control input-xs"
+                                        id="id_language"
+                                        name="language"
+                                        ng-model="selected_citation.language">
+                                        {% verbatim %}
+                                        <option
+                                            ng-repeat="option in language_options"
+                                            value="{{option.value}}"
+                                            label="{{option.name}}"
+                                            ng-selected="option.value == selected_citation.language"></option>
+                                        {% endverbatim %}
+                                    </select>
+                                </div>
+
+                                <div class="citation_form-group form-group">
+                                    <label for="{{ citation_form.description.id_for_label }}">{{ citation_form.description.label }}:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.description.help_text }}" class="fa fa-info-circle"></a></label>
+                                    <textarea class="form-control input-xs" cols="40" id="id_description" name="description" rows="3" ng-model="selected_citation.description"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <a class="h4 accordion-toggle collapsed"
+                                data-toggle="collapse"
+                                data-parent="#citation-panels"
+                                href="#curatorial-fields"
+                                >
+                                Curatorial Fields
+                            </a>
+                        </div>
+                        <div class="panel-collapse collapse" role="tabpanel" id="curatorial-fields">
+                            <div class="panel-body">
+                                <div class="citation_form-group form-group">
+                                    <div class="checkbox">
+                                        <label for="{{ citation_form.public.id_for_label }}">
+                                        {{ citation_form.public }} {{ citation_form.public.label }} <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.public.help_text }}" class="fa fa-info-circle"></a>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="citation_form-group form-group">
+                                    <label for="{{ citation_form.administrator_notes.id_for_label }}">{{ citation_form.administrator_notes.label }}:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.administrator_notes.help_text }}" class="fa fa-info-circle"></a></label>
+                                    {{ citation_form.administrator_notes }}
+                                </div>
+
+                                <div class="citation_form-group form-group">
+                                    <label for="{{ citation_form.record_history.id_for_label }}">{{ citation_form.record_history.label }}: <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.record_history.help_text }}" class="fa fa-info-circle"></a></label>
+                                    {{ citation_form.record_history }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <a class="h4 accordion-toggle collapsed"
+                                data-toggle="collapse"
+                                data-parent="#citation-panels"
+                                href="#authority-fields"
+                                >
+                                Related Authorities
+                            </a>
+                        </div>
+                        <div class="panel-collapse collapse" role="tabpanel" id="authority-fields">
+                            <ul class="list-group">
+                                <!-- When an ACRelation has an associated ``authority``, is
+                                     is highlighted in blue. -->
+                                <li class="form-group list-group-item"
+                                    ng-class="{'list-group-item-info': acrelation.authority, 'list-group-item-warning': acrelation.id == selected_acrelation.id}"
+                                    ng-repeat="acrelation in selected_citation.acrelation_set">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-xs-4">
+                                                <label>Type</label>
+                                                {% verbatim %}
+                                                <select
+                                                    class="form-control input-xs"
+                                                    name="type_controlled"
+                                                    ng-model="acrelation.type_controlled">
+                                                    <option
+                                                        ng-repeat="option in acrelation_type_options"
+                                                        value="{{option.value}}"
+                                                        label="{{option.name}}"
+                                                        ng-selected="option.value == acrelation.type_controlled"></option>
+                                                </select>
+                                                {% endverbatim %}
+
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <label>Name (display)</label>
+                                                <input type="text" class="form-control input-xs" ng-model="acrelation.name_for_display_in_citation"></input>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- Selected authority -->
+                                    <div class="form-group">
+                                        <div class="input-group input-group-xs">
+                                            <input class="form-control" type="text" ng-disabled="true" ng-model="acrelation.authority" />
+                                            <span class="input-group-btn" ng-show="acrelation.name_for_display_in_citation">
+                                                <a href=""
+                                                    class="btn btn-xs"
+                                                    ng-click="selectACRelation(acrelation)">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </a>
+                                            </span>
+                                            <span class="input-group-btn">
+                                                <a href=""
+                                                    class="btn btn-xs"
+                                                    ng-show="acrelation.authority"
+                                                    ng-click="disassociateAuthority(acrelation)">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                </a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="panel-body">
+                                <a href="" class="btn btn-xs" ng-click="addACRelation(selected_citation)">
+                                    Add Authority-Citation Relation <span class="glyphicon glyphicon-plus"></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <a class="h4 accordion-toggle collapsed"
+                                data-toggle="collapse"
+                                data-parent="#citation-panels"
+                                href="#ccrelation-fields">Related Citations</a>
+                        </div>
+                        <div class="panel-collapse collapse"
+                            role="tabpanel"
+                            id="ccrelation-fields">
+                            <div class="panel-body">
+                                <p class="text-info">Not yet implemented.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab">
+                            <a class="h4 accordion-toggle collapsed"
+                                data-toggle="collapse"
+                                data-parent="#citation-panels"
+                                href="#attribute-fields">Attributes</a>
+                        </div>
+                        <div class="panel-collapse collapse" role="tabpanel" id="attribute-fields">
+                            <div class="panel-body">
+                                <p class="text-info">Not yet implemented.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-class="{'col-xs-3': iframe_enabled, 'col-lg-2': iframe_enabled, 'col-xs-6': !iframe_enabled}">
+                <div class="panel panel-default"
+                    ng-show="selected_acrelation">
+                    <div class="panel-heading clearfix">
+                        {% verbatim %}
+                        <span class="h4">{{ selected_acrelation.authority.name }}</span>
+                        {% endverbatim %}
+                        <div class="btn-group pull-right"
+                            ng-show="!show_authority_buttons">
+                            <span class="btn btn-xs btn-success"
+                                ng-click="saveSelectedACRelationAndHide()">
+                                Save
+                            </span>
+                        </div>
+                        <div class="btn-group pull-right"
+                            ng-show="show_authority_buttons">
+                            <span class="btn btn-xs btn-success"
+                                ng-click="newAuthority(selected_acrelation)">
+                                New
+                            </span>
+                            <span class="btn btn-xs btn-primary"
+                                href=""
+                                ng-disabled="!selected_authority"
+                                ng-click="associateSelection()">
+                                Match
+                            </span>
+                        </div>
+                    </div>
+                    <ul class="list-group"
+                        style="max-height: 500px; overflow-y: scroll;"
+                        ng-show="show_authority_suggestions">
+                        {% verbatim %}
+                        <a class="list-group-item"
+                            href=""
+                            ng-click="selectSuggestion(suggestion)"
+                            ng-class="{'list-group-item-warning': selected_authority.id == suggestion.id}"
+                            ng-repeat="suggestion in suggested_authorities.data">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    {{ suggestion.name }}
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="progress" style="height: 7px;">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ suggestion.match }}" aria-valuemin="0" aria-valuemax="1" style="width: {{ suggestion.match*100 }}%;">
+                                            <span class="sr-only">{{ suggestion.match }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="suggestion-reasons" style="max-width: 100%; overflow-x: scroll;">
+                                <span class="text-danger"
+                                    style="margin-left: 5px;">{{ suggestion.type_controlled }}</span>
+                                <span class="text-success"
+                                    style="margin-left: 5px;"
+                                    ng-repeat="reason in suggestion.reasons">{{ reason[0] }}|{{ reason[1] }}</span>
+                            </div>
+                        </a>
+                        {% endverbatim %}
+                    </ul>
+                    <div class="panel-body"
+                        ng-show="show_authority_edit">
+                        {% verbatim %}
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text"
+                                class="form-control input-xs"
+                                ng-model="selected_authority.name" />
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select
+                                class="form-control input-xs"
+                                name="type_controlled"
+                                ng-model="selected_authority.type_controlled">
+                                <option
+                                    ng-repeat="option in authority_type_options"
+                                    value="{{option.value}}"
+                                    label="{{option.name}}"
+                                    ng-selected="option.value == selected_authority.type_controlled"></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea
+                                class="form-control input-xs"
+                                ng-model="selected_authority.description">
+                            </textarea>
+                        </div>
+                        {% endverbatim %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rendered Authority iframe. -->
+            <div class="col-xs-4 col-lg-6"
+                ng-show="iframe_enabled">
+                <div class="embed-responsive embed-responsive-4by3"
+                    style="height: 600px;">
+                    {% verbatim %}
+                    <iframe class="embed-responsive-item"
+                        id="explorer-iframe"
+                        src="{{ iframe_target }}"></iframe>
+                    {% endverbatim %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom panels -->
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="h4">Imported Citations</span>
+                    </div>
+                    <ul class="list-group">
+                        {% verbatim %}
+                        <a id="{{draftcitation.id}}"
+                            ng-class="{'list-group-item-warning': draftcitation.id == selected_draftcitation.id}"
+                            ng-repeat="draftcitation in draft_citations"
+                            ng-click="selectDraftCitation(draftcitation)"
+                            class="list-group-item citation-list-item">
+                            {{ draftcitation.title }}
+                        </a>
+                        {% endverbatim %}
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="h4">Original Record</span>
+                    </div>
+                    <table class="table table-compact"
+                        id="original-record-data"
+                        ng-show="selected_draftcitation">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% verbatim %}
+                            <tr>
+                                <td>Title</td>
+                                <td>{{ selected_draftcitation.title }}</td>
+                            </tr>
+                            <tr>
+                                <td>Type</td>
+                                <td>{{ selected_draftcitation.type_controlled }}</td>
+                            </tr>
+                            <tr>
+                                <td>Publication date</td>
+                                <td>{{ selected_draftcitation.publication_date }}</td>
+                            </tr>
+                            <tr>
+                                <td>Volume</td>
+                                <td>{{ selected_draftcitation.volume }}</td>
+                            </tr>
+                            <tr>
+                                <td>Issue</td>
+                                <td>{{ selected_draftcitation.issue }}</td>
+                            </tr>
+                            <tr>
+                                <td>Pages</td>
+                                <td>{{ selected_draftcitation.page_start }} - {{ selected_draftcitation.page_end }}</td>
+                            </tr>
+                            <tr>
+                                <td>Abstract</td>
+                                <td>{{ selected_draftcitation.abstract }}</td>
+                            </tr>
+                            {% endverbatim %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function () {
+    // Enable all tooltips on the page.
+    $('[data-toggle="tooltip"]').tooltip()
+})
+
+var clearOriginalRecord = function() {
+    $('#original-record-data tbody').empty();
+}
+
+$('.citation-list-item').click(function(e) {
+    var elem = $(this);
+
+    $.get('{% url "admin:importaccession_draftcitations" importaccession.id %}' + elem.attr('id') + '/', {}, function(response) {
+        clearOriginalRecord();
+
+        for (var key in response) {
+            // skip loop if the property is from prototype
+            if (!response.hasOwnProperty(key)) continue;
+
+            var value = response[key];
+            $('#original-record-data tbody').append(
+                '<tr>' +
+                    '<td>' + key + '</td>' +
+                    '<td>' + value + '</td>' +
+                '</tr>'
+            );
+        }
+    });
+});
+</script>
+{% endblock %}
