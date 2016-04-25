@@ -6,6 +6,7 @@
 {% load search_filters %}
 
 {% block meta_tags %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 {% endblock %}
 
@@ -282,12 +283,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endfor %}
     {% endif %}
 
-    <table  class="details" style="margin-top: 0px;">
-      <tr>
-        <td>Citation URI:</td>
-        <td>{{ citation.generate_uri }}</td>
-      </tr>
-    </table>
+
+    <div style="max-width: 100%; overflow-x: scroll;">
+        <p><strong>Citation URI</strong><br />
+        {{ citation.generate_uri }}</p>
+    </div>
   </div>
 
   <!-- for printing only -->
