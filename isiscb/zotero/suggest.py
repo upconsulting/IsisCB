@@ -62,11 +62,17 @@ def suggest_authority_by_resolutions(draftAuthority):
 
     resolutions = defaultdict(list)
     for resolvedAuthority in queryset:
+        # Just in case we marked this DraftAuthority resolved without creating
+        #  a corresponding InstanceResolutionEvent.
+        if resolvedAuthority.resolutions.count() == 0:
+            continue
+
         # SequenceMatcher.quick_ratio gives us a rough indication of the
         #  similarity between the two authority names.
-        match = difflib.SequenceMatcher(None, draftAuthority.name, resolvedAuthority.name).quick_ratio()
+        match = difflib.SequenceMatcher(None, draftAuthority.name,
+                                        resolvedAuthority.name).quick_ratio()
         if match > 0.6:     # This is an arbitrary threshold.
-            resolution = resolvedAuthority.resolutions.all()[0]
+            resolution = resolvedAuthority.resolutions.first()
             resolutions[resolution.to_instance.id].append((resolvedAuthority.name, match))
 
     if len(resolutions) == 0:

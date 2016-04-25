@@ -88,6 +88,11 @@ class DraftCitation(ImportedData):
     def __unicode__(self):
         return self.title
 
+    resolutions = GenericRelation('InstanceResolutionEvent',
+                                  related_query_name='citation_resolutions',
+                                  content_type_field='for_model',
+                                  object_id_field='for_instance_id')
+
 
 class DraftAuthority(ImportedData):
     """
@@ -139,6 +144,10 @@ class DraftAuthority(ImportedData):
     def __unicode__(self):
         return self.name
 
+    @property
+    def resolved(self):
+        return self.resolutions.count() > 0
+
     class Meta:
         verbose_name = 'draft authority record'
         verbose_name_plural = 'draft authority records'
@@ -179,8 +188,15 @@ class DraftACRelation(ImportedData):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series')
     )
-    type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES)
-    type_broad_controlled = models.CharField(max_length=2)
+    type_controlled = models.CharField(max_length=2, blank=True, null=True,
+                                       choices=TYPE_CHOICES)
+    type_broad_controlled = models.CharField(max_length=2, blank=True,
+                                             null=True)
+
+    resolutions = GenericRelation('InstanceResolutionEvent',
+                                  related_query_name='acrelation_resolutions',
+                                  content_type_field='for_model',
+                                  object_id_field='for_instance_id')
 
 
 class DraftCitationLinkedData(ImportedData):

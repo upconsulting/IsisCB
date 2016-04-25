@@ -39,3 +39,35 @@ def suggest_authority_json(request, authority_id):
             })
         suggestions.append(suggestion)
     return JsonResponse({'data': suggestions})
+
+
+@login_required
+@csrf_protect
+def suggest_acrelation_json(request, acrelation_id):
+    draftACRelation = get_object_or_404(DraftACRelation, pk=acrelation_id)
+    return suggest_authority_json(request, draftACRelation.authority_id)
+
+
+@login_required
+@csrf_protect
+def suggest_production_acrelation_json(request, acrelation_id):
+    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    if acrelation.resolutions.count() < 1:
+        draftCitation = acrelation.citation.resolutions.first().for_instance
+        draftAuthority = DraftAuthority.objects.create(
+            name=acrelation.name_for_display_in_citation,
+            part_of=draftCitation.part_of
+        )
+        draftACRelation = DraftACRelation.objects.create(
+            citation=draftCitation,
+            authority=draftAuthority,
+            part_of=draftCitation.part_of
+        )
+        InstanceResolutionEvent.objects.create(
+            for_instance=draftACRelation,
+            to_instance=acrelation
+        )
+    else:
+        draftAuthority = acrelation.resolutions.first().for_instance.authority
+
+    return suggest_authority_json(request, draftAuthority.id)

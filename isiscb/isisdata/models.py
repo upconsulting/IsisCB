@@ -486,18 +486,18 @@ class Citation(ReferencedEntity, CuratedMixin):
     Recource Types http://dublincore.org/documents/resource-typelist/
     """))
 
-    abstract = models.TextField(blank=True, help_text=help_text("""
+    abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.
     """))
 
-    edition_details = models.TextField(blank=True, help_text=help_text("""
+    edition_details = models.TextField(blank=True, null=True, help_text=help_text("""
     Use for describing the edition or version of the resource. Include names of
     additional contributors if necessary for clarification (such as translators,
     introduction by, etc). Always, use relationship table to list contributors
     (even if they are specified here).
     """))
 
-    physical_details = models.CharField(max_length=255, blank=True,
+    physical_details = models.CharField(max_length=255, null=True, blank=True,
                                         help_text=help_text("""
     For describing the physical description of the resource. Use whatever
     information is appropriate for the type of resource.
@@ -505,7 +505,8 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     # Storing this in the model would be kind of hacky. This will make it easier
     #  to do things like sort or filter by language.
-    language = models.ManyToManyField('Language', help_text=help_text("""
+    language = models.ManyToManyField('Language', blank=True, null=True,
+    help_text=help_text("""
     Language of the resource. Multiple languages can be specified.
     """))
 
@@ -586,6 +587,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         related_query_name='citations',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
+
+    resolutions = GenericRelation('zotero.InstanceResolutionEvent',
+                                  related_query_name='citation_resolutions',
+                                  content_type_field='to_model',
+                                  object_id_field='to_instance_id')
 
     def __unicode__(self):
         return strip_tags(self.title)
@@ -703,7 +709,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (SEARCH, 'SAC')
     )
     classification_system = models.CharField(max_length=4, blank=True,
-                                             null=True,
+                                             null=True, default=SWP,
                                              choices=CLASS_SYSTEM_CHOICES,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
@@ -897,7 +903,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     citation (e.g. 'introduction by', 'dissertation supervisor', etc).
     """)
 
-    name_for_display_in_citation = models.CharField(max_length=255,
+    name_for_display_in_citation = models.CharField(max_length=255, blank=True,
+                                                    null=True,
                                                     help_text=help_text("""
     Display for the authority as it is to be used when being displayed with the
     citation. Eg. the form of the author's name as it appears on a
@@ -905,7 +912,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     authority--Jenifer Elizabeth Koval.
     """))
 
-    name_as_entered = models.CharField(max_length=255, blank=True,
+    name_as_entered = models.CharField(max_length=255, null=True, blank=True,
                                        help_text=help_text("""
     Display for the authority as it is has been used in a publication.
     """))
@@ -952,6 +959,11 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         related_query_name='ac_relations',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
+
+    resolutions = GenericRelation('zotero.InstanceResolutionEvent',
+                                  related_query_name='acrelation_resolutions',
+                                  content_type_field='to_model',
+                                  object_id_field='to_instance_id')
 
     def _render_type_controlled(self):
         try:
@@ -1204,14 +1216,14 @@ class PartDetails(models.Model):
         verbose_name_plural = 'part details'
 
 
-    volume = models.CharField(max_length=255, blank=True)
-    volume_free_text = models.CharField(max_length=255, blank=True)
+    volume = models.CharField(max_length=255, null=True, blank=True)
+    volume_free_text = models.CharField(max_length=255, null=True, blank=True)
     volume_begin = models.IntegerField(blank=True, null=True)
     volume_end = models.IntegerField(blank=True, null=True)
-    issue_free_text = models.CharField(max_length=255, blank=True)
+    issue_free_text = models.CharField(max_length=255, null=True, blank=True)
     issue_begin = models.IntegerField(blank=True, null=True)
     issue_end = models.IntegerField(blank=True, null=True)
-    pages_free_text = models.CharField(max_length=255, blank=True)
+    pages_free_text = models.CharField(max_length=255, null=True, blank=True)
     page_begin = models.IntegerField(blank=True, null=True)
     page_end = models.IntegerField(blank=True, null=True)
 
