@@ -33,6 +33,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
+    sort_order_dir_comment = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
@@ -56,6 +57,15 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return search_models
 
+    def get_comment_model(self):
+        """Return an alphabetical list of model classes in the index."""
+        search_models = []
+
+        if self.is_valid():
+            search_models.append(apps.get_model(*'isisdata.comment'.split('.')))
+
+        return search_models
+
     def get_sort_order_citation(self):
         sort_order = 'publication_date_for_sort'
 
@@ -75,6 +85,18 @@ class MyFacetedSearchForm(FacetedSearchForm):
             sort_order = self.cleaned_data.get('sort_order_authority', 'name')
             if not sort_order:
                 sort_order = 'name'
+            #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
+            #    sort_order = 'name'
+
+        return sort_order
+
+    def get_sort_order_comment(self):
+        sort_order = 'created_on'
+
+        if self.is_valid():
+            sort_order = self.cleaned_data.get('sort_order_comment', 'comment_created_date')
+            if not sort_order:
+                sort_order = 'created_on'
             #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
             #    sort_order = 'name'
 
@@ -106,6 +128,17 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sort_order_dir
 
+    def get_sort_order_direction_comment(self):
+        sort_order_dir = 'descend'
+
+        if self.is_valid():
+            sort_order_dir = self.cleaned_data.get('sort_order_dir_comment', 'descend')
+
+            if not sort_order_dir:
+                sort_order_dir = 'descend'
+
+        return sort_order_dir
+
     def has_specified_field(self, query_string):
         query_parameters = query_string.split(':')
         # no field specified
@@ -123,12 +156,16 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if not self.is_valid():
             #return self.no_query_found()
             return {'authority' : self.no_query_found(),
-                    'citation': self.no_query_found()}
+                    'citation': self.no_query_found(),
+                    'comment': self.no_query_found()
+                    }
 
         if not self.cleaned_data.get('q'):
             #return self.no_query_found()
             return {'authority' : self.no_query_found(),
-                    'citation': self.no_query_found()}
+                    'citation': self.no_query_found(),
+                    'comment': self.no_query_found()
+                    }
 
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
 
@@ -144,6 +181,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         sqs_citation = sqs.load_all()
         sqs_authority = sqs_citation
+        sqs_comment = sqs_citation
 
         # We apply faceting ourselves.
         for facet in self.selected_facets:
@@ -154,26 +192,41 @@ class MyFacetedSearchForm(FacetedSearchForm):
             field = field.strip()
             value = value.strip()
 
+            # turn facet names into narrow calls
+            # each type of facet start with the model name it describes
+            # so we have to cut the model name off before narrowing the search
+            # hence field[9:] for citation facets ('citation_' is 9 characters long)
             if value and field.startswith('citation_'):
                 sqs_citation = sqs_citation.narrow(u'%s:"%s"' % (field[9:], sqs.query.clean(value)))
             if value and field.startswith('authority_'):
                 sqs_authority = sqs_authority.narrow(u'%s:"%s"' % (field[10:], sqs.query.clean(value)))
+            if value and field.startswith('comment_'):
+                sqs_comment = sqs_comment.narrow(u'%s:"%s"' % (field[8:], sqs.query.clean(value)))
+
 
         sort_order_citation = self.get_sort_order_citation()
         sort_order_authority = self.get_sort_order_authority()
+        sort_order_comment = self.get_sort_order_comment()
         sort_order_dir_citation = self.get_sort_order_direction_citation()
         sort_order_dir_authority = self.get_sort_order_direction_authority()
+        sort_order_dir_comment = self.get_sort_order_direction_comment()
 
         if sort_order_dir_citation == 'descend':
             sort_order_citation = "-" + sort_order_citation
         if sort_order_dir_authority == 'descend':
             sort_order_authority = "-" + sort_order_authority
+        if sort_order_dir_comment == 'descend':
+            sort_order_comment = "-" + sort_order_comment
 
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
+        results_comment = sqs_comment.models(*self.get_comment_model()).order_by(sort_order_comment)
+        print results_comment
 
         return {'authority' : results_authority,
-                'citation': results_citation}
+                'citation': results_citation,
+                'comment': results_comment
+                }
 
 
 class UserRegistrationForm(forms.Form):

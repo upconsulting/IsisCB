@@ -519,11 +519,13 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
 class CommentsIndex(indexes.SearchIndex, indexes.Indexable):
 
-    text = indexes.EdgeNgramField(document=True)
-    author = indexes.CharField(model_attr='created_by', indexed=False)
+    text = indexes.EdgeNgramField(document=True, use_template=True)
+    comment_author = indexes.CharField(model_attr='created_by', faceted=True, indexed=False)
+    comment_created_date = indexes.DateTimeField(model_attr='created_on', indexed=False)
+    comment_modified_date = indexes.DateTimeField(model_attr='modified_on', indexed=False)
 
     def get_model(self):
         return Comment
 
-    def prepare_author(self, obj):
+    def prepare_comment_author(self, obj):
         return obj.created_by.username

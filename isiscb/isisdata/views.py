@@ -855,6 +855,8 @@ def citation(request, citation_id):
     user_cache = caches['default']
     search_results = user_cache.get('search_results_citation_' + str(search_key))
     page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
+    model_prefix = 'isisdata.citation.'
+    page_suffix = '_page_citation'
 
     if search_results and fromsearch and page_citation:
         search_count = search_results.count()
@@ -863,16 +865,16 @@ def citation(request, citation_id):
             prev_search_result = search_results[(page_citation - 1)*20 - 1]
 
         # if we got to the last result of the previous page we need to count down the page number
-        if prev_search_result == 'isisdata.citation.' + citation_id:
+        if prev_search_result == model_prefix + citation_id:
             page_citation = page_citation - 1
-            user_cache.set(session_id + '_page_citation', page_citation)
+            user_cache.set(session_id + page_suffix, page_citation)
 
         search_results_page = search_results[(page_citation - 1)*20:page_citation*20 + 2]
 
         try:
-            search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
+            search_index = search_results_page.index(model_prefix + citation_id) + 1   # +1 for display.
             if search_index == 21:
-                user_cache.set(session_id + '_page_citation', page_citation+1)
+                user_cache.set(session_id + page_suffix, page_citation+1)
 
         except (IndexError, ValueError):
             search_index = None
@@ -1036,6 +1038,7 @@ class IsisSearchView(FacetedSearchView):
 
         page_citation = self.request.GET.get('page_citation', 1)
         page_authority = self.request.GET.get('page_authority', 1)
+        page_comment = self.request.GET.get('page_comment', 1)
 
         # self.request = request
         # self.form = self.build_form()
@@ -1053,6 +1056,8 @@ class IsisSearchView(FacetedSearchView):
         sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
         sort_field_authority = self.request.GET.get('sort_order_authority', None)
         sort_order_authority = self.request.GET.get('sort_order_dir_authority', None)
+        sort_field_comment = self.request.GET.get('sort_order_comment', None)
+        sort_order_comment = self.request.GET.get('sort_order_dir_comment', None)
 
         # If the user is logged in, attempt to save the search in their
         #  search history.
@@ -1104,9 +1109,11 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
+            user_cache.set(session_id + '_page_comment', int(page_comment))
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
+            user_cache.set('search_results_comment_' + str(search_key), self.queryset['comment'].values_list('id', flat=True), 3600)
 
         context = self.get_context_data(**{
             # self.form_name: form,
@@ -1132,27 +1139,38 @@ class IsisSearchView(FacetedSearchView):
         except (TypeError, ValueError):
             raise Http404("Not a valid number for page.")
 
+        try:
+            page_no_comment = int(self.request.GET.get('page_comment', 1))
+        except (TypeError, ValueError):
+            raise Http404("Not a valid number for page.")
+
         if page_no_authority < 1:
             raise Http404("Pages should be 1 or greater.")
 
         if page_no_citation < 1:
             raise Http404("Pages should be 1 or greater.")
 
+        if page_no_comment < 1:
+            raise Http404("Pages should be 1 or greater.")
+
         start_offset_authority = (page_no_authority - 1) * self.results_per_page
         start_offset_citation = (page_no_citation - 1) * self.results_per_page
+        start_offset_comment = (page_no_comment -1) * self.results_per_page
 
         if isinstance(self.queryset, EmptySearchQuerySet):
             self.queryset[0:self.results_per_page]
             paginator_authority = Paginator(self.queryset, self.results_per_page)
             paginator_citation = Paginator(self.queryset, self.results_per_page)
+            paginator_comment = Paginator(self.queryset, self.results_per_page)
 
         else:
             self.queryset['citation'][start_offset_citation:start_offset_citation + self.results_per_page]
             self.queryset['authority'][start_offset_authority:start_offset_authority+ self.results_per_page]
+            self.queryset['comment'][start_offset_comment:start_offset_comment + self.results_per_page]
 
             paginator_authority = Paginator(self.queryset['authority'], self.results_per_page)
             paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
-
+            paginator_comment = Paginator(self.queryset['comment'], self.results_per_page)
 
         try:
             page_authority = paginator_authority.page(page_no_authority)
@@ -1170,7 +1188,15 @@ class IsisSearchView(FacetedSearchView):
             except InvalidPage:
                 raise Http404("No such page!")
 
-        return ({'authority':paginator_authority, 'citation':paginator_citation}, {'authority':page_authority, 'citation':page_citation})
+        try:
+            page_comment = paginator_comment.page(page_no_comment)
+        except InvalidPage:
+            try:
+                page_comment = paginator_comment.page(page_no_comment)
+            except InvalidPage:
+                raise Http404("No such page!")
+
+        return ({'authority':paginator_authority, 'citation':paginator_citation, 'comment':paginator_comment }, {'authority':page_authority, 'citation':page_citation, 'comment':page_comment})
 
     def get_context_data(self, **kwargs):
         if 'form' not in kwargs:
@@ -1204,19 +1230,25 @@ class IsisSearchView(FacetedSearchView):
         if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0
             extra['facets_authority'] = 0
+            extra['facets_comment'] = 0
             extra['count_citation'] = len(self.queryset)
             extra['count_authority'] = len(self.queryset)
+            extra['count_comment'] = len(self.queryset)
         else:
             extra['facets_authority'] = self.queryset['authority'].facet_counts()
             extra['facets_citation'] = self.queryset['citation'].facet_counts()
+            extra['facets_comment'] = self.queryset['comment'].facet_counts()
             extra['count_citation'] = len(self.queryset['citation'])
             extra['count_authority'] = len(self.queryset['authority'])
+            extra['count_comment'] = len(self.queryset['comment'])
 
         extra['models'] = self.request.GET.getlist('models')
         extra['sort_order_citation'] = self.request.GET.get('sort_order_citation')
         extra['sort_order_authority'] = self.request.GET.get('sort_order_authority')
+        extra['sort_order_comment'] = self.request.GET.get('sort_order_comment')
         extra['sort_order_dir_citation'] = self.request.GET.get('sort_order_dir_citation')
         extra['sort_order_dir_authority'] = self.request.GET.get('sort_order_dir_authority')
+        extra['sort_order_dir_comment'] = self.request.GET.get('sort_order_dir_comment')
 
         # we need to change something about this, this is terrible...
         # but it works
@@ -1225,6 +1257,9 @@ class IsisSearchView(FacetedSearchView):
 
         if not extra['sort_order_dir_authority']:
             extra['sort_order_dir_authority'] = 'ascend'
+
+        if not extra['sort_order_dir_comment']:
+            extra['sort_order_dir_comment'] = 'ascend'
 
         extra['active'] = 'home'
 

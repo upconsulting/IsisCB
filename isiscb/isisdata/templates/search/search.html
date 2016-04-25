@@ -15,6 +15,10 @@ $(document).ready(function() {
   if ('{{models.0}}' == 'isisdata.authority') {
     $('#search_tabs li:eq(1) a').tab('show')
   }
+
+  if ('{{models.0}}' == 'isisdata.comment') {
+    $('#search_tabs li:eq(2) a').tab('show')
+  }
 });
 </script>
 
@@ -27,7 +31,11 @@ $(document).ready(function() {
         <div class="col-sm-12 col-md-12">
             <ul id="search_tabs" class="nav nav-tabs space-top hidden-print" role="tablist">
                 <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
+
                 <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
+
+                <li role="presentation"><a href="#comments" data-target="#comments, #comments_facets" role="tab" data-toggle="tab">Comments ({{ count_comment }})</a></li>
+
                 <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
                 <li class="no-tab pull-right">
                     <div class="topnav text-center">
@@ -59,6 +67,19 @@ $(document).ready(function() {
                     </div>
                     <div class="col-sm-8 col-md-9">
                         {% include "search/search_results_authorities.html" %}
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Comments tab -->
+            <div role="tabpanel" class="tab-pane" id="comments">
+                <div class="row space-top">
+                    <div class="col-sm-4 col-md-3">
+                        {% include "search/search_facets_comments.html" %}
+                    </div>
+                    <div class="col-sm-8 col-md-9">
+                        {% include "search/search_results_comments.html" %}
                     </div>
                 </div>
 

@@ -1,0 +1,32 @@
+{% load app_filters %}
+{% load metadata_filters %}
+
+{% if query %}
+
+<div class="panel panel-default hidden-print">
+  <div class="panel-heading"><h3 class="panel-title">Author</h3></div>
+  <div class="facet_panel panel-body">
+    {% if facets_comment.fields.comment_author %}
+          <ul class="selected_facets">
+            {% for author in selected_facets.comment_comment_author %}
+            {% with author|create_facet_string:'comment_comment_author' as encoded_author %}
+            <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.comment' }}"><i class="fa fa-check-square-o"></i> {{ author }}</a></li>
+            {% endwith %}
+            {% endfor %}
+          </ul>
+          <ul class="unselected_facets">
+            {% for author in facets_comment.fields.comment_author|slice:":7" %}
+            {% if author.0 %}
+            {% if "comment_comment_author" not in selected_facets.keys or author.0 not in selected_facets.comment_comment_author %}
+            <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.comment' }}&amp;selected_facets=comment_comment_author:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0 }} </a>({{ author.1 }})</li>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+          </ul>
+    {% else %}
+            <p>No author facets.</p>
+    {% endif %}
+
+</div>
+</div>
+{% endif %}

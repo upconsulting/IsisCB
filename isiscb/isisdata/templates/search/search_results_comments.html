@@ -1,0 +1,96 @@
+{% load app_filters %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% if query %}
+<div class="row">
+  <div class="col-md-8">
+    <h3><span class="visible-print-inline">Comments </span>Search Results</h3>
+    <div class="results-info">Showing {{ page.comment.start_index }} to {{ page.comment.end_index }} of {{ count_comment}} results.</div>
+  </div>
+  <div class="col-md-4 menuContainer hidden-print">
+    <div class="dropdown pull-right">
+        {% if sort_order_dir_comment == 'descend' %}
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_comment:ascend'|set_index_model:'models:isisdata.comment' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+        {% else %}
+        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_comment:descend'|set_index_model:'models:isisdata.comment' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+        {% endif %}
+
+      </div>
+      <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+    </div>
+  </div>
+
+
+    {% for result in page.comment.object_list %}
+    <p>
+          <span class="fa fa-comment-o"></span>
+          {{ result.comment_author }} on {{ result.comment_modified_date }} about <a href="{{ result.object.subject|get_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.object.subject|create_label }}</a>:
+          <br>
+          "{{ result.text }}"
+    </p>
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
+    {% if page.comment.has_previous or page.comment.has_next %}
+    <nav class="hidden-print">
+      <ul class="pagination">
+        <li class="disabled"><a>Go to page:</a></li>
+
+          {% if page.comment.has_previous %}
+          <li>
+            {% with pagenr=page.comment.previous_page_number|stringformat:"s"  %}
+            {% with ppage='page_comment:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.comment' }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          {% else %}
+          <li class="disabled">
+            {% with pagenr=page.comment.number|stringformat:"s"  %}
+            {% with ppage='page_comment:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.comment' }}" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          {% endif %}
+          {% if page.comment.has_previous or page.comment.has_next %}
+          {% for p in page.comment.paginator.page_range %}
+          {% with pagenr=forloop.counter|stringformat:"s" %}
+          {% with ppage='page_comment:'|add:pagenr %}
+              <li {% if page.comment.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.comment' }}">{{ p }}</a></li>
+          {% endwith %}
+          {% endwith %}
+          {% endfor %}
+          {% endif %}
+          {% if page.comment.has_next %}
+          <li>
+            {% with pagenr=page.comment.next_page_number|stringformat:"s" %}
+            {% with ppage='page_comment:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.comment' }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          {% else %}
+          <li class="disabled">
+            {% with pagenr=page.comment.number|stringformat:"s" %}
+            {% with ppage='page_comment:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.comment' }}" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+{% else %}
+    {# Show some example queries to run, maybe query syntax, something else? #}
+{% endif %}
