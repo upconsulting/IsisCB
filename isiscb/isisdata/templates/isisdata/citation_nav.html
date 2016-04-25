@@ -76,11 +76,11 @@
 <ul class="topics_list">
   {% for category in categories %}
     <li>
-        {% if place.authority %}
+        {% if category.authority %}
         <a href="{% url 'authority' category.authority.id %}">
         {% endif %}
             {{ category.authority.name }} <i class="fa fa-info-circle"></i>
-        {% if place.authority %}
+        {% if category.authority %}
         </a>
         {% endif %}
     </li>
