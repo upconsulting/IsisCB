@@ -459,7 +459,7 @@ class ZoteroParser(RDFParser):
         return tuple(value.split('-'))
 
     def postprocess_pages(self, entry):
-        if type(entry.pages) == not in [tuple, list]:
+        if type(entry.pages) not in [tuple, list]:
             start = entry.pages
             end = None
         else:
