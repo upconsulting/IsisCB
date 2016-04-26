@@ -845,10 +845,13 @@ def citation(request, citation_id):
     fromsearch = request.GET.get('fromsearch', False)
     #search_key = request.session.get('search_key', None)
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
+
     query_string = request.GET.get('query_string', None)
+
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
+        search_key = base64.b64encode(last_query)
+        # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
 
@@ -857,20 +860,22 @@ def citation(request, citation_id):
     page_citation = user_cache.get(session_id + '_page_citation', None) #request.session.get('page_citation', None)
 
     if search_results and fromsearch and page_citation:
+
         search_count = search_results.count()
+
         prev_search_result = None
-        if (page_citation > 1):
+        # Only display the "previous" link if we are on page 2+.
+        if page_citation > 1:
             prev_search_result = search_results[(page_citation - 1)*20 - 1]
 
-        # if we got to the last result of the previous page we need to count down the page number
+        # If we got to the last result of the previous page we need to count
+        #  down the page number.
         if prev_search_result == 'isisdata.citation.' + citation_id:
             page_citation = page_citation - 1
             user_cache.set(session_id + '_page_citation', page_citation)
-
         search_results_page = search_results[(page_citation - 1)*20:page_citation*20 + 2]
-
         try:
-            search_index = search_results_page.index('isisdata.citation.' + citation_id) + 1   # +1 for display.
+            search_index = search_results_page.index(citation_id) + 1   # +1 for display.
             if search_index == 21:
                 user_cache.set(session_id + '_page_citation', page_citation+1)
 
@@ -1029,7 +1034,6 @@ class IsisSearchView(FacetedSearchView):
         return kwargs
 
     def form_valid(self, form):
-    # def __call__(self, request):
         """
         Overridden to provide search history log functionality.
         """
@@ -1044,11 +1048,13 @@ class IsisSearchView(FacetedSearchView):
         # !! Why are we using strings rather than bools?
         log = self.request.GET.get('log', 'True') != 'False'
 
+        # These are used to generate a SearchQuery instance.
         parameters = self.request.GET.get('q', None)
-        if (parameters):
-            parameters = parameters.encode('ascii','ignore')
+        if parameters:
+            parameters = parameters.encode('ascii', 'ignore')
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
+
         sort_field_citation = self.request.GET.get('sort_order_citation', None)
         sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
         sort_field_authority = self.request.GET.get('sort_order_authority', None)
@@ -1087,14 +1093,16 @@ class IsisSearchView(FacetedSearchView):
             # Perform the search, and store the results in the cache.
             # self.results = self.get_results()
             self.queryset = form.search()
-            user_cache.set(cache_key, self.queryset, 3600)
+            # Disabling cache for the search itself, for now.
+            # user_cache.set(cache_key, self.queryset, 3600)
 
         # self.results = self.queryset
         # This code sets up cached data to support the search result progression
         #  feature in the citation and authority detail views. It is independent
         #  of the search cacheing above, which is just for performance.
         if parameters:  # Store results in the session cache.
-            search_key = base64.b64encode(parameters)
+            search_key = base64.b64encode(self.request.get_full_path().encode('ascii', 'ignore'))
+
             # make sure we have a session key
             if hasattr(self.request, 'session') and not self.request.session.session_key:
                 self.request.session.save()
@@ -1112,7 +1120,6 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
         return self.render_to_response(context)
-        # return self.create_response()
 
     def build_page(self):
         """
@@ -1428,7 +1435,6 @@ def user_profile(request, username):
     # Only the owner of the profile can change it. We use a regular Form rather
     #  than a ModelForm because some fields belong to User and other fields
     #  belong to UserProfile.
-    print request.user.id, user.id, request.method
     form_error = False
     if request.method == 'POST' and request.user.id == user.id:
         form = UserProfileForm(request.POST)
