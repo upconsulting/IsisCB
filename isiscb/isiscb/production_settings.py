@@ -22,19 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['SECRET_KEY']
 
-try:
-    DEBUG = eval(os.environ.get('DEBUG', 'False'))
-except NameError:
-    DEBUG = False
+DEBUG = os.environ.get('DEBUG', False)
 
-
-ALLOWED_HOSTS = [
-    'isiscb-staging.elasticbeanstalk.com',
-    'isiscb.elasticbeanstalk.com',
-    'isiscb-production.elasticbeanstalk.com',
-    'isiscb-develop.elasticbeanstalk.com',
-    '.isiscb.org',
-]
+ALLOWED_HOSTS = ['*']
 
 MIGRATION_MODULES = {
     'isisdata': 'isisdata.migrations'
