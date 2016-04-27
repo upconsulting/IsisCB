@@ -546,7 +546,7 @@ app.controller('CitationListController',
                                             ng-repeat="option in type_options"
                                             value="{{option.value}}"
                                             label="{{option.name}}"
-                                            ng-selected="option.value == selected_citation.type_controlled"></option>
+                                            ng-selected="option.value == selected_citation.type_controlled">{{option.name}}</option>
                                         {% endverbatim %}
                                     </select>
                                 </div>
@@ -563,7 +563,7 @@ app.controller('CitationListController',
                                             ng-repeat="option in language_options"
                                             value="{{option.value}}"
                                             label="{{option.name}}"
-                                            ng-selected="option.value == selected_citation.language"></option>
+                                            ng-selected="option.value == selected_citation.language">{{ option.name }}</option>
                                         {% endverbatim %}
                                     </select>
                                 </div>
@@ -637,7 +637,7 @@ app.controller('CitationListController',
                                                         ng-repeat="option in acrelation_type_options"
                                                         value="{{option.value}}"
                                                         label="{{option.name}}"
-                                                        ng-selected="option.value == acrelation.type_controlled"></option>
+                                                        ng-selected="option.value == acrelation.type_controlled">{{ option.name }}</option>
                                                 </select>
                                                 {% endverbatim %}
 
@@ -787,7 +787,7 @@ app.controller('CitationListController',
                                     ng-repeat="option in authority_type_options"
                                     value="{{option.value}}"
                                     label="{{option.name}}"
-                                    ng-selected="option.value == selected_authority.type_controlled"></option>
+                                    ng-selected="option.value == selected_authority.type_controlled">{{ option.name }}</option>
                             </select>
                         </div>
                         <div class="form-group">
