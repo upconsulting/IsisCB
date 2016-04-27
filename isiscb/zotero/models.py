@@ -82,6 +82,7 @@ class DraftCitation(ImportedData):
 
     page_start = models.CharField(max_length=100, blank=True, null=True)
     page_end = models.CharField(max_length=100, blank=True, null=True)
+    pages_free_text = models.CharField(max_length=100, blank=True, null=True)
     volume = models.CharField(max_length=100, blank=True, null=True)
     issue = models.CharField(max_length=100, blank=True, null=True)
 

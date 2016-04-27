@@ -1,6 +1,6 @@
 from rest_framework import viewsets, serializers, mixins, permissions
 
-from isisdata.models import Citation, Authority, ACRelation
+from isisdata.models import Citation, Authority, ACRelation, PartDetails
 from zotero.models import *
 
 
@@ -46,9 +46,16 @@ class ACRelationSerializer(serializers.ModelSerializer):
         return instance
 
 
+class PartDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PartDetails
+        exclude = []
+
+
 class CitationSerializer(serializers.ModelSerializer):
     resolutions = InstanceResolutionEventSerializer(many=True, read_only=True)
     acrelation_set = ACRelationSerializer(many=True, read_only=True)
+    part_details = PartDetailsSerializer()
 
     class Meta:
         model = Citation
@@ -58,6 +65,18 @@ class CitationSerializer(serializers.ModelSerializer):
                    'created_by_fm',
                    'related_citations')
 
+    def update(self, instance, validated_data):
+        """
+        Overwritten to allow related fields.
+        """
+        for attr, value in validated_data.items():
+            if attr == 'part_details':
+                for a, v in value.iteritems():
+                    setattr(instance.part_details, attr, value)
+            else:
+                setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 class DraftAuthoritySerializer(serializers.ModelSerializer):
     resolutions = InstanceResolutionEventSerializer(many=True)
@@ -74,8 +93,6 @@ class DraftACRelationSerializer(serializers.ModelSerializer):
     class Meta:
         model = DraftACRelation
         exclude = []
-
-
 
 
 class DraftCitationSerializer(serializers.ModelSerializer):

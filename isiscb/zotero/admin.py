@@ -299,8 +299,16 @@ class ImportAccessionAdmin(admin.ModelAdmin):
             creation_msg = self._get_creation_message(request, draftcitation)
             pages = '%s - %s' % (draftcitation.page_start,
                                  draftcitation.page_end)
+            if draftcitation.pages_free_text:
+                pages_free_text = draftcitation.pages_free_text
+            else:
+                pages_free_text = '%s - %s' % (draftcitation.page_start,
+                                               draftcitation.page_end)
+
             part_details = PartDetails(**{
-                'pages_free_text': pages,
+                'page_begin': draftcitation.page_start,
+                'page_end': draftcitation.page_end,
+                'pages_free_text': pages_free_text,
                 'volume': draftcitation.volume,
                 'issue_free_text': draftcitation.issue,
             })
@@ -1208,7 +1216,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                         attributeType = attributeForm.cleaned_data['type_controlled']
                     except KeyError:
                         continue
-                        
+
                     valueModel = attributeType.value_content_type.model_class()
                     value = attributeForm.cleaned_data['value']
 

@@ -31,6 +31,7 @@ LINK_ELEM = rdflib.URIRef(RSS + u"link")
 FORENAME_ELEM = rdflib.URIRef(FOAF + u'givenname')
 SURNAME_ELEM = rdflib.URIRef(FOAF + u'surname')
 VOL = rdflib.term.URIRef(PRISM + u'volume')
+ISSUE = rdflib.term.URIRef(PRISM + u'number')
 IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
 
@@ -281,10 +282,13 @@ class ZoteroParser(RDFParser):
          rdflib.URIRef("http://purl.org/dc/elements/1.1/identifier")),
         ('abstract', rdflib.URIRef("http://purl.org/dc/terms/abstract")),
         ('authors_full', rdflib.URIRef("http://purl.org/net/biblio#authors")),
-        ('seriesEditors', rdflib.URIRef("http://www.zotero.org/namespaces/export#seriesEditors")),
+        ('seriesEditors',
+         rdflib.URIRef("http://www.zotero.org/namespaces/export#seriesEditors")),
         ('editors', rdflib.URIRef("http://purl.org/net/biblio#editors")),
-        ('contributors', rdflib.URIRef("http://purl.org/net/biblio#contributors")),
-        ('translators', rdflib.URIRef("http://www.zotero.org/namespaces/export#translators")),
+        ('contributors',
+         rdflib.URIRef("http://purl.org/net/biblio#contributors")),
+        ('translators',
+         rdflib.URIRef("http://www.zotero.org/namespaces/export#translators")),
         ('link', rdflib.URIRef("http://purl.org/rss/1.0/modules/link/link")),
         ('title', rdflib.URIRef("http://purl.org/dc/elements/1.1/title")),
         ('isPartOf', rdflib.URIRef("http://purl.org/dc/terms/isPartOf")),
@@ -325,7 +329,6 @@ class ZoteroParser(RDFParser):
         ident_type = self.graph.value(subject=value, predicate=TYPE_ELEM)
         if ident_type == URI_ELEM:
             self.set_value('uri', identifier)
-
 
     def handle_link(self, value):
         """
@@ -439,6 +442,8 @@ class ZoteroParser(RDFParser):
 
             if p == VOL:        # Volume number
                 self.set_value('volume', unicode(o))
+            elif p == ISSUE:
+                self.set_value('issue', unicode(o))
             elif p == IDENT:
                 # Zotero (in all of its madness) makes some identifiers, like
                 #  DOIs, properties of Journals rather than the Articles to
@@ -466,6 +471,7 @@ class ZoteroParser(RDFParser):
             try: # ISISCB-395: Skip malformed page numbers.
                 start, end = entry.pages
             except ValueError:
+                setattr(entry, 'pagesFreeText', entry.pages)
                 del entry.pages
                 return
         setattr(entry, 'pageStart', start)
@@ -638,6 +644,7 @@ def process_paper(paper, instance):
         ('type_controlled', 'documentType'),
         ('page_start', 'pageStart'),
         ('page_end', 'pageEnd'),
+        ('pages_free_text', 'pagesFreeText'),
         ('volume', 'volume'),
         ('issue', 'issue'),
     ]
