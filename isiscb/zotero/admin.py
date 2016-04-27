@@ -135,7 +135,8 @@ class ImportAccessionAdmin(admin.ModelAdmin):
                    instance.part_of.imported_by, request.user.username)\
            .strip()
 
-    def _get_or_create_acrelation(self, request, draftcitation, citation, draftacrelation):
+    def _get_or_create_acrelation(self, request, draftcitation, citation,
+                                  draftacrelation):
         """
 
         """
@@ -146,14 +147,13 @@ class ImportAccessionAdmin(admin.ModelAdmin):
 
         # ACRelations created here are headless -- the curator has yet to
         #  associate a specific Authority instance with this relation.
-        acrelation = ACRelation(
+        acrelation = ACRelation.objects.create(
             citation=citation,
             name_for_display_in_citation=draftacrelation.authority.name,
             type_controlled=draftacrelation.type_controlled,
             type_broad_controlled=draftacrelation.type_broad_controlled,
             record_history=self._get_creation_message(request, draftcitation),
         )
-        acrelation.save()
 
         InstanceResolutionEvent(for_instance=draftacrelation,
                                 to_instance=acrelation).save()
@@ -287,7 +287,24 @@ class ImportAccessionAdmin(admin.ModelAdmin):
         return HttpResponse(response_data, content_type='application/json')
 
     def get_citation_for_draft(self, request, accession_id, draftcitation_id):
+        """
+        Generate a :class:`.Citation` instance and attendant relations for a
+        :class:`.DraftCitation` instance.
+
+        Parameters
+        ----------
+        request : :class:`django.http.request.HttpRequest`
+        accession_id : int
+        draftcitation_id : int
+
+        Returns
+        -------
+        response : :class:`django.http.response.HttpResponse`
+            JSON representation of a :class:`.Citation` instance.
+        """
+
         draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+
         if draftcitation.resolutions.count() == 1:
             citation = draftcitation.resolutions.first().to_instance
         else:
@@ -332,9 +349,8 @@ class ImportAccessionAdmin(admin.ModelAdmin):
 
             # If the publication date is available and parse-able, create the
             #  Attribute and other attendant objects.
-
-
             if iso_publication_date:
+                # Chances are good that this already exists, but just in case.
                 attribute_type, _ = AttributeType.objects.get_or_create(
                     name='PublicationDate',
                     defaults={
@@ -342,17 +358,16 @@ class ImportAccessionAdmin(admin.ModelAdmin):
                         'display_name': 'Publication Date',
                     }
                 )
-                attribute = Attribute(
+
+                attribute = Attribute.objects.create(
                     value_freeform=draftcitation.publication_date,
                     source=citation,
                     type_controlled=attribute_type,
                 )
-                attribute.save()
-                value = DateValue(
+                value = DateValue.objects.create(
                     value=iso_publication_date,
                     attribute=attribute,
                 )
-                value.save()
 
             for draftacrelation in draftcitation.authority_relations.all():
                 self._get_or_create_acrelation(request, draftcitation,
@@ -360,7 +375,7 @@ class ImportAccessionAdmin(admin.ModelAdmin):
 
             # Reload the Citation instance so that we are assured to have all
             #  of the updated fields/relations. This might be overkill, but a
-            #  small price to pay.
+            #  relatively small price to pay.
             citation = Citation.objects.get(pk=citation.id)
 
         data = {'citation': CitationSerializer(citation).data}

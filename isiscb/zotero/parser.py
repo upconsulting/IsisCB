@@ -13,6 +13,7 @@ import logging
 from datetime import datetime
 
 from models import *
+from isisdata.models import Authority, Citation, ACRelation
 
 # rdflib complains a lot.
 logging.getLogger("rdflib").setLevel(logging.ERROR)
@@ -23,6 +24,8 @@ DC = u'http://purl.org/dc/elements/1.1/'
 FOAF = u'http://xmlns.com/foaf/0.1/'
 PRISM = u'http://prismstandard.org/namespaces/1.2/basic/'
 RSS = u'http://purl.org/rss/1.0/modules/link/'
+BIBLIO = u'http://purl.org/net/biblio#'
+ZOTERO = u'http://www.zotero.org/namespaces/export#'
 
 URI_ELEM = rdflib.URIRef("http://purl.org/dc/terms/URI")
 TYPE_ELEM = rdflib.term.URIRef(RDF + u'type')
@@ -34,6 +37,17 @@ VOL = rdflib.term.URIRef(PRISM + u'volume')
 ISSUE = rdflib.term.URIRef(PRISM + u'number')
 IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
+
+
+BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
+JOURNAL = rdflib.term.URIRef(BIBLIO + 'Journal')
+WEBSITE = rdflib.term.URIRef(ZOTERO + 'Website')
+
+# TODO: We don't have the right relation types to support WEBSITE yet!
+PARTOF_TYPES = [
+    (BOOK, 'book'),
+    (JOURNAL, 'journal'),
+]
 
 
 
@@ -273,7 +287,7 @@ class ZoteroParser(RDFParser):
         'webpage': 'WE',
     }
     tags = {
-        'isPartOf': 'journal'
+        # 'isPartOf': 'journal'
     }
 
     meta_elements = [
@@ -439,7 +453,7 @@ class ZoteroParser(RDFParser):
     def handle_isPartOf(self, value):
         journal = None
         for s, p, o in self.graph.triples((value, None, None)):
-
+            print s, p, o
             if p == VOL:        # Volume number
                 self.set_value('volume', unicode(o))
             elif p == ISSUE:
@@ -457,7 +471,14 @@ class ZoteroParser(RDFParser):
                 except ValueError:
                     pass
             elif p == TITLE:
-                journal = unicode(o)    # Journal title.
+                # This could be a journal, book, website, or other
+                #  super-publication to which the current record belongs.
+                self.set_value('partof__title', unicode(o))
+            elif p == TYPE_ELEM:
+                # Indicates the type of super-publication (e.g. Journal, Book).
+                #(BOOK, 'DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER),
+                self.set_value('partof__type', dict(PARTOF_TYPES)[o])
+
         return journal
 
     def handle_pages(self, value):
@@ -478,43 +499,6 @@ class ZoteroParser(RDFParser):
         setattr(entry, 'pageEnd', end)
         del entry.pages
 
-    def postprocess_link(self, entry):
-        """
-        Attempt to load full-text content from resource.
-        """
-
-        if not self.follow_links:
-            return
-
-        if type(entry.link) is not list:
-            entry.link = [entry.link]
-
-        for link in list(entry.link):
-            if not os.path.exists(link):
-                continue
-
-            mime_type = magic.from_file(link, mime=True)
-            if mime_type == 'application/pdf':
-                structuredfeature = extract_pdf(link)
-            elif mime_type == 'text/plain':
-                structuredfeature = extract_text(link)
-            else:
-                structuredfeature = None
-
-            if not structuredfeature:
-                continue
-
-            fset_name = mime_type.split('/')[-1] + '_text'
-            if not fset_name in self.full_text:
-                self.full_text[fset_name] = {}
-
-            if hasattr(self, 'index_by'):
-                ident = getattr(entry, self.index_by)
-            else:   # If `index_by` is not set, use `uri` by default.
-                ident = entry.uri
-
-            self.full_text[fset_name][ident] = structuredfeature
-
 
 def read(path):
     """
@@ -528,7 +512,6 @@ def read(path):
     Returns
     -------
     list
-        A list of :class:`.Paper`\s.
     """
 
     parser = ZoteroParser(path, follow_links=False)
@@ -538,18 +521,41 @@ def read(path):
 
 
 def process_authorities(paper, instance):
+    """
+    Create :class:.`DraftAuthority` and :class:`.DraftACRelation` instances from
+    parsed data.
+
+    Parameters
+    ----------
+    paper : :class:`.Paper`
+        Vanilla object representing a single Zotero record, and containing
+        parsed data.
+    instance : :class:`.ImportAccession`
+        The current accession instance.
+
+    Returns
+    -------
+    tuple
+        ``([Authorities], [ACRelations])``
+
+    """
+
+    # The entries below map parsed fields (2nd position) onto values for
+    #  Authority.type_controlled and ACRelation.type_controlled
     authority_fields = [
-        ('PE', 'AU', 'authors_full'),
-        ('PE', 'ED', 'editors'),
-        ('PE', 'ED', 'seriesEditors'),
-        ('PE', 'CO', 'contributors'),
-        ('PE', 'TR', 'translators'),
-        ('SE', 'PE', 'journal'),
+        (Authority.PERSON, ACRelation.AUTHOR, 'authors_full', DraftACRelation, 'citation'),
+        (Authority.PERSON, ACRelation.EDITOR, 'editors', DraftACRelation, 'citation'),
+        (Authority.PERSON, ACRelation.EDITOR, 'seriesEditors', DraftACRelation, 'citation'),
+        (Authority.PERSON, ACRelation.CONTRIBUTOR, 'contributors', DraftACRelation, 'citation'),
+        (Authority.PERSON, ACRelation.TRANSLATOR, 'translators', DraftACRelation, 'citation'),
+        (Authority.SERIAL_PUBLICATION, ACRelation.PERIODICAL, 'partof__title', DraftACRelation, 'citation'),
+
+        # ('DraftACRelation', 'authority', ACRelation.PERIODICAL)),('DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER)),
     ]
 
     draftAuthorities = []
     draftACRelations = []
-    for authority_type, acrelation_type, field in authority_fields:
+    for authority_type, acrelation_type, field, relation_model, relation_field in authority_fields:
         if not hasattr(paper, field):
             continue
 
