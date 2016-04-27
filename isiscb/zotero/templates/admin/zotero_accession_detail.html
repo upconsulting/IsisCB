@@ -342,6 +342,7 @@ app.controller('CitationListController',
         // Get a new Citation instance from the selected DraftCitation instance.
         DraftCitation.getCitation({id: draftcitation.id})
             .$promise.then(function(data) {
+                console.log(data);
                 $scope.selected_citation = data.citation;
             });
     }
@@ -513,23 +514,37 @@ app.controller('CitationListController',
                                     <div class="row">
                                         <div class="col-xs-6">
                                             <label for="id_page_start">Start page:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.page_start.help_text }}" class="fa fa-info-circle"></a></label>
-                                            <input class="form-control input-xs" id="id_page_start" maxlength="2000" name="page_start" type="text" ng-model="selected_citation.page_start"></input>
+                                            <input class="form-control input-xs" id="id_page_start" maxlength="2000" name="page_begin" type="text" ng-model="selected_citation.part_details.page_begin"></input>
                                         </div>
                                         <div class="col-xs-6">
                                             <label for="id_page_end">End page:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.page_end.help_text }}" class="fa fa-info-circle"></a></label>
-                                            <input class="form-control input-xs" id="id_page_end" maxlength="2000" name="page_end" type="text" ng-model="selected_citation.page_end"></input>
+                                            <input class="form-control input-xs" id="id_page_end" maxlength="2000" name="page_end" type="text" ng-model="selected_citation.part_details.page_end"></input>
+                                        </div>
+                                    </div>
+                                    <label>Pages (free text):</label>
+                                    <input class="form-control input-xs" id="id_page_start" maxlength="2000" name="pages_free_text" type="text" ng-model="selected_citation.part_details.pages_free_text"></input>
+                                </div>
+                                <div class="citation_form-group form-group">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <label for="id_volume">Volume:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.volume.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_volume" maxlength="2000" name="volume" type="text" ng-model="selected_citation.part_details.volume"></input>
+                                        </div>
+                                        <div class="col-xs-6">
+                                            <label for="id_issue">Issue (free text):  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.issue.help_text }}" class="fa fa-info-circle"></a></label>
+                                            <input class="form-control input-xs" id="id_issue" maxlength="2000" name="issue_free_text" type="text" ng-model="selected_citation.part_details.issue_free_text"></input>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="citation_form-group form-group">
                                     <div class="row">
                                         <div class="col-xs-6">
-                                            <label for="id_volume">Volume:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.volume.help_text }}" class="fa fa-info-circle"></a></label>
-                                            <input class="form-control input-xs" id="id_volume" maxlength="2000" name="volume" type="text" ng-model="selected_citation.volume"></input>
+                                            <label for="id_volume">Issue (begin):</label>
+                                            <input class="form-control input-xs" id="id_volume" maxlength="2000" name="issue_begin" type="number" ng-model="selected_citation.part_details.issue_begin"></input>
                                         </div>
                                         <div class="col-xs-6">
-                                            <label for="id_issue">Issue:  <a data-toggle="tooltip" data-placement="right" title="{{ citation_form.issue.help_text }}" class="fa fa-info-circle"></a></label>
-                                            <input class="form-control input-xs" id="id_issue" maxlength="2000" name="page_end" type="text" ng-model="selected_citation.issue"></input>
+                                            <label for="id_issue">Issue (end):</label>
+                                            <input class="form-control input-xs" id="id_issue" maxlength="2000" name="issue_end" type="number" ng-model="selected_citation.part_details.issue_end"></input>
                                         </div>
                                     </div>
                                 </div>
@@ -546,7 +561,7 @@ app.controller('CitationListController',
                                             ng-repeat="option in type_options"
                                             value="{{option.value}}"
                                             label="{{option.name}}"
-                                            ng-selected="option.value == selected_citation.type_controlled"></option>
+                                            ng-selected="option.value == selected_citation.type_controlled">{{option.name}}</option>
                                         {% endverbatim %}
                                     </select>
                                 </div>
@@ -563,7 +578,7 @@ app.controller('CitationListController',
                                             ng-repeat="option in language_options"
                                             value="{{option.value}}"
                                             label="{{option.name}}"
-                                            ng-selected="option.value == selected_citation.language"></option>
+                                            ng-selected="option.value == selected_citation.language">{{ option.name }}</option>
                                         {% endverbatim %}
                                     </select>
                                 </div>
@@ -637,7 +652,7 @@ app.controller('CitationListController',
                                                         ng-repeat="option in acrelation_type_options"
                                                         value="{{option.value}}"
                                                         label="{{option.name}}"
-                                                        ng-selected="option.value == acrelation.type_controlled"></option>
+                                                        ng-selected="option.value == acrelation.type_controlled">{{ option.name }}</option>
                                                 </select>
                                                 {% endverbatim %}
 
@@ -787,7 +802,7 @@ app.controller('CitationListController',
                                     ng-repeat="option in authority_type_options"
                                     value="{{option.value}}"
                                     label="{{option.name}}"
-                                    ng-selected="option.value == selected_authority.type_controlled"></option>
+                                    ng-selected="option.value == selected_authority.type_controlled">{{ option.name }}</option>
                             </select>
                         </div>
                         <div class="form-group">

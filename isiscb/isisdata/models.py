@@ -36,11 +36,6 @@ from openurl.models import Institution
 
 
 
-
-
-
-
-
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue')
@@ -887,7 +882,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     )
     type_broad_controlled = models.CharField(max_length=2,
                                              choices=BROAD_TYPE_CHOICES,
-                                             blank=True,
+                                             blank=True, null=True,
                                              verbose_name='relationship type (broad)',
                                              help_text=help_text("""
     Used to specify the nature of the relationship between authority (as the

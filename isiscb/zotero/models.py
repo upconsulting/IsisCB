@@ -82,6 +82,7 @@ class DraftCitation(ImportedData):
 
     page_start = models.CharField(max_length=100, blank=True, null=True)
     page_end = models.CharField(max_length=100, blank=True, null=True)
+    pages_free_text = models.CharField(max_length=100, blank=True, null=True)
     volume = models.CharField(max_length=100, blank=True, null=True)
     issue = models.CharField(max_length=100, blank=True, null=True)
 
@@ -153,10 +154,51 @@ class DraftAuthority(ImportedData):
         verbose_name_plural = 'draft authority records'
 
 
-class DraftACRelation(ImportedData):
-    citation = models.ForeignKey('DraftCitation', related_name='authority_relations')
-    authority = models.ForeignKey('DraftAuthority', related_name='citation_relations')
+class DraftCCRelation(ImportedData):
+    """
+    A relation between two :class:`.Citation` instances.
 
+    For example, between a review article and the book that it reviews,
+    between an article and an article that it cites, or between a chapter and
+    the book in which it appears.
+    """
+
+
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+
+    INCLUDES_CHAPTER = 'IC'
+    INCLUDES_SERIES_ARTICLE = 'ISA'
+    REVIEW_OF = 'RO'
+    REVIEWED_BY = 'RB'
+    RESPONDS_TO = 'RE'
+    ASSOCIATED_WITH = 'AS'
+    TYPE_CHOICES = (
+        (INCLUDES_CHAPTER, 'Includes Chapter'),
+        (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (REVIEW_OF, 'Is Review Of'),
+        (RESPONDS_TO, 'Responds To'),
+        (ASSOCIATED_WITH, 'Is Associated With'),
+        (REVIEWED_BY, 'Is Reviewed By')
+    )
+    type_controlled = models.CharField(max_length=3, null=True, blank=True,
+                                       choices=TYPE_CHOICES)
+
+    type_free = models.CharField(max_length=255, blank=True, null=True)
+
+    subject = models.ForeignKey('DraftCitation', related_name='relations_from')
+    object = models.ForeignKey('DraftCitation', related_name='relations_to')
+
+
+class DraftACRelation(ImportedData):
+    citation = models.ForeignKey('DraftCitation',
+                                 related_name='authority_relations')
+    authority = models.ForeignKey('DraftAuthority',
+                                  related_name='citation_relations')
+
+    # TODO: implement mechanism in save() to populate type_broad_controlled
+    #  based on the value of type_controlled.
     AUTHOR = 'AU'
     EDITOR = 'ED'
     ADVISOR = 'AD'
