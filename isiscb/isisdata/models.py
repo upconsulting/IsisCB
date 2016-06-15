@@ -273,6 +273,10 @@ class CuratedMixin(models.Model):
     public = models.BooleanField(default=True, help_text=help_text("""
     Controls whether this instance can be viewed by end users."""))
 
+    record_status_value = models.CharField(max_length=255, blank=True, null=True)
+    record_status_explanation = models.CharField(max_lenth=255, blank=True,
+                                                 null=True)
+
     @property
     def created_on(self):
         """
@@ -309,6 +313,8 @@ class CuratedMixin(models.Model):
                                       verbose_name="modified by (FM)",
                                       help_text=help_text("""
     Value of ModifiedOn from the original FM database."""))
+
+    dataset = models.CharField(max_length=255, blank=True, null=True)
 
     @property
     def _history_user(self):
@@ -647,7 +653,6 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         return normalize(self.description)
 
-
     @property
     def label(self):
         return self.name
@@ -805,6 +810,7 @@ class Person(Authority):
     personal_name_last = models.CharField(max_length=255)
     personal_name_first = models.CharField(max_length=255)
     personal_name_suffix = models.CharField(max_length=255, blank=True)
+    personal_name_preferred = models.CharField(max_length=255, blank=True)
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
@@ -911,6 +917,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                                        help_text=help_text("""
     Display for the authority as it is has been used in a publication.
     """))
+
+    personal_name_first = models.CharField(max_length=255, null=True, blank=True)
+    personal_name_last = models.CharField(max_length=255, null=True, blank=True)
+    personal_name_suffix = models.CharField(max_length=255, null=True, blank=True)
 
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
     Position at which the authority should be displayed in the citation detail
@@ -1107,6 +1117,11 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                        content_type_field='subject_content_type',
                                        object_id_field='subject_instance_id')
 
+    data_display_order = models.FloatField(default=1.0, help_text=help_text("""
+    Position at which the citation should be displayed in the citation detail
+    view. Whole numbers or decimals can be used.
+    """))
+
     def _render_type_controlled(self):
         try:
             return dict(self.TYPE_CHOICES)[self.type_controlled]
@@ -1226,6 +1241,11 @@ class PartDetails(models.Model):
     New field: provides a sort order for works that are part of a larger work.
     """))
 
+    extent = models.PositiveIntegerField(blank=True, null=True,
+                                         help_text=help_text("""
+    Provides the size of the work in pages, words, or other counters."""))
+    extent_note = models.TextField(blank=True, null=True)
+
 
 class Place(models.Model):
     """
@@ -1290,6 +1310,17 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     web or to identify the physical object uniquely.
     """))
 
+    resource_name = models.CharField(max_length=255, blank=True, null=True,
+                                     help_text=help_text("""
+    Name of the resource that the URN links to."""))
+
+    url = models.CharField(max_length=255, blank=True, null=True,
+                           help_text=help_text(
+    """
+    If the resource has a DOI, use the DOI instead and do not include URL. Do
+    include the http:// prefix. If used must also provide URLDateAccessed.
+    """))
+
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
     subject_content_type = models.ForeignKey(ContentType)
@@ -1306,6 +1337,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
+
+    access_status = models.CharField(max_length=255, blank=True, null=True)
+    access_status_date_verified = models.DateField(blank=True, null=True)
 
     def __unicode__(self):
         values = (self.type_controlled,
