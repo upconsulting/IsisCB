@@ -12,6 +12,11 @@ import re
 import pprint
 
 
+with open('isisdata/fixtures/language.json', 'r') as f:
+    languages = json.load(f)
+languageLookup = {l['fields']['name'].lower(): l['pk'] for l in languages}
+
+
 def fast_iter(context, func, *extra):
     for event, e in context:
         func(e, *extra)
@@ -70,7 +75,6 @@ class FMPDSOParser(object):
 
     @staticmethod
     def _try_int(model_name, fm_field, fm_value):
-        print fm_field, fm_value
         try:
             return int(fm_value)
         except ValueError:
@@ -103,6 +107,11 @@ class FMPDSOParser(object):
             return (FMPDSOParser._to_int(fm_value), 'BGN')
         elif fm_field == 'DateEnd':
             return (FMPDSOParser._to_int(fm_value), 'END')
+
+    @staticmethod
+    def _handle_language(model_name, fm_field, fm_value):
+        print fm_value
+        return languageLookup.get(fm_value.lower(), None)
 
     fields = {
         'StaffNotes': 'administrator_notes',
@@ -146,6 +155,7 @@ class FMPDSOParser(object):
             'VolumeFreeText': 'volume_free_text',
             'Extent': 'extent',
             'ExtentNote': 'extent_note',
+            'ID': None,
         },
         'authority': {
             'ClassificationSystem': 'classification_system',
@@ -232,6 +242,7 @@ class FMPDSOParser(object):
         ('value', 'type_qualifier'): {
             'attribute': _handle_attribute_value,
         },
+        'language': _handle_language,
         'type_controlled': {
             'citation': {
                 'Book': 'BO',
@@ -323,9 +334,12 @@ class FMPDSOParser(object):
         if not fm_value:
             return []
 
-        model_field = self.fields.get(fm_field, None)
+        model_field = self.fields[model_name].get(fm_field, False)
+        if model_field is None:
+            return []
+
         if not model_field:
-            model_field = self.fields[model_name].get(fm_field, None)
+            model_field = self.fields.get(fm_field, None)            
             if not model_field:
                 return []    # Skip the field.
 
@@ -386,6 +400,9 @@ class FMPDSOParser(object):
 
 
 class VerboseHandler(object):
+    """
+    Just for testing.
+    """
     def handle_citation(self, fielddata, extra):
         pprint.pprint(fielddata)
 
@@ -393,6 +410,45 @@ class VerboseHandler(object):
         pprint.pprint(fielddata)
 
 
+class DatabaseHandler(object):
+    pk_fields = ['language']
+    def _update_with(self, instance, data):
+        for field, value in data.iteritems():
+            if field in self.pk_fields:
+                field += '_id'
+            setattr(instance, field, value)
+        instance.save()
+
+
+
+    def handle_citation(self, fielddata, extra):
+        citation_data = dict(fielddata)
+        citation_id = citation_data.pop('id')    # Don't want this in update.
+
+        pprint.pprint(citation_data)
+        print 'handling citation %s' % citation_id,
+
+        citation, created = Citation.objects.get_or_create(pk=citation_id,
+                                                           defaults=citation_data)
+        if created:
+            print ':: created!',
+        else:
+            print ':: already exists!',
+
+        partdetails_data = dict(extra[0])
+        if not created:
+            self._update_with(citation, citation_data)
+            print ':: updated citation',
+            if citation.part_details and len(partdetails_data) > 0:
+                self._update_with(citation.part_details, partdetails_data)
+                print ':: created new partdetails'
+
+        if (created or not citation.part_details) and len(partdetails_data) > 0:
+            part_details = PartDetails.objects.create(**partdetails_data)
+            part_details.save()
+            citation.part_details = part_details
+            citation.save()
+            print ':: created new partdetails'
 
 
 class Command(BaseCommand):
@@ -412,8 +468,8 @@ class Command(BaseCommand):
         parser.add_argument('table', nargs='*', type=str)
 
     def handle(self, *args, **options):
-        handler = VerboseHandler()
+        handler = DatabaseHandler()
         parser = FMPDSOParser(handler)
         table = options['table'][0]
         path = os.path.join(options['datapath'][0], '%s.xml' % table)
-        parser.parse(table, path, [])
+        parser.parse(table, path, ['partdetails'])
