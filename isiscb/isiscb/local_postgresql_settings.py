@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'zotero',
     'openurl',
+    "sslserver",
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
