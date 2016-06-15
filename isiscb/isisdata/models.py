@@ -274,7 +274,7 @@ class CuratedMixin(models.Model):
     Controls whether this instance can be viewed by end users."""))
 
     record_status_value = models.CharField(max_length=255, blank=True, null=True)
-    record_status_explanation = models.CharField(max_lenth=255, blank=True,
+    record_status_explanation = models.CharField(max_length=255, blank=True,
                                                  null=True)
 
     @property
@@ -408,6 +408,13 @@ class Citation(ReferencedEntity, CuratedMixin):
     The name to be used to identify the resource. For reviews that traditionally
     have no title, this should be added as something like "[Review of Title
     (Year) by Author]"."""))
+
+    additional_titles = models.TextField(blank=True, null=True,
+                                         help_text=help_text("""
+    Additional titles (not delimited, free text)."""))
+    book_series = models.CharField(max_length=255, blank=True, null=True,
+                                   help_text=help_text("""
+    Used for books, and potentially other works in a series."""))
 
     @property
     def normalized_title(self):
@@ -1206,6 +1213,17 @@ class Attribute(ReferencedEntity, CuratedMixin):
     #  a mechanism for grouping/ranking AttributeTypes.
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
+
+    BEGIN = 'BGN'
+    END = 'END'
+    OCCUR = 'OCR'
+    QUALIFIER_CHOICES = (
+        (BEGIN, 'Began'),
+        (END, 'Ended'),
+        (OCCUR, 'Occurred'),
+    )
+    type_qualifier = models.CharField(max_length=3, choices=QUALIFIER_CHOICES,
+                                      blank=True, null=True)
 
     def __unicode__(self):
         try:
