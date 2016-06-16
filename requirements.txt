@@ -37,4 +37,3 @@ djangorestframework-filters
 chardet
 rdflib
 Markdown==2.6.6
-django-sslify
