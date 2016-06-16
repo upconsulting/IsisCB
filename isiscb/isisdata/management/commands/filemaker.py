@@ -7,6 +7,7 @@ import datetime
 import xml.etree.ElementTree as ET
 import os
 import copy
+import string
 
 def fast_iter(context, func):
     for event, e in context:
@@ -28,6 +29,8 @@ as_upper = lambda x: x.upper()
 
 # TODO: Make this more DRY.
 def as_datetime(x):
+    if len(x) < 4:
+        x = string.zfill(x, 4)
     try:
         return datetime.datetime.strptime(x, datetime_format)
     except ValueError:
@@ -383,7 +386,7 @@ class Command(BaseCommand):
             print self.failed
 
     def handle_citations(self, datapath):
-        citationspath = os.path.join(datapath, 'citations.xml')
+        citationspath = os.path.join(datapath, 'citation.xml')
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -452,7 +455,7 @@ class Command(BaseCommand):
         fast_iter(context, process_elem)
 
     def handle_authorities(self, datapath):
-        authoritiespath = os.path.join(datapath, 'authorities.xml')
+        authoritiespath = os.path.join(datapath, 'authority.xml')
         missed_relations = []
 
         def process_elem(r):
@@ -508,7 +511,7 @@ class Command(BaseCommand):
                 pass
 
     def handle_ac_relations(self, datapath):
-        acrelationspath = os.path.join(datapath, 'ac_relations.xml')
+        acrelationspath = os.path.join(datapath, 'acrelation.xml')
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -561,7 +564,7 @@ class Command(BaseCommand):
         fast_iter(context, process_elem)
 
     def handle_cc_relations(self, datapath):
-        ccrelationspath = os.path.join(datapath, 'cc_relations.xml')
+        ccrelationspath = os.path.join(datapath, 'ccrelation.xml')
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -614,7 +617,7 @@ class Command(BaseCommand):
         fast_iter(context, process_elem)
 
     def handle_attributes(self, datapath):
-        attributesspath = os.path.join(datapath, 'attributes.xml')
+        attributesspath = os.path.join(datapath, 'attribute.xml')
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':
@@ -717,7 +720,7 @@ class Command(BaseCommand):
         fast_iter(context, process_elem)
 
     def handle_linkeddata(self, datapath):
-        linkeddatapath = os.path.join(datapath, 'linked_data.xml')
+        linkeddatapath = os.path.join(datapath, 'linkeddata.xml')
 
         def process_elem(r):
             if r.tag.replace(fm_namespace, '') != 'ROW':

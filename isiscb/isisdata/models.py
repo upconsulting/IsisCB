@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -72,6 +73,7 @@ class Value(models.Model):
         if hasattr(self, 'convert') and self.value is not None:
             self.value = self.convert(self.value)
         if self.child_class == '' or self.child_class is None:
+            print self, type(self), type(self).__name__, self.value, type(self.value)
             self.child_class = type(self).__name__
         return super(Value, self).save(*args, **kwargs)
 
@@ -177,6 +179,31 @@ class DateTimeValue(Value):
         verbose_name = 'date and time'
 
 
+class DateRangeValue(Value):
+    value = pg_fields.ArrayField(
+        models.DateField(),
+        size=2,
+    )
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list] and len(value) == 2:
+            for i in xrange(2):
+                if type(value[i]) is not datetime.date:
+                    try:
+                        value[i] = iso8601.parse_date(value[i]).date()
+                    except iso8601.ParseError:
+                        raise ValidationError('Not a valid ISO8601 date')
+            # The first element should always be a lower value than the second.
+            return sorted(value)
+        else:
+            raise ValidationError('Must be a 2-tuple or 2-element list')
+
+    class Meta:
+        verbose_name = 'date range'
+
+
+
 class DateValue(Value):
     """
     An ISO 8601 date value.
@@ -241,6 +268,8 @@ VALUE_MODELS = [
     (datetime.date,     DateValue),
     (str,               CharValue),
     (unicode,           CharValue),
+    (tuple,             DateRangeValue),
+    (list,              DateRangeValue),
 ]
 
 
@@ -1106,8 +1135,8 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     Type of relationship as used in the citation.
     """))
 
-    subject = models.ForeignKey('Citation', related_name='relations_from')
-    object = models.ForeignKey('Citation', related_name='relations_to')
+    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True)
+    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective

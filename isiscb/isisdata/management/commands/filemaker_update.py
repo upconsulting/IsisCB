@@ -3,18 +3,20 @@ from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationErr
 from django.contrib.contenttypes.models import ContentType
 from isisdata.models import *
 
-import datetime
+import datetime, iso8601
 import xml.etree.ElementTree as ET
 import os
 import copy
 import json
 import re
 import pprint
+import string
 
 
 with open('isisdata/fixtures/language.json', 'r') as f:
     languages = json.load(f)
 languageLookup = {l['fields']['name'].lower(): l['pk'] for l in languages}
+languageLookup.update({l['pk'].lower(): l['pk'] for l in languages})
 
 
 def fast_iter(context, func, *extra):
@@ -25,6 +27,10 @@ def fast_iter(context, func, *extra):
 
 
 class FMPDSOParser(object):
+    """
+    Parses FileMaker's FMPDSO XML format into field-data that can be ingested
+    into the IsisCB Explore ORM.
+    """
     fm_namespace = '{http://www.filemaker.com/fmpdsoresult}'
     datetime_formats = [
         '%m/%d/%Y %I:%M:%S %p',
@@ -38,24 +44,23 @@ class FMPDSOParser(object):
     as_int = lambda x: int(x)
     as_upper = lambda x: x.upper()
 
-    id_prefixes = {
-        'CBB': 'citation',
-        'CBA': 'authority',
-        'ACR': 'acrelation',
-        'AAR': 'aarelation',
-        'CCR': 'ccrelation',
-    }
-
     @staticmethod
     def _as_datetime(model_name, fm_field, fm_value):
         """
         Attempt to coerce a value to ``datetime``.
         """
+        if len(fm_value) < 4:
+            fm_value = string.zfill(fm_value, 4)
+
         for format in FMPDSOParser.datetime_formats + FMPDSOParser.date_formats:
             try:
                 return datetime.datetime.strptime(fm_value, format)
             except ValueError:
                 pass
+        try:
+            return iso8601.parse_date(fm_value)
+        except ValueError:
+            pass
         raise ValueError('Could not coerce value to datetime: %s' % fm_value)
 
     @staticmethod
@@ -71,7 +76,7 @@ class FMPDSOParser(object):
 
     @staticmethod
     def _to_date(model_name, fm_field, fm_value):
-        return FMPDSOParser._as_datetime(fm_value).date()
+        return FMPDSOParser._as_datetime(model_name, fm_field, fm_value).date()
 
     @staticmethod
     def _try_int(model_name, fm_field, fm_value):
@@ -104,14 +109,19 @@ class FMPDSOParser(object):
     @staticmethod
     def _handle_attribute_value(model_name, fm_field, fm_value):
         if fm_field == 'DateBegin':
-            return (FMPDSOParser._to_int(fm_value), 'BGN')
+            return (FMPDSOParser._to_date(model_name, fm_field, fm_value), 'BGN')
         elif fm_field == 'DateEnd':
-            return (FMPDSOParser._to_int(fm_value), 'END')
+            return (FMPDSOParser._to_date(model_name, fm_field, fm_value), 'END')
 
     @staticmethod
     def _handle_language(model_name, fm_field, fm_value):
-        print fm_value
         return languageLookup.get(fm_value.lower(), None)
+
+    @staticmethod
+    def _handle_citation_fk(model_name, fm_field, fm_value):
+        if fm_value == 'CBB0':
+            return None
+        return fm_value
 
     fields = {
         'StaffNotes': 'administrator_notes',
@@ -126,6 +136,7 @@ class FMPDSOParser(object):
         'Description': 'description',
         'Name': 'name',
         'Type.free': 'type_free',
+        'Type.controlled': 'type_controlled',
         'DataDisplayOrder': 'data_display_order',
         'ConfidenceMeasure': 'confidence_measure',
         'RelationshipWeight': 'relationship_weight',
@@ -156,6 +167,14 @@ class FMPDSOParser(object):
             'Extent': 'extent',
             'ExtentNote': 'extent_note',
             'ID': None,
+            'CreatedBy': None,
+            'CreatedOn': None,
+            'ModifiedBy': None,
+            'ModifiedOn': None,
+            'Description': None,
+            'Dataset':  None,
+            'RecordStatus': None,
+            'Type.controlled': None,
         },
         'authority': {
             'ClassificationSystem': 'classification_system',
@@ -187,16 +206,18 @@ class FMPDSOParser(object):
             'Notes': 'notes',
         },
         'attribute': {
-            'ID.Subject.link': 'subject',
+            'ID.Subject.link': 'source',
             'DateAttribute.free': 'value_freeform',
             'DateBegin': ('value', 'type_qualifier'),
             'DateEnd': ('value', 'type_qualifier'),
             'Type.Broad.controlled': 'type_controlled_broad',
+            'Type.controlled': 'type_controlled',
         },
         'linkeddata': {
             'AccessStatus': 'access_status',
             'AccessStatusDateVerified': 'access_status_date_verified',
             'ID.Subject.link': 'subject',
+            'Type.controlled': 'type_controlled',
             'Type.Broad.controlled': 'type_controlled_broad',
             'UniversalResourceName.link': 'universal_resource_name',
             'NameOfResource': 'resource_name',
@@ -221,10 +242,10 @@ class FMPDSOParser(object):
         },
         'type_broad_controlled': {
             'acrelation': {
-                'HasPersonalResponsibilityFor': 'PR',
-                'ProvidesSubjectContentAbout': 'SC',
-                'IsInstitutionalHostOf': 'IH',
-                'IsPublicationHostOf': 'PH',
+                'HASPERSONALRESPONSIBILITYFOR': 'PR',
+                'PROVIDESSUBJECTCONTENTABOUT': 'SC',
+                'ISINSTITUTIONALHOSTOF': 'IH',
+                'ISPUBLICATIONHOSTOF': 'PH',
             }
         },
         'created_on_fm': _as_datetime,
@@ -243,68 +264,77 @@ class FMPDSOParser(object):
             'attribute': _handle_attribute_value,
         },
         'language': _handle_language,
+        'subject': {
+            'ccrelation': _handle_citation_fk,
+        },
         'type_controlled': {
             'citation': {
-                'Book': 'BO',
-                'Article': 'AR',
-                'Chapter': 'CH',
-                'Review': 'RE',
-                'EssayReview': 'ES',
-                'Thesis': 'TH',
-                'Event': 'EV',
-                'Presentation': 'PR',
-                'InteractiveResource': 'IN',
-                'Website': 'WE',
-                'Application': 'AP',
+                'BOOK': 'BO',
+                'ARTICLE': 'AR',
+                'CHAPTER': 'CH',
+                'REVIEW': 'RE',
+                'ESSAYREVIEW': 'ES',
+                'THESIS': 'TH',
+                'EVENT': 'EV',
+                'PRESENTATION': 'PR',
+                'INTERACTIVERESOURCE': 'IN',
+                'WEBSITE': 'WE',
+                'APPLICATION': 'AP',
             },
             'authority': {
-                'Person': 'PE',
-                'Institution': 'IN',
-                'TimePeriod': 'TI',
-                'GeographicTerm': 'GE',
-                'SerialPublication': 'SE',
-                'ClassificationTerm': 'CT',
-                'Concept': 'CO',
-                'CreativeWork': 'CW',
-                'Event': 'EV',
-                'Publishers': 'PU',
-                'Cross-reference': 'CR',
+                'PERSON': 'PE',
+                'INSTITUTION': 'IN',
+                'TIMEPERIOD': 'TI',
+                'GEOGRAPHICTERM': 'GE',
+                'SERIALPUBLICATION': 'SE',
+                'CLASSIFICATIONTERM': 'CT',
+                'CONCEPT': 'CO',
+                'CREATIVEWORK': 'CW',
+                'EVENT': 'EV',
+                'PUBLISHERS': 'PU',
+                'CROSS-REFERENCE': 'CR',
             },
             'acrelation': {
-                'Author': 'AU',
-                'Editor': 'ED',
-                'Advisor': 'AD',
-                'Contributor': 'CO',
-                'Translator': 'TR',
-                'Subject': 'SU',
-                'Category': 'CA',
-                'Publisher': 'PU',
-                'School': 'SC',
-                'Institution': 'IN',
-                'Meeting': 'ME',
-                'Periodical': 'PE',
-                'BookSeries': 'BS'
+                'AUTHOR': 'AU',
+                'EDITOR': 'ED',
+                'ADVISOR': 'AD',
+                'CONTRIBUTOR': 'CO',
+                'TRANSLATOR': 'TR',
+                'SUBJECT': 'SU',
+                'CATEGORY': 'CA',
+                'PUBLISHER': 'PU',
+                'SCHOOL': 'SC',
+                'INSTITUTION': 'IN',
+                'MEETING': 'ME',
+                'PERIODICAL': 'PE',
+                'BOOKSERIES': 'BS'
             },
             'ccrelation': {
-                'includesChapter': 'IC',
-                'includesSeriesArticle': 'ISA',
-                'isReviewOf': 'RO',
-                'isReviewedBy': 'RB',
-                'respondsTo': 'RE',
-                'isAssociatedWith': 'AS'
+                'INCLUDESCHAPTER': 'IC',
+                'INCLUDESSERIESARTICLE': 'ISA',
+                'ISREVIEWOF': 'RO',
+                'ISREVIEWEDBY': 'RB',
+                'RESPONDSTO': 'RE',
+                'ISASSOCIATEDWITH': 'AS'
             },
             'tracking': {
-                'HSTMUpload': 'HS',
-                'Printed': 'PT',
-                'Authorized': 'AU',
-                'Proofed': 'PD',
-                'FullyEntered': 'FU',
-                'Bulk Data Update': 'BD'
+                'HSTMUPLOAD': 'HS',
+                'PRINTED': 'PT',
+                'AUTHORIZED': 'AU',
+                'PROOFED': 'PD',
+                'FULLYENTERED': 'FU',
+                'BULK DATA UPDATE': 'BD'
             }
         }
     }
 
     def __init__(self, handler):
+        """
+
+        Parameters
+        ----------
+        handler : :class:`type`
+        """
         self.handler = handler
 
     def _map_field_value(self, model_name, fm_field, fm_value):
@@ -339,30 +369,46 @@ class FMPDSOParser(object):
             return []
 
         if not model_field:
-            model_field = self.fields.get(fm_field, None)            
+            model_field = self.fields.get(fm_field, None)
             if not model_field:
                 return []    # Skip the field.
 
-
+        # ``mapper`` is a function (staticmethod) or dict. See
+        #   :prop:`FMPDSOParser.mappings`.
         mapper = self.mappings.get(model_field, None)
+
+        # This might not be necessary, but I'm paranoid.
         value = copy.copy(fm_value)
+
         if mapper:
-            # The mapping may apply to all models with this field.
-            if hasattr(mapper, '__call__') or type(mapper) is staticmethod:
-                value = self.mappings[model_field].__func__(model_name, fm_field, value)
+            attrs = (model_name, fm_field, value.upper())
 
-            # And/or be model-specific.
+            # If the mapper is a method of some kind, it applies to all models
+            #  with this field.
+            if type(mapper) is staticmethod:
+                value = self.mappings[model_field].__func__(*attrs)
+
+            # Otherwise, it may be model-specific or not. If it's
+            #  model-specific, then we should find an entry for the model name
+            #  in the mapper.
             elif hasattr(mapper, 'get'):
-                mapper = mapper.get(model_name, None)
-                if mapper:
-                    # The mapper itself may be a function, or...
-                    if hasattr(mapper, '__call__') or type(mapper) is staticmethod:
-                        value = mapper.__func__(model_name, fm_field, value)
-                    # ...a hashmap (dict).
-                    elif hasattr(mapper, 'get'):
-                        value = mapper.get(value, value)
-
-
+                # If there is a model-specific mapping, then we prefer that
+                #  over a more general mapping.
+                model_mapper = mapper.get(model_name, None)
+                if model_mapper:
+                    # The mapper itself may be a static method...
+                    if type(model_mapper) is staticmethod:
+                        value = model_mapper.__func__(*attrs)
+                    # ...or a hashmap (dict).
+                    elif hasattr(model_mapper, 'get'):
+                        value = model_mapper.get(value.upper(), value)
+                # If we didn't find a model-specific mapping, then we assume
+                #  that the currently selected mapper applies generally.
+                else:
+                    # If the value can't be mapped, then we just return the
+                    #  original value.
+                    # TODO: we may want to make this behavior configurable.
+                    value = mapper.get(value.upper(), value)
 
         # A single field/value in FM may map to two or more fields/values in
         #  IsisCB Explore.
@@ -371,12 +417,32 @@ class FMPDSOParser(object):
         return [(model_field, value)]
 
     def _get_handler(self, model_name):
+        """
+        The class of the handler instance (passed to constructor, and assigned
+        to ``self.handler``) should define a handler method for each model,
+        named ``handle_[model_name]``.
+
+        Parameters
+        ----------
+        model_name : str
+            Must be the (lowercase normed) name of a model in
+            :mod:`isiscb.isisdata.models`\.
+
+        Returns
+        -------
+        instancemethod
+        """
         return getattr(self.handler, 'handle_%s' % model_name, None)
 
     def _tag(self, element):
         return copy.copy(element.tag).replace(self.fm_namespace, '')
 
     def parse_record(self, record, model_name, parse_also=None):
+        """
+        Parse a single row of data from FMPDSO XML.
+        """
+        # There are some strange elements early in the XML document that we
+        #  don't care about. <ROW>s hold the data that we're after.
         if self._tag(record) != 'ROW':
             return
 
@@ -386,17 +452,45 @@ class FMPDSOParser(object):
             fm_field = self._tag(element)
             fm_value = copy.copy(element.text)
             fielddata += self._map_field_value(model_name, fm_field, fm_value)
+
+            # Data for some models (e.g. Citation, Authority) need to be
+            #  handled at the same time as data for other models (e.g.
+            #  PartDetails, Person).
             if parse_also:
                 for i, extra_model in enumerate(parse_also):
-                    extra[i] += self._map_field_value(extra_model, fm_field, fm_value)
+                    args = (extra_model, fm_field, fm_value)
+                    extra[i] += self._map_field_value(*args)
 
+        # The class of the handler instance (passed to constructor, and set to
+        #  self.handler) should define a handler method for each model.
         handler = self._get_handler(model_name)
         if not handler:
             return
         return handler(fielddata, extra)
 
     def parse(self, model_name, data_path, parse_also):
-        fast_iter(ET.iterparse(data_path), self.parse_record, model_name, parse_also)
+        """
+        Kick off parsing for a single FMPDSO XML document.
+
+        Parameters
+        ----------
+        model_name : str
+            Must be the (lowercase-normed) name of a
+            :class:`django.db.models.Model` subclass in
+            :mod:`isiscb.isisdata.models`\.
+        data_path : str
+            Location of the XML document.
+        parse_also : list
+            Names of other models that should be parsed at the same time.
+        """
+
+        # This is a much more memory-friendly approach -- ET does all kinds of
+        #  crazy copying otherwise. The trade-off is that we only get one crack
+        #  each element that streams through.
+        fast_iter(ET.iterparse(data_path),     # Iterator.
+                  self.parse_record,           # Method.
+                  model_name,                  # Extra...
+                  parse_also)
 
 
 class VerboseHandler(object):
@@ -411,48 +505,334 @@ class VerboseHandler(object):
 
 
 class DatabaseHandler(object):
-    pk_fields = ['language']
+    """
+    Updates the IsisCB Explore database using data yielded by the
+    :class:`.FMPDSOParser`\.
+    """
+
+    pk_fields = ['language', 'subject', 'object', 'citation', 'authority',
+                 'redirect_to', 'source']
+    """
+    When these fields are encountered, `_id` will be appended to the field
+    name.
+    """
+
+    id_prefixes = {
+        'CBB': 'citation',
+        'CBA': 'authority',
+        'ACR': 'acrelation',
+        'AAR': 'aarelation',
+        'CCR': 'ccrelation',
+    }
+    """
+    Maps ID prefixes onto model names.
+    """
+
+    def _get_subject(self, subject_id):
+        """
+        Obtain the ID of the ContentType instance corresponding to the object
+        with ID ``subject_id``.
+
+        Parameters
+        ----------
+        subject_id : str
+
+        Returns
+        -------
+        int
+            Primary key ID for the ContentType instance for the object's
+            model class.
+        """
+        model_name = self.id_prefixes[subject_id[:3]]
+        return ContentType.objects.get(model=model_name).id
+
     def _update_with(self, instance, data):
+        """
+        Update a db model ``instance`` with values in ``data``.
+
+        Parameters
+        ----------
+        instance : :class:`django.db.models.Model`
+        data : dict
+        """
         for field, value in data.iteritems():
-            if field in self.pk_fields:
-                field += '_id'
             setattr(instance, field, value)
         instance.save()
 
+    def _prepare_data(self, model, data):
+        """
+        Converts ``data`` to a dict, and makes any necessary modifications to
+        field names.
 
+        Parameters
+        ----------
+        data : list
+            A list of (fieldname, value) tuples.
+
+        Returns
+        -------
+        dict
+        """
+
+        prepped_data = {}
+        print data
+        for field, value in dict(data).iteritems():
+
+            if field in self.pk_fields:
+                field += '_id'
+            prepped_data[field] = value
+        print prepped_data
+        print '--'*20
+        return prepped_data
 
     def handle_citation(self, fielddata, extra):
-        citation_data = dict(fielddata)
+        """
+        Create or update a :class:`.Citation` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+
+        citation_data = self._prepare_data(Citation, fielddata)
         citation_id = citation_data.pop('id')    # Don't want this in update.
+        language_id = citation_data.pop('language_id', None)
+        citation, created = Citation.objects.update_or_create(
+            pk=citation_id,
+            defaults=citation_data
+        )
+        if language_id:
+            citation.language.add(language_id)
 
-        pprint.pprint(citation_data)
-        print 'handling citation %s' % citation_id,
 
-        citation, created = Citation.objects.get_or_create(pk=citation_id,
-                                                           defaults=citation_data)
-        if created:
-            print ':: created!',
-        else:
-            print ':: already exists!',
 
-        partdetails_data = dict(extra[0])
+        partdetails_data = self._prepare_data(PartDetails, extra[0])
         if not created:
-            self._update_with(citation, citation_data)
-            print ':: updated citation',
             if citation.part_details and len(partdetails_data) > 0:
                 self._update_with(citation.part_details, partdetails_data)
-                print ':: created new partdetails'
 
         if (created or not citation.part_details) and len(partdetails_data) > 0:
             part_details = PartDetails.objects.create(**partdetails_data)
             part_details.save()
             citation.part_details = part_details
             citation.save()
-            print ':: created new partdetails'
+
+    def handle_authority(self, fielddata, extra):
+        """
+        Create or update an :class:`.Authority` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+        authority_data = self._prepare_data(Authority, fielddata)
+        person_data = self._prepare_data(Person, extra[0])
+
+        if person_data and authority_data.get('type_controlled') == 'PE':
+            model = Person
+            authority_data.update(person_data)
+        else:
+            model = Authority
+
+        authority_id = authority_data.pop('id')
+        authority, created = model.objects.update_or_create(
+            pk=authority_id,
+            defaults=authority_data
+        )
+
+    def handle_ccrelation(self, fielddata, extra):
+        """
+        Create or update a :class:`.CCRelation` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+        ccrelation_data = self._prepare_data(CCRelation, fielddata)
+        ccrelation_id = ccrelation_data.pop('id')
+
+        ccrelation, created = CCRelation.objects.update_or_create(
+            pk=ccrelation_id,
+            defaults=ccrelation_data
+        )
+
+
+    def handle_acrelation(self, fielddata, extra):
+        """
+        Create or update a :class:`.ACRelation` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+        acrelation_data = self._prepare_data(ACRelation, fielddata)
+        acrelation_id = acrelation_data.pop('id')
+
+
+        acrelation, created = ACRelation.objects.update_or_create(
+            pk=acrelation_id,
+            defaults=acrelation_data
+        )
+
+
+
+    def handle_attribute(self, fielddata, extra):
+        """
+        Create or update an :class:`.Attribute` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+
+
+        # In the FileMaker database, a single row in the Attribute table may
+        #  contain several values. For example, there may be a DateBegin and
+        #  a DateEnd value. This is somewhat contrary to the
+        #  one-attribute-one-value model of IsisCB Explore. To accommodate this
+        #  descrepancy, we will separate out multi-value rows into multiple
+        #  Attributes, and assign a qualifier.
+
+        # First we need to determine just how many values are present. Usually
+        #  this will be 1, but sometimes 2.
+        # TODO: ever 0?
+        N_values = 0
+        datasets = []
+        value_data = []
+        for field, value in fielddata:
+            if field == 'value':
+                value_data.append(value)
+        N_values = len(value_data)
+        if len(value_data) == 1:
+            value_data = value_data[0]
+
+        # If the row has some problem, there may not be an actual Value.
+        if not value_data:
+            return
+
+        attribute_data = self._prepare_data(Attribute, fielddata)
+        attribute_id = attribute_data.pop('id', None)
+
+        # `subject` is a generic relation; an Attribute can describe anything.
+        subject_id = attribute_data.pop('source_id')
+        subject_type_id = self._get_subject(subject_id)
+        attribute_data.update({
+            'source_content_type_id': subject_type_id,
+            'source_instance_id': subject_id,
+        })
+
+        # We don't want these in the data for Attribute.
+        attribute_data.pop('type_qualifier', None)
+        attribute_data.pop('value', None)
+        type_controlled = attribute_data.pop('type_controlled')
+
+        value_model = dict(VALUE_MODELS)[type(value_data)]
+        attribute_type, _ = AttributeType.objects.get_or_create(
+            name=type_controlled,
+            defaults={
+                'value_content_type_id': ContentType.objects.get_for_model(value_model).id
+            }
+        )
+
+        attribute_data.update({
+            'type_controlled_id': attribute_type.id,
+        })
+
+        attribute, created = Attribute.objects.update_or_create(
+            pk=attribute_id,
+            defaults=attribute_data
+        )
+
+
+        if not hasattr(attribute, 'value'):
+            print 'attribute has no value'
+
+            value = value_model.objects.create(
+                value=value_data,
+                attribute=attribute
+            )
+        else:
+            print 'attribute has value', attribute.value, type(attribute.value)
+            self._update_with(attribute.value, {'value': value_data})
+        print attribute.value.__dict__
+
+    def handle_linkeddata(self, fielddata, extra):
+        """
+        Create or update a :class:`.LinkedData` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+        linkeddata_data = self._prepare_data(LinkedData, fielddata)
+        linkeddata_id = linkeddata_data.pop('id')
+
+        # `subject` is a generic relation; an Attribute can describe anything.
+        subject_id = linkeddata_data.pop('subject_id')
+        subject_type_id = self._get_subject(subject_id)
+
+        # Get the LinkedDataType instance for this LinkedData.
+        type_controlled = linkeddata_data.pop('type_controlled')
+        ld_type, _ = LinkedDataType.objects.get_or_create(name=type_controlled)
+
+        linkeddata_data.update({
+            'subject_content_type_id': subject_type_id,
+            'subject_instance_id': subject_id,
+            'type_controlled_id': ld_type.id,
+        })
+
+        linkeddata, created = LinkedData.objects.update_or_create(
+            pk=linkeddata_id,
+            defaults=linkeddata_data
+        )
+
+    def handle_tracking(self, fielddata, extra):
+        """
+        Create or update a :class:`.Tracking` with ``fielddata``.
+
+        Parameters
+        ----------
+        fielddata : list
+            A list of (fieldname, value) tuples.
+        extra : list
+            Items are lists in the same format as ``fielddata``.
+        """
+        tracking_data = self._prepare_data(Tracking, fielddata)
+        tracking_id = tracking_data.pop('id')
+
+        subject_id = tracking_data.pop('subject_id')
+        subject_type_id = self._get_subject(subject_id)
+        tracking_data.update({
+            'subject_content_type_id': subject_type_id,
+            'subject_instance_id': subject_id,
+        })
+
+        tracking, created = Tracking.objects.update_or_create(
+            pk=tracking_id,
+            defaults=tracking_data
+        )
 
 
 class Command(BaseCommand):
-    help = 'Load FileMaker data from XML'
+    help = 'Update the IsisCB Explore database with FileMaker Pro FMPDSO XML.'
 
     def __init__(self, *args, **kwargs):
         self.failed = []
@@ -468,8 +848,15 @@ class Command(BaseCommand):
         parser.add_argument('table', nargs='*', type=str)
 
     def handle(self, *args, **options):
-        handler = DatabaseHandler()
-        parser = FMPDSOParser(handler)
+        parser = FMPDSOParser(DatabaseHandler())
         table = options['table'][0]
         path = os.path.join(options['datapath'][0], '%s.xml' % table)
-        parser.parse(table, path, ['partdetails'])
+
+        if table == 'citation':
+            parse_also = ['partdetails']
+        elif table == 'authority':
+            parse_also = ['person']
+        else:
+            parse_also = []
+
+        parser.parse(table, path, parse_also)

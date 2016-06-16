@@ -10,7 +10,7 @@
 		<Type.Broad.controlled></Type.Broad.controlled>
 		<Type.free>Some kind of linked data</Type.free>
 		<RecordHistory>This is the history!</RecordHistory>
-		
+
 		<CreatedBy>ep</CreatedBy>
 		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
 		<ModifiedBy>jd</ModifiedBy>
@@ -20,12 +20,12 @@
 	</ROW>
 	<ROW>
 		<ID>LED000000002</ID>
-		<ID.Subject.link>CBC000000001</ID.Subject.link>
+		<ID.Subject.link>CBB000000001</ID.Subject.link>
 		<Type.controlled>ISSN</Type.controlled>
 		<Type.Broad.controlled></Type.Broad.controlled>
 		<Type.free>Some kind of linked data</Type.free>
 		<RecordHistory>This is the history!</RecordHistory>
-		
+
 		<CreatedBy>ep</CreatedBy>
 		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
 		<ModifiedBy>jd</ModifiedBy>
@@ -34,4 +34,3 @@
 		<UniversalResourceName.link>1234-5678</UniversalResourceName.link>
 	</ROW>
 </FMPDSORESULT>
-

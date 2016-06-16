@@ -5,7 +5,7 @@
 	<DATABASE>IsisCBData.fmp12</DATABASE>
 	<LAYOUT></LAYOUT>
 	<ROW>
-		<ID>CBC000000001</ID>
+		<ID>CBB000000001</ID>
 		<Title>Test Citation</Title>
 		<Type.controlled>Book</Type.controlled>
 		<Abstract>This is the abstract. It is very abstract.</Abstract>
@@ -23,7 +23,7 @@
 		<Language>English</Language>
 	</ROW>
 	<ROW>
-		<ID>CBC000000002</ID>
+		<ID>CBB000000002</ID>
 		<Title>Test Citation 2</Title>
 		<Type.controlled>Article</Type.controlled>
 		<Abstract>This is the abstract. It is very abstract.</Abstract>
@@ -39,5 +39,5 @@
 		<RecordAction>Hold</RecordAction>
 		<StatusOfRecord>Scope</StatusOfRecord>
 		<Language>German</Language>
-	</ROW>	
+	</ROW>
 </FMPDSORESULT>

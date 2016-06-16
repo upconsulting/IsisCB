@@ -10,10 +10,28 @@
 		<Type.Broad.controlled></Type.Broad.controlled>
 		<Type.free>When dude was born</Type.free>
 		<RecordHistory>This is the history!</RecordHistory>
-		
+
 		<DateAttribute.free>Around 1995</DateAttribute.free>
 		<DateBegin>1995</DateBegin>
-		
+
+		<CreatedBy>ep</CreatedBy>
+		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
+		<ModifiedBy>jd</ModifiedBy>
+		<ModiefiedOn>7/20/2015 9:17:59 PM</ModiefiedOn>
+		<Notes>Admin notes</Notes>
+	</ROW>
+    <ROW>
+		<ID>ATR000000002</ID>
+		<ID.Subject.link>CBA000000002</ID.Subject.link>
+		<Type.controlled>BirthDeathDates</Type.controlled>
+		<Type.Broad.controlled></Type.Broad.controlled>
+		<Type.free>When dude was born</Type.free>
+		<RecordHistory>This is the history!</RecordHistory>
+
+		<DateAttribute.free>Around 1995</DateAttribute.free>
+		<DateBegin>995</DateBegin>
+        <DateEnd>1005</DateEnd>
+
 		<CreatedBy>ep</CreatedBy>
 		<CreatedOn>7/16/2015 7:17:59 PM</CreatedOn>
 		<ModifiedBy>jd</ModifiedBy>
