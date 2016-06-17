@@ -80,6 +80,14 @@ class TestLoadFileMaker(unittest.TestCase):
                 then = getattr(instance, field)
                 self.assertGreater(now, then)
 
+        # Sometimes nasty non-integer data ends up in fields that should have
+        #  integers only. These should get pushed off into the corresponding
+        #  free_text field.
+        instance = Citation.objects.get(pk='CBB000000002')
+        self.assertGreater(len(instance.part_details.issue_free_text), 0)
+        self.assertEqual(instance.part_details.issue_free_text, '32B')
+        self.assertEqual(instance.part_details.issue_begin, None)
+
     def test_load_attributes(self):
         call_command('filemaker_update', 'isisdata/tests/data', 'citation')
         call_command('filemaker_update', 'isisdata/tests/data', 'authority')

@@ -592,6 +592,27 @@ class DatabaseHandler(object):
             prepped_data[field] = value
         return prepped_data
 
+    def _fix_partdetails(self, partdetails_data):
+        """
+        Occassionally non-int data will be entered in int-only fields for
+        :class:`.PartDetails`\. If so, we pass the value off to the
+        corresponding ``free_text`` field, and remove the non-conforming field.
+        """
+        int_fields = [
+            'issue_end', 'issue_begin',
+            'page_begin', 'page_end',
+            'volume_begin', 'volume_end'
+        ]
+
+        for key, value in partdetails_data.iteritems():
+            if key in int_fields and type(value) is not int:
+                prefix = key.split('_')[0]
+                freetext_key = prefix + u'_free_text'
+                if freetext_key not in partdetails_data:
+                    partdetails_data[freetext_key] = value
+                del partdetails_data[key]
+        return partdetails_data
+
     def handle_citation(self, fielddata, extra):
         """
         Create or update a :class:`.Citation` with ``fielddata``.
@@ -614,9 +635,9 @@ class DatabaseHandler(object):
         if language_id:
             citation.language.add(language_id)
 
-
-
         partdetails_data = self._prepare_data(PartDetails, extra[0])
+        partdetails_data = self._fix_partdetails(partdetails_data)
+
         if not created:
             if citation.part_details and len(partdetails_data) > 0:
                 self._update_with(citation.part_details, partdetails_data)
