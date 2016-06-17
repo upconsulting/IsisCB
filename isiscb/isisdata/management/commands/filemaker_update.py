@@ -603,15 +603,17 @@ class DatabaseHandler(object):
             'page_begin', 'page_end',
             'volume_begin', 'volume_end'
         ]
-
+        partdetails_data_fixed = {}
         for key, value in partdetails_data.iteritems():
             if key in int_fields and type(value) is not int:
                 prefix = key.split('_')[0]
                 freetext_key = prefix + u'_free_text'
-                if freetext_key not in partdetails_data:
-                    partdetails_data[freetext_key] = value
-                del partdetails_data[key]
-        return partdetails_data
+                # Don't overwrite existing data.
+                if freetext_key in partdetails_data:
+                    continue
+                key = freetext_key
+            partdetails_data_fixed[key] = value
+        return partdetails_data_fixed
 
     def handle_citation(self, fielddata, extra):
         """
