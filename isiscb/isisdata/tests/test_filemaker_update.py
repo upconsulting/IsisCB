@@ -12,14 +12,10 @@ DATETIME_FIELDS = [
 ]
 
 CURATION_FIELDS = [
-    'administrator_notes',
-    'record_history',
     'created_by_fm',
 ]
 
 UTC = pytz.UTC
-
-
 
 
 class TestLoadFileMaker(unittest.TestCase):

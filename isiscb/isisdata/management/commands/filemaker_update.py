@@ -166,8 +166,8 @@ class FMPDSOParser(object):
             'VolumeFreeText': 'volume_free_text',
             'Extent': 'extent',
             'ExtentNote': 'extent_note',
-            'ID': None,
-            'CreatedBy': None,
+            'ID': None,           # These are all fields from Citation that we
+            'CreatedBy': None,    #  don't want in PartDetails.
             'CreatedOn': None,
             'ModifiedBy': None,
             'ModifiedOn': None,
@@ -294,6 +294,19 @@ class FMPDSOParser(object):
                 'PUBLISHERS': 'PU',
                 'CROSS-REFERENCE': 'CR',
             },
+            'person': {
+                'PERSON': 'PE',
+                'INSTITUTION': 'IN',
+                'TIMEPERIOD': 'TI',
+                'GEOGRAPHICTERM': 'GE',
+                'SERIALPUBLICATION': 'SE',
+                'CLASSIFICATIONTERM': 'CT',
+                'CONCEPT': 'CO',
+                'CREATIVEWORK': 'CW',
+                'EVENT': 'EV',
+                'PUBLISHERS': 'PU',
+                'CROSS-REFERENCE': 'CR',
+            },
             'acrelation': {
                 'AUTHOR': 'AU',
                 'EDITOR': 'ED',
@@ -369,7 +382,7 @@ class FMPDSOParser(object):
             return []
 
         if not model_field:
-            model_field = self.fields.get(fm_field, None)
+            model_field = self.fields.get(fm_field, False)
             if not model_field:
                 return []    # Skip the field.
 
@@ -394,21 +407,19 @@ class FMPDSOParser(object):
             elif hasattr(mapper, 'get'):
                 # If there is a model-specific mapping, then we prefer that
                 #  over a more general mapping.
-                model_mapper = mapper.get(model_name, None)
-                if model_mapper:
-                    # The mapper itself may be a static method...
-                    if type(model_mapper) is staticmethod:
-                        value = model_mapper.__func__(*attrs)
-                    # ...or a hashmap (dict).
-                    elif hasattr(model_mapper, 'get'):
-                        value = model_mapper.get(value.upper(), value)
-                # If we didn't find a model-specific mapping, then we assume
-                #  that the currently selected mapper applies generally.
-                else:
-                    # If the value can't be mapped, then we just return the
-                    #  original value.
-                    # TODO: we may want to make this behavior configurable.
-                    value = mapper.get(value.upper(), value)
+                model_mapper = mapper.get(model_name, mapper)
+
+                # The mapper itself may be a static method...
+                if type(model_mapper) is staticmethod:
+                    value = model_mapper.__func__(*attrs)
+                # ...or a hashmap (dict).
+                elif hasattr(model_mapper, 'get'):
+                    value = model_mapper.get(value.upper(), value)
+
+            # This should only be falsey if it is set explicitly.
+            if not value:
+                return []
+
 
         # A single field/value in FM may map to two or more fields/values in
         #  IsisCB Explore.
@@ -575,14 +586,10 @@ class DatabaseHandler(object):
         """
 
         prepped_data = {}
-        print data
         for field, value in dict(data).iteritems():
-
             if field in self.pk_fields:
                 field += '_id'
             prepped_data[field] = value
-        print prepped_data
-        print '--'*20
         return prepped_data
 
     def handle_citation(self, fielddata, extra):
@@ -631,6 +638,7 @@ class DatabaseHandler(object):
         extra : list
             Items are lists in the same format as ``fielddata``.
         """
+
         authority_data = self._prepare_data(Authority, fielddata)
         person_data = self._prepare_data(Person, extra[0])
 
@@ -640,7 +648,7 @@ class DatabaseHandler(object):
         else:
             model = Authority
 
-        authority_id = authority_data.pop('id')
+        authority_id = authority_data['id']
         authority, created = model.objects.update_or_create(
             pk=authority_id,
             defaults=authority_data
@@ -665,7 +673,6 @@ class DatabaseHandler(object):
             defaults=ccrelation_data
         )
 
-
     def handle_acrelation(self, fielddata, extra):
         """
         Create or update a :class:`.ACRelation` with ``fielddata``.
@@ -677,16 +684,14 @@ class DatabaseHandler(object):
         extra : list
             Items are lists in the same format as ``fielddata``.
         """
+
         acrelation_data = self._prepare_data(ACRelation, fielddata)
         acrelation_id = acrelation_data.pop('id')
-
 
         acrelation, created = ACRelation.objects.update_or_create(
             pk=acrelation_id,
             defaults=acrelation_data
         )
-
-
 
     def handle_attribute(self, fielddata, extra):
         """
@@ -700,17 +705,6 @@ class DatabaseHandler(object):
             Items are lists in the same format as ``fielddata``.
         """
 
-
-        # In the FileMaker database, a single row in the Attribute table may
-        #  contain several values. For example, there may be a DateBegin and
-        #  a DateEnd value. This is somewhat contrary to the
-        #  one-attribute-one-value model of IsisCB Explore. To accommodate this
-        #  descrepancy, we will separate out multi-value rows into multiple
-        #  Attributes, and assign a qualifier.
-
-        # First we need to determine just how many values are present. Usually
-        #  this will be 1, but sometimes 2.
-        # TODO: ever 0?
         N_values = 0
         datasets = []
         value_data = []
@@ -758,18 +752,13 @@ class DatabaseHandler(object):
             defaults=attribute_data
         )
 
-
         if not hasattr(attribute, 'value'):
-            print 'attribute has no value'
-
             value = value_model.objects.create(
                 value=value_data,
                 attribute=attribute
             )
         else:
-            print 'attribute has value', attribute.value, type(attribute.value)
             self._update_with(attribute.value, {'value': value_data})
-        print attribute.value.__dict__
 
     def handle_linkeddata(self, fielddata, extra):
         """
