@@ -12,6 +12,8 @@ import re
 import pprint
 import string
 
+from collections import Counter
+
 
 with open('isisdata/fixtures/language.json', 'r') as f:
     languages = json.load(f)
@@ -94,10 +96,8 @@ class FMPDSOParser(object):
 
     @staticmethod
     def _handle_record_status(model_name, fm_field, fm_value):
-
         if not fm_value:
-
-            return True, 'Active', u'Set active by default'
+            return True, u'Active', u'Set active by default'
         match = re.match('(In)?[aA]ctive(.*)', fm_value)
         if match:
             public_raw, explanation_raw = match.groups()
@@ -108,9 +108,9 @@ class FMPDSOParser(object):
             match = re.match('Redirect(.*)', fm_value)
             if match:
                 explanation_raw = match.groups()[0].strip()
-                public, status, explanation = False, 'Redirect', explanation_raw
+                public, status, explanation = False, u'Redirect', explanation_raw
             else:
-                public, status, explanation = False, 'Inactive', u''
+                public, status, explanation = False, u'Inactive', u''
         return public, status, explanation
 
     @staticmethod
@@ -132,7 +132,9 @@ class FMPDSOParser(object):
 
     fields = {
         'StaffNotes': 'administrator_notes',
-        'RecordStatus': ('public', 'record_status_value', 'record_status_explanation'),
+        'RecordStatus': ('public',
+                         'record_status_value',
+                         'record_status_explanation'),
         'RecordHistory': 'record_history',
         'ID': 'id',
         'Dataset': 'dataset',
@@ -266,7 +268,9 @@ class FMPDSOParser(object):
         'volume_end': _try_int,
         'data_display_order': _to_float,
         'access_status_date_verified': _as_datetime,
-        ('public', 'record_status_value', 'record_status_explanation'): _handle_record_status,
+        ('public',
+         'record_status_value',
+         'record_status_explanation'): _handle_record_status,
         ('value', 'type_qualifier'): {
             'attribute': _handle_attribute_value,
         },
@@ -353,7 +357,7 @@ class FMPDSOParser(object):
 
         Parameters
         ----------
-        handler : :class:`type`
+        handler : object
         """
         self.handler = handler
 
@@ -546,6 +550,16 @@ class DatabaseHandler(object):
     Maps ID prefixes onto model names.
     """
 
+    def __init__(self, print_every=200):
+        self.model_counts = Counter()
+        self.print_every = print_every
+
+    def _tick(self, model_name):
+        self.model_counts[model_name] += 1
+        N = self.model_counts[model_name]
+        if N % self.print_every == 0:
+            pprint.pprint('handled %i %s records' % (N, model_name))
+
     def _get_subject(self, subject_id):
         """
         Obtain the ID of the ContentType instance corresponding to the object
@@ -657,6 +671,8 @@ class DatabaseHandler(object):
             citation.part_details = part_details
             citation.save()
 
+        self._tick('citation')
+
     def handle_authority(self, fielddata, extra):
         """
         Create or update an :class:`.Authority` with ``fielddata``.
@@ -683,6 +699,7 @@ class DatabaseHandler(object):
             pk=authority_id,
             defaults=authority_data
         )
+        self._tick('authority')
 
     def handle_ccrelation(self, fielddata, extra):
         """
@@ -702,6 +719,7 @@ class DatabaseHandler(object):
             pk=ccrelation_id,
             defaults=ccrelation_data
         )
+        self._tick('ccrelation')
 
     def handle_acrelation(self, fielddata, extra):
         """
@@ -722,6 +740,7 @@ class DatabaseHandler(object):
             pk=acrelation_id,
             defaults=acrelation_data
         )
+        self._tick('acrelation')
 
     def handle_attribute(self, fielddata, extra):
         """
@@ -789,6 +808,7 @@ class DatabaseHandler(object):
             )
         else:
             self._update_with(attribute.value, {'value': value_data})
+        self._tick('attribute')
 
     def handle_linkeddata(self, fielddata, extra):
         """
@@ -822,6 +842,7 @@ class DatabaseHandler(object):
             pk=linkeddata_id,
             defaults=linkeddata_data
         )
+        self._tick('linkeddata')
 
     def handle_tracking(self, fielddata, extra):
         """
@@ -848,6 +869,7 @@ class DatabaseHandler(object):
             pk=tracking_id,
             defaults=tracking_data
         )
+        self._tick('tracking')
 
 
 class Command(BaseCommand):
