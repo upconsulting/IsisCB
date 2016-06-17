@@ -86,6 +86,13 @@ class FMPDSOParser(object):
             return fm_value
 
     @staticmethod
+    def _try_positive_int(model_name, fm_field, fm_value):
+        try:
+            return abs(int(fm_value))
+        except ValueError:
+            return fm_value
+
+    @staticmethod
     def _handle_record_status(model_name, fm_field, fm_value):
 
         if not fm_value:
@@ -250,7 +257,7 @@ class FMPDSOParser(object):
         },
         'created_on_fm': _as_datetime,
         'modified_on_fm': _as_datetime,
-        'extent': _try_int,
+        'extent': _try_positive_int,
         'issue_begin': _try_int,
         'issue_end': _try_int,
         'page_begin': _try_int,
