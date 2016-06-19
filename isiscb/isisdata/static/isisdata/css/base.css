@@ -363,9 +363,25 @@ ul.topics_list {
     color: white;
 }
 
+div.panel-cell {
+  padding-left: 15px;
+  padding-right: 2px;
+}
+
+div.panel-row {
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+div.panel-cell>hr {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
 div.facet_panel {
-  padding-left: 10px;
-  padding-bottom: 0px;
+  padding-left: 0px;
+  padding-bottom: 5px;
+  padding-top: 0px;
 }
 
 div.facet_panel > ul {

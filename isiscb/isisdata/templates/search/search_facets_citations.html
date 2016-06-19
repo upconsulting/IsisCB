@@ -1,6 +1,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load facet_filters %}
+{% load search_filters %}
 
 {% if query %}
 <div class="panel-group hidden-print" id="type_panel">
@@ -15,31 +16,107 @@
     </div>
     <div id="collapseTypes" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
-        {% if facets_citation.fields.type %}
-              <ul class="selected_facets">
+        <div class="row panel-row">
+          <div class="col-md-12 panel-cell">
+            <h5><small>Click on a publication type to only see publications of that type. Click on "Excl." to exclude a specific type.</small></h5>
+          </div>
+        </div>
+          {% if facets_citation.fields.type %}
+
+              {% if selected_facets.citation_type  %}
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <small>Showing only: </small>
+                </div>
+              </div>
+              {% endif %}
+
+              <!--<ul class="selected_facets">-->
                 {% for type in selected_facets.citation_type %}
                 {% with type|create_facet_string:'citation_type' as encoded_type %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ type }}</a></li>
+                <div class="row panel-row ">
+                  <div class="col-md-12 panel-cell">
+
+                  <small><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ type }}</a></small>
+                  </div>
+                </div>
                 {% endwith %}
                 {% endfor %}
-              </ul>
-              <ul class="unselected_facets">
+
+                {% if facets_citation.fields.type|length != selected_facets.citation_type|length %}
+                <div class="row panel-row">
+                  <div class="col-md-12 panel-cell">
+                    <small>Select publication type:</small>
+                  </div>
+                </div>
+                {% endif %}
+
                 {% for type in facets_citation.fields.type %}
                 {% if type.0 %}
                 {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
-                <li><a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="fa fa-square-o"></i> {{ type.0 }}</a> ({{ type.1 }})</li>
+                <div class="row panel-row">
+                  <div class="col-md-8 panel-cell">
+                    <small><a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="fa fa-square-o"></i> {{ type.0 }}</a>
+                  ({{ type.1 }})</small>
+                  </div>
+                  <div class="col-md-4 text-right panel-cell">
+                    <small>
+                      <a title="Exclude from search" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_type:{{ type.0|urlencode }}"><i class="fa fa-minus-square-o" aria-hidden="true"></i> Excl.</a>
+                    </small>
+                  </div>
+                </div>
                 {% endif %}
                 {% endif %}
                 {% endfor %}
-              </ul>
+
+                {% if excluded_facets.citation_type and facets_citation.fields.type%}
+                <div class="row panel-row">
+                  <div class="col-md-12 panel-cell">
+                    <hr>
+                  </div>
+                </div>
+
+                <div class="row panel-row">
+                  <div class="col-md-12 panel-cell">
+                    <strong class="text-muted"><small>Excluded:</small></strong>
+                  </div>
+                </div>
+                {% endif %}
+
+
+
+                {# List excluded facets #}
+                {% for type in excluded_facets.citation_type %}
+                {% with type|create_exclude_facet_string:'citation_type' as encoded_type %}
+                <div class="row panel-row">
+                  <div class="col-md-8 panel-cell">
+                    <small class="text-muted">
+                      <i class="fa fa-minus-square-o" aria-hidden="true"></i> {{ type }}
+                    </small>
+                  </div>
+                  <div class="col-md-4 text-right panel-cell">
+                    <small>
+                    <a href="{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
+                    </small>
+                  </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+
         {% else %}
-                <p>No type facets.</p>
+        <div class="row panel-row">
+          <div class="col-md-12 panel-cell">
+            <p><small>No type facets.</small></p>
+          </div>
+        </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 
+<!-- Author panel -->
 <div class="panel-group hidden-print" id="author_panel">
   <div class="panel panel-default">
     <div class="panel-heading">
@@ -52,33 +129,120 @@
     </div>
     <div id="collapseAuthors" class="panel-collapse collapse in">
       <div class="facet_panel panel-body">
+          <div class="row panel-row">
+            <div class="col-md-12">
+              <h5><small>Click on an author or contributor to only see their publications. Click on "Excl." to exclude a specific author or contributor.</small></h5>
+            </div>
+          </div>
+
         {% if facets_citation.fields.all_contributor_ids %}
-              <ul class="selected_facets">
-                {% for author in selected_facets.citation_all_contributor_ids_exact %}
-                {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
-                <li><a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>  </li>
-                {% endwith %}
-                {% endfor %}
-              </ul>
-              <ul class="unselected_facets">
-                {# Provide only the top 7 authors #}
-                {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
-                {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_aall_contributor_ids_exact %}
-                <li><a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a></li>
-                {% endif %}
-                {% endfor %}
-              </ul>
-              {% if facets_citation.fields.all_contributor_ids|length > 7 %}
-              <div class="more-facets">
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
-                  More...
-                </button>
-              </div>
-              {% endif %}
-        {% else %}
-                <p>No author facets.</p>
+
+        {% if selected_facets.citation_all_contributor_ids_exact %}
+        <div class="row panel-row">
+          <div class="col-md-12 panel-cell">
+            <small>Showing only publications by:</small>
+          </div>
+        </div>
         {% endif %}
+
+          {% for author in selected_facets.citation_all_contributor_ids_exact %}
+          {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
+          <div class="row panel-row ">
+            <div class="col-md-12">
+              <small>
+                <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>
+              </small>
+            </div>
+          </div>
+          {% endwith %}
+          {% endfor %}
+
+          {% if selected_facets.citation_all_contributor_ids_exact and facets_citation.fields.all_contributor_ids %}
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <hr>
+            </div>
+          </div>
+          {% endif %}
+
+
+          {# Provide only the top 7 authors #}
+          {% if facets_citation.fields.all_contributor_ids|length != selected_facets.citation_all_contributor_ids_exact|length %}
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <small>Select author/contributor:</small>
+            </div>
+          </div>
+          {% endif %}
+
+          {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
+          {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
+          <div class="row panel-row">
+            <div class="col-md-8 panel-cell">
+              <small>
+              <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }})</small>
+              <small><a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a></small>
+            </div>
+            <div class="col-md-4 text-right panel-cell">
+              <a title="Exclude from search" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_all_contributor_ids:{{ author.0|urlencode }}">
+                <small><i class="fa fa-minus-square-o" aria-hidden="true"></i> Excl.</small>
+              </a>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+
+          {% if facets_citation.fields.all_contributor_ids|length > 7 %}
+          <div class="row">
+            <div class="more-facets">
+              <!-- Button trigger modal -->
+              <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
+                <small>More...</small>
+              </button>
+            </div>
+          </div>
+          {% endif %}
+
+          {% if excluded_facets.citation_all_contributor_ids and facets_citation.fields.all_contributor_ids %}
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <hr>
+            </div>
+          </div>
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <strong class="text-muted"><small>Excluded from search:</small></strong>
+            </div>
+          </div>
+          {% endif %}
+
+
+          {# List excluded facets #}
+          {% for contr_id in excluded_facets.citation_all_contributor_ids %}
+          {% with contr_id|create_exclude_facet_string:'citation_all_contributor_ids' as encoded_contr_id %}
+          <div class="row panel-row">
+            <div class="col-md-8 panel-cell">
+              <small class="text-muted">
+                <i class="fa fa-minus-square-o" aria-hidden="true"></i> {{ contr_id|get_authority_name }}
+              </small>
+            </div>
+            <div class="col-md-4 text-right panel-cell">
+              <small>
+              <a href="{{ request.get_full_path|include_facet:encoded_contr_id|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
+              </small>
+            </div>
+          </div>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+
+          {% else %}
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <p><small>No author facets.</small></p>
+            </div>
+          </div>
+          {% endif %}
       </div>
     </div>
   </div>
