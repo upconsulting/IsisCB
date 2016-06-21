@@ -697,10 +697,15 @@ class DatabaseHandler(object):
             model = Authority
 
         authority_id = authority_data['id']
-        authority, created = model.objects.update_or_create(
-            pk=authority_id,
-            defaults=authority_data
-        )
+        try:
+            authority, created = model.objects.update_or_create(
+                pk=authority_id,
+                defaults=authority_data
+            )
+        except Exception as E:
+            print E
+            print authority_data, authority_id
+            raise E
         self._tick('authority')
 
     def handle_ccrelation(self, fielddata, extra):
