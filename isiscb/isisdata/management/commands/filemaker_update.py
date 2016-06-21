@@ -196,6 +196,7 @@ class FMPDSOParser(object):
             'Dataset':  None,
             'RecordStatus': None,
             'Type.controlled': None,
+            'RecordHistory': None,
         },
         'authority': {
             'ClassificationSystem': 'classification_system',
