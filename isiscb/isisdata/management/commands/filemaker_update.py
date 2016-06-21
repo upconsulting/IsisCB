@@ -28,6 +28,12 @@ def fast_iter(context, func, tag, *extra):
     del context
 
 
+def _strip_non_numbers(s):
+    transmap = string.maketrans('','')
+    nodigs = transmap.translate(transmap, string.digits)
+    return s.translate(transmap, nodigs)
+
+
 class FMPDSOParser(object):
     """
     Parses FileMaker's FMPDSO XML format into field-data that can be ingested
@@ -86,13 +92,6 @@ class FMPDSOParser(object):
             return int(fm_value)
         except ValueError:
             return fm_value
-
-
-    def _strip_non_numbers(s):
-        transmap = string.maketrans('','')
-        nodigs = transmap.translate(transmap, string.digits)
-        return s.translate(transmap, nodigs)
-
 
     @staticmethod
     def _try_positive_int(model_name, fm_field, fm_value):
@@ -690,7 +689,7 @@ class DatabaseHandler(object):
                 part_details = PartDetails.objects.create(**partdetails_data)
             except Exception as E:
                 print partdetails_data
-                
+
             citation.part_details = part_details
             citation.save()
 
