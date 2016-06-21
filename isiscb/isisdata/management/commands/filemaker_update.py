@@ -3,14 +3,13 @@ from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationErr
 from django.contrib.contenttypes.models import ContentType
 from isisdata.models import *
 
-import datetime, iso8601
+import datetime, iso8601, string
 import xml.etree.ElementTree as ET
 import os
 import copy
 import json
 import re
 import pprint
-import string
 
 from collections import Counter
 
@@ -88,12 +87,25 @@ class FMPDSOParser(object):
         except ValueError:
             return fm_value
 
+
+    def _strip_non_numbers(s):
+        transmap = string.maketrans('','')
+        nodigs = transmap.translate(transmap, string.digits)
+        return s.translate(transmap, nodigs)
+
+
     @staticmethod
     def _try_positive_int(model_name, fm_field, fm_value):
-        try:
-            return abs(int(fm_value))
-        except ValueError:
-            return fm_value
+        attempts = [
+            lambda x: abs(int(x)),
+            lambda x: abs(int(_strip_non_numbers(x)))
+        ]
+        for func in attempts:
+            try:
+                return func(fm_value)
+            except ValueError:
+                pass
+        return fm_value
 
     @staticmethod
     def _handle_record_status(model_name, fm_field, fm_value):
