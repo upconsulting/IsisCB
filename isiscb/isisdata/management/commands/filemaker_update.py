@@ -317,6 +317,7 @@ class FMPDSOParser(object):
                 'CREATIVEWORK': 'CW',
                 'EVENT': 'EV',
                 'PUBLISHERS': 'PU',
+                'PUBLISHER': 'PU',
                 'CROSS-REFERENCE': 'CR',
             },
             'acrelation': {
