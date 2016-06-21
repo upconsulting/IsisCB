@@ -673,6 +673,7 @@ class DatabaseHandler(object):
             )
         except Exception as E:
             print citation_data, citation_id
+            raise E
 
         if language_id:
             citation.language.add(language_id)
@@ -689,6 +690,7 @@ class DatabaseHandler(object):
                 part_details = PartDetails.objects.create(**partdetails_data)
             except Exception as E:
                 print partdetails_data
+                raise E
 
             citation.part_details = part_details
             citation.save()
