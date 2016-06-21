@@ -197,6 +197,7 @@ class FMPDSOParser(object):
             'RecordStatus': None,
             'Type.controlled': None,
             'RecordHistory': None,
+            'StaffNotes': None,
         },
         'authority': {
             'ClassificationSystem': 'classification_system',
