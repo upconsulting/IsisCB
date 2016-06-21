@@ -667,10 +667,14 @@ class DatabaseHandler(object):
         citation_data = self._prepare_data(Citation, fielddata)
         citation_id = citation_data.pop('id')    # Don't want this in update.
         language_id = citation_data.pop('language_id', None)
-        citation, created = Citation.objects.update_or_create(
-            pk=citation_id,
-            defaults=citation_data
-        )
+        try:
+            citation, created = Citation.objects.update_or_create(
+                pk=citation_id,
+                defaults=citation_data
+            )
+        except Exception as E:
+            print citation_data, citation_id
+
         if language_id:
             citation.language.add(language_id)
 
@@ -682,8 +686,11 @@ class DatabaseHandler(object):
                 self._update_with(citation.part_details, partdetails_data)
 
         if (created or not citation.part_details) and len(partdetails_data) > 0:
-            part_details = PartDetails.objects.create(**partdetails_data)
-            part_details.save()
+            try:
+                part_details = PartDetails.objects.create(**partdetails_data)
+            except Exception as E:
+                print partdetails_data
+                
             citation.part_details = part_details
             citation.save()
 
@@ -717,7 +724,6 @@ class DatabaseHandler(object):
                 defaults=authority_data
             )
         except Exception as E:
-            print E
             print authority_data, authority_id
             raise E
         self._tick('authority')
