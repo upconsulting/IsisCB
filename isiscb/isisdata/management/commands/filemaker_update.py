@@ -21,10 +21,11 @@ languageLookup = {l['fields']['name'].lower(): l['pk'] for l in languages}
 languageLookup.update({l['pk'].lower(): l['pk'] for l in languages})
 
 
-def fast_iter(context, func, *extra):
-    for event, e in context:
-        func(e, *extra)
-        # e.clear()
+def fast_iter(context, func, tag, *extra):
+    for event, elem in context:
+        func(elem, *extra)
+        if elem.tag.replace('{http://www.filemaker.com/fmpdsoresult}', '') == tag:
+            elem.clear()
     del context
 
 
@@ -511,6 +512,7 @@ class FMPDSOParser(object):
         #  each element that streams through.
         fast_iter(ET.iterparse(data_path),     # Iterator.
                   self.parse_record,           # Method.
+                  'ROW',
                   model_name,                  # Extra...
                   parse_also)
 
@@ -558,7 +560,7 @@ class DatabaseHandler(object):
         self.model_counts[model_name] += 1
         N = self.model_counts[model_name]
         if N % self.print_every == 0:
-            pprint.pprint('handled %i %s records' % (N, model_name))
+            pprint.pprint("handled %i %s records" % (N, model_name))
 
     def _get_subject(self, subject_id):
         """
@@ -891,7 +893,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         parser = FMPDSOParser(DatabaseHandler())
         table = options['table'][0]
-        path = os.path.join(options['datapath'][0], '%s.xml' % table)
 
         if table == 'citation':
             parse_also = ['partdetails']
@@ -900,4 +901,13 @@ class Command(BaseCommand):
         else:
             parse_also = []
 
-        parser.parse(table, path, parse_also)
+        dirpath = os.path.join(options['datapath'][0], table)
+        if os.path.exists(dirpath) and os.path.isdir(dirpath):
+            for fname in os.listdir(dirpath):
+                if fname.startswith(table) and fname.endswith('xml'):
+                    path = os.path.join(dirpath, fname)
+                    print 'processing %s' % fname
+                    parser.parse(table, path, parse_also)
+        else:
+            path = os.path.join(options['datapath'][0], '%s.xml' % table)
+            parser.parse(table, path, parse_also)
