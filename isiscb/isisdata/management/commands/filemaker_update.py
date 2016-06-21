@@ -295,6 +295,7 @@ class FMPDSOParser(object):
             },
             'authority': {
                 'PERSON': 'PE',
+                'PUBLISHER': 'PU',
                 'INSTITUTION': 'IN',
                 'TIMEPERIOD': 'TI',
                 'GEOGRAPHICTERM': 'GE',
