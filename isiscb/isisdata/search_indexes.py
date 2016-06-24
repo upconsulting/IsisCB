@@ -512,7 +512,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.get_type_controlled_display()
 
     def prepare_dates(self, obj):
-        return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue'])]
+        return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue', 'isodatevalue', 'isodaterangevalue', 'daterangevalue'])]
 
     #def prepare_citation_nr(self, obj):
         #ACRelation.objects.filter(authority=obj, citation__public=True).distinct('citation_id').count()
