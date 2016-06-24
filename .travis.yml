@@ -1,6 +1,8 @@
 language: python
 python:
 - '2.7'
+services:
+- postgresql
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.local_settings
@@ -8,6 +10,8 @@ env:
     - SOCIAL_AUTH_TWITTER_KEY=''
     - SOCIAL_AUTH_FACEBOOK_SECRET=''
     - SOCIAL_AUTH_TWITTER_SECRET=''
+before_script:
+- psql -c 'create database isiscb;' -U postgres
 script:
 - pip install nose
 - cd isiscb
