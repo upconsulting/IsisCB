@@ -123,6 +123,9 @@ class TextValue(Value):
     """
     value = models.TextField()
 
+    def __unicode__(self):
+        return self.value
+
     class Meta:
         verbose_name = 'text (long)'
 
@@ -138,6 +141,9 @@ class CharValue(Value):
         if len(value) > 2000:
             raise ValidationError('Must be 2,000 characters or less')
         return value
+
+    def __unicode__(self):
+        return self.value
 
     class Meta:
         verbose_name = 'text (short)'
@@ -155,6 +161,9 @@ class IntValue(Value):
             return int(value)
         except ValueError:
             raise ValidationError('Must be an integer')
+
+    def __unicode__(self):
+        return unicode(self.value)
 
     class Meta:
         verbose_name = 'integer'
@@ -174,6 +183,9 @@ class DateTimeValue(Value):
             return iso8601.parse_date(value)
         except iso8601.ParseError:
             raise ValidationError('Not a valid ISO8601 date')
+
+    def __unicode__(self):
+        return self.value.isoformat()
 
     class Meta:
         verbose_name = 'date and time'
@@ -246,6 +258,9 @@ class DateRangeValue(Value):
             return sorted(value)
         else:
             raise ValidationError('Must be a 2-tuple or 2-element list')
+
+    def __unicode__(self):
+        return u'%s to %s' % tuple([part.isodate() for part in self.value])
 
     class Meta:
         verbose_name = 'date range'
@@ -393,6 +408,9 @@ class DateValue(Value):
         except iso8601.ParseError:
             raise ValidationError('Not a valid ISO8601 date')
 
+    def __unicode__(self):
+        return self.value.isodate()
+
     class Meta:
         verbose_name = 'date'
 
@@ -410,6 +428,9 @@ class FloatValue(Value):
         except ValueError:
             raise ValidationError('Must be a floating point number')
 
+    def __unicode__(self):
+        return unicode(self.value)
+
     class Meta:
         verbose_name = 'floating point number'
 
@@ -419,6 +440,9 @@ class LocationValue(Value):
     A location value. Points to an instance of :class:`.Location`\.
     """
     value = models.ForeignKey('Location')   # TODO: One to One?
+
+    def __unicode__(self):
+        return self.value.__unicode__
 
     class Meta:
         verbose_name = 'location'

@@ -867,9 +867,15 @@ class DatabaseHandler(object):
                     )
                 else:
                     self._update_with(attribute.value, {'value': value_data})
+                    value = attribute.value
         except Exception as E:
             print E.__repr__(), acrelation_id, acrelation_data
             self.errors.append(('value', E.__repr__(), attribute_id, value_data))
+
+        if 'value_freeform' not in attribute_data or not attribute.value_freeform:
+            attribute.value_freeform = attribute.value.__unicode__()
+            attribute.save()
+
         self._tick('attribute')
 
     def handle_linkeddata(self, fielddata, extra):
