@@ -122,15 +122,15 @@ class FMPDSOParser(object):
                 explanation_raw = match.groups()[0].strip()
                 public, status, explanation = False, u'Redirect', explanation_raw
             else:
-                public, status, explanation = False, u'Inactive', u''
+                public, status, explanation = True, u'A ctive', u''
         return public, status, explanation
 
     @staticmethod
     def _handle_attribute_value(model_name, fm_field, fm_value):
         if fm_field == 'DateBegin':
-            return (FMPDSOParser._to_date(model_name, fm_field, fm_value), 'BGN')
+            return (fm_value, 'BGN')
         elif fm_field == 'DateEnd':
-            return (FMPDSOParser._to_date(model_name, fm_field, fm_value), 'END')
+            return (fm_value, 'END')
 
     @staticmethod
     def _handle_language(model_name, fm_field, fm_value):
@@ -349,7 +349,8 @@ class FMPDSOParser(object):
                 'INSTITUTION': 'IN',
                 'MEETING': 'ME',
                 'PERIODICAL': 'PE',
-                'BOOKSERIES': 'BS'
+                'BOOKSERIES': 'BS',
+                'COMMITTEE MEMBER': 'CM',
             },
             'ccrelation': {
                 'INCLUDESCHAPTER': 'IC',
@@ -420,7 +421,7 @@ class FMPDSOParser(object):
         mapper = self.mappings.get(model_field, None)
 
         # This might not be necessary, but I'm paranoid.
-        value = copy.copy(fm_value)
+        value = copy.copy(fm_value).strip()
 
         if mapper:
             attrs = (model_name, fm_field, value.upper())
@@ -572,6 +573,8 @@ class DatabaseHandler(object):
     def __init__(self, print_every=200):
         self.model_counts = Counter()
         self.print_every = print_every
+        with open('ingest_errors.pickle', 'r') as f:
+            self.errors = pickle.load(f)
 
     def _tick(self, model_name):
         self.model_counts[model_name] += 1
@@ -747,10 +750,13 @@ class DatabaseHandler(object):
         ccrelation_data = self._prepare_data(CCRelation, fielddata)
         ccrelation_id = ccrelation_data.pop('id')
 
-        ccrelation, created = CCRelation.objects.update_or_create(
-            pk=ccrelation_id,
-            defaults=ccrelation_data
-        )
+        try:
+            ccrelation, created = CCRelation.objects.update_or_create(
+                pk=ccrelation_id,
+                defaults=ccrelation_data
+            )
+        except Exception as E:
+            self.errors.append(('ccrelation', E.__repr__(), ccrelation_id, ccrelation_data))
         self._tick('ccrelation')
 
     def handle_acrelation(self, fielddata, extra):
@@ -767,11 +773,14 @@ class DatabaseHandler(object):
 
         acrelation_data = self._prepare_data(ACRelation, fielddata)
         acrelation_id = acrelation_data.pop('id')
-
-        acrelation, created = ACRelation.objects.update_or_create(
-            pk=acrelation_id,
-            defaults=acrelation_data
-        )
+        try:
+            acrelation, created = ACRelation.objects.update_or_create(
+                pk=acrelation_id,
+                defaults=acrelation_data
+            )
+        except Exception as E:
+            print E.__repr__(), acrelation_id, acrelation_data
+            self.errors.append(('acrelation', E.__repr__(), acrelation_id, acrelation_data))
         self._tick('acrelation')
 
     def handle_attribute(self, fielddata, extra):
@@ -816,7 +825,13 @@ class DatabaseHandler(object):
         attribute_data.pop('value', None)
         type_controlled = attribute_data.pop('type_controlled')
 
-        value_model = dict(VALUE_MODELS)[type(value_data)]
+        if type(value_data) in [list, tuple] and len(value_data) == 2:
+            value_model = ISODateRangeValue
+        elif 'date' in type_controlled.lower():
+            value_model = ISODateValue
+        else:
+            value_model = dict(VALUE_MODELS)[type(value_data)]
+
         attribute_type, _ = AttributeType.objects.get_or_create(
             name=type_controlled,
             defaults={
@@ -827,19 +842,34 @@ class DatabaseHandler(object):
         attribute_data.update({
             'type_controlled_id': attribute_type.id,
         })
-
-        attribute, created = Attribute.objects.update_or_create(
-            pk=attribute_id,
-            defaults=attribute_data
-        )
-
-        if not hasattr(attribute, 'value'):
-            value = value_model.objects.create(
-                value=value_data,
-                attribute=attribute
+        try:
+            attribute, created = Attribute.objects.update_or_create(
+                pk=attribute_id,
+                defaults=attribute_data
             )
-        else:
-            self._update_with(attribute.value, {'value': value_data})
+        except Exception as E:
+            print E.__repr__(), acrelation_id, acrelation_data
+            self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
+
+        try:
+            if not hasattr(attribute, 'value'):
+                value = value_model.objects.create(
+                    value=value_data,
+                    attribute=attribute
+                )
+            else:
+                child_class = attribute.value.get_child_class()
+                if type(child_class) != value_model:
+                    attribute.value.delete()
+                    value = value_model.objects.create(
+                        value=value_data,
+                        attribute=attribute
+                    )
+                else:
+                    self._update_with(attribute.value, {'value': value_data})
+        except Exception as E:
+            print E.__repr__(), acrelation_id, acrelation_data
+            self.errors.append(('value', E.__repr__(), attribute_id, value_data))
         self._tick('attribute')
 
     def handle_linkeddata(self, fielddata, extra):
@@ -870,10 +900,13 @@ class DatabaseHandler(object):
             'type_controlled_id': ld_type.id,
         })
 
-        linkeddata, created = LinkedData.objects.update_or_create(
-            pk=linkeddata_id,
-            defaults=linkeddata_data
-        )
+        try:
+            linkeddata, created = LinkedData.objects.update_or_create(
+                pk=linkeddata_id,
+                defaults=linkeddata_data
+            )
+        except Exception as E:
+            self.errors.append(('linkeddata', E.__repr__(), linkeddata_id, linkeddata_data))
         self._tick('linkeddata')
 
     def handle_tracking(self, fielddata, extra):
@@ -897,12 +930,19 @@ class DatabaseHandler(object):
             'subject_instance_id': subject_id,
         })
 
-        tracking, created = Tracking.objects.update_or_create(
-            pk=tracking_id,
-            defaults=tracking_data
-        )
+        try:
+            tracking, created = Tracking.objects.update_or_create(
+                pk=tracking_id,
+                defaults=tracking_data
+            )
+        except Exception as E:
+            self.errors.append(('tracking', E.__repr__(), tracking_id, tracking_data))
         self._tick('tracking')
 
+    def __del__(self):
+        import cPickle as pickle
+        with open('./ingest_errors.pickle', 'w') as f:
+            pickle.dump(self.errors, f)
 
 class Command(BaseCommand):
     help = 'Update the IsisCB Explore database with FileMaker Pro FMPDSO XML.'

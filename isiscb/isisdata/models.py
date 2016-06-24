@@ -18,6 +18,7 @@ from oauth2_provider.models import AbstractApplication
 
 from isisdata.utils import *
 
+import copy
 import datetime
 import iso8601
 import pickle
@@ -39,8 +40,8 @@ from openurl.models import Institution
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
-            | Q(model='floatvalue') | Q(model='locationvalue')
-
+            | Q(model='floatvalue') | Q(model='locationvalue') \
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue')
 
 
 class Value(models.Model):
@@ -73,7 +74,6 @@ class Value(models.Model):
         if hasattr(self, 'convert') and self.value is not None:
             self.value = self.convert(self.value)
         if self.child_class == '' or self.child_class is None:
-            print self, type(self), type(self).__name__, self.value, type(self.value)
             self.child_class = type(self).__name__
         return super(Value, self).save(*args, **kwargs)
 
@@ -179,6 +179,54 @@ class DateTimeValue(Value):
         verbose_name = 'date and time'
 
 
+class ISODateRangeValue(Value):
+    start = pg_fields.ArrayField(models.IntegerField(default=0), size=3)
+    end = pg_fields.ArrayField(models.IntegerField(default=0), size=3)
+
+    PARTS = ['start', 'end']
+
+    def _valuegetter(self):
+        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS]
+
+    def _valuesetter(self, value):
+        try:
+            value = ISODateRangeValue.convert(value)
+        except ValidationError:
+            raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
+
+        for part_value, part in zip(value, self.PARTS):
+            setattr(self, part, part_value)
+
+    value = property(_valuegetter, _valuesetter)
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list] and len(value) == 2:
+            value = list(value)
+            for i in xrange(2):
+                value[i] = ISODateValue.convert(value[i])
+        else:
+            raise ValidationError('Not a valid ISO8601 date range')
+
+        return value
+
+    def __unicode__(self):
+        def _coerce(val):
+            val = unicode(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
+
+    class Meta:
+        verbose_name = 'date range'
+
+
 class DateRangeValue(Value):
     value = pg_fields.ArrayField(
         models.DateField(),
@@ -201,6 +249,121 @@ class DateRangeValue(Value):
 
     class Meta:
         verbose_name = 'date range'
+
+
+class ISODateValue(Value):
+    """
+    A variable-precision date.
+    """
+    PARTS = [u'year', u'month', u'day']
+
+    year = models.IntegerField(default=0)
+    month = models.IntegerField(default=0)
+    day = models.IntegerField(default=0)
+
+    datetime_formats = [
+        '%m/%d/%Y %I:%M:%S %p',
+        '%m/%d/%Y %I:%M %p'
+    ]
+    date_formats = [
+        '%m/%d/%Y',
+        '%Y'
+    ]
+
+    @property
+    def as_date(self):
+        """
+        Attempt to coerce a value to ``datetime.date``.
+        """
+        value = self.__unicode__()
+        for format in ISODateValue.datetime_formats + ISODateValue.date_formats:
+            try:
+                return datetime.datetime.strptime(value, format)
+            except ValueError:
+                pass
+        try:
+            return iso8601.parse_date(value)
+        except ValueError:
+            pass
+        raise ValueError('Could not coerce value to datetime: %s' % value)
+
+    def save(self, *args, **kwargs):
+        """
+        Override to update Citation.publication_date, if this DateValue belongs
+        to an Attribute of type "PublicationDate".
+        """
+        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
+
+        if self.attribute.type_controlled.name == 'PublicationDate':
+            try:
+                self.attribute.source.publication_date = self.as_date
+                self.attribute.source.save()
+            except ValueError:
+                print 'Error settings publication_date on %i' % self.attribute.source.id
+
+    def _valuegetter(self):
+        return [getattr(self, part) for part in self.PARTS if getattr(self, part) != 0]
+
+    def _valuesetter(self, value):
+        try:
+            value = ISODateValue.convert(value)
+        except ValidationError:
+            raise ValueError('Invalid value for ISODateValue: %s' % value.__repr__())
+
+        for i, v in enumerate(value):
+            setattr(self, self.PARTS[i], v)
+
+    def __unicode__(self):
+        def _coerce(val):
+            val = unicode(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return '-'.join([_coerce(v) for v in self.value])
+
+    value = property(_valuegetter, _valuesetter)
+
+    @property
+    def precision(self):
+        last = None
+        for part in self.PARTS:
+            if getattr(self, part) == 0:
+                return last
+            last = copy.copy(part)
+        return part
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list]:
+            value = list(value)
+        elif type(value) in [str, unicode]:
+            pre = u''
+            if value.startswith('-'):   # Preserve negative years.
+                value = value[1:]
+                pre = u'-'
+            value = value.split('-')
+            value[0] = pre + value[0]
+        elif type(value) is datetime.datetime:
+            date = value.date()
+            value = [date.year, date.month, date.day]
+        elif type(value) is datetime.date:
+            value = [value.year, value.month, value.day]
+        elif type(value) is int:   # We assume that it is just a year.
+            value = [value]
+        else:
+            raise ValidationError('Not a valid ISO8601 date')
+        try:
+            return [int(v) for v in value if v]
+        except NameError:
+            raise ValidationError('Not a valid ISO8601 date')
+
+    class Meta:
+        verbose_name = 'isodate'
 
 
 
@@ -265,7 +428,7 @@ VALUE_MODELS = [
     (int,               IntValue),
     (float,             FloatValue),
     (datetime.datetime, DateTimeValue),
-    (datetime.date,     DateValue),
+    (datetime.date,     ISODateValue),
     (str,               CharValue),
     (unicode,           CharValue),
     (tuple,             DateRangeValue),
@@ -889,6 +1052,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     # if Type.Broad.controlled = 'IsPublicationHostOf'
     PERIODICAL = 'PE'
     BOOK_SERIES = 'BS'
+    COMMITTEE_MEMBER = 'CM'
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
@@ -902,7 +1066,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (INSTITUTION, 'Institution'),
         (MEETING, 'Meeting'),
         (PERIODICAL, 'Periodical'),
-        (BOOK_SERIES, 'Book Series')
+        (BOOK_SERIES, 'Book Series'),
+        (COMMITTEE_MEMBER, 'Committee Member'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1187,7 +1352,7 @@ class LinkedDataType(models.Model):
 
         if re.match(self.pattern, value) is None:
             message = 'Does not match pattern for {0}'.format(self.name)
-            print 'asdf'
+
             raise ValidationError(message)
 
     def __unicode__(self):
