@@ -823,7 +823,12 @@ class DatabaseHandler(object):
         # We don't want these in the data for Attribute.
         attribute_data.pop('type_qualifier', None)
         attribute_data.pop('value', None)
-        type_controlled = attribute_data.pop('type_controlled')
+        try:
+            type_controlled = attribute_data.pop('type_controlled')
+        except KeyError as E:
+            print E.__repr__(), attribute_id, attribute_data
+            self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
+            return
 
         if type(value_data) in [list, tuple] and len(value_data) == 2:
             value_model = ISODateRangeValue
@@ -848,7 +853,7 @@ class DatabaseHandler(object):
                 defaults=attribute_data
             )
         except Exception as E:
-            print E.__repr__(), acrelation_id, acrelation_data
+            print E.__repr__(), attribute_id, attribute_data
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
 
         try:
@@ -869,7 +874,7 @@ class DatabaseHandler(object):
                     self._update_with(attribute.value, {'value': value_data})
                     value = attribute.value
         except Exception as E:
-            print E.__repr__(), acrelation_id, acrelation_data
+            print E.__repr__(), attribute_id, attribute_data
             self.errors.append(('value', E.__repr__(), attribute_id, value_data))
 
         if 'value_freeform' not in attribute_data or not attribute.value_freeform:
