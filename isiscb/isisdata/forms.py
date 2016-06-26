@@ -38,6 +38,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
         self.excluded_facets = kwargs.get('data', {}).getlist('excluded_facets', [])
+        self.facet_operators = kwargs.get('data', {}).getlist('facet_operators', [])
 
     def get_authority_model(self):
         """Return an alphabetical list of model classes in the index."""
@@ -149,8 +150,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sqs_authority = sqs_citation
 
         # We apply faceting ourselves.
-        sqs_citation = self.set_facets(self.selected_facets, sqs_citation, "citation_")
-        sqs_authority = self.set_facets(self.selected_facets, sqs_authority, "authority_")
+        sqs_citation = self.set_facets(self.selected_facets, sqs_citation, "citation_", self.facet_operators)
+        sqs_authority = self.set_facets(self.selected_facets, sqs_authority, "authority_", self.facet_operators)
 
         # exclude facets
         sqs_citation = self.exclude_facets(self.excluded_facets, sqs_citation, "citation_")
@@ -172,7 +173,14 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return {'authority' : results_authority,
                 'citation': results_citation}
 
-    def set_facets(self, selected_facets, sqs, type_string):
+    def set_facets(self, selected_facets, sqs, type_string, facet_operators):
+        operators = {}
+        for op in facet_operators:
+            op_type, operator = op.split(":", 1)
+            operators[op_type] = operator
+
+        or_facets = {}
+
         for facet in selected_facets:
             if ":" not in facet:
                 continue
@@ -187,9 +195,18 @@ class MyFacetedSearchForm(FacetedSearchForm):
                 if field.endswith('_exact'):
                     field = field[0:(len(field) - 6)]
 
-                # Let's use filter instead of narrow so that we have the option to use
-                # 'OR' or 'AND' in the future
-                sqs = sqs.filter(**{field + "__exact" : Clean(value)})
+                # if facets should be connected with and just narrow query
+                # otherwise save value for combined query later
+                if operators.get(field, 'and') == 'or':
+                    value_list = or_facets.setdefault(field, [])
+                    value_list.append(value)
+                else:
+                    sqs = sqs.narrow(u'%s:"%s"' % (field + "_exact", Clean(value)))
+
+        # create 'and' query
+        for or_facet in or_facets.keys():
+            query_str = ' OR '.join(or_facets[or_facet])
+            sqs = sqs.narrow(u'%s:%s' % (or_facet + "_exact", Clean('(' + query_str + ')')))
 
         return sqs
 
