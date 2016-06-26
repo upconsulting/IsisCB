@@ -93,7 +93,7 @@
                       });
 
                       $('div[data-candlestick-id="candlestick_{{ type.0 }}"]>.candlestick-off').on('click', function(e) {
-                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}';
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }};facet_operators=type:or';
                       });
                     });
                     </script>
