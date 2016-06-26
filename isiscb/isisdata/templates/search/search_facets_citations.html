@@ -2,6 +2,7 @@
 {% load metadata_filters %}
 {% load facet_filters %}
 {% load search_filters %}
+{% load staticfiles %}
 
 {% if query %}
 <div class="panel-group hidden-print" id="type_panel">
@@ -23,21 +24,35 @@
         </div>
           {% if facets_citation.fields.type %}
 
-              {% if selected_facets.citation_type  %}
-              <div class="row panel-row">
-                <div class="col-md-12 panel-cell">
-                  <small>Showing only: </small>
-                </div>
-              </div>
-              {% endif %}
-
               <!--<ul class="selected_facets">-->
                 {% for type in selected_facets.citation_type %}
                 {% with type|create_facet_string:'citation_type' as encoded_type %}
                 <div class="row panel-row ">
-                  <div class="col-md-12 panel-cell">
+                  <div class="col-md-8 panel-cell">
 
                   <small><a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{ type }}</a></small>
+                  </div>
+
+                  <div class="col-md-4 text-right panel-cell">
+                    <div>
+                      <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="0">
+                    </div>
+                    <script>
+                    $(function() {
+                      $('.toggle_{{ type }}').candlestick({
+                        'default': '0',
+                        'size': 'sm',
+                      });
+
+                      $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-nc').on('click', function(e) {
+                        window.location = '{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}';
+                      });
+                      $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-on').on('click', function(e) {
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_type:{{ type|urlencode }}';
+                      });
+                    });
+                    </script>
+
                   </div>
                 </div>
                 {% endwith %}
@@ -60,30 +75,34 @@
                   ({{ type.1 }})</small>
                   </div>
                   <div class="col-md-4 text-right panel-cell">
-                    <small>
+                    <!--<small>
                       <a title="Exclude from search" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_type:{{ type.0|urlencode }}"><i class="fa fa-minus-square-o" aria-hidden="true"></i> Excl.</a>
-                    </small>
+                    </small>-->
+                    <div>
+                      <input class="toggle_{{ type.0 }}" type="checkbox" name="candlestick_{{ type.0 }}" value="2">
+                    </div>
+                    <script>
+                    $(function() {
+                      $('.toggle_{{ type.0 }}').candlestick({
+                        'default': '2',
+                        'size': 'sm',
+                      });
+
+                      $('div[data-candlestick-id="candlestick_{{ type.0 }}"]>.candlestick-on').on('click', function(e) {
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_type:{{ type.0|urlencode }}';
+                      });
+
+                      $('div[data-candlestick-id="candlestick_{{ type.0 }}"]>.candlestick-off').on('click', function(e) {
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}';
+                      });
+                    });
+                    </script>
+
                   </div>
                 </div>
                 {% endif %}
                 {% endif %}
                 {% endfor %}
-
-                {% if excluded_facets.citation_type and facets_citation.fields.type%}
-                <div class="row panel-row">
-                  <div class="col-md-12 panel-cell">
-                    <hr>
-                  </div>
-                </div>
-
-                <div class="row panel-row">
-                  <div class="col-md-12 panel-cell">
-                    <strong class="text-muted"><small>Excluded:</small></strong>
-                  </div>
-                </div>
-                {% endif %}
-
-
 
                 {# List excluded facets #}
                 {% for type in excluded_facets.citation_type %}
@@ -95,9 +114,26 @@
                     </small>
                   </div>
                   <div class="col-md-4 text-right panel-cell">
-                    <small>
+                    <!--<small>
                     <a href="{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
-                    </small>
+                  </small>-->
+
+                    <div>
+                      <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="1">
+                    </div>
+                    <script>
+                    $(function() {
+                      $('.toggle_{{ type }}').candlestick({
+                        'default': '1',
+                        'size': 'sm',
+                      });
+
+                      $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-nc').on('click', function(e) {
+                        window.location = '{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}';
+                      });
+                    });
+                    </script>
+
                   </div>
                 </div>
                 {% endwith %}
@@ -475,3 +511,8 @@
     </div>
   </div>
 </div><!-- /modal -->
+
+<link rel="stylesheet" href={% static "isisdata/candlestick/candlestick.css" %}>
+<script src={% static "isisdata/candlestick/candlestick.js" %} type="text/javascript"></script>
+<script src={% static "isisdata/candlestick/hammer.min.js" %} type="text/javascript"></script>
+<script src={% static "isisdata/candlestick/jquery.hammer.js" %} type="text/javascript"></script>
