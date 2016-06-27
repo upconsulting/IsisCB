@@ -9,6 +9,7 @@ from haystack import connections
 from haystack.constants import DEFAULT_ALIAS
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 from haystack.utils import get_model_ct
+from haystack.inputs import Clean
 
 from captcha.fields import CaptchaField
 
@@ -36,6 +37,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
+        self.excluded_facets = kwargs.get('data', {}).getlist('excluded_facets', [])
+        self.facet_operators = kwargs.get('data', {}).getlist('facet_operators', [])
 
     def get_authority_model(self):
         """Return an alphabetical list of model classes in the index."""
@@ -130,6 +133,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
             return {'authority' : self.no_query_found(),
                     'citation': self.no_query_found()}
 
+
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
 
         # Removed: query sanitization already occurs (by design) in the
@@ -146,18 +150,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sqs_authority = sqs_citation
 
         # We apply faceting ourselves.
-        for facet in self.selected_facets:
-            if ":" not in facet:
-                continue
+        sqs_citation = self.set_facets(self.selected_facets, sqs_citation, "citation_", self.facet_operators)
+        sqs_authority = self.set_facets(self.selected_facets, sqs_authority, "authority_", self.facet_operators)
 
-            field, value = facet.split(":", 1)
-            field = field.strip()
-            value = value.strip()
-
-            if value and field.startswith('citation_'):
-                sqs_citation = sqs_citation.narrow(u'%s:"%s"' % (field[9:], sqs.query.clean(value)))
-            if value and field.startswith('authority_'):
-                sqs_authority = sqs_authority.narrow(u'%s:"%s"' % (field[10:], sqs.query.clean(value)))
+        # exclude facets
+        sqs_citation = self.exclude_facets(self.excluded_facets, sqs_citation, "citation_")
+        sqs_authority = self.exclude_facets(self.excluded_facets, sqs_authority, "authority_")
 
         sort_order_citation = self.get_sort_order_citation()
         sort_order_authority = self.get_sort_order_authority()
@@ -175,6 +173,60 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return {'authority' : results_authority,
                 'citation': results_citation}
 
+    def set_facets(self, selected_facets, sqs, type_string, facet_operators):
+        operators = {}
+        for op in facet_operators:
+            op_type, operator = op.split(":", 1)
+            operators[op_type] = operator
+
+        or_facets = {}
+
+        for facet in selected_facets:
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+            field = field.strip()
+            value = value.strip()
+
+            if value and field.startswith(type_string):
+                field = field[len(type_string):]
+
+
+                # if facets should be connected with and just narrow query
+                # otherwise save value for combined query later
+                if operators.get(field, 'and') == 'or':
+                    value_list = or_facets.setdefault(field, [])
+                    value_list.append(value)
+                else:
+                    sqs = sqs.narrow(u'%s:"%s"' % (field, Clean(value)))
+
+        # create 'and' query
+        for or_facet in or_facets.keys():
+            query_str = ' OR '.join(or_facets[or_facet])
+            sqs = sqs.narrow(u'%s:%s' % (or_facet, Clean('(' + query_str + ')')))
+
+        return sqs
+
+    def exclude_facets(sef, excluded_facets, sqs, type_string):
+        for facet in excluded_facets:
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+            field = field.strip()
+            value = value.strip()
+
+            if value and field.startswith(type_string):
+                field = field[len(type_string):]
+
+                if field.endswith('_exact'):
+                    field = field[0:(len(field) - 6)]
+
+                # Exclude facets
+                sqs = sqs.exclude(**{field + "__exact" : Clean(value)})
+
+        return sqs
 
 class UserRegistrationForm(forms.Form):
     username = forms.CharField()

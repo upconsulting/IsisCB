@@ -1054,6 +1054,7 @@ class IsisSearchView(FacetedSearchView):
             parameters = parameters.encode('ascii', 'ignore')
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
+        excluded_facets = self.request.GET.get('excluded_facets', None)
 
         sort_field_citation = self.request.GET.get('sort_order_citation', None)
         sort_order_citation = self.request.GET.get('sort_order_dir_citation', None)
@@ -1068,6 +1069,7 @@ class IsisSearchView(FacetedSearchView):
                 parameters = parameters,
                 search_models = search_models,
                 selected_facets = selected_facets,
+                excluded_facets = excluded_facets,
             )
             searchquery.save()
             # make sure we have a session key
@@ -1081,7 +1083,7 @@ class IsisSearchView(FacetedSearchView):
             #request.session['last_query'] = request.get_full_path()
 
         # Used to identify the current search for retrieval from the cache.
-        cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}'.format(parameters, search_models, selected_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
+        cache_key = u'{0}_{1}_{2}_{3}_{4}_{5}_{6}_{7}'.format(parameters, search_models, selected_facets, excluded_facets, sort_field_citation, sort_order_citation, sort_field_authority, sort_order_authority)
 
         # 'search_results_cache' is the database cache
         #  (see production_settings.py).
@@ -1250,6 +1252,23 @@ class IsisSearchView(FacetedSearchView):
 
         extra['selected_facets'] = facet_map
         extra['selected_facets_raw'] = facets_raw
+
+        # add excluded facets
+        excluded_facets_map = {}
+        excluded_facets_raw = []
+        for facet in self.request.GET.getlist("excluded_facets"):
+            if ":" not in facet:
+                continue
+
+            field, value = facet.split(":", 1)
+
+            if value:
+                excluded_facets_map.setdefault(field, []).append(value)
+                excluded_facets_raw.append(field + ":" + quote(codecs.encode(value,'utf-8')))
+
+        extra['excluded_facets'] = excluded_facets_map
+        extra['excluded_facets_raw'] = excluded_facets_raw
+
 
         return extra
 
