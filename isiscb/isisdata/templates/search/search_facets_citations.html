@@ -8,11 +8,11 @@
 
 <div class="panel-group hidden-print" id="type_panel">
   <div class="panel panel-default">
-    <div class="toggle_heading panel-heading">
+    <div class="panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseTypes">
-          Document Type <span class="toggle_heading badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
+          Document Type <span class="badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
         </a>
       </h4>
     </div>
@@ -30,15 +30,10 @@
                 {% for type in selected_facets.citation_type %}
                 {% with type|create_facet_string:'citation_type' as encoded_type %}
                 <div class="row panel-row ">
-                  <div class="col-md-8 panel-cell">
 
-                  <i class="fa fa-check-square-o"></i> {{ type }}
-                  </div>
 
-                  <div class="col-md-4 text-right panel-cell">
-                    <div>
+                  <div class="col-md-12 panel-cell">
                       <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="0">
-                    </div>
                     <script>
                     $(function() {
                       $('.toggle_{{ type }}').candlestick({
@@ -47,7 +42,7 @@
                       });
 
                       $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-nc').on('click', function(e) {
-                        /*window.location = '{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation'|safe }}';*/
+                        window.location = '{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation'|safe }}';
                       });
                       $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-on').on('click', function(e) {
                         window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:type|add_facet_or_operator|safe }}';
@@ -55,6 +50,8 @@
                     });
                     </script>
 
+
+                  {{ type }}
                   </div>
                 </div>
                 {% endwith %}
@@ -64,17 +61,9 @@
                 {% if type.0 %}
                 {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
                 <div class="row panel-row">
-                  <div class="col-md-8 panel-cell">
-                    <i class="fa fa-square-o"></i> {{ type.0 }}
-                  ({{ type.1 }})
-                  </div>
-                  <div class="col-md-4 text-right panel-cell">
-                    <!--<small>
-                      <a title="Exclude from search" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_type:{{ type.0|urlencode }}"><i class="fa fa-minus-square-o" aria-hidden="true"></i> Excl.</a>
-                    </small>-->
-                    <div>
-                      <input class="toggle_{{ type.0 }}" type="checkbox" name="candlestick_{{ type.0 }}" value="2">
-                    </div>
+
+                  <div class="col-md-12 panel-cell">
+                      <input  class="toggle_{{ type.0 }}" type="checkbox" name="candlestick_{{ type.0 }}" value="2">
                     <script>
                     $(function() {
                       $('.toggle_{{ type.0 }}').candlestick({
@@ -87,11 +76,12 @@
                       });
 
                       $('div[data-candlestick-id="candlestick_{{ type.0 }}"]>.candlestick-off').on('click', function(e) {
-                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:type.0|set_excluded_facets:facets_citation.fields.type|add_facet_or_operator|safe }}';
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:type.0|add_facet_or_operator|safe }}';
                       });
                     });
                     </script>
 
+                    {{ type.0 }} ({{ type.1 }})
                   </div>
                 </div>
                 {% endif %}
@@ -102,19 +92,13 @@
                 {% for type in excluded_facets.citation_type %}
                 {% with type|create_exclude_facet_string:'citation_type' as encoded_type %}
                 <div class="row panel-row">
-                  <div class="col-md-8 panel-cell">
-                    <small class="text-muted">
-                      <i class="fa fa-minus-square-o" aria-hidden="true"></i> {{ type }}
-                    </small>
-                  </div>
-                  <div class="col-md-4 text-right panel-cell">
+
+                  <div class="col-md-12 panel-cell">
                     <!--<small>
                     <a href="{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
                   </small>-->
 
-                    <div>
                       <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="1">
-                    </div>
                     <script>
                     $(function() {
                       $('.toggle_{{ type }}').candlestick({
@@ -123,24 +107,19 @@
                       });
 
                       $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-nc').on('click', function(e) {
-                        /*window.location = '{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}';*/
+                        window.location = '{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}';
                       });
                       $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-off').on('click', function(e) {
-                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_type|add_selected_facet:type|set_excluded_facets:facets_citation.fields.type|add_facet_or_operator|safe }}';
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_type|add_selected_facet:type|add_facet_or_operator|safe }}';
                       });
                     });
                     </script>
 
+                      {{ type }}
                   </div>
                 </div>
                 {% endwith %}
                 {% endfor %}
-
-                <div class="row panel-row" style="margin-top: 5px;">
-                  <div class="col-md-12 panel-cell text-right">
-                    <p><small><a title="Reset all facets" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_all_type_facets:'citation_type' }}"><i class="fa fa-undo" aria-hidden="true"></i> Reset</a></small></p>
-                  </div>
-                </div>
 
         {% else %}
         <div class="row panel-row">
