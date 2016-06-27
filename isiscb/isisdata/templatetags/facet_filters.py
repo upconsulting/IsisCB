@@ -2,6 +2,7 @@ from django import template
 from isisdata.models import *
 from isisdata.templatetags.app_filters import *
 import urllib
+import re
 
 register = template.Library()
 
@@ -46,3 +47,8 @@ def add_excluded_citation_type_facet(url, facet):
         url = url.replace('selected_facets=' + facet_str, '')
     url = url + '&excluded_facets=' + facet_str
     return url.replace('&&', '&')
+
+@register.filter
+def remove_all_type_facets(url, facet_type):
+    url = re.sub(r"selected_facets=" + facet_type + ":.+?&", "", url).replace('&&', '&')
+    return re.sub(r"excluded_facets=" + facet_type + ":.+?&", "", url).replace('&&', '&')

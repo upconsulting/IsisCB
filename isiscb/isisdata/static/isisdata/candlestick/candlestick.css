@@ -32,16 +32,16 @@
 .candlestick-wrapper .candlestick-bg.on,
 .candlestick-wrapper .candlestick-bg.on .candlestick-off:before,
 .candlestick-wrapper .candlestick-bg.on .candlestick-on:after {
-    /*background-color: #5cb85c;*/
-    background-color: #d9534f;
+    /*background-color: #789a78;*/
+    background-color: #bf6e6b;
 
 }
 
 .candlestick-wrapper .candlestick-bg.off,
 .candlestick-wrapper .candlestick-bg.off .candlestick-off:before,
 .candlestick-wrapper .candlestick-bg.off .candlestick-on:after {
-    /*background-color: #d9534f;*/
-    background-color: #5cb85c;
+    /*background-color: #bf6e6b;*/
+    background-color: #789a78;
 }
 
 .candlestick-wrapper .candlestick-bg.grab:not(.candlestick-disabled ) .candlestick-toggle {
@@ -106,14 +106,14 @@
 
 .candlestick-wrapper .candlestick-bg .candlestick-on i,
 .candlestick-wrapper .candlestick-bg.on .candlestick-off i {
-    /*color: #5cb85c;*/
-    color: #d9534f;
+    /*color: #789a78;*/
+    color: #bf6e6b;
 }
 
 .candlestick-wrapper .candlestick-bg .candlestick-off i,
 .candlestick-wrapper .candlestick-bg.off .candlestick-on i {
-    /*color: #d9534f;*/
-    color: #5cb85c;
+    /*color: #bf6e6b;*/
+    color: #789a78;
 }
 
 /**
@@ -167,7 +167,7 @@
 
     .candlestick-wrapper.candlestick-contents .candlestick-bg .candlestick-toggle {
         z-index: 0;
-        background-color: #d9534f;
+        background-color: #bf6e6b;
         border-radius: 25px;
         border: 4px solid #FFFFFF;
         width: 100px;

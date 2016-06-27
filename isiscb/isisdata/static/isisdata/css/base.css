@@ -363,6 +363,10 @@ ul.topics_list {
     color: white;
 }
 
+.toggle_heading {
+  background-color: #e4ebf5 ! important; 
+}
+
 div.panel-cell {
   padding-left: 15px;
   padding-right: 2px;

@@ -5,13 +5,14 @@
 {% load staticfiles %}
 
 {% if query %}
+
 <div class="panel-group hidden-print" id="type_panel">
   <div class="panel panel-default">
-    <div class="panel-heading">
+    <div class="toggle_heading panel-heading">
       <h4 class="panel-title">
         <a data-toggle="collapse" data-parent="#accordion"
           href="#collapseTypes">
-          Document Type <span class="badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
+          Document Type <span class="toggle_heading badge {% if selected_facets.type %}active{% endif %}">{{ facets_citation.fields.type|length }}</span>
         </a>
       </h4>
     </div>
@@ -19,7 +20,7 @@
       <div class="facet_panel panel-body">
         <div class="row panel-row">
           <div class="col-md-12 panel-cell">
-            <h5><small>Click on a publication type to only see publications of that type. Click on "Excl." to exclude a specific type.</small></h5>
+            <h5><small>Narrow the results list by requiring that all entries have this characteristic (green checkmark) or by omitting all entries that have this characteristic (red x).</small></h5>
           </div>
         </div>
 
@@ -31,7 +32,7 @@
                 <div class="row panel-row ">
                   <div class="col-md-8 panel-cell">
 
-                  <small><i class="fa fa-check-square-o"></i> {{ type }}</small>
+                  <i class="fa fa-check-square-o"></i> {{ type }}
                   </div>
 
                   <div class="col-md-4 text-right panel-cell">
@@ -64,8 +65,8 @@
                 {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
                 <div class="row panel-row">
                   <div class="col-md-8 panel-cell">
-                    <small><i class="fa fa-square-o"></i> {{ type.0 }}
-                  ({{ type.1 }})</small>
+                    <i class="fa fa-square-o"></i> {{ type.0 }}
+                  ({{ type.1 }})
                   </div>
                   <div class="col-md-4 text-right panel-cell">
                     <!--<small>
@@ -135,7 +136,11 @@
                 {% endwith %}
                 {% endfor %}
 
-
+                <div class="row panel-row" style="margin-top: 5px;">
+                  <div class="col-md-12 panel-cell text-right">
+                    <p><small><a title="Reset all facets" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_all_type_facets:'citation_type' }}"><i class="fa fa-undo" aria-hidden="true"></i> Reset</a></small></p>
+                  </div>
+                </div>
 
         {% else %}
         <div class="row panel-row">
@@ -170,21 +175,13 @@
 
         {% if facets_citation.fields.all_contributor_ids %}
 
-        {% if selected_facets.citation_all_contributor_ids_exact %}
-        <div class="row panel-row">
-          <div class="col-md-12 panel-cell">
-            <small>Showing only publications by:</small>
-          </div>
-        </div>
-        {% endif %}
-
           {% for author in selected_facets.citation_all_contributor_ids_exact %}
           {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
           <div class="row panel-row ">
             <div class="col-md-12">
-              <small>
+
                 <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>
-              </small>
+
             </div>
           </div>
           {% endwith %}
@@ -199,28 +196,14 @@
           {% endif %}
 
 
-          {# Provide only the top 7 authors #}
-          {% if facets_citation.fields.all_contributor_ids|length != selected_facets.citation_all_contributor_ids_exact|length %}
-          <div class="row panel-row">
-            <div class="col-md-12 panel-cell">
-              <small>Select author/contributor:</small>
-            </div>
-          </div>
-          {% endif %}
-
           {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
           {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
           <div class="row panel-row">
-            <div class="col-md-8 panel-cell">
-              <small>
-              <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }})</small>
-              <small><a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a></small>
+            <div class="col-md-12 panel-cell">
+              <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }})
+              <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a>
             </div>
-            <div class="col-md-4 text-right panel-cell">
-              <a title="Exclude from search" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;excluded_facets=citation_all_contributor_ids:{{ author.0|urlencode }}">
-                <small><i class="fa fa-minus-square-o" aria-hidden="true"></i> Excl.</small>
-              </a>
-            </div>
+
           </div>
           {% endif %}
           {% endfor %}
