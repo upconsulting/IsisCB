@@ -52,6 +52,9 @@ INSTALLED_APPS = (
     'corsheaders',
     'zotero',
     'openurl',
+    'curation',
+    'guardian',
+    'pagination',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -70,12 +73,14 @@ MIDDLEWARE_CLASSES = (
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'isisdata.middleware.ProfileMiddleware',
+    'pagination.middleware.PaginationMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

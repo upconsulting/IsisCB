@@ -6,6 +6,9 @@ from isisdata.models import *
 register = template.Library()
 
 
+PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
+
+
 @register.filter(name='render_object')
 def render_object(obj):
     model_name = obj.__class__.__name__
@@ -37,3 +40,34 @@ def render_object(obj):
     elem += u'</div>'
 
     return SafeText(elem)
+
+
+@register.filter(name='get_citation_title')
+def get_citation_title(obj):
+    title = obj.title
+    if not title:
+        for relation in obj.ccrelations:
+            if relation.type_controlled in [CCRelation.REVIEW_OF, CCRelation.REVIEWED_BY]:
+                return u'Review: %s' % relation.subject.title if relation.subject.id != obj.id else relation.object.title
+        return u'Untitled review'
+    return title
+
+
+@register.filter(name='get_authors_editors')
+def get_authors_editors(obj):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
+
+@register.filter(name='get_citation_pubdate')
+def get_citation_pubdate(obj):
+    date = getattr(obj, 'publication_date', None)
+    if not date:
+        return 'missing'
+    return date.isoformat()[:4]
+
+
+@register.filter(name='get_citation_periodical')
+def get_citation_periodical(obj):
+    return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
+        if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])

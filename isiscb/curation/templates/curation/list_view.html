@@ -45,6 +45,7 @@
 </div>
 
 <div class="panel">
+    {% block object_list %}
     <ul class="list-group">
         {% for object in filter_list %}
         <a class="list-group-item" href="">
@@ -52,6 +53,7 @@
         </a>
         {% endfor %}
     </ul>
+    {% endblock %}
 
     <div class="panel-footer text-center">
     {% paginate %}
