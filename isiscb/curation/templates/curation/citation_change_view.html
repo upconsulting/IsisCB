@@ -13,11 +13,9 @@
         <input type="submit" value="Save" class="btn btn-success" />
     </div>
 </div>
-<div class="h2"> {{instance.title|safe}}</div>
-<div class="h3 text-warning">{{instance.id}}</div>
-
-
-
+<div class="h2"> {{ instance.title|safe }}</div>
+<div class="h4">{{ instance|get_authors_editors }}</div>
+<div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">
     <li role="presentation" class="active">
