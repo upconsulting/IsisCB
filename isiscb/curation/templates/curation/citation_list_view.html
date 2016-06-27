@@ -1,0 +1,38 @@
+{% extends "curation/list_view.html" %}
+{% load addcss %}
+{% load pagination_tags %}
+{% load render_object %}
+
+
+{% block object_list %}
+
+<table class="table table-responsive table-hover table-curation">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Author/Editor(s)</th>
+            <th>Published</th>
+            <th>Periodical</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in filter_list %}
+        <tr>
+            <td>
+                <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
+            </td>
+            <td>{{ object.get_type_controlled_display }}</td>
+            <td>{{ object|get_citation_title }}</td>
+            <td>{{ object|get_authors_editors }}</td>
+            <td>{{ object|get_citation_pubdate }}</td>
+            <td>{{ object|get_citation_periodical }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+    </thead>
+
+</table>
+{% endblock %}
