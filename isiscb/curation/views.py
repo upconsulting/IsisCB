@@ -29,12 +29,13 @@ def citation(request, citation_id=None):
     if citation_id:
         pass
     else:
-        template = loader.get_template('curation/list_view.html')
+        template = loader.get_template('curation/citation_list_view.html')
         filtered_objects = CitationFilter(request.GET, queryset=Citation.objects.all())
-        print request.GET.values()
+
         context.update({
             'objects': filtered_objects,
-            'filters_active': len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0,
+            'filters_active': len([v for k, v in request.GET.iteritems()
+                                   if len(v) > 0 and k != 'page']) > 0,
         })
         return HttpResponse(template.render(context))
 
@@ -48,10 +49,12 @@ def authority(request, authority_id=None):
     if authority_id:
         pass
     else:
-        template = loader.get_template('curation/list_view.html')
+        template = loader.get_template('curation/authority_list_view.html')
         filtered_objects = AuthorityFilter(request.GET, queryset=Authority.objects.all())
         context.update({
             'objects': filtered_objects,
+            'filters_active': len([v for k, v in request.GET.iteritems()
+                                   if len(v) > 0 and k != 'page']) > 0,
         })
         return HttpResponse(template.render(context))
 

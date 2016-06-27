@@ -1,0 +1,33 @@
+{% extends "curation/list_view.html" %}
+{% load addcss %}
+{% load pagination_tags %}
+{% load render_object %}
+
+
+{% block object_list %}
+
+<table class="table table-responsive table-hover table-curation">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Name</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in filter_list %}
+        <tr>
+            <td>
+                <a href="{% url "curate_authority" object.id %}">{{ object.id }}</a>
+            </td>
+            <td>{{ object.get_type_controlled_display }}</td>
+            <td>{{ object.name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+    </thead>
+
+</table>
+{% endblock %}
