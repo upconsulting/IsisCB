@@ -192,8 +192,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
             if value and field.startswith(type_string):
                 field = field[len(type_string):]
 
-                if field.endswith('_exact'):
-                    field = field[0:(len(field) - 6)]
 
                 # if facets should be connected with and just narrow query
                 # otherwise save value for combined query later
@@ -201,12 +199,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
                     value_list = or_facets.setdefault(field, [])
                     value_list.append(value)
                 else:
-                    sqs = sqs.narrow(u'%s:"%s"' % (field + "_exact", Clean(value)))
+                    sqs = sqs.narrow(u'%s:"%s"' % (field, Clean(value)))
 
         # create 'and' query
         for or_facet in or_facets.keys():
             query_str = ' OR '.join(or_facets[or_facet])
-            sqs = sqs.narrow(u'%s:%s' % (or_facet + "_exact", Clean('(' + query_str + ')')))
+            sqs = sqs.narrow(u'%s:%s' % (or_facet, Clean('(' + query_str + ')')))
 
         return sqs
 
