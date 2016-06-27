@@ -15,7 +15,7 @@
             style="margin-top: 5px;">
             <ul class="nav nav-pills nav-justified">
                 <li{% if curation_section == "dashboard" %} class="active"{% endif %}><a href="{% url "dashboard" %}">Dashboard</a></li>
-                <li{% if curation_section == "users" %} class="active"{% endif %}><a href="#">Users</a></li>
+                <li{% if curation_section == "users" %} class="active"{% endif %}><a href="{% url "user_list" %}">Users</a></li>
                 <li{% if curation_section == "datasets" %} class="active"{% endif %}><a href="#">Datasets</a></li>
                 <li{% if curation_section == "zotero" %} class="active"{% endif %}><a href="#">Zotero</a></li>
             </ul>

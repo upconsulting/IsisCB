@@ -7,4 +7,5 @@ urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
     url(r'^(?i)citation/$', views.citation, name='citation_list'),
     url(r'^(?i)authority/$', views.authority, name='authority_list'),
+    url(r'^(?i)users/$', views.users, name='user_list'),
 ]
