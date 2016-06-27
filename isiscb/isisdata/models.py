@@ -409,7 +409,7 @@ class DateValue(Value):
             raise ValidationError('Not a valid ISO8601 date')
 
     def __unicode__(self):
-        return self.value.isodate()
+        return self.value.isoformat()
 
     class Meta:
         verbose_name = 'date'
