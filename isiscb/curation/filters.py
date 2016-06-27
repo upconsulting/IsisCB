@@ -18,8 +18,15 @@ class CitationFilter(django_filters.FilterSet):
 
     class Meta:
         model = Citation
-        fields = ['id', 'title', 'publication_date_from', 'publication_date_to',
-                  'abstract', 'description', ]
+        fields = [
+            'id', 'title', 'abstract', 'description',
+            'publication_date_from', 'publication_date_to'
+        ]
+
+        order_by = [
+            ('publication_date', 'Publication date (ascending)'),
+            ('-publication_date', 'Publication date (descending)')
+        ]
 
     def filter_publication_date_from(self, queryset, value):
         try:
