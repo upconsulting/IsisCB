@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import Q
+from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -17,6 +18,7 @@ from oauth2_provider.models import AbstractApplication
 
 from isisdata.utils import *
 
+import copy
 import datetime
 import iso8601
 import pickle
@@ -38,8 +40,8 @@ from openurl.models import Institution
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
-            | Q(model='floatvalue') | Q(model='locationvalue')
-
+            | Q(model='floatvalue') | Q(model='locationvalue') \
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue')
 
 
 class Value(models.Model):
@@ -121,6 +123,9 @@ class TextValue(Value):
     """
     value = models.TextField()
 
+    def __unicode__(self):
+        return self.value
+
     class Meta:
         verbose_name = 'text (long)'
 
@@ -136,6 +141,9 @@ class CharValue(Value):
         if len(value) > 2000:
             raise ValidationError('Must be 2,000 characters or less')
         return value
+
+    def __unicode__(self):
+        return self.value
 
     class Meta:
         verbose_name = 'text (short)'
@@ -153,6 +161,9 @@ class IntValue(Value):
             return int(value)
         except ValueError:
             raise ValidationError('Must be an integer')
+
+    def __unicode__(self):
+        return unicode(self.value)
 
     class Meta:
         verbose_name = 'integer'
@@ -173,8 +184,202 @@ class DateTimeValue(Value):
         except iso8601.ParseError:
             raise ValidationError('Not a valid ISO8601 date')
 
+    def __unicode__(self):
+        return self.value.isoformat()
+
     class Meta:
         verbose_name = 'date and time'
+
+
+class ISODateRangeValue(Value):
+    start = pg_fields.ArrayField(models.IntegerField(default=0), size=3)
+    end = pg_fields.ArrayField(models.IntegerField(default=0), size=3)
+
+    PARTS = ['start', 'end']
+
+    def _valuegetter(self):
+        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS]
+
+    def _valuesetter(self, value):
+        try:
+            value = ISODateRangeValue.convert(value)
+        except ValidationError:
+            raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
+
+        for part_value, part in zip(value, self.PARTS):
+            setattr(self, part, part_value)
+
+    value = property(_valuegetter, _valuesetter)
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list] and len(value) == 2:
+            value = list(value)
+            for i in xrange(2):
+                value[i] = ISODateValue.convert(value[i])
+        else:
+            raise ValidationError('Not a valid ISO8601 date range')
+
+        return value
+
+    def __unicode__(self):
+        def _coerce(val):
+            val = unicode(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
+
+    class Meta:
+        verbose_name = 'date range'
+
+
+class DateRangeValue(Value):
+    value = pg_fields.ArrayField(
+        models.DateField(),
+        size=2,
+    )
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list] and len(value) == 2:
+            for i in xrange(2):
+                if type(value[i]) is not datetime.date:
+                    try:
+                        value[i] = iso8601.parse_date(value[i]).date()
+                    except iso8601.ParseError:
+                        raise ValidationError('Not a valid ISO8601 date')
+            # The first element should always be a lower value than the second.
+            return sorted(value)
+        else:
+            raise ValidationError('Must be a 2-tuple or 2-element list')
+
+    def __unicode__(self):
+        return u'%s to %s' % tuple([part.isodate() for part in self.value])
+
+    class Meta:
+        verbose_name = 'date range'
+
+
+class ISODateValue(Value):
+    """
+    A variable-precision date.
+    """
+    PARTS = [u'year', u'month', u'day']
+
+    year = models.IntegerField(default=0)
+    month = models.IntegerField(default=0)
+    day = models.IntegerField(default=0)
+
+    datetime_formats = [
+        '%m/%d/%Y %I:%M:%S %p',
+        '%m/%d/%Y %I:%M %p'
+    ]
+    date_formats = [
+        '%m/%d/%Y',
+        '%Y'
+    ]
+
+    @property
+    def as_date(self):
+        """
+        Attempt to coerce a value to ``datetime.date``.
+        """
+        value = self.__unicode__()
+        for format in ISODateValue.datetime_formats + ISODateValue.date_formats:
+            try:
+                return datetime.datetime.strptime(value, format)
+            except ValueError:
+                pass
+        try:
+            return iso8601.parse_date(value)
+        except ValueError:
+            pass
+        raise ValueError('Could not coerce value to datetime: %s' % value)
+
+    def save(self, *args, **kwargs):
+        """
+        Override to update Citation.publication_date, if this DateValue belongs
+        to an Attribute of type "PublicationDate".
+        """
+        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
+
+        if self.attribute.type_controlled.name == 'PublicationDate':
+            try:
+                self.attribute.source.publication_date = self.as_date
+                self.attribute.source.save()
+            except ValueError:
+                print 'Error settings publication_date on %i' % self.attribute.source.id
+
+    def _valuegetter(self):
+        return [getattr(self, part) for part in self.PARTS if getattr(self, part) != 0]
+
+    def _valuesetter(self, value):
+        try:
+            value = ISODateValue.convert(value)
+        except ValidationError:
+            raise ValueError('Invalid value for ISODateValue: %s' % value.__repr__())
+
+        for i, v in enumerate(value):
+            setattr(self, self.PARTS[i], v)
+
+    def __unicode__(self):
+        def _coerce(val):
+            val = unicode(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return '-'.join([_coerce(v) for v in self.value])
+
+    value = property(_valuegetter, _valuesetter)
+
+    @property
+    def precision(self):
+        last = None
+        for part in self.PARTS:
+            if getattr(self, part) == 0:
+                return last
+            last = copy.copy(part)
+        return part
+
+    @staticmethod
+    def convert(value):
+        if type(value) in [tuple, list]:
+            value = list(value)
+        elif type(value) in [str, unicode]:
+            pre = u''
+            if value.startswith('-'):   # Preserve negative years.
+                value = value[1:]
+                pre = u'-'
+            value = value.split('-')
+            value[0] = pre + value[0]
+        elif type(value) is datetime.datetime:
+            date = value.date()
+            value = [date.year, date.month, date.day]
+        elif type(value) is datetime.date:
+            value = [value.year, value.month, value.day]
+        elif type(value) is int:   # We assume that it is just a year.
+            value = [value]
+        else:
+            raise ValidationError('Not a valid ISO8601 date')
+        try:
+            return [int(v) for v in value if v]
+        except NameError:
+            raise ValidationError('Not a valid ISO8601 date')
+
+    class Meta:
+        verbose_name = 'isodate'
+
 
 
 class DateValue(Value):
@@ -203,6 +408,9 @@ class DateValue(Value):
         except iso8601.ParseError:
             raise ValidationError('Not a valid ISO8601 date')
 
+    def __unicode__(self):
+        return self.value.isodate()
+
     class Meta:
         verbose_name = 'date'
 
@@ -220,6 +428,9 @@ class FloatValue(Value):
         except ValueError:
             raise ValidationError('Must be a floating point number')
 
+    def __unicode__(self):
+        return unicode(self.value)
+
     class Meta:
         verbose_name = 'floating point number'
 
@@ -230,6 +441,9 @@ class LocationValue(Value):
     """
     value = models.ForeignKey('Location')   # TODO: One to One?
 
+    def __unicode__(self):
+        return self.value.__unicode__
+
     class Meta:
         verbose_name = 'location'
 
@@ -238,9 +452,11 @@ VALUE_MODELS = [
     (int,               IntValue),
     (float,             FloatValue),
     (datetime.datetime, DateTimeValue),
-    (datetime.date,     DateValue),
+    (datetime.date,     ISODateValue),
     (str,               CharValue),
     (unicode,           CharValue),
+    (tuple,             DateRangeValue),
+    (list,              DateRangeValue),
 ]
 
 
@@ -272,6 +488,10 @@ class CuratedMixin(models.Model):
 
     public = models.BooleanField(default=True, help_text=help_text("""
     Controls whether this instance can be viewed by end users."""))
+
+    record_status_value = models.CharField(max_length=255, blank=True, null=True)
+    record_status_explanation = models.CharField(max_length=255, blank=True,
+                                                 null=True)
 
     @property
     def created_on(self):
@@ -309,6 +529,8 @@ class CuratedMixin(models.Model):
                                       verbose_name="modified by (FM)",
                                       help_text=help_text("""
     Value of ModifiedOn from the original FM database."""))
+
+    dataset = models.CharField(max_length=255, blank=True, null=True)
 
     @property
     def _history_user(self):
@@ -402,6 +624,13 @@ class Citation(ReferencedEntity, CuratedMixin):
     The name to be used to identify the resource. For reviews that traditionally
     have no title, this should be added as something like "[Review of Title
     (Year) by Author]"."""))
+
+    additional_titles = models.TextField(blank=True, null=True,
+                                         help_text=help_text("""
+    Additional titles (not delimited, free text)."""))
+    book_series = models.CharField(max_length=255, blank=True, null=True,
+                                   help_text=help_text("""
+    Used for books, and potentially other works in a series."""))
 
     @property
     def normalized_title(self):
@@ -647,7 +876,6 @@ class Authority(ReferencedEntity, CuratedMixin):
         """
         return normalize(self.description)
 
-
     @property
     def label(self):
         return self.name
@@ -805,6 +1033,7 @@ class Person(Authority):
     personal_name_last = models.CharField(max_length=255)
     personal_name_first = models.CharField(max_length=255)
     personal_name_suffix = models.CharField(max_length=255, blank=True)
+    personal_name_preferred = models.CharField(max_length=255, blank=True)
 
 
 class ACRelation(ReferencedEntity, CuratedMixin):
@@ -822,7 +1051,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
 
     history = HistoricalRecords()
 
-    citation = models.ForeignKey('Citation')
+    citation = models.ForeignKey('Citation', blank=True, null=True)
     authority = models.ForeignKey('Authority', blank=True, null=True)
 
     name = models.CharField(max_length=255, blank=True)
@@ -847,6 +1076,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     # if Type.Broad.controlled = 'IsPublicationHostOf'
     PERIODICAL = 'PE'
     BOOK_SERIES = 'BS'
+    COMMITTEE_MEMBER = 'CM'
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
@@ -860,7 +1090,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (INSTITUTION, 'Institution'),
         (MEETING, 'Meeting'),
         (PERIODICAL, 'Periodical'),
-        (BOOK_SERIES, 'Book Series')
+        (BOOK_SERIES, 'Book Series'),
+        (COMMITTEE_MEMBER, 'Committee Member'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -911,6 +1142,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                                        help_text=help_text("""
     Display for the authority as it is has been used in a publication.
     """))
+
+    personal_name_first = models.CharField(max_length=255, null=True, blank=True)
+    personal_name_last = models.CharField(max_length=255, null=True, blank=True)
+    personal_name_suffix = models.CharField(max_length=255, null=True, blank=True)
 
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
     Position at which the authority should be displayed in the citation detail
@@ -1089,8 +1324,8 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     Type of relationship as used in the citation.
     """))
 
-    subject = models.ForeignKey('Citation', related_name='relations_from')
-    object = models.ForeignKey('Citation', related_name='relations_to')
+    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True)
+    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
@@ -1106,6 +1341,11 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                        related_query_name='cc_relations',
                                        content_type_field='subject_content_type',
                                        object_id_field='subject_instance_id')
+
+    data_display_order = models.FloatField(default=1.0, help_text=help_text("""
+    Position at which the citation should be displayed in the citation detail
+    view. Whole numbers or decimals can be used.
+    """))
 
     def _render_type_controlled(self):
         try:
@@ -1136,7 +1376,7 @@ class LinkedDataType(models.Model):
 
         if re.match(self.pattern, value) is None:
             message = 'Does not match pattern for {0}'.format(self.name)
-            print 'asdf'
+
             raise ValidationError(message)
 
     def __unicode__(self):
@@ -1192,6 +1432,17 @@ class Attribute(ReferencedEntity, CuratedMixin):
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
 
+    BEGIN = 'BGN'
+    END = 'END'
+    OCCUR = 'OCR'
+    QUALIFIER_CHOICES = (
+        (BEGIN, 'Began'),
+        (END, 'Ended'),
+        (OCCUR, 'Occurred'),
+    )
+    type_qualifier = models.CharField(max_length=3, choices=QUALIFIER_CHOICES,
+                                      blank=True, null=True)
+
     def __unicode__(self):
         try:
             return u'{0}: {1}'.format(self.type_controlled.name,
@@ -1225,6 +1476,11 @@ class PartDetails(models.Model):
     sort_order = models.IntegerField(default=0, help_text=help_text(""""
     New field: provides a sort order for works that are part of a larger work.
     """))
+
+    extent = models.PositiveIntegerField(blank=True, null=True,
+                                         help_text=help_text("""
+    Provides the size of the work in pages, words, or other counters."""))
+    extent_note = models.TextField(blank=True, null=True)
 
 
 class Place(models.Model):
@@ -1290,6 +1546,17 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     web or to identify the physical object uniquely.
     """))
 
+    resource_name = models.CharField(max_length=255, blank=True, null=True,
+                                     help_text=help_text("""
+    Name of the resource that the URN links to."""))
+
+    url = models.CharField(max_length=255, blank=True, null=True,
+                           help_text=help_text(
+    """
+    If the resource has a DOI, use the DOI instead and do not include URL. Do
+    include the http:// prefix. If used must also provide URLDateAccessed.
+    """))
+
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
     subject_content_type = models.ForeignKey(ContentType)
@@ -1306,6 +1573,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
+
+    access_status = models.CharField(max_length=255, blank=True, null=True)
+    access_status_date_verified = models.DateField(blank=True, null=True)
 
     def __unicode__(self):
         values = (self.type_controlled,

@@ -1,0 +1,24 @@
+.nav-curation>li.active>a,
+.nav-pills>li.active>a:focus,
+.nav-pills>li.active>a:hover {
+    /*background-color: */
+}
+
+.navbar-curation .navbar-toggle {
+    float: left;
+}
+
+.navbar-curation .icon-bar {
+  display: block;
+  width: 44px;
+  height: 2px;
+  background-color: #cccccc;
+  border-radius: 1px;
+}
+
+
+.brand-logo-container {
+    background-color: #012e64;
+     border-radius: 4px;
+
+}

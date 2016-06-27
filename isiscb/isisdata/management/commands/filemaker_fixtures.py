@@ -437,7 +437,7 @@ class Command(BaseCommand):
             languages = json.load(f)
         languageLookup = {l['fields']['name']: l['pk'] for l in languages}
 
-        citationspath = os.path.join(datapath, 'citations.xml')
+        citationspath = os.path.join(datapath, 'citation.xml')
         self.citations = []
         self.part_details_instances = []
 
@@ -516,7 +516,7 @@ class Command(BaseCommand):
 
 
     def handle_authorities(self, datapath):
-        authoritiespath = os.path.join(datapath, 'authorities.xml')
+        authoritiespath = os.path.join(datapath, 'authority.xml')
         self.redirect_authorities = []
         self.authorities = []
         self.persons = []
@@ -578,7 +578,7 @@ class Command(BaseCommand):
 
 
     def handle_ac_relations(self, datapath):
-        acrelationspath = os.path.join(datapath, 'ac_relations.xml')
+        acrelationspath = os.path.join(datapath, 'acrelation.xml')
 
         self.acrelations = []
 
@@ -628,7 +628,7 @@ class Command(BaseCommand):
         self.write_fixtures(self.acrelations, 'acrelations')
 
     def handle_cc_relations(self, datapath):
-        ccrelationspath = os.path.join(datapath, 'cc_relations.xml')
+        ccrelationspath = os.path.join(datapath, 'ccrelation.xml')
         self.ccrelations = []
 
         def process_elem(r):
@@ -682,7 +682,7 @@ class Command(BaseCommand):
         self.write_fixtures(self.ccrelations, 'ccrelations')
 
     def handle_attributes(self, datapath):
-        attributesspath = os.path.join(datapath, 'attributes.xml')
+        attributesspath = os.path.join(datapath, 'attribute.xml')
         self.attributes = []
         self.values = []
         self.cvalues = []
@@ -833,7 +833,7 @@ class Command(BaseCommand):
         self.write_fixtures(self.trackings, 'trackings')
 
     def handle_linkeddata(self, datapath):
-        linkeddatapath = os.path.join(datapath, 'linked_data.xml')
+        linkeddatapath = os.path.join(datapath, 'linkeddata.xml')
         self.linkeddata = []
 
         def process_elem(r):
