@@ -8,6 +8,7 @@ register = template.Library()
 
 PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
 
+
 @register.filter(name='render_object')
 def render_object(obj):
     model_name = obj.__class__.__name__
@@ -46,8 +47,8 @@ def get_citation_title(obj):
     title = obj.title
     if not title:
         for relation in obj.ccrelations:
-            if relation.type_controlled in [CCRelation.REVIEW_OF]:
-                return u'Review: %s' % relation.citation.title
+            if relation.type_controlled in [CCRelation.REVIEW_OF, CCRelation.REVIEWED_BY]:
+                return u'Review: %s' % relation.subject.title if relation.subject.id != obj.id else relation.object.title
         return u'Untitled review'
     return title
 

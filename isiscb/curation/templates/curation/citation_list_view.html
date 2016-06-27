@@ -24,7 +24,7 @@
                 <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
-            <td>{{ object|get_citation_title }}</td>
+            <td>{{ object|get_citation_title|safe }}</td>
             <td>{{ object|get_authors_editors }}</td>
             <td>{{ object|get_citation_pubdate }}</td>
             <td>{{ object|get_citation_periodical }}</td>
