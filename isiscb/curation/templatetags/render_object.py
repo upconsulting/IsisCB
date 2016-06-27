@@ -48,6 +48,7 @@ def get_citation_title(obj):
         for relation in obj.ccrelations:
             if relation.type_controlled in [CCRelation.REVIEW_OF]:
                 return u'Review: %s' % relation.citation.title
+        return u'Untitled review'
     return title
 
 
