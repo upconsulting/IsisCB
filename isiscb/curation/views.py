@@ -1,8 +1,11 @@
 from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required
+
 from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
+
 
 from isisdata.models import *
 from curation.filters import *
@@ -56,7 +59,7 @@ def citation(request, citation_id=None):
                 'instance': citation,
                 'partdetails_form': partdetails_form,
             })
-            
+
 
     else:
         template = loader.get_template('curation/citation_list_view.html')
@@ -96,4 +99,12 @@ def dataset(request, dataset_id=None):
 
 @staff_member_required
 def users(request, user_id=None):
-    return HttpResponse('')
+    context = RequestContext(request, {
+        'curation_section': 'users',
+    })
+    template = loader.get_template('curation/users.html')
+    users =  User.objects.all()
+    context.update({
+        'objects': users,
+    })
+    return HttpResponse(template.render(context))
