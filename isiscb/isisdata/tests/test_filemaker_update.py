@@ -12,12 +12,11 @@ DATETIME_FIELDS = [
 ]
 
 CURATION_FIELDS = [
-    'administrator_notes',
-    'record_history',
     'created_by_fm',
 ]
 
 UTC = pytz.UTC
+
 
 class TestLoadFileMaker(unittest.TestCase):
     def setUp(self):
@@ -40,7 +39,7 @@ class TestLoadFileMaker(unittest.TestCase):
 
 
     def test_load_authorities(self):
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
 
         self.assertEqual(Authority.objects.count(), 3)
         for instance in Authority.objects.all():
@@ -49,7 +48,7 @@ class TestLoadFileMaker(unittest.TestCase):
             self.assertGreater(len(instance.classification_system), 0)
             self.assertGreater(len(instance.classification_code), 0)
             self.assertGreater(len(instance.classification_hierarchy), 0)
-            self.assertGreater(len(instance.record_status), 0)
+            self.assertGreater(len(instance.record_status_value), 0)
             self.assertGreater(len(instance.classification_system), 0)
             for field in CURATION_FIELDS:
                 self.assertGreater(len(getattr(instance, field)), 0)
@@ -58,11 +57,11 @@ class TestLoadFileMaker(unittest.TestCase):
                 then = getattr(instance, field)
                 self.assertGreater(now, then)
 
-            if instance.record_status == 'RD':
+            if instance.record_status_value == 'RD':
                 self.assertTrue(instance.redirect_to is not None)
 
     def test_load_citations(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
 
         self.assertEqual(Citation.objects.count(), 2)
 
@@ -73,8 +72,6 @@ class TestLoadFileMaker(unittest.TestCase):
             self.assertGreater(len(instance.abstract), 0)
             self.assertGreater(len(instance.edition_details), 0)
             self.assertGreater(len(instance.physical_details), 0)
-            self.assertGreater(len(instance.record_action), 0)
-            self.assertGreater(len(instance.status_of_record), 0)
             self.assertGreater(instance.language.count(), 0)
             for field in CURATION_FIELDS:
                 self.assertGreater(len(getattr(instance, field)), 0)
@@ -83,10 +80,18 @@ class TestLoadFileMaker(unittest.TestCase):
                 then = getattr(instance, field)
                 self.assertGreater(now, then)
 
+        # Sometimes nasty non-integer data ends up in fields that should have
+        #  integers only. These should get pushed off into the corresponding
+        #  free_text field.
+        instance = Citation.objects.get(pk='CBB000000002')
+        self.assertGreater(len(instance.part_details.issue_free_text), 0)
+        self.assertEqual(instance.part_details.issue_free_text, '32B')
+        self.assertEqual(instance.part_details.issue_begin, None)
+
     def test_load_attributes(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
-        call_command('filemaker', 'isisdata/tests/data', 'attributes')
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
+        call_command('filemaker_update', 'isisdata/tests/data', 'attribute')
 
         self.assertEqual(Attribute.objects.count(), 2)
         self.assertEqual(Value.objects.count(), 2)
@@ -108,9 +113,10 @@ class TestLoadFileMaker(unittest.TestCase):
             self.assertTrue(child.attribute_id is not None)
 
     def test_load_linked_data(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
-        call_command('filemaker', 'isisdata/tests/data', 'linkeddata')
+
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
+        call_command('filemaker_update', 'isisdata/tests/data', 'linkeddata')
 
         self.assertEqual(LinkedData.objects.count(), 2)
 
@@ -118,6 +124,8 @@ class TestLoadFileMaker(unittest.TestCase):
             self.assertTrue(instance.universal_resource_name is not None)
             self.assertTrue(instance.type_controlled is not None)
             for field in CURATION_FIELDS:
+                if field in ['record_action']:
+                    continue
                 self.assertGreater(len(getattr(instance, field)), 0)
             for field in DATETIME_FIELDS:
                 now = UTC.localize(datetime.datetime.now())
@@ -125,9 +133,9 @@ class TestLoadFileMaker(unittest.TestCase):
                 self.assertGreater(now, then)
 
     def test_load_tracking(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
-        call_command('filemaker', 'isisdata/tests/data', 'tracking')
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
+        call_command('filemaker_update', 'isisdata/tests/data', 'tracking')
 
         self.assertEqual(Tracking.objects.count(), 2)
 
@@ -137,9 +145,9 @@ class TestLoadFileMaker(unittest.TestCase):
             self.assertTrue(instance.type_controlled is not None)
 
     def test_load_ac_relations(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
-        call_command('filemaker', 'isisdata/tests/data', 'ac_relations')
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
+        call_command('filemaker_update', 'isisdata/tests/data', 'acrelation')
 
         self.assertEqual(ACRelation.objects.count(), 2)
 
@@ -160,9 +168,9 @@ class TestLoadFileMaker(unittest.TestCase):
                 self.assertGreater(now, then)
 
     def test_load_cc_relations(self):
-        call_command('filemaker', 'isisdata/tests/data', 'citations')
-        call_command('filemaker', 'isisdata/tests/data', 'authorities')
-        call_command('filemaker', 'isisdata/tests/data', 'cc_relations')
+        call_command('filemaker_update', 'isisdata/tests/data', 'citation')
+        call_command('filemaker_update', 'isisdata/tests/data', 'authority')
+        call_command('filemaker_update', 'isisdata/tests/data', 'ccrelation')
 
         self.assertEqual(CCRelation.objects.count(), 2)
 

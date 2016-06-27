@@ -6,11 +6,11 @@
 	<LAYOUT></LAYOUT>
 	<ROW>
 		<ID>CCR000000001</ID>
-		<ID.Subject.link>CBC000000002</ID.Subject.link>
-		<ID.Object.link>CBC000000001</ID.Object.link>
+		<ID.Subject.link>CBB000000002</ID.Subject.link>
+		<ID.Object.link>CBB000000001</ID.Object.link>
 		<description>This is a description of an ac relationship.</description>
 		<name>Test cc relation 1</name>
-		
+
 		<Type.controlled>isReviewOf</Type.controlled>
 		<Type.free>Types want to be free</Type.free>
 
@@ -24,11 +24,11 @@
 	</ROW>
 	<ROW>
 		<ID>CCR000000002</ID>
-		<ID.Subject.link>CBC000000001</ID.Subject.link>
-		<ObjectID8Digit>CBC000000002</ObjectID8Digit>
+		<ID.Subject.link>CBB000000001</ID.Subject.link>
+		<ID.Object.link>CBB000000002</ID.Object.link>
 		<description>This is a description of an ac relationship.</description>
 		<name>Test cc relation 2</name>
-		
+
 		<Type.controlled>isReviewedBy</Type.controlled>
 		<Type.free>Types want to be free</Type.free>
 

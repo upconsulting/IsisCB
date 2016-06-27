@@ -477,7 +477,7 @@ class ZoteroParser(RDFParser):
             elif p == TYPE_ELEM:
                 # Indicates the type of super-publication (e.g. Journal, Book).
                 #(BOOK, 'DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER),
-                self.set_value('partof__type', dict(PARTOF_TYPES)[o])
+                self.set_value('partof__type', dict(PARTOF_TYPES).get(o, None))
 
         return journal
 
