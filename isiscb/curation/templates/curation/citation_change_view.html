@@ -13,11 +13,9 @@
         <input type="submit" value="Save" class="btn btn-success" />
     </div>
 </div>
-<div class="h2"> {{instance.title|safe}}</div>
-<div class="h3 text-warning">{{instance.id}}</div>
-
-
-
+<div class="h2"> {{ instance.title|safe }}</div>
+<div class="h4">{{ instance|get_authors_editors }}</div>
+<div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">
     <li role="presentation" class="active">
@@ -37,40 +35,144 @@
     </li>
 </ul>
 
-
 <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="fields">
-
-
-            <div class="row">
-                <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
-                    <div class="h4">Citation Details</div>
-                    {% for field in form %}
-                    {% for error in field.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
-                    <div class="form-group">
-                        <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control" }}
-                    </div>
-                    {% endfor %}
+        <div class="row">
+            <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
+                <div class="h4">Citation Details</div>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field|addcss:"form-control" }}
                 </div>
-                {% if partdetails_form %}
-                <div class="col-sm-6">
-                    <div class="h4">Article Details</div>
-                    {% for field in partdetails_form %}
-                    {% for error in field.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
-                    <div class="form-group">
-                        <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control" }}
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+                {% endfor %}
             </div>
+            {% if partdetails_form %}
+            <div class="col-sm-6">
+                <div class="h4">Article Details</div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.volume_free_text.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>Volume</label>
+                            {{ partdetails_form.volume_free_text|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.volume_begin.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.volume_begin.label }}</label>
+                            {{ partdetails_form.volume_begin|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.volume_end.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.volume_end.label }}</label>
+                            {{ partdetails_form.volume_end|addcss:"form-control" }}
+                        </div>
+                    </div>
+                </div>
 
+                <div class="row">
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.issue_free_text.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>Issue</label>
+                            {{ partdetails_form.issue_free_text|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.issue_begin.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.issue_begin.label }}</label>
+                            {{ partdetails_form.issue_begin|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.issue_end.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.issue_end.label }}</label>
+                            {{ partdetails_form.issue_end|addcss:"form-control" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.pages_free_text.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>Pages</label>
+                            {{ partdetails_form.pages_free_text|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.page_begin.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.page_begin.label }}</label>
+                            {{ partdetails_form.page_begin|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.page_end.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.page_end.label }}</label>
+                            {{ partdetails_form.page_end|addcss:"form-control" }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.sort_order.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>Sort order</label>
+                            {{ partdetails_form.sort_order|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.extent.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.extent.label }}</label>
+                            {{ partdetails_form.extent|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-4">
+                        {% for error in partdetails_form.extent_note.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ partdetails_form.extent_note.label }}</label>
+                            {{ partdetails_form.extent_note|addcss:"form-control" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
     <div role="tabpanel" class="tab-pane" id="attributes">
         <ul class="list-group">

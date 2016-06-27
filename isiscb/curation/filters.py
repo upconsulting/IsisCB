@@ -29,12 +29,12 @@ class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
     id = django_filters.CharFilter(name='id', lookup_type='exact')
-    title = django_filters.CharFilter(name='title', lookup_type='icontains')
+    title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
     publication_date_from = django_filters.MethodFilter()
     publication_date_to = django_filters.MethodFilter()
-    abstract = django_filters.CharFilter(name='abstract', lookup_type='icontains')
-    description = django_filters.CharFilter(name='description', lookup_type='icontains')
+    abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
+    description = django_filters.MethodFilter(name='description', lookup_type='icontains')
 
     author_or_editor = django_filters.MethodFilter()
     periodical = django_filters.MethodFilter()
@@ -54,6 +54,27 @@ class CitationFilter(django_filters.FilterSet):
             ('-publication_date', 'Publication date (descending)')
         ]
 
+    def filter_title(self, queryset, value):
+        if not value:
+            return queryset
+        for part in value.split():
+            queryset = queryset.filter(title__icontains=part)
+        return queryset
+
+    def filter_abstract(self, queryset, value):
+        if not value:
+            return queryset
+        for part in value.split():
+            queryset = queryset.filter(abstract__icontains=part)
+        return queryset
+
+    def filter_description(self, queryset, value):
+        if not value:
+            return queryset
+        for part in value.split():
+            queryset = queryset.filter(description__icontains=part)
+        return queryset
+
     def filter_publication_date_from(self, queryset, value):
         try:
             date = iso8601.parse_date(value)
@@ -71,10 +92,13 @@ class CitationFilter(django_filters.FilterSet):
     def filter_author_or_editor(self, queryset, value):
         if not value:
             return queryset
-        return queryset.filter(acrelation__authority__name__istartswith=value,
-                               acrelation__type_controlled__in=[
+        for part in value.split():
+            queryset = queryset.filter(
+                        acrelation__authority__name__icontains=part,
+                        acrelation__type_controlled__in=[
                                     ACRelation.AUTHOR,
                                     ACRelation.EDITOR])
+        return queryset
 
     def filter_periodical(self, queryset, value):
         if not value:
@@ -91,7 +115,7 @@ class CitationFilter(django_filters.FilterSet):
                                acrelation__type_controlled=ACRelation.PUBLISHER)
 
 
-    def filter_publisher(self, queryset, value):
+    def filter_subject(self, queryset, value):
         if not value:
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,

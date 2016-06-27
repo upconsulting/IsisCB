@@ -3,9 +3,7 @@
 {% load pagination_tags %}
 {% load render_object %}
 
-
 {% block object_list %}
-
 <table class="table table-responsive table-hover table-curation">
     <thead>
         <tr>
@@ -35,4 +33,133 @@
     </thead>
 
 </table>
+{% endblock %}
+
+{% block filter_form %}
+<form class="form clearfix">
+    <div class="row">
+        <div class="col-sm-4">
+            {% for error in objects.form.id.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.id.label }}</label>
+                {{ objects.form.id|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.abstract.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.abstract.label }}</label>
+                {{ objects.form.abstract|addcss:"form-control" }}
+            </div>
+
+            <div class="row">
+                <div class="col-xs-6">
+                    {% for error in objects.form.publication_date_from.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                    <div class="form-group clearable">
+                        <label>{{ objects.form.publication_date_from.label }}</label>
+                        {{ objects.form.publication_date_from|addcss:"form-control" }}
+                    </div>
+                </div>
+                <div class="col-xs-6">
+                    {% for error in objects.form.publication_date_to.errors %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                    {% endfor %}
+                    <div class="form-group clearable">
+                        <label>{{ objects.form.publication_date_to.label }}</label>
+                        {{ objects.form.publication_date_to|addcss:"form-control" }}
+                    </div>
+                </div>
+            </div>
+
+            {% for error in objects.form.publisher.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.publisher.label }}</label>
+                {{ objects.form.publisher|addcss:"form-control" }}
+            </div>
+
+        </div>
+        <div class="col-sm-4">
+            {% for error in objects.form.title.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.title.label }}</label>
+                {{ objects.form.title|addcss:"form-control" }}
+            </div>
+
+
+            {% for error in objects.form.author_or_editor.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.author_or_editor.label }}</label>
+                {{ objects.form.author_or_editor|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.periodical.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.periodical.label }}</label>
+                {{ objects.form.periodical|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.o.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.o.label }}</label>
+                {{ objects.form.o|addcss:"form-control" }}
+            </div>
+
+        </div>
+
+        <div class="col-sm-4">
+            {% for error in objects.form.type_controlled.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.type_controlled.label }}</label>
+                {{ objects.form.type_controlled|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.description.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.description.label }}</label>
+                {{ objects.form.description|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.subject.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.subject.label }}</label>
+                {{ objects.form.subject|addcss:"form-control" }}
+            </div>
+
+            <div class="btn-group pull-right">
+                <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
+                <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+<script>
+$(document).ready(function() {
+    $('#clear-filters').on('click', function() {
+        $('.form-group.clearable input').val('');
+        $('.form-group.clearable select').val('');
+    });
+});
+</script>
 {% endblock %}
