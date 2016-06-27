@@ -60,6 +60,7 @@
                 {% for type in facets_citation.fields.type %}
                 {% if type.0 %}
                 {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
+                {% with type.0|create_facet_with_field:'citation_type' as facet_with_field %}
                 <div class="row panel-row">
 
                   <div class="col-md-12 panel-cell">
@@ -76,7 +77,7 @@
                       });
 
                       $('div[data-candlestick-id="candlestick_{{ type.0 }}"]>.candlestick-off').on('click', function(e) {
-                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:type.0|add_facet_or_operator|safe }}';
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:facet_with_field|add_facet_or_operator|safe }}';
                       });
                     });
                     </script>
@@ -84,21 +85,20 @@
                     {{ type.0 }} ({{ type.1 }})
                   </div>
                 </div>
+                {% endwith %}
                 {% endif %}
                 {% endif %}
                 {% endfor %}
 
                 {# List excluded facets #}
                 {% for type in excluded_facets.citation_type %}
+                {% with type|create_facet_with_field:'citation_type' as facet_with_field %}
                 {% with type|create_exclude_facet_string:'citation_type' as encoded_type %}
                 <div class="row panel-row">
 
                   <div class="col-md-12 panel-cell">
-                    <!--<small>
-                    <a href="{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
-                  </small>-->
 
-                      <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="1">
+                    <input class="toggle_{{ type }}" type="checkbox" name="candlestick_{{ type }}" value="1">
                     <script>
                     $(function() {
                       $('.toggle_{{ type }}').candlestick({
@@ -110,7 +110,7 @@
                         window.location = '{{ request.get_full_path|include_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}';
                       });
                       $('div[data-candlestick-id="candlestick_{{ type }}"]>.candlestick-off').on('click', function(e) {
-                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_type|add_selected_facet:type|add_facet_or_operator|safe }}';
+                        window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_type|add_selected_facet:facet_with_field|add_facet_or_operator|safe }}';
                       });
                     });
                     </script>
@@ -118,6 +118,7 @@
                       {{ type }}
                   </div>
                 </div>
+                {% endwith %}
                 {% endwith %}
                 {% endfor %}
 
@@ -152,40 +153,104 @@
             </div>
           </div>
 
-        {% if facets_citation.fields.all_contributor_ids %}
+        {% if facets_citation.fields.all_contributor_ids or excluded_facets.citation_all_contributor_ids %}
 
           {% for author in selected_facets.citation_all_contributor_ids_exact %}
+          {% with author|create_facet_with_field:'citation_all_contributor_ids' as facet_with_model %}
           {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
           <div class="row panel-row ">
             <div class="col-md-12">
 
-                <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>
+              <input class="toggle_{{ author }}" type="checkbox" name="candlestick_{{ author }}" value="0">
+            <script>
+            $(function() {
+              $('.toggle_{{ author }}').candlestick({
+                'default': '0',
+                'size': 'sm',
+              });
+
+              $('div[data-candlestick-id="candlestick_{{ author }}"]>.candlestick-nc').on('click', function(e) {
+                window.location = '{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation'|safe }}';
+              });
+              $('div[data-candlestick-id="candlestick_{{ author }}"]>.candlestick-on').on('click', function(e) {
+                window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_author|add_excluded_facet:facet_with_model|safe }}';
+              });
+            });
+            </script>
+
+                {{author|get_authority_name}} <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>
 
             </div>
           </div>
           {% endwith %}
+          {% endwith %}
           {% endfor %}
-
-          {% if selected_facets.citation_all_contributor_ids_exact and facets_citation.fields.all_contributor_ids %}
-          <div class="row panel-row">
-            <div class="col-md-12 panel-cell">
-              <hr>
-            </div>
-          </div>
-          {% endif %}
-
 
           {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
           {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
+          {% with author.0|create_facet_with_field:'citation_all_contributor_ids' as facet_with_field %}
+          {% with author.0|create_facet_with_field:'citation_all_contributor_ids_exact' as facet_with_field_exact %}
           <div class="row panel-row">
             <div class="col-md-12 panel-cell">
-              <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }})
+              <input  class="toggle_{{ author.0 }}" type="checkbox" name="candlestick_{{ author.0 }}" value="2">
+              <script>
+                $(function() {
+                  $('.toggle_{{ author.0 }}').candlestick({
+                    'default': '2',
+                    'size': 'sm',
+                  });
+
+                  $('div[data-candlestick-id="candlestick_{{ author.0 }}"]>.candlestick-on').on('click', function(e) {
+                    window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_facet:facet_with_field|safe }}';
+                  });
+
+                  $('div[data-candlestick-id="candlestick_{{ author.0 }}"]>.candlestick-off').on('click', function(e) {
+                    window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:facet_with_field_exact|add_facet_or_operator|safe }}';
+                  });
+                });
+              </script>
+               {{ author.0|get_authority_name }}  ({{ author.1 }})
               <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a>
             </div>
 
           </div>
+          {% endwith %}
+          {% endwith %}
           {% endif %}
           {% endfor %}
+
+          {# List excluded facets #}
+          {% for contr_id in excluded_facets.citation_all_contributor_ids %}
+          {% with contr_id|create_facet_with_field:'citation_all_contributor_ids' as facet_with_field %}
+          {% with contr_id|create_facet_with_field:'citation_all_contributor_ids_exact' as facet_with_field_exact %}
+          {% with contr_id|create_exclude_facet_string:'citation_all_contributor_ids' as encoded_contr_id %}
+          <div class="row panel-row">
+            <div class="col-md-12 panel-cell">
+              <input class="toggle_{{ contr_id }}" type="checkbox" name="candlestick_{{ contr_id }}" value="1">
+              <script>
+              $(function() {
+                $('.toggle_{{ contr_id }}').candlestick({
+                  'default': '1',
+                  'size': 'sm',
+                });
+
+                $('div[data-candlestick-id="candlestick_{{ contr_id }}"]>.candlestick-nc').on('click', function(e) {
+                  window.location = '{{ request.get_full_path|include_facet:encoded_contr_id|set_page_to_one|set_index_model:'models:isisdata.citation'|safe }}';
+                });
+                $('div[data-candlestick-id="candlestick_{{ contr_id }}"]>.candlestick-off').on('click', function(e) {
+                  window.location = '{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:encoded_contr_id|add_selected_facet:facet_with_field_exact|add_facet_or_operator|safe }}';
+                });
+              });
+              </script>
+
+               {{ contr_id|get_authority_name }}
+
+            </div>
+          </div>
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
 
           {% if facets_citation.fields.all_contributor_ids|length > 7 %}
           <div class="row">
@@ -197,39 +262,6 @@
             </div>
           </div>
           {% endif %}
-
-          {% if excluded_facets.citation_all_contributor_ids and facets_citation.fields.all_contributor_ids %}
-          <div class="row panel-row">
-            <div class="col-md-12 panel-cell">
-              <hr>
-            </div>
-          </div>
-          <div class="row panel-row">
-            <div class="col-md-12 panel-cell">
-              <strong class="text-muted"><small>Excluded from search:</small></strong>
-            </div>
-          </div>
-          {% endif %}
-
-
-          {# List excluded facets #}
-          {% for contr_id in excluded_facets.citation_all_contributor_ids %}
-          {% with contr_id|create_exclude_facet_string:'citation_all_contributor_ids' as encoded_contr_id %}
-          <div class="row panel-row">
-            <div class="col-md-8 panel-cell">
-              <small class="text-muted">
-                <i class="fa fa-minus-square-o" aria-hidden="true"></i> {{ contr_id|get_authority_name }}
-              </small>
-            </div>
-            <div class="col-md-4 text-right panel-cell">
-              <small>
-              <a href="{{ request.get_full_path|include_facet:encoded_contr_id|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Incl.</a>
-              </small>
-            </div>
-          </div>
-          {% endwith %}
-          {% endfor %}
-        </ul>
 
           {% else %}
           <div class="row panel-row">

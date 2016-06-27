@@ -31,7 +31,7 @@ def remove_url_part(url, arg):
 
 @register.filter
 def add_selected_facet(url, facet):
-    return (url + "&selected_facets=citation_type:" + urllib.unquote(facet)).replace("&&", "&")
+    return (url + "&selected_facets=" + urllib.unquote(facet)).replace("&&", "&")
 
 @register.filter
 def add_facet_or_operator(url):
@@ -49,6 +49,17 @@ def add_excluded_citation_type_facet(url, facet):
     return url.replace('&&', '&')
 
 @register.filter
+def add_excluded_facet(url, facet):
+    if 'selected_facets=' + facet in url:
+        url = url.replace('selected_facets=' + facet, '')
+    url = url + '&excluded_facets=' + facet
+    return url.replace('&&', '&')
+
+@register.filter
 def remove_all_type_facets(url, facet_type):
     url = re.sub(r"selected_facets=" + facet_type + ":.+?&", "", url).replace('&&', '&')
     return re.sub(r"excluded_facets=" + facet_type + ":.+?&", "", url).replace('&&', '&')
+
+@register.filter
+def create_facet_with_field(facet, field):
+    return field + ":" + facet
