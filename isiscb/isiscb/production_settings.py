@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social.apps.django_app.default',
+    'pagination',
     'rest_framework',
     'markupfield',
     'simple_history',
@@ -53,6 +54,8 @@ INSTALLED_APPS = (
     'corsheaders',
     'zotero',
     'openurl',
+    'curation',
+    'guardian',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -68,6 +71,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'pagination.middleware.PaginationMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -93,6 +97,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
@@ -197,10 +203,11 @@ AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = True
 
-STATICFILES_DIRS = ['isisdata/static']
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+# STATICFILES_DIRS = ['isisdata/static']
+# STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
+# STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+# STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+STATIC_URL ='/static/'
 
 # STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
@@ -248,4 +255,9 @@ LICENSE = """This work is licensed under a Creative Commons Attribution-NonComme
 
 MARKUP_FIELD_TYPES = (
     ('markdown', markdown.markdown),
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # default
+    'guardian.backends.ObjectPermissionBackend',
 )

@@ -1,0 +1,33 @@
+{% extends "isisdata/__base.html" %}
+{% load staticfiles %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static "curation/css/curation.css" %}" />
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-sm-3">
+        <nav class="navbar navbar-curation">
+            <div class="navbar-header">
+                <button type="button"
+                    class="navbar-toggle collapsed" data-toggle="collapse" data-target="#sidenav" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="navbar-collapse collapse" id="sidenav">
+                <ul class="nav nav-pills nav-stacked nav-curation">
+                    <li class="active"><a href="{% url "dashboard" %}">Dashboard</a></li>
+                    <li><a href="#">Users</a></li>
+                    <li><a href="#">Datasets</a></li>
+                    <li><a href="#">Zotero</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-10"></div>
+</div>
+{% endblock %}
