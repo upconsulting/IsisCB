@@ -36,6 +36,5 @@ django-ipware
 djangorestframework-filters
 chardet
 rdflib
-django-filter
-Markdown==2.6.6
 -e git://github.com/erickpeirson/django-pagination@master#egg=django-pagination
+Markdown==2.6.6
