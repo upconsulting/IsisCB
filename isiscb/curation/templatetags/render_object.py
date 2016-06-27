@@ -15,7 +15,7 @@ def render_object(obj):
         elem += '<span class="label label-primary">' + obj.get_type_controlled_display() + '</span> '
         elem += obj.title
         elem += '<span class="text-warning">'
-        elem += ' by ' + ', '.join([relation.authority.name + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+        elem += ' by ' + ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                     if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
 
@@ -23,12 +23,12 @@ def render_object(obj):
 
         elem += '<dl class="dl-horizontal">'
         elem += '<dt>Publication date</dt>'
-        elem += '<dd>' + obj.publication_date.isoformat() + '</dd>'
+        elem += '<dd>' + getattr(obj.publication_date, 'isoformat', lambda: 'missing')() + '</dd>'
 
         for relation in obj.acrelations:
             if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]:
                 elem += '<dt>' + relation.get_type_controlled_display() + '</dt>'
-                elem += '<dd>' + relation.authority.name + '</dd>'
+                elem += '<dd>' + getattr(relation.authority, 'name', 'missing') + '</dd>'
 
         elem += '</dl>'
 
