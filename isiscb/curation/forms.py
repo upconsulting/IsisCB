@@ -8,7 +8,7 @@ class PartDetailsForm(forms.ModelForm):
 
     class Meta:
         model = PartDetails
-        fields = '__all__'
+        exclude =['volume',]
 
 
 class CitationForm(forms.ModelForm):
@@ -18,6 +18,8 @@ class CitationForm(forms.ModelForm):
     additional_titles = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
     edition_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
     physical_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
+
+    language = forms.ModelMultipleChoiceField(queryset=Language.objects.all())
 
     class Meta:
         model = Citation
