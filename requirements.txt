@@ -38,4 +38,4 @@ chardet
 rdflib
 django-filter
 Markdown==2.6.6
--e git://github.com/erickpeirson/django-pagination@master
+-e git://github.com/erickpeirson/django-pagination@master#egg=django-pagination
