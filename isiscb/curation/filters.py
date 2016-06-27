@@ -1,5 +1,6 @@
 import django_filters
 from django_filters.fields import Lookup
+from django_filters.filterset import STRICTNESS
 from django.db.models import Q
 
 from isisdata.models import *
@@ -7,8 +8,26 @@ from isisdata.helper_methods import strip_punctuation
 import six
 import iso8601
 
+from django_filters import filters
+
+filters.LOOKUP_TYPES = [
+    ('', '---------'),
+    ('exact', 'Is equal to'),
+    ('not_exact', 'Is not equal to'),
+    ('lt', 'Lesser than'),
+    ('gt', 'Greater than'),
+    ('gte', 'Greater than or equal to'),
+    ('lte', 'Lesser than or equal to'),
+    ('startswith', 'Starts with'),
+    ('endswith', 'Ends with'),
+    ('icontains', 'Contains'),
+    ('not_contains', 'Does not contain'),
+]
+
 
 class CitationFilter(django_filters.FilterSet):
+    strict = STRICTNESS.RAISE_VALIDATION_ERROR
+
     id = django_filters.CharFilter(name='id', lookup_type='exact')
     title = django_filters.CharFilter(name='title', lookup_type='icontains')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
@@ -81,11 +100,23 @@ class CitationFilter(django_filters.FilterSet):
 
 
 class AuthorityFilter(django_filters.FilterSet):
+    strict = STRICTNESS.RAISE_VALIDATION_ERROR
+
     id = django_filters.CharFilter(name='id', lookup_type='exact')
-    name = django_filters.CharFilter(name='name', lookup_type='icontains')
+    name = django_filters.MethodFilter()
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
     description = django_filters.CharFilter(name='description', lookup_type='icontains')
+
 
     class Meta:
         model = Authority
         fields = ['name', 'type_controlled']
+
+
+    def filter_name(self, queryset, value):
+        if not value:
+            return queryset
+        for part in value.split():
+            queryset = queryset.filter(name__icontains=part)
+
+        return queryset
