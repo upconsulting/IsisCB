@@ -30,7 +30,7 @@ def citation(request, citation_id=None):
     else:
         template = loader.get_template('curation/citation_list_view.html')
         filtered_objects = CitationFilter(request.GET, queryset=Citation.objects.all())
-        
+
         context.update({
             'objects': filtered_objects,
             'filters_active': len([v for k, v in request.GET.iteritems()
@@ -48,7 +48,7 @@ def authority(request, authority_id=None):
     if authority_id:
         pass
     else:
-        template = loader.get_template('curation/list_view.html')
+        template = loader.get_template('curation/authority_list_view.html')
         filtered_objects = AuthorityFilter(request.GET, queryset=Authority.objects.all())
         context.update({
             'objects': filtered_objects,
