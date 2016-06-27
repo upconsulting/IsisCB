@@ -1069,7 +1069,6 @@ class IsisSearchView(FacetedSearchView):
                 parameters = parameters,
                 search_models = search_models,
                 selected_facets = selected_facets,
-                excluded_facets = excluded_facets,
             )
             searchquery.save()
             # make sure we have a session key
