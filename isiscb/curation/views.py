@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbid
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.forms import modelform_factory
 
 
 from isisdata.models import *
@@ -21,6 +22,69 @@ def dashboard(request):
     """
     template = loader.get_template('curation/dashboard.html')
     context = RequestContext(request, {
+    })
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def attribute_for_citation(request, citation_id, attribute_id=None):
+
+    template = loader.get_template('curation/citation_attribute_changeview.html')
+    citation = get_object_or_404(Citation, pk=citation_id)
+    attribute, value, value_form, value_form_class = None, None, None, None
+
+    value_forms = {at.id: modelform_factory(at.value_content_type.model_class(), exclude=('attribute', 'child_class'))
+                   for at in AttributeType.objects.all()}
+
+    if attribute_id:
+        attribute = get_object_or_404(Attribute, pk=attribute_id)
+        if hasattr(attribute, 'value'):
+            value = attribute.value
+            value_form_class = value_forms[attribute.type_controlled.id]
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'attribute': attribute,
+        'value': value,
+    })
+
+    if request.method == 'GET':
+        if attribute:
+            attribute_form = AttributeForm(instance=attribute, prefix='attribute')
+            if value:
+                value_form = value_form_class(instance=value.get_child_class(), prefix='value')
+        else:
+            attribute_form = AttributeForm()
+
+
+    elif request.method == 'POST':
+        print request.POST
+        if attribute:    # Update.
+            attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
+
+            value_instance = value.get_child_class() if value else None
+            value_form = value_form_class(request.POST, instance=value_instance, prefix='value')
+        else:    # Create.
+            attribute_form = AttributeForm(request.POST, prefix='attribute')
+            value_form = value_form_class(request.POST, prefix='value')
+
+        if attribute_form.is_valid() and value_form and value_form.is_valid():
+            print 'both valid'
+            attribute_form.save()
+            value_form.save()
+
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+        else:
+            print 'what'
+            print attribute_form.errors
+            print value_form.errors
+        print attribute_form, value_form
+
+    context.update({
+        'attribute_form': attribute_form,
+        'value_form': value_form,
     })
     return HttpResponse(template.render(context))
 
@@ -62,8 +126,6 @@ def citation(request, citation_id=None):
                 'instance': citation,
                 'partdetails_form': partdetails_form,
             })
-
-
     else:
         template = loader.get_template('curation/citation_list_view.html')
         filtered_objects = CitationFilter(request.GET, queryset=Citation.objects.all())

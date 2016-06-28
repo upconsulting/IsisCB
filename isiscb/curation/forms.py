@@ -51,3 +51,15 @@ class PersonForm(forms.ModelForm):
             'personal_name_last', 'personal_name_first', 'personal_name_suffix',
             'personal_name_preferred',
         ]
+
+
+class AttributeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    class Meta:
+        model = Attribute
+
+        fields = [
+            'type_controlled',
+            'description',
+            'value_freeform',
+        ]
