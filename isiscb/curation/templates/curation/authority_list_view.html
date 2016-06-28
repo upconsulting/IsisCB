@@ -31,3 +31,84 @@
 
 </table>
 {% endblock %}
+
+{% block filter_form %}
+<form class="form clearfix">
+
+    <div class="row">
+        <div class="col-sm-4">
+            {% for error in objects.form.id.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.id.label }}</label>
+                {{ objects.form.id|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.classification_system.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.classification_system.label }}</label>
+                {{ objects.form.classification_system|addcss:"form-control" }}
+            </div>
+
+
+
+
+        </div>
+        <div class="col-sm-4">
+            {% for error in objects.form.name.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.name.label }}</label>
+                {{ objects.form.name|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.classification_code.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.classification_code.label }}</label>
+                {{ objects.form.classification_code|addcss:"form-control" }}
+            </div>
+
+
+
+        </div>
+
+        <div class="col-sm-4">
+            {% for error in objects.form.description.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.description.label }}</label>
+                {{ objects.form.description|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.classification_hierarchy.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.classification_hierarchy.label }}</label>
+                {{ objects.form.classification_hierarchy|addcss:"form-control" }}
+            </div>
+
+            <div class="btn-group pull-right">
+                <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
+                <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+<script>
+$(document).ready(function() {
+    $('#clear-filters').on('click', function() {
+        $('.form-group.clearable input').val('');
+        $('.form-group.clearable select').val('');
+    });
+});
+</script>
+{% endblock %}

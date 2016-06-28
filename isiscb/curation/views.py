@@ -34,6 +34,8 @@ def citation(request, citation_id=None):
     if citation_id:
         citation = get_object_or_404(Citation, pk=citation_id)
         template = loader.get_template('curation/citation_change_view.html')
+        partdetails_form = None
+        context.update({'tab': request.GET.get('tab', None)})
         if request.method == 'GET':
             form = CitationForm(instance=citation)
             context.update({
@@ -49,7 +51,7 @@ def citation(request, citation_id=None):
             form = CitationForm(request.POST, instance=citation)
             if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
                 partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
-            if form.is_valid() and partdetails_form.is_valid():
+            if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
                 form.save()
                 partdetails_form.save()
                 return HttpResponseRedirect(reverse('citation_list'))
@@ -80,7 +82,37 @@ def authority(request, authority_id=None):
         'curation_subsection': 'authorities',
     })
     if authority_id:
-        pass
+
+        authority = get_object_or_404(Authority, pk=authority_id)
+        template = loader.get_template('curation/authority_change_view.html')
+        person_form = None
+        if request.method == 'GET':
+            if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
+                person_form = PersonForm(instance=authority.person)
+
+            form = AuthorityForm(instance=authority)
+            context.update({
+                'form': form,
+                'instance': authority,
+                'person_form': person_form,
+            })
+
+
+        elif request.method == 'POST':
+            if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
+                person_form = PersonForm(request.POST, instance=authority.person)
+
+            form = AuthorityForm(request.POST, instance=authority)
+            if form.is_valid() and (person_form is None or person_form.is_valid()):
+                form.save()
+                return HttpResponseRedirect(reverse('authority_list'))
+
+            context.update({
+                'form': form,
+                'person_form': person_form,
+                'instance': citation,
+                # 'partdetails_form': partdetails_form,
+            })
     else:
         template = loader.get_template('curation/authority_list_view.html')
         filtered_objects = AuthorityFilter(request.GET, queryset=Authority.objects.all())
@@ -89,7 +121,7 @@ def authority(request, authority_id=None):
             'filters_active': len([v for k, v in request.GET.iteritems()
                                    if len(v) > 0 and k != 'page']) > 0,
         })
-        return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context))
 
 
 @staff_member_required

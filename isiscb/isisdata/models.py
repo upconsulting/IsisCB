@@ -489,9 +489,30 @@ class CuratedMixin(models.Model):
     public = models.BooleanField(default=True, help_text=help_text("""
     Controls whether this instance can be viewed by end users."""))
 
-    record_status_value = models.CharField(max_length=255, blank=True, null=True)
+    ACTIVE = 'Active'
+    DUPLICATE = 'Duplicate'
+    REDIRECT = 'Redirect'
+    INACTIVE = 'Inactive'
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (DUPLICATE, 'Duplicate'),
+        (REDIRECT, 'Redirect'),
+        (INACTIVE, 'Inactive'),
+    )
+    record_status_value = models.CharField(choices=STATUS_CHOICES, max_length=255, blank=True, null=True)
     record_status_explanation = models.CharField(max_length=255, blank=True,
                                                  null=True)
+
+    def save(self, *args, **kwargs):
+        """
+        The record_status_value field controls whether or not the record is
+        public.
+        """
+        if self.record_status_value == self.ACTIVE:
+            self.public = True
+        else:
+            self.public = False
+        super(CuratedMixin, self).save(*args, **kwargs)
 
     @property
     def created_on(self):
