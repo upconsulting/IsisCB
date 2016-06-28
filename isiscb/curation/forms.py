@@ -19,10 +19,34 @@ class CitationForm(forms.ModelForm):
     edition_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
     physical_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
 
-    language = forms.ModelMultipleChoiceField(queryset=Language.objects.all())
+    language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
     class Meta:
         model = Citation
-        fields = ['type_controlled', 'title', 'description', 'edition_details',
-                  'physical_details', 'language', 'abstract',
-                  'additional_titles', 'book_series']
+        fields = [
+            'type_controlled', 'title', 'description', 'edition_details',
+              'physical_details', 'language', 'abstract', 'additional_titles',
+              'book_series', 'record_status_value', 'record_status_explanation',
+        ]
+
+
+class AuthorityForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+
+    class Meta:
+        model = Authority
+        fields = [
+            'type_controlled', 'name', 'description', 'classification_system',
+            'classification_code', 'classification_hierarchy', 'record_status',
+        ]
+
+
+class PersonForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+
+    class Meta:
+        model = Person
+        fields = [
+            'personal_name_last', 'personal_name_first', 'personal_name_suffix',
+            'personal_name_preferred', 
+        ]

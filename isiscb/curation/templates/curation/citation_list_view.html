@@ -23,9 +23,21 @@
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
             <td>{{ object|get_citation_title|safe }}</td>
-            <td>{{ object|get_authors_editors }}</td>
-            <td>{{ object|get_citation_pubdate }}</td>
-            <td>{{ object|get_citation_periodical }}</td>
+            <td>
+                <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                    {{ object|get_authors_editors }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url "curate_citation" object.id %}?tab=attributes">
+                    {{ object|get_citation_pubdate }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                    {{ object|get_citation_periodical }}
+                </a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -144,6 +156,14 @@
             <div class="form-group clearable">
                 <label>{{ objects.form.subject.label }}</label>
                 {{ objects.form.subject|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.record_status.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.record_status.label }}</label>
+                {{ objects.form.record_status|addcss:"form-control" }}
             </div>
 
             <div class="btn-group pull-right">

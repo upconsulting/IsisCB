@@ -57,6 +57,7 @@ class TestLoadFileMaker(unittest.TestCase):
                 then = getattr(instance, field)
                 self.assertGreater(now, then)
 
+            print 'record_status_value', instance.record_status_value
             if instance.record_status_value == 'RD':
                 self.assertTrue(instance.redirect_to is not None)
 
