@@ -37,7 +37,8 @@ class AuthorityForm(forms.ModelForm):
         model = Authority
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
-            'classification_code', 'classification_hierarchy', 'record_status',
+            'classification_code', 'classification_hierarchy',
+            'record_status_value', 'record_status_explanation',
         ]
 
 
