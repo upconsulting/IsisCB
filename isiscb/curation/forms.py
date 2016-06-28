@@ -10,29 +10,20 @@ class ISODateValueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ISODateValueForm, self).__init__(*args, **kwargs)
         instance = kwargs.get('instance')
-        print self.__dict__
-        print self.fields['value'].__dict__
-        print '--'*80
-        if instance and not self.is_bound:
 
-            print 'instance', instance.value
+        if instance and not self.is_bound:
             self.fields['value'].initial = instance.__unicode__()
 
     def clean_value(self):
-        print 'hello clean value!!'
         value = self.cleaned_data['value']
         try:
             ISODateValue.convert(value)
         except:
             raise forms.ValidationError('Please enter an ISO8601-compliant date.')
-        print 'asdf'
         return value
 
     def save(self, *args, **kwargs):
         self.instance.value = self.cleaned_data.get('value')
-        print self.instance
-        print self.instance.value
-        print self.cleaned_data
         super(ISODateValueForm, self).save(*args, **kwargs)
 
     class Meta:

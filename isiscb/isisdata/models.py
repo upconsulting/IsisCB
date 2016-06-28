@@ -331,7 +331,7 @@ class ISODateValue(Value):
             value = ISODateValue.convert(value)
         except ValidationError:
             raise ValueError('Invalid value for ISODateValue: %s' % value.__repr__())
-        
+
         for i, part in enumerate(self.PARTS):
         # for i, v in enumerate(value):
             if i >= len(value):
@@ -351,6 +351,9 @@ class ISODateValue(Value):
             return val
 
         return '-'.join([_coerce(v) for v in self.value])
+
+    def render(self):
+        return self.__unicode__()
 
     value = property(_valuegetter, _valuesetter)
 

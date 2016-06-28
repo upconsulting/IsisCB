@@ -54,7 +54,7 @@ def delete_attribute_for_authority(request, authority_id, attribute_id):
     })
     if request.GET.get('confirm', False):
         attribute.delete()
-        return HttpResponseRedirect(reverse('curate_authority', args=(citation.id,)) + '?tab=attributes')
+        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
     template = loader.get_template('curation/authority_attribute_delete.html')
     return HttpResponse(template.render(context))
 
@@ -257,7 +257,7 @@ def authority(request, authority_id=None):
         'curation_subsection': 'authorities',
     })
     if authority_id:
-
+        context.update({'tab': request.GET.get('tab', None)})
         authority = get_object_or_404(Authority, pk=authority_id)
         template = loader.get_template('curation/authority_change_view.html')
         person_form = None

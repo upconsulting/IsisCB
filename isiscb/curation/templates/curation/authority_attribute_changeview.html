@@ -13,7 +13,11 @@
             <input type="submit" value="Save" class="btn btn-success" />
         </div>
     </div>
-    <div class="h2"> {{ instance.name|safe }}</div>
+    <div class="h2">
+        <a href="{% url "curate_authority" instance.id %}?tab=attributes" style="text-decoration:none;">
+            <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.name|safe }}
+        </a>
+    </div>
     <span class="h5"><ul style="list-style: none;">{{ instance|get_date_attributes }}</ul></span>
     <div class="h4 text-warning">{{ instance.id }}</div>
 

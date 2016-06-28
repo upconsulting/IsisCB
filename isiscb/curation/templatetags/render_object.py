@@ -87,4 +87,4 @@ def get_citation_periodical(obj):
 
 @register.filter(name='get_date_attributes')
 def get_date_attributes(obj):
-    return SafeText(' '.join(['<li><span class="label label-success">%s</span> %s</li>' % (attribute.type_controlled.display_name, attribute.value.display) for attribute in obj.attributes.all()]))
+    return SafeText(' '.join(['<li><span class="label label-success">%s</span> %s</li>' % (attribute.type_controlled.name, attribute.value.display) for attribute in obj.attributes.all()]))

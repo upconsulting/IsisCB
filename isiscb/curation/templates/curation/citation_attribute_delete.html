@@ -6,7 +6,11 @@
 <hr />
 
 <div class="h3 text-warning">Editing Attribute for Citation:</div>
-<div class="h2"> {{ instance.title|safe }}</div>
+<div class="h2">
+    <a href="{% url "curate_citation" instance.id %}?tab=attributes" style="text-decoration:none;">
+        <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.title|safe }}
+    </a>
+</div>
 <div class="h4">{{ instance|get_authors_editors }}</div>
 <div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
 
