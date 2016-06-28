@@ -140,3 +140,18 @@ def users(request, user_id=None):
         'objects': users,
     })
     return HttpResponse(template.render(context))
+
+@staff_member_required
+def add_role(request, user_id=None):
+    context = RequestContext(request, {
+        'curation_section': 'users',
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_role.html')
+        form = RoleForm()
+        context.update({
+            'form': form,
+        })
+
+    return HttpResponse(template.render(context))

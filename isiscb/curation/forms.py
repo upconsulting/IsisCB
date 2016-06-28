@@ -48,5 +48,13 @@ class PersonForm(forms.ModelForm):
         model = Person
         fields = [
             'personal_name_last', 'personal_name_first', 'personal_name_suffix',
-            'personal_name_preferred', 
+            'personal_name_preferred',
+        ]
+
+class RoleForm(forms.ModelForm):
+    
+    class Meta:
+        model = IsisCBRole
+        field = [
+            'name',
         ]

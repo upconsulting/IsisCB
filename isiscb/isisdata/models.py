@@ -1802,6 +1802,8 @@ class IsisCBRole(models.Model):
     """
     name = models.CharField(max_length=255, blank=True, null=True)
 
+    users = models.ManyToManyField(User)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1818,18 +1820,24 @@ class CRUDRule(AccessRule):
     """
     This rule defines a CRUD permission on all records, e.g. edit all records.
     """
+    CREATE = 'create'
+    VIEW = 'view'
+    UPDATE = 'update'
+    DELETE = 'delete'
     CRUD_CHOICES = (
-        'create',
-        'view',
-        'update',
-        'delete'
+        (CREATE, 'Create'),
+        (VIEW, 'View'),
+        (UPDATE, 'Update'),
+        (DELETE, 'Delete'),
     )
     crud_action = models.CharField(max_length=255, null=True, blank=True,
                                        choices=CRUD_CHOICES)
 
+    CITATION = 'citation'
+    AUTHORITY = 'authority'
     OBJECT_TYPES = (
-        'citation',
-        'authority'
+        (CITATION, 'Citation'),
+        (AUTHORITY, 'Authority'),
     )
     object_type = models.CharField(max_length=255, null=True, blank=True,
                                        choices=OBJECT_TYPES)
@@ -1840,7 +1848,7 @@ class FieldRule(AccessRule):
     """
     field_name = models.CharField(max_length=255, null=False, blank=False)
 
-    is_accessible = BooleanField(default=True, help_text=help_text("""
+    is_accessible = models.BooleanField(default=True, help_text=help_text("""
     Controls whether a user has access to the specified field."""))
 
 class DatasetRule(AccessRule):
@@ -1848,9 +1856,3 @@ class DatasetRule(AccessRule):
     This rules limits the records a user has access to to a specific dataset.
     """
     dataset = models.CharField(max_length=255, null=False, blank=False)
-
-class IsisCBUser(AbstractBaseUser):
-    """
-    IsisCB user model that has roles to manage curation permission
-    """
-    roles = models.ManyToManyField(IsisCBRole)
