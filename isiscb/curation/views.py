@@ -1,7 +1,7 @@
 from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required
 
-from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbidden, Http404, , JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -24,6 +24,39 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
+
+@staff_member_required
+def acrelation_for_citation(request, citation_id, acrelation_id=None):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    acrelation = None
+    if acrelation_id:
+        acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'acrelation': acrelation,
+    })
+    if request.method == 'GET':
+        if acrelation:
+            form = ACRelationForm(instance=acrelation, prefix='acrelation')
+        else:
+            form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+
+    elif request.method == 'POST':
+        form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
+
+
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/citation_acrelation_changeview.html')
+    return HttpResponse(template.render(context))
 
 @staff_member_required
 def delete_attribute_for_citation(request, citation_id, attribute_id):
@@ -317,3 +350,22 @@ def users(request, user_id=None):
         'objects': users,
     })
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def quick_and_dirty_authority_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+
+    queryset = Authority.objects.all()
+    for part in q.split():
+        queryset = queryset.filter(name__icontains=part)
+    results = [{
+        'id': obj.id,
+        'type': obj.get_type_controlled_display(),
+        'name': obj.name,
+        'description': obj.description,
+        'url': obj.get_absolute_url(),
+    } for obj in queryset[:20]]
+    return JsonResponse({'results': results})

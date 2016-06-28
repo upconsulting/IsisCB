@@ -90,7 +90,7 @@
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'aarelations' %} active{% endif %}" id="aarelations">
         <ul class="list-group">
-        {% for aarelation in instance.aarelations.all %}
+        {% for aarelation in instance.aarelation_set.all %}
             <a class="list-group-item">
                 {% if instance.id == aarelation.subject.id %}
                 <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
@@ -119,7 +119,7 @@
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
         <ul class="list-group">
-        {% for acrelation in instance.acrelations.all %}
+        {% for acrelation in instance.acrelation_set.all %}
             <a class="list-group-item">
                 <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
                 {% if acrelation.type_broad_controlled %}
