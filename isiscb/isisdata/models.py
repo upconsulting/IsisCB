@@ -235,6 +235,9 @@ class ISODateRangeValue(Value):
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
 
+    def render(self):
+        return self.__unicode__()
+
     class Meta:
         verbose_name = 'date range'
 

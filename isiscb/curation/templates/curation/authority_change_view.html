@@ -13,7 +13,7 @@
         <input type="submit" value="Save" class="btn btn-success" />
     </div>
 </div>
-<div class="h2"> {{ instance.name|safe }}</div>
+<div class="h2"> {{ instance.name|safe }} <span class="small">{{ instance|get_date_attributes }}</span></div>
 <div class="h4 text-warning">{{ instance.id }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">

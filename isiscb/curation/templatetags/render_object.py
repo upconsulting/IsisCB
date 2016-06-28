@@ -71,3 +71,8 @@ def get_citation_pubdate(obj):
 def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
+
+
+@register.filter(name='get_date_attributes')
+def get_date_attributes(obj):
+    return SafeText(' '.join(['<span class="">%s</span> %s' % (attribute.type_controlled.display_name, attribute.value.display) for attribute in obj.attributes.all()]))
