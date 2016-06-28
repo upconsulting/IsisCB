@@ -37,7 +37,8 @@ class AuthorityForm(forms.ModelForm):
         model = Authority
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
-            'classification_code', 'classification_hierarchy', 'record_status',
+            'classification_code', 'classification_hierarchy',
+            'record_status_value', 'record_status_explanation',
         ]
 
 
@@ -48,5 +49,5 @@ class PersonForm(forms.ModelForm):
         model = Person
         fields = [
             'personal_name_last', 'personal_name_first', 'personal_name_suffix',
-            'personal_name_preferred', 
+            'personal_name_preferred',
         ]
