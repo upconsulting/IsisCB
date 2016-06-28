@@ -18,25 +18,25 @@
 <div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">
-    <li role="presentation" class="active">
+    <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
         <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
     </li>
-    <li role="presentation">
+    <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
         <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
     </li>
-    <li role="presentation">
+    <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
         <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
     </li>
-    <li role="presentation">
-        <a href="#ccrelations" aria-controls="linkeddata" role="tab" data-toggle="tab">Related Citations</a>
+    <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
+        <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
     </li>
-    <li role="presentation">
-        <a href="#acrelations" aria-controls="linkeddata" role="tab" data-toggle="tab">Related Authorities</a>
+    <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
+        <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
     </li>
 </ul>
 
 <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="fields">
+    <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
         <div class="row">
             <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
                 <div class="h4">Citation Details</div>
@@ -174,7 +174,7 @@
             {% endif %}
         </div>
     </div>
-    <div role="tabpanel" class="tab-pane" id="attributes">
+    <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
         <ul class="list-group">
         {% for attribute in instance.attributes.all %}
             <a class="list-group-item">
@@ -187,12 +187,12 @@
         {% endfor %}
         </ul>
     </div>
-    <div role="tabpanel" class="tab-pane" id="linkeddata">
+    <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
         {% for linkeddata in instance.linkeddata.all %}
             {{ linkeddata }}
         {% endfor %}
     </div>
-    <div role="tabpanel" class="tab-pane" id="ccrelations">
+    <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
         <ul class="list-group">
         {% for ccrelation in instance.ccrelations.all %}
             <a class="list-group-item">
@@ -221,7 +221,7 @@
         </ul>
 
     </div>
-    <div role="tabpanel" class="tab-pane" id="acrelations">
+    <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
         <ul class="list-group">
         {% for acrelation in instance.acrelations.all %}
             <a class="list-group-item">

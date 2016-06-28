@@ -35,6 +35,7 @@ def citation(request, citation_id=None):
         citation = get_object_or_404(Citation, pk=citation_id)
         template = loader.get_template('curation/citation_change_view.html')
         partdetails_form = None
+        context.update({'tab': request.GET.get('tab', None)})
         if request.method == 'GET':
             form = CitationForm(instance=citation)
             context.update({
