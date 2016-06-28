@@ -53,7 +53,8 @@ def citation(request, citation_id=None):
                 partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
             if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
                 form.save()
-                partdetails_form.save()
+                if partdetails_form:
+                    partdetails_form.save()
                 return HttpResponseRedirect(reverse('citation_list'))
 
             context.update({
@@ -105,6 +106,8 @@ def authority(request, authority_id=None):
             form = AuthorityForm(request.POST, instance=authority)
             if form.is_valid() and (person_form is None or person_form.is_valid()):
                 form.save()
+                if person_form:
+                    person_form.save()
                 return HttpResponseRedirect(reverse('authority_list'))
 
             context.update({
