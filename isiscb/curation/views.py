@@ -80,7 +80,36 @@ def authority(request, authority_id=None):
         'curation_subsection': 'authorities',
     })
     if authority_id:
-        pass
+
+        authority = get_object_or_404(Authority, pk=authority_id)
+        template = loader.get_template('curation/authority_change_view.html')
+        if request.method == 'GET':
+            form = AuthorityForm(instance=authority)
+            context.update({
+                'form': form,
+                'instance': authority,
+            })
+            if authority.type_controlled == Authority.PERSON:
+                pass
+                # partdetails_form = PartDetailsForm(instance=citation.part_details)
+                # context.update({
+                #     'partdetails_form': partdetails_form,
+                # })
+        elif request.method == 'POST':
+            form = AuthorityForm(request.POST, instance=authority)
+            if authority.type_controlled == Authority.PERSON:
+                pass
+                # partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
+            if form.is_valid():# and partdetails_form.is_valid():
+                form.save()
+                # partdetails_form.save()
+                return HttpResponseRedirect(reverse('authority_list'))
+
+            context.update({
+                'form': form,
+                'instance': citation,
+                # 'partdetails_form': partdetails_form,
+            })
     else:
         template = loader.get_template('curation/authority_list_view.html')
         filtered_objects = AuthorityFilter(request.GET, queryset=Authority.objects.all())
@@ -89,7 +118,7 @@ def authority(request, authority_id=None):
             'filters_active': len([v for k, v in request.GET.iteritems()
                                    if len(v) > 0 and k != 'page']) > 0,
         })
-        return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context))
 
 
 @staff_member_required

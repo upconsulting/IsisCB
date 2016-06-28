@@ -40,6 +40,8 @@ class CitationFilter(django_filters.FilterSet):
     periodical = django_filters.MethodFilter()
     publisher = django_filters.MethodFilter()
     subject = django_filters.MethodFilter()
+
+    record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     class Meta:
@@ -47,7 +49,7 @@ class CitationFilter(django_filters.FilterSet):
         fields = [
             'id', 'title', 'abstract', 'description',
             'publication_date_from', 'publication_date_to',
-            'author_or_editor', 'periodical',
+            'author_or_editor', 'periodical', 'record_status'
         ]
         order_by = [
             ('publication_date', 'Publication date (ascending)'),
@@ -130,11 +132,16 @@ class AuthorityFilter(django_filters.FilterSet):
     name = django_filters.MethodFilter()
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
     description = django_filters.CharFilter(name='description', lookup_type='icontains')
-
+    classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
+    classification_code = django_filters.AllValuesFilter(name='classification_code')
+    classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
 
     class Meta:
         model = Authority
-        fields = ['name', 'type_controlled']
+        fields = [
+            'id', 'name', 'type_controlled', 'description',
+            'classification_system', 'classification_code',
+            'classification_hierarchy']
 
 
     def filter_name(self, queryset, value):

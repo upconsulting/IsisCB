@@ -1,0 +1,132 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+<hr />
+
+<form class="form" action="." method="POST">
+    {% csrf_token %}
+
+<div class="h3 text-warning">Editing Authority Record:
+    <div class="button-group pull-right">
+        <input type="submit" value="Save" class="btn btn-success" />
+    </div>
+</div>
+<div class="h2"> {{ instance.name|safe }}</div>
+<div class="h4 text-warning">{{ instance.id }}</div>
+
+<ul class="nav nav-tabs nav-justified" role="tablist">
+    <li role="presentation" class="active">
+        <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+    </li>
+    <li role="presentation">
+        <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+    </li>
+    <li role="presentation">
+        <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+    </li>
+    <li role="presentation">
+        <a href="#acrelations" aria-controls="linkeddata" role="tab" data-toggle="tab">Related Citations</a>
+    </li>
+    <li role="presentation">
+        <a href="#aarelations" aria-controls="linkeddata" role="tab" data-toggle="tab">Related Authorities</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="fields">
+        <div class="row">
+            <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
+                <div class="h4">Authority Details</div>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field|addcss:"form-control" }}
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="attributes">
+        <ul class="list-group">
+        {% for attribute in instance.attributes.all %}
+            <a class="list-group-item">
+                <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+                {{ attribute.value.get_child_class }}
+                <span class="text-warning">{{ attribute.value_freeform}}</span>
+
+                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+            </a>
+        {% endfor %}
+        </ul>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="linkeddata">
+        {% for linkeddata in instance.linkeddata.all %}
+            {{ linkeddata }}
+        {% endfor %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="aarelations">
+        <ul class="list-group">
+        {% for aarelation in instance.aarelations.all %}
+            <a class="list-group-item">
+                {% if instance.id == aarelation.subject.id %}
+                <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+                {% else %}
+
+                The <span class="label label-success">{{ aarelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ aarelation.subject|get_citation_title }}</span>
+
+                {% endif %}
+                <span class="label label-primary">{{ aarelation.get_type_controlled_display }}</span>
+                {% if aarelation.type_free %}
+                <span class="label label-success">{{ aarelation.type_free }}</span>
+                {% endif %}
+
+                {% if instance.id == aarelation.object.id %}
+                <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+                {% else %}
+                the <span class="label label-success">{{ aarelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ aarelation.object|get_citation_title }}</span>.
+                {% endif %}
+
+
+                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+            </a>
+        {% endfor %}
+        </ul>
+
+    </div>
+    <div role="tabpanel" class="tab-pane" id="acrelations">
+        <ul class="list-group">
+        {% for acrelation in instance.acrelations.all %}
+            <a class="list-group-item">
+                <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
+                {% if acrelation.type_broad_controlled %}
+                <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
+                {% endif %}
+                {{ acrelation.citation.title }}
+                {% if acrelation.name_for_display_in_citation %}
+                <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+                {% endif %}
+
+                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+            </a>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="clearfix">
+    <div class="button-group pull-right">
+        <input type="submit" value="Save" class="btn btn-success" />
+    </div>
+</div>
+
+</form>
+<script>
+$('#id_language').multiSelect()
+</script>
+{% endblock %}
