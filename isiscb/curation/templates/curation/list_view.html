@@ -18,6 +18,7 @@
 </div>
 
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
+    {% block filter_form %}
     <form class="form clearfix">
         {% for field in objects.form %}
         <div class="form-group clearable">
@@ -38,6 +39,7 @@
         });
     });
     </script>
+    {% endblock %}
 </div>
 
 <div class="text-center">
