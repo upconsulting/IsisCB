@@ -15,7 +15,7 @@
     </div>
     <div class="h2"> {{ instance.title|safe }}</div>
     <div class="h4">{{ instance|get_authors_editors }}</div>
-    <div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
+    <div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
 
     <div class="container-fluid">
         <div class="row">
@@ -37,15 +37,19 @@
                 </div>
             </div>
             <div class="col-sm-6">
-                {% for field in value_form %}
-                {% for error in field.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field|addcss:"form-control" }}
-                </div>
-                {% endfor %}
+                {% if value_form %}
+                    {% for field in value_form %}
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field|addcss:"form-control" }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div id="value_form_container"></div>
+                {% endif %}
 
                 {% for error in attribute_form.value_freeform.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
@@ -57,19 +61,43 @@
             </div>
         </div>
 
-        <div class="row">
-
-        </div>
 
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
+                {% if attribute %}<a href="{% url "delete_attribute_for_citation" instance.id attribute.id %}" class="btn btn-danger">Delete</a>{% endif %}
             </div>
         </div>
     </div>
 
 </form>
+
+<div id="value_forms" style="visibility: hidden;">
+    {% for id, form in value_forms %}
+    <div id="form_for_{{id}}">
+        {% for field in form %}
+        {% for error in field.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field|addcss:"form-control" }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
 <script>
 $('#id_language').multiSelect()
+
+$('#id_attribute-type_controlled').change(function() {
+    var value = $(this).val();
+    console.log(value);
+    var container = $('#value_form_container');
+    container.empty();
+    var form = $('#form_for_' + value).clone();
+    console.log(form);
+    container.append(form);
+});
 </script>
 {% endblock %}

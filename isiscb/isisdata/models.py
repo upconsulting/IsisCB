@@ -310,7 +310,7 @@ class ISODateValue(Value):
         Override to update Citation.publication_date, if this DateValue belongs
         to an Attribute of type "PublicationDate".
         """
-        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
+
 
         if self.attribute.type_controlled.name == 'PublicationDate':
             try:
@@ -318,6 +318,8 @@ class ISODateValue(Value):
                 self.attribute.source.save()
             except ValueError:
                 print 'Error settings publication_date on %i' % self.attribute.source.id
+
+        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
 
     def _valuegetter(self):
         return [getattr(self, part) for part in self.PARTS if getattr(self, part) != 0]
@@ -375,6 +377,10 @@ class ISODateValue(Value):
             value = [value]
         else:
             raise ValidationError('Not a valid ISO8601 date')
+
+        for v in value[1:]:
+            if type(v) in [str, unicode] and len(v) != 2:
+                raise ValidationError('Not a valid ISO8601 date')
         try:
             return [int(v) for v in value if v]
         except NameError:

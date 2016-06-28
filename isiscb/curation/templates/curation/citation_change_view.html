@@ -15,7 +15,7 @@
 </div>
 <div class="h2"> {{ instance.title|safe }}</div>
 <div class="h4">{{ instance|get_authors_editors }}</div>
-<div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
+<div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">
     <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
@@ -185,6 +185,9 @@
                 <span class="glyphicon glyphicon-chevron-right pull-right"></span>
             </a>
         {% endfor %}
+            <a class="list-group-item text-muted" href="{% url "create_attribute_for_citation" instance.id %}">
+                <span class="glyphicon glyphicon-plus"></span> Create new attribute
+            </a>
         </ul>
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">

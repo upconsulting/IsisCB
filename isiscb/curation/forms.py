@@ -3,6 +3,36 @@ from django import forms
 from isisdata.models import *
 
 
+
+class ISODateValueForm(forms.ModelForm):
+    value = forms.CharField()
+
+    def __init__(self, *args, **kwargs):
+        super(ISODateValueForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if instance:
+            self.fields['value'].initial = instance.__unicode__()
+
+    def clean_value(self):
+        value = self.cleaned_data['value']
+        try:
+            ISODateValue.convert(value)
+        except:
+            raise forms.ValidationError('Please enter an ISO8601-compliant date.')
+        return value
+
+    def save(self, *args, **kwargs):
+        self.instance.value = self.cleaned_data.get('value')
+        print self.instance
+        print self.instance.value
+        print self.cleaned_data
+        super(ISODateValueForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = ISODateValue
+        fields = []
+
+
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
 
@@ -55,6 +85,8 @@ class PersonForm(forms.ModelForm):
 
 class AttributeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
+
     class Meta:
         model = Attribute
 
@@ -63,3 +95,13 @@ class AttributeForm(forms.ModelForm):
             'description',
             'value_freeform',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(AttributeForm, self).__init__(*args, **kwargs)
+        if self.instance.id:
+            self.fields['type_controlled'].widget.attrs['disabled'] = True
+
+    def save(self, *args, **kwargs):
+        if self.instance.id:
+            self.fields['type_controlled'].initial = self.instance.type_controlled
+        super(AttributeForm, self).save(*args, **kwargs)
