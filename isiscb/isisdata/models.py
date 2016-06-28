@@ -3,12 +3,14 @@ from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
+
 
 from markupfield.fields import MarkupField
 
@@ -1770,3 +1772,64 @@ class UserProfile(models.Model):
                                             help_text=help_text("""
     A user can 'claim' an Authority record, asserting that the record refers to
     theirself."""))
+
+# ---------------------- Curation models ----------------------------
+
+class IsisCBRole(models.Model):
+    """
+    Supports permission mechanism for IsisCB
+    """
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+class AccessRule(models.Model):
+    """
+    Parent class for all rules
+    """
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    role = models.ForeignKey(IsisCBRole, null=True, blank=True,
+                                    help_text=help_text("""The role a rules belongs to."""))
+
+    class Meta:
+        abstract = True
+
+class CRUDRule(AccessRule):
+    """
+    This rule defines a CRUD permission on all records, e.g. edit all records.
+    """
+    CRUD_CHOICES = (
+        'create',
+        'view',
+        'update',
+        'delete'
+    )
+    crud_action = models.CharField(max_length=255, null=True, blank=True,
+                                       choices=CRUD_CHOICES)
+
+    OBJECT_TYPES = (
+        'citation',
+        'authority'
+    )
+    object_type = models.CharField(max_length=255, null=True, blank=True,
+                                       choices=OBJECT_TYPES)
+
+class FieldRule(AccessRule):
+    """
+    This rule defines edit access to a specific field.
+    """
+    field_name = models.CharField(max_length=255, null=False, blank=False)
+
+    is_accessible = BooleanField(default=True, help_text=help_text("""
+    Controls whether a user has access to the specified field."""))
+
+class DatasetRule(AccessRule):
+    """
+    This rules limits the records a user has access to to a specific dataset.
+    """
+    dataset = models.CharField(max_length=255, null=False, blank=False)
+
+class IsisCBUser(AbstractBaseUser):
+    """
+    IsisCB user model that has roles to manage curation permission
+    """
+    roles = models.ManyToManyField(IsisCBRole)

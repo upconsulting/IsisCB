@@ -53,7 +53,6 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
-    'guardian',
     'pagination',
 )
 
@@ -80,7 +79,6 @@ AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
