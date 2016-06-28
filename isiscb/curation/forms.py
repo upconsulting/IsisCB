@@ -59,3 +59,31 @@ class RoleForm(forms.ModelForm):
         fields = [
             'name', 'description',
         ]
+
+class DatasetRuleForm(forms.ModelForm):
+    dataset_values = Citation.objects.values_list('dataset').distinct()
+
+    choices = []
+    for value in dataset_values:
+        if value[0]:
+            choices.append((value[0], value[0]))
+
+    dataset = forms.ChoiceField(choices = choices, required=True)
+
+    class Meta:
+        model = DatasetRule
+
+        fields = [
+            'dataset', 'role'
+        ]
+
+class AddRoleForm(forms.Form):
+    roles = IsisCBRole.objects.all()
+
+    choices = []
+    for role in roles:
+        choices.append((role.pk, role.name))
+
+    role = forms.ChoiceField(choices = choices, required=True)
+
+    

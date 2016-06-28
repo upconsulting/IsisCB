@@ -1,0 +1,26 @@
+{% extends "curation/base.html" %}
+
+{% load addcss %}
+
+{% block content %}
+<div class="h3 text-warning">Add Role to User:</div>
+<p>
+Add a role to user.
+</p>
+<form method="POST" class="post-form">{% csrf_token %}
+
+  {% for field in form %}
+  {% if field.name != 'users' %}
+  <div class="form-group">
+      <label>{{ field.label }}</label>
+      {{ field|addcss:"form-control" }}
+      {% for error in field.errors %}
+      <p class="error"><small>{{ error }}</small></p>
+      {% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  <button type="submit" class="btn btn-default">Save</button>
+</form>
+{% endblock %}

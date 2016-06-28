@@ -1805,6 +1805,10 @@ class IsisCBRole(models.Model):
 
     users = models.ManyToManyField(User)
 
+    @property
+    def dataset_rules(self):
+        return DatasetRule.objects.filter(role=self.pk)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1814,6 +1818,14 @@ class AccessRule(models.Model):
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
                                     help_text=help_text("""The role a rules belongs to."""))
 
+    CITATION = 'citation'
+    AUTHORITY = 'authority'
+    OBJECT_TYPES = (
+        (CITATION, 'Citation'),
+        (AUTHORITY, 'Authority'),
+    )
+    object_type = models.CharField(max_length=255, null=True, blank=True,
+                                       choices=OBJECT_TYPES)
     class Meta:
         abstract = True
 
@@ -1833,16 +1845,6 @@ class CRUDRule(AccessRule):
     )
     crud_action = models.CharField(max_length=255, null=True, blank=True,
                                        choices=CRUD_CHOICES)
-
-    CITATION = 'citation'
-    AUTHORITY = 'authority'
-    OBJECT_TYPES = (
-        (CITATION, 'Citation'),
-        (AUTHORITY, 'Authority'),
-    )
-    object_type = models.CharField(max_length=255, null=True, blank=True,
-                                       choices=OBJECT_TYPES)
-
 class FieldRule(AccessRule):
     """
     This rule defines edit access to a specific field.

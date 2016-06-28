@@ -8,7 +8,26 @@
 </p>
 
 <p>
-  <a href="" class="btn btn-sm btn-primary">Limit records by dataset</a>
+  <a href="{% url 'create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary">Limit records by dataset</a>
 </p>
+
+<table class="table table-striped table-responsive table-hover table-curation">
+  <thead>
+    <tr>
+      <th width="20%">Rule Type</th>
+      <th>Rule</th>
+    </tr>
+  </thead>
+  <tbody>
+{% if role.dataset_rules %}
+{% for rule in role.dataset_rules %}
+    <tr>
+      <td>Limited Dataset</td>
+      <td>Dataset = '{{ rule.dataset }}'</td>
+    </tr>
+{% endfor %}
+{% endif %}
+  </tbody>
+</table>
 
 {% endblock %}

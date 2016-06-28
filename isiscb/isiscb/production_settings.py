@@ -55,7 +55,7 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
-    'guardian',
+    'rules',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True

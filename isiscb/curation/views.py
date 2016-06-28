@@ -1,5 +1,7 @@
+from __future__ import absolute_import
+
 from django.template import RequestContext, loader
-from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 
 from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
@@ -7,14 +9,15 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 
+from rules.contrib.views import permission_required, objectgetter
+from .rules import is_accessible_by_dataset
 
 from isisdata.models import *
 from curation.filters import *
 from curation.forms import *
 
 import iso8601
-
-
+import rules
 
 @staff_member_required
 def dashboard(request):
@@ -26,7 +29,8 @@ def dashboard(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+#@staff_member_required
+#@permission_required('isiscb.view_dataset', fn=objectgetter(Citation, 'citation_id'), raise_exception=True)
 def citation(request, citation_id=None):
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -34,6 +38,12 @@ def citation(request, citation_id=None):
     })
     if citation_id:
         citation = get_object_or_404(Citation, pk=citation_id)
+        print rules.rule_exists('is_accessible_by_dataset')
+        # test for dataset
+        if not rules.test_rule('is_accessible_by_dataset', request.user, citation):
+           template = loader.get_template('curation/access_denied.html')
+           return HttpResponse(template.render(context))
+
         template = loader.get_template('curation/citation_change_view.html')
         partdetails_form = None
         context.update({'tab': request.GET.get('tab', None)})
@@ -181,5 +191,66 @@ def role(request, role_id, user_id=None):
         'curation_section': 'users',
         'role': role,
     })
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def add_dataset_rule(request, role_id, user_id=None):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_dataset_rule.html')
+        form = DatasetRuleForm(initial = { 'role': role })
+        context.update({
+            'form': form,
+            'role': role,
+        })
+    elif request.method == 'POST':
+        form = DatasetRuleForm(request.POST)
+
+        if form.is_valid():
+            rule = form.save()
+            rule.role = role
+            rule.save()
+
+            return redirect('role', role_id=role.pk)
+        else:
+            template = loader.get_template('curation/add_dataset_rule.html')
+            context.update({
+                'form': form,
+            })
+
+        return redirect('role', role_id=role.pk)
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def add_role_to_user(request, user_edit_id, user_id=None):
+    user = get_object_or_404(User, pk=user_edit_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_role_to_user.html')
+        form = AddRoleForm(initial = { 'users': user })
+        context.update({
+            'form': form,
+        })
+    elif request.method == 'POST':
+        form = AddRoleForm(request.POST)
+
+        if form.is_valid():
+            role_id = form.cleaned_data['role']
+            role = get_object_or_404(IsisCBRole, pk=role_id)
+            role.users.add(user)
+            role.save()
+
+            return redirect('user_list')
 
     return HttpResponse(template.render(context))

@@ -54,6 +54,7 @@ INSTALLED_APPS = (
     'openurl',
     'curation',
     'pagination',
+    'rules.apps.AutodiscoverRulesConfig',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
