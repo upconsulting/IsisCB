@@ -39,3 +39,14 @@ class AuthorityForm(forms.ModelForm):
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy', 'record_status',
         ]
+
+
+class PersonForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+
+    class Meta:
+        model = Person
+        fields = [
+            'personal_name_last', 'personal_name_first', 'personal_name_suffix',
+            'personal_name_preferred', 
+        ]

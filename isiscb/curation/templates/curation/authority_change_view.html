@@ -37,7 +37,7 @@
 <div class="tab-content">
     <div role="tabpanel" class="tab-pane active" id="fields">
         <div class="row">
-            <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
+            <div class="{% if person_form %}col-sm-6{% else %}col-sm-12{% endif %}">
                 <div class="h4">Authority Details</div>
                 {% for field in form %}
                 {% for error in field.errors %}
@@ -49,6 +49,20 @@
                 </div>
                 {% endfor %}
             </div>
+            {% if person_form %}
+            <div class="col-sm-6">
+                <div class="h4">Person Details</div>
+                {% for field in person_form %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field|addcss:"form-control" }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
 
         </div>
     </div>
