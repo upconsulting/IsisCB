@@ -8,42 +8,11 @@
 {% block content %}
 {% autopaginate objects 40 as filter_list %}
 
-<div class="clearfix">
-    <div class="btn-group pull-right">
-        <button data-toggle="collapse"
-            class="btn btn-primary"
-            data-target="#filters">
-            Show/hide filters
-        </button>
-    </div>
-</div>
-
-<div class="collapse{% if filters_active %} in{% endif %}" id="filters">
-    <form class="form clearfix">
-        {% for field in objects.form %}
-        <div class="form-group clearable">
-            <label>{{ field.label }}</label>
-            {{ field|addcss:"form-control" }}
-        </div>
-        {% endfor %}
-        <div class="btn-group pull-right">
-            <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-            <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-        </div>
-    </form>
-    <script>
-    $(document).ready(function() {
-        $('#clear-filters').on('click', function() {
-            $('.form-group.clearable input').val('');
-            $('.form-group.clearable select').val('');
-        });
-    });
-    </script>
-</div>
-
 
 <div class="row">
-  <a class="btn btn-primary" href="">Create new group</a>
+  <div class="col-md-12">
+    <a class="btn btn-primary" href="{% url "create_role" %}">Create new role</a>
+  </div>
 </div>
 
 <div class="text-center">

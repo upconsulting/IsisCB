@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbid
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.shortcuts import redirect
 
 
 from isisdata.models import *
@@ -153,5 +154,32 @@ def add_role(request, user_id=None):
         context.update({
             'form': form,
         })
+    elif request.method == 'POST':
+        form = RoleForm(request.POST)
+
+        if form.is_valid():
+            role = form.save()
+
+            return redirect('role', role_id=role.pk)
+        else:
+            template = loader.get_template('curation/add_role.html')
+            context.update({
+                'form': form,
+            })
+    else:
+        # for now just redirect to user page in any other case
+        template = loader.get_template('curation/users.html')
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def role(request, role_id, user_id=None):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    template = loader.get_template('curation/role.html')
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
 
     return HttpResponse(template.render(context))

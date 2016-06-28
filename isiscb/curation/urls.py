@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^(?i)users/$', views.users, name='user_list'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
     url(r'^(?i)users/role/$', views.add_role, name='create_role'),
+    url(r'^(?i)users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
 ]

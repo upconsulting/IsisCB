@@ -1800,7 +1800,8 @@ class IsisCBRole(models.Model):
     """
     Supports permission mechanism for IsisCB
     """
-    name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(null=True, blank=True)
 
     users = models.ManyToManyField(User)
 

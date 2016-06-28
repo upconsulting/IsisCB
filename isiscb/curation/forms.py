@@ -52,9 +52,9 @@ class PersonForm(forms.ModelForm):
         ]
 
 class RoleForm(forms.ModelForm):
-    
+
     class Meta:
         model = IsisCBRole
-        field = [
-            'name',
+        fields = [
+            'name', 'description',
         ]
