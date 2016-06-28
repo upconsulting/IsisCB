@@ -70,7 +70,7 @@
     <div role="tabpanel" class="tab-pane" id="attributes">
         <ul class="list-group">
         {% for attribute in instance.attributes.all %}
-            <a class="list-group-item">
+            <a class="list-group-item" href="{% url "update_attribute_for_attribute" instance.id attribute.id%}">
                 <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
                 {{ attribute.value.get_child_class }}
                 <span class="text-warning">{{ attribute.value_freeform}}</span>
@@ -78,6 +78,9 @@
                 <span class="glyphicon glyphicon-chevron-right pull-right"></span>
             </a>
         {% endfor %}
+        <a class="list-group-item text-muted" href="{% url "create_attribute_for_authority" instance.id %}">
+            <span class="glyphicon glyphicon-plus"></span> Create new attribute
+        </a>
         </ul>
     </div>
     <div role="tabpanel" class="tab-pane" id="linkeddata">

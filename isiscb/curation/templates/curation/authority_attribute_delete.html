@@ -5,10 +5,10 @@
 {% block content %}
 <hr />
 
-<div class="h3 text-warning">Editing Attribute for Citation:</div>
-<div class="h2"> {{ instance.title|safe }}</div>
-<div class="h4">{{ instance|get_authors_editors }}</div>
-<div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
+<div class="h3 text-warning">Editing Attribute for Authority:</div>
+<div class="h2"> {{ instance.name|safe }}</div>
+<span class="h5"><ul style="list-style: none;">{{ instance|get_date_attributes }}</ul></span>
+<div class="h4 text-warning">{{ instance.id }}</div>
 
 <div class="container-fluid">
     <div class="h3">Are you sure that you want to delete this attribute?</div>
@@ -23,7 +23,7 @@
 
     <div class="clearfix">
         <div class="button-group pull-right">
-            <a href="{% url "delete_attribute_for_citation" instance.id attribute.id %}?confirm=true" class="btn btn-danger">Delete</a>
+            <a href="{% url "delete_attribute_for_authority" instance.id attribute.id %}?confirm=true" class="btn btn-danger">Delete</a>
         </div>
     </div>
 </div>

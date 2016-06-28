@@ -325,13 +325,19 @@ class ISODateValue(Value):
         return [getattr(self, part) for part in self.PARTS if getattr(self, part) != 0]
 
     def _valuesetter(self, value):
+        # raise AttributeError('grrargh')
+
         try:
             value = ISODateValue.convert(value)
         except ValidationError:
             raise ValueError('Invalid value for ISODateValue: %s' % value.__repr__())
-
-        for i, v in enumerate(value):
-            setattr(self, self.PARTS[i], v)
+        
+        for i, part in enumerate(self.PARTS):
+        # for i, v in enumerate(value):
+            if i >= len(value):
+                setattr(self, part, 0)
+            else:
+                setattr(self, part, value[i])
 
     def __unicode__(self):
         def _coerce(val):
@@ -359,36 +365,43 @@ class ISODateValue(Value):
 
     @staticmethod
     def convert(value):
+
         if type(value) in [tuple, list]:
             value = list(value)
         elif type(value) in [str, unicode]:
+
             pre = u''
             if value.startswith('-'):   # Preserve negative years.
                 value = value[1:]
                 pre = u'-'
             value = value.split('-')
             value[0] = pre + value[0]
+
+        elif type(value) is int:   # We assume that it is just a year.
+            value = [value]
         elif type(value) is datetime.datetime:
             date = value.date()
             value = [date.year, date.month, date.day]
         elif type(value) is datetime.date:
             value = [value.year, value.month, value.day]
-        elif type(value) is int:   # We assume that it is just a year.
-            value = [value]
         else:
             raise ValidationError('Not a valid ISO8601 date')
 
+        if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
+            raise ValidationError('Not a valid ISO8601 date')
+        elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
+            raise ValidationError('Not a valid ISO8601 date')
         for v in value[1:]:
             if type(v) in [str, unicode] and len(v) != 2:
                 raise ValidationError('Not a valid ISO8601 date')
         try:
+
             return [int(v) for v in value if v]
         except NameError:
             raise ValidationError('Not a valid ISO8601 date')
 
     class Meta:
         verbose_name = 'isodate'
-
 
 
 class DateValue(Value):
