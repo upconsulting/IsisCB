@@ -3,7 +3,7 @@
 {% load addcss %}
 {% load pagination_tags %}
 {% load render_object %}
-{% load permissions %}
+{% load permission_tags %}
 
 
 {% block content %}
@@ -25,7 +25,6 @@
       <thead>
         <tr>
           <th>Username</th>
-          <th>Name</th>
           <th>Email</th>
           <th>Roles</th>
           <th></th>
@@ -38,9 +37,6 @@
             {{ user.username }}
           </td>
           <td>
-            {{ user.first_name }} {{ user.last_name }}
-          </td>
-          <td>
             {{ user.email }}
           </td>
           <td>
@@ -49,7 +45,8 @@
             {% endfor %}
           </td>
           <td>
-            <a href="{% url 'add_role_to_user' user.pk %}">Role</a>
+            <a href="{% url 'add_role_to_user' user.pk %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
+            <a href="{% url 'user' user.pk %}"><i class="fa fa-cog" aria-hidden="true"></i> User Profile</a>
           </td>
         </tr>
         {% endfor %}

@@ -149,6 +149,18 @@ def users(request, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+def user(request, user_id):
+    selected_user = get_object_or_404(User, pk=user_id)
+
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'selected_user': selected_user,
+    })
+    template = loader.get_template('curation/user.html')
+    return HttpResponse(template.render(context))
+
+@staff_member_required
 def add_role(request, user_id=None):
     context = RequestContext(request, {
         'curation_section': 'users',
@@ -177,6 +189,15 @@ def add_role(request, user_id=None):
         template = loader.get_template('curation/users.html')
 
     return HttpResponse(template.render(context))
+
+@staff_member_required
+def remove_role(request, user_id, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+    user = get_object_or_404(User, pk=user_id)
+
+    role.users.remove(user)
+
+    return redirect('user', user_id=user.pk)
 
 @staff_member_required
 def role(request, role_id, user_id=None):
@@ -339,6 +360,9 @@ def add_role_to_user(request, user_edit_id, user_id=None):
             role = get_object_or_404(IsisCBRole, pk=role_id)
             role.users.add(user)
             role.save()
+
+            if request.GET.get('from_user', False):
+                return redirect('user', user.pk)
 
             return redirect('user_list')
 
