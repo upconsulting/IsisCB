@@ -13,19 +13,23 @@
             <input type="submit" value="Save" class="btn btn-success" />
         </div>
     </div>
-    <div class="h2"> {{ instance.title|safe }}</div>
+    <div class="h2">
+        <a href="{% url "curate_citation" instance.id %}?tab=acrelations" style="text-decoration:none;">
+            <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.title|safe }}
+        </a>
+     </div>
     <div class="h4">{{ instance|get_authors_editors }}</div>
     <div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
 
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                {% for error in form.name.errors %}
+                {% for error in form.name_for_display_in_citation.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.name.label }}</label>
-                    {{ form.name|addcss:"form-control" }}
+                    <label>{{ form.name_for_display_in_citation.label }}</label>
+                    {{ form.name_for_display_in_citation|addcss:"form-control" }}
                 </div>
 
                 {% for error in form.type_controlled.errors %}
@@ -42,14 +46,6 @@
                 <div class="form-group">
                     <label>{{ form.type_broad_controlled.label }}</label>
                     {{ form.type_broad_controlled|addcss:"form-control" }}
-                </div>
-
-                {% for error in form.name_for_display_in_citation.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.name_for_display_in_citation.label }}</label>
-                    {{ form.name_for_display_in_citation|addcss:"form-control" }}
                 </div>
 
                 <div class="row">

@@ -426,6 +426,7 @@ class FMPDSOParser(object):
         if not fm_value:
             return []
 
+        fm_field = fm_field.replace('Modiefied', 'Modified')
         model_field = self.fields[model_name].get(fm_field, False)
         if model_field is None:
             return []

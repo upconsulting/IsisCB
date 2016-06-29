@@ -1,0 +1,185 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+<hr />
+
+<form class="form" action="." method="POST">
+    {% csrf_token %}
+
+    <div class="h3 text-warning">Editing Citation-Citation Relation for Citation:
+        <div class="button-group pull-right">
+            <input type="submit" value="Save" class="btn btn-success" />
+        </div>
+    </div>
+    <div class="h2">
+        <a href="{% url "curate_citation" instance.id %}?tab=acrelations" style="text-decoration:none;">
+            <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.title|safe }}
+        </a>
+    </div>
+    <div class="h4">{{ instance|get_authors_editors }}</div>
+    <div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                {% for error in form.type_controlled.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.type_controlled.label }}</label>
+                    {{ form.type_controlled|addcss:"form-control" }}
+                </div>
+
+                {% for error in form.description.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.description.label }}</label>
+                    {{ form.description|addcss:"form-control" }}
+                </div>
+
+                {% for error in form.data_display_order.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.data_display_order.label }}</label>
+                    {{ form.data_display_order|addcss:"form-control" }}
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-xs-6">
+                        {% for error in form.record_status_value.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.record_status_value.label }}</label>
+                            {{ form.record_status_value|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        {% for error in form.record_status_explanation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.record_status_explanation.label }}</label>
+                            {{ form.record_status_explanation|addcss:"form-control" }}
+                        </div>
+                    </div>
+                </div>
+                {{ form.subject }}
+                {{ form.object }}
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text"
+                        id="citation-search-subject"
+                        class="form-control citation-search"
+                        name="citation-search"
+                        results-target="#subject-results-container"
+                        selected-result-target="#id_ccrelation-subject"
+                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}/>
+                </div>
+                <ul class="list-group" id="subject-results-container"></ul>
+
+
+                <div class="text-center">
+                    <div class="button-group">
+                        <span class="btn btn-lg glyphicon glyphicon-refresh"
+                            id="swap-subject-object"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Object</label>
+                    <input type="text"
+                        id="citation-search-object"
+                        class="form-control citation-search"
+                        name="citation-search"
+                        results-target="#object-results-container"
+                        selected-result-target="#id_ccrelation-object" />
+                </div>
+                <ul class="list-group" id="object-results-container"></ul>
+            </div>
+        </div>
+        <div class="clearfix">
+            <div class="button-group pull-right">
+                <input type="submit" value="Save" class="btn btn-success" />
+                {% if acrelation %}<a class="btn btn-danger">Delete</a>{% endif %}
+            </div>
+        </div>
+    </div>
+
+</form>
+
+
+<script>
+$('#id_language').multiSelect()
+</script>
+
+<script>
+
+$(document).ready(function() {
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subect.title }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object.title }}{% endif %}";
+    if (subject_name.length > 0) {
+        $('#citation-search-subject').val(subject_name);
+        $('#citation-search-subject').attr('disabled', true);
+    }
+
+    if (object_name.length > 0) {
+        $('#citation-search-object').val(object_name);
+        $('#citation-search-object').attr('disabled', true);
+    }
+
+    $('#swap-subject-object').click(function() {
+        var subject_name = $('#citation-search-subject').val();
+        var object_name = $('#citation-search-object').val();
+        var subject_id = $('#id_ccrelation-subject').val();
+        var object_id = $('#id_ccrelation-object').val();
+
+        $('#citation-search-subject').val(object_name);
+        $('#citation-search-object').val(subject_name);
+        $('#id_ccrelation-subject').val(object_id);
+        $('#id_ccrelation-object').val(subject_id);
+
+        $('.citation-search').each(function(i, elem) {
+            $($(elem).attr('results-target')).empty();
+        });
+    });
+
+
+    $('.citation-search').on('keyup', function(e) {
+        var search_input = $(this);
+        var query = search_input.val();
+        console.log('query', query);
+        var results_container = $($(this).attr('results-target'));
+        console.log('results_container', results_container);
+        var id_result_container = $($(this).attr('selected-result-target'));
+
+        $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+            success: function(result) {
+                console.log('success', results_container);
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    results_container.append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.title + '"><span class="label label-primary">' + r.type + '</span> ' + r.title + ' (' + r.id + ') | <span class="text-muted">' + r.description + '</span></a>');
+                });
+
+                $('.search-result').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    results_container.empty();
+                    search_input.val(selected_name);
+                    id_result_container.val(selected_id);
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
