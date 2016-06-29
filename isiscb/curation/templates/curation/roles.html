@@ -1,0 +1,43 @@
+{% extends "curation/base.html" %}
+
+{% load rules %}
+
+{% block content %}
+
+
+<div class="h3 text-warning">Existing Roles</div>
+
+<p class="text-muted">
+  Below is a list of all the roles that exist in the system. You can create as many roles as you like. Each role consists of a set of rules that define what a user can do in the curation inteface. Roles do not have any effect on the public IsisCB page. They purely govern what users are allowed to do and see in the curation interface.
+</p>
+
+<p class="text-muted">
+  To grant a user access to the curation interface in general, go to their profile page by clicking on their username. Access to the curation inteface is not regulated through roles.
+</p>
+
+<div class="row" style="margin-top: 35px;">
+  <div class="col-md-12 text-right">
+    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create new role</a>
+  </div>
+</div>
+
+<table class="table table-striped table-responsive table-hover table-curation">
+<thead>
+  <tr>
+    <th width="30%">Role Name</th>
+    <th>Description</th>
+    <th width="30%">Assigned to</th>
+  </tr>
+</thead>
+<tbody>
+{% for role in roles %}
+  <tr>
+    <td><a href="{% url 'role' role.pk %}">{{ role.name }}</a></td>
+    <td>{{ role.description }}</td>
+    <td>{% for user in role.users.all %}<a href="{% url 'user' user.pk %}">{{ user.username }}</a>, {% endfor %}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

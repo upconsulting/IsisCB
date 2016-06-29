@@ -409,15 +409,14 @@ def add_role(request, user_id=None):
         if form.is_valid():
             role = form.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('roles')
         else:
             template = loader.get_template('curation/add_role.html')
             context.update({
                 'form': form,
             })
     else:
-        # for now just redirect to user page in any other case
-        template = loader.get_template('curation/users.html')
+        return redirect('roles')
 
     return HttpResponse(template.render(context))
 
@@ -440,6 +439,19 @@ def role(request, role_id, user_id=None):
     context = RequestContext(request, {
         'curation_section': 'users',
         'role': role,
+    })
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+@check_rules('can_view_user_module')
+def roles(request):
+    roles = IsisCBRole.objects.all()
+
+    template = loader.get_template('curation/roles.html')
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'roles': roles,
     })
 
     return HttpResponse(template.render(context))
