@@ -70,12 +70,15 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
+    dataset = forms.ChoiceField(choices=[(d, d) for d in Citation.objects.order_by().values_list('dataset', flat=True).distinct()])
+
     class Meta:
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'language', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
+              'dataset',
         ]
 
 
