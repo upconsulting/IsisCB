@@ -11,8 +11,13 @@ rules.add_rule('can_view_record', can_view_record)
 rules.add_rule('can_edit_record', can_edit_record)
 rules.add_rule('can_create_record', can_create_record)
 rules.add_rule('can_delete_record', can_delete_record)
-rules.add_rule('can_view_citation_field', can_view_citation_field)
-rules.add_rule('can_update_citation_field', can_update_citation_field)
+
+rules.add_rule('can_view_citation_field', can_view_citation_field & can_view_citation_record_using_id)
+rules.add_rule('can_update_citation_field', can_update_citation_field & can_edit_citation_record_using_id)
+
+rules.add_rule('can_view_authority_field', can_view_authority_field & can_view_authority_record_using_id)
+rules.add_rule('can_update_authority_field', can_update_authority_field & can_edit_authority_record_using_id)
+
 rules.add_rule('is_user_staff', is_user_staff)
 rules.add_rule('is_user_superuser', is_user_superuser)
 rules.add_rule('can_view_user_module', can_view_user_module)

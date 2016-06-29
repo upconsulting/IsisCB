@@ -31,8 +31,6 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
-#@staff_member_required
-#@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 @staff_member_required
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -243,6 +241,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
 
 @staff_member_required
+#@check_rules('can_edit_record', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id=None):
     context = RequestContext(request, {
         'curation_section': 'datasets',

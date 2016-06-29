@@ -11,10 +11,21 @@
 {% autopaginate objects 40 as filter_list %}
 
 {% test_rule 'can_update_user_module' user as update_module %}
+
+<div class="h3 text-warning">Registered Users</div>
+
+<p class="text-muted">
+  Below you find a list of all registered users. If you have user administration permissions, you can add roles to a user. Roles define what a user is allowed to do in the curation interface. You can for example restrict what records a user can see depending on the dataset value of a record, or you can give users only view or update but no delete or create permissions.
+</p>
+
+<p class="text-muted">
+  We recommend that you define small and limited roles over large, capture-it-all roles. Rather than trying to create one role that gives a user all the access they need, try to create smaller roles and then assign a user multiple roles. For example, if you want user 'Mickey Mouse' to be able to modify all records in dataset 'Awesome Dataset', but only see all other records, then  define one role for editing dataset 'Awesome Dataset', and one role for viewing all records. Then give user 'Mickey Mouse' both roles. This way you can reuse roles for other users that should only be able to do one of these things and it's easier to understand what a user can do by looking a the list of roles they have.
+</p>
+
 {% if update_module %}
-<div class="row">
+<div class="row" style="margin-top: 35px;">
   <div class="col-md-12">
-    <a class="btn btn-primary" href="{% url "create_role" %}">Create new role</a>
+    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}">Create new role</a>
   </div>
 </div>
 {% endif %}
