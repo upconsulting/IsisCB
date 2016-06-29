@@ -104,6 +104,79 @@ class PersonForm(forms.ModelForm):
             'personal_name_preferred',
         ]
 
+class RoleForm(forms.ModelForm):
+
+    class Meta:
+        model = IsisCBRole
+        fields = [
+            'name', 'description',
+        ]
+
+class DatasetRuleForm(forms.ModelForm):
+    dataset_values = Citation.objects.values_list('dataset').distinct()
+
+    choices = []
+    for value in dataset_values:
+        if value[0]:
+            choices.append((value[0], value[0]))
+
+    dataset = forms.ChoiceField(choices = choices, required=True)
+
+    class Meta:
+        model = DatasetRule
+
+        fields = [
+            'dataset', 'role'
+        ]
+
+class AddRoleForm(forms.Form):
+    roles = IsisCBRole.objects.all()
+
+    choices = []
+    for role in roles:
+        choices.append((role.pk, role.name))
+
+    role = forms.ChoiceField(choices = choices, required=True)
+
+class CRUDRuleForm(forms.ModelForm):
+
+    class Meta:
+        model = CRUDRule
+        fields = [
+            'crud_action'
+        ]
+
+class FieldRuleCitationForm(forms.ModelForm):
+
+    all_citation_fields = Citation._meta.get_fields()
+
+    choices = []
+    for field in all_citation_fields:
+        choices.append((field.name, field.name))
+
+
+    field_name = forms.ChoiceField(choices = choices, required = True)
+
+    class Meta:
+        model = FieldRule
+        fields = [
+            'field_action', 'field_name',
+        ]
+
+class FieldRuleAuthorityForm(forms.ModelForm):
+    all_authority_fields = Authority._meta.get_fields()
+
+    authority_choices = []
+    for field in all_authority_fields:
+        authority_choices.append((field.name, field.name))
+
+    field_name = forms.ChoiceField(choices = authority_choices, required = True)
+
+    class Meta:
+        model = FieldRule
+        fields = [
+            'field_action', 'field_name',
+        ]
 
 class AttributeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
