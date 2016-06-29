@@ -1854,6 +1854,10 @@ class IsisCBRole(models.Model):
     def field_rules(self):
         return FieldRule.objects.filter(role=self.pk)
 
+    @property
+    def user_module_rules(self):
+        return UserModuleRule.objects.filter(role=self.pk)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1908,3 +1912,16 @@ class DatasetRule(AccessRule):
     This rules limits the records a user has access to to a specific dataset.
     """
     dataset = models.CharField(max_length=255, null=False, blank=False)
+
+class UserModuleRule(AccessRule):
+    """
+    This rule allows a user access to the user management module.
+    """
+
+    VIEW = 'view'
+    UPDATE = 'update'
+    FIELD_CHOICES = (
+        (VIEW, 'View'),
+        (UPDATE, 'Update'),
+    )
+    module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)

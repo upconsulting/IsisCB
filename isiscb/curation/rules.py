@@ -11,6 +11,10 @@ def is_accessible_by_dataset(user, object):
     Checks if the user has a role that has a dataset rule that allows
     the user to see the current object.
     """
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
     roles = IsisCBRole.objects.filter(users__pk=user.pk)
     has_dataset_rules = False
     for role in roles:
@@ -36,6 +40,10 @@ def can_update_citation_field(user, object):
 
 
 def is_field_action_allowed(user, object, action, object_type):
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
     roles = IsisCBRole.objects.filter(users__pk=user.pk)
     has_rules = False
     for role in roles:
@@ -64,6 +72,10 @@ def can_delete_record(user, object):
     return is_action_allowed(user, object, CRUDRule.DELETE)
 
 def is_action_allowed(user, object, action):
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
     roles = IsisCBRole.objects.filter(users__pk=user.pk)
     for role in roles:
         rules = role.crud_rules
@@ -71,3 +83,32 @@ def is_action_allowed(user, object, action):
             if rule.crud_action == action:
                 return True
     return False
+
+@predicate
+def can_view_user_module(user):
+    return is_user_module_action_allowed(user, UserModuleRule.VIEW)
+
+@predicate
+def can_update_user_module(user):
+    return is_user_module_action_allowed(user, UserModuleRule.UPDATE)
+
+def is_user_module_action_allowed(user, action):
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
+    roles = IsisCBRole.objects.filter(users__pk=user.pk)
+    for role in roles:
+        rules = role.user_module_rules
+        for rule in rules:
+            if rule.module_action == action:
+                return True
+    return False
+
+@predicate
+def is_user_staff(user, object):
+    return user.is_staff
+
+@predicate
+def is_user_superuser(user, object):
+    return user.is_superuser

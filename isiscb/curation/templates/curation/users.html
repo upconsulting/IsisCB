@@ -4,17 +4,20 @@
 {% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
+{% load rules %}
 
 
 {% block content %}
 {% autopaginate objects 40 as filter_list %}
 
-
+{% test_rule 'can_update_user_module' user as update_module %}
+{% if update_module %}
 <div class="row">
   <div class="col-md-12">
     <a class="btn btn-primary" href="{% url "create_role" %}">Create new role</a>
   </div>
 </div>
+{% endif %}
 
 <div class="text-center">
     {% paginate %}
@@ -25,6 +28,7 @@
       <thead>
         <tr>
           <th>Username</th>
+          <th></th>
           <th>Email</th>
           <th>Roles</th>
           <th></th>
@@ -34,7 +38,11 @@
         {% for user in filter_list %}
         <tr>
           <td>
-            {{ user.username }}
+            <a href="{% url 'user' user.pk %}">{{ user.username }}</a>
+          </td>
+          <td>
+            {% if user.is_superuser %}<span class="label label-danger">Administrator</span> {% endif %}
+            {% if user.is_staff %}<span class="label label-warning">Curation Access</span>{% endif %}
           </td>
           <td>
             {{ user.email }}
@@ -45,8 +53,10 @@
             {% endfor %}
           </td>
           <td>
+            {% if update_module %}
             <a href="{% url 'add_role_to_user' user.pk %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
             <a href="{% url 'user' user.pk %}"><i class="fa fa-cog" aria-hidden="true"></i> User Profile</a>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}
