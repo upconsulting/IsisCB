@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 {% load render_object %}
+{% load rules %}
 
 {% block content %}
 <hr />
@@ -41,6 +42,10 @@
             <div class="{% if partdetails_form %}col-sm-6{% else %}col-sm-12{% endif %}">
                 <div class="h4">Citation Details</div>
                 {% for field in form %}
+                {% test_rule 'can_update_citation_field' user field.name as can_update %}
+                {% if can_update %}
+                Can update
+                {% endif %}
                 {% for error in field.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}

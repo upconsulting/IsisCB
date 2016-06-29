@@ -86,4 +86,42 @@ class AddRoleForm(forms.Form):
 
     role = forms.ChoiceField(choices = choices, required=True)
 
-    
+class CRUDRuleForm(forms.ModelForm):
+
+    class Meta:
+        model = CRUDRule
+        fields = [
+            'crud_action'
+        ]
+
+class FieldRuleCitationForm(forms.ModelForm):
+
+    all_citation_fields = Citation._meta.get_fields()
+
+    choices = []
+    for field in all_citation_fields:
+        choices.append((field.name, field.name))
+
+
+    field_name = forms.ChoiceField(choices = choices, required = True)
+
+    class Meta:
+        model = FieldRule
+        fields = [
+            'field_action', 'field_name',
+        ]
+
+class FieldRuleAuthorityForm(forms.ModelForm):
+    all_authority_fields = Authority._meta.get_fields()
+
+    authority_choices = []
+    for field in all_authority_fields:
+        authority_choices.append((field.name, field.name))
+
+    field_name = forms.ChoiceField(choices = authority_choices, required = True)
+
+    class Meta:
+        model = FieldRule
+        fields = [
+            'field_action', 'field_name',
+        ]

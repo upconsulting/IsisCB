@@ -9,6 +9,9 @@
 
 <p>
   <a href="{% url 'create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary">Limit records by dataset</a>
+  <a href="{% url 'create_rule_crud' role.pk %}" class="btn btn-sm btn-primary">Add allowed actions</a>
+  <a href="{% url 'create_rule_citation_field' role.pk 'citation' %}" class="btn btn-sm btn-primary">Add citation field access</a>
+  <a href="{% url 'create_rule_citation_field' role.pk 'authority'%}" class="btn btn-sm btn-primary">Add authority field access</a>
 </p>
 
 <table class="table table-striped table-responsive table-hover table-curation">
@@ -16,6 +19,7 @@
     <tr>
       <th width="20%">Rule Type</th>
       <th>Rule</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -24,9 +28,31 @@
     <tr>
       <td>Limited Dataset</td>
       <td>Dataset = '{{ rule.dataset }}'</td>
+      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
     </tr>
 {% endfor %}
 {% endif %}
+
+{% if role.crud_rules %}
+{% for rule in role.crud_rules %}
+    <tr>
+      <td>Permitted Action</td>
+      <td>Action = '{{ rule.crud_action }}'</td>
+      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
+    </tr>
+{% endfor %}
+{% endif %}
+
+{% if role.field_rules %}
+{% for rule in role.field_rules %}
+    <tr>
+      <td>Field Access</td>
+      <td><span class="label label-info">{{ rule.get_object_type_display }}</span> {{ rule.get_field_action_display }} field '{{ rule.field_name }}'</td>
+      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
+    </tr>
+{% endfor %}
+{% endif %}
+
   </tbody>
 </table>
 

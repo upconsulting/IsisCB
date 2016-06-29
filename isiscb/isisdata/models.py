@@ -1809,6 +1809,14 @@ class IsisCBRole(models.Model):
     def dataset_rules(self):
         return DatasetRule.objects.filter(role=self.pk)
 
+    @property
+    def crud_rules(self):
+        return CRUDRule.objects.filter(role=self.pk)
+
+    @property
+    def field_rules(self):
+        return FieldRule.objects.filter(role=self.pk)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1826,8 +1834,7 @@ class AccessRule(models.Model):
     )
     object_type = models.CharField(max_length=255, null=True, blank=True,
                                        choices=OBJECT_TYPES)
-    class Meta:
-        abstract = True
+
 
 class CRUDRule(AccessRule):
     """
@@ -1843,7 +1850,7 @@ class CRUDRule(AccessRule):
         (UPDATE, 'Update'),
         (DELETE, 'Delete'),
     )
-    crud_action = models.CharField(max_length=255, null=True, blank=True,
+    crud_action = models.CharField(max_length=255, null=False, blank=False,
                                        choices=CRUD_CHOICES)
 class FieldRule(AccessRule):
     """
@@ -1851,8 +1858,13 @@ class FieldRule(AccessRule):
     """
     field_name = models.CharField(max_length=255, null=False, blank=False)
 
-    is_accessible = models.BooleanField(default=True, help_text=help_text("""
-    Controls whether a user has access to the specified field."""))
+    CANNOT_VIEW = 'cannot_view'
+    CANNOT_UPDATE = 'cannot_update'
+    FIELD_CHOICES = (
+        (CANNOT_VIEW, 'Cannot View'),
+        (CANNOT_UPDATE, 'Cannot Update'),
+    )
+    field_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
 
 class DatasetRule(AccessRule):
     """

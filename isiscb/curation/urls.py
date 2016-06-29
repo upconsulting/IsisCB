@@ -4,11 +4,23 @@ from django.conf.urls import include, url
 
 from curation import views
 import rules
-from .rules import is_accessible_by_dataset
+from .rules import *
 
 rules.add_rule('is_accessible_by_dataset',is_accessible_by_dataset)
+rules.add_rule('can_view_record', can_view_record)
+rules.add_rule('can_edit_record', can_edit_record)
+rules.add_rule('can_create_record', can_create_record)
+rules.add_rule('can_delete_record', can_delete_record)
+rules.add_rule('can_view_citation_field', can_view_citation_field)
+rules.add_rule('can_update_citation_field', can_update_citation_field)
 
-rules.add_perm('isiscb.view_dataset', is_accessible_by_dataset)
+can_access_and_view = is_accessible_by_dataset & can_view_record
+rules.add_rule('can_access_and_view', can_access_and_view)
+
+can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
+rules.add_rule('can_access_view_edit', can_access_view_edit)
+
+rules.add_perm('curation.change_record', can_edit_record)
 
 urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
@@ -21,4 +33,7 @@ urlpatterns = [
     url(r'^(?i)users/role/$', views.add_role, name='create_role'),
     url(r'^(?i)users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
     url(r'^(?i)users/rule/dataset/(?P<role_id>[0-9]+)/$', views.add_dataset_rule, name='create_rule_dataset'),
+    url(r'^(?i)users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),
+    url(r'^(?i)users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', views.add_field_rule, name='create_rule_citation_field'),
+    url(r'^(?i)users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', views.remove_rule, name='remove_rule'),
 ]

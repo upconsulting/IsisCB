@@ -15,6 +15,7 @@ from .rules import is_accessible_by_dataset
 from isisdata.models import *
 from curation.filters import *
 from curation.forms import *
+from curation.contrib.views import check_rules
 
 import iso8601
 import rules
@@ -30,7 +31,7 @@ def dashboard(request):
 
 
 #@staff_member_required
-#@permission_required('isiscb.view_dataset', fn=objectgetter(Citation, 'citation_id'), raise_exception=True)
+#@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id=None):
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -38,11 +39,6 @@ def citation(request, citation_id=None):
     })
     if citation_id:
         citation = get_object_or_404(Citation, pk=citation_id)
-        print rules.rule_exists('is_accessible_by_dataset')
-        # test for dataset
-        if not rules.test_rule('is_accessible_by_dataset', request.user, citation):
-           template = loader.get_template('curation/access_denied.html')
-           return HttpResponse(template.render(context))
 
         template = loader.get_template('curation/citation_change_view.html')
         partdetails_form = None
@@ -200,14 +196,16 @@ def add_dataset_rule(request, role_id, user_id=None):
 
     context = RequestContext(request, {
         'curation_section': 'users',
+        'role': role,
     })
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_dataset_rule.html')
+        template = loader.get_template('curation/add_rule.html')
         form = DatasetRuleForm(initial = { 'role': role })
+        header_template = loader.get_template('curation/rule_dataset_header.html').render(context)
         context.update({
             'form': form,
-            'role': role,
+            'header': header_template
         })
     elif request.method == 'POST':
         form = DatasetRuleForm(request.POST)
@@ -219,9 +217,100 @@ def add_dataset_rule(request, role_id, user_id=None):
 
             return redirect('role', role_id=role.pk)
         else:
-            template = loader.get_template('curation/add_dataset_rule.html')
+            template = loader.get_template('curation/add_rule.html')
+            header_template = loader.get_template('curation/rule_dataset_header.html').render(context)
+
             context.update({
                 'form': form,
+                'header': header_template,
+            })
+
+        return redirect('role', role_id=role.pk)
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def add_crud_rule(request, role_id, user_id=None):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_rule.html')
+        header_template = loader.get_template('curation/rule_crud_header.html').render(context)
+
+        form = CRUDRuleForm(initial = { 'role': role })
+        context.update({
+            'form': form,
+            'header': header_template,
+        })
+    elif request.method == 'POST':
+        form = CRUDRuleForm(request.POST)
+
+        if form.is_valid():
+            rule = form.save()
+            rule.role = role
+            rule.save()
+
+            return redirect('role', role_id=role.pk)
+        else:
+            template = loader.get_template('curation/add_rule.html')
+            header_template = loader.get_template('curation/rule_crud_header.html').render(context)
+
+            context.update({
+                'form': form,
+                'header_template': header_template,
+            })
+
+        return redirect('role', role_id=role.pk)
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATION):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_rule.html')
+        if object_type == AccessRule.CITATION:
+            form = FieldRuleCitationForm(initial = { 'role': role, 'object_type': object_type})
+        else:
+            form = FieldRuleAuthorityForm(initial = { 'role': role, 'object_type': object_type})
+
+        header_template = loader.get_template('curation/rule_field_citation_header.html').render(context)
+        context.update({
+            'form': form,
+            'header': header_template
+        })
+    elif request.method == 'POST':
+        if object_type == AccessRule.CITATION:
+            form = FieldRuleCitationForm(request.POST)
+        else:
+            form = FieldRuleAuthorityForm(request.POST)
+
+
+        if form.is_valid():
+            rule = form.save()
+            rule.object_type = object_type
+            rule.role = role
+            rule.save()
+
+            return redirect('role', role_id=role.pk)
+        else:
+            template = loader.get_template('curation/add_rule.html')
+            header_template = loader.get_template('curation/rule_field_citation_header.html').render(context)
+
+            context.update({
+                'form': form,
+                'header': header_template,
             })
 
         return redirect('role', role_id=role.pk)
@@ -254,3 +343,12 @@ def add_role_to_user(request, user_edit_id, user_id=None):
             return redirect('user_list')
 
     return HttpResponse(template.render(context))
+
+@staff_member_required
+def remove_rule(request, role_id, rule_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+    rule = get_object_or_404(AccessRule, pk=rule_id)
+
+    rule.delete()
+
+    return redirect('role', role_id=role.pk)
