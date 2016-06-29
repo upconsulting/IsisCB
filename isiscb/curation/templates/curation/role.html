@@ -1,18 +1,65 @@
 {% extends "curation/base.html" %}
 
+{% load rules %}
+{% load permission_tags %}
+
 {% block content %}
+
+{% test_rule 'can_update_user_module' user as update_module %}
+
 <div class="h3 text-warning">Role: {{ role.name }}</div>
 
 <p>
   {{ role.description }}
 </p>
 
-<p>
-  <a href="{% url 'create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary">Limit records by dataset</a>
-  <a href="{% url 'create_rule_crud' role.pk %}" class="btn btn-sm btn-primary">Add allowed actions</a>
-  <a href="{% url 'create_rule_citation_field' role.pk 'citation' %}" class="btn btn-sm btn-primary">Add citation field access</a>
-  <a href="{% url 'create_rule_citation_field' role.pk 'authority'%}" class="btn btn-sm btn-primary">Add authority field access</a>
+<p class="text-muted">
+  The following table shows the rules of this role.
 </p>
+<p class="text-muted">
+  <strong>Dataset rules</strong> limit what records a user can see. If you add a dataset rule, then the user can only see records for which <code>dataset = 'dataset in rule'</code> is true. You can add multiple dataset rules.
+</p>
+<p class="text-muted">
+  You can restrict the actions a user can perform on records by <strong>adding allowed actions</strong>. You can allow users to view, update, create, or delete records. Make sure to give a user 'view' permissions when allowing them to update, create, or delete records.
+</p>
+
+<p class="text-muted">
+  To restrict a users access to a specific field, add a <strong>field access rule</strong>. You prohibit that a user can update or even see a specific field.
+</p>
+
+<p class="text-muted">
+  If you want a user to be able to have access to the user module, add a <strong>user module access rule</strong>. You can allow users to have either reading access (a user can see all registered users and their permissions but not change them), or update access, which allows them to modify users and their roles. Note that only administrators can grant administrator controls to the system.
+</p>
+
+{% if update_module %}
+<p style="margin-top: 35px;">
+  <div class="btn-group">
+    <a href="{% url 'create_rule_dataset' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-files-o" aria-hidden="true"></i> Limit records by dataset</a>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'create_rule_crud' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-eye" aria-hidden="true"></i> Add allowed actions</a>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      <i class="fa fa-bars" aria-hidden="true"></i> Add Field Access Rule
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li><a href="{% url 'create_rule_citation_field' role.pk 'citation' %}">Citation</a></li>
+      <li><a href="{% url 'create_rule_citation_field' role.pk 'authority'%}">Authority</a></li>
+    </ul>
+  </div>
+  <div class="btn-group">
+    <a href="{% url 'create_user_module_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-users" aria-hidden="true"></i> Add access to user module</a>
+  </div>
+</p>
+{% endif %}
+
+{% if role.crud_rules|needs_view_rule %}
+<div class="alert alert-warning" role="alert">
+It seems like you've granted update, create, or delete access to records but no view permissions. Currently users with this role will not be able to update, create, or delete records because they won't be able to see them.
+</div>
+{% endif %}
 
 <table class="table table-striped table-responsive table-hover table-curation">
   <thead>
@@ -27,8 +74,8 @@
 {% for rule in role.dataset_rules %}
     <tr>
       <td>Limited Dataset</td>
-      <td>Dataset = '{{ rule.dataset }}'</td>
-      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
+      <td>User has access to records with dataset '{{ rule.dataset }}'.</td>
+      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
@@ -37,8 +84,8 @@
 {% for rule in role.crud_rules %}
     <tr>
       <td>Permitted Action</td>
-      <td>Action = '{{ rule.crud_action }}'</td>
-      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
+      <td>User can <span class="label label-warning">{{ rule.crud_action }}</span> records.</td>
+      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
@@ -46,14 +93,47 @@
 {% if role.field_rules %}
 {% for rule in role.field_rules %}
     <tr>
-      <td>Field Access</td>
-      <td><span class="label label-info">{{ rule.get_object_type_display }}</span> {{ rule.get_field_action_display }} field '{{ rule.field_name }}'</td>
-      <td><a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a></td>
+      <td>Field Access <span class="label label-info">{{ rule.get_object_type_display }}</span></td>
+      <td>User <span class="label label-warning">{{ rule.get_field_action_display }}</span> field '{{ rule.field_name }}'.</td>
+      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
+    </tr>
+{% endfor %}
+{% endif %}
+
+{% if role.user_module_rules %}
+{% for rule in role.user_module_rules %}
+    <tr>
+      <td>User Module Access</td>
+      <td>User can <span class="label label-warning">{{ rule.get_module_action_display }}</span> user module.</td>
+      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
 
   </tbody>
+</table>
+<hr>
+<h4>This role is assigend to the following users:</h4>
+
+<table class="table table-striped table-responsive table-hover table-curation">
+<thead>
+  <tr>
+    <th>Username</th>
+    <th>Roles</th>
+  </tr>
+</thead>
+<tbody>
+  {% for user in role.users.all %}
+  <tr>
+    <td>{{ user.username }}</td>
+    <td>
+      {% for role in user.pk|roles %}
+        <a href="{% url 'role' role.pk %}">{{ role.name }}</a>,
+      {% endfor %}
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
 </table>
 
 {% endblock %}

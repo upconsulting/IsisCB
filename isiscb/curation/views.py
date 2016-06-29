@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
+from django.contrib import messages
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
@@ -273,6 +274,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
 
 @staff_member_required
+#@check_rules('can_edit_record', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id=None):
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -372,6 +374,23 @@ def authority(request, authority_id=None):
         })
     return HttpResponse(template.render(context))
 
+@staff_member_required
+def quick_and_dirty_authority_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+
+    queryset = Authority.objects.all()
+    for part in q.split():
+        queryset = queryset.filter(name__icontains=part)
+    results = [{
+        'id': obj.id,
+        'type': obj.get_type_controlled_display(),
+        'name': obj.name,
+        'description': obj.description,
+        'url': obj.get_absolute_url(),
+    } for obj in queryset[:20]]
+    return JsonResponse({'results': results})
 
 @staff_member_required
 def dataset(request, dataset_id=None):
@@ -379,6 +398,7 @@ def dataset(request, dataset_id=None):
 
 
 @staff_member_required
+@check_rules('can_view_user_module')
 def users(request, user_id=None):
     context = RequestContext(request, {
         'curation_section': 'users',
@@ -391,6 +411,7 @@ def users(request, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_view_user_module')
 def user(request, user_id):
     selected_user = get_object_or_404(User, pk=user_id)
 
@@ -403,6 +424,7 @@ def user(request, user_id):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def add_role(request, user_id=None):
     context = RequestContext(request, {
         'curation_section': 'users',
@@ -433,6 +455,7 @@ def add_role(request, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def remove_role(request, user_id, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     user = get_object_or_404(User, pk=user_id)
@@ -442,6 +465,7 @@ def remove_role(request, user_id, role_id):
     return redirect('user', user_id=user.pk)
 
 @staff_member_required
+@check_rules('can_view_user_module')
 def role(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
@@ -454,6 +478,7 @@ def role(request, role_id, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def add_dataset_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
@@ -493,6 +518,7 @@ def add_dataset_rule(request, role_id, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def add_crud_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
@@ -533,6 +559,7 @@ def add_crud_rule(request, role_id, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATION):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
@@ -559,7 +586,6 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
         else:
             form = FieldRuleAuthorityForm(request.POST)
 
-
         if form.is_valid():
             rule = form.save()
             rule.object_type = object_type
@@ -581,6 +607,48 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
+def add_user_module_rule(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
+
+    if request.method == 'GET':
+        template = loader.get_template('curation/add_rule.html')
+        form = UserModuleRuleForm()
+
+        header_template = loader.get_template('curation/rule_user_module_header.html').render(context)
+        context.update({
+            'form': form,
+            'header': header_template
+        })
+    elif request.method == 'POST':
+        form = UserModuleRuleForm(request.POST)
+
+        if form.is_valid():
+            rule = form.save()
+            rule.role = role
+            rule.save()
+
+            return redirect('role', role_id=role.pk)
+        else:
+            template = loader.get_template('curation/add_rule.html')
+            header_template = loader.get_template('curation/rule_user_module_header.html').render(context)
+
+            context.update({
+                'form': form,
+                'header_template': header_template,
+            })
+
+        return redirect('role', role_id=role.pk)
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+@check_rules('can_update_user_module')
 def add_role_to_user(request, user_edit_id, user_id=None):
     user = get_object_or_404(User, pk=user_edit_id)
 
@@ -611,6 +679,7 @@ def add_role_to_user(request, user_edit_id, user_id=None):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_update_user_module')
 def remove_rule(request, role_id, rule_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     rule = get_object_or_404(AccessRule, pk=rule_id)
@@ -640,19 +709,40 @@ def quick_and_dirty_citation_search(request):
 
 
 @staff_member_required
-def quick_and_dirty_authority_search(request):
-    q = request.GET.get('q', None)
-    if not q or len(q) < 3:
-        return JsonResponse({'results': []})
+@check_rules('can_update_user_module')
+def change_is_staff(request, user_id):
 
-    queryset = Authority.objects.all()
-    for part in q.split():
-        queryset = queryset.filter(name__icontains=part)
-    results = [{
-        'id': obj.id,
-        'type': obj.get_type_controlled_display(),
-        'name': obj.name,
-        'description': obj.description,
-        'url': obj.get_absolute_url(),
-    } for obj in queryset[:20]]
-    return JsonResponse({'results': results})
+    if request.method == 'POST':
+        user = get_object_or_404(User, pk=user_id)
+
+        is_staff = request.POST.get('is_staff', False)
+        if is_staff == 'True':
+            user.is_staff = True
+        else:
+            user.is_staff = False
+        user.save()
+
+    return redirect('user', user_id=user_id)
+
+@check_rules('is_user_superuser')
+def change_is_superuser(request, user_id):
+
+    if request.method == "POST":
+        user = get_object_or_404(User, pk=user_id)
+
+        is_superuser = request.POST.get('is_superuser', False)
+        if is_superuser == 'True':
+            user.is_superuser = True
+            user.save()
+
+        elif is_superuser == 'False':
+            superusers = User.objects.filter(is_superuser=True)
+
+            if len(superusers) > 1:
+                user.is_superuser = False
+                user.save()
+            else:
+                message = "This is the only admin user in the system. There have to be at least two adminstrators to remove administrator permissions from a user. "
+                messages.add_message(request, messages.ERROR, message)
+
+    return redirect('user', user_id=user_id)
