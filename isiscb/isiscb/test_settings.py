@@ -20,7 +20,7 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'asdf1234'
+SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
 
 DEBUG = False
 
@@ -111,16 +111,16 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['RDS_DB_NAME'],
-        'USER': os.environ['RDS_USERNAME'],
-        'PASSWORD': os.environ['RDS_PASSWORD'],
-        'HOST': os.environ['RDS_HOSTNAME'],
-        'PORT': os.environ['RDS_PORT'],
+        'NAME': 'isiscb',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
-ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
-ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
+ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
+ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
 # HAYSTACK_CONNECTIONS = {
 #     'default': {
@@ -194,9 +194,9 @@ REST_FRAMEWORK = {
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-AWS_MEDIA_BUCKET_NAME = os.environ['AWS_MEDIA_BUCKET_NAME']
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME', '')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY', '')
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = True
 
@@ -219,32 +219,32 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = os.environ['DJANGO_DOMAIN']
-URI_PREFIX = os.environ['DJANGO_URI_PREFIX']
+DOMAIN = os.environ.get('DJANGO_DOMAIN', '')
+URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = os.environ['SMTP_USER']
-EMAIL_HOST_PASSWORD = os.environ['SMTP_PASSWORD']
-EMAIL_HOST = os.environ['SMTP_HOST']
-SMTP_EMAIL = os.environ['SMTP_EMAIL']
+EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+EMAIL_HOST = os.environ.get('SMTP_HOST', '')
+SMTP_EMAIL = os.environget('SMTP_EMAIL', '')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
 
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
-SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
 
 TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
-GOOGLE_ANALYTICS_ID = os.environ['GOOGLE_ANALYTICS_ID']
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
 
 
 LICENSE = """This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."""
