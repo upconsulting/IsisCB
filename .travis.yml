@@ -3,6 +3,8 @@ python:
 - '2.7'
 services:
 - postgresql
+cache:
+- pip
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.test_settings
