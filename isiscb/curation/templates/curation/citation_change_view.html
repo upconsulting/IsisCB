@@ -16,7 +16,7 @@
 </div>
 <div class="h2"> {{ instance.title|safe }}</div>
 <div class="h4">{{ instance|get_authors_editors }}</div>
-<div class="h4 text-warning">{{ instance.id }} | {{ instance.publication_date }}</div>
+<div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
 
 <ul class="nav nav-tabs nav-justified" role="tablist">
     <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
@@ -182,7 +182,7 @@
     <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
         <ul class="list-group">
         {% for attribute in instance.attributes.all %}
-            <a class="list-group-item">
+            <a class="list-group-item" href="{% url "update_attribute_for_citation" instance.id attribute.id%}">
                 <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
                 {{ attribute.value.get_child_class }}
                 <span class="text-warning">{{ attribute.value_freeform}}</span>
@@ -190,6 +190,9 @@
                 <span class="glyphicon glyphicon-chevron-right pull-right"></span>
             </a>
         {% endfor %}
+            <a class="list-group-item text-muted" href="{% url "create_attribute_for_citation" instance.id %}">
+                <span class="glyphicon glyphicon-plus"></span> Create new attribute
+            </a>
         </ul>
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
@@ -199,7 +202,7 @@
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
         <ul class="list-group">
-        {% for ccrelation in instance.ccrelations.all %}
+        {% for ccrelation in instance.ccrelation_set.all %}
             <a class="list-group-item">
                 {% if instance.id == ccrelation.subject.id %}
                 <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
@@ -228,8 +231,8 @@
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
         <ul class="list-group">
-        {% for acrelation in instance.acrelations.all %}
-            <a class="list-group-item">
+        {% for acrelation in instance.acrelation_set.all %}
+            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list-group-item">
                 <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
                 {% if acrelation.type_broad_controlled %}
                 <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
@@ -242,6 +245,9 @@
                 <span class="glyphicon glyphicon-chevron-right pull-right"></span>
             </a>
         {% endfor %}
+        <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
+            <span class="glyphicon glyphicon-plus"></span> Create new authority-citation relation
+        </a>
         </ul>
     </div>
 </div>

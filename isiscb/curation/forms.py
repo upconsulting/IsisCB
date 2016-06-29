@@ -3,6 +3,55 @@ from django import forms
 from isisdata.models import *
 
 
+class ACRelationForm(forms.ModelForm):
+    authority = forms.CharField(widget=forms.HiddenInput())
+    citation = forms.CharField(widget=forms.HiddenInput())
+    """We will set these dynamically in the rendered form."""
+
+    class Meta:
+        model = ACRelation
+        fields = [
+            'name', 'type_controlled', 'type_broad_controlled',
+            'name_for_display_in_citation', 'data_display_order',
+            'confidence_measure', 'authority', 'citation',
+            'record_status_value', 'record_status_explanation'
+        ]
+
+    def clean(self):
+        super(ACRelationForm, self).clean()
+        authority_id = self.cleaned_data['authority']
+        self.cleaned_data['authority'] = Authority.objects.get(pk=authority_id)
+        citation_id = self.cleaned_data['citation']
+        self.cleaned_data['citation'] = Citation.objects.get(pk=citation_id)
+
+
+class ISODateValueForm(forms.ModelForm):
+    value = forms.CharField()
+
+    def __init__(self, *args, **kwargs):
+        super(ISODateValueForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+
+        if instance and not self.is_bound:
+            self.fields['value'].initial = instance.__unicode__()
+
+    def clean_value(self):
+        value = self.cleaned_data['value']
+        try:
+            ISODateValue.convert(value)
+        except:
+            raise forms.ValidationError('Please enter an ISO8601-compliant date.')
+        return value
+
+    def save(self, *args, **kwargs):
+        self.instance.value = self.cleaned_data.get('value')
+        super(ISODateValueForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = ISODateValue
+        fields = []
+
+
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
 
@@ -125,3 +174,26 @@ class FieldRuleAuthorityForm(forms.ModelForm):
         fields = [
             'field_action', 'field_name',
         ]
+
+class AttributeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
+
+    class Meta:
+        model = Attribute
+
+        fields = [
+            'type_controlled',
+            'description',
+            'value_freeform',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(AttributeForm, self).__init__(*args, **kwargs)
+        if self.instance.id:
+            self.fields['type_controlled'].widget.attrs['disabled'] = True
+
+    def save(self, *args, **kwargs):
+        if self.instance.id:
+            self.fields['type_controlled'].initial = self.instance.type_controlled
+        super(AttributeForm, self).save(*args, **kwargs)

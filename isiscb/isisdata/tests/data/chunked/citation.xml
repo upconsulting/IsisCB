@@ -1,0 +1,773 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FMPDSORESULT xmlns:ns0="http://www.filemaker.com/fmpdsoresult" xmlns="http://www.filemaker.com/fmpdsoresult">
+    <ns0:ROW MODID="85" RECORDID="1">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries>The Collected Writings of Rousseau, 8</ns0:BookSeries>
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description />
+        <ns0:EditionDetails>Translated by Charles E. Butterworth, Alexandra Cook, and Terence E. Marshall</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000111626</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/12/2016 2:07:52 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>The Reveries of the Solitary Walker, Botanical Writings, and Letters to Franquières</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="2">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Ziman, a theoretical physicist, discusses the social institutions of science, and expresses concerns about “post-academic” science tied to industrial concerns.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110001</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>xii + 399 pp., bibl., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Real Science: What It Is and What It Means</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="3">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Written to accompany PBS documentary of same name by Robert Uth.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110002</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>xiv + 184 pp., illus., figs., bibls., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Tesla: Master of Lightning</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="4">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>With an emphasis on Western European culture from Roman period to modern day, Contributors include: Jane Caplan, C. P. Jones, Mark Gustafson, Charles W. Macquarrie, Jennipher Allen Rosecrans, Juliet Fleming, Harriet Guest, Clare Anderson, Hamish Maxwell-Stewart, Ian Duffield, James Bradley, Abby M. Schrader, Stephan Oettermann, Alan Govenar, Susan Benson.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110003</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>xxiii + 318 pp.</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>The Tattoo in European and American History</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="45" RECORDID="5">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Concerning the work of William Cheselden (1688-1752) and Sebastien Guillié (1780-1865).</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110004</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>French</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>295</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>295--304</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}34{/VolNumberBegin}
+            {PageNumberBegin}295{/PageNumberBegin}
+            {PageNumberEnd}304{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}10{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>De l'expérience de Cheselden (1728) aux expériences du docteur Guillié sur l'ophtalmie contagieuse (1819-1820): les diverses modalités de l'utilisation de l'aveugle-né comme lieu de la preuve, au XVIIIe et au XIXe siècles</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>34</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="39" RECORDID="6">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description />
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110005</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>German</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>297</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>297--344</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}55{/VolNumberBegin}
+            {PageNumberBegin}297{/PageNumberBegin}
+            {PageNumberEnd}344{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}48{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Das Brechungsgesetz in der Fassung von Snellius: Rekonstruktion seines Entdeckungspfades und eine Übersetzung seines lateinischen Manuskriptes sowie ergänzender Dokumente</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>55</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="38" RECORDID="7">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Wada developed the intracarotid amobarbital procedure (IAP) for electroconvulsive shock therapy for psychosis, now a diagnostic test for epilepsy.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110006</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>286</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>286--292</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}9{/VolNumberBegin}
+            {PageNumberBegin}286{/PageNumberBegin}
+            {PageNumberEnd}292{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}7{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Juhn A. Wada and the Sodium Amytal Test the First (and Last? ) 50 years</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>9</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="8">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>W. Schäffner, From Psychiatry to History of Madness: Michel Foucault's Analysis of Power Technologies; D. B. Weiner, Observe and Heal: Philippe Pinel's Experiment at Salpétrière Hospice, 1802-1805; J. van Belzen, Spiritual Power and Aspirations in Confessional Psychiatry: On the Development of a Psychological Psychiatry by Leendert Boumann; E. Shorter, Will the Real Franz Nissl Please Stand Up?; R. Steinberg, Robert Schumann's Illness in the Eyes of his Pathographers; J. Lázaro, Scientific Knowledge and Professional Power at the Birth of Spanish Psychiatric Institutions; E. D. Myers, Lunacy and the 1834 English Poor Law with Special Reference to the Stoke-upon-Trent Workhouse; J. Gasser, G. Heller, Social and Medical Criteria of Psychiatric Hospitalization in Lausanne and Geneva (Switzerland); C. Cording, Griesinger's Diagnostic Classification and its Prognostic Validity: An Empirical Study; M. Kutzer, Knowledge and Therapy: Psychiatric Practice Sixteenth-Century-Style; A. Killen: Influencing Machines: Electrotherapy and Neurosis in Nineteenth Century Germany; G. Cocks, The Göring Institute, 1936-1945: Contents and Contexts of Knowledge and Power in German Psychiatry; K. Dörner, Die Endlösung der Sozialen Frage; A. Schäfer, Psychiatry as Biopolitics: The Dispositive of Homosexuality under National Socialism ; G. Hohendorf, V. Roelcke, M. Rotzoll, Innovation without Ethical Restriction: Remarks on the History and Ethics of Psychiatric Research at the University of Heidelberg, 1941-1945; A. Greifenhagen, Psychiatric Research on Homelessness and Mental Illness in National Socialist Germany; M. Leonhardt, Forensic Psychiatry and National Socialism: A Methodological and Casuistic Approach; A. Tucker, The Genealogy of Incommensurability in Psychoanalysis; K. Libbrecht, Freud and Meynert's Clinical Knowledge: The Relevance of Amentia Reconsidered; D. Nobus, Freud and Krafft-Ebing as Kindred Spirits: A Re-evaluation of the Knowledge Governing a Powerful Historical Image.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110007</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>234 pp., illus., figs., tables.</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Knowledge and Power: Perspectives in the History of Psychiatry</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="34" RECORDID="9">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries>Islamic Philosophy Theology and Science, Texts and Studies, 33; 34.</ns0:BookSeries>
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Vol. 1. The Arabic original - Kitab al-milal wa-al-duwal (The book of religions and dynasties) Arabic text edited by Keiji Yamamoto, with an English translation by Keiji Yamamoto and Charles Burnett. Vol. 2. The Latin version: Albumasar, De Magnis coniu</ns0:Description>
+        <ns0:EditionDetails>Translated by Keiji Yamamoto and Charles Burnett</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110008</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Abu Ma'sar on Historical Astrology: The Book of Religions and Dynasties (On Great Conjunctions)</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="10">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Using fractals to explain the formation of sociology</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110009</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>xvi + 259 pp., figs., tables, bibl., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Chaos of Disciplines</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="38" RECORDID="11">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Uses the case of Shamba to illustrate how non-governmental organizations (NGOs) in less-developed countries (LDCs) initiate agricultural research.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110010</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>95</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>95--124</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}30{/VolNumberBegin}
+            {PageNumberBegin}95{/PageNumberBegin}
+            {PageNumberEnd}124{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}30{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Science and story in development: The emergence of non-governmental organizations in agricultural research</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>30</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="38" RECORDID="12">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Uses oral history materials to examine lay understanding and union activism on behalf of miners stricken with pneumoconiosis in the 1920s and 1930s in Wales.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110011</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>125</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>125--140</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}30{/VolNumberBegin}
+            {PageNumberBegin}125{/PageNumberBegin}
+            {PageNumberEnd}140{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}16{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>The South Wales Miners Federation, Miners' Lung, and the Instrumental Use of Expertise, 1900-1950</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>30</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="38" RECORDID="13">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Uses fourfold typology of the social-structure concept, and a critique of Giddens's and Bourdieu's strategies for transcending the divide between objectivist and subjectivist sociologies.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110012</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:38:10 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>741</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>741--762</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}34{/VolNumberBegin}
+            {PageNumberBegin}741{/PageNumberBegin}
+            {PageNumberEnd}762{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}22{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>The Subjectivist-Objectivist Divide: Against Transcendence</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>34</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="38" RECORDID="14">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Uses biography by G. D. Andresse (Titan Kan niet Slapen (1993)) and author's own work on Huygens' optics (1999) to examine the life of Christiaan Huygens.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110013</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>Dutch</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>56</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>56--68</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}23{/VolNumberBegin}
+            {PageNumberBegin}56{/PageNumberBegin}
+            {PageNumberEnd}68{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}13{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Titan en Christiaan: Huygens in werk en leven</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>23</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="15">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Updated directory of individuals involved in history of technology in Europe.</ns0:Description>
+        <ns0:EditionDetails>Fourth Edition</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110014</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>x + 225 pp., indexes.</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Guide to the History of Technology in Europe</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="44" RECORDID="16">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Unpublished drawings of Caribbean plants made by Charles Plumier, 1689-1697.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110015</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>677</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>677--688</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>{Metadata}{VolNumberBegin}48{/VolNumberBegin}
+            {PageNumberBegin}677{/PageNumberBegin}
+            {PageNumberEnd}688{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}12{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Charles Plumier's drawings of American plants and the nomenclature of early Caribbean Aristolochia species (Aristolochiaceae)</ns0:Title>
+        <ns0:Type.controlled>Article</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>48</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="46" RECORDID="17">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Two essay reviews of Naomi Oreskes' &lt;em&gt;The Rejection of Continental Drift: Theory and Method in American Earth Science&lt;/em&gt; (1999), along with a reply from the author.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110016</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:30:46 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>321</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>321--350</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Marked all EssayReviews as Active. -- Were previously marked Inactive. (2016.06.01) Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Fix Record. ***This record needs to have Journal link. Not sure why these did not get connected.
+            ***This record needs to have book links. The essay review was initially added as a journal article in the old system and book links were never made.
+
+            {Metadata}{VolNumberBegin}18{/VolNumberBegin}
+            {PageNumberBegin}321{/PageNumberBegin}
+            {PageNumberEnd}350{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}30{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Focus Book: Naomi Oreskes, The Rejection of Continental Drift: Theory and Method in American Earth Science</ns0:Title>
+        <ns0:Type.controlled>EssayReview</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>18</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="46" RECORDID="18">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Two essay reviews of James Rodger Fleming's &lt;em&gt;Historical Perspectives on Climate Change&lt;/em&gt; (1998), along with a reply by the author.</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110017</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:30:38 PM</ns0:ModifiedOn>
+        <ns0:PageBegin>91</ns0:PageBegin>
+        <ns0:PageEnd />
+        <ns0:PagesFreeText>91--100</ns0:PagesFreeText>
+        <ns0:PhysicalDetails />
+        <ns0:RecordHistory>Marked all EssayReviews as Active. -- Were previously marked Inactive. (2016.06.01) Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Fix Record. ***This record needs to have Journal link. Not sure why these did not get connected.
+            ***This record needs to have book links. The essay review was initially added as a journal article in the old system and book links were never made.
+
+            {Metadata}{VolNumberBegin}18{/VolNumberBegin}
+            {PageNumberBegin}91{/PageNumberBegin}
+            {PageNumberEnd}100{/PageNumberEnd}
+            {PageLengthNote}Calculated{/PageLengthNote}
+            {PageLength}10{/PageLength}
+            {BibNote="2015 Extracted article and review information"}{Date=2015.02.09}{User="Weldon"}{/Metadata}
+        </ns0:StaffNotes>
+        <ns0:Title>Focus Book: James Rodger Fleming, Historical Perspectives on Climate Change</ns0:Title>
+        <ns0:Type.controlled>EssayReview</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText>18</ns0:VolumeFreeText>
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="19">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Translations of four of Plato's dialogues: &lt;em&gt;Ion&lt;/em&gt; (by Paul Woodruff), &lt;em&gt;Protagoras&lt;/em&gt; (by Stanley Lombardo and Karen Bell), &lt;em&gt;Gorgias&lt;/em&gt; (by Donald J. Zeyl), and &lt;em&gt;Phaedrus&lt;/em&gt; (by Alexander Nehamas and Paul Woodruff).</ns0:Description>
+        <ns0:EditionDetails />
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110018</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>ix + 220 pp., bibl., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Plato on rhetoric and language: Four key dialogues</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="20">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Translation of &lt;em&gt;Meditations pascaliennes&lt;/em&gt;.</ns0:Description>
+        <ns0:EditionDetails>Translated by Richard Nice</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110019</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>vii + 256 pp., bibl., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Pascalian meditations</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="21">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Translation of &lt;em&gt;L'Orient Ancien et Nous&lt;/em&gt;. Contents include: Jean Bottero, Religion and reasoning in Mesopotamia; Clarisse Herrenschmidt, Writing between visible and invisible worlds in Iran, Israel, and Greece; Jean-Pierre Vernant, Writing and civil religion in Greece.</ns0:Description>
+        <ns0:EditionDetails>Translated by Teresa Lavender Fagan. Foreword by François Zabbal</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110020</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>xiii + 192 pp., illus., bibl., index</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Ancestor of the West: Writing, reasoning, and religion in Mesopotamia, Elam, and Greece.</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+    <ns0:ROW MODID="32" RECORDID="22">
+        <ns0:Abstract />
+        <ns0:AdditionalTitles />
+        <ns0:BookSeries />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn>7/15/2003</ns0:CreatedOn>
+        <ns0:Dataset>Isis Bibliography of the History of Science (Joy Harvey, ed.)</ns0:Dataset>
+        <ns0:Description>Translation from French of &lt;em&gt;La mondialisation de la communication&lt;/em&gt; (1996).</ns0:Description>
+        <ns0:EditionDetails>Translated by Liz Carey-Libbrecht, James A. Cohen</ns0:EditionDetails>
+        <ns0:Extent />
+        <ns0:ExtentNote />
+        <ns0:ID>CBB000110022</ns0:ID>
+        <ns0:IssueBegin />
+        <ns0:IssueEnd />
+        <ns0:IssueFreeText />
+        <ns0:Language>English</ns0:Language>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>10/26/2015 9:37:22 PM</ns0:ModifiedOn>
+        <ns0:PageBegin />
+        <ns0:PageEnd />
+        <ns0:PagesFreeText />
+        <ns0:PhysicalDetails>viii + 129 pp., bibl.</ns0:PhysicalDetails>
+        <ns0:RecordHistory>Original source of data: Joy</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Title>Networking the world, 1794-2000.</ns0:Title>
+        <ns0:Type.controlled>Book</ns0:Type.controlled>
+        <ns0:VolumeBegin />
+        <ns0:VolumeEnd />
+        <ns0:VolumeFreeText />
+    </ns0:ROW>
+</FMPDSORESULT>

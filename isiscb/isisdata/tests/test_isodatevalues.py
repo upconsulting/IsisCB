@@ -23,7 +23,6 @@ class TestISODateValue(unittest.TestCase):
     def _do_test(self, date, precision):
         value = ISODateValue.objects.create(value=date, attribute=self.attribute)
         self.assertIsInstance(value.value, list)
-        print value
         self.assertIsInstance(value.precision, unicode)
         self.assertEqual(value.precision, precision)
         return value.value
@@ -87,7 +86,6 @@ class TestISODateRangeValue(unittest.TestCase):
     def _do_test(self, date):
         value = ISODateRangeValue.objects.create(value=date, attribute=self.attribute)
         self.assertIsInstance(value.value, list)
-        print value
         return value.value
 
     def test_create_daterangevalue_from_date(self):

@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 
-from django.http import HttpResponse, HttpResponseRedirect #, HttpResponseForbidden, Http404, , JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
+from django.forms import modelform_factory
 
 from isisdata.models import *
 from curation.filters import *
@@ -29,9 +30,218 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
-
 #@staff_member_required
 #@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@staff_member_required
+def acrelation_for_citation(request, citation_id, acrelation_id=None):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    acrelation = None
+    if acrelation_id:
+        acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'acrelation': acrelation,
+    })
+    if request.method == 'GET':
+        if acrelation:
+            form = ACRelationForm(instance=acrelation, prefix='acrelation')
+        else:
+            form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+
+    elif request.method == 'POST':
+        form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
+
+
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/citation_acrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+def delete_attribute_for_citation(request, citation_id, attribute_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    attribute = get_object_or_404(Attribute, pk=attribute_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'attribute': attribute,
+    })
+    if request.GET.get('confirm', False):
+        attribute.delete()
+        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+    template = loader.get_template('curation/citation_attribute_delete.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def delete_attribute_for_authority(request, authority_id, attribute_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    attribute = get_object_or_404(Attribute, pk=attribute_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': authority,
+        'attribute': attribute,
+    })
+    if request.GET.get('confirm', False):
+        attribute.delete()
+        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
+    template = loader.get_template('curation/authority_attribute_delete.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def attribute_for_citation(request, citation_id, attribute_id=None):
+
+    template = loader.get_template('curation/citation_attribute_changeview.html')
+    citation = get_object_or_404(Citation, pk=citation_id)
+    attribute, value, value_form, value_form_class = None, None, None, None
+
+    value_forms = {}
+    for at in AttributeType.objects.all():
+        value_class = at.value_content_type.model_class()
+        if value_class is ISODateValue:
+            value_forms[at.id] = ISODateValueForm
+        else:
+            value_forms[at.id] = modelform_factory(value_class,
+                                    exclude=('attribute', 'child_class'))
+
+    if attribute_id:
+        attribute = get_object_or_404(Attribute, pk=attribute_id)
+        if hasattr(attribute, 'value'):
+            value = attribute.value.get_child_class()
+            value_form_class = value_forms[attribute.type_controlled.id]
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'attribute': attribute,
+        'value': value,
+    })
+
+    if request.method == 'GET':
+        if attribute:
+            attribute_form = AttributeForm(instance=attribute, prefix='attribute')
+            if value:
+                value_form = value_form_class(instance=value, prefix='value')
+        else:
+            attribute_form = AttributeForm(prefix='attribute')
+
+
+    elif request.method == 'POST':
+        if attribute:    # Update.
+            attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
+
+            value_instance = value if value else None
+            value_form = value_form_class(request.POST, instance=value_instance, prefix='value')
+        else:    # Create.
+            attribute_form = AttributeForm(request.POST, prefix='attribute')
+            selected_type_controlled = request.POST.get('attribute-type_controlled', None)
+            if selected_type_controlled:
+                value_form_class = value_forms[int(selected_type_controlled)]
+                value_form = value_form_class(request.POST, prefix='value')
+
+        if attribute_form.is_valid() and value_form and value_form.is_valid():
+
+            attribute_form.instance.source = citation
+            attribute_form.save()
+            value_form.instance.attribute = attribute_form.instance
+            value_form.save()
+
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+        else:
+            pass
+
+    context.update({
+        'attribute_form': attribute_form,
+        'value_form': value_form,
+        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+    })
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def attribute_for_authority(request, authority_id, attribute_id=None):
+
+    template = loader.get_template('curation/authority_attribute_changeview.html')
+    authority = get_object_or_404(Authority, pk=authority_id)
+    attribute, value, value_form, value_form_class = None, None, None, None
+
+    value_forms = {}
+    for at in AttributeType.objects.all():
+        value_class = at.value_content_type.model_class()
+        if value_class is ISODateValue:
+            value_forms[at.id] = ISODateValueForm
+        else:
+            value_forms[at.id] = modelform_factory(value_class,
+                                    exclude=('attribute', 'child_class'))
+
+    if attribute_id:
+        attribute = get_object_or_404(Attribute, pk=attribute_id)
+        if hasattr(attribute, 'value'):
+            value = attribute.value.get_child_class()
+            value_form_class = value_forms[attribute.type_controlled.id]
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+        'attribute': attribute,
+        'value': value,
+    })
+
+    if request.method == 'GET':
+        if attribute:
+            attribute_form = AttributeForm(instance=attribute, prefix='attribute')
+            if value:
+                value_form = value_form_class(instance=value, prefix='value')
+        else:
+            attribute_form = AttributeForm(prefix='attribute')
+
+
+    elif request.method == 'POST':
+
+        if attribute:    # Update.
+            attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
+
+            value_instance = value if value else None
+            value_form = value_form_class(request.POST, instance=value_instance, prefix='value')
+        else:    # Create.
+            attribute_form = AttributeForm(request.POST, prefix='attribute')
+            selected_type_controlled = request.POST.get('attribute-type_controlled', None)
+            if selected_type_controlled:
+                value_form_class = value_forms[int(selected_type_controlled)]
+                value_form = value_form_class(request.POST, prefix='value')
+
+        if attribute_form.is_valid() and value_form and value_form.is_valid():
+            attribute_form.instance.source = authority
+            attribute_form.save()
+            value_form.instance.attribute = attribute_form.instance
+            value_form.save()
+
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
+        else:
+            pass
+
+    context.update({
+        'attribute_form': attribute_form,
+        'value_form': value_form,
+        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+    })
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
 def citation(request, citation_id=None):
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -60,7 +270,8 @@ def citation(request, citation_id=None):
                 partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
             if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
                 form.save()
-                partdetails_form.save()
+                if partdetails_form:
+                    partdetails_form.save()
                 return HttpResponseRedirect(reverse('citation_list'))
 
             context.update({
@@ -68,8 +279,6 @@ def citation(request, citation_id=None):
                 'instance': citation,
                 'partdetails_form': partdetails_form,
             })
-
-
     else:
         template = loader.get_template('curation/citation_list_view.html')
         filtered_objects = CitationFilter(request.GET, queryset=Citation.objects.all())
@@ -89,7 +298,7 @@ def authority(request, authority_id=None):
         'curation_subsection': 'authorities',
     })
     if authority_id:
-
+        context.update({'tab': request.GET.get('tab', None)})
         authority = get_object_or_404(Authority, pk=authority_id)
         template = loader.get_template('curation/authority_change_view.html')
         person_form = None
@@ -112,6 +321,8 @@ def authority(request, authority_id=None):
             form = AuthorityForm(request.POST, instance=authority)
             if form.is_valid() and (person_form is None or person_form.is_valid()):
                 form.save()
+                if person_form:
+                    person_form.save()
                 return HttpResponseRedirect(reverse('authority_list'))
 
             context.update({
@@ -376,3 +587,21 @@ def remove_rule(request, role_id, rule_id):
     rule.delete()
 
     return redirect('role', role_id=role.pk)
+
+@staff_member_required
+def quick_and_dirty_authority_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+
+    queryset = Authority.objects.all()
+    for part in q.split():
+        queryset = queryset.filter(name__icontains=part)
+    results = [{
+        'id': obj.id,
+        'type': obj.get_type_controlled_display(),
+        'name': obj.name,
+        'description': obj.description,
+        'url': obj.get_absolute_url(),
+    } for obj in queryset[:20]]
+    return JsonResponse({'results': results})

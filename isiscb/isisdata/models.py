@@ -200,7 +200,7 @@ class ISODateRangeValue(Value):
     PARTS = ['start', 'end']
 
     def _valuegetter(self):
-        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS]
+        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS if getattr(self, part)]
 
     def _valuesetter(self, value):
         try:
@@ -208,20 +208,31 @@ class ISODateRangeValue(Value):
         except ValidationError:
             raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
 
-        for part_value, part in zip(value, self.PARTS):
-            setattr(self, part, part_value)
+        for i, part in enumerate(self.PARTS):
+            if i >= len(value):
+                setattr(self, part, [0, 0, 0])
+            else:
+                v = value[i]
+                if type(v) not in [list, tuple]:
+                    v = [v]
+                setattr(self, part, v)
+        # for part_value, part in zip(value, self.PARTS):
+            # setattr(self, part, part_value)
 
     value = property(_valuegetter, _valuesetter)
 
     @staticmethod
     def convert(value):
+        print value
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
             for i in xrange(2):
                 value[i] = ISODateValue.convert(value[i])
         else:
-            raise ValidationError('Not a valid ISO8601 date range')
-
+            try:
+                value = ISODateValue.convert(value)
+            except:
+                raise ValidationError('Not a valid ISO8601 date range')
         return value
 
     def __unicode__(self):
@@ -237,8 +248,11 @@ class ISODateRangeValue(Value):
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
 
+    def render(self):
+        return self.__unicode__()
+
     class Meta:
-        verbose_name = 'date range'
+        verbose_name = 'ISO date range'
 
 
 class DateRangeValue(Value):
@@ -309,26 +323,34 @@ class ISODateValue(Value):
         Override to update Citation.publication_date, if this DateValue belongs
         to an Attribute of type "PublicationDate".
         """
-        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
+
 
         if self.attribute.type_controlled.name == 'PublicationDate':
             try:
                 self.attribute.source.publication_date = self.as_date
                 self.attribute.source.save()
-            except ValueError:
-                print 'Error settings publication_date on %i' % self.attribute.source.id
+            except (ValueError, AttributeError):
+                print 'Error settings publication_date on source'
+
+        super(ISODateValue, self).save(*args, **kwargs)    # Save first.
 
     def _valuegetter(self):
         return [getattr(self, part) for part in self.PARTS if getattr(self, part) != 0]
 
     def _valuesetter(self, value):
+        # raise AttributeError('grrargh')
+
         try:
             value = ISODateValue.convert(value)
         except ValidationError:
             raise ValueError('Invalid value for ISODateValue: %s' % value.__repr__())
 
-        for i, v in enumerate(value):
-            setattr(self, self.PARTS[i], v)
+        for i, part in enumerate(self.PARTS):
+        # for i, v in enumerate(value):
+            if i >= len(value):
+                setattr(self, part, 0)
+            else:
+                setattr(self, part, value[i])
 
     def __unicode__(self):
         def _coerce(val):
@@ -343,6 +365,9 @@ class ISODateValue(Value):
 
         return '-'.join([_coerce(v) for v in self.value])
 
+    def render(self):
+        return self.__unicode__()
+
     value = property(_valuegetter, _valuesetter)
 
     @property
@@ -356,32 +381,44 @@ class ISODateValue(Value):
 
     @staticmethod
     def convert(value):
+
         if type(value) in [tuple, list]:
             value = list(value)
         elif type(value) in [str, unicode]:
+
             pre = u''
             if value.startswith('-'):   # Preserve negative years.
                 value = value[1:]
                 pre = u'-'
             value = value.split('-')
             value[0] = pre + value[0]
+
+        elif type(value) is int:   # We assume that it is just a year.
+            value = [value]
         elif type(value) is datetime.datetime:
             date = value.date()
             value = [date.year, date.month, date.day]
         elif type(value) is datetime.date:
             value = [value.year, value.month, value.day]
-        elif type(value) is int:   # We assume that it is just a year.
-            value = [value]
         else:
             raise ValidationError('Not a valid ISO8601 date')
+
+        if len(value) > 0:
+            if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
+                raise ValidationError('Not a valid ISO8601 date')
+            elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
+                raise ValidationError('Not a valid ISO8601 date')
+            for v in value[1:]:
+                if type(v) in [str, unicode] and len(v) != 2:
+                    raise ValidationError('Not a valid ISO8601 date')
         try:
+
             return [int(v) for v in value if v]
         except NameError:
             raise ValidationError('Not a valid ISO8601 date')
 
     class Meta:
         verbose_name = 'isodate'
-
 
 
 class DateValue(Value):
@@ -505,16 +542,16 @@ class CuratedMixin(models.Model):
     record_status_explanation = models.CharField(max_length=255, blank=True,
                                                  null=True)
 
-    def save(self, *args, **kwargs):
-        """
-        The record_status_value field controls whether or not the record is
-        public.
-        """
-        if self.record_status_value == self.ACTIVE:
-            self.public = True
-        else:
-            self.public = False
-        super(CuratedMixin, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     """
+    #     The record_status_value field controls whether or not the record is
+    #     public.
+    #     """
+    #     if self.record_status_value == self.ACTIVE:
+    #         self.public = True
+    #     else:
+    #         self.public = False
+    #     return super(CuratedMixin, self).save(*args, **kwargs)
 
     @property
     def created_on(self):
@@ -613,7 +650,7 @@ class ReferencedEntity(models.Model):
 
         if self.uri == '':
             self.uri = self.generate_uri()
-        super(ReferencedEntity, self).save(*args, **kwargs)
+        return super(ReferencedEntity, self).save(*args, **kwargs)
 
 
 class Language(models.Model):
