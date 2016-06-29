@@ -3,56 +3,76 @@
 {% load addcss %}
 {% load pagination_tags %}
 {% load render_object %}
+{% load permission_tags %}
+{% load rules %}
 
 
 {% block content %}
 {% autopaginate objects 40 as filter_list %}
 
-<div class="clearfix">
-    <div class="btn-group pull-right">
-        <button data-toggle="collapse"
-            class="btn btn-primary"
-            data-target="#filters">
-            Show/hide filters
-        </button>
-    </div>
-</div>
+{% test_rule 'can_update_user_module' user as update_module %}
 
-<div class="collapse{% if filters_active %} in{% endif %}" id="filters">
-    <form class="form clearfix">
-        {% for field in objects.form %}
-        <div class="form-group clearable">
-            <label>{{ field.label }}</label>
-            {{ field|addcss:"form-control" }}
-        </div>
-        {% endfor %}
-        <div class="btn-group pull-right">
-            <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-            <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-        </div>
-    </form>
-    <script>
-    $(document).ready(function() {
-        $('#clear-filters').on('click', function() {
-            $('.form-group.clearable input').val('');
-            $('.form-group.clearable select').val('');
-        });
-    });
-    </script>
+<div class="h3 text-warning">Registered Users</div>
+
+<p class="text-muted">
+  Below you find a list of all registered users. If you have user administration permissions, you can add roles to a user. Roles define what a user is allowed to do in the curation interface. You can for example restrict what records a user can see depending on the dataset value of a record, or you can give users only view or update but no delete or create permissions.
+</p>
+
+<p class="text-muted">
+  We recommend that you define small and limited roles over large, capture-it-all roles. Rather than trying to create one role that gives a user all the access they need, try to create smaller roles and then assign a user multiple roles. For example, if you want user 'Mickey Mouse' to be able to modify all records in dataset 'Awesome Dataset', but only see all other records, then  define one role for editing dataset 'Awesome Dataset', and one role for viewing all records. Then give user 'Mickey Mouse' both roles. This way you can reuse roles for other users that should only be able to do one of these things and it's easier to understand what a user can do by looking a the list of roles they have.
+</p>
+
+{% if update_module %}
+<div class="row" style="margin-top: 35px;">
+  <div class="col-md-12">
+    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}">Create new role</a>
+  </div>
 </div>
+{% endif %}
 
 <div class="text-center">
     {% paginate %}
 </div>
 
 <div class="panel">
-    <ul class="list-group">
-        {% for object in filter_list %}
-        <a class="list-group-item" href="">
-            {{ object|render_object }}
-        </a>
+    <table class="table table-striped table-responsive table-hover table-curation">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th></th>
+          <th>Email</th>
+          <th>Roles</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in filter_list %}
+        <tr>
+          <td>
+            <a href="{% url 'user' user.pk %}">{{ user.username }}</a>
+          </td>
+          <td>
+            {% if user.is_superuser %}<span class="label label-danger">Administrator</span> {% endif %}
+            {% if user.is_staff %}<span class="label label-warning">Curation Access</span>{% endif %}
+          </td>
+          <td>
+            {{ user.email }}
+          </td>
+          <td>
+            {% for role in user.pk|roles %}
+              <a href="{% url 'role' role.pk %}">{{ role.name }}</a>,
+            {% endfor %}
+          </td>
+          <td>
+            {% if update_module %}
+            <a href="{% url 'add_role_to_user' user.pk %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
+            <a href="{% url 'user' user.pk %}"><i class="fa fa-cog" aria-hidden="true"></i> User Profile</a>
+            {% endif %}
+          </td>
+        </tr>
         {% endfor %}
-    </ul>
+      </tbody>
+    </table>
 
     <div class="panel-footer text-center">
     {% paginate %}

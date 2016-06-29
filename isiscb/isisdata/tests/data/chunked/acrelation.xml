@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FMPDSORESULT xmlns:ns0="http://www.filemaker.com/fmpdsoresult" xmlns="http://www.filemaker.com/fmpdsoresult">
+    <ns0:ROW MODID="23" RECORDID="1">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>10.001</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000001</ns0:ID>
+        <ns0:ID.Authority.link>CBA000087646</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000111626</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Rousseau, Jean-Jacques</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Jean-Jacques</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Rousseau</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: Author</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Author</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="23" RECORDID="2">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>20.001</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000002</ns0:ID>
+        <ns0:ID.Authority.link>CBA000052926</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000111626</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Kelly, Christopher</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Christopher</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Kelly</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: Editor</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Editor</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="21" RECORDID="3">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>50.001</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000003</ns0:ID>
+        <ns0:ID.Authority.link>CBA000015055</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000111626</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Butterworth, Charles E.</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Charles E.</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Butterworth</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: EditionDetails</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Contributor</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="21" RECORDID="4">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>50.002</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000004</ns0:ID>
+        <ns0:ID.Authority.link>CBA000020763</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000111626</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Cook, Alexandra</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Alexandra</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Cook</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: EditionDetails</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Contributor</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="21" RECORDID="5">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>50.003</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000005</ns0:ID>
+        <ns0:ID.Authority.link>CBA000065308</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000111626</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Marshall, Terence E.</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Terence E.</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Marshall</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: EditionDetails</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Contributor</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="21" RECORDID="6">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>10.001</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000006</ns0:ID>
+        <ns0:ID.Authority.link>CBA000113253</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000110001</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Ziman, John</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>John</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Ziman</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: Author</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Author</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="21" RECORDID="7">
+        <ns0:ConfidenceMeasure />
+        <ns0:CreatedBy>spweldon</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2015 3:55:00 PM</ns0:CreatedOn>
+        <ns0:DataDisplayOrder>10.001</ns0:DataDisplayOrder>
+        <ns0:Dataset />
+        <ns0:ID>ACR000000007</ns0:ID>
+        <ns0:ID.Authority.link>CBA000018344</ns0:ID.Authority.link>
+        <ns0:ID.Citation.link>CBB000110002</ns0:ID.Citation.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/2/2016 4:06:06 PM</ns0:ModifiedOn>
+        <ns0:NameForDisplay>Cheney, Margaret</ns0:NameForDisplay>
+        <ns0:PersonalNameFirst>Margaret</ns0:PersonalNameFirst>
+        <ns0:PersonalNameLast>Cheney</ns0:PersonalNameLast>
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Added in a single upload from SR Contributors File which did the extraction and unicode conversion of all names in CB Data as of May 2015. Original FM citation field where data was extracted: Author</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RelationshipWeight />
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled>HasPersonalResponsibilityFor</ns0:Type.Broad.controlled>
+        <ns0:Type.controlled>Author</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+</FMPDSORESULT>

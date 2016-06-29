@@ -3,9 +3,11 @@ python:
 - '2.7'
 services:
 - postgresql
+cache:
+- pip
 env:
   global:
-    - DJANGO_SETTINGS_MODULE=isiscb.local_settings
+    - DJANGO_SETTINGS_MODULE=isiscb.test_settings
     - SOCIAL_AUTH_FACEBOOK_KEY=''
     - SOCIAL_AUTH_TWITTER_KEY=''
     - SOCIAL_AUTH_FACEBOOK_SECRET=''
@@ -16,21 +18,9 @@ script:
 - pip install nose
 - cd isiscb
 - git clone http://github.com/ubernostrum/django-registration.git --depth 2
-- python manage.py migrate
 - python -Wi manage.py test
 - cd ..
 deploy:
-  - provider: codedeploy
-    access_key_id: AKIAIVNDMWM77W3N2KTA
-    region: us-west-2
-    bucket: S3 Bucket
-    revision_type: github
-    application: "isiscb-develop-app"
-    deployment_group: "isiscb-develop-deploymentgroup"
-    secret_access_key:
-      secure: "osQ5jCPZsn/RasLViriEYTNElAwIKFkkG5fmurDeeV/PrtUuk/u4Bi5mXDw5LLp8RCggEQAExTiAcJKvERUGkNrkRB4p7ExeoTzEf8YaBfwwXotZ4YtdiEt/iIa53aIAZz2pVLpDeJ3pK1OyK/jQPLE5yCwHEDLZVWMNtjXE1fmPVsQWX5p+5VK5ntEeZjMunZBgZFa6B2uvGNJFVhK5ymFREkoJT3lqH4cavD1ddf5lP1wjf0YtAqmuVaRZzyOIN/zdPMEsj5G38na7p/d89kCfSr6X9+0EMOso3l0MXztKoBiY9x0REV9GH8UGoJV2pltljw/CNRcE2BZg7x4SamZRmeLNx2409Xk5JAQ2AQ7/rCQweCEmIPCLZMmMz99i5UzsZ8Y/pgNBRLS9qwugXssvQd7ypJnce0iRueCndX1C2Al4XnomTwlHWamwvtC/CszMlT1zFLvi0DiUOyX0dYm1MzpBDPB/Gy8T7JJ9zRigZ9QzqapDi6mZ2D2Dt7rT0CQL6kdZIy7upFReEs5pNaNn64hlK5PVTa9dn7hO8O2T6J9gvbTi0xXhefPGaHnOUtQeOtJBe/xStbz8RKSn7XIXt9VYtgiJ4RfW2YAiofnGhnwQYy5HKJgbrPGC1uCHAeNpR5uq5AQEVbET8lghuoqm97lw1VtbVMYuB17AWnQ="
-    on:
-      branch: develop
   - provider: elasticbeanstalk
     access_key_id: AKIAI3SRBWU3O3X5S7CQ
     secret_access_key:

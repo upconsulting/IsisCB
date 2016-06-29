@@ -1,0 +1,96 @@
+{% extends "curation/base.html" %}
+
+{% load permission_tags %}
+{% load rules %}
+
+{% block content %}
+
+{% test_rule 'can_update_user_module' user as update_module %}
+{% test_rule 'is_user_superuser' user as superuser %}
+
+<div class="h3 text-warning">User Profile</div>
+
+<h1>{{ selected_user.username }}</h1>
+<p class="lead">{{ selected_user.email }}</p>
+
+{% for message in messages %}
+<div class="alert alert-danger" role="alert">{{ message }}</div>
+{% endfor %}
+
+
+<div>
+    {% if selected_user.is_superuser %}
+    <form action="{% url 'change_is_superuser' selected_user.pk %}" method="POST">
+      {% csrf_token %}
+      <span class="label label-danger">Administrator</span> This user is an <strong>administrator</strong> and can do anything in the system.
+      <br>
+      {% if superuser %}
+      <input type="hidden" name="is_superuser" value="False">
+      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Remove administrator permissions.</small></button>
+      {% endif %}
+    </form>
+    {% endif %}
+    {% if not selected_user.is_superuser %}
+    <form action="{% url 'change_is_superuser' selected_user.pk %}" method="POST">
+      {% csrf_token %}
+      <span class="label label-default">Administrator</span> This user <strong>is not</strong> an administrator.
+      <br>
+      {% if superuser %}
+      <input type="hidden" name="is_superuser" value="True">
+      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Make user administrator.</small></button>
+      {% endif %}
+    </form>
+    {% endif %}
+    {% if selected_user.is_staff %}
+    <form action="{% url 'change_is_staff' selected_user.pk %}" method="POST">
+      {% csrf_token %}
+      <span class="label label-warning">Curation Access</span> This user <strong>can access</strong> the curation interface.
+      <br>
+      {% if update_module %}
+      <input type="hidden" name="is_staff" value="False">
+      <button type="submit" class="btn btn-link"><small><i class='fa fa-user-times' aria-hidden='true'></i> Remove curation interface access.</small></button>
+      {% endif %}
+    </form>
+    {% endif %}
+    {% if not selected_user.is_staff %}
+    <p>
+      <form action="{% url 'change_is_staff' selected_user.pk %}" method="POST" class="form-inline">
+        {% csrf_token %}
+        <span class="label label-default">Curation Access</span> This user <strong>cannot access</strong> the curation interface.
+        <br>
+        {% if update_module %}
+        <input type="hidden" name="is_staff" value="True">
+        <button type="submit" class="btn btn-link"><small><i class='fa fa-users' aria-hidden='true'></i> Allow access to curation interface.</small></button>
+        {% endif %}
+      </form>
+    </p>
+    {% endif %}
+</div>
+
+{% if update_module %}
+<div class="pull-right">
+<a href="{% url 'add_role_to_user' selected_user.pk %}?from_user=True" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
+</div>
+{% endif %}
+
+<h3>Roles:</h3>
+<table class="table table-striped table-responsive table-hover table-curation">
+<thead>
+  <tr>
+    <th>Role name</th>
+    <th width="20%"></th>
+  </tr>
+</thead>
+<tbody>
+    {% for role in selected_user.pk|roles %}
+    <tr>
+      <td><a href="{% url 'role' role.pk %}">{{ role.name }}</a></td>
+      <td>{% if update_module %}<a title="Remove Role" href="{% url 'remove_role' selected_user.pk role.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+
+
+{% endblock %}

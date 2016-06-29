@@ -30,7 +30,7 @@
             </td>
             <td>
                 <a href="{% url "curate_citation" object.id %}?tab=attributes">
-                    {{ object|get_citation_pubdate }}
+                    {{ object|get_citation_pubdate_fast }}
                 </a>
             </td>
             <td>

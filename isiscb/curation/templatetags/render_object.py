@@ -61,6 +61,18 @@ def get_authors_editors(obj):
 
 @register.filter(name='get_citation_pubdate')
 def get_citation_pubdate(obj):
+    for attribute in obj.attributes.all():
+        if attribute.type_controlled.name == 'PublicationDate':
+            return attribute.value.get_child_class().__unicode__()
+
+    date = getattr(obj, 'publication_date', None)
+    if not date:
+        return 'missing'
+    return date.isoformat()[:4]
+
+
+@register.filter(name='get_citation_pubdate_fast')
+def get_citation_pubdate_fast(obj):
     date = getattr(obj, 'publication_date', None)
     if not date:
         return 'missing'
@@ -71,3 +83,8 @@ def get_citation_pubdate(obj):
 def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
+
+
+@register.filter(name='get_date_attributes')
+def get_date_attributes(obj):
+    return SafeText(' '.join(['<li><span class="label label-success">%s</span> %s</li>' % (attribute.type_controlled.name, attribute.value.display) for attribute in obj.attributes.all()]))

@@ -20,15 +20,15 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
 
-DEBUG = eval(os.environ.get('DEBUG', 'False'))
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-MIGRATION_MODULES = {
-    'isisdata': 'isisdata.migrations'
-}
+# MIGRATION_MODULES = {
+#     'isisdata': 'isisdata.migrations'
+# }
 
 # Application definition
 
@@ -41,37 +41,37 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'social.apps.django_app.default',
-    'pagination',
+    # 'social.apps.django_app.default',
+    # 'pagination',
     'rest_framework',
     'markupfield',
     'simple_history',
     'storages',
-    'haystack',
-    'captcha',
-    "elasticstack",     # TODO: Do we need this?
-    'oauth2_provider',
-    'corsheaders',
+    # 'haystack',
+    # 'captcha',
+    # "elasticstack",     # TODO: Do we need this?
+    # 'oauth2_provider',
+    # 'corsheaders',
     'zotero',
     'openurl',
     'curation',
-    'rules',
+    # 'guardian',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'pagination.middleware.PaginationMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    # 'django.contrib.messages.middleware.MessageMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
+    # 'simple_history.middleware.HistoryRequestMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
+    # 'pagination.middleware.PaginationMiddleware',
 )
 
 
@@ -109,55 +109,56 @@ WSGI_APPLICATION = 'isiscb.wsgi.application'
 
 DATABASES = {
     'default': {
+
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['RDS_DB_NAME'],
-        'USER': os.environ['RDS_USERNAME'],
-        'PASSWORD': os.environ['RDS_PASSWORD'],
-        'HOST': os.environ['RDS_HOSTNAME'],
-        'PORT': os.environ['RDS_PORT'],
+        'NAME': 'isiscb',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
-ELASTICSEARCH_HOST = os.environ['ELASTICSEARCH_HOST']
-ELASTICSEARCH_INDEX = os.environ['ELASTICSEARCH_INDEX']
+ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
+ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-        # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-        'URL': ELASTICSEARCH_HOST,
-        'INDEX_NAME': ELASTICSEARCH_INDEX,
-    },
-}
-
-ELASTICSEARCH_INDEX_SETTINGS = {
-     "settings" : {
-         "analysis" : {
-             "analyzer" : {
-                 "default" : {
-                     "tokenizer" : "standard",
-                     "filter" : ["standard", "asciifolding"]
-                 }
-             }
-         }
-     }
- }
+# HAYSTACK_CONNECTIONS = {
+#     'default': {
+#         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+#         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+#         'URL': ELASTICSEARCH_HOST,
+#         'INDEX_NAME': ELASTICSEARCH_INDEX,
+#     },
+# }
+#
+# ELASTICSEARCH_INDEX_SETTINGS = {
+#      "settings" : {
+#          "analysis" : {
+#              "analyzer" : {
+#                  "default" : {
+#                      "tokenizer" : "standard",
+#                      "filter" : ["standard", "asciifolding"]
+#                  }
+#              }
+#          }
+#      }
+#  }
 
 
 ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    },
-    'search_results_cache': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'search_cache',
-    }
-}
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#         'LOCATION': 'unique-snowflake',
+#     },
+#     'search_results_cache': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'search_cache',
+#     }
+# }
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+# SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -193,17 +194,17 @@ REST_FRAMEWORK = {
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
-AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-AWS_MEDIA_BUCKET_NAME = os.environ['AWS_MEDIA_BUCKET_NAME']
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY']
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME', '')
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY', '')
 AWS_S3_CUSTOM_DOMAIN = 's3.amazonaws.com'
 AWS_S3_SECURE_URLS = True
 
-STATICFILES_DIRS = ['isisdata/static']
-STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
-STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
-# STATIC_URL ='/static/'
+# STATICFILES_DIRS = ['isisdata/static']
+# STATICFILES_LOCATION = '%s/static' % AWS_STORAGE_BUCKET_NAME
+# STATICFILES_STORAGE = 'custom_storages.StaticStorage'
+# STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
+STATIC_URL ='/static/'
 
 # STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
@@ -218,32 +219,32 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
-DOMAIN = os.environ['DJANGO_DOMAIN']
-URI_PREFIX = os.environ['DJANGO_URI_PREFIX']
+DOMAIN = os.environ.get('DJANGO_DOMAIN', '')
+URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = os.environ['SMTP_USER']
-EMAIL_HOST_PASSWORD = os.environ['SMTP_PASSWORD']
-EMAIL_HOST = os.environ['SMTP_HOST']
-SMTP_EMAIL = os.environ['SMTP_EMAIL']
+EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+EMAIL_HOST = os.environ.get('SMTP_HOST', '')
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
 
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
-SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
-SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
 
 TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
-GOOGLE_ANALYTICS_ID = os.environ['GOOGLE_ANALYTICS_ID']
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
 
 
 LICENSE = """This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License."""
@@ -254,7 +255,21 @@ MARKUP_FIELD_TYPES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.twitter.TwitterOAuth',
-    'social.backends.facebook.FacebookOAuth2',
+    # 'social.backends.twitter.TwitterOAuth',
+    # 'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+
+class DisableMigrations(object):
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return "notmigrations"
+
+MIGRATION_MODULES = DisableMigrations()

@@ -13,6 +13,24 @@ import pprint
 
 from collections import Counter
 
+def _update_or_create(model, pk, data):
+    try:
+        instance = model.objects.get(pk=pk)
+        for key, value in data.iteritems():
+            if key == 'id':
+                pass
+            setattr(instance, key, value)
+        instance.save()
+    except model.DoesNotExist:
+        instance = model.objects.create(**data)
+        for key, value in data.iteritems():
+            print key, value
+            if getattr(instance, key) != value:
+                setattr(instance, key, value)
+        instance.save()
+
+    return instance
+
 
 with open('isisdata/fixtures/language.json', 'r') as f:
     languages = json.load(f)
@@ -108,6 +126,7 @@ class FMPDSOParser(object):
 
     @staticmethod
     def _handle_record_status(model_name, fm_field, fm_value):
+        fm_value = fm_value.title()
         if not fm_value:
             return True, u'Active', u'Set active by default'
         match = re.match('(In)?[aA]ctive(.*)', fm_value)
@@ -122,7 +141,7 @@ class FMPDSOParser(object):
                 explanation_raw = match.groups()[0].strip()
                 public, status, explanation = False, u'Redirect', explanation_raw
             else:
-                public, status, explanation = True, u'A ctive', u''
+                public, status, explanation = True, u'Active', u''
         return public, status, explanation
 
     @staticmethod
@@ -573,8 +592,12 @@ class DatabaseHandler(object):
     def __init__(self, print_every=200):
         self.model_counts = Counter()
         self.print_every = print_every
-        with open('ingest_errors.pickle', 'r') as f:
-            self.errors = pickle.load(f)
+        self.errors = []
+        try:
+            with open('ingest_errors.pickle', 'r') as f:
+                self.errors += pickle.load(f)
+        except:
+            pass
 
     def _tick(self, model_name):
         self.model_counts[model_name] += 1
@@ -719,6 +742,9 @@ class DatabaseHandler(object):
         authority_data = self._prepare_data(Authority, fielddata)
         person_data = self._prepare_data(Person, extra[0])
 
+        if authority_data['record_status_value'] == CuratedMixin.ACTIVE:
+            authority_data['public'] = True
+
         if person_data and authority_data.get('type_controlled') == 'PE':
             model = Person
             authority_data.update(person_data)
@@ -731,8 +757,9 @@ class DatabaseHandler(object):
                 pk=authority_id,
                 defaults=authority_data
             )
+
         except Exception as E:
-            print authority_data, authority_id
+            self.errors.append(('authority', E.__repr__(), authority_id, authority_data))
             raise E
         self._tick('authority')
 
@@ -830,17 +857,20 @@ class DatabaseHandler(object):
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
             return
 
-        if type(value_data) in [list, tuple] and len(value_data) == 2:
+
+        if type_controlled == 'BirthToDeathDates' or \
+            (type(value_data) in [list, tuple] and len(value_data) == 2):
             value_model = ISODateRangeValue
         elif 'date' in type_controlled.lower():
             value_model = ISODateValue
         else:
             value_model = dict(VALUE_MODELS)[type(value_data)]
 
-        attribute_type, _ = AttributeType.objects.get_or_create(
+        value_model_ctype = ContentType.objects.get_for_model(value_model)
+        attribute_type, _ = AttributeType.objects.update_or_create(
             name=type_controlled,
             defaults={
-                'value_content_type_id': ContentType.objects.get_for_model(value_model).id
+                'value_content_type_id': value_model_ctype.id
             }
         )
 
@@ -856,26 +886,26 @@ class DatabaseHandler(object):
             print E.__repr__(), attribute_id, attribute_data
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
 
-        try:
-            if not hasattr(attribute, 'value'):
+        # try:
+        if not hasattr(attribute, 'value'):
+            value = value_model.objects.create(
+                value=value_data,
+                attribute=attribute
+            )
+        else:
+            child_class = attribute.value.get_child_class()
+            if type(child_class) != value_model:
+                attribute.value.delete()
                 value = value_model.objects.create(
                     value=value_data,
                     attribute=attribute
                 )
             else:
-                child_class = attribute.value.get_child_class()
-                if type(child_class) != value_model:
-                    attribute.value.delete()
-                    value = value_model.objects.create(
-                        value=value_data,
-                        attribute=attribute
-                    )
-                else:
-                    self._update_with(attribute.value, {'value': value_data})
-                    value = attribute.value
-        except Exception as E:
-            print E.__repr__(), attribute_id, attribute_data
-            self.errors.append(('value', E.__repr__(), attribute_id, value_data))
+                self._update_with(attribute.value, {'value': value_data})
+                value = attribute.value
+        # except Exception as E:
+        #     print E.__repr__(), attribute_id, attribute_data
+        #     self.errors.append(('value', E.__repr__(), attribute_id, value_data))
 
         if 'value_freeform' not in attribute_data or not attribute.value_freeform:
             attribute.value_freeform = attribute.value.__unicode__()
