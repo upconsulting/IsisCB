@@ -13,6 +13,8 @@
             <th>Author/Editor(s)</th>
             <th>Published</th>
             <th>Periodical</th>
+            <th>Modified</th>
+            <th>Created</th>
         </tr>
     </thead>
     <tbody>
@@ -37,6 +39,12 @@
                 <a href="{% url "curate_citation" object.id %}?tab=acrelations">
                     {{ object|get_citation_periodical }}
                 </a>
+            </td>
+            <td>
+                {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
+            </td>
+            <td>
+                {% if object.created_on %}{{ object.created_on }}{% else %}{{ object.created_on_fm }}{% endif %}
             </td>
         </tr>
         {% endfor %}
