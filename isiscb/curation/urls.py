@@ -53,6 +53,7 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
     url(r'^(?i)users/role/$', views.add_role, name='create_role'),
     url(r'^(?i)users/roles/$', views.roles, name='roles'),
+    url(r'^(?i)users/role/delete/(?P<role_id>[0-9]+)/$', views.delete_role, name='delete_role'),
     url(r'^(?i)users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
     url(r'^(?i)users/rule/dataset/(?P<role_id>[0-9]+)/$', views.add_dataset_rule, name='create_rule_dataset'),
     url(r'^(?i)users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),

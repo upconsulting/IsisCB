@@ -426,9 +426,25 @@ def remove_role(request, user_id, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     user = get_object_or_404(User, pk=user_id)
 
-    role.users.remove(user)
+    if request.method == 'POST':
+        role.users.remove(user)
 
     return redirect('user', user_id=user.pk)
+
+@staff_member_required
+@check_rules('can_update_user_module')
+def delete_role(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    if request.method == 'POST':
+        if role.users.all():
+            usernames = [user.username for user in role.users.all()]
+            message = "Only roles that are not assigned to any user can be deleted. This role has the following users assigned: " + ", ".join(usernames) + "."
+            messages.add_message(request, messages.ERROR, message)
+        else:
+            role.delete()
+
+    return redirect('roles')
 
 @staff_member_required
 @check_rules('can_view_user_module')
@@ -663,7 +679,8 @@ def remove_rule(request, role_id, rule_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     rule = get_object_or_404(AccessRule, pk=rule_id)
 
-    rule.delete()
+    if request.method == 'POST':
+        rule.delete()
 
     return redirect('role', role_id=role.pk)
 

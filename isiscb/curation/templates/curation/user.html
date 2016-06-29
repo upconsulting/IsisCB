@@ -85,7 +85,11 @@
     {% for role in selected_user.pk|roles %}
     <tr>
       <td><a href="{% url 'role' role.pk %}">{{ role.name }}</a></td>
-      <td>{% if update_module %}<a title="Remove Role" href="{% url 'remove_role' selected_user.pk role.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove</a>{% endif %}</td>
+      <td>
+        {% if update_module %}
+        <form action="{% url 'remove_role' selected_user.pk role.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Role" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Role</small></button></form>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
 </tbody>

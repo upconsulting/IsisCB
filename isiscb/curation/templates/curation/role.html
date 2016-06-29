@@ -75,7 +75,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Limited Dataset</td>
       <td>User has access to records with dataset '{{ rule.dataset }}'.</td>
-      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
+      <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
@@ -85,7 +85,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Permitted Action</td>
       <td>User can <span class="label label-warning">{{ rule.crud_action }}</span> records.</td>
-      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
+      <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
@@ -95,7 +95,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>Field Access <span class="label label-info">{{ rule.get_object_type_display }}</span></td>
       <td>User <span class="label label-warning">{{ rule.get_field_action_display }}</span> field '{{ rule.field_name }}'.</td>
-      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
+      <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
@@ -105,7 +105,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <tr>
       <td>User Module Access</td>
       <td>User can <span class="label label-warning">{{ rule.get_module_action_display }}</span> user module.</td>
-      <td>{% if update_module %}<a title="Remove Rule" href="{% url 'remove_rule' role.id rule.id %}"><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</a>{% endif %}</td>
+      <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
 {% endfor %}
 {% endif %}
