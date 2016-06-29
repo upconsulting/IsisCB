@@ -42,12 +42,6 @@
             <div class="col-sm-4">
                 <div class="h4">Citation Details</div>
 
-                {% for field in form %}
-                {% test_rule 'can_update_citation_field' user field.name as can_update %}
-                {% if can_update %}
-                Can update
-                {% endif %}
-
                 {% for error in form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
@@ -265,6 +259,7 @@
                 </ul>
             </div>
             <div class="col-sm-5">
+                <div class="h4">&nbsp;</div>
                 {% for error in form.abstract.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
@@ -343,7 +338,8 @@
     </div>
     <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
         <ul class="list-group">
-        {% for ccrelation in instance.ccrelation_set.all %}
+        {% for ccrelation in instance.relations_from.all %}
+
             <a class="list-group-item">
                 {% if instance.id == ccrelation.subject.id %}
                 <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
@@ -367,6 +363,34 @@
                 <span class="glyphicon glyphicon-chevron-right pull-right"></span>
             </a>
         {% endfor %}
+        {% for ccrelation in instance.relations_to.all %}
+
+            <a class="list-group-item">
+                {% if instance.id == ccrelation.subject.id %}
+                <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+                {% else %}
+
+                The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title }}</span>
+
+                {% endif %}
+                <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+                {% if ccrelation.type_free %}
+                <span class="label label-success">{{ ccrelation.type_free }}</span>
+                {% endif %}
+
+                {% if instance.id == ccrelation.object.id %}
+                <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+                {% else %}
+                the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title }}</span>.
+                {% endif %}
+
+
+                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+            </a>
+        {% endfor %}
+            <a class="list-group-item text-muted" href="{% url "create_ccrelation_for_citation" instance.id %}">
+                <span class="glyphicon glyphicon-plus"></span> Create new relation
+            </a>
         </ul>
 
     </div>

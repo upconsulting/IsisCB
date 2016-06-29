@@ -24,14 +24,6 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                {% for error in form.name.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.name.label }}</label>
-                    {{ form.name|addcss:"form-control" }}
-                </div>
-
                 {% for error in form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
@@ -40,43 +32,23 @@
                     {{ form.type_controlled|addcss:"form-control" }}
                 </div>
 
-                {% for error in form.type_broad_controlled.errors %}
+                {% for error in form.description.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.type_broad_controlled.label }}</label>
-                    {{ form.type_broad_controlled|addcss:"form-control" }}
+                    <label>{{ form.description.label }}</label>
+                    {{ form.description|addcss:"form-control" }}
                 </div>
 
-                {% for error in form.name_for_display_in_citation.errors %}
+                {% for error in form.data_display_order.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.name_for_display_in_citation.label }}</label>
-                    {{ form.name_for_display_in_citation|addcss:"form-control" }}
+                    <label>{{ form.data_display_order.label }}</label>
+                    {{ form.data_display_order|addcss:"form-control" }}
                 </div>
 
-                <div class="row">
-                    <div class="col-xs-6">
-                        {% for error in form.data_display_order.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.data_display_order.label }}</label>
-                            {{ form.data_display_order|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-                        {% for error in form.confidence_measure.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.confidence_measure.label }}</label>
-                            {{ form.confidence_measure|addcss:"form-control" }}
-                        </div>
-                    </div>
 
-                </div>
                 <div class="row">
 
                     <div class="col-xs-6">
@@ -98,18 +70,40 @@
                         </div>
                     </div>
                 </div>
-                {{ form.authority }}
-                {{ form.citation }}
+                {{ form.subject }}
+                {{ form.object }}
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Authority</label>
+                    <label>Subject</label>
                     <input type="text"
-                        class="form-control"
-                        name="authority-search"
-                        id="authority-search" />
+                        id="citation-search-subject"
+                        class="form-control citation-search"
+                        name="citation-search"
+                        results-target="#subject-results-container"
+                        selected-result-target="#id_ccrelation-subject"
+                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}/>
                 </div>
-                <ul class="list-group" id="results-container"></ul>
+                <ul class="list-group" id="subject-results-container"></ul>
+
+
+                <div class="text-center">
+                    <div class="button-group">
+                        <span class="btn btn-lg glyphicon glyphicon-refresh"
+                            id="swap-subject-object"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Object</label>
+                    <input type="text"
+                        id="citation-search-object"
+                        class="form-control citation-search"
+                        name="citation-search"
+                        results-target="#object-results-container"
+                        selected-result-target="#id_ccrelation-object" />
+                </div>
+                <ul class="list-group" id="object-results-container"></ul>
             </div>
         </div>
         <div class="clearfix">
@@ -130,32 +124,62 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var authority_name = "{% if acrelation %}{{ acrelation.authority.name }}{% endif %}";
-    if (authority_name.length > 0) {
-        $('#authority-search').val(authority_name);
-        $('#authority-search').attr('disabled', true);
-    } else {
-        $('#authority-search').on('keyup', function(e) {
-            var query = $(this).val();
-            $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
-                success: function(result) {
-                    $('#results-container').empty();
-                    result.results.forEach(function(r) {
-                        $('#results-container').append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.name + '"><span class="label label-primary">' + r.type + '</span> ' + r.name + ' | <span class="text-muted">' + r.description + '</span></a>');
-                    });
-
-                    $('.search-result').click(function() {
-                        var selected = $(this);
-                        var selected_id = selected.attr('data-id');
-                        var selected_name = selected.attr('data-name');
-                        $('#results-container').empty();
-                        $('#authority-search').val(selected_name);
-                        $('#id_acrelation-authority').val(selected_id);
-                    });
-                }
-            });
-        });
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subect.title }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object.title }}{% endif %}";
+    if (subject_name.length > 0) {
+        $('#citation-search-subject').val(subject_name);
+        $('#citation-search-subject').attr('disabled', true);
     }
+
+    if (object_name.length > 0) {
+        $('#citation-search-object').val(object_name);
+        $('#citation-search-object').attr('disabled', true);
+    }
+
+    $('#swap-subject-object').click(function() {
+        var subject_name = $('#citation-search-subject').val();
+        var object_name = $('#citation-search-object').val();
+        var subject_id = $('#id_ccrelation-subject').val();
+        var object_id = $('#id_ccrelation-object').val();
+
+        $('#citation-search-subject').val(object_name);
+        $('#citation-search-object').val(subject_name);
+        $('#id_ccrelation-subject').val(object_id);
+        $('#id_ccrelation-object').val(subject_id);
+
+        $('.citation-search').each(function(i, elem) {
+            $($(elem).attr('results-target')).empty();
+        });
+    });
+
+
+    $('.citation-search').on('keyup', function(e) {
+        var search_input = $(this);
+        var query = search_input.val();
+        console.log('query', query);
+        var results_container = $($(this).attr('results-target'));
+        console.log('results_container', results_container);
+        var id_result_container = $($(this).attr('selected-result-target'));
+
+        $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+            success: function(result) {
+                console.log('success', results_container);
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    results_container.append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.title + '"><span class="label label-primary">' + r.type + '</span> ' + r.title + ' (' + r.id + ') | <span class="text-muted">' + r.description + '</span></a>');
+                });
+
+                $('.search-result').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    results_container.empty();
+                    search_input.val(selected_name);
+                    id_result_container.val(selected_id);
+                });
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

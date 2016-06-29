@@ -3,6 +3,27 @@ from django import forms
 from isisdata.models import *
 
 
+class CCRelationForm(forms.ModelForm):
+    subject = forms.CharField(widget=forms.HiddenInput())
+    object = forms.CharField(widget=forms.HiddenInput())
+
+    class Meta:
+        model = CCRelation
+        fields = [
+            'type_controlled', 'description', 'data_display_order', 'subject',
+            'object', 'record_status_value', 'record_status_explanation'
+        ]
+
+    def clean(self):
+        super(CCRelationForm, self).clean()
+        subject_id = self.cleaned_data['subject']
+        self.cleaned_data['subject'] = Citation.objects.get(pk=subject_id)
+
+        object_id = self.cleaned_data['object']
+        self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
+
+
+
 class ACRelationForm(forms.ModelForm):
     authority = forms.CharField(widget=forms.HiddenInput())
     citation = forms.CharField(widget=forms.HiddenInput())
@@ -11,7 +32,7 @@ class ACRelationForm(forms.ModelForm):
     class Meta:
         model = ACRelation
         fields = [
-            'name', 'type_controlled', 'type_broad_controlled',
+            'type_controlled', 'type_broad_controlled',
             'name_for_display_in_citation', 'data_display_order',
             'confidence_measure', 'authority', 'citation',
             'record_status_value', 'record_status_explanation'
