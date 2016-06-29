@@ -1,7 +1,26 @@
+from __future__ import absolute_import
+
 from django.conf.urls import include, url
 
 from curation import views
+import rules
+from .rules import *
 
+rules.add_rule('is_accessible_by_dataset',is_accessible_by_dataset)
+rules.add_rule('can_view_record', can_view_record)
+rules.add_rule('can_edit_record', can_edit_record)
+rules.add_rule('can_create_record', can_create_record)
+rules.add_rule('can_delete_record', can_delete_record)
+rules.add_rule('can_view_citation_field', can_view_citation_field)
+rules.add_rule('can_update_citation_field', can_update_citation_field)
+
+can_access_and_view = is_accessible_by_dataset & can_view_record
+rules.add_rule('can_access_and_view', can_access_and_view)
+
+can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
+rules.add_rule('can_access_view_edit', can_access_view_edit)
+
+rules.add_perm('curation.change_record', can_edit_record)
 
 urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
@@ -18,7 +37,15 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/attribute/(?P<attribute_id>[A-Z0-9]+)/$', views.attribute_for_authority, name='update_attribute_for_authority'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/attribute/(?P<attribute_id>[A-Z0-9]+)/delete/$', views.delete_attribute_for_authority, name='delete_attribute_for_authority'),
     url(r'^(?i)users/$', views.users, name='user_list'),
-
+    url(r'^(?i)users/(?P<user_id>[0-9]+)$', views.user, name='user'),
+    url(r'^(?i)users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', views.remove_role, name='remove_role'),
+    url(r'^(?i)users/addrole/(?P<user_edit_id>[0-9]+)/$', views.add_role_to_user, name='add_role_to_user'),
     url(r'^(?i)qdsearch/authority/$', views.quick_and_dirty_authority_search, name='quick_and_dirty_authority_search'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
+    url(r'^(?i)users/role/$', views.add_role, name='create_role'),
+    url(r'^(?i)users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
+    url(r'^(?i)users/rule/dataset/(?P<role_id>[0-9]+)/$', views.add_dataset_rule, name='create_rule_dataset'),
+    url(r'^(?i)users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),
+    url(r'^(?i)users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', views.add_field_rule, name='create_rule_citation_field'),
+    url(r'^(?i)users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', views.remove_rule, name='remove_rule'),
 ]

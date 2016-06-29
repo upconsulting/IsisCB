@@ -3,12 +3,14 @@ from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
+
 
 from markupfield.fields import MarkupField
 
@@ -1828,3 +1830,81 @@ class UserProfile(models.Model):
                                             help_text=help_text("""
     A user can 'claim' an Authority record, asserting that the record refers to
     theirself."""))
+
+# ---------------------- Curation models ----------------------------
+
+class IsisCBRole(models.Model):
+    """
+    Supports permission mechanism for IsisCB
+    """
+    name = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(null=True, blank=True)
+
+    users = models.ManyToManyField(User)
+
+    @property
+    def dataset_rules(self):
+        return DatasetRule.objects.filter(role=self.pk)
+
+    @property
+    def crud_rules(self):
+        return CRUDRule.objects.filter(role=self.pk)
+
+    @property
+    def field_rules(self):
+        return FieldRule.objects.filter(role=self.pk)
+
+class AccessRule(models.Model):
+    """
+    Parent class for all rules
+    """
+    name = models.CharField(max_length=255, blank=True, null=True)
+
+    role = models.ForeignKey(IsisCBRole, null=True, blank=True,
+                                    help_text=help_text("""The role a rules belongs to."""))
+
+    CITATION = 'citation'
+    AUTHORITY = 'authority'
+    OBJECT_TYPES = (
+        (CITATION, 'Citation'),
+        (AUTHORITY, 'Authority'),
+    )
+    object_type = models.CharField(max_length=255, null=True, blank=True,
+                                       choices=OBJECT_TYPES)
+
+
+class CRUDRule(AccessRule):
+    """
+    This rule defines a CRUD permission on all records, e.g. edit all records.
+    """
+    CREATE = 'create'
+    VIEW = 'view'
+    UPDATE = 'update'
+    DELETE = 'delete'
+    CRUD_CHOICES = (
+        (CREATE, 'Create'),
+        (VIEW, 'View'),
+        (UPDATE, 'Update'),
+        (DELETE, 'Delete'),
+    )
+    crud_action = models.CharField(max_length=255, null=False, blank=False,
+                                       choices=CRUD_CHOICES)
+class FieldRule(AccessRule):
+    """
+    This rule defines edit access to a specific field.
+    """
+    field_name = models.CharField(max_length=255, null=False, blank=False)
+
+    CANNOT_VIEW = 'cannot_view'
+    CANNOT_UPDATE = 'cannot_update'
+    FIELD_CHOICES = (
+        (CANNOT_VIEW, 'Cannot View'),
+        (CANNOT_UPDATE, 'Cannot Update'),
+    )
+    field_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
+class DatasetRule(AccessRule):
+    """
+    This rules limits the records a user has access to to a specific dataset.
+    """
+    dataset = models.CharField(max_length=255, null=False, blank=False)

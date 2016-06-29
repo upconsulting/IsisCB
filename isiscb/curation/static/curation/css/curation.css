@@ -27,3 +27,7 @@
 .table-curation {
     font-size: 9pt;
 }
+
+.error {
+  color: #a70404;
+}
