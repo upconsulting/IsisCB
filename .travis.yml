@@ -18,7 +18,6 @@ script:
 - pip install nose
 - cd isiscb
 - git clone http://github.com/ubernostrum/django-registration.git --depth 2
-- python manage.py migrate
 - python -Wi manage.py test
 - cd ..
 deploy:
