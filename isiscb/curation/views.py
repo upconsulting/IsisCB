@@ -442,15 +442,14 @@ def add_role(request, user_id=None):
         if form.is_valid():
             role = form.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('roles')
         else:
             template = loader.get_template('curation/add_role.html')
             context.update({
                 'form': form,
             })
     else:
-        # for now just redirect to user page in any other case
-        template = loader.get_template('curation/users.html')
+        return redirect('roles')
 
     return HttpResponse(template.render(context))
 
@@ -460,9 +459,25 @@ def remove_role(request, user_id, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     user = get_object_or_404(User, pk=user_id)
 
-    role.users.remove(user)
+    if request.method == 'POST':
+        role.users.remove(user)
 
     return redirect('user', user_id=user.pk)
+
+@staff_member_required
+@check_rules('can_update_user_module')
+def delete_role(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    if request.method == 'POST':
+        if role.users.all():
+            usernames = [user.username for user in role.users.all()]
+            message = "Only roles that are not assigned to any user can be deleted. This role has the following users assigned: " + ", ".join(usernames) + "."
+            messages.add_message(request, messages.ERROR, message)
+        else:
+            role.delete()
+
+    return redirect('roles')
 
 @staff_member_required
 @check_rules('can_view_user_module')
@@ -473,6 +488,19 @@ def role(request, role_id, user_id=None):
     context = RequestContext(request, {
         'curation_section': 'users',
         'role': role,
+    })
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+@check_rules('can_view_user_module')
+def roles(request):
+    roles = IsisCBRole.objects.all()
+
+    template = loader.get_template('curation/roles.html')
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'roles': roles,
     })
 
     return HttpResponse(template.render(context))
@@ -684,7 +712,8 @@ def remove_rule(request, role_id, rule_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
     rule = get_object_or_404(AccessRule, pk=rule_id)
 
-    rule.delete()
+    if request.method == 'POST':
+        rule.delete()
 
     return redirect('role', role_id=role.pk)
 
