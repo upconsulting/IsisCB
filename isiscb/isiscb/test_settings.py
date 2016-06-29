@@ -227,7 +227,7 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
 EMAIL_HOST = os.environ.get('SMTP_HOST', '')
-SMTP_EMAIL = os.environget('SMTP_EMAIL', '')
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
