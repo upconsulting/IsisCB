@@ -175,6 +175,13 @@ class FieldRuleAuthorityForm(forms.ModelForm):
             'field_action', 'field_name',
         ]
 
+class UserModuleRuleForm(forms.ModelForm):
+    class Meta:
+        model = UserModuleRule
+        fields = [
+            'module_action',
+        ]
+
 class AttributeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
