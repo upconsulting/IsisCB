@@ -31,6 +31,40 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
+
+@staff_member_required
+def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    ccrelation = None
+    if ccrelation_id:
+        ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'ccrelation': ccrelation,
+    })
+    if request.method == 'GET':
+        if ccrelation:
+            form = CCRelationForm(instance=ccrelation, prefix='ccrelation')
+        else:
+            form = CCRelationForm(prefix='ccrelation', initial={'subject': citation.id})
+
+    elif request.method == 'POST':
+        form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/citation_ccrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+#@staff_member_required
+#@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 @staff_member_required
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -52,8 +86,6 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
-
-
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
@@ -63,6 +95,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     })
     template = loader.get_template('curation/citation_acrelation_changeview.html')
     return HttpResponse(template.render(context))
+
 
 @staff_member_required
 def delete_attribute_for_citation(request, citation_id, attribute_id):
@@ -654,6 +687,25 @@ def remove_rule(request, role_id, rule_id):
     rule.delete()
 
     return redirect('role', role_id=role.pk)
+
+
+@staff_member_required
+def quick_and_dirty_citation_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+
+    queryset = Citation.objects.all()
+    for part in q.split():
+        queryset = queryset.filter(title__icontains=part)
+    results = [{
+        'id': obj.id,
+        'type': obj.get_type_controlled_display(),
+        'title': obj.title,
+        'description': obj.description,
+        'url': obj.get_absolute_url(),
+    } for obj in queryset[:20]]
+    return JsonResponse({'results': results})
 
 
 @staff_member_required
