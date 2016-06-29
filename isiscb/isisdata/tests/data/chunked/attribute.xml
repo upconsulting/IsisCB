@@ -1,0 +1,561 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FMPDSORESULT xmlns:ns0="http://www.filemaker.com/fmpdsoresult" xmlns="http://www.filemaker.com/fmpdsoresult">
+    <ns0:ROW MODID="9" RECORDID="9">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000-05-03</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000009</ns0:ID>
+        <ns0:ID.Subject.link>CBB000111626</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="10">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000010</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110001</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="11">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1999</ns0:DateAttribute.free>
+        <ns0:DateBegin>1999</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1999</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000011</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110002</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="12">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000012</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110003</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="13">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000013</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110004</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="14">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2001</ns0:DateAttribute.free>
+        <ns0:DateBegin>2001</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2001</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000014</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110005</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="15">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000015</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110006</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="16">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1999</ns0:DateAttribute.free>
+        <ns0:DateBegin>1999</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1999</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000016</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110007</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="17">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000017</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110008</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="18">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000018</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110009</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="19">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000019</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110010</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="20">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000020</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110011</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="9" RECORDID="21">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 4:20:39 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>2000</ns0:DateAttribute.free>
+        <ns0:DateBegin>2000</ns0:DateBegin>
+        <ns0:DateBegin.ISO>2000</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO />
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000000021</ns0:ID>
+        <ns0:ID.Subject.link>CBB000110012</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>spw</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/1/2016 6:40:52 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes />
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>PublicationDate</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="15" RECORDID="204041">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 6:19:22 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1916-1973</ns0:DateAttribute.free>
+        <ns0:DateBegin>1916</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1916</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd>1973</ns0:DateEnd>
+        <ns0:DateEnd.ISO>1973</ns0:DateEnd.ISO>
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000204033</ns0:ID>
+        <ns0:ID.Subject.link>CBA000073481</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/13/2016 12:26:13 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Stephen Weldon converted the ISO dates for this record on about March 15, 2015.. </ns0:StaffNotes>
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>BirthToDeathDates</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="15" RECORDID="204042">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 6:19:22 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1916-1972</ns0:DateAttribute.free>
+        <ns0:DateBegin>1916</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1916</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd>1972</ns0:DateEnd>
+        <ns0:DateEnd.ISO>1972</ns0:DateEnd.ISO>
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000204034</ns0:ID>
+        <ns0:ID.Subject.link>CBA000018872</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/13/2016 12:26:13 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Stephen Weldon converted the ISO dates for this record on about March 15, 2015.. </ns0:StaffNotes>
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>BirthToDeathDates</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="15" RECORDID="204043">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 6:19:22 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1916-</ns0:DateAttribute.free>
+        <ns0:DateBegin>1916</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1916</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO>unknown</ns0:DateEnd.ISO>
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000204035</ns0:ID>
+        <ns0:ID.Subject.link>CBA000019231</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/13/2016 12:26:13 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Stephen Weldon converted the ISO dates for this record on about March 15, 2015.. </ns0:StaffNotes>
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>BirthToDeathDates</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="15" RECORDID="204044">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 6:19:22 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1916-</ns0:DateAttribute.free>
+        <ns0:DateBegin>1916</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1916</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO>unknown</ns0:DateEnd.ISO>
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000204036</ns0:ID>
+        <ns0:ID.Subject.link>CBA000060556</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/13/2016 12:26:13 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Stephen Weldon converted the ISO dates for this record on about March 15, 2015.. </ns0:StaffNotes>
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>BirthToDeathDates</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+    <ns0:ROW MODID="15" RECORDID="204045">
+        <ns0:CreatedBy>spw</ns0:CreatedBy>
+        <ns0:CreatedOn>7/16/2015 6:19:22 PM</ns0:CreatedOn>
+        <ns0:Dataset />
+        <ns0:DateAttribute.free>1916-</ns0:DateAttribute.free>
+        <ns0:DateBegin>1916</ns0:DateBegin>
+        <ns0:DateBegin.ISO>1916</ns0:DateBegin.ISO>
+        <ns0:DateBeginQualifier />
+        <ns0:DateEnd />
+        <ns0:DateEnd.ISO>unknown</ns0:DateEnd.ISO>
+        <ns0:DateEndQualifier />
+        <ns0:DateNote />
+        <ns0:Description />
+        <ns0:ID>ATT000204037</ns0:ID>
+        <ns0:ID.Subject.link>CBA000042082</ns0:ID.Subject.link>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>6/13/2016 12:26:13 PM</ns0:ModifiedOn>
+        <ns0:Place.controlled />
+        <ns0:PlaceAttribute.free />
+        <ns0:PlaceGISField1 />
+        <ns0:PlaceGISField2 />
+        <ns0:PlaceGISSchema />
+        <ns0:PlaceNote />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:StaffNotes>Stephen Weldon converted the ISO dates for this record on about March 15, 2015.. </ns0:StaffNotes>
+        <ns0:Type.Broad.controlled />
+        <ns0:Type.controlled>BirthToDeathDates</ns0:Type.controlled>
+        <ns0:Type.free />
+    </ns0:ROW>
+</FMPDSORESULT>

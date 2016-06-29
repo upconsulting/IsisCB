@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FMPDSORESULT xmlns:ns0="http://www.filemaker.com/fmpdsoresult" xmlns="http://www.filemaker.com/fmpdsoresult">
+    <ns0:ROW MODID="6" RECORDID="165030">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem />
+        <ns0:CreatedBy>admin</ns0:CreatedBy>
+        <ns0:CreatedOn>5/20/2016 11:10:29 AM</ns0:CreatedOn>
+        <ns0:Description />
+        <ns0:ID>CBA000167135</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/20/2016 11:11:42 AM</ns0:ModifiedOn>
+        <ns0:Name>Perugia: Edizioni Centro Stampa</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Imported from Filemaker conversion table on May 27, 2016.  Created during the 2015 conversion conversion</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>Publisher</ns0:Type.controlled>
+    </ns0:ROW>
+    <ns0:ROW MODID="6" RECORDID="164954">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem />
+        <ns0:CreatedBy>admin</ns0:CreatedBy>
+        <ns0:CreatedOn>4/18/2016 1:23:28 PM</ns0:CreatedOn>
+        <ns0:Description />
+        <ns0:ID>CBA000167056</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/13/2016 1:46:24 PM</ns0:ModifiedOn>
+        <ns0:Name>Prince, Lisa C.</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Imported from Filemaker conversion table on May 27, 2016.  Created on 2016.04.18 during 2015 IsisCB data conversion</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>Person</ns0:Type.controlled>
+    </ns0:ROW>
+    <ns0:ROW MODID="6" RECORDID="164586">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem />
+        <ns0:CreatedBy>admin</ns0:CreatedBy>
+        <ns0:CreatedOn>4/18/2016 1:23:28 PM</ns0:CreatedOn>
+        <ns0:Description />
+        <ns0:ID>CBA000166688</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/13/2016 1:46:24 PM</ns0:ModifiedOn>
+        <ns0:Name>Deutsch-norwegisches Stipendienprogramm für Geschichtswissenschaften (Ruhrgas-Stipendium)</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Imported from Filemaker conversion table on May 27, 2016.  Created on 2016.04.18 during 2015 IsisCB data conversion</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>Institution</ns0:Type.controlled>
+    </ns0:ROW>
+    <ns0:ROW MODID="6" RECORDID="163093">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem />
+        <ns0:CreatedBy>admin</ns0:CreatedBy>
+        <ns0:CreatedOn>4/18/2016 1:23:28 PM</ns0:CreatedOn>
+        <ns0:Description />
+        <ns0:ID>CBA000165193</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/13/2016 1:46:24 PM</ns0:ModifiedOn>
+        <ns0:Name>Zambua</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Imported from Filemaker conversion table on May 27, 2016.  Created from Thesaurus in old FileMaker during 2015</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>GeographicTerm</ns0:Type.controlled>
+    </ns0:ROW>
+    <ns0:ROW MODID="6" RECORDID="163090">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem>Weldon Thesaurus Terms (2002-present)</ns0:ClassificationSystem>
+        <ns0:CreatedBy>admin</ns0:CreatedBy>
+        <ns0:CreatedOn>4/18/2016 1:23:28 PM</ns0:CreatedOn>
+        <ns0:Description />
+        <ns0:ID>CBA000165190</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>5/13/2016 1:46:24 PM</ns0:ModifiedOn>
+        <ns0:Name>Speleology</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory>Imported from Filemaker conversion table on May 27, 2016.  Created from Thesaurus in old FileMaker during 2015</ns0:RecordHistory>
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Active</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>Concept</ns0:Type.controlled>
+    </ns0:ROW>
+    <ns0:ROW MODID="13" RECORDID="122897">
+        <ns0:ClassificationCode />
+        <ns0:ClassificationHierarchy />
+        <ns0:ClassificationSystem />
+        <ns0:CreatedBy />
+        <ns0:CreatedOn />
+        <ns0:Description />
+        <ns0:ID>CBA000031356</ns0:ID>
+        <ns0:ModifiedBy>admin</ns0:ModifiedBy>
+        <ns0:ModifiedOn>11/13/2015 12:26:35 PM</ns0:ModifiedOn>
+        <ns0:Name>FernÃ¡ndez Perez, JoaquÃ­n</ns0:Name>
+        <ns0:PersonalNameFirst />
+        <ns0:PersonalNameLast />
+        <ns0:PersonalNamePreferredForm />
+        <ns0:PersonalNameSuffix />
+        <ns0:RecordHistory />
+        <ns0:RecordLocked />
+        <ns0:RecordStatus>Inactive</ns0:RecordStatus>
+        <ns0:RedirectTo />
+        <ns0:StaffNotes />
+        <ns0:Type.controlled>Person</ns0:Type.controlled>
+    </ns0:ROW>
+</FMPDSORESULT>

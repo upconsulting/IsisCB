@@ -198,7 +198,7 @@ class ISODateRangeValue(Value):
     PARTS = ['start', 'end']
 
     def _valuegetter(self):
-        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS]
+        return [[v for v in getattr(self, part) if v != 0] for part in self.PARTS if getattr(self, part)]
 
     def _valuesetter(self, value):
         try:
@@ -206,20 +206,31 @@ class ISODateRangeValue(Value):
         except ValidationError:
             raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
 
-        for part_value, part in zip(value, self.PARTS):
-            setattr(self, part, part_value)
+        for i, part in enumerate(self.PARTS):
+            if i >= len(value):
+                setattr(self, part, [0, 0, 0])
+            else:
+                v = value[i]
+                if type(v) not in [list, tuple]:
+                    v = [v]
+                setattr(self, part, v)
+        # for part_value, part in zip(value, self.PARTS):
+            # setattr(self, part, part_value)
 
     value = property(_valuegetter, _valuesetter)
 
     @staticmethod
     def convert(value):
+        print value
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
             for i in xrange(2):
                 value[i] = ISODateValue.convert(value[i])
         else:
-            raise ValidationError('Not a valid ISO8601 date range')
-
+            try:
+                value = ISODateValue.convert(value)
+            except:
+                raise ValidationError('Not a valid ISO8601 date range')
         return value
 
     def __unicode__(self):
@@ -239,7 +250,7 @@ class ISODateRangeValue(Value):
         return self.__unicode__()
 
     class Meta:
-        verbose_name = 'date range'
+        verbose_name = 'ISO date range'
 
 
 class DateRangeValue(Value):
@@ -316,8 +327,8 @@ class ISODateValue(Value):
             try:
                 self.attribute.source.publication_date = self.as_date
                 self.attribute.source.save()
-            except ValueError:
-                print 'Error settings publication_date on %i' % self.attribute.source.id
+            except (ValueError, AttributeError):
+                print 'Error settings publication_date on source'
 
         super(ISODateValue, self).save(*args, **kwargs)    # Save first.
 
@@ -390,13 +401,14 @@ class ISODateValue(Value):
         else:
             raise ValidationError('Not a valid ISO8601 date')
 
-        if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
-            raise ValidationError('Not a valid ISO8601 date')
-        elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
-            raise ValidationError('Not a valid ISO8601 date')
-        for v in value[1:]:
-            if type(v) in [str, unicode] and len(v) != 2:
+        if len(value) > 0:
+            if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
                 raise ValidationError('Not a valid ISO8601 date')
+            elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
+                raise ValidationError('Not a valid ISO8601 date')
+            for v in value[1:]:
+                if type(v) in [str, unicode] and len(v) != 2:
+                    raise ValidationError('Not a valid ISO8601 date')
         try:
 
             return [int(v) for v in value if v]
@@ -528,16 +540,16 @@ class CuratedMixin(models.Model):
     record_status_explanation = models.CharField(max_length=255, blank=True,
                                                  null=True)
 
-    def save(self, *args, **kwargs):
-        """
-        The record_status_value field controls whether or not the record is
-        public.
-        """
-        if self.record_status_value == self.ACTIVE:
-            self.public = True
-        else:
-            self.public = False
-        super(CuratedMixin, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     """
+    #     The record_status_value field controls whether or not the record is
+    #     public.
+    #     """
+    #     if self.record_status_value == self.ACTIVE:
+    #         self.public = True
+    #     else:
+    #         self.public = False
+    #     return super(CuratedMixin, self).save(*args, **kwargs)
 
     @property
     def created_on(self):
@@ -636,7 +648,7 @@ class ReferencedEntity(models.Model):
 
         if self.uri == '':
             self.uri = self.generate_uri()
-        super(ReferencedEntity, self).save(*args, **kwargs)
+        return super(ReferencedEntity, self).save(*args, **kwargs)
 
 
 class Language(models.Model):
