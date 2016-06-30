@@ -36,3 +36,7 @@
 .delete {
     color: red;
 }
+
+.notpublic {
+  background-color: #efefef;
+}

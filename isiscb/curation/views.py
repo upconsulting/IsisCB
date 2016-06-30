@@ -676,6 +676,7 @@ def quick_and_dirty_authority_search(request):
         'description': obj.description,
         'datestring': _get_datestring_for_authority(obj),
         'url': reverse("curate_authority", args=(obj.id,)),
+        'public': obj.public,
     } for obj in queryset[:20]]
     return JsonResponse({'results': results})
 

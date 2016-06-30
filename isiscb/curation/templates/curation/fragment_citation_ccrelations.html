@@ -11,7 +11,7 @@
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
 
-    <li class="list-group-item clearfix" id="ccrelation-{{ccrelation.id}}">
+    <li class="list-group-item clearfix {% if not ccrelation.object.public %}notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
         {% if instance.id == ccrelation.subject.id %}
         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
         {% else %}
@@ -28,6 +28,10 @@
         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
         {% else %}
         the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+        {% endif %}
+
+        {% if not ccrelation.object.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
         {% endif %}
 
         {% if can_update %}

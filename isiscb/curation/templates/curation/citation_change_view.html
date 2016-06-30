@@ -1,9 +1,28 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 {% load render_object %}
+{% load permission_tags %}
 
 {% block content %}
 <hr />
+{% if not instance.public %}
+<div class="alert alert-info" role="alert">
+<i class="fa fa-eye-slash" aria-hidden="true"></i> This citation is not public. It cannot be found through the public site.
+</div>
+{% endif %}
+
+{% if not instance|are_related_objects_for_citation_public %}
+<div class="alert alert-info" role="alert">
+<i class="fa fa-eye-slash" aria-hidden="true"></i> At least one record linked to this citation is not public.
+</div>
+{% endif %}
+
+{% if instance|is_public_inconsistent %}
+<div class="alert alert-warning" role="alert">
+  <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+ There is a problem with this record. It has the status "Active" but it is not marked as public.
+</div>
+{% endif %}
 
 <form class="form" action="." method="POST">
     {% csrf_token %}

@@ -11,7 +11,7 @@
 <ul class="list-group" id="acrelation-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
-    <li class="list-group-item clearfix" id="acrelation-{{ acrelation.id }}">
+    <li class="list-group-item clearfix {% if not acrelation.authority.public %}notpublic{% endif %}" id="acrelation-{{ acrelation.id }}" >
       {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
@@ -21,6 +21,7 @@
                 acrelation-title="{{ acrelation.authority.name }}"></a>
         </span>
         {% endif %}
+
         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
         {% if acrelation.type_broad_controlled %}
         <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
@@ -29,6 +30,10 @@
         {% if acrelation.name_for_display_in_citation %}
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
         {% endif %}
+        {% if not acrelation.authority.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+        {% endif %}
+
 
     </li>
 {% endfor %}
