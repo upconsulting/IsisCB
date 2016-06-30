@@ -1,0 +1,37 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+
+{% block content %}
+
+<div class="h3">
+    <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6">
+            <ul class="list-group">
+                {% for authority in accession.draftauthority_set.all %}
+                {% with authority.citation_relations.first as acrelation %}
+                <li class="list-group-item clearfix">
+                    <div class="h5">
+                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> {{ authority.name }}
+                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                    </div>
+
+                    <dl class="dl-horizontal">
+                        <dt>Title</dt>
+                        <dd>{{ acrelation.citation.title }}</dd>
+                        <dt>Abstract</dt>
+                        <dd>{{ acrelation.citation.abstract|truncatechars:200 }}</dd>
+                    </dl>
+                </li>
+                {% endwith %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

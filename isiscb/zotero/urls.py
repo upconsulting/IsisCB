@@ -11,4 +11,5 @@ urlpatterns = [
 
     url(r'accessions/$', accessions, name='accessions'),
     url(r'accessions/create/$', create_accession, name='create_accession'),
+    url(r'accessions/(?P<accession_id>[0-9]+)/$', retrieve_accession, name='retrieve_accession'),
 ]

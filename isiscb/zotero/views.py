@@ -101,6 +101,9 @@ def accessions(request):
 
 @staff_member_required
 def create_accession(request):
+    """
+    Curators should be able to upload Zotero RDF.
+    """
     context = RequestContext(request, {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
@@ -127,4 +130,21 @@ def create_accession(request):
             zparser.process(papers, instance=instance)
     context.update({'form': form})
 
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def retrieve_accession(request, accession_id):
+    """
+    Curator should be able to see a list of all draft authorities in a specific
+    Zotero ingest.
+    """
+
+    template = loader.get_template('zotero/retrieve_accession.html')
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+    })
     return HttpResponse(template.render(context))

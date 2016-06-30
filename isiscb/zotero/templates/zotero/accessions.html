@@ -20,7 +20,7 @@
         {% for object in filter_list %}
         <tr>
             <td>
-                <a href="">{{ object.id }}</a>
+                <a href="{% url "retrieve_accession" object.id %}">{{ object.id }}</a>
             </td>
             <td>{{ object.name }}</td>
             <td>{{ object.imported_on }}</td>
