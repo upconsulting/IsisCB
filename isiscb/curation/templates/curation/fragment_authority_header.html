@@ -1,0 +1,9 @@
+{% load render_object %}
+
+<div class="h3">
+    <span class="text-warning">Authority:</span> {{ instance.id }} | {{ instance.name|safe }}
+    <div class="button-group pull-right">
+        <input type="submit" value="Save" class="btn btn-success" />
+    </div>
+</div>
+<div class="h4"><span class="text-warning">{{ instance.get_type_controlled_display }}:</span> {{ instance|get_date_attributes }}</div>
