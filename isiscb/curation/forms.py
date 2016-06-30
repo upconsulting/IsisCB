@@ -168,11 +168,14 @@ class RoleForm(forms.ModelForm):
 
 class DatasetRuleForm(forms.ModelForm):
     dataset_values = Citation.objects.values_list('dataset').distinct()
+    authority_dataset_values = Authority.objects.values_list('dataset').distinct()
 
-    choices = []
-    for value in dataset_values:
+    all_datasets = list(dataset_values) + list(authority_dataset_values)
+
+    choices = set()
+    for value in all_datasets:
         if value[0]:
-            choices.append((value[0], value[0]))
+            choices.add((value[0], value[0]))
 
     dataset = forms.ChoiceField(choices = choices, required=True)
 

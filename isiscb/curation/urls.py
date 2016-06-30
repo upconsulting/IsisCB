@@ -33,7 +33,7 @@ rules.add_perm('curation.change_record', can_edit_record)
 
 urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
-    url(r'^(?i)citation/$', views.citation, name='citation_list'),
+    url(r'^(?i)citation/$', views.citations, name='citation_list'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/$', views.create_ccrelation_for_citation, name='create_ccrelation_for_citation'),
@@ -50,7 +50,7 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority_format'),
 
-    url(r'^(?i)authority/$', views.authority, name='authority_list'),
+    url(r'^(?i)authority/$', views.authorities, name='authority_list'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/attribute/$', views.attribute_for_citation, name='create_attribute_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/attribute/(?P<attribute_id>[A-Z0-9]+)/$', views.attribute_for_citation, name='update_attribute_for_citation'),
