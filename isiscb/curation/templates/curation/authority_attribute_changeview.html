@@ -8,18 +8,7 @@
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-    <div class="h3 text-warning">Editing Attribute for Authority:
-        <div class="button-group pull-right">
-            <input type="submit" value="Save" class="btn btn-success" />
-        </div>
-    </div>
-    <div class="h2">
-        <a href="{% url "curate_authority" instance.id %}?tab=attributes" style="text-decoration:none;">
-            <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.name|safe }}
-        </a>
-    </div>
-    <span class="h5"><ul style="list-style: none;">{{ instance|get_date_attributes }}</ul></span>
-    <div class="h4 text-warning">{{ instance.id }}</div>
+    {% include "curation/fragment_authority_header.html" %}
 
     <div class="container-fluid">
         <div class="row">
@@ -38,6 +27,28 @@
                 <div class="form-group">
                     <label>{{ attribute_form.description.label }}</label>
                     {{ attribute_form.description|addcss:"form-control" }}
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-6">
+                        {% for error in attribute_form.record_status_value.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ attribute_form.record_status_value.label }}</label>
+                            {{ attribute_form.record_status_value|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+
+                        {% for error in attribute_form.record_status_explanation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ attribute_form.record_status_explanation.label }}</label>
+                            {{ attribute_form.record_status_explanation|addcss:"form-control" }}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6">

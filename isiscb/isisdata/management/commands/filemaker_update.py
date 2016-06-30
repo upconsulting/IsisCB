@@ -867,13 +867,17 @@ class DatabaseHandler(object):
         else:
             value_model = dict(VALUE_MODELS)[type(value_data)]
 
-        value_model_ctype = ContentType.objects.get_for_model(value_model)
-        attribute_type, _ = AttributeType.objects.update_or_create(
-            name=type_controlled,
-            defaults={
-                'value_content_type_id': value_model_ctype.id
-            }
-        )
+        try:
+            value_model_ctype = ContentType.objects.get_for_model(value_model)
+            attribute_type, _ = AttributeType.objects.update_or_create(
+                name=type_controlled,
+                defaults={
+                    'value_content_type_id': value_model_ctype.id
+                }
+            )
+        except Exception as E:
+            print E.__repr__(), attribute_id, attribute_data
+            self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
 
         attribute_data.update({
             'type_controlled_id': attribute_type.id,
@@ -889,18 +893,26 @@ class DatabaseHandler(object):
 
         # try:
         if not hasattr(attribute, 'value'):
-            value = value_model.objects.create(
-                value=value_data,
-                attribute=attribute
-            )
-        else:
-            child_class = attribute.value.get_child_class()
-            if type(child_class) != value_model:
-                attribute.value.delete()
+            try:
                 value = value_model.objects.create(
                     value=value_data,
                     attribute=attribute
                 )
+            except Exception as E:
+                print E.__repr__(), attribute_id, attribute_data
+                self.errors.append(('value', E.__repr__(), attribute_id, value_data))
+        else:
+            child_class = attribute.value.get_child_class()
+            if type(child_class) != value_model:
+                attribute.value.delete()
+                try:
+                    value = value_model.objects.create(
+                        value=value_data,
+                        attribute=attribute
+                    )
+                except Exception as E:
+                    print E.__repr__(), attribute_id, attribute_data
+                    self.errors.append(('value', E.__repr__(), attribute_id, value_data))
             else:
                 self._update_with(attribute.value, {'value': value_data})
                 value = attribute.value
