@@ -10,7 +10,11 @@ from isisdata.models import *
 
 from zotero.models import *
 from zotero.filters import *
+from zotero.forms import *
+from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
+
+import tempfile
 
 
 @login_required
@@ -92,4 +96,35 @@ def accessions(request):
         'objects': filtered_objects,
     })
     template = loader.get_template('zotero/accessions.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def create_accession(request):
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+    })
+
+    template = loader.get_template('zotero/create_accession.html')
+
+
+    if request.method == 'GET':
+        form = ImportAccessionForm()
+
+    elif request.method == 'POST':
+        form = ImportAccessionForm(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save()
+            instance.imported_by = request.user
+            instance.save()
+
+            with tempfile.NamedTemporaryFile(suffix='.rdf', delete=False) as destination:
+                destination.write(form.cleaned_data['zotero_rdf'].file.read())
+                path = destination.name
+
+            papers = zparser.read(path)
+            zparser.process(papers, instance=instance)
+    context.update({'form': form})
+
     return HttpResponse(template.render(context))

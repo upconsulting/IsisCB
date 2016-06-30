@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'suggest/acrelation/(?P<acrelation_id>[A-Z]+[0-9]+)/$', suggest_production_acrelation_json, name='suggest_production_acrelation'),
 
     url(r'accessions/$', accessions, name='accessions'),
+    url(r'accessions/create/$', create_accession, name='create_accession'),
 ]
