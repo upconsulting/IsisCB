@@ -595,7 +595,7 @@ class DatabaseHandler(object):
         self.print_every = print_every
         self.errors = []
         try:
-            with open('ingest_errors.pickle', 'r') as f:
+            with open('/home/ec2-user/ingest_errors.pickle', 'r') as f:
                 self.errors += pickle.load(f)
         except:
             pass
@@ -983,7 +983,7 @@ class DatabaseHandler(object):
 
     def __del__(self):
         import cPickle as pickle
-        with open('./ingest_errors.pickle', 'w') as f:
+        with open('/home/ec2-user/ingest_errors.pickle', 'w') as f:
             pickle.dump(self.errors, f)
 
 class Command(BaseCommand):
