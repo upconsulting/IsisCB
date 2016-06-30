@@ -113,7 +113,8 @@
             <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
                 <ul class="list-group">
                 {% for acrelation in instance.acrelation_set.all %}
-                    <a class="list-group-item">
+                    <a class="list-group-item"
+                        href="{% url "update_acrelation_for_authority" instance.id acrelation.id %}">
                         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
                         {% if acrelation.type_broad_controlled %}
                         <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
@@ -126,6 +127,9 @@
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
                     </a>
                 {% endfor %}
+                    <a class="list-group-item text-muted" href="{% url "create_acrelation_for_authority" instance.id %}">
+                        <span class="glyphicon glyphicon-plus"></span> Create new relation
+                    </a>
                 </ul>
             </div>
         </div>

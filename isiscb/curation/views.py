@@ -56,6 +56,7 @@ def create_ccrelation_for_citation(request, citation_id):
     template = loader.get_template('curation/citation_ccrelation_changeview.html')
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -87,14 +88,92 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     template = loader.get_template('curation/citation_ccrelation_changeview.html')
     return HttpResponse(template.render(context))
 
+
+@staff_member_required
+def create_acrelation_for_authority(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+
+    })
+    if request.method == 'GET':
+        form = ACRelationForm(prefix='acrelation', initial={'authority': authority.id})
+
+    elif request.method == 'POST':
+        form = ACRelationForm(request.POST, prefix='acrelation')
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/authority_acrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def acrelation_for_authority(request, authority_id, acrelation_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+        'acrelation': acrelation,
+    })
+    if request.method == 'GET':
+        form = ACRelationForm(instance=acrelation, prefix='acrelation')
+
+    elif request.method == 'POST':
+        form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/authority_acrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def create_acrelation_for_citation(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+    })
+    if request.method == 'GET':
+        form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+
+    elif request.method == 'POST':
+        form = ACRelationForm(request.POST, prefix='acrelation')
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/citation_acrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+
 #@staff_member_required
 #@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 @staff_member_required
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
-    acrelation = None
-    if acrelation_id:
-        acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -103,10 +182,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         'acrelation': acrelation,
     })
     if request.method == 'GET':
-        if acrelation:
-            form = ACRelationForm(instance=acrelation, prefix='acrelation')
-        else:
-            form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+        form = ACRelationForm(instance=acrelation, prefix='acrelation')
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
