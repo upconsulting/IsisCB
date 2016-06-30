@@ -1,0 +1,59 @@
+{% load render_object %}
+
+<ul class="list-group">
+{% for ccrelation in instance.relations_from.all %}
+
+    <a class="list-group-item"
+        href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}">
+        {% if instance.id == ccrelation.subject.id %}
+        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+        {% else %}
+
+        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
+
+        {% endif %}
+        <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+        {% if ccrelation.type_free %}
+        <span class="label label-success">{{ ccrelation.type_free }}</span>
+        {% endif %}
+
+        {% if instance.id == ccrelation.object.id %}
+        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+        {% else %}
+        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+        {% endif %}
+
+
+        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+    </a>
+{% endfor %}
+{% for ccrelation in instance.relations_to.all %}
+
+    <a class="list-group-item"
+        href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}">
+        {% if instance.id == ccrelation.subject.id %}
+        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+        {% else %}
+
+        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }}</span>
+
+        {% endif %}
+        <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+        {% if ccrelation.type_free %}
+        <span class="label label-success">{{ ccrelation.type_free }}</span>
+        {% endif %}
+
+        {% if instance.id == ccrelation.object.id %}
+        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+        {% else %}
+        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
+        {% endif %}
+
+
+        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+    </a>
+{% endfor %}
+    <a class="list-group-item text-muted" href="{% url "create_ccrelation_for_citation" instance.id %}">
+        <span class="glyphicon glyphicon-plus"></span> Create new relation
+    </a>
+</ul>
