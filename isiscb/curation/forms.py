@@ -148,11 +148,15 @@ class CitationForm(forms.ModelForm):
             can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
             if not can_update:
                 self.fields[field].widget.attrs['readonly'] = True
+                self.fields[field].widget.attrs['disabled'] = True
+
 
             can_view = rules.test_rule('can_view_citation_field', user, (field, self.instance.pk))
             if not can_view:
                 self.fields[field] = forms.CharField(widget=NoViewInput())
                 self.fields[field].widget.attrs['readonly'] = True
+                self.fields[field].widget.attrs['disabled'] = True
+
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
