@@ -595,7 +595,7 @@ class DatabaseHandler(object):
         self.print_every = print_every
         self.errors = []
         try:
-            with open('ingest_errors.pickle', 'r') as f:
+            with open('/home/ec2-user/ingest_errors.pickle', 'r') as f:
                 self.errors += pickle.load(f)
         except:
             pass
@@ -914,7 +914,11 @@ class DatabaseHandler(object):
                     print E.__repr__(), attribute_id, attribute_data
                     self.errors.append(('value', E.__repr__(), attribute_id, value_data))
             else:
-                self._update_with(attribute.value, {'value': value_data})
+                try:
+                    self._update_with(attribute.value, {'value': value_data})
+                except Exception as E:
+                    print E.__repr__(), attribute_id, attribute_data
+                    self.errors.append(('value', E.__repr__(), attribute_id, value_data))
                 value = attribute.value
         # except Exception as E:
         #     print E.__repr__(), attribute_id, attribute_data
@@ -995,7 +999,7 @@ class DatabaseHandler(object):
 
     def __del__(self):
         import cPickle as pickle
-        with open('./ingest_errors.pickle', 'w') as f:
+        with open('/home/ec2-user/ingest_errors.pickle', 'w') as f:
             pickle.dump(self.errors, f)
 
 class Command(BaseCommand):

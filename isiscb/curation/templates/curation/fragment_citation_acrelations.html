@@ -7,10 +7,20 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<ul class="list-group">
+
+<ul class="list-group" id="acrelation-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
-    <li class="list-group-item" id="acrelation-{{ acrelation.id }}">
+    <li class="list-group-item clearfix" id="acrelation-{{ acrelation.id }}">
+      {% if can_update %}
+        <span class="button-group button-group-xs pull-right">
+            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
+            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation"
+                type="button"
+                acrelation-id="{{ acrelation.id }}"
+                acrelation-title="{{ acrelation.authority.name }}"></a>
+        </span>
+        {% endif %}
         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
         {% if acrelation.type_broad_controlled %}
         <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
@@ -20,12 +30,6 @@
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
         {% endif %}
 
-        {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" data-target="{{ acrelation.id }}"></a>
-        </span>
-        {% endif %}
     </li>
 {% endfor %}
 {% if can_update %}
@@ -49,14 +53,52 @@
 
 <script>
 $(document).ready(function() {
+    bind_acrelation();
+});
+
+
+var bind_acrelation = function() {
     $('.delete-acrelation').click(function() {
         var elem = $(this);
-        var acrelation_id = elem.attr('data-target');
+        var acrelation_id = elem.attr('acrelation-id');
+        var acrelation_title = elem.attr('acrelation-title');
+        $('#acrelation-id-container').val(acrelation_id);
+        $('#delete-acrelation-target-name').html(acrelation_title);
+        $('#delete-acrelation-modal').modal('show');
+    });
+}
+
+var delete_acrelation = function() {
+    $('#delete-acrelation-modal').modal('hide');
+    var acrelation_id = $('#acrelation-id-container').val();
+    if (acrelation_id) {
         $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#acrelation-' + acrelation_id).remove();
+                $('#subject-' + acrelation_id).remove();
             },
         });
-    });
-});
+    }
+}
 </script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-acrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-acrelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-acrelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
+                <input type="hidden" id="acrelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_acrelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>

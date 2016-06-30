@@ -121,12 +121,25 @@ $(document).ready(function() {
             var query = $(this).val();
             $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
                 success: function(result) {
-                    $('#results-container').empty();
+                    var results_container = $('#results-container');
+                    results_container.empty();
                     result.results.forEach(function(r) {
-                        $('#results-container').append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.title + '"><span class="label label-primary">' + r.type + '</span> ' + r.title + ' | <span class="text-muted">' + r.description + '</span></a>');
+                        var choice_elem = '<li class="list-group-item search-result">';
+                        choice_elem += '<span class="button-group button-group-xs">';
+                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                        choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                        choice_elem += '</span>';
+                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                        if (r.description != null) {
+                            choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                        }
+                        choice_elem += '</li>';
+
+                        results_container.append(choice_elem);
+
                     });
 
-                    $('.search-result').click(function() {
+                    $('.select-citation').click(function() {
                         var selected = $(this);
                         var selected_id = selected.attr('data-id');
                         var selected_name = selected.attr('data-name');
