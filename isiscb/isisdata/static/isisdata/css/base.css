@@ -341,6 +341,18 @@ li {
   font-size: 14px;
 }
 
+.panel-title .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+    content: "\f078";    /* adjust as needed, taken from bootstrap.css */
+    font-size: 12px;
+}
+.panel-title .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\f054";    /* adjust as needed, taken from bootstrap.css */
+    font-size: 12px;
+}
+
 ul.topics_list {
   padding-left: 25px;
   padding-top: 10px;
@@ -364,7 +376,7 @@ ul.topics_list {
 }
 
 .toggle_heading {
-  background-color: #e4ebf5 ! important; 
+  background-color: #e4ebf5 ! important;
 }
 
 div.panel-cell {

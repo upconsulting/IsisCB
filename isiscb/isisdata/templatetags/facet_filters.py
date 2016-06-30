@@ -63,3 +63,7 @@ def remove_all_type_facets(url, facet_type):
 @register.filter
 def create_facet_with_field(facet, field):
     return field + ":" + facet
+
+@register.filter
+def are_reviews_excluded(url):
+    return 'excluded_facets=citation_type:Review' in url

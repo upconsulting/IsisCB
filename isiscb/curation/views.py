@@ -89,6 +89,7 @@ def quick_create_acrelation(request):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -114,6 +115,7 @@ def create_ccrelation_for_citation(request, citation_id):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = None
@@ -146,6 +148,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def create_acrelation_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
 
@@ -172,6 +175,7 @@ def create_acrelation_for_authority(request, authority_id):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def acrelation_for_authority(request, authority_id, acrelation_id):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
@@ -199,6 +203,7 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -223,9 +228,8 @@ def create_acrelation_for_citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 
-#@staff_member_required
-#@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
@@ -253,6 +257,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
@@ -272,6 +277,7 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
@@ -291,6 +297,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
@@ -310,6 +317,7 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_acrelation_for_authority(request, authority_id, acrelation_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
@@ -329,6 +337,7 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_attribute_for_authority(request, authority_id, attribute_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
@@ -348,6 +357,7 @@ def delete_attribute_for_authority(request, authority_id, attribute_id, format=N
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def attribute_for_citation(request, citation_id, attribute_id=None):
 
     template = loader.get_template('curation/citation_attribute_changeview.html')
@@ -419,6 +429,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
 
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def attribute_for_authority(request, authority_id, attribute_id=None):
 
     template = loader.get_template('curation/authority_attribute_changeview.html')
@@ -490,104 +501,162 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
 
 @staff_member_required
-#@check_rules('can_edit_record', fn=objectgetter(Citation, 'citation_id'))
-def citation(request, citation_id=None):
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def citation(request, citation_id):
     context = RequestContext(request, {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
     })
-    if citation_id:
-        citation = get_object_or_404(Citation, pk=citation_id)
 
-        template = loader.get_template('curation/citation_change_view.html')
-        partdetails_form = None
-        context.update({'tab': request.GET.get('tab', None)})
-        if request.method == 'GET':
-            form = CitationForm(instance=citation)
-            context.update({
-                'form': form,
-                'instance': citation,
-            })
-            if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-                partdetails_form = PartDetailsForm(instance=citation.part_details)
-                context.update({
-                    'partdetails_form': partdetails_form,
-                })
-        elif request.method == 'POST':
-            form = CitationForm(request.POST, instance=citation)
-            if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-                partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
-            if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
-                form.save()
-                if partdetails_form:
-                    partdetails_form.save()
-                return HttpResponseRedirect(reverse('citation_list'))
+    citation = get_object_or_404(Citation, pk=citation_id)
 
+    template = loader.get_template('curation/citation_change_view.html')
+    partdetails_form = None
+    context.update({'tab': request.GET.get('tab', None)})
+    if request.method == 'GET':
+        form = CitationForm(instance=citation)
+        context.update({
+            'form': form,
+            'instance': citation,
+        })
+        if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
+            partdetails_form = PartDetailsForm(instance=citation.part_details)
             context.update({
-                'form': form,
-                'instance': citation,
                 'partdetails_form': partdetails_form,
             })
-    else:
-        template = loader.get_template('curation/citation_list_view.html')
-        filtered_objects = CitationFilter(request.GET, queryset=Citation.objects.all())
+    elif request.method == 'POST':
+        form = CitationForm(request.POST, instance=citation)
+        if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
+            partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
+        if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.save()
+            if partdetails_form:
+                partdetails_form.save()
+            return HttpResponseRedirect(reverse('citation_list'))
 
         context.update({
-            'objects': filtered_objects,
-            'filters_active': len([v for k, v in request.GET.iteritems()
-                                   if len(v) > 0 and k != 'page']) > 0,
+            'form': form,
+            'instance': citation,
+            'partdetails_form': partdetails_form,
         })
+
     return HttpResponse(template.render(context))
 
+@staff_member_required
+def citations(request):
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+    })
+
+    template = loader.get_template('curation/citation_list_view.html')
+
+    queryset = filter_queryset(request.user, Citation.objects.all())
+    filtered_objects = CitationFilter(request.GET, queryset=queryset)
+
+    context.update({
+        'objects': filtered_objects,
+        'filters_active': len([v for k, v in request.GET.iteritems()
+                               if len(v) > 0 and k != 'page']) > 0,
+    })
+
+    return HttpResponse(template.render(context))
+
+def filter_queryset(user, queryset):
+    roles = IsisCBRole.objects.filter(users__pk=user.pk)
+
+    datasets = []
+    excluded_datasets = []
+    can_view_all = False
+
+    if user.is_superuser:
+        can_view_all = True
+    else:
+        for role in roles:
+            # if there are dataset limitations in role
+            if role.dataset_rules:
+                crud_actions = [rule.crud_action for rule in role.crud_rules]
+                datasets_in_role = [rule.dataset for rule in role.dataset_rules]
+                # if the crud rules allow viewing records in datasets add them to included datasets
+                if CRUDRule.VIEW in crud_actions:
+                    datasets += datasets_in_role
+                # otherwise exclude datasets
+                else:
+                    excluded_datasets += datasets_in_role
+            # if there are no dataset limitations
+            else:
+                crud_actions = [rule.crud_action for rule in role.crud_rules]
+                if CRUDRule.VIEW in crud_actions:
+                    can_view_all = True
+
+    if excluded_datasets:
+        queryset = queryset.exclude(dataset__in=excluded_datasets)
+    if datasets and not can_view_all:
+        queryset = queryset.filter(dataset__in=datasets)
+
+    return queryset
 
 @staff_member_required
-def authority(request, authority_id=None):
+def authorities(request):
     context = RequestContext(request, {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
     })
-    if authority_id:
-        context.update({'tab': request.GET.get('tab', None)})
-        authority = get_object_or_404(Authority, pk=authority_id)
-        template = loader.get_template('curation/authority_change_view.html')
-        person_form = None
-        if request.method == 'GET':
-            if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-                person_form = PersonForm(instance=authority.person)
 
-            form = AuthorityForm(instance=authority)
-            context.update({
-                'form': form,
-                'instance': authority,
-                'person_form': person_form,
-            })
+    template = loader.get_template('curation/authority_list_view.html')
+    queryset = filter_queryset(request.user, Authority.objects.all())
+    filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
 
+    context.update({
+        'objects': filtered_objects,
+        'filters_active': len([v for k, v in request.GET.iteritems()
+                               if len(v) > 0 and k != 'page']) > 0,
+    })
 
-        elif request.method == 'POST':
-            if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-                person_form = PersonForm(request.POST, instance=authority.person)
+    return HttpResponse(template.render(context))
 
-            form = AuthorityForm(request.POST, instance=authority)
-            if form.is_valid() and (person_form is None or person_form.is_valid()):
-                form.save()
-                if person_form:
-                    person_form.save()
-                return HttpResponseRedirect(reverse('authority_list'))
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def authority(request, authority_id):
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+    })
 
-            context.update({
-                'form': form,
-                'person_form': person_form,
-                'instance': citation,
-                # 'partdetails_form': partdetails_form,
-            })
-    else:
-        template = loader.get_template('curation/authority_list_view.html')
-        filtered_objects = AuthorityFilter(request.GET, queryset=Authority.objects.all())
+    context.update({'tab': request.GET.get('tab', None)})
+    authority = get_object_or_404(Authority, pk=authority_id)
+    template = loader.get_template('curation/authority_change_view.html')
+    person_form = None
+    if request.method == 'GET':
+        if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
+            person_form = PersonForm(instance=authority.person)
+
+        form = AuthorityForm(instance=authority)
         context.update({
-            'objects': filtered_objects,
-            'filters_active': len([v for k, v in request.GET.iteritems()
-                                   if len(v) > 0 and k != 'page']) > 0,
+            'form': form,
+            'instance': authority,
+            'person_form': person_form,
         })
+
+
+    elif request.method == 'POST':
+        if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
+            person_form = PersonForm(request.POST, instance=authority.person)
+
+        form = AuthorityForm(request.POST, instance=authority)
+        if form.is_valid() and (person_form is None or person_form.is_valid()):
+            form.save()
+            if person_form:
+                person_form.save()
+            return HttpResponseRedirect(reverse('authority_list'))
+
+        context.update({
+            'form': form,
+            'person_form': person_form,
+            'instance': citation,
+            # 'partdetails_form': partdetails_form,
+        })
+
     return HttpResponse(template.render(context))
 
 
