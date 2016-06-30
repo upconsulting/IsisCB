@@ -1,0 +1,214 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load staticfiles %}
+
+
+{% block content %}
+
+<div class="h3">
+    <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-6">
+            <ul class="list-group">
+                {% for authority in accession.draftauthority_set.all %}
+                {% with authority.citation_relations.first as acrelation %}
+                <a class="list-group-item clearfix draftauthority"
+                    id="authority-{{ authority.id }}"
+                    data-id="{{ authority.id }}">
+                    <div class="h5">
+                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> {{ authority.name }}
+                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                    </div>
+
+                    <dl class="dl-horizontal">
+                        <dt>Title</dt>
+                        <dd>{{ acrelation.citation.title }}</dd>
+                        <dt>Abstract</dt>
+                        <dd>{{ acrelation.citation.abstract|truncatechars:200 }}</dd>
+                    </dl>
+                </a>
+                {% endwith %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-xs-6">
+            <div id="matching" style="visibility: hidden;">
+                <ul class="nav nav-tabs nav-justified" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggestions</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="suggest">
+                        <ul class="suggestion-results-list list-group">
+                        </ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="search">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <input class="authority-search form-control"
+                                        id="authority-search"
+                                        placeholder="Search for an authority record..." />
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="list-group" id="results-container"></ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="create">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="text-info">
+                                    Do you want to create a new authority record in the production database?
+                                    <div class="btn btn-md btn-success">Create</div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'zotero/js/spin.min.js' %}"></script>
+<script src="{% static 'zotero/js/jquery.spin.js' %}"></script>
+
+<script>
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 4 // The length of each line
+, width: 2 // The line thickness
+, radius: 5 // The radius of the inner circle
+, scale: 1 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#297CA6' // #rgb or #rrggbb or array of colors
+, opacity: 0.5 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 62 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '7px' // Top position relative to parent
+, left: '-15px' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'relative' // Element positioning
+}
+
+
+$('.draftauthority').click(function() {
+    var elem = $(this);
+    console.log('select authority', elem);
+    $('.selected').removeClass('selected');
+    elem.addClass('selected');
+
+    $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
+        beforeSend: function(response) {
+            elem.find('.suggestion-status').spin(opts);
+        },
+        success: function(response) {
+            $('#matching').css('visibility', 'visible');
+
+            // status.addClass('label');
+
+
+                // status.addClass('label-success');
+                // status.attr('data-toggle', "collapse");
+
+            var target = $('.suggestion-results-list');
+            target.empty();
+
+            response.data.forEach(function(suggestion) {
+                var suggestElem = '<li class="list-group-item">';
+                suggestElem += '<div class="row">';
+
+                suggestElem += '<div class="col-xs-2">';
+                suggestElem += '<span class="button-group button-group-md">';
+                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
+                suggestElem += '<a class="glyphicon glyphicon-pencil btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
+                suggestElem += '</span>';
+                suggestElem += '</div>';
+
+                suggestElem += '<div class="col-xs-10">';
+
+                suggestElem += '<div class="h5">' + suggestion.name + ' (' + suggestion.id + ') <div class="pull-right col-sm-3"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div></div>';
+
+                suggestElem += ' <span class="label label-danger" style="margin-left: 5px;">' + suggestion.type_controlled + '</span> ';
+
+                suggestElem += '<span class="suggestion-reasons">';
+                suggestion.reasons.forEach(function(reason) {
+                    suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
+                });
+                suggestElem += '</span>';
+                suggestElem += '</div>';
+                suggestElem += '</div>';
+
+                suggestElem += '</li>';
+
+                target.append(suggestElem);
+            });
+
+            $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
+                $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
+            });
+
+        }
+    });
+});
+
+$(document).ready(function() {
+    $('#authority-search').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            success: function(result) {
+                $('#results-container').empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    choice_elem += '</li>';
+
+                    $('#results-container').append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#results-container').empty();
+                    $('#authority-search').val(selected_name);
+                    $('#id_acrelation-name_for_display_in_citation').val(selected_name);
+                    $('#id_acrelation-authority').val(selected_id);
+                });
+            }
+        });
+    });
+});
+
+</script>
+
+<style>
+.selected {
+    background-color: orange;
+}
+</style>
+
+{% endblock %}

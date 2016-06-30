@@ -97,7 +97,12 @@ var delete_acrelation = function() {
                 <h4 class="modal-title" id="delete-acrelation-modal-label">Are you sure?</h4>
             </div>
             <div class="modal-body">
-                You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
+                <p>
+                    You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority itself, only the relation between the authority and this citation.
+                </p>
                 <input type="hidden" id="acrelation-id-container" />
             </div>
             <div class="modal-footer">

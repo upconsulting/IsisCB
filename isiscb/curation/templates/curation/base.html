@@ -55,8 +55,13 @@
         <div class="container-fluid"
             style="margin-top: 10px;">
             <ul class="nav nav-pills nav-justified">
+                {% if curation_section == "datasets" %}
                 <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}">Citations</a></li>
                 <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}">Authorities</a></li>
+                {% elif curation_section == "zotero" %}
+                <li{% if curation_subsection == "accessions" %} class="active"{% endif %}><a href="{% url "accessions" %}">Accessions</a></li>
+                <li{% if curation_subsection == "draftauthorities" %} class="active"{% endif %}><a href="">Authorities</a></li>
+                {% endif %}
             </ul>
         </div>
 
