@@ -1,6 +1,10 @@
+from __future__ import absolute_import
+
 from django import forms
 
 from isisdata.models import *
+
+import rules
 
 
 class CCRelationForm(forms.ModelForm):
@@ -93,12 +97,63 @@ class ISODateValueForm(forms.ModelForm):
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
 
+    def __init__(self, user, citation_id, *args, **kwargs):
+        super(PartDetailsForm, self).__init__( *args, **kwargs)
+        self.user = user
+        self.citation_id = citation_id
+
+        can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
+        can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
+
+        set_field_access(can_update, can_view, self.fields)
+
     class Meta:
         model = PartDetails
         exclude =['volume',]
 
+    def _get_validation_exclusions(self):
+        exclude = super(PartDetailsForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        can_update = rules.test_rule('can_update_citation_field', self.user, ('part_details', self.citation_id))
+        can_view = rules.test_rule('can_view_citation_field', self.user, ('part_details', self.citation_id))
+
+        for field in self.fields:
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
+
+def set_field_access(can_update, can_view, fields):
+    for field in fields:
+        if not can_update:
+            fields[field].widget.attrs['readonly'] = True
+
+        if not can_view:
+            fields[field] = forms.CharField(widget=NoViewInput())
+            fields[field].widget.attrs['readonly'] = True
 
 class CitationForm(forms.ModelForm):
+
+    def __init__(self, user, *args, **kwargs):
+        super(CitationForm, self).__init__( *args, **kwargs)
+        self.user = user
+
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+
+        # disable fields user doesn't have access to
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
+            if not can_update:
+                self.fields[field].widget.attrs['readonly'] = True
+
+            can_view = rules.test_rule('can_view_citation_field', user, (field, self.instance.pk))
+            if not can_view:
+                self.fields[field] = forms.CharField(widget=NoViewInput())
+                self.fields[field].widget.attrs['readonly'] = True
+
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
@@ -120,12 +175,23 @@ class CitationForm(forms.ModelForm):
               'dataset',
         ]
 
-    def __init__(self, *args, **kwargs):
-        super(CitationForm, self).__init__(*args, **kwargs)
-        if not self.is_bound:
-            if not self.fields['record_status_value'].initial:
-                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+    def _get_validation_exclusions(self):
+        exclude = super(CitationForm, self)._get_validation_exclusions()
 
+        # remove fields that user isn't allowed to modify
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_citation_field', self.user, (field, self.instance.pk))
+            can_view = rules.test_rule('can_view_citation_field', self.user, (field, self.instance.pk))
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
+
+class NoViewInput(forms.TextInput):
+
+    def render(self, name, value, attrs=None):
+        value = "You do not have sufficient permissions to view this field."
+        return super(NoViewInput, self).render(name, value, attrs)
 
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -139,12 +205,36 @@ class AuthorityForm(forms.ModelForm):
             'record_status_value', 'record_status_explanation',
         ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
+        self.user = user
+
+        # disable fields user doesn't have access to
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_authority_field', user, (field, self.instance.pk))
+            if not can_update:
+                self.fields[field].widget.attrs['readonly'] = True
+
+            can_view = rules.test_rule('can_view_authority_field', user, (field, self.instance.pk))
+            if not can_view:
+                self.fields[field] = forms.CharField(widget=NoViewInput())
+                self.fields[field].widget.attrs['readonly'] = True
+
+    def _get_validation_exclusions(self):
+        exclude = super(AuthorityForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_authority_field', self.user, (field, self.instance.pk))
+            can_view = rules.test_rule('can_view_authority_field', self.user, (field, self.instance.pk))
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -202,6 +292,9 @@ class CRUDRuleForm(forms.ModelForm):
         fields = [
             'crud_action'
         ]
+        labels = {
+            'crud_action': 'Allowed Action',
+        }
 
 class FieldRuleCitationForm(forms.ModelForm):
 
@@ -210,7 +303,7 @@ class FieldRuleCitationForm(forms.ModelForm):
     choices = []
     for field in all_citation_fields:
         choices.append((field.name, field.name))
-
+    choices.sort()
 
     field_name = forms.ChoiceField(choices = choices, required = True)
 
@@ -226,6 +319,7 @@ class FieldRuleAuthorityForm(forms.ModelForm):
     authority_choices = []
     for field in all_authority_fields:
         authority_choices.append((field.name, field.name))
+    authority_choices.sort()
 
     field_name = forms.ChoiceField(choices = authority_choices, required = True)
 

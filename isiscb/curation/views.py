@@ -514,20 +514,20 @@ def citation(request, citation_id):
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
-        form = CitationForm(instance=citation)
+        form = CitationForm(user=request.user, instance=citation)
         context.update({
             'form': form,
             'instance': citation,
         })
         if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(instance=citation.part_details)
+            partdetails_form = PartDetailsForm(request.user, citation_id, instance=citation.part_details)
             context.update({
                 'partdetails_form': partdetails_form,
             })
     elif request.method == 'POST':
-        form = CitationForm(request.POST, instance=citation)
+        form = CitationForm(request.user, request.POST, instance=citation)
         if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
+            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()
             if partdetails_form:
@@ -631,7 +631,7 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(instance=authority.person)
 
-        form = AuthorityForm(instance=authority)
+        form = AuthorityForm(request.user, instance=authority)
         context.update({
             'form': form,
             'instance': authority,
@@ -643,7 +643,7 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.POST, instance=authority.person)
 
-        form = AuthorityForm(request.POST, instance=authority)
+        form = AuthorityForm(request.user, request.POST, instance=authority)
         if form.is_valid() and (person_form is None or person_form.is_valid()):
             form.save()
             if person_form:
