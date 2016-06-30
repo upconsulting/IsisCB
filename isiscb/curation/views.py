@@ -459,7 +459,7 @@ def citation(request, citation_id):
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
-        form = CitationForm(instance=citation)
+        form = CitationForm(user=request.user, instance=citation)
         context.update({
             'form': form,
             'instance': citation,
@@ -470,7 +470,7 @@ def citation(request, citation_id):
                 'partdetails_form': partdetails_form,
             })
     elif request.method == 'POST':
-        form = CitationForm(request.POST, instance=citation)
+        form = CitationForm(request.user, request.POST, instance=citation)
         if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
@@ -551,7 +551,7 @@ def authorities(request):
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
-    
+
     context.update({
         'objects': filtered_objects,
         'filters_active': len([v for k, v in request.GET.iteritems()
