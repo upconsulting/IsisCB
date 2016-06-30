@@ -914,7 +914,11 @@ class DatabaseHandler(object):
                     print E.__repr__(), attribute_id, attribute_data
                     self.errors.append(('value', E.__repr__(), attribute_id, value_data))
             else:
-                self._update_with(attribute.value, {'value': value_data})
+                try:
+                    self._update_with(attribute.value, {'value': value_data})
+                except Exception as E:
+                    print E.__repr__(), attribute_id, attribute_data
+                    self.errors.append(('value', E.__repr__(), attribute_id, value_data))
                 value = attribute.value
         # except Exception as E:
         #     print E.__repr__(), attribute_id, attribute_data
