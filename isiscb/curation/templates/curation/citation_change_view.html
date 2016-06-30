@@ -330,12 +330,13 @@
                 <ul class="list-group">
                 {% for ccrelation in instance.relations_from.all %}
 
-                    <a class="list-group-item">
+                    <a class="list-group-item"
+                        href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}">
                         {% if instance.id == ccrelation.subject.id %}
                         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
                         {% else %}
 
-                        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title }}</span>
+                        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }}</span>
 
                         {% endif %}
                         <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
@@ -346,7 +347,7 @@
                         {% if instance.id == ccrelation.object.id %}
                         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
                         {% else %}
-                        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title }}</span>.
+                        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
                         {% endif %}
 
 
@@ -355,12 +356,13 @@
                 {% endfor %}
                 {% for ccrelation in instance.relations_to.all %}
 
-                    <a class="list-group-item">
+                    <a class="list-group-item"
+                        href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}">
                         {% if instance.id == ccrelation.subject.id %}
                         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
                         {% else %}
 
-                        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title }}</span>
+                        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }}</span>
 
                         {% endif %}
                         <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
@@ -371,7 +373,7 @@
                         {% if instance.id == ccrelation.object.id %}
                         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
                         {% else %}
-                        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title }}</span>.
+                        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
                         {% endif %}
 
 

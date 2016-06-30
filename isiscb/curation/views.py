@@ -33,6 +33,30 @@ def dashboard(request):
 
 
 @staff_member_required
+def create_ccrelation_for_citation(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+    })
+    if request.method == 'GET':
+        form = CCRelationForm(prefix='ccrelation', initial={'subject': citation.id})
+
+    elif request.method == 'POST':
+        form = CCRelationForm(request.POST, prefix='ccrelation')
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+
+    context.update({
+        'form': form,
+    })
+    template = loader.get_template('curation/citation_ccrelation_changeview.html')
+    return HttpResponse(template.render(context))
+
+@staff_member_required
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = None

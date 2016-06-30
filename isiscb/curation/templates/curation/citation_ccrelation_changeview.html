@@ -71,7 +71,8 @@
                         name="citation-search"
                         results-target="#subject-results-container"
                         selected-result-target="#id_ccrelation-subject"
-                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}/>
+                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}
+                        {% if not ccrelation and instance %}disabled{% endif %} />
                 </div>
                 <ul class="list-group" id="subject-results-container"></ul>
 
@@ -113,28 +114,45 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var subject_name = "{% if ccrelation %}{{ ccrelation.subect.title }}{% endif %}";
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subject.title }}{% endif %}";
+    var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
     var object_name = "{% if ccrelation %}{{ ccrelation.object.title }}{% endif %}";
-    if (subject_name.length > 0) {
+    var object_id = "{% if ccrelation %}{{ ccrelation.object.id }}{% endif %}";
+
+    if (subject_id.length > 0) {
         $('#citation-search-subject').val(subject_name);
         $('#citation-search-subject').attr('disabled', true);
     }
 
-    if (object_name.length > 0) {
+    if (object_id.length > 0) {
         $('#citation-search-object').val(object_name);
         $('#citation-search-object').attr('disabled', true);
     }
 
     $('#swap-subject-object').click(function() {
-        var subject_name = $('#citation-search-subject').val();
-        var object_name = $('#citation-search-object').val();
-        var subject_id = $('#id_ccrelation-subject').val();
-        var object_id = $('#id_ccrelation-object').val();
+        subject_name = $('#citation-search-subject').val();
+        object_name = $('#citation-search-object').val();
+        subject_id = $('#id_ccrelation-subject').val();
+        object_id = $('#id_ccrelation-object').val();
+        var subject_disabled = $('#citation-search-subject').attr('disabled');
+        var object_disabled = $('#citation-search-object').attr('disabled');
 
         $('#citation-search-subject').val(object_name);
         $('#citation-search-object').val(subject_name);
+        if (object_disabled) {
+            $('#citation-search-subject').attr('disabled', true);
+        } else {
+            $('#citation-search-subject').removeAttr('disabled');
+        }
+
+        if (subject_disabled) {
+            $('#citation-search-object').attr('disabled', true);
+        } else {
+            $('#citation-search-object').removeAttr('disabled');
+        }
         $('#id_ccrelation-subject').val(object_id);
         $('#id_ccrelation-object').val(subject_id);
+
 
         $('.citation-search').each(function(i, elem) {
             $($(elem).attr('results-target')).empty();
