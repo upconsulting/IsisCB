@@ -22,6 +22,27 @@ from curation.contrib.views import check_rules
 import iso8601
 import rules
 
+
+def _get_datestring_for_authority(authority):
+    return ', '.join([attribute.value.display for attribute in authority.attributes.all()])
+
+
+def _get_datestring_for_citation(citation):
+    if citation.publication_date:
+        return citation.publication_date.isoformat()[:4]
+    return 'missing'
+
+
+def _get_citation_title(citation):
+    title = citation.title
+    if not title:
+        for relation in citation.ccrelations:
+            if relation.type_controlled in [CCRelation.REVIEW_OF, CCRelation.REVIEWED_BY]:
+                return u'Review: %s' % relation.subject.title if relation.subject.id != citation.id else relation.object.title
+        return u'Untitled review'
+    return title
+
+
 @staff_member_required
 def dashboard(request):
     """
@@ -30,6 +51,41 @@ def dashboard(request):
     context = RequestContext(request, {
     })
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def quick_create_acrelation(request):
+    if request.method == 'POST':
+        print request.POST
+        authority_id = request.POST.get('authority_id')
+        citation_id = request.POST.get('citation_id')
+        type_controlled = request.POST.get('type_controlled')
+        type_broad_controlled = request.POST.get('type_broad_controlled')
+        instance = ACRelation.objects.create(
+            authority_id=authority_id,
+            citation_id=citation_id,
+            type_controlled=type_controlled,
+            type_broad_controlled=type_broad_controlled
+        )
+
+        response_data = {
+            'acrelation': {
+                'id': instance.id,
+                'type_controlled': instance.type_controlled,
+                'type_broad_controlled': instance.type_broad_controlled,
+                'authority': {
+                    'id': instance.authority.id,
+                    'name': instance.authority.name,
+                    'type_controlled': instance.authority.type_controlled,
+                },
+                'citation': {
+                    'id': instance.citation.id,
+                    'name': _get_citation_title(instance.citation),
+                    'type_controlled': instance.citation.type_controlled,
+                },
+            }
+        }
+        return JsonResponse(response_data)
 
 
 @staff_member_required
@@ -96,7 +152,6 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
 def create_acrelation_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
 
-
     context = RequestContext(request, {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
@@ -104,7 +159,7 @@ def create_acrelation_for_authority(request, authority_id):
 
     })
     if request.method == 'GET':
-        form = ACRelationForm(prefix='acrelation', initial={'authority': authority.id})
+        form = ACRelationForm(prefix='acrelation', initial={'authority': authority.id, 'name_for_display_in_citation': authority.name})
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
@@ -551,7 +606,7 @@ def authorities(request):
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
-    
+
     context.update({
         'objects': filtered_objects,
         'filters_active': len([v for k, v in request.GET.iteritems()
@@ -604,6 +659,7 @@ def authority(request, authority_id):
 
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
@@ -618,9 +674,11 @@ def quick_and_dirty_authority_search(request):
         'type': obj.get_type_controlled_display(),
         'name': obj.name,
         'description': obj.description,
-        'url': obj.get_absolute_url(),
+        'datestring': _get_datestring_for_authority(obj),
+        'url': reverse("curate_authority", args=(obj.id,)),
     } for obj in queryset[:20]]
     return JsonResponse({'results': results})
+
 
 @staff_member_required
 def dataset(request, dataset_id=None):
@@ -960,9 +1018,10 @@ def quick_and_dirty_citation_search(request):
     results = [{
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
-        'title': obj.title,
+        'title': _get_citation_title(obj),
+        'datestring': _get_datestring_for_citation(obj),
         'description': obj.description,
-        'url': obj.get_absolute_url(),
+        'url': reverse("curate_citation", args=(obj.id,)),
     } for obj in queryset[:20]]
     return JsonResponse({'results': results})
 
