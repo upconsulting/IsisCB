@@ -1,21 +1,42 @@
 {% load render_object %}
 
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'attributes'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
 <ul class="list-group">
+{% if can_view %}
 {% for attribute in instance.attributes.all %}
     <li class="list-group-item" id="attribute-{{ attribute.id }}">
         <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
         {{ attribute.value.get_child_class }}
         <span class="text-warning">{{ attribute.value_freeform}}</span>
+        {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_attribute_for_citation" instance.id attribute.id%}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-attribute" data-target="{{ attribute.id }}"></a>
         </span>
+        {% endif %}
     </li>
 {% endfor %}
+{% if can_update %}
     <a class="list-group-item text-muted" href="{% url "create_attribute_for_citation" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new attribute
     </a>
+{% endif %}
+{% endif %}
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view attributes.
+  </div>
+</li>
+{% endif %}
 </ul>
+
+{% endwith %}
 
 <script>
 $(document).ready(function() {

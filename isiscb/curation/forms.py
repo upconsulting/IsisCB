@@ -97,10 +97,41 @@ class ISODateValueForm(forms.ModelForm):
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
 
+    def __init__(self, user, citation_id, *args, **kwargs):
+        super(PartDetailsForm, self).__init__( *args, **kwargs)
+        self.user = user
+        self.citation_id = citation_id
+
+        can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
+        can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
+
+        set_field_access(can_update, can_view, self.fields)
+
     class Meta:
         model = PartDetails
         exclude =['volume',]
 
+    def _get_validation_exclusions(self):
+        exclude = super(PartDetailsForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        can_update = rules.test_rule('can_update_citation_field', self.user, ('part_details', self.citation_id))
+        can_view = rules.test_rule('can_view_citation_field', self.user, ('part_details', self.citation_id))
+
+        for field in self.fields:
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
+
+def set_field_access(can_update, can_view, fields):
+    for field in fields:
+        if not can_update:
+            fields[field].widget.attrs['readonly'] = True
+
+        if not can_view:
+            fields[field] = forms.CharField(widget=NoViewInput())
+            fields[field].widget.attrs['readonly'] = True
 
 class CitationForm(forms.ModelForm):
 
@@ -122,7 +153,6 @@ class CitationForm(forms.ModelForm):
             if not can_view:
                 self.fields[field] = forms.CharField(widget=NoViewInput())
                 self.fields[field].widget.attrs['readonly'] = True
-                print self.fields[field].initial
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -238,6 +268,9 @@ class CRUDRuleForm(forms.ModelForm):
         fields = [
             'crud_action'
         ]
+        labels = {
+            'crud_action': 'Allowed Action',
+        }
 
 class FieldRuleCitationForm(forms.ModelForm):
 
@@ -246,7 +279,7 @@ class FieldRuleCitationForm(forms.ModelForm):
     choices = []
     for field in all_citation_fields:
         choices.append((field.name, field.name))
-
+    choices.sort()
 
     field_name = forms.ChoiceField(choices = choices, required = True)
 
@@ -262,6 +295,7 @@ class FieldRuleAuthorityForm(forms.ModelForm):
     authority_choices = []
     for field in all_authority_fields:
         authority_choices.append((field.name, field.name))
+    authority_choices.sort()
 
     field_name = forms.ChoiceField(choices = authority_choices, required = True)
 

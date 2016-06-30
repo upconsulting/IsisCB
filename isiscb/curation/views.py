@@ -465,14 +465,14 @@ def citation(request, citation_id):
             'instance': citation,
         })
         if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(instance=citation.part_details)
+            partdetails_form = PartDetailsForm(request.user, citation_id, instance=citation.part_details)
             context.update({
                 'partdetails_form': partdetails_form,
             })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
         if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(request.POST, instance=citation.part_details)
+            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()
             if partdetails_form:
