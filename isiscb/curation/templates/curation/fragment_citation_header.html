@@ -1,6 +1,6 @@
 {% load render_object %}
 
 <div class="h3">
-    <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance.title|safe }}
+    <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance|get_citation_title|safe }}
 </div>
 <div class="h4">{{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span></div>

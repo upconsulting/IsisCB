@@ -198,7 +198,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
 
 
 @staff_member_required
-def delete_attribute_for_citation(request, citation_id, attribute_id):
+def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
     context = RequestContext(request, {
@@ -209,13 +209,34 @@ def delete_attribute_for_citation(request, citation_id, attribute_id):
     })
     if request.GET.get('confirm', False):
         attribute.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
         return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
     template = loader.get_template('curation/citation_attribute_delete.html')
     return HttpResponse(template.render(context))
 
 
 @staff_member_required
-def delete_acrelation_for_citation(request, citation_id, acrelation_id):
+def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'ccrelation': ccrelation,
+    })
+    if request.GET.get('confirm', False):
+        ccrelation.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
+        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+    template = loader.get_template('curation/citation_ccrelation_delete.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
     context = RequestContext(request, {
@@ -226,13 +247,15 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id):
     })
     if request.GET.get('confirm', False):
         acrelation.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
         return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
     template = loader.get_template('curation/citation_acrelation_delete.html')
     return HttpResponse(template.render(context))
 
 
 @staff_member_required
-def delete_acrelation_for_authority(request, authority_id, acrelation_id):
+def delete_acrelation_for_authority(request, authority_id, acrelation_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
     context = RequestContext(request, {
@@ -243,13 +266,15 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id):
     })
     if request.GET.get('confirm', False):
         acrelation.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
         return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
     template = loader.get_template('curation/authority_acrelation_delete.html')
     return HttpResponse(template.render(context))
 
 
 @staff_member_required
-def delete_attribute_for_authority(request, authority_id, attribute_id):
+def delete_attribute_for_authority(request, authority_id, attribute_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
     context = RequestContext(request, {
@@ -260,6 +285,8 @@ def delete_attribute_for_authority(request, authority_id, attribute_id):
     })
     if request.GET.get('confirm', False):
         attribute.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
         return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
     template = loader.get_template('curation/authority_attribute_delete.html')
     return HttpResponse(template.render(context))

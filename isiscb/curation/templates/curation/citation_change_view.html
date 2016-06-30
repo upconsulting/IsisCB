@@ -276,13 +276,6 @@
                             {{ form.physical_details|addcss:"form-control" }}
                         </div>
 
-                        {% for error in form.physical_details.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.physical_details.label }}</label>
-                            {{ form.physical_details|addcss:"form-control" }}
-                        </div>
 
                         {% for error in form.dataset.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
@@ -291,8 +284,6 @@
                             <label>{{ form.dataset.label }}</label>
                             {{ form.dataset|addcss:"form-control" }}
                         </div>
-
-
 
                         {% for error in form.language.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
@@ -306,20 +297,7 @@
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
-                <ul class="list-group">
-                {% for attribute in instance.attributes.all %}
-                    <a class="list-group-item" href="{% url "update_attribute_for_citation" instance.id attribute.id%}">
-                        <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
-                        {{ attribute.value.get_child_class }}
-                        <span class="text-warning">{{ attribute.value_freeform}}</span>
-
-                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                    </a>
-                {% endfor %}
-                    <a class="list-group-item text-muted" href="{% url "create_attribute_for_citation" instance.id %}">
-                        <span class="glyphicon glyphicon-plus"></span> Create new attribute
-                    </a>
-                </ul>
+                {% include "curation/fragment_citation_attributes.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
                 {% for linkeddata in instance.linkeddata.all %}
@@ -331,25 +309,7 @@
 
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
-                <ul class="list-group">
-                {% for acrelation in instance.acrelation_set.all %}
-                    <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list-group-item">
-                        <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
-                        {% if acrelation.type_broad_controlled %}
-                        <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
-                        {% endif %}
-                        {{ acrelation.authority.name }}
-                        {% if acrelation.name_for_display_in_citation %}
-                        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-                        {% endif %}
-
-                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                    </a>
-                {% endfor %}
-                <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
-                    <span class="glyphicon glyphicon-plus"></span> Create new authority-citation relation
-                </a>
-                </ul>
+                {% include "curation/fragment_citation_acrelations.html" %}
             </div>
         </div>
     </div>

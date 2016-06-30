@@ -71,7 +71,7 @@
                         name="citation-search"
                         results-target="#subject-results-container"
                         selected-result-target="#id_ccrelation-subject"
-                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}
+                        {% if not ccrelation and instance %}value="{{instance|get_citation_title}}"{% endif %}
                         {% if not ccrelation and instance %}disabled{% endif %} />
                 </div>
                 <ul class="list-group" id="subject-results-container"></ul>
@@ -99,7 +99,7 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}<a class="btn btn-danger">Delete</a>{% endif %}
+                {% if ccrelation %}<a href="{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
             </div>
         </div>
     </div>
@@ -114,9 +114,9 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var subject_name = "{% if ccrelation %}{{ ccrelation.subject.title }}{% endif %}";
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title }}{% endif %}";
     var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
-    var object_name = "{% if ccrelation %}{{ ccrelation.object.title }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title }}{% endif %}";
     var object_id = "{% if ccrelation %}{{ ccrelation.object.id }}{% endif %}";
 
     if (subject_id.length > 0) {
