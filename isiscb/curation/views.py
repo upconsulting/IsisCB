@@ -215,12 +215,46 @@ def delete_attribute_for_citation(request, citation_id, attribute_id):
 
 
 @staff_member_required
+def delete_acrelation_for_citation(request, citation_id, acrelation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'acrelation': acrelation,
+    })
+    if request.GET.get('confirm', False):
+        acrelation.delete()
+        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+    template = loader.get_template('curation/citation_acrelation_delete.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def delete_acrelation_for_authority(request, authority_id, acrelation_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+        'acrelation': acrelation,
+    })
+    if request.GET.get('confirm', False):
+        acrelation.delete()
+        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
+    template = loader.get_template('curation/authority_acrelation_delete.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
 def delete_attribute_for_authority(request, authority_id, attribute_id):
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
     context = RequestContext(request, {
         'curation_section': 'datasets',
-        'curation_subsection': 'citations',
+        'curation_subsection': 'authorities',
         'instance': authority,
         'attribute': attribute,
     })

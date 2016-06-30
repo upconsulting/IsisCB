@@ -96,7 +96,7 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}<a class="btn btn-danger">Delete</a>{% endif %}
+                {% if acrelation %}<a href="{% url "delete_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
             </div>
         </div>
     </div>
