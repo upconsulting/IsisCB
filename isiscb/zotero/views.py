@@ -42,9 +42,11 @@ def suggest_authority_json(request, authority_id):
         instance = Authority.objects.get(pk=suggestion['id'])
         suggestion.update({
             'name': instance.name,
-            'type_controlled': instance.type_controlled,
+            'type_controlled': instance.get_type_controlled_display(),
             })
         suggestions.append(suggestion)
+        if len(suggestions) > 30:
+            break
     return JsonResponse({'data': suggestions})
 
 

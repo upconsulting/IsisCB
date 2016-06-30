@@ -1,5 +1,6 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
+{% load staticfiles %}
 
 
 {% block content %}
@@ -14,7 +15,9 @@
             <ul class="list-group">
                 {% for authority in accession.draftauthority_set.all %}
                 {% with authority.citation_relations.first as acrelation %}
-                <li class="list-group-item clearfix">
+                <a class="list-group-item clearfix draftauthority"
+                    id="authority-{{ authority.id }}"
+                    data-id="{{ authority.id }}">
                     <div class="h5">
                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> {{ authority.name }}
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
@@ -26,12 +29,107 @@
                         <dt>Abstract</dt>
                         <dd>{{ acrelation.citation.abstract|truncatechars:200 }}</dd>
                     </dl>
-                </li>
+                </a>
                 {% endwith %}
                 {% endfor %}
             </ul>
         </div>
+        <div class="col-xs-6">
+            <ul class="suggestion-results-list list-group">
+            </ul>
+        </div>
     </div>
 </div>
+
+<script src="{% static 'zotero/js/spin.min.js' %}"></script>
+<script src="{% static 'zotero/js/jquery.spin.js' %}"></script>
+
+<script>
+var opts = {
+  lines: 13 // The number of lines to draw
+, length: 4 // The length of each line
+, width: 2 // The line thickness
+, radius: 5 // The radius of the inner circle
+, scale: 1 // Scales overall size of the spinner
+, corners: 1 // Corner roundness (0..1)
+, color: '#297CA6' // #rgb or #rrggbb or array of colors
+, opacity: 0.5 // Opacity of the lines
+, rotate: 0 // The rotation offset
+, direction: 1 // 1: clockwise, -1: counterclockwise
+, speed: 1 // Rounds per second
+, trail: 62 // Afterglow percentage
+, fps: 20 // Frames per second when using setTimeout() as a fallback for CSS
+, zIndex: 2e9 // The z-index (defaults to 2000000000)
+, className: 'spinner' // The CSS class to assign to the spinner
+, top: '7px' // Top position relative to parent
+, left: '-15px' // Left position relative to parent
+, shadow: false // Whether to render a shadow
+, hwaccel: false // Whether to use hardware acceleration
+, position: 'relative' // Element positioning
+}
+
+
+    $('.draftauthority').click(function() {
+
+        var elem = $(this);
+        console.log('select authority', elem);
+
+        $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
+            beforeSend: function(response) {
+                elem.find('.suggestion-status').spin(opts);
+            },
+            success: function(response) {
+                console.log('success', response);
+                elem.addClass('selected');
+                // status.addClass('label');
+
+
+                    // status.addClass('label-success');
+                    // status.attr('data-toggle', "collapse");
+
+                var target = $('.suggestion-results-list');
+                target.empty();
+                response.data.forEach(function(suggestion) {
+                    var suggestElem = '<li class="list-group-item">';
+                    suggestElem += '<div class="row">';
+
+                    suggestElem += '<div class="col-xs-2">';
+                    suggestElem += '<span class="button-group button-group-md">';
+                    suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
+                    suggestElem += '<a class="glyphicon glyphicon-share-alt btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
+                    suggestElem += '</span>';
+                    suggestElem += '</div>';
+
+                    suggestElem += '<div class="col-xs-10">';
+
+                    suggestElem += '<div class="h5">' + suggestion.name + ' (' + suggestion.id + ') <div class="pull-right col-sm-3"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div></div>';
+
+                    suggestElem += ' <span class="label label-danger" style="margin-left: 5px;">' + suggestion.type_controlled + '</span> ';
+
+                    suggestElem += '<span class="suggestion-reasons">';
+                    suggestion.reasons.forEach(function(reason) {
+                        suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
+                    });
+                    suggestElem += '</span>';
+                    suggestElem += '</div>';
+                    suggestElem += '</div>';
+
+                    suggestElem += '</li>';
+
+                    target.append(suggestElem);
+                });
+                var customElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" id="suggestions_for_' + elem.attr('id') + '_radio" value="" checked="checked"><input size="40" type="text" name="input_for_' + elem.attr('id') + '_text" id="input_for_' + elem.attr('id') + '_text" placeholder="Enter an authority entry ID..." /></label></li>');
+                var noneElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="-1" checked="checked"><strong>None</strong></label></li>');
+                target.append(customElem);
+                target.append(noneElem);
+                $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
+                    $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
+                });
+
+            }
+        });
+    });
+</script>
+
 
 {% endblock %}
