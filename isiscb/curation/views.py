@@ -54,6 +54,41 @@ def dashboard(request):
 
 
 @staff_member_required
+def quick_create_acrelation(request):
+    if request.method == 'POST':
+        print request.POST
+        authority_id = request.POST.get('authority_id')
+        citation_id = request.POST.get('citation_id')
+        type_controlled = request.POST.get('type_controlled')
+        type_broad_controlled = request.POST.get('type_broad_controlled')
+        instance = ACRelation.objects.create(
+            authority_id=authority_id,
+            citation_id=citation_id,
+            type_controlled=type_controlled,
+            type_broad_controlled=type_broad_controlled
+        )
+
+        response_data = {
+            'acrelation': {
+                'id': instance.id,
+                'type_controlled': instance.type_controlled,
+                'type_broad_controlled': instance.type_broad_controlled,
+                'authority': {
+                    'id': instance.authority.id,
+                    'name': instance.authority.name,
+                    'type_controlled': instance.authority.type_controlled,
+                },
+                'citation': {
+                    'id': instance.citation.id,
+                    'name': _get_citation_title(instance.citation),
+                    'type_controlled': instance.citation.type_controlled,
+                },
+            }
+        }
+        return JsonResponse(response_data)
+
+
+@staff_member_required
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 

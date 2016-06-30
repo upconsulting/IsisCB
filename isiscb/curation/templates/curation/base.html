@@ -14,7 +14,33 @@
         <script src="{% static "isisdata/js/jquery-1.11.3.min.js" %}" type="text/javascript"></script>
         <script src="{% static "curation/js/jquery.multi-select.js" %}" type="text/javascript"></script>
         <script src="{% static "isisdata/bootstrap-3.3.5/js/bootstrap.min.js" %}" type="text/javascript"></script>
+        <script>
+        // Django needs CSRF for AJAX POST requests.
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    // Only send the token to relative URLs i.e. locally.
+                    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                }
+            }
+        });
+        </script>
     </head>
     <body>
         <div class="container-fluid"

@@ -61,6 +61,8 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/attribute/(?P<attribute_id>[A-Z0-9]+)/delete/$', views.delete_attribute_for_authority, name='delete_attribute_for_authority'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/attribute/(?P<attribute_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_attribute_for_authority, name='delete_attribute_for_authority_format'),
 
+    url(r'^(?i)acrelation/quickcreate/$', views.quick_create_acrelation, name='quick_create_acrelation'),
+
     url(r'^(?i)users/$', views.users, name='user_list'),
     url(r'^(?i)users/(?P<user_id>[0-9]+)$', views.user, name='user'),
     url(r'^(?i)users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', views.remove_role, name='remove_role'),
