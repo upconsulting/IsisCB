@@ -29,13 +29,28 @@
                     {{ attribute_form.description|addcss:"form-control" }}
                 </div>
 
-                {% for error in attribute_form.record_status_value.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ attribute_form.record_status_value.label }}</label>
-                    {{ attribute_form.record_status_value|addcss:"form-control" }}
+                <div class="row">
+                    <div class="col-xs-6">
+                        {% for error in attribute_form.record_status_value.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ attribute_form.record_status_value.label }}</label>
+                            {{ attribute_form.record_status_value|addcss:"form-control" }}
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+
+                        {% for error in attribute_form.record_status_explanation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ attribute_form.record_status_explanation.label }}</label>
+                            {{ attribute_form.record_status_explanation|addcss:"form-control" }}
+                        </div>
+                    </div>
                 </div>
+
             </div>
             <div class="col-sm-6">
                 {% if value_form %}
