@@ -1,6 +1,14 @@
 {% load render_object %}
 
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
 <ul class="list-group">
+{% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     <li class="list-group-item" id="acrelation-{{ acrelation.id }}">
         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
@@ -12,16 +20,32 @@
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
         {% endif %}
 
+        {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" data-target="{{ acrelation.id }}"></a>
         </span>
+        {% endif %}
     </li>
 {% endfor %}
+{% if can_update %}
     <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
+{% endif %}
+{% endif %}
+
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view related authorities.
+  </div>
+</li>
+{% endif %}
+
 </ul>
+
+{% endwith %}
 
 <script>
 $(document).ready(function() {

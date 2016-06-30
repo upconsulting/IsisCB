@@ -576,7 +576,7 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(instance=authority.person)
 
-        form = AuthorityForm(instance=authority)
+        form = AuthorityForm(request.user, instance=authority)
         context.update({
             'form': form,
             'instance': authority,
@@ -588,7 +588,7 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.POST, instance=authority.person)
 
-        form = AuthorityForm(request.POST, instance=authority)
+        form = AuthorityForm(request.user, request.POST, instance=authority)
         if form.is_valid() and (person_form is None or person_form.is_valid()):
             form.save()
             if person_form:

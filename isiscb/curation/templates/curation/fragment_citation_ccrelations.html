@@ -1,6 +1,14 @@
 {% load render_object %}
 
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'citations_related'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
 <ul class="list-group">
+{% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
 
     <li class="list-group-item" id="ccrelation-{{ccrelation.id}}">
@@ -22,11 +30,12 @@
         the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
         {% endif %}
 
-
+        {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation" data-target="{{ ccrelation.id }}"></a>
         </span>
+        {% endif %}
     </li>
 {% endfor %}
 {% for ccrelation in instance.relations_to.all %}
@@ -50,18 +59,32 @@
         the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
         {% endif %}
 
-
+        {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation" data-target="{{ ccrelation.id }}"></a>
         </span>
+        {% endif %}
     </li>
 {% endfor %}
+{% endif %}
+
+{% if can_update %}
     <a class="list-group-item text-muted" href="{% url "create_ccrelation_for_citation" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
+{% endif %}
+
+  {% if not can_view %}
+  <li class="list-group-item">
+    <div class="alert alert-warning" role="alert">
+    You do not have sufficient permissions to view related citations.
+    </div>
+  </li>
+  {% endif %}
 </ul>
 
+{% endwith %}
 
 <script>
 $(document).ready(function() {

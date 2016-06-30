@@ -205,12 +205,36 @@ class AuthorityForm(forms.ModelForm):
             'record_status_value', 'record_status_explanation',
         ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
+        self.user = user
+
+        # disable fields user doesn't have access to
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_authority_field', user, (field, self.instance.pk))
+            if not can_update:
+                self.fields[field].widget.attrs['readonly'] = True
+
+            can_view = rules.test_rule('can_view_authority_field', user, (field, self.instance.pk))
+            if not can_view:
+                self.fields[field] = forms.CharField(widget=NoViewInput())
+                self.fields[field].widget.attrs['readonly'] = True
+
+    def _get_validation_exclusions(self):
+        exclude = super(AuthorityForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        for field in self.fields:
+            can_update = rules.test_rule('can_update_authority_field', self.user, (field, self.instance.pk))
+            can_view = rules.test_rule('can_view_authority_field', self.user, (field, self.instance.pk))
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
