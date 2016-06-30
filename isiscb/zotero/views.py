@@ -3,10 +3,13 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
+from django.template import RequestContext, loader
 
 from isisdata.models import *
 
 from zotero.models import *
+from zotero.filters import *
 from zotero.suggest import suggest_citation, suggest_authority
 
 
@@ -71,3 +74,22 @@ def suggest_production_acrelation_json(request, acrelation_id):
         draftAuthority = acrelation.resolutions.first().for_instance.authority
 
     return suggest_authority_json(request, draftAuthority.id)
+
+
+@staff_member_required
+def accessions(request):
+    """
+    Curator should be able to see a list of Zotero ingests, with indication of
+    whether all authorities have been resolved for a batch.
+    """
+
+    queryset = ImportAccession.objects.filter(resolved=False)
+    filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
+
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'objects': filtered_objects,
+    })
+    template = loader.get_template('zotero/accessions.html')
+    return HttpResponse(template.render(context))

@@ -1,0 +1,36 @@
+{% extends "curation/list_view.html" %}
+{% load pagination_tags %}
+
+
+{% block object_list %}
+<div style="margin-bottom: 15px; margin-top: 15px;">
+    <a class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Upload RDF</a>
+</div>
+<table class="table table-responsive table-hover table-curation">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Imported on</th>
+            <th>Imported by</th>
+            <th>Resolved</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in filter_list %}
+        <tr>
+            <td>
+                <a href="">{{ object.id }}</a>
+            </td>
+            <td>{{ object.name }}</td>
+            <td>{{ object.imported_on }}</td>
+            <td>{{ object.imported_by }}</td>
+            <td>{{ object.resolved }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+    </thead>
+
+</table>
+{% endblock %}
