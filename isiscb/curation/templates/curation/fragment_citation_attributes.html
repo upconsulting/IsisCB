@@ -8,7 +8,10 @@
         <span class="text-warning">{{ attribute.value_freeform}}</span>
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_attribute_for_citation" instance.id attribute.id%}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-attribute" data-target="{{ attribute.id }}"></a>
+            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-attribute"
+                type="button"
+                attribute-id="{{ attribute.id }}"
+                attribute-title="{{ attribute.type_controlled.name }}"></a>
         </span>
     </li>
 {% endfor %}
@@ -20,14 +23,46 @@
 <script>
 $(document).ready(function() {
     $('.delete-attribute').click(function() {
-        console.log('click');
         var elem = $(this);
-        var attribute_id = elem.attr('data-target');
+        var attribute_id = elem.attr('attribute-id');
+        var attribute_title = elem.attr('attribute-title');
+        $('#attribute-id-container').val(attribute_id);
+        $('#delete-attribute-target-name').html(attribute_title);
+        $('#delete-attribute-modal').modal('show');
+    });
+
+});
+
+var delete_attribute = function() {
+    $('#delete-attribute-modal').modal('hide');
+    var attribute_id = $('#attribute-id-container').val();
+    if (attribute_id) {
         $.ajax("{% url "create_attribute_for_citation" instance.id %}" + attribute_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#attribute-' + attribute_id).remove();
             },
         });
-    });
-});
+    }
+}
 </script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-attribute-modal" tabindex="-1" role="dialog" aria-labelledby="delete-attribute-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-attribute-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
+                <input type="hidden" id="attribute-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_attribute();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
