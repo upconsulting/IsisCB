@@ -152,7 +152,12 @@ var delete_subject = function() {
                 <h4 class="modal-title" id="delete-subject-modal-label">Are you sure?</h4>
             </div>
             <div class="modal-body">
-                You are remove a subject relation with <span class="text-warning" id="delete-subject-target-name"></span>. Deletion cannot be undone!
+                <p>
+                    You are about to remove a subject relation with <span class="text-warning" id="delete-subject-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority record itself, only the association between that record and this citation.
+                </p>
                 <input type="hidden" id="subject-id-container" />
             </div>
             <div class="modal-footer">
