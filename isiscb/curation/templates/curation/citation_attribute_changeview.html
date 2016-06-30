@@ -28,6 +28,14 @@
                     <label>{{ attribute_form.description.label }}</label>
                     {{ attribute_form.description|addcss:"form-control" }}
                 </div>
+
+                {% for error in attribute_form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ attribute_form.record_status_value.label }}</label>
+                    {{ attribute_form.record_status_value|addcss:"form-control" }}
+                </div>
             </div>
             <div class="col-sm-6">
                 {% if value_form %}
