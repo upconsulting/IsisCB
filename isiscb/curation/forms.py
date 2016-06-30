@@ -6,6 +6,9 @@ from isisdata.models import *
 class CCRelationForm(forms.ModelForm):
     subject = forms.CharField(widget=forms.HiddenInput())
     object = forms.CharField(widget=forms.HiddenInput())
+    """We will set these dynamically in the rendered form."""
+
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
         model = CCRelation
@@ -13,6 +16,12 @@ class CCRelationForm(forms.ModelForm):
             'type_controlled', 'description', 'data_display_order', 'subject',
             'object', 'record_status_value', 'record_status_explanation'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(CCRelationForm, self).__init__(*args, **kwargs)
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
     def clean(self):
         super(CCRelationForm, self).clean()
@@ -29,6 +38,8 @@ class ACRelationForm(forms.ModelForm):
     citation = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+
     class Meta:
         model = ACRelation
         fields = [
@@ -37,6 +48,12 @@ class ACRelationForm(forms.ModelForm):
             'confidence_measure', 'authority', 'citation',
             'record_status_value', 'record_status_explanation'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(ACRelationForm, self).__init__(*args, **kwargs)
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
     def clean(self):
         super(ACRelationForm, self).clean()
@@ -92,6 +109,7 @@ class CitationForm(forms.ModelForm):
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
     dataset = forms.ChoiceField(choices=[(d, d) for d in Citation.objects.order_by().values_list('dataset', flat=True).distinct()])
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
         model = Citation
@@ -102,9 +120,16 @@ class CitationForm(forms.ModelForm):
               'dataset',
         ]
 
+    def __init__(self, *args, **kwargs):
+        super(CitationForm, self).__init__(*args, **kwargs)
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+
 
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
         model = Authority
@@ -113,6 +138,12 @@ class AuthorityForm(forms.ModelForm):
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(AuthorityForm, self).__init__(*args, **kwargs)
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
 
 class PersonForm(forms.ModelForm):
@@ -125,6 +156,7 @@ class PersonForm(forms.ModelForm):
             'personal_name_preferred',
         ]
 
+
 class RoleForm(forms.ModelForm):
 
     class Meta:
@@ -132,6 +164,7 @@ class RoleForm(forms.ModelForm):
         fields = [
             'name', 'description',
         ]
+
 
 class DatasetRuleForm(forms.ModelForm):
     dataset_values = Citation.objects.values_list('dataset').distinct()
@@ -199,6 +232,7 @@ class FieldRuleAuthorityForm(forms.ModelForm):
             'field_action', 'field_name',
         ]
 
+
 class UserModuleRuleForm(forms.ModelForm):
     class Meta:
         model = UserModuleRule
@@ -206,9 +240,11 @@ class UserModuleRuleForm(forms.ModelForm):
             'module_action',
         ]
 
+
 class AttributeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
         model = Attribute
@@ -217,12 +253,18 @@ class AttributeForm(forms.ModelForm):
             'type_controlled',
             'description',
             'value_freeform',
+            'record_status_value',
+            'record_status_explanation'
         ]
 
     def __init__(self, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
         if self.instance.id:
             self.fields['type_controlled'].widget.attrs['disabled'] = True
+
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
     def save(self, *args, **kwargs):
         if self.instance.id:

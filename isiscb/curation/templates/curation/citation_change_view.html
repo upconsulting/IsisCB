@@ -8,413 +8,313 @@
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-<div class="h3 text-warning">Editing Citation:
-    <div class="button-group pull-right">
-        <input type="submit" value="Save" class="btn btn-success" />
-    </div>
-</div>
-<div class="h2"> {{ instance.title|safe }}</div>
-<div class="h4">{{ instance|get_authors_editors }}</div>
-<div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
+{% include "curation/fragment_citation_header.html" %}
 
-<ul class="nav nav-tabs nav-justified" role="tablist">
-    <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-        <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
-    </li>
-    <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-        <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
-    </li>
-    <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-        <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
-    </li>
-    <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-        <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
-    </li>
-    <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-        <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
-    </li>
-</ul>
+<div class="row">
+    <div class="col-sm-4">
+        <div class="h4">Citation Details</div>
 
-<div class="tab-content">
-    <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+        {% for error in form.type_controlled.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.type_controlled.label }}</label>
+            {{ form.type_controlled|addcss:"form-control" }}
+        </div>
+
+        {% for error in form.title.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.title.label }}</label>
+            {{ form.title|addcss:"form-control" }}
+        </div>
+
+        <div class="form-group">
+            <label>Authors & Editors</label>
+            <div class="h5">
+                <a href="?tab=acrelations">{{ instance|get_authors_editors }}</a>
+            </div>
+        </div>
+
+        {% for error in form.edition_details.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.edition_details.label }}</label>
+            {{ form.edition_details|addcss:"form-control" }}
+        </div>
+
+        {% if partdetails_form %}
         <div class="row">
-            <div class="col-sm-4">
-                <div class="h4">Citation Details</div>
-
-                {% for error in form.type_controlled.errors %}
+            <div class="col-xs-4">
+                {% for error in partdetails_form.volume_free_text.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control" }}
+                    <label>Volume</label>
+                    {{ partdetails_form.volume_free_text|addcss:"form-control" }}
                 </div>
-
-                {% for error in form.title.errors %}
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.volume_begin.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.title.label }}</label>
-                    {{ form.title|addcss:"form-control" }}
+                    <label>{{ partdetails_form.volume_begin.label }}</label>
+                    {{ partdetails_form.volume_begin|addcss:"form-control" }}
                 </div>
-
-                <div class="form-group">
-                    <label>Authors & Editors</label>
-                    <div class="h5">
-                        <a href="?tab=acrelations">{{ instance|get_authors_editors }}</a>
-                    </div>
-                </div>
-
-                {% for error in form.edition_details.errors %}
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.volume_end.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.edition_details.label }}</label>
-                    {{ form.edition_details|addcss:"form-control" }}
+                    <label>{{ partdetails_form.volume_end.label }}</label>
+                    {{ partdetails_form.volume_end|addcss:"form-control" }}
                 </div>
+            </div>
+        </div>
 
-                {% if partdetails_form %}
-                <div class="row">
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.volume_free_text.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>Volume</label>
-                            {{ partdetails_form.volume_free_text|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.volume_begin.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.volume_begin.label }}</label>
-                            {{ partdetails_form.volume_begin|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.volume_end.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.volume_end.label }}</label>
-                            {{ partdetails_form.volume_end|addcss:"form-control" }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.issue_free_text.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>Issue</label>
-                            {{ partdetails_form.issue_free_text|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.issue_begin.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.issue_begin.label }}</label>
-                            {{ partdetails_form.issue_begin|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.issue_end.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.issue_end.label }}</label>
-                            {{ partdetails_form.issue_end|addcss:"form-control" }}
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.pages_free_text.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>Pages</label>
-                            {{ partdetails_form.pages_free_text|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.page_begin.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.page_begin.label }}</label>
-                            {{ partdetails_form.page_begin|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.page_end.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.page_end.label }}</label>
-                            {{ partdetails_form.page_end|addcss:"form-control" }}
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.sort_order.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>Sort order</label>
-                            {{ partdetails_form.sort_order|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.extent.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.extent.label }}</label>
-                            {{ partdetails_form.extent|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-4">
-                        {% for error in partdetails_form.extent_note.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ partdetails_form.extent_note.label }}</label>
-                            {{ partdetails_form.extent_note|addcss:"form-control" }}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="form-group">
-                    <label>Periodical</label>
-                    <div class="h5">
-                        <a href="?tab=acrelations">{{ instance|get_citation_periodical }}</a>
-                    </div>
-                </div>
-
-                {% for error in form.book_series.errors %}
+        <div class="row">
+            <div class="col-xs-4">
+                {% for error in partdetails_form.issue_free_text.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.book_series.label }}</label>
-                    {{ form.book_series|addcss:"form-control" }}
+                    <label>Issue</label>
+                    {{ partdetails_form.issue_free_text|addcss:"form-control" }}
                 </div>
-
-                {% for error in form.additional_titles.errors %}
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.issue_begin.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.additional_titles.label }}</label>
-                    {{ form.additional_titles|addcss:"form-control" }}
+                    <label>{{ partdetails_form.issue_begin.label }}</label>
+                    {{ partdetails_form.issue_begin|addcss:"form-control" }}
                 </div>
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.issue_end.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ partdetails_form.issue_end.label }}</label>
+                    {{ partdetails_form.issue_end|addcss:"form-control" }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+                {% for error in partdetails_form.pages_free_text.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>Pages</label>
+                    {{ partdetails_form.pages_free_text|addcss:"form-control" }}
+                </div>
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.page_begin.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ partdetails_form.page_begin.label }}</label>
+                    {{ partdetails_form.page_begin|addcss:"form-control" }}
+                </div>
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.page_end.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ partdetails_form.page_end.label }}</label>
+                    {{ partdetails_form.page_end|addcss:"form-control" }}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+                {% for error in partdetails_form.sort_order.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>Sort order</label>
+                    {{ partdetails_form.sort_order|addcss:"form-control" }}
+                </div>
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.extent.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ partdetails_form.extent.label }}</label>
+                    {{ partdetails_form.extent|addcss:"form-control" }}
+                </div>
+            </div>
+            <div class="col-xs-4">
+                {% for error in partdetails_form.extent_note.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ partdetails_form.extent_note.label }}</label>
+                    {{ partdetails_form.extent_note|addcss:"form-control" }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
-                <div class="row">
-                    <div class="col-xs-6">
-                        {% for error in form.record_status_value.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.record_status_value.label }}</label>
-                            {{ form.record_status_value|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-                        {% for error in form.record_status_explanation.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.record_status_explanation.label }}</label>
-                            {{ form.record_status_explanation|addcss:"form-control" }}
-                        </div>
-                    </div>
+        <div class="form-group">
+            <label>Periodical</label>
+            <div class="h5">
+                <a href="?tab=acrelations">{{ instance|get_citation_periodical }}</a>
+            </div>
+        </div>
+
+        {% for error in form.book_series.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.book_series.label }}</label>
+            {{ form.book_series|addcss:"form-control" }}
+        </div>
+
+        {% for error in form.additional_titles.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.additional_titles.label }}</label>
+            {{ form.additional_titles|addcss:"form-control" }}
+        </div>
+
+        <div class="row">
+            <div class="col-xs-6">
+                {% for error in form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.record_status_value.label }}</label>
+                    {{ form.record_status_value|addcss:"form-control" }}
                 </div>
+            </div>
+            <div class="col-xs-6">
+                {% for error in form.record_status_explanation.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.record_status_explanation.label }}</label>
+                    {{ form.record_status_explanation|addcss:"form-control" }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-sm-8">
+        <ul class="nav nav-tabs nav-justified" role="tablist">
+            <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
+                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+            </li>
+            <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
+                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+            </li>
+            <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
+                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+            </li>
+            <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
+                <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+            </li>
+            <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
+                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <div class="h4">Subjects</div>
+                        <ul class="list-group">
+                        {% for acrelation in instance.acrelation_set.all %}
+                            {% if acrelation.type_controlled == 'SU' %}
+                            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list-group-item">
+                                {{ acrelation.authority.name }}
+                                {% if acrelation.name_for_display_in_citation %}
+                                <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+                                {% endif %}
+                                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+                        <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
+                            <span class="glyphicon glyphicon-plus"></span> Create new authority-citation relation
+                        </a>
+                        </ul>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="h4">&nbsp;</div>
+                        {% for error in form.abstract.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.abstract.label }}</label>
+                            {{ form.abstract|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.description.label }}</label>
+                            {{ form.description|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.physical_details.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.physical_details.label }}</label>
+                            {{ form.physical_details|addcss:"form-control" }}
+                        </div>
+
+
+                        {% for error in form.dataset.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.dataset.label }}</label>
+                            {{ form.dataset|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.language.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.language.label }}</label>
+                            {{ form.language|addcss:"form-control" }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
+                {% include "curation/fragment_citation_attributes.html" %}
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
+                {% for linkeddata in instance.linkeddata.all %}
+                    {{ linkeddata }}
+                {% endfor %}
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
+                {% include "curation/fragment_citation_ccrelations.html" %}
 
             </div>
-
-            <div class="col-sm-3">
-                <div class="h4">Subjects</div>
-                <ul class="list-group">
-                {% for acrelation in instance.acrelation_set.all %}
-                    {% if acrelation.type_controlled == 'SU' %}
-                    <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list-group-item">
-                        {{ acrelation.authority.name }}
-                        {% if acrelation.name_for_display_in_citation %}
-                        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-                        {% endif %}
-                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                    </a>
-                    {% endif %}
-                {% endfor %}
-                <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
-                    <span class="glyphicon glyphicon-plus"></span> Create new authority-citation relation
-                </a>
-                </ul>
+            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
+                {% include "curation/fragment_citation_acrelations.html" %}
             </div>
-            <div class="col-sm-5">
-                <div class="h4">&nbsp;</div>
-                {% for error in form.abstract.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.abstract.label }}</label>
-                    {{ form.abstract|addcss:"form-control" }}
-                </div>
-
-                {% for error in form.description.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.description.label }}</label>
-                    {{ form.description|addcss:"form-control" }}
-                </div>
-
-                {% for error in form.physical_details.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.physical_details.label }}</label>
-                    {{ form.physical_details|addcss:"form-control" }}
-                </div>
-
-                {% for error in form.physical_details.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.physical_details.label }}</label>
-                    {{ form.physical_details|addcss:"form-control" }}
-                </div>
-
-                {% for error in form.dataset.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.dataset.label }}</label>
-                    {{ form.dataset|addcss:"form-control" }}
-                </div>
-
-
-
-                {% for error in form.language.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.language.label }}</label>
-                    {{ form.language|addcss:"form-control" }}
-                </div>
-
-
-            </div>
-
         </div>
     </div>
-    <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
-        <ul class="list-group">
-        {% for attribute in instance.attributes.all %}
-            <a class="list-group-item" href="{% url "update_attribute_for_citation" instance.id attribute.id%}">
-                <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
-                {{ attribute.value.get_child_class }}
-                <span class="text-warning">{{ attribute.value_freeform}}</span>
-
-                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-            </a>
-        {% endfor %}
-            <a class="list-group-item text-muted" href="{% url "create_attribute_for_citation" instance.id %}">
-                <span class="glyphicon glyphicon-plus"></span> Create new attribute
-            </a>
-        </ul>
-    </div>
-    <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
-        {% for linkeddata in instance.linkeddata.all %}
-            {{ linkeddata }}
-        {% endfor %}
-    </div>
-    <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
-        <ul class="list-group">
-        {% for ccrelation in instance.relations_from.all %}
-
-            <a class="list-group-item">
-                {% if instance.id == ccrelation.subject.id %}
-                <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
-                {% else %}
-
-                The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title }}</span>
-
-                {% endif %}
-                <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
-                {% if ccrelation.type_free %}
-                <span class="label label-success">{{ ccrelation.type_free }}</span>
-                {% endif %}
-
-                {% if instance.id == ccrelation.object.id %}
-                <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
-                {% else %}
-                the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title }}</span>.
-                {% endif %}
-
-
-                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-            </a>
-        {% endfor %}
-        {% for ccrelation in instance.relations_to.all %}
-
-            <a class="list-group-item">
-                {% if instance.id == ccrelation.subject.id %}
-                <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
-                {% else %}
-
-                The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title }}</span>
-
-                {% endif %}
-                <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
-                {% if ccrelation.type_free %}
-                <span class="label label-success">{{ ccrelation.type_free }}</span>
-                {% endif %}
-
-                {% if instance.id == ccrelation.object.id %}
-                <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
-                {% else %}
-                the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title }}</span>.
-                {% endif %}
-
-
-                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-            </a>
-        {% endfor %}
-            <a class="list-group-item text-muted" href="{% url "create_ccrelation_for_citation" instance.id %}">
-                <span class="glyphicon glyphicon-plus"></span> Create new relation
-            </a>
-        </ul>
-
-    </div>
-    <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
-        <ul class="list-group">
-        {% for acrelation in instance.acrelation_set.all %}
-            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list-group-item">
-                <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
-                {% if acrelation.type_broad_controlled %}
-                <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
-                {% endif %}
-                {{ acrelation.authority.name }}
-                {% if acrelation.name_for_display_in_citation %}
-                <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-                {% endif %}
-
-                <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-            </a>
-        {% endfor %}
-        <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
-            <span class="glyphicon glyphicon-plus"></span> Create new authority-citation relation
-        </a>
-        </ul>
-    </div>
 </div>
+
 
 <div class="clearfix">
     <div class="button-group pull-right">
