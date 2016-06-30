@@ -35,8 +35,47 @@
             </ul>
         </div>
         <div class="col-xs-6">
-            <ul class="suggestion-results-list list-group">
-            </ul>
+            <div id="matching" style="visibility: hidden;">
+                <ul class="nav nav-tabs nav-justified" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggestions</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="suggest">
+                        <ul class="suggestion-results-list list-group">
+                        </ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="search">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <input class="authority-search form-control"
+                                        id="authority-search"
+                                        placeholder="Search for an authority record..." />
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="list-group" id="results-container"></ul>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="create">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="text-info">
+                                    Do you want to create a new authority record in the production database?
+                                    <div class="btn btn-md btn-success">Create</div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -69,67 +108,107 @@ var opts = {
 }
 
 
-    $('.draftauthority').click(function() {
+$('.draftauthority').click(function() {
+    var elem = $(this);
+    console.log('select authority', elem);
+    $('.selected').removeClass('selected');
+    elem.addClass('selected');
 
-        var elem = $(this);
-        console.log('select authority', elem);
+    $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
+        beforeSend: function(response) {
+            elem.find('.suggestion-status').spin(opts);
+        },
+        success: function(response) {
+            $('#matching').css('visibility', 'visible');
 
-        $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
-            beforeSend: function(response) {
-                elem.find('.suggestion-status').spin(opts);
-            },
-            success: function(response) {
-                console.log('success', response);
-                elem.addClass('selected');
-                // status.addClass('label');
+            // status.addClass('label');
 
 
-                    // status.addClass('label-success');
-                    // status.attr('data-toggle', "collapse");
+                // status.addClass('label-success');
+                // status.attr('data-toggle', "collapse");
 
-                var target = $('.suggestion-results-list');
-                target.empty();
-                response.data.forEach(function(suggestion) {
-                    var suggestElem = '<li class="list-group-item">';
-                    suggestElem += '<div class="row">';
+            var target = $('.suggestion-results-list');
+            target.empty();
 
-                    suggestElem += '<div class="col-xs-2">';
-                    suggestElem += '<span class="button-group button-group-md">';
-                    suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
-                    suggestElem += '<a class="glyphicon glyphicon-share-alt btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
-                    suggestElem += '</span>';
-                    suggestElem += '</div>';
+            response.data.forEach(function(suggestion) {
+                var suggestElem = '<li class="list-group-item">';
+                suggestElem += '<div class="row">';
 
-                    suggestElem += '<div class="col-xs-10">';
+                suggestElem += '<div class="col-xs-2">';
+                suggestElem += '<span class="button-group button-group-md">';
+                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
+                suggestElem += '<a class="glyphicon glyphicon-pencil btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
+                suggestElem += '</span>';
+                suggestElem += '</div>';
 
-                    suggestElem += '<div class="h5">' + suggestion.name + ' (' + suggestion.id + ') <div class="pull-right col-sm-3"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div></div>';
+                suggestElem += '<div class="col-xs-10">';
 
-                    suggestElem += ' <span class="label label-danger" style="margin-left: 5px;">' + suggestion.type_controlled + '</span> ';
+                suggestElem += '<div class="h5">' + suggestion.name + ' (' + suggestion.id + ') <div class="pull-right col-sm-3"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div></div>';
 
-                    suggestElem += '<span class="suggestion-reasons">';
-                    suggestion.reasons.forEach(function(reason) {
-                        suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
-                    });
-                    suggestElem += '</span>';
-                    suggestElem += '</div>';
-                    suggestElem += '</div>';
+                suggestElem += ' <span class="label label-danger" style="margin-left: 5px;">' + suggestion.type_controlled + '</span> ';
 
-                    suggestElem += '</li>';
-
-                    target.append(suggestElem);
+                suggestElem += '<span class="suggestion-reasons">';
+                suggestion.reasons.forEach(function(reason) {
+                    suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
                 });
-                var customElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" id="suggestions_for_' + elem.attr('id') + '_radio" value="" checked="checked"><input size="40" type="text" name="input_for_' + elem.attr('id') + '_text" id="input_for_' + elem.attr('id') + '_text" placeholder="Enter an authority entry ID..." /></label></li>');
-                var noneElem = $('<li class="list-group-item"><label class="radio-inline control-label"><input type="radio" style="margin-top: 0px;" name="suggestions_for_' + elem.attr('id') + '" value="-1" checked="checked"><strong>None</strong></label></li>');
-                target.append(customElem);
-                target.append(noneElem);
-                $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
-                    $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
+                suggestElem += '</span>';
+                suggestElem += '</div>';
+                suggestElem += '</div>';
+
+                suggestElem += '</li>';
+
+                target.append(suggestElem);
+            });
+
+            $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
+                $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
+            });
+
+        }
+    });
+});
+
+$(document).ready(function() {
+    $('#authority-search').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            success: function(result) {
+                $('#results-container').empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    choice_elem += '</li>';
+
+                    $('#results-container').append(choice_elem);
                 });
 
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#results-container').empty();
+                    $('#authority-search').val(selected_name);
+                    $('#id_acrelation-name_for_display_in_citation').val(selected_name);
+                    $('#id_acrelation-authority').val(selected_id);
+                });
             }
         });
     });
+});
+
 </script>
 
+<style>
+.selected {
+    background-color: orange;
+}
+</style>
 
 {% endblock %}
