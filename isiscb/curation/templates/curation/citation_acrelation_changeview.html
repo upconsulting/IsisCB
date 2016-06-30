@@ -88,6 +88,7 @@
                     <input type="text"
                         class="form-control"
                         name="authority-search"
+                        autocomplete="off"
                         id="authority-search" />
                 </div>
                 <ul class="list-group" id="results-container"></ul>
@@ -122,15 +123,27 @@ $(document).ready(function() {
                 success: function(result) {
                     $('#results-container').empty();
                     result.results.forEach(function(r) {
-                        $('#results-container').append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.name + '"><span class="label label-primary">' + r.type + '</span> ' + r.name + ' | <span class="text-muted">' + r.description + '</span></a>');
+                        var choice_elem = '<li class="list-group-item search-result">';
+                        choice_elem += '<span class="button-group button-group-xs">';
+                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                        choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                        choice_elem += '</span>';
+                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                        if (r.description != null) {
+                            choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                        }
+                        choice_elem += '</li>';
+
+                        $('#results-container').append(choice_elem);
                     });
 
-                    $('.search-result').click(function() {
+                    $('.select-citation').click(function() {
                         var selected = $(this);
                         var selected_id = selected.attr('data-id');
                         var selected_name = selected.attr('data-name');
                         $('#results-container').empty();
                         $('#authority-search').val(selected_name);
+                        $('#id_acrelation-name_for_display_in_citation').val(selected_name);
                         $('#id_acrelation-authority').val(selected_id);
                     });
                 }
