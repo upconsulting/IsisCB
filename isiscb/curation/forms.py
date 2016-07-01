@@ -167,7 +167,7 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all())
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset')
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
@@ -178,6 +178,9 @@ class CitationForm(forms.ModelForm):
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to',
         ]
+        labels = {
+            'belongs_to': 'Dataset',
+        }
 
     def _get_validation_exclusions(self):
         exclude = super(CitationForm, self)._get_validation_exclusions()
@@ -283,15 +286,11 @@ class RoleForm(forms.ModelForm):
 
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset_values = Citation.objects.values_list('dataset').distinct()
-    authority_dataset_values = Authority.objects.values_list('dataset').distinct()
-
-    all_datasets = list(dataset_values) + list(authority_dataset_values)
+    dataset_values = Dataset.objects.all()
 
     choices = set()
-    for value in all_datasets:
-        if value[0]:
-            choices.add((value[0], value[0]))
+    for ds in dataset_values:
+        choices.add((ds.pk, ds.name))
 
     dataset = forms.ChoiceField(choices = choices, required=True)
 
