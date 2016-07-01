@@ -167,7 +167,7 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    dataset = forms.ChoiceField(choices=[(d, d) for d in Citation.objects.order_by().values_list('dataset', flat=True).distinct()])
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all())
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
@@ -176,7 +176,7 @@ class CitationForm(forms.ModelForm):
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'language', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'dataset',
+              'belongs_to',
         ]
 
     def _get_validation_exclusions(self):
