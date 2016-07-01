@@ -31,3 +31,12 @@
 .error {
   color: #a70404;
 }
+
+
+.delete {
+    color: red;
+}
+
+.notpublic {
+  background-color: #efefef;
+}

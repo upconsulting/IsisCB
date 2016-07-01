@@ -26,3 +26,31 @@ def needs_view_rule(crud_rules):
 @register.filter
 def create_perm_tuple(fieldname, id):
     return (fieldname, id)
+
+@register.filter
+def is_public_inconsistent(instance):
+    if instance.public and instance.record_status_value != 'Active':
+        return True
+    if not instance.public and instance.record_status_value == 'Active':
+        return True
+    return False
+
+@register.filter
+def are_related_objects_for_citation_public(citation):
+    for acrel in citation.acrelations:
+        if not acrel.public:
+            return False
+        if not acrel.authority.public:
+            return False
+
+    for ccrel in citation.ccrelations:
+        if not ccrel.public:
+            return False
+        if not ccrel.object.public:
+            return False
+
+    for attr in citation.attributes.all():
+        if not attr.public:
+            return False
+
+    return True

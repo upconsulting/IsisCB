@@ -1,0 +1,150 @@
+{% load render_object %}
+
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'citations_related'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+<ul class="list-group">
+{% if can_view %}
+{% for ccrelation in instance.relations_from.all %}
+
+    <li class="list-group-item clearfix {% if not ccrelation.object.public or not ccrelation.public %}notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
+        {% if instance.id == ccrelation.subject.id %}
+        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+        {% else %}
+
+        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
+
+        {% endif %}
+        <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+        {% if ccrelation.type_free %}
+        <span class="label label-success">{{ ccrelation.type_free }}</span>
+        {% endif %}
+
+        {% if instance.id == ccrelation.object.id %}
+        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+        {% else %}
+        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+        {% endif %}
+
+        {% if not ccrelation.object.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+        {% endif %}
+        {% if not ccrelation.public %}
+        <i class="fa fa-minus-square" aria-hidden="true" title="This CCRelation is not public."></i>
+        {% endif %}
+
+        {% if can_update %}
+        <span class="button-group button-group-xs pull-right">
+            <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
+            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation"
+                type="button"
+                ccrelation-id="{{ ccrelation.id }}"
+                ccrelation-title="{{ ccrelation.object|get_citation_title|safe }}"></a>
+        </span>
+        {% endif %}
+    </li>
+{% endfor %}
+{% for ccrelation in instance.relations_to.all %}
+
+    <li class="list-group-item clearfix" id="ccrelation-{{ccrelation.id}}">
+        {% if instance.id == ccrelation.subject.id %}
+        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+        {% else %}
+
+        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }}</span>
+
+        {% endif %}
+        <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+        {% if ccrelation.type_free %}
+        <span class="label label-success">{{ ccrelation.type_free }}</span>
+        {% endif %}
+
+        {% if instance.id == ccrelation.object.id %}
+        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+        {% else %}
+        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
+        {% endif %}
+
+        {% if can_update %}
+        <span class="button-group button-group-xs pull-right">
+            <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
+            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation"
+                type="button"
+                ccrelation-id="{{ ccrelation.id }}"
+                ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}"></a>
+        </span>
+        {% endif %}
+    </li>
+{% endfor %}
+{% endif %}
+
+{% if can_update %}
+    <a class="list-group-item text-muted" href="{% url "create_ccrelation_for_citation" instance.id %}">
+        <span class="glyphicon glyphicon-plus"></span> Create new relation
+    </a>
+{% endif %}
+
+  {% if not can_view %}
+  <li class="list-group-item">
+    <div class="alert alert-warning" role="alert">
+    You do not have sufficient permissions to view related citations.
+    </div>
+  </li>
+  {% endif %}
+</ul>
+
+{% endwith %}
+
+<script>
+$(document).ready(function() {
+    $('.delete-ccrelation').click(function() {
+        var elem = $(this);
+        var ccrelation_id = elem.attr('ccrelation-id');
+        var ccrelation_title = elem.attr('ccrelation-title');
+        $('#ccrelation-id-container').val(ccrelation_id);
+        $('#delete-ccrelation-target-name').html(ccrelation_title);
+        $('#delete-ccrelation-modal').modal('show');
+    });
+
+});
+
+var delete_ccrelation = function() {
+    $('#delete-ccrelation-modal').modal('hide');
+    var ccrelation_id = $('#ccrelation-id-container').val();
+    if (ccrelation_id) {
+        $.ajax("{% url "create_ccrelation_for_citation" instance.id %}" + ccrelation_id + '/delete.json?confirm=true', {
+            'success': function(r) {
+                $('#ccrelation-' + ccrelation_id).remove();
+            },
+        });
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-ccrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-ccrelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-ccrelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                You are about to delete a citation-citation relation with <span class="text-warning" id="delete-ccrelation-target-name"></span>. Deletion cannot be undone!
+                <p>
+                    This will not delete the related citation itself, only the relation between that citation and this one.
+                </p>
+                <input type="hidden" id="ccrelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_ccrelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>

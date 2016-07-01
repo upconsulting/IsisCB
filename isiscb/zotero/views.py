@@ -3,11 +3,18 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
+from django.template import RequestContext, loader
 
 from isisdata.models import *
 
 from zotero.models import *
+from zotero.filters import *
+from zotero.forms import *
+from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
+
+import tempfile
 
 
 @login_required
@@ -35,9 +42,11 @@ def suggest_authority_json(request, authority_id):
         instance = Authority.objects.get(pk=suggestion['id'])
         suggestion.update({
             'name': instance.name,
-            'type_controlled': instance.type_controlled,
+            'type_controlled': instance.get_type_controlled_display(),
             })
         suggestions.append(suggestion)
+        if len(suggestions) > 30:
+            break
     return JsonResponse({'data': suggestions})
 
 
@@ -71,3 +80,73 @@ def suggest_production_acrelation_json(request, acrelation_id):
         draftAuthority = acrelation.resolutions.first().for_instance.authority
 
     return suggest_authority_json(request, draftAuthority.id)
+
+
+@staff_member_required
+def accessions(request):
+    """
+    Curator should be able to see a list of Zotero ingests, with indication of
+    whether all authorities have been resolved for a batch.
+    """
+
+    queryset = ImportAccession.objects.filter(resolved=False)
+    filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
+
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'objects': filtered_objects,
+    })
+    template = loader.get_template('zotero/accessions.html')
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def create_accession(request):
+    """
+    Curators should be able to upload Zotero RDF.
+    """
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+    })
+
+    template = loader.get_template('zotero/create_accession.html')
+
+
+    if request.method == 'GET':
+        form = ImportAccessionForm()
+
+    elif request.method == 'POST':
+        form = ImportAccessionForm(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save()
+            instance.imported_by = request.user
+            instance.save()
+
+            with tempfile.NamedTemporaryFile(suffix='.rdf', delete=False) as destination:
+                destination.write(form.cleaned_data['zotero_rdf'].file.read())
+                path = destination.name
+
+            papers = zparser.read(path)
+            zparser.process(papers, instance=instance)
+    context.update({'form': form})
+
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def retrieve_accession(request, accession_id):
+    """
+    Curator should be able to see a list of all draft authorities in a specific
+    Zotero ingest.
+    """
+
+    template = loader.get_template('zotero/retrieve_accession.html')
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+    })
+    return HttpResponse(template.render(context))

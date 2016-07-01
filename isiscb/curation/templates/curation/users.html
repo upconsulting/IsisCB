@@ -22,10 +22,17 @@
   We recommend that you define small and limited roles over large, capture-it-all roles. Rather than trying to create one role that gives a user all the access they need, try to create smaller roles and then assign a user multiple roles. For example, if you want user 'Mickey Mouse' to be able to modify all records in dataset 'Awesome Dataset', but only see all other records, then  define one role for editing dataset 'Awesome Dataset', and one role for viewing all records. Then give user 'Mickey Mouse' both roles. This way you can reuse roles for other users that should only be able to do one of these things and it's easier to understand what a user can do by looking a the list of roles they have.
 </p>
 
+<p class="text-muted">
+  To grant a user access to the curation interface in general, go to their profile page. Access to the curation inteface is not regulated through roles.
+</p>
+
 {% if update_module %}
 <div class="row" style="margin-top: 35px;">
-  <div class="col-md-12">
-    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}">Create new role</a>
+  <div class="col-md-6">
+    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create new role</a>
+  </div>
+  <div class="col-md-6 text-right" style="padding-top:10px;">
+    <a href="{% url 'roles' %}"><i class="fa fa-key" aria-hidden="true"></i> See all roles</a>
   </div>
 </div>
 {% endif %}
@@ -65,7 +72,8 @@
           </td>
           <td>
             {% if update_module %}
-            <a href="{% url 'add_role_to_user' user.pk %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
+            <a href="{% url 'add_role_to_user' user.pk %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add Role</a>
+            &nbsp; &nbsp;
             <a href="{% url 'user' user.pk %}"><i class="fa fa-cog" aria-hidden="true"></i> User Profile</a>
             {% endif %}
           </td>

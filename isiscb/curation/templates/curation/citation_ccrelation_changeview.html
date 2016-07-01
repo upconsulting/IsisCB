@@ -5,21 +5,16 @@
 {% block content %}
 <hr />
 
+{% if not form.instance.public %}
+<div class="alert alert-danger" role="alert">
+<i class="fa fa-eye-slash" aria-hidden="true"></i> This CCRelation is not public.
+</div>
+{% endif %}
+
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-    <div class="h3 text-warning">Editing Citation-Citation Relation for Citation:
-        <div class="button-group pull-right">
-            <input type="submit" value="Save" class="btn btn-success" />
-        </div>
-    </div>
-    <div class="h2">
-        <a href="{% url "curate_citation" instance.id %}?tab=acrelations" style="text-decoration:none;">
-            <span class="glyphicon glyphicon-chevron-left"></span> {{ instance.title|safe }}
-        </a>
-    </div>
-    <div class="h4">{{ instance|get_authors_editors }}</div>
-    <div class="h4 text-warning">{{ instance.id }} | {{ instance|get_citation_pubdate }}</div>
+    {% include "curation/fragment_citation_header.html" %}
 
     <div class="container-fluid">
         <div class="row">
@@ -82,7 +77,8 @@
                         name="citation-search"
                         results-target="#subject-results-container"
                         selected-result-target="#id_ccrelation-subject"
-                        {% if not ccrelation and instance %}value="{{instance.title}}"{% endif %}/>
+                        {% if not ccrelation and instance %}value="{{instance|get_citation_title}}"{% endif %}
+                        {% if not ccrelation and instance %}disabled{% endif %} />
                 </div>
                 <ul class="list-group" id="subject-results-container"></ul>
 
@@ -101,6 +97,7 @@
                         class="form-control citation-search"
                         name="citation-search"
                         results-target="#object-results-container"
+                        autocomplete="off"
                         selected-result-target="#id_ccrelation-object" />
                 </div>
                 <ul class="list-group" id="object-results-container"></ul>
@@ -109,7 +106,7 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}<a class="btn btn-danger">Delete</a>{% endif %}
+                {% if ccrelation %}<a href="{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
             </div>
         </div>
     </div>
@@ -124,28 +121,45 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var subject_name = "{% if ccrelation %}{{ ccrelation.subect.title }}{% endif %}";
-    var object_name = "{% if ccrelation %}{{ ccrelation.object.title }}{% endif %}";
-    if (subject_name.length > 0) {
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title }}{% endif %}";
+    var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title }}{% endif %}";
+    var object_id = "{% if ccrelation %}{{ ccrelation.object.id }}{% endif %}";
+
+    if (subject_id.length > 0) {
         $('#citation-search-subject').val(subject_name);
         $('#citation-search-subject').attr('disabled', true);
     }
 
-    if (object_name.length > 0) {
+    if (object_id.length > 0) {
         $('#citation-search-object').val(object_name);
         $('#citation-search-object').attr('disabled', true);
     }
 
     $('#swap-subject-object').click(function() {
-        var subject_name = $('#citation-search-subject').val();
-        var object_name = $('#citation-search-object').val();
-        var subject_id = $('#id_ccrelation-subject').val();
-        var object_id = $('#id_ccrelation-object').val();
+        subject_name = $('#citation-search-subject').val();
+        object_name = $('#citation-search-object').val();
+        subject_id = $('#id_ccrelation-subject').val();
+        object_id = $('#id_ccrelation-object').val();
+        var subject_disabled = $('#citation-search-subject').attr('disabled');
+        var object_disabled = $('#citation-search-object').attr('disabled');
 
         $('#citation-search-subject').val(object_name);
         $('#citation-search-object').val(subject_name);
+        if (object_disabled) {
+            $('#citation-search-subject').attr('disabled', true);
+        } else {
+            $('#citation-search-subject').removeAttr('disabled');
+        }
+
+        if (subject_disabled) {
+            $('#citation-search-object').attr('disabled', true);
+        } else {
+            $('#citation-search-object').removeAttr('disabled');
+        }
         $('#id_ccrelation-subject').val(object_id);
         $('#id_ccrelation-object').val(subject_id);
+
 
         $('.citation-search').each(function(i, elem) {
             $($(elem).attr('results-target')).empty();
@@ -166,10 +180,21 @@ $(document).ready(function() {
                 console.log('success', results_container);
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    results_container.append('<a class="list-group-item search-result" data-id="' + r.id + '" data-name="' + r.title + '"><span class="label label-primary">' + r.type + '</span> ' + r.title + ' (' + r.id + ') | <span class="text-muted">' + r.description + '</span></a>');
+                    var choice_elem = '<li class="list-group-item search-result">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    choice_elem += '</li>';
+
+                    results_container.append(choice_elem);
                 });
 
-                $('.search-result').click(function() {
+                $('.select-citation').click(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');

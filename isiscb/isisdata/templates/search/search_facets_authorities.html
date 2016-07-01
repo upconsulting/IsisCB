@@ -6,27 +6,35 @@
 <div class="panel panel-default hidden-print">
   <div class="panel-heading"><h3 class="panel-title">Authority Type</h3></div>
   <div class="facet_panel panel-body">
+    <div class="row panel-row">
+      <div class="col-md-12 panel-cell">
+        <h5><small>Select the type of authority you would like see.</small></h5>
+      </div>
+    </div>
 
   {% if facets_authority.fields.authority_type %}
-        <ul class="selected_facets">
+        <div class="row panel-row ">
           {% for auth_type in selected_facets.authority_authority_type %}
           {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
-          <li><a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><i class="fa fa-check-square-o"></i> {{ auth_type }}</a></li>
+          <div class="col-md-12">
+            <a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><i class="fa fa-check-square-o"></i> {{ auth_type }}</a>
+          </div>
           {% endwith %}
           {% endfor %}
-        </ul>
-        <ul class="unselected_facets">
+
           {# Provide only the top 7 authors #}
           {% for auth_type in facets_authority.fields.authority_type|slice:":7" %}
           {% if auth_type.0 %}
           {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="fa fa-square-o"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})</li>
+          <div class="col-md-12">
+            <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="fa fa-square-o"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})
+          </div>
           {% endif %}
           {% endif %}
           {% endfor %}
-        </ul>
+        </div>
   {% else %}
-          <p>No authority type facets.</p>
+            <div class="col-md-12"><p>No authority type facets.</p></div>
   {% endif %}
 </div>
 </div>

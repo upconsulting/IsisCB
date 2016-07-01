@@ -5,16 +5,10 @@
 {% block content %}
 <hr />
 
-{% if not form.instance.public %}
-<div class="alert alert-danger" role="alert">
-<i class="fa fa-eye-slash" aria-hidden="true"></i> This ACRelation is not public.
-</div>
-{% endif %}
-
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-    {% include "curation/fragment_citation_header.html" %}
+    {% include "curation/fragment_authority_header.html" %}
 
     <div class="container-fluid">
         <div class="row">
@@ -90,12 +84,11 @@
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Authority</label>
+                    <label>Citation</label>
                     <input type="text"
                         class="form-control"
-                        name="authority-search"
-                        autocomplete="off"
-                        id="authority-search" />
+                        name="citation-search"
+                        id="citation-search" />
                 </div>
                 <ul class="list-group" id="results-container"></ul>
             </div>
@@ -103,7 +96,7 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}<a href="{% url "delete_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
+                {% if acrelation %}<a href="{% url "delete_acrelation_for_authority" instance.id acrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
             </div>
         </div>
     </div>
@@ -118,29 +111,32 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var authority_name = "{% if acrelation %}{{ acrelation.authority.name }}{% endif %}";
-    if (authority_name.length > 0) {
-        $('#authority-search').val(authority_name);
-        $('#authority-search').attr('disabled', true);
+    var citation_name = "{% if acrelation %}{{ acrelation.citation|get_citation_title|safe }}{% endif %}";
+    var citation_id = "{% if acrelation %}{{ acrelation.citation.id }}{% endif %}";
+    if (citation_id.length > 0) {
+        $('#citation-search').val(citation_name);
+        $('#citation-search').attr('disabled', true);
     } else {
-        $('#authority-search').on('keyup', function(e) {
+        $('#citation-search').on('keyup', function(e) {
             var query = $(this).val();
-            $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
                 success: function(result) {
-                    $('#results-container').empty();
+                    var results_container = $('#results-container');
+                    results_container.empty();
                     result.results.forEach(function(r) {
                         var choice_elem = '<li class="list-group-item search-result">';
                         choice_elem += '<span class="button-group button-group-xs">';
-                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
                         choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                         choice_elem += '</span>';
-                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
                         if (r.description != null) {
                             choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                         }
                         choice_elem += '</li>';
 
-                        $('#results-container').append(choice_elem);
+                        results_container.append(choice_elem);
+
                     });
 
                     $('.select-citation').click(function() {
@@ -148,9 +144,8 @@ $(document).ready(function() {
                         var selected_id = selected.attr('data-id');
                         var selected_name = selected.attr('data-name');
                         $('#results-container').empty();
-                        $('#authority-search').val(selected_name);
-                        $('#id_acrelation-name_for_display_in_citation').val(selected_name);
-                        $('#id_acrelation-authority').val(selected_id);
+                        $('#citation-search').val(selected_name);
+                        $('#id_acrelation-citation').val(selected_id);
                     });
                 }
             });

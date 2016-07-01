@@ -8,19 +8,19 @@
 {% include "curation/fragment_citation_header.html" %}
 
 <div class="container-fluid">
-    <div class="h3">Are you sure that you want to delete this attribute?</div>
+    <div class="h3">Are you sure that you want to delete this relation?</div>
 
     <dl>
         <dt>Type</dt>
-        <dd>{{ attribute.type_controlled.display_name }}</dd>
-        <dt>Value</dt>
-        <dd>{{ attribute.value.get_child_class }}</dd>
+        <dd>{{ acrelation.get_type_controlled_display }}</dd>
+        <dt>Authority</dt>
+        <dd>{{ acrelation.authority.name }}</dd>
     </dl>
 
 
     <div class="clearfix">
         <div class="button-group pull-right">
-            <a href="{% url "delete_attribute_for_citation" instance.id attribute.id %}?confirm=true" class="btn btn-danger">Delete</a>
+            <a href="{% url "delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true" class="btn btn-danger">Delete</a>
         </div>
     </div>
 </div>
