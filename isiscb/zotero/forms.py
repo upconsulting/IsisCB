@@ -7,9 +7,9 @@ class ImportAccessionForm(forms.ModelForm):
     """
     Used to create a :class:`.ImportAccession`\.
     """
-    
+
     zotero_rdf = forms.FileField()
 
     class Meta:
         model = ImportAccession
-        fields = ['name', 'zotero_rdf']
+        fields = ['name', 'ingest_to', 'zotero_rdf']

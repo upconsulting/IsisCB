@@ -13,6 +13,7 @@
             <th>Name</th>
             <th>Imported on</th>
             <th>Imported by</th>
+            <th>Dataset</th>
             <th>Citations</th>
             <th>Authorities</th>
             <th>Resolved</th>
@@ -29,6 +30,7 @@
             </td>
             <td>{{ object.imported_on }}</td>
             <td>{{ object.imported_by }}</td>
+            <td>{{ object.ingest_to.name }}</td>
             <td>{{ object.draftcitation_set.count }}</td>
             <td>{{ object.draftauthority_set.count }}</td>
             <td>{{ object.resolved }}</td>

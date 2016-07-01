@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
+from isisdata.models import Dataset
+
 import re
 
 
@@ -21,6 +23,7 @@ class ImportAccession(models.Model):
     imported_by = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(max_length=255)
     resolved = models.BooleanField(default=False)
+    ingest_to = models.ForeignKey(Dataset, null=True)
 
 
 class ImportedData(models.Model):
