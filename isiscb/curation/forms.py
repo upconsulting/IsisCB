@@ -12,7 +12,7 @@ class CCRelationForm(forms.ModelForm):
     object = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = CCRelation
@@ -42,7 +42,7 @@ class ACRelationForm(forms.ModelForm):
     citation = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = ACRelation
@@ -167,8 +167,8 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset')
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = Citation
@@ -202,7 +202,7 @@ class NoViewInput(forms.TextInput):
 
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = Authority

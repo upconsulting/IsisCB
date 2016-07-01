@@ -1091,8 +1091,8 @@ class Person(Authority):
     #  users to be able to "claim" their PERSON record -- this is much more
     #  straightforward with separate models.
     # are those calculated?
-    personal_name_last = models.CharField(max_length=255)
-    personal_name_first = models.CharField(max_length=255)
+    personal_name_last = models.CharField(max_length=255, blank=True)
+    personal_name_first = models.CharField(max_length=255, blank=True)
     personal_name_suffix = models.CharField(max_length=255, blank=True)
     personal_name_preferred = models.CharField(max_length=255, blank=True)
 
