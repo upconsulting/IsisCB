@@ -1859,6 +1859,10 @@ class IsisCBRole(models.Model):
     def user_module_rules(self):
         return UserModuleRule.objects.filter(role=self.pk)
 
+    @property
+    def zotero_rules(self):
+        return ZoteroRule.objects.filter(role=self.pk)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1931,6 +1935,11 @@ class UserModuleRule(AccessRule):
     )
     module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
 
+class ZoteroRule(AccessRule):
+    """
+    This rule allows a user access to the Zotero module.
+    """
+    # so far no properties
 
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
