@@ -590,7 +590,8 @@ class CuratedMixin(models.Model):
                                       help_text=help_text("""
     Value of ModifiedOn from the original FM database."""))
 
-    dataset = models.CharField(max_length=255, blank=True, null=True)
+    dataset_literal = models.CharField(max_length=255, blank=True, null=True)
+    belongs_to = models.ForeignKey('Dataset', null=True)
 
     @property
     def _history_user(self):
@@ -1893,6 +1894,8 @@ class CRUDRule(AccessRule):
     )
     crud_action = models.CharField(max_length=255, null=False, blank=False,
                                        choices=CRUD_CHOICES)
+
+
 class FieldRule(AccessRule):
     """
     This rule defines edit access to a specific field.
@@ -1907,11 +1910,13 @@ class FieldRule(AccessRule):
     )
     field_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
 
+
 class DatasetRule(AccessRule):
     """
     This rules limits the records a user has access to to a specific dataset.
     """
     dataset = models.CharField(max_length=255, null=False, blank=False)
+
 
 class UserModuleRule(AccessRule):
     """
@@ -1925,3 +1930,8 @@ class UserModuleRule(AccessRule):
         (UPDATE, 'Update'),
     )
     module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
+
+class Dataset(CuratedMixin):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
