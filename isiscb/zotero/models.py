@@ -31,6 +31,9 @@ class ImportedData(models.Model):
     imported_by = models.ForeignKey(User, blank=True, null=True)
     part_of = models.ForeignKey('ImportAccession')
 
+    # dataset = models.CharField(max_length=255, blank=True, null=True)
+    # editor = models.CharField(max_length=255, blank=True, null=True)
+
     processed = models.BooleanField(default=False, help_text=help_text("""
     Indicates whether or not a record has been inspected, and a corresponding
     entry/entries in isisdata have been created. When True, a record should

@@ -8,6 +8,13 @@
 <div class="h3">
     <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
 </div>
+<div class="h4">Authority Resolution</div>
+<p class="text-info">
+    Use the interface below to resolve authority records from this Zotero accession.
+    All authority records must be resolved before citations can be imported into the
+    production database.
+</p>
+
 
 <div class="container-fluid">
     <div class="row">
@@ -107,14 +114,16 @@ var opts = {
 , position: 'relative' // Element positioning
 }
 
+var selected_authority;
 
 $('.draftauthority').click(function() {
     var elem = $(this);
     console.log('select authority', elem);
     $('.selected').removeClass('selected');
     elem.addClass('selected');
-
-    $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
+    var draftauthority_id = elem.attr('data-id');
+    selected_authority = draftauthority_id;
+    $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {
             elem.find('.suggestion-status').spin(opts);
         },
@@ -136,7 +145,7 @@ $('.draftauthority').click(function() {
 
                 suggestElem += '<div class="col-xs-2">';
                 suggestElem += '<span class="button-group button-group-md">';
-                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
+                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion" id="authority-suggestion-' + suggestion.id + '" data-suggestion="'+ suggestion.id +'" data-authority="'+ draftauthority_id +'"></a> ';
                 suggestElem += '<a class="glyphicon glyphicon-pencil btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
                 suggestElem += '</span>';
                 suggestElem += '</div>';
@@ -177,7 +186,7 @@ $(document).ready(function() {
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation resolve-with-search" data-id="' + r.id + '" data-name="' + r.name + '" data-suggestion="' + r.id + '" data-authority="' + selected_authority + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -202,6 +211,38 @@ $(document).ready(function() {
         });
     });
 });
+
+
+var bindSuggestions = function() {
+    $('.resolve-with-suggestion').click(function(e) {
+        var suggestElem = $(this);
+        var suggestion_id = suggestElem.attr('data-suggestion'),
+            draftauthority_id = suggestElem.attr('data-authority');
+
+        // modal -> resolve.
+    });
+}
+
+var bindSearchSelect = function() {
+    $('.resolve-with-search').click(function(e) {
+        var suggestElem = $(this);
+        var suggestion_id = suggestElem.attr('data-suggestion'),
+            draftauthority_id = suggestElem.attr('data-authority');
+
+        // modal -> resolve.
+    });
+}
+
+var bindCreateNew = function() {
+    $('.resolve-with-create').click(function(e) {
+
+        // create.
+
+        // modal -> resolve.
+    });
+}
+
+var triggerResolveAuthority = function()
 
 </script>
 

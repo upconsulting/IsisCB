@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.template import RequestContext, loader
+from django.core.urlresolvers import reverse
 
 from isisdata.models import *
 
@@ -113,7 +114,6 @@ def create_accession(request):
 
     template = loader.get_template('zotero/create_accession.html')
 
-
     if request.method == 'GET':
         form = ImportAccessionForm()
 
@@ -130,6 +130,7 @@ def create_accession(request):
 
             papers = zparser.read(path)
             zparser.process(papers, instance=instance)
+            return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
     return HttpResponse(template.render(context))
@@ -150,3 +151,31 @@ def retrieve_accession(request, accession_id):
         'accession': accession,
     })
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def resolve_authority(request):
+    authority_id = request.GET.get('authority')
+    draftauthority_id = request.GET.get('draftauthority')
+
+    authority = get_object_or_404(Authority, pk=authority_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+
+    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+
+    return JsonResponse({'data': resolution.id})
+
+
+@staff_member_required
+def create_authority_for_draft(request):
+    # authority_id = request.GET.get('authority')
+    draftauthority_id = request.GET.get('draftauthority')
+
+    # authority = get_object_or_404(Authority, pk=authority_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+
+    # Authority instance from field data.
+
+    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+
+    return JsonResponse({'data': resolution.id})
