@@ -56,5 +56,25 @@ def are_related_objects_for_citation_public(citation):
     return True
 
 @register.filter
+def are_related_objects_for_authority_public(authority):
+    for acrel in authority.acrelations:
+        if not acrel.public:
+            return False
+        if not acrel.citation.public:
+            return False
+
+    for aarel in authority.aarelations:
+        if not aarel.public:
+            return False
+        if not aarel.object.public:
+            return False
+
+    for attr in authority.attributes.all():
+        if not attr.public:
+            return False
+
+    return True
+
+@register.filter
 def get_dataset_name(ds_id):
     return Dataset.objects.get(pk=ds_id).name
