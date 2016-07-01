@@ -17,8 +17,9 @@ from isisdata.models import Authority, Citation, ACRelation
 
 import csv
 
+
 subjectIDMap = {}
-with open('AuthorityIDmap.tab', 'rU') as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../AuthorityIDmap.tab'), 'rU') as f:
     reader = csv.reader(f, delimiter='\t')
     for row in reader:
         subjectIDMap[int(row[1])] = row[0]
