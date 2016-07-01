@@ -602,9 +602,9 @@ def filter_queryset(user, queryset):
                     can_view_all = True
 
     if excluded_datasets:
-        queryset = queryset.exclude(dataset__in=excluded_datasets)
+        queryset = queryset.exclude(belongs_to__in=excluded_datasets)
     if datasets and not can_view_all:
-        queryset = queryset.filter(dataset__in=datasets)
+        queryset = queryset.filter(belongs_to__in=datasets)
 
     return queryset
 
