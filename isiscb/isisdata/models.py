@@ -542,16 +542,16 @@ class CuratedMixin(models.Model):
     record_status_explanation = models.CharField(max_length=255, blank=True,
                                                  null=True)
 
-    # def save(self, *args, **kwargs):
-    #     """
-    #     The record_status_value field controls whether or not the record is
-    #     public.
-    #     """
-    #     if self.record_status_value == self.ACTIVE:
-    #         self.public = True
-    #     else:
-    #         self.public = False
-    #     return super(CuratedMixin, self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        """
+        The record_status_value field controls whether or not the record is
+        public.
+        """
+        if self.record_status_value == CuratedMixin.ACTIVE:
+            self.public = True
+        else:
+            self.public = False
+        return super(CuratedMixin, self).save(*args, **kwargs)
 
     @property
     def created_on(self):

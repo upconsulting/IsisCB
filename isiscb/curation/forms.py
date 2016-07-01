@@ -95,7 +95,7 @@ class ISODateValueForm(forms.ModelForm):
 
 
 class PartDetailsForm(forms.ModelForm):
-    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
+    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
 
     def __init__(self, user, citation_id, *args, **kwargs):
         super(PartDetailsForm, self).__init__( *args, **kwargs)
