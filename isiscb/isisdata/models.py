@@ -591,7 +591,7 @@ class CuratedMixin(models.Model):
     Value of ModifiedOn from the original FM database."""))
 
     dataset_literal = models.CharField(max_length=255, blank=True, null=True)
-    # dataset = models.ForeignKey('Dataset', blank=True, null=True)
+    belongs_to = models.ForeignKey('Dataset', null=True)
 
     @property
     def _history_user(self):
