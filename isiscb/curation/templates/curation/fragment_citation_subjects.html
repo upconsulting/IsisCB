@@ -11,7 +11,7 @@
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'SU' %}
-    <li class="list-group-item clearfix {% if not acrelation.authority.public or not acrelation.public %}notpublic{% endif %}" id="subject-{{ acrelation.id }}">
+    <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
         {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
@@ -74,7 +74,7 @@ var createNewSubject = function() {
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result';
                     if (r.public != true) {
-                      choice_elem += ' notpublic';
+                      choice_elem += ' record-notpublic';
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';

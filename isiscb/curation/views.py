@@ -1039,6 +1039,7 @@ def quick_and_dirty_citation_search(request):
         'datestring': _get_datestring_for_citation(obj),
         'description': obj.description,
         'url': reverse("curate_citation", args=(obj.id,)),
+        'public':obj.public,
     } for obj in queryset[:20]]
     return JsonResponse({'results': results})
 
