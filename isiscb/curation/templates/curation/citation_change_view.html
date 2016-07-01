@@ -88,8 +88,8 @@
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.dataset.label }}</label>
-                            {{ form.dataset|addcss:"form-control" }}
+                            <label>{{ form.belongs_to.label }}</label>
+                            {{ form.belongs_to|addcss:"form-control" }}
                         </div>
 
                         {% for error in form.language.errors %}
