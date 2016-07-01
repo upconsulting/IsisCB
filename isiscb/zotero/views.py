@@ -90,7 +90,7 @@ def accessions(request):
     whether all authorities have been resolved for a batch.
     """
 
-    queryset = ImportAccession.objects.filter(resolved=False)
+    queryset = ImportAccession.objects.filter(processed=False)
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
 
     context = RequestContext(request, {
@@ -154,6 +154,27 @@ def retrieve_accession(request, accession_id):
 
 
 @staff_member_required
+def similar_authorities(request):
+    accession_id = request.GET.get('accession')
+    draftauthority_id = request.GET.get('draftauthority')
+
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+
+    queryset = accession.draftauthority_set.filter(
+                        name=draftauthority.name,
+                        processed=False,
+                        type_controlled=draftauthority.type_controlled)
+    queryset = queryset.exclude(pk=draftauthority_id)
+    response_data = {
+        'count': queryset.count(),
+        'draftauthorities': [obj.id for obj in queryset],
+    }
+    return JsonResponse({'data': response_data})
+
+
+
+@staff_member_required
 def resolve_authority(request):
     authority_id = request.GET.get('authority')
     draftauthority_id = request.GET.get('draftauthority')
@@ -162,6 +183,8 @@ def resolve_authority(request):
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
 
     resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+    draftauthority.processed = True
+    draftauthority.save()
 
     return JsonResponse({'data': resolution.id})
 
@@ -170,12 +193,28 @@ def resolve_authority(request):
 def create_authority_for_draft(request):
     # authority_id = request.GET.get('authority')
     draftauthority_id = request.GET.get('draftauthority')
+    accession_id = request.GET.get('accession')
 
     # authority = get_object_or_404(Authority, pk=authority_id)
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
 
     # Authority instance from field data.
+    authority = Authority.objects.create(
+        name=draftauthority.name,
+        type_controlled=draftauthority.type_controlled,
+        public=False,
+        belongs_to=accession.ingest_to,
+        record_status_value=CuratedMixin.INACTIVE,
+    )
 
     resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+    draftauthority.processed = True
+    draftauthority.save()
 
-    return JsonResponse({'data': resolution.id})
+    response_data = {
+        'resolution': resolution.id,
+        'authority': authority.id,
+    }
+
+    return JsonResponse({'data': response_data})

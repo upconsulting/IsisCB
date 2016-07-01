@@ -22,8 +22,12 @@ class ImportAccession(models.Model):
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(max_length=255)
-    resolved = models.BooleanField(default=False)
     ingest_to = models.ForeignKey(Dataset, null=True)
+    processed = models.BooleanField(default=False)
+
+    @property
+    def resolved(self):
+        return self.draftauthority_set.filter(processed=False).count() == 0
 
 
 class ImportedData(models.Model):
