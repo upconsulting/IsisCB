@@ -7,9 +7,11 @@ class ImportAccessionForm(forms.ModelForm):
     """
     Used to create a :class:`.ImportAccession`\.
     """
-    
+
     zotero_rdf = forms.FileField()
+    ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
+                                       empty_label='No dataset')
 
     class Meta:
         model = ImportAccession
-        fields = ['name', 'zotero_rdf']
+        fields = ['name', 'ingest_to', 'zotero_rdf']

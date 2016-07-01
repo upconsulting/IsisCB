@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 {% load staticfiles %}
+{% load zotero_tags %}
 
 
 {% block content %}
@@ -8,16 +9,24 @@
 <div class="h3">
     <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
 </div>
+<div class="h4">Authority Resolution</div>
+<p class="text-info">
+    Use the interface below to resolve authority records from this Zotero accession.
+    All authority records must be resolved before citations can be imported into the
+    production database.
+</p>
+
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-xs-6">
             <ul class="list-group">
-                {% for authority in accession.draftauthority_set.all %}
+                {% for authority in accession.draftauthority_set.all|filter_unresolved %}
                 {% with authority.citation_relations.first as acrelation %}
                 <a class="list-group-item clearfix draftauthority"
                     id="authority-{{ authority.id }}"
-                    data-id="{{ authority.id }}">
+                    data-id="{{ authority.id }}"
+                    data-name="{{ authority.name }}">
                     <div class="h5">
                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> {{ authority.name }}
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
@@ -69,7 +78,7 @@
                             <div class="panel-body">
                                 <p class="text-info">
                                     Do you want to create a new authority record in the production database?
-                                    <div class="btn btn-md btn-success">Create</div>
+                                    <div class="btn btn-md btn-success resolve-with-create">Create</div>
                                 </p>
                             </div>
                         </div>
@@ -107,25 +116,26 @@ var opts = {
 , position: 'relative' // Element positioning
 }
 
+var selected_authority, selected_authority_name;
 
 $('.draftauthority').click(function() {
     var elem = $(this);
-    console.log('select authority', elem);
     $('.selected').removeClass('selected');
-    elem.addClass('selected');
 
-    $.ajax('/zotero/suggest/authority/' + elem.attr('data-id') + '/', {
+    elem.addClass('selected');
+    var draftauthority_id = elem.attr('data-id');
+
+    selected_authority = draftauthority_id;
+    selected_authority_name = elem.attr('data-name');
+
+    bindCreateNew();
+
+    $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {
             elem.find('.suggestion-status').spin(opts);
         },
         success: function(response) {
             $('#matching').css('visibility', 'visible');
-
-            // status.addClass('label');
-
-
-                // status.addClass('label-success');
-                // status.attr('data-toggle', "collapse");
 
             var target = $('.suggestion-results-list');
             target.empty();
@@ -136,7 +146,7 @@ $('.draftauthority').click(function() {
 
                 suggestElem += '<div class="col-xs-2">';
                 suggestElem += '<span class="button-group button-group-md">';
-                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md" ></a> ';
+                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion" id="authority-suggestion-' + suggestion.id + '" data-suggestion="'+ suggestion.id +'" data-authority="'+ draftauthority_id +'" data-name="' + suggestion.name + '"></a> ';
                 suggestElem += '<a class="glyphicon glyphicon-pencil btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
                 suggestElem += '</span>';
                 suggestElem += '</div>';
@@ -163,12 +173,14 @@ $('.draftauthority').click(function() {
             $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
                 $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
             });
+            bindSuggestions();
 
         }
     });
 });
 
 $(document).ready(function() {
+    bindModal();
     $('#authority-search').on('keyup', function(e) {
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
@@ -177,7 +189,7 @@ $(document).ready(function() {
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation resolve-with-search" data-id="' + r.id + '" data-name="' + r.name + '" data-suggestion="' + r.id + '" data-authority="' + selected_authority + '" data-name="' + r.name + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -198,11 +210,118 @@ $(document).ready(function() {
                     $('#id_acrelation-name_for_display_in_citation').val(selected_name);
                     $('#id_acrelation-authority').val(selected_id);
                 });
+                bindSearchSelect();
             }
         });
     });
 });
 
+//
+var bindSuggestions = function() {
+    $('.resolve-with-suggestion').click(function(e) {
+        var suggestElem = $(this);
+        var suggestion_id = suggestElem.attr('data-suggestion'),
+            draftauthority_id = suggestElem.attr('data-authority'),
+            suggestion_name = suggestElem.attr('data-name');
+
+        promptResolveModal(draftauthority_id, suggestion_id, suggestElem.attr('data-name'));
+        // modal -> resolve.
+        // triggerResolveAuthority(draftauthority_id, suggestion_id);
+    });
+}
+
+var bindSearchSelect = function() {
+    $('.resolve-with-search').click(function(e) {
+        var suggestElem = $(this);
+        var suggestion_id = suggestElem.attr('data-suggestion'),
+            draftauthority_id = suggestElem.attr('data-authority'),
+            suggestion_name = suggestElem.attr('data-name');
+        promptResolveModal(draftauthority_id, suggestion_id, suggestElem.attr('data-name'));
+    });
+}
+
+var getSimilarAuthorities = function(draftauthority_id, callback) {
+    $.get('{% url "similar_authorities" %}?draftauthority=' + draftauthority_id + '&accession={{ accession.id }}', function(result) {
+        callback(result.data.count, result.data.draftauthorities);
+    });
+}
+
+var promptResolveModal = function(draftauthority_id, suggestion_id, sname) {
+    getSimilarAuthorities(draftauthority_id, function(count, ids) {
+        $('#draftauthority-id-container').val(draftauthority_id);
+        $('#authority-id-container').val(suggestion_id);
+        $('#similar_authority_count').text(count);
+        $('#draftauthority_name').text(selected_authority_name);
+        $('#authority_name').text(sname);
+        $('#prompt-resolve-modal').modal('show');
+    });
+}
+
+var confirmResolveModal = function() {
+    $('#prompt-resolve-modal').modal('hide');
+    var draftauthority_id = $('#draftauthority-id-container').val();
+    var suggestion_id = $('#authority-id-container').val();
+    triggerResolveAuthority(draftauthority_id, suggestion_id);
+
+    var applyToSimilar = $('#bulkapply').val();
+    if (applyToSimilar) {
+        getSimilarAuthorities(draftauthority_id, function(count, ids) {
+            ids.forEach(function(di) {
+                triggerResolveAuthority(di, suggestion_id);
+            });
+        });
+    }
+    $('#bulkapply').val(false);
+}
+
+var confirmCreateModal = function() {
+    $('#prompt-create-modal').modal('hide');
+    var draftauthority_id = $('#draftauthority-id-container-create').val();
+    triggerCreateAuthority(draftauthority_id, function(created_authority_id) {
+        getSimilarAuthorities(draftauthority_id, function(count, ids) {
+            ids.forEach(function(di) {
+                triggerResolveAuthority(di, created_authority_id);
+            });
+        });
+        $("#authority-" + draftauthority_id).remove();
+        $('#matching').css('visibility', 'hidden');
+    });
+
+}
+
+var bindCreateNew = function() {
+    $('.resolve-with-create').click(function(e) {
+        var suggestElem = $(this);
+        getSimilarAuthorities(selected_authority, function(count, ids) {
+            $('#draftauthority-id-container-create').val(selected_authority);
+            // $('#authority-id-container-create').val(suggestion_id);
+            $('#similar_authority_count-create').text(count);
+            $('#draftauthority_name-create').text(selected_authority_name);
+            // $('#authority_name-create').text(sname);
+            $('#prompt-create-modal').modal('show');
+        });
+    });
+}
+
+var triggerCreateAuthority = function(draftauthority_id, callback) {
+    $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&draftauthority=' + draftauthority_id, function(result) {
+        callback(result.data.authority);
+    });
+}
+
+var triggerResolveAuthority = function(draftauthority_id, authority_id) {
+    $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
+        $("#authority-" + draftauthority_id).remove();
+        $('#matching').css('visibility', 'hidden');
+    })
+}
+
+var bindModal = function() {
+    $('#prompt-resolve-modal').on('hide.bs.modal', function() {
+        // cleanup;
+        $('#authority-search').val('');
+    });
+}
 </script>
 
 <style>
@@ -210,5 +329,60 @@ $(document).ready(function() {
     background-color: orange;
 }
 </style>
+
+
+<div class="modal fade" id="prompt-resolve-modal" tabindex="-1" role="dialog" aria-labelledby="prompt-resolve-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="prompt-resolve-modal-label">Resolve Draft Authority</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to resolve the draft authority <span class="text-warning" id="draftauthority_name"></span>
+                    into the production authority record <span class="text-warning" id="authority_name"></span>.
+                </p>
+                <p>
+                    <input name="bulkapply" id="bulkapply" type="checkbox"></input> Apply this resolution to <span class="label label-primary" id="similar_authority_count"></span>
+                    similar draft authorities.
+                </p>
+                <input type="hidden" id="draftauthority-id-container" />
+                <input type="hidden" id="authority-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-success" onclick="confirmResolveModal();">Resolve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="prompt-create-modal" tabindex="-1" role="dialog" aria-labelledby="prompt-create-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="prompt-create-modal-label">Resolve Draft Authority</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to create a new production authority record based on the draft authority
+                    <span class="text-warning" id="draftauthority_name-create"></span>.
+                </p>
+                <p>
+                    <input name="bulkapply" id="bulkapply-create" type="checkbox"></input> Apply this resolution to <span class="label label-primary" id="similar_authority_count-create"></span>
+                    similar draft authorities.
+                </p>
+                <input type="hidden" id="draftauthority-id-container-create" />
+                <input type="hidden" id="authority-id-container-create" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-success" onclick="confirmCreateModal();">Resolve</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
