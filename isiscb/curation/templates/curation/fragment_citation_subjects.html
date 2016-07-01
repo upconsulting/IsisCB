@@ -1,10 +1,18 @@
 {% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
 <div class="h4">Subjects</div>
 <ul class="list-group" id="subject-list-group">
+{% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'SU' %}
-    <li class="list-group-item clearfix" id="subject-{{ acrelation.id }}">
+    <li class="list-group-item clearfix {% if not acrelation.authority.public or not acrelation.public %}notpublic{% endif %}" id="subject-{{ acrelation.id }}">
+        {% if can_update %}
         <span class="button-group button-group-xs pull-right">
             <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-subject"
@@ -12,20 +20,40 @@
                 acrelation-id="{{ acrelation.id }}"
                 acrelation-title="{{ acrelation.authority.name }}"></a>
         </span>
+        {% endif %}
+
         {{ acrelation.authority.name }}
         {% if acrelation.name_for_display_in_citation %}
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
         {% endif %}
+        {% if not acrelation.authority.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+        {% endif %}
+        {% if not acrelation.public %}
+        <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+        {% endif %}
     </li>
     {% endif %}
 {% endfor %}
+
+{% if can_update %}
 <li class="list-group-item" id="create-subject-item" style="visibility: hidden;"></li>
 <a class="list-group-item text-muted" onclick="createNewSubject();">
     <span class="glyphicon glyphicon-plus"></span> Add a subject
 </a>
+{% endif %}
+{% endif %}
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view subjects.
+  </div>
+</li>
+{% endif %}
+
 </ul>
 
-
+{% endwith %}
 <script>
 var subject_creation_container = $('#create-subject-item');
 
@@ -44,7 +72,11 @@ var createNewSubject = function() {
                 var results_container = $('#create-subject-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result">';
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' notpublic';
+                    }
+                    choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
                     choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
@@ -56,6 +88,10 @@ var createNewSubject = function() {
                     if (r.description != null) {
                         choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                     }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+
                     choice_elem += '</li>';
 
                     results_container.append(choice_elem);
