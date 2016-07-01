@@ -1935,3 +1935,4 @@ class UserModuleRule(AccessRule):
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
+    editor = models.CharField(max_length=255, null=True)
