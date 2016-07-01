@@ -1938,4 +1938,4 @@ class Dataset(CuratedMixin):
     editor = models.CharField(max_length=255, null=True)
 
     def __unicode__(self):
-        return self.name
+        return u'{0}'.format(self.name)

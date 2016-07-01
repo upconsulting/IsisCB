@@ -602,9 +602,9 @@ def filter_queryset(user, queryset):
                     can_view_all = True
 
     if excluded_datasets:
-        queryset = queryset.exclude(dataset__in=excluded_datasets)
-    if datasets and not can_view_all:
-        queryset = queryset.filter(dataset__in=datasets)
+        queryset = queryset.exclude(belongs_to__in=excluded_datasets)
+    if not can_view_all:
+        queryset = queryset.filter(belongs_to__in=datasets)
 
     return queryset
 
@@ -1039,6 +1039,7 @@ def quick_and_dirty_citation_search(request):
         'datestring': _get_datestring_for_citation(obj),
         'description': obj.description,
         'url': reverse("curate_citation", args=(obj.id,)),
+        'public':obj.public,
     } for obj in queryset[:20]]
     return JsonResponse({'results': results})
 

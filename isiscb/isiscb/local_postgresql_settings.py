@@ -206,7 +206,7 @@ AWS_HEADERS = {
 }
 
 DOMAIN = 'data.isiscb.org'
-URI_PREFIX = 'http://isiscb-develop.aplacecalledup.com/isis/'
+URI_PREFIX = 'http://localhost:8000/isis/'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 

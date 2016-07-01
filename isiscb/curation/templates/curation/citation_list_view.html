@@ -29,6 +29,9 @@
                 {% if not object|are_related_objects_for_citation_public %}
                 <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
                 {% endif %}
+                {% if object|is_public_inconsistent %}
+                <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
+                {% endif %}
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
             <td>{{ object|get_citation_title|safe }}</td>

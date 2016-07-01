@@ -38,5 +38,9 @@
 }
 
 .notpublic {
-  background-color: #efefef;
+  background-color: #e6e4d9;
+}
+
+.record-notpublic {
+  background-color: #f1e0e0;
 }
