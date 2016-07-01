@@ -33,6 +33,7 @@ rules.add_perm('curation.change_record', can_edit_record)
 
 urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
+    url(r'^(?i)datasets/$', views.datasets, name='datasets'),
     url(r'^(?i)citation/$', views.citations, name='citation_list'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
 
