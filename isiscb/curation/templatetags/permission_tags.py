@@ -54,3 +54,7 @@ def are_related_objects_for_citation_public(citation):
             return False
 
     return True
+
+@register.filter
+def get_dataset_name(ds_id):
+    return Dataset.objects.get(pk=ds_id).name

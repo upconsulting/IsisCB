@@ -11,7 +11,7 @@
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
 
-    <li class="list-group-item clearfix {% if not ccrelation.object.public or not ccrelation.public %}notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
+    <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
         {% if instance.id == ccrelation.subject.id %}
         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
         {% else %}

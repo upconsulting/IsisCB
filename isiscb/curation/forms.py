@@ -167,7 +167,7 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    dataset = forms.ChoiceField(choices=[(d, d) for d in Citation.objects.order_by().values_list('dataset', flat=True).distinct()])
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset')
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
     class Meta:
@@ -176,8 +176,11 @@ class CitationForm(forms.ModelForm):
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'language', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'dataset',
+              'belongs_to',
         ]
+        labels = {
+            'belongs_to': 'Dataset',
+        }
 
     def _get_validation_exclusions(self):
         exclude = super(CitationForm, self)._get_validation_exclusions()
@@ -243,6 +246,16 @@ class AuthorityForm(forms.ModelForm):
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
+    def __init__(self, user, authority_id, *args, **kwargs):
+        super(PersonForm, self).__init__( *args, **kwargs)
+        self.user = user
+        self.authority_id = authority_id
+
+        can_update = rules.test_rule('can_update_authority_field', user, ('person', authority_id))
+        can_view = rules.test_rule('can_view_authority_field', user, ('person', authority_id))
+
+        set_field_access(can_update, can_view, self.fields)
+
     class Meta:
         model = Person
         fields = [
@@ -250,6 +263,18 @@ class PersonForm(forms.ModelForm):
             'personal_name_preferred',
         ]
 
+    def _get_validation_exclusions(self):
+        exclude = super(PersonForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        can_update = rules.test_rule('can_update_authority_field', self.user, ('person', self.authority_id))
+        can_view = rules.test_rule('can_view_authority_field', self.user, ('person', self.authority_id))
+
+        for field in self.fields:
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
 
 class RoleForm(forms.ModelForm):
 
@@ -261,15 +286,11 @@ class RoleForm(forms.ModelForm):
 
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset_values = Citation.objects.values_list('dataset').distinct()
-    authority_dataset_values = Authority.objects.values_list('dataset').distinct()
-
-    all_datasets = list(dataset_values) + list(authority_dataset_values)
+    dataset_values = Dataset.objects.all()
 
     choices = set()
-    for value in all_datasets:
-        if value[0]:
-            choices.add((value[0], value[0]))
+    for ds in dataset_values:
+        choices.add((ds.pk, ds.name))
 
     dataset = forms.ChoiceField(choices = choices, required=True)
 
