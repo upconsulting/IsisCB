@@ -300,6 +300,7 @@ class DatasetRuleForm(forms.ModelForm):
         fields = [
             'dataset', 'role'
         ]
+        
 
 class AddRoleForm(forms.Form):
     roles = IsisCBRole.objects.all()

@@ -12,4 +12,8 @@ urlpatterns = [
     url(r'accessions/$', accessions, name='accessions'),
     url(r'accessions/create/$', create_accession, name='create_accession'),
     url(r'accessions/(?P<accession_id>[0-9]+)/$', retrieve_accession, name='retrieve_accession'),
+
+    url(r'authority/resolve/$', resolve_authority, name='resolve_authority'),
+    url(r'authority/create/$', create_authority_for_draft, name='create_authority_for_draft'),
+    url(r'authority/similar/$', similar_authorities, name='similar_authorities'),
 ]

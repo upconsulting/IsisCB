@@ -30,4 +30,4 @@ class ImportAccesionFilter(django_filters.FilterSet):
 
     class Meta:
         model = ImportAccession
-        fields = ['id', 'name', 'resolved', 'imported_on', 'imported_by']
+        fields = ['id', 'name', 'processed', 'imported_on', 'imported_by', 'ingest_to']

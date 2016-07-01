@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.template import RequestContext, loader
+from django.core.urlresolvers import reverse
 
 from isisdata.models import *
 
@@ -89,7 +90,7 @@ def accessions(request):
     whether all authorities have been resolved for a batch.
     """
 
-    queryset = ImportAccession.objects.filter(resolved=False)
+    queryset = ImportAccession.objects.filter(processed=False)
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
 
     context = RequestContext(request, {
@@ -113,7 +114,6 @@ def create_accession(request):
 
     template = loader.get_template('zotero/create_accession.html')
 
-
     if request.method == 'GET':
         form = ImportAccessionForm()
 
@@ -130,6 +130,7 @@ def create_accession(request):
 
             papers = zparser.read(path)
             zparser.process(papers, instance=instance)
+            return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
     return HttpResponse(template.render(context))
@@ -150,3 +151,70 @@ def retrieve_accession(request, accession_id):
         'accession': accession,
     })
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def similar_authorities(request):
+    accession_id = request.GET.get('accession')
+    draftauthority_id = request.GET.get('draftauthority')
+
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+
+    queryset = accession.draftauthority_set.filter(
+                        name=draftauthority.name,
+                        processed=False,
+                        type_controlled=draftauthority.type_controlled)
+    queryset = queryset.exclude(pk=draftauthority_id)
+    response_data = {
+        'count': queryset.count(),
+        'draftauthorities': [obj.id for obj in queryset],
+    }
+    return JsonResponse({'data': response_data})
+
+
+
+@staff_member_required
+def resolve_authority(request):
+    authority_id = request.GET.get('authority')
+    draftauthority_id = request.GET.get('draftauthority')
+
+    authority = get_object_or_404(Authority, pk=authority_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+
+    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+    draftauthority.processed = True
+    draftauthority.save()
+
+    return JsonResponse({'data': resolution.id})
+
+
+@staff_member_required
+def create_authority_for_draft(request):
+    # authority_id = request.GET.get('authority')
+    draftauthority_id = request.GET.get('draftauthority')
+    accession_id = request.GET.get('accession')
+
+    # authority = get_object_or_404(Authority, pk=authority_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+
+    # Authority instance from field data.
+    authority = Authority.objects.create(
+        name=draftauthority.name,
+        type_controlled=draftauthority.type_controlled,
+        public=False,
+        belongs_to=accession.ingest_to,
+        record_status_value=CuratedMixin.INACTIVE,
+    )
+
+    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+    draftauthority.processed = True
+    draftauthority.save()
+
+    response_data = {
+        'resolution': resolution.id,
+        'authority': authority.id,
+    }
+
+    return JsonResponse({'data': response_data})

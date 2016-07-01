@@ -15,6 +15,15 @@ from datetime import datetime
 from models import *
 from isisdata.models import Authority, Citation, ACRelation
 
+import csv
+
+subjectIDMap = {}
+with open('AuthorityIDmap.tab', 'rU') as f:
+    reader = csv.reader(f, delimiter='\t')
+    for row in reader:
+        subjectIDMap[int(row[1])] = row[0]
+
+
 # rdflib complains a lot.
 logging.getLogger("rdflib").setLevel(logging.ERROR)
 
@@ -37,6 +46,7 @@ VOL = rdflib.term.URIRef(PRISM + u'volume')
 ISSUE = rdflib.term.URIRef(PRISM + u'number')
 IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
+SUBJECT = rdflib.URIRef(DC + u"subject")
 
 
 BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
@@ -294,6 +304,8 @@ class ZoteroParser(RDFParser):
         ('date', rdflib.URIRef("http://purl.org/dc/elements/1.1/date")),
         ('identifier',
          rdflib.URIRef("http://purl.org/dc/elements/1.1/identifier")),
+        ('subjects', rdflib.URIRef("http://purl.org/dc/terms/subject")),
+        ('subjects', rdflib.URIRef("http://purl.org/dc/elements/1.1/subject")),
         ('abstract', rdflib.URIRef("http://purl.org/dc/terms/abstract")),
         ('authors_full', rdflib.URIRef("http://purl.org/net/biblio#authors")),
         ('seriesEditors',
@@ -333,6 +345,14 @@ class ZoteroParser(RDFParser):
             f.write(corrected)
 
         super(ZoteroParser, self).open()
+
+    def handle_subjects(self, value):
+        match = re.match('([^\[]+)\[([A-Z0-9]+)\]', value.toPython())
+        if match:
+            name, identifier = match.groups()
+            return (name.strip(), identifier.strip())
+        else:
+            return (value.toPython(), None)
 
     def handle_identifier(self, value):
         """
@@ -453,7 +473,6 @@ class ZoteroParser(RDFParser):
     def handle_isPartOf(self, value):
         journal = None
         for s, p, o in self.graph.triples((value, None, None)):
-            print s, p, o
             if p == VOL:        # Volume number
                 self.set_value('volume', unicode(o))
             elif p == ISSUE:
@@ -549,6 +568,7 @@ def process_authorities(paper, instance):
         (Authority.PERSON, ACRelation.CONTRIBUTOR, 'contributors', DraftACRelation, 'citation'),
         (Authority.PERSON, ACRelation.TRANSLATOR, 'translators', DraftACRelation, 'citation'),
         (Authority.SERIAL_PUBLICATION, ACRelation.PERIODICAL, 'partof__title', DraftACRelation, 'citation'),
+        (Authority.CONCEPT, ACRelation.SUBJECT, 'subjects', DraftACRelation, 'citation'),
 
         # ('DraftACRelation', 'authority', ACRelation.PERIODICAL)),('DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER)),
     ]
@@ -572,6 +592,59 @@ def process_authorities(paper, instance):
                 )
                 entity.save()
                 draftAuthorities.append(entity)
+
+                relation = DraftACRelation(
+                    authority = entity,
+                    type_controlled = acrelation_type,
+                    part_of = instance,
+                )
+                draftACRelations.append(relation)
+        elif type(field_value) is list and len(field_value) > 0 and type(field_value[0]) is tuple:
+            authority_id = None
+            authority = None
+            for value, ident in field_value:
+                if ident:
+                    if ident.startswith('C'):   # Native PK id.
+                        authority_id = ident
+                    else:
+                        authority_id = subjectIDMap.get(int(ident), None)
+                    try:
+                        authority = Authority.objects.get(pk=authority_id)
+                    except Authority.DoesNotExist:
+                        pass
+                else:
+                    if value.startswith('='):
+                        # * Parse the string: "=340-140=" -> 340, 140
+                        match = re.match('=([0-9]+)-([0-9]+)=', value)
+                        if match:
+                            partA, partB = match.groups()
+                            # * Invert the values: 340, 140 -> 140, 340
+                            # * Build a new string: 140, 340 -> "140-340"
+                            lookup = '-'.join([partB, partA])
+
+                            # * Search for an Authority with that
+                            #   classification_code: "140-340" -> CBA000131150
+                            try:
+                                authority = Authority.objects.get(classification_code=lookup)
+                                authority_id = authority.id
+                            except Authority.DoesNotExist:
+                                pass
+
+                # Use the Authority's name, if available. Otherwise just use
+                #  whatever we found in Zotero.
+                entity = DraftAuthority.objects.create(
+                    name=getattr(authority, 'name', value),
+                    type_controlled=authority_type,
+                    part_of=instance,
+                    processed=True if authority else False
+                )
+                draftAuthorities.append(entity)
+
+                if authority:
+                    resolution = InstanceResolutionEvent.objects.create(
+                        for_instance=entity,
+                        to_instance=authority,
+                    )
 
                 relation = DraftACRelation(
                     authority = entity,

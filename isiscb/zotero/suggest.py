@@ -135,7 +135,6 @@ def suggest_by_field(draftObject, field, targetModel, targetField, scramble=Fals
 
     inexact_match = targetModel.objects.filter(q_objects)
 
-
     for obj in inexact_match:
         targetValue = getattr(obj, targetField)
         match = difflib.SequenceMatcher(None, value, targetValue).quick_ratio()
