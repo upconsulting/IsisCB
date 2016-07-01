@@ -1,6 +1,12 @@
 {% load render_object %}
 
+{% load general_tags %}
+
 <div class="h3">
     <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance|get_citation_title|safe }}
 </div>
 <div class="h4">{{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span></div>
+
+<p>
+<span class="label label-success">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
+</p>
