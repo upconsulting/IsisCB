@@ -243,6 +243,16 @@ class AuthorityForm(forms.ModelForm):
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
+    def __init__(self, user, authority_id, *args, **kwargs):
+        super(PersonForm, self).__init__( *args, **kwargs)
+        self.user = user
+        self.authority_id = authority_id
+
+        can_update = rules.test_rule('can_update_authority_field', user, ('person', authority_id))
+        can_view = rules.test_rule('can_view_authority_field', user, ('person', authority_id))
+
+        set_field_access(can_update, can_view, self.fields)
+
     class Meta:
         model = Person
         fields = [
@@ -250,6 +260,18 @@ class PersonForm(forms.ModelForm):
             'personal_name_preferred',
         ]
 
+    def _get_validation_exclusions(self):
+        exclude = super(PersonForm, self)._get_validation_exclusions()
+
+        # remove fields that user isn't allowed to modify
+        can_update = rules.test_rule('can_update_authority_field', self.user, ('person', self.authority_id))
+        can_view = rules.test_rule('can_view_authority_field', self.user, ('person', self.authority_id))
+
+        for field in self.fields:
+            if not can_update or not can_view:
+                exclude.append(field)
+
+        return exclude
 
 class RoleForm(forms.ModelForm):
 
