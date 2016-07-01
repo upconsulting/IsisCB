@@ -2,6 +2,7 @@
 {% load addcss %}
 {% load pagination_tags %}
 {% load render_object %}
+{% load permission_tags %}
 
 
 {% block object_list %}
@@ -17,9 +18,18 @@
     </thead>
     <tbody>
         {% for object in filter_list %}
-        <tr>
+        <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
             <td>
                 <a href="{% url "curate_authority" object.id %}">{{ object.id }}</a>
+                {% if not object.public %}
+                <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
+                {% endif %}
+                {% if not object|are_related_objects_for_authority_public %}
+                <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
+                {% endif %}
+                {% if object|is_public_inconsistent %}
+                <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
+                {% endif %}
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
             <td>{{ object.name }}</td>
