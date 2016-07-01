@@ -1,0 +1,550 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2015.1010777">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0191-6599"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Luban</foaf:surname>
+                        <foaf:givenname>Daniel</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14935"/>
+        <link:link rdf:resource="#item_14936"/>
+        <dc:subject>=350-140=</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Economics  [387]</dc:subject>
+        <dc:subject>Mandeville, Bernard [CBA000140007 ]</dc:subject>
+        <dc:subject>Materialism [4719]</dc:subject>
+        <dc:subject>moral philosophy [CBA000120197]</dc:subject>
+        <dc:subject>Political economy [18070]</dc:subject>
+        <dc:subject>Social sciences [1238]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1010777</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>831-857</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>Today remembered primarily as an eighteenth-century predecessor of laissez-faire economics, Bernard Mandeville's notorious Fable of the Bees marks the intersection of two modes of thought. On the one hand, Mandeville was a ‘moralist’ heir to the French Augustinianism of the previous century, viewing sociability as a mere mask for vanity and pride. On the other, he was a ‘materialist’ forerunner of economics, concerned to demonstrate the universality of human appetites for corporeal pleasures. The tension between these two modes of thought results in ambivalences and contradictions—concerning the relative power of norms and interests, the relationship between motives and behaviours, and the historical variability of human cultures—that run throughout the Fable. Both traditions, with their attendant difficulties, have a long afterlife in the later history of the social sciences; understanding their origins in Mandeville's thought can help us get a firmer grip on problems that still trouble us today.</dcterms:abstract>
+        <dc:title>Bernard Mandeville as Moralist and Materialist</dc:title>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0191-6599">
+        <prism:volume>41</prism:volume>
+        <prism:number>7</prism:number>
+        <dc:title>History of European Ideas</dc:title>
+        <dc:identifier>ISSN 0191-6599</dc:identifier>
+        <dc:identifier>DOI 10.1080/01916599.2015.1010777</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_14935">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2015.1010777</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14936">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1010777</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2015.1016316">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2015.1016316</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Imbruglia</foaf:surname>
+                        <foaf:givenname>Girolamo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14931"/>
+        <link:link rdf:resource="#item_14932"/>
+        <dc:subject>=340-140=</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Colonialism  [246]</dc:subject>
+        <dc:subject>Diderot, Denis (1713-1784) [8290]</dc:subject>
+        <dc:subject>Enlightenment [416]</dc:subject>
+        <dc:subject>Montesquieu, Charles de Secondat, Baron de (1689-1755) [11244]</dc:subject>
+        <dc:subject>moral philosophy [CBA000120197]</dc:subject>
+        <dc:subject>Raynal, Guillaume (1713-1796) [12117]</dc:subject>
+        <dc:subject>Science and civilization [1122]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1016316</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>858-882</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>The Enlightened theory of civilisation was expressed through the formula of ‘doux commerce’, a form of commerce which acknowledged the need for the European conquest of non-European lands and nations, and the opportunity to bring European civilisation to other peoples without violence. Montesquieu was the first to express this idea, condemning the Spanish conquest and empire. In the Histoire des deux Indes, this idea was dramatically discussed: Raynal wanted to defend it; Diderot dismantled this project showing that civilisation was but the mask of violent conquest. In this way the latter offered an extraordinary refutation of both Enlightened ideology and its strategy of civilisation.</dcterms:abstract>
+        <dc:title>Civilisation and Colonisation: Enlightenment Theories in the Debate between Diderot and Raynal</dc:title>
+        <z:shortTitle>Civilisation and Colonisation</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14931">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2015.1016316</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14932">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1016316</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2015.1029728">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2015.1029728</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Clure</foaf:surname>
+                        <foaf:givenname>Graham</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14944"/>
+        <link:link rdf:resource="#item_14945"/>
+        <dc:subject>=340-140=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>Catherine II, Empress of Russia (1729-1796) [7711]</dc:subject>
+        <dc:subject>Diderot, Denis (1713-1784) [8290]</dc:subject>
+        <dc:subject>Economics  [387]</dc:subject>
+        <dc:subject>International cooperation [14955]</dc:subject>
+        <dc:subject>International relations [14925]</dc:subject>
+        <dc:subject>Montesquieu, Charles de Secondat, Baron de (1689-1755) [11244]</dc:subject>
+        <dc:subject>Political economy [18070]</dc:subject>
+        <dc:subject>Rousseau, Jean-Jacques (1712-1778) [12355]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1029728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>883-908</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>In the Social Contract, Rousseau predicted that Europe would experience a cycle of increasingly intense wars, culminating in invasion from the east: first, Russia would conquer Europe's exhausted and war-torn states; then, Russia would itself become overextended and Europe would ultimately be overrun by the Tartars. The future of the modern state would be a version of the fall of Rome. The present essay provides an explanation of why Rousseau held such apocalyptic views by placing them in the context of projects to reform Europe's political economy in the aftermath of the Seven Years’ War. In 1767, when Catherine the Great was planning a major revision of the Russian legal code, she outlined her goals in a manifesto called the Grand Instruction, key sections of which were derived from Montesquieu's analysis of depopulation of the countryside caused by uncontrolled industrialisation. The Grand Instruction became the subject of a critical exchange between the Physiocrat Le Trosne and Diderot, who, drawing upon Rousseau, was by turns both sympathetic to and sceptical of Physiocracy. This discourse reveals a triangular debate about the possibility of stabilising the international order by imposing a balance between the agricultural and manufacturing sectors of Europe's rapidly growing economies.</dcterms:abstract>
+        <dc:title>Rousseau, Diderot and the Spirit of Catherine the Great's Reforms</dc:title>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14944">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2015.1029728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14945">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2015.1029728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2014.981966">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2014.981966</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Armenteros</foaf:surname>
+                        <foaf:givenname>Carolina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14929"/>
+        <link:link rdf:resource="#item_14930"/>
+        <dc:subject>=360-102=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Absolutism</dc:subject>
+        <dc:subject>Enlightenment [416]</dc:subject>
+        <dc:subject>Maistre, Joseph Marie, Comte de (1753-1821) [10823]</dc:subject>
+        <dc:subject>moral philosophy [CBA000120197]</dc:subject>
+        <dc:subject>Spirituality [38119]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.981966</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>909-921</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>The French Idea of History: Joseph de Maistre and His Heirs, 1794–1854 (Cornell, 2011) is a monograph by Carolina Armenteros describing the historical thought of Joseph de Maistre (1753–1821) and recounting its posterity among French traditionalist, socialist and positivist thinkers. This article presents Armenteros's reflections on some of her book's themes and on the place they occupy in current scholarly debates. She notes that commentators today tend to assume politics' primacy over spirituality as a human motivator. A product of the de-spiritualisation of human experience in late modernity, this view is associated with the polarisation of the concepts of tradition and Enlightenment, and with ideas of liberty and reason ill-adapted to interpreting Maistre's thought. Armenteros shows how her portrait of an anti-absolutist, empiricist and reasonable Maistre disappointed with kings and bent on resolving the problem of violence through spiritual means is the necessary consequence of investigating his historical and political thought in context.</dcterms:abstract>
+        <dc:title>Spirituality, Politics, and the Maistrian Moment: Reflections on Themes from The French Idea of History</dc:title>
+        <z:shortTitle>Spirituality, Politics, and the Maistrian Moment</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14929">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2014.981966</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14930">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.981966</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2014.989676">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2014.989676</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lancaster</foaf:surname>
+                        <foaf:givenname>Brian</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14933"/>
+        <link:link rdf:resource="#item_14934"/>
+        <dc:subject>=360-143=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Cross-national interaction [301]</dc:subject>
+        <dc:subject>Economics  [387]</dc:subject>
+        <dc:subject>London (England) [15697]</dc:subject>
+        <dc:subject>Say, Jean-Baptiste (1767-1832) [CBA000090197]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.989676</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>922-930</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>The French classical economist Jean-Baptiste Say (1767–1832) gained fame as a political economist in the first half of the nineteenth century. In 1785, aged eighteen, he visited Britain for the first time to prepare himself for a commercial career and to learn English. Other visits followed; but, in contrast to his visits in subsequent years, during 1814/15 and 1825, little is known about his first visit and those writing about Say tend to ignore it or consider it irrelevant. By drawing on his draft autobiography and on his street plan of Croydon, the article adds more information to supplement the meagre published accounts of this visit: where and with whom he lived, for whom he worked, whom he met and what his itinerary was during the time he was in England. The key places Say mentions are London, Croydon and Fulham. While not a definitive account of the visit, it does correct factual errors, clear up confusion and clarify ambiguities. The article questions speculations about Say witnessing the Industrial Revolution and proposes that, during his visit, his interests may have lain elsewhere than only in matters of commerce and taxation.</dcterms:abstract>
+        <dc:title>Jean-Baptiste Say's First Visit to England (1785/6)</dc:title>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14933">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2014.989676</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14934">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.989676</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2014.991143">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2014.991143</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Slaboch</foaf:surname>
+                        <foaf:givenname>Matthew</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14938"/>
+        <link:link rdf:resource="#item_14939"/>
+        <dc:subject>=360-22=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Europe [5119]</dc:subject>
+        <dc:subject>Philosophy and politics [17844]</dc:subject>
+        <dc:subject>philosophy of history</dc:subject>
+        <dc:subject>Progress, ideas of [15901]</dc:subject>
+        <dc:subject>Schopenhauer, Arthur (1788-1860) [12610]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.991143</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>931-947</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>Scholars have tended to overlook the political import of the ideas of Arthur Schopenhauer (1788–1860). This is perhaps unsurprising, since Schopenhauer himself was not a political philosopher and wrote relatively little about political matters. But Schopenhauer's near-silence on political topics should warrant our attention: why would a systematic philosopher, who made lasting contributions in metaphysics, ethics, and aesthetics, devote so little attention to politics? Connecting his political thought with his philosophy of history, I argue that Schopenhauer can best be regarded as a critic of the idea of progress, especially ‘progress’ conceived of as national development or the growth of the state.</dcterms:abstract>
+        <dc:title>‘Eadem, sed aliter’: Arthur Schopenhauer as a Critic of ‘Progress’</dc:title>
+        <z:shortTitle>‘Eadem, sed aliter’</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14938">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2014.991143</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14939">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.991143</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2014.949051">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2014.949051</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>López</foaf:surname>
+                        <foaf:givenname>Rosario</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14937"/>
+        <link:link rdf:resource="#item_14926"/>
+        <dc:subject>=360-143=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Cobden, Richard (1804-1865) {VIAF: 66539206}</dc:subject>
+        <dc:subject>Economics  [387]</dc:subject>
+        <dc:subject>Russia [5149]</dc:subject>
+        <dc:subject>Spain [5155]</dc:subject>
+        <dc:subject>Travel; exploration [454]</dc:subject>
+        <dc:subject>Venice (Italy) [1399]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.949051</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>948-965</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>This article presents a transcription of three brief unpublished essays written by Richard Cobden (1804–1865) on Spain, Russia and Venice, along with a critical introduction. These three essays were written during Cobden's European tour, between 1846–47. Excluded from Miles Taylor's edition of the European Diaries, published in 1994, they have escaped scholarly attention. In the introduction I argue that the three essays deserve further study, either by themselves or as part of the European Diaries. Going beyond an anecdotal record of Cobden's activities, the essays concerning Spain, Venice, and Russia examine different economic and political issues of each context. Particularly since Cobden planned to write a theoretical work about free trade as linked to other aspects of society and politics, they can help to revise some interpretations of Cobden's liberalism where his ideas on free trade are overpowering.</dcterms:abstract>
+        <dc:title>Richard Cobden's European Tour: Three Unpublished Essays on Spain, Venice and Russia</dc:title>
+        <z:shortTitle>Richard Cobden's European Tour</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14937">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2014.949051</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14926">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.949051</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://dx.doi.org/10.1080/01916599.2014.948728">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <prism:number>7</prism:number>
+                <dc:title>History of European Ideas</dc:title>
+                <dc:identifier>ISSN 0191-6599</dc:identifier>
+                <dc:identifier>DOI 10.1080/01916599.2014.948728</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mastnak</foaf:surname>
+                        <foaf:givenname>Tomaž</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_14942"/>
+        <link:link rdf:resource="#item_14943"/>
+        <dc:subject>=370-140=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>1938</dc:subject>
+        <dc:subject>Hobbes, Thomas (1588-1679) [9654]</dc:subject>
+        <dc:subject>National Socialism [1145]</dc:subject>
+        <dc:subject>Political science [15632]</dc:subject>
+        <dc:subject>Schmitt, Carl (1888-1985) [30869]</dc:subject>
+        <dc:subject>Tönnies, Ferdinand [CBA000102771]</dc:subject>
+        <dc:subject>Universität Kiel [23053]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.948728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>966-991</bib:pages>
+        <dc:date>October 3, 2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dcterms:abstract>This article sheds light on intellectual politics under Nazism by looking at a crucial shift in the field of Hobbes studies that was marked in a congress celebrating the three hundred and fiftieth anniversary of Thomas Hobbes's birth, organised in Kiel, 1938. Before the congress, the decisive voice in Hobbes studies had for almost fifty years been that of Kiel University professor Ferdinand Tönnies. Tönnies was purged from the university upon the Nazi seizure of power in 1933 and died three years later. At the opening of the Hobbes congress in Kiel, its convener, Cay von Brockdorff, declared that the phase of Hobbes studies shaped by Tönnies was ending and that a new phase, represented by Paul Ritterbusch and Carl Schmitt, had emerged. Against the background of a long tradition of Hobbes studies in Kiel, this article summarises Tönnies's contribution to Hobbes studies; analyses organisation and proceeedings of the congress, paying special attention to politico-theoretical disagreements between Ritterbusch and Schmitt and to von Brockdorff's exploitation of their rivalry; and contextualises Schmitt's interpretation of Hobbes published in the aftermath of the congress.</dcterms:abstract>
+        <dc:title>Hobbes in Kiel, 1938: From Ferdinand Tönnies to Carl Schmitt</dc:title>
+        <z:shortTitle>Hobbes in Kiel, 1938</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_14942">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.tandfonline.com/doi/pdf/10.1080/01916599.2014.948728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Full Text PDF</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_14943">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://dx.doi.org/10.1080/01916599.2014.948728</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-28 16:33:01</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>

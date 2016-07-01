@@ -282,25 +282,25 @@ class RoleForm(forms.ModelForm):
         ]
 
 
-class DatasetRuleForm(forms.ModelForm):
-    dataset_values = Citation.objects.values_list('dataset').distinct()
-    authority_dataset_values = Authority.objects.values_list('dataset').distinct()
-
-    all_datasets = list(dataset_values) + list(authority_dataset_values)
-
-    choices = set()
-    for value in all_datasets:
-        if value[0]:
-            choices.add((value[0], value[0]))
-
-    dataset = forms.ChoiceField(choices = choices, required=True)
-
-    class Meta:
-        model = DatasetRule
-
-        fields = [
-            'dataset', 'role'
-        ]
+# class DatasetRuleForm(forms.ModelForm):
+#     dataset_values = Citation.objects.values_list('dataset').distinct()
+#     authority_dataset_values = Authority.objects.values_list('dataset').distinct()
+#
+#     all_datasets = list(dataset_values) + list(authority_dataset_values)
+#
+#     choices = set()
+#     for value in all_datasets:
+#         if value[0]:
+#             choices.add((value[0], value[0]))
+#
+#     dataset = forms.ChoiceField(choices = choices, required=True)
+#
+#     class Meta:
+#         model = DatasetRule
+#
+#         fields = [
+#             'dataset', 'role'
+#         ]
 
 class AddRoleForm(forms.Form):
     roles = IsisCBRole.objects.all()

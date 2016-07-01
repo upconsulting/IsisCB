@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 {% load staticfiles %}
+{% load zotero_tags %}
 
 
 {% block content %}
@@ -20,7 +21,7 @@
     <div class="row">
         <div class="col-xs-6">
             <ul class="list-group">
-                {% for authority in accession.draftauthority_set.all %}
+                {% for authority in accession.draftauthority_set.all|filter_unresolved %}
                 {% with authority.citation_relations.first as acrelation %}
                 <a class="list-group-item clearfix draftauthority"
                     id="authority-{{ authority.id }}"
@@ -212,37 +213,37 @@ $(document).ready(function() {
     });
 });
 
+//
+// var bindSuggestions = function() {
+//     $('.resolve-with-suggestion').click(function(e) {
+//         var suggestElem = $(this);
+//         var suggestion_id = suggestElem.attr('data-suggestion'),
+//             draftauthority_id = suggestElem.attr('data-authority');
+//
+//         // modal -> resolve.
+//     });
+// }
+//
+// var bindSearchSelect = function() {
+//     $('.resolve-with-search').click(function(e) {
+//         var suggestElem = $(this);
+//         var suggestion_id = suggestElem.attr('data-suggestion'),
+//             draftauthority_id = suggestElem.attr('data-authority');
+//
+//         // modal -> resolve.
+//     });
+// }
+//
+// var bindCreateNew = function() {
+//     $('.resolve-with-create').click(function(e) {
+//
+//         // create.
+//
+//         // modal -> resolve.
+//     });
+// }
 
-var bindSuggestions = function() {
-    $('.resolve-with-suggestion').click(function(e) {
-        var suggestElem = $(this);
-        var suggestion_id = suggestElem.attr('data-suggestion'),
-            draftauthority_id = suggestElem.attr('data-authority');
-
-        // modal -> resolve.
-    });
-}
-
-var bindSearchSelect = function() {
-    $('.resolve-with-search').click(function(e) {
-        var suggestElem = $(this);
-        var suggestion_id = suggestElem.attr('data-suggestion'),
-            draftauthority_id = suggestElem.attr('data-authority');
-
-        // modal -> resolve.
-    });
-}
-
-var bindCreateNew = function() {
-    $('.resolve-with-create').click(function(e) {
-
-        // create.
-
-        // modal -> resolve.
-    });
-}
-
-var triggerResolveAuthority = function()
+// var triggerResolveAuthority = function()
 
 </script>
 

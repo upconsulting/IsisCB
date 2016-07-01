@@ -9,6 +9,8 @@ class ImportAccessionForm(forms.ModelForm):
     """
 
     zotero_rdf = forms.FileField()
+    ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
+                                       empty_label='No dataset')
 
     class Meta:
         model = ImportAccession
