@@ -213,3 +213,16 @@ def is_user_staff(user, object):
 @predicate
 def is_user_superuser(user, object):
     return user.is_superuser
+
+@predicate
+def has_zotero_access(user):
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
+    roles = IsisCBRole.objects.filter(users__pk=user.pk)
+    for role in roles:
+        if role.zotero_rules:
+            return True
+
+    return False

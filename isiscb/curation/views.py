@@ -1084,3 +1084,17 @@ def change_is_superuser(request, user_id):
                 messages.add_message(request, messages.ERROR, message)
 
     return redirect('user', user_id=user_id)
+
+@check_rules('can_update_user_module')
+def add_zotero_rule(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
+
+    if request.method == 'POST':
+        rule = ZoteroRule.objects.create(role_id=role_id)
+
+    return redirect('role', role_id=role.pk)

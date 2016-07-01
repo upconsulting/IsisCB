@@ -52,6 +52,12 @@
   <div class="btn-group">
     <a href="{% url 'create_user_module_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fa fa-users" aria-hidden="true"></i> Add access to user module</a>
   </div>
+  <div class="btn-group">
+    <form action="{% url 'add_zotero_rule' role.pk %}" method="POST" style="margin: 0px;"> {% csrf_token %}
+      <button title="Add acess to Zotero module" type="submit" class="btn btn-primary btn-sm"><i class="fa fa-book" aria-hidden="true"></i>
+   Add access to Zotero module</button>
+    </form>
+  </div>
 </p>
 {% endif %}
 
@@ -70,45 +76,57 @@ It seems like you've granted update, create, or delete access to records but no 
     </tr>
   </thead>
   <tbody>
-{% if role.dataset_rules %}
-{% for rule in role.dataset_rules %}
+
+  {% if role.zotero_rules %}
+  {% for rule in role.zotero_rules %}
+      <tr>
+        <td>Zotero Module Access</td>
+        <td>User has access to Zotero module.</td>
+        <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      </tr>
+  {% endfor %}
+
+  {% endif %}
+  {% if role.user_module_rules %}
+  {% for rule in role.user_module_rules %}
+      <tr>
+        <td>User Module Access</td>
+        <td>User can <span class="label label-warning">{{ rule.get_module_action_display }}</span> user module.</td>
+        <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
+      </tr>
+  {% endfor %}
+  {% endif %}
+
+  {% if role.dataset_rules %}
+  {% for rule in role.dataset_rules %}
     <tr>
       <td>Limited Dataset</td>
       <td>User has access to records with dataset '{{ rule.dataset|get_dataset_name }}'.</td>
       <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
-{% endfor %}
-{% endif %}
+  {% endfor %}
+  {% endif %}
 
-{% if role.crud_rules %}
-{% for rule in role.crud_rules %}
+  {% if role.crud_rules %}
+  {% for rule in role.crud_rules %}
     <tr>
       <td>Permitted Action</td>
       <td>User can <span class="label label-warning">{{ rule.crud_action }}</span> records.</td>
       <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
-{% endfor %}
-{% endif %}
+  {% endfor %}
+  {% endif %}
 
-{% if role.field_rules %}
-{% for rule in role.field_rules %}
+  {% if role.field_rules %}
+  {% for rule in role.field_rules %}
     <tr>
       <td>Field Access <span class="label label-info">{{ rule.get_object_type_display }}</span></td>
       <td>User <span class="label label-warning">{{ rule.get_field_action_display }}</span> field '{{ rule.field_name }}'.</td>
       <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
     </tr>
-{% endfor %}
-{% endif %}
+  {% endfor %}
+  {% endif %}
 
-{% if role.user_module_rules %}
-{% for rule in role.user_module_rules %}
-    <tr>
-      <td>User Module Access</td>
-      <td>User can <span class="label label-warning">{{ rule.get_module_action_display }}</span> user module.</td>
-      <td>{% if update_module %}<form action="{% url 'remove_rule' role.id rule.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Rule" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Rule</small></button></form>{% endif %}</td>
-    </tr>
-{% endfor %}
-{% endif %}
 
   </tbody>
 </table>

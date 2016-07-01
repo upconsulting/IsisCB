@@ -29,7 +29,8 @@ rules.add_rule('can_access_and_view', can_access_and_view)
 can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
 rules.add_rule('can_access_view_edit', can_access_view_edit)
 
-rules.add_perm('curation.change_record', can_edit_record)
+rules.add_rule('has_zotero_access', has_zotero_access)
+
 
 urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
@@ -71,6 +72,7 @@ urlpatterns = [
     url(r'^(?i)qdsearch/authority/$', views.quick_and_dirty_authority_search, name='quick_and_dirty_authority_search'),
     url(r'^(?i)qdsearch/citation/$', views.quick_and_dirty_citation_search, name='quick_and_dirty_citation_search'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
+
     url(r'^(?i)users/role/$', views.add_role, name='create_role'),
     url(r'^(?i)users/roles/$', views.roles, name='roles'),
     url(r'^(?i)users/role/delete/(?P<role_id>[0-9]+)/$', views.delete_role, name='delete_role'),
@@ -79,6 +81,7 @@ urlpatterns = [
     url(r'^(?i)users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),
     url(r'^(?i)users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', views.add_field_rule, name='create_rule_citation_field'),
     url(r'^(?i)users/rule/user_module/(?P<role_id>[0-9]+)/$', views.add_user_module_rule, name='create_user_module_rule'),
+    url(r'^(?i)users/rule/zotero/(?P<role_id>[0-9]+)/$', views.add_zotero_rule, name='add_zotero_rule'),
     url(r'^(?i)users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', views.remove_rule, name='remove_rule'),
     url(r'^(?i)users/role/staff/(?P<user_id>[0-9]+)$', views.change_is_staff, name='change_is_staff'),
     url(r'^(?i)users/role/superuser/(?P<user_id>[0-9]+)$', views.change_is_superuser, name='change_is_superuser'),

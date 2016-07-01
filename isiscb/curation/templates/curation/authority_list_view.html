@@ -30,6 +30,9 @@
                 {% if object|is_public_inconsistent %}
                 <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
                 {% endif %}
+                {% if object.record_status_value == 'Redirect' %}
+                <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
+                {% endif %}
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
             <td>{{ object.name }}</td>
