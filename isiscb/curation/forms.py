@@ -12,7 +12,7 @@ class CCRelationForm(forms.ModelForm):
     object = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = CCRelation
@@ -42,7 +42,7 @@ class ACRelationForm(forms.ModelForm):
     citation = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = ACRelation
@@ -124,6 +124,7 @@ class PartDetailsForm(forms.ModelForm):
 
         return exclude
 
+
 def set_field_access(can_update, can_view, fields):
     for field in fields:
         if not can_update:
@@ -132,6 +133,7 @@ def set_field_access(can_update, can_view, fields):
         if not can_view:
             fields[field] = forms.CharField(widget=NoViewInput())
             fields[field].widget.attrs['readonly'] = True
+
 
 class CitationForm(forms.ModelForm):
 
@@ -167,8 +169,8 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset')
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = Citation
@@ -194,15 +196,17 @@ class CitationForm(forms.ModelForm):
 
         return exclude
 
+
 class NoViewInput(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         value = "You do not have sufficient permissions to view this field."
         return super(NoViewInput, self).render(name, value, attrs)
 
+
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = Authority
@@ -211,6 +215,7 @@ class AuthorityForm(forms.ModelForm):
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation',
         ]
+
 
     def __init__(self, user, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
@@ -242,6 +247,7 @@ class AuthorityForm(forms.ModelForm):
                 exclude.append(field)
 
         return exclude
+
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -276,6 +282,7 @@ class PersonForm(forms.ModelForm):
 
         return exclude
 
+
 class RoleForm(forms.ModelForm):
 
     class Meta:
@@ -300,7 +307,7 @@ class DatasetRuleForm(forms.ModelForm):
         fields = [
             'dataset', 'role'
         ]
-        
+
 
 class AddRoleForm(forms.Form):
     roles = IsisCBRole.objects.all()

@@ -1091,8 +1091,8 @@ class Person(Authority):
     #  users to be able to "claim" their PERSON record -- this is much more
     #  straightforward with separate models.
     # are those calculated?
-    personal_name_last = models.CharField(max_length=255)
-    personal_name_first = models.CharField(max_length=255)
+    personal_name_last = models.CharField(max_length=255, blank=True)
+    personal_name_first = models.CharField(max_length=255, blank=True)
     personal_name_suffix = models.CharField(max_length=255, blank=True)
     personal_name_preferred = models.CharField(max_length=255, blank=True)
 
@@ -1859,6 +1859,10 @@ class IsisCBRole(models.Model):
     def user_module_rules(self):
         return UserModuleRule.objects.filter(role=self.pk)
 
+    @property
+    def zotero_rules(self):
+        return ZoteroRule.objects.filter(role=self.pk)
+
 class AccessRule(models.Model):
     """
     Parent class for all rules
@@ -1931,6 +1935,11 @@ class UserModuleRule(AccessRule):
     )
     module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
 
+class ZoteroRule(AccessRule):
+    """
+    This rule allows a user access to the Zotero module.
+    """
+    # so far no properties
 
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)

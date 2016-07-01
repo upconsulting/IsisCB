@@ -643,7 +643,7 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.user, authority_id, instance=authority.person)
 
-        form = AuthorityForm(request.user, instance=authority)
+        form = AuthorityForm(request.user, instance=authority, prefix='authority')
         context.update({
             'form': form,
             'instance': authority,
@@ -655,12 +655,14 @@ def authority(request, authority_id):
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.user, authority_id, request.POST, instance=authority.person)
 
-        form = AuthorityForm(request.user, request.POST, instance=authority)
+        form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
         if form.is_valid() and (person_form is None or person_form.is_valid()):
-            form.save()
             if person_form:
                 person_form.save()
-            return HttpResponseRedirect(reverse('authority_list'))
+
+            form.save()
+
+            return HttpResponseRedirect(reverse('curate_authority', args=[authority.id,]))
 
         context.update({
             'form': form,
@@ -1082,3 +1084,17 @@ def change_is_superuser(request, user_id):
                 messages.add_message(request, messages.ERROR, message)
 
     return redirect('user', user_id=user_id)
+
+@check_rules('can_update_user_module')
+def add_zotero_rule(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'users',
+        'role': role,
+    })
+
+    if request.method == 'POST':
+        rule = ZoteroRule.objects.create(role_id=role_id)
+
+    return redirect('role', role_id=role.pk)
