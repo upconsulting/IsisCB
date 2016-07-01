@@ -49,8 +49,20 @@ def dashboard(request):
     """
     template = loader.get_template('curation/dashboard.html')
     context = RequestContext(request, {
+
     })
     return HttpResponse(template.render(context))
+
+@staff_member_required
+def datasets(request):
+    """
+    """
+    template = loader.get_template('curation/dashboard.html')
+    context = RequestContext(request, {
+        'curation_section':'datasets',
+    })
+    return HttpResponse(template.render(context))
+
 
 # TODO this method needs to be logged down!
 @staff_member_required
