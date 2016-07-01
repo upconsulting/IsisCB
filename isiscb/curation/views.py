@@ -641,7 +641,7 @@ def authority(request, authority_id):
     person_form = None
     if request.method == 'GET':
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-            person_form = PersonForm(instance=authority.person)
+            person_form = PersonForm(request.user, authority_id, instance=authority.person)
 
         form = AuthorityForm(request.user, instance=authority)
         context.update({
@@ -653,7 +653,7 @@ def authority(request, authority_id):
 
     elif request.method == 'POST':
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-            person_form = PersonForm(request.POST, instance=authority.person)
+            person_form = PersonForm(request.user, authority_id, request.POST, instance=authority.person)
 
         form = AuthorityForm(request.user, request.POST, instance=authority)
         if form.is_valid() and (person_form is None or person_form.is_valid()):
@@ -665,7 +665,7 @@ def authority(request, authority_id):
         context.update({
             'form': form,
             'person_form': person_form,
-            'instance': citation,
+            'instance': authority,
             # 'partdetails_form': partdetails_form,
         })
 
@@ -901,10 +901,12 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
         template = loader.get_template('curation/add_rule.html')
         if object_type == AccessRule.CITATION:
             form = FieldRuleCitationForm(initial = { 'role': role, 'object_type': object_type})
+            header_template = 'curation/rule_field_citation_header.html'
         else:
             form = FieldRuleAuthorityForm(initial = { 'role': role, 'object_type': object_type})
+            header_template = 'curation/rule_field_authority_header.html'
 
-        header_template = loader.get_template('curation/rule_field_citation_header.html').render(context)
+        header_template = loader.get_template(header_template).render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -912,8 +914,10 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
     elif request.method == 'POST':
         if object_type == AccessRule.CITATION:
             form = FieldRuleCitationForm(request.POST)
+            header_template = 'curation/rule_field_citation_header.html'
         else:
             form = FieldRuleAuthorityForm(request.POST)
+            header_template = 'curation/rule_field_authority_header.html'
 
         if form.is_valid():
             rule = form.save()
@@ -924,7 +928,7 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
             return redirect('role', role_id=role.pk)
         else:
             template = loader.get_template('curation/add_rule.html')
-            header_template = loader.get_template('curation/rule_field_citation_header.html').render(context)
+            header_template = loader.get_template(header_template).render(context)
 
             context.update({
                 'form': form,
