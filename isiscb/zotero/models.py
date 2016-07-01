@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
+from isisdata.models import Dataset
+
 import re
 
 
@@ -20,7 +22,12 @@ class ImportAccession(models.Model):
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(max_length=255)
-    resolved = models.BooleanField(default=False)
+    ingest_to = models.ForeignKey(Dataset, null=True)
+    processed = models.BooleanField(default=False)
+
+    @property
+    def resolved(self):
+        return self.draftauthority_set.filter(processed=False).count() == 0
 
 
 class ImportedData(models.Model):
@@ -30,6 +37,9 @@ class ImportedData(models.Model):
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True)
     part_of = models.ForeignKey('ImportAccession')
+
+    # dataset = models.CharField(max_length=255, blank=True, null=True)
+    # editor = models.CharField(max_length=255, blank=True, null=True)
 
     processed = models.BooleanField(default=False, help_text=help_text("""
     Indicates whether or not a record has been inspected, and a corresponding

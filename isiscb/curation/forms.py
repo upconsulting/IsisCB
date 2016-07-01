@@ -124,6 +124,7 @@ class PartDetailsForm(forms.ModelForm):
 
         return exclude
 
+
 def set_field_access(can_update, can_view, fields):
     for field in fields:
         if not can_update:
@@ -132,6 +133,7 @@ def set_field_access(can_update, can_view, fields):
         if not can_view:
             fields[field] = forms.CharField(widget=NoViewInput())
             fields[field].widget.attrs['readonly'] = True
+
 
 class CitationForm(forms.ModelForm):
 
@@ -194,11 +196,13 @@ class CitationForm(forms.ModelForm):
 
         return exclude
 
+
 class NoViewInput(forms.TextInput):
 
     def render(self, name, value, attrs=None):
         value = "You do not have sufficient permissions to view this field."
         return super(NoViewInput, self).render(name, value, attrs)
+
 
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -211,6 +215,7 @@ class AuthorityForm(forms.ModelForm):
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation',
         ]
+
 
     def __init__(self, user, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
@@ -242,6 +247,7 @@ class AuthorityForm(forms.ModelForm):
                 exclude.append(field)
 
         return exclude
+
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -276,6 +282,7 @@ class PersonForm(forms.ModelForm):
 
         return exclude
 
+
 class RoleForm(forms.ModelForm):
 
     class Meta:
@@ -300,6 +307,7 @@ class DatasetRuleForm(forms.ModelForm):
         fields = [
             'dataset', 'role'
         ]
+
 
 class AddRoleForm(forms.Form):
     roles = IsisCBRole.objects.all()
