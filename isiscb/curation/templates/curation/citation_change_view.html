@@ -6,14 +6,14 @@
 {% block content %}
 <hr />
 {% if not instance.public %}
-<div class="alert alert-info" role="alert">
+<div class="alert alert-danger" role="alert">
 <i class="fa fa-eye-slash" aria-hidden="true"></i> This citation is not public. It cannot be found through the public site.
 </div>
 {% endif %}
 
 {% if not instance|are_related_objects_for_citation_public %}
 <div class="alert alert-info" role="alert">
-<i class="fa fa-eye-slash" aria-hidden="true"></i> At least one record linked to this citation is not public.
+  <i class="fa fa-exclamation-circle" aria-hidden="true"></i> At least one record linked to this citation is not public.
 </div>
 {% endif %}
 

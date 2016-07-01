@@ -38,10 +38,14 @@ def is_public_inconsistent(instance):
 @register.filter
 def are_related_objects_for_citation_public(citation):
     for acrel in citation.acrelations:
+        if not acrel.public:
+            return False
         if not acrel.authority.public:
             return False
 
     for ccrel in citation.ccrelations:
+        if not ccrel.public:
+            return False
         if not ccrel.object.public:
             return False
 
