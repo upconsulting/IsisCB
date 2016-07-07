@@ -1,11 +1,19 @@
+body, p, div, table, input {
+  font-family: 'Lato', sans-serif;
+}
+
 .nav-curation>li.active>a,
 .nav-pills>li.active>a:focus,
 .nav-pills>li.active>a:hover {
     /*background-color: */
 }
 
-.navbar-curation .navbar-toggle {
+.navbar-toggle {
     float: left;
+}
+
+.navbar-brand {
+  font-family: 'Raleway', sans-serif;
 }
 
 .navbar-curation .icon-bar {
