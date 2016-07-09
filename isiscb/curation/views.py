@@ -288,6 +288,41 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
 
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def delete_language_for_citation(request, citation_id):
+    # TODO: format?
+    citation = get_object_or_404(Citation, pk=citation_id)
+    language_id = request.GET.get('language', None)
+    if not language_id:
+        raise Http404
+
+    citation.language.remove(language_id)
+    citation.save()
+    return JsonResponse({'result': True})
+
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def add_language_for_citation(request, citation_id):
+    # TODO: format?
+    citation = get_object_or_404(Citation, pk=citation_id)
+    language_id = request.POST.get('language', None)
+    if not language_id:
+        raise Http404
+
+    language = get_object_or_404(Language, pk=language_id)
+    citation.language.add(language)
+    citation.save()
+    result = {
+        'language': {
+            'id': language_id,
+            'name':language.name
+        }
+    }
+    return JsonResponse(result)
+
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
@@ -670,6 +705,20 @@ def authority(request, authority_id):
         })
 
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def quick_and_dirty_language_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+    queryset = Language.objects.filter(name__istartswith=q)
+    results = [{
+        'id': language.id,
+        'name': language.name,
+        'public': True,
+    } for language in queryset[:20]]
+    return JsonResponse({'results': results})
 
 
 @staff_member_required

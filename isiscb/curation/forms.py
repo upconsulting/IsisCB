@@ -176,7 +176,7 @@ class CitationForm(forms.ModelForm):
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
-              'physical_details', 'language', 'abstract', 'additional_titles',
+              'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to',
         ]
@@ -241,7 +241,7 @@ class AuthorityForm(forms.ModelForm):
         super(AuthorityForm, self).clean()
         authority_id = self.cleaned_data['redirect_to']
         self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
-        
+
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
 
