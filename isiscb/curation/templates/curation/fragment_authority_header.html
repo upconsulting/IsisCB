@@ -2,9 +2,10 @@
 
 {% load general_tags %}
 
-<div class="h3">
-    <span class="text-warning">Authority:</span> {{ instance.id }} | {{ instance.name|safe }}
+<div class="h4">
+    <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance.name|safe }}</strong>
 </div>
+
 <div class="clearfix">
     <div class="button-group pull-right">
         <input type="submit" value="Save" class="btn btn-success" />

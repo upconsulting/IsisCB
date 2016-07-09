@@ -2,8 +2,8 @@
 
 {% load general_tags %}
 
-<div class="h3">
-    <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance|get_citation_title|safe }}
+<div class="h4">
+    <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance|get_citation_title|safe }}</strong>
 </div>
 <div class="clearfix">
     <div class="button-group pull-right">
