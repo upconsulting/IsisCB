@@ -78,7 +78,14 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if attribute %}<a href="{% url "delete_attribute_for_authority" instance.id attribute.id %}" class="btn btn-danger">Delete</a>{% endif %}
+                {% if attribute %}
+                <a href="#"
+                    class="btn btn-danger delete-attribute"
+                    attribute-id="{{ attribute.id }}"
+                    attribute-title="{{ attribute.type_controlled.name }}">
+                    Delete
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -113,4 +120,51 @@ $('#id_attribute-type_controlled').change(function() {
     container.append(form);
 });
 </script>
+
+{% if attribute %}
+<script>
+$(document).ready(function() {
+    $('.delete-attribute').click(function() {
+        var elem = $(this);
+        var attribute_id = elem.attr('attribute-id');
+        var attribute_title = elem.attr('attribute-title');
+        $('#attribute-id-container').val(attribute_id);
+        $('#delete-attribute-target-name').html(attribute_title);
+        $('#delete-attribute-modal').modal('show');
+    });
+
+});
+
+var delete_attribute = function() {
+    $('#delete-attribute-modal').modal('hide');
+    var attribute_id = $('#attribute-id-container').val();
+    if (attribute_id) {
+        window.location.replace("{% url "delete_attribute_for_authority" instance.id attribute.id %}?confirm=true");
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-attribute-modal" tabindex="-1" role="dialog" aria-labelledby="delete-attribute-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-attribute-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <input type="hidden" id="attribute-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_attribute();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

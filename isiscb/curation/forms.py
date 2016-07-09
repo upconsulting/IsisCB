@@ -18,8 +18,12 @@ class CCRelationForm(forms.ModelForm):
         model = CCRelation
         fields = [
             'type_controlled', 'description', 'data_display_order', 'subject',
-            'object', 'record_status_value', 'record_status_explanation'
+            'object', 'record_status_value', 'record_status_explanation',
+            'administrator_notes',
         ]
+        labels = {
+            'administrator_notes': 'Staff notes'
+        }
 
     def __init__(self, *args, **kwargs):
         super(CCRelationForm, self).__init__(*args, **kwargs)
@@ -50,8 +54,12 @@ class ACRelationForm(forms.ModelForm):
             'type_controlled', 'type_broad_controlled',
             'name_for_display_in_citation', 'data_display_order',
             'confidence_measure', 'authority', 'citation',
-            'record_status_value', 'record_status_explanation'
+            'record_status_value', 'record_status_explanation',
+            'administrator_notes'
         ]
+        labels = {
+            'administrator_notes': 'Staff notes',
+        }
 
     def __init__(self, *args, **kwargs):
         super(ACRelationForm, self).__init__(*args, **kwargs)
@@ -176,12 +184,13 @@ class CitationForm(forms.ModelForm):
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
-              'physical_details', 'language', 'abstract', 'additional_titles',
+              'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to',
+              'belongs_to', 'administrator_notes',
         ]
         labels = {
             'belongs_to': 'Dataset',
+            'administrator_notes': 'Staff notes'
         }
 
     def _get_validation_exclusions(self):
@@ -214,8 +223,13 @@ class AuthorityForm(forms.ModelForm):
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
-            'record_status_value', 'record_status_explanation', 'redirect_to'
+            'record_status_value', 'record_status_explanation', 'redirect_to',
+            'administrator_notes',
         ]
+
+        labels = {
+            'administrator_notes': 'Staff notes',
+        }
 
 
     def __init__(self, user, *args, **kwargs):
@@ -240,8 +254,11 @@ class AuthorityForm(forms.ModelForm):
     def clean(self):
         super(AuthorityForm, self).clean()
         authority_id = self.cleaned_data['redirect_to']
-        self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
-        
+        if authority_id:
+            self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
+        else:
+            self.cleaned_data['redirect_to'] = None
+
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
 

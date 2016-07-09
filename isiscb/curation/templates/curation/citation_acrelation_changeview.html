@@ -85,6 +85,14 @@
                         </div>
                     </div>
                 </div>
+
+                {% for error in form.administrator_notes.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.administrator_notes.label }}</label>
+                    {{ form.administrator_notes|addcss:"form-control" }}
+                </div>
                 {{ form.authority }}
                 {{ form.citation }}
             </div>
@@ -103,7 +111,14 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}<a href="{% url "delete_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
+                {% if acrelation %}
+                <a href="#"
+                    class="btn btn-danger delete-acrelation"
+                    acrelation-id="{{ acrelation.id }}"
+                    acrelation-title="{{ acrelation.authority.name }}">
+                    Delete
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -165,4 +180,57 @@ $(document).ready(function() {
     }
 });
 </script>
+
+{% if acrelation %}
+<script>
+$(document).ready(function() {
+    bind_acrelation();
+});
+
+var bind_acrelation = function() {
+    $('.delete-acrelation').click(function() {
+        var elem = $(this);
+        var acrelation_id = elem.attr('acrelation-id');
+        var acrelation_title = elem.attr('acrelation-title');
+        $('#acrelation-id-container').val(acrelation_id);
+        $('#delete-acrelation-target-name').html(acrelation_title);
+        $('#delete-acrelation-modal').modal('show');
+    });
+}
+
+var delete_acrelation = function() {
+    $('#delete-acrelation-modal').modal('hide');
+    var acrelation_id = $('#acrelation-id-container').val();
+    if (acrelation_id) {
+        window.location.replace("{% url "delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true");
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-acrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-acrelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-acrelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority itself, only the relation between the authority and this citation.
+                </p>
+                <input type="hidden" id="acrelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_acrelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

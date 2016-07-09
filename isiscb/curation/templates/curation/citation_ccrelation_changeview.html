@@ -65,6 +65,16 @@
                         </div>
                     </div>
                 </div>
+
+                {% for error in form.administrator_notes.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.administrator_notes.label }}</label>
+                    {{ form.administrator_notes|addcss:"form-control" }}
+                </div>
+
+
                 {{ form.subject }}
                 {{ form.object }}
             </div>
@@ -106,7 +116,14 @@
         <div class="clearfix">
             <div class="button-group pull-right">
                 <input type="submit" value="Save" class="btn btn-success" />
-                {% if ccrelation %}<a href="{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-danger">Delete</a>{% endif %}
+                {% if ccrelation %}
+                <a href="#"
+                    class="btn btn-danger delete-ccrelation"
+                    ccrelation-id="{{ ccrelation.id }}"
+                    ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}">
+                    Delete
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -214,4 +231,52 @@ $(document).ready(function() {
     });
 });
 </script>
+
+{% if ccrelation %}
+<script>
+$(document).ready(function() {
+    $('.delete-ccrelation').click(function() {
+        var elem = $(this);
+        var ccrelation_id = elem.attr('ccrelation-id');
+        var ccrelation_title = elem.attr('ccrelation-title');
+        $('#ccrelation-id-container').val(ccrelation_id);
+        $('#delete-ccrelation-target-name').html(ccrelation_title);
+        $('#delete-ccrelation-modal').modal('show');
+    });
+
+});
+
+var delete_ccrelation = function() {
+    $('#delete-ccrelation-modal').modal('hide');
+    var ccrelation_id = $('#ccrelation-id-container').val();
+    if (ccrelation_id) {
+        window.location.replace("{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}?confirm=true");
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-ccrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-ccrelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-ccrelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                You are about to delete a citation-citation relation with <span class="text-warning" id="delete-ccrelation-target-name"></span>. Deletion cannot be undone!
+                <p>
+                    This will not delete the related citation itself, only the relation between that citation and this one.
+                </p>
+                <input type="hidden" id="ccrelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_ccrelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

@@ -66,9 +66,7 @@ def get_citation_pubdate(obj):
             return attribute.value.get_child_class().__unicode__()
 
     date = getattr(obj, 'publication_date', None)
-    if not date:
-        return 'missing'
-    return date.isoformat()[:4]
+    return 'missing' if not date else date.isoformat()[:4]
 
 
 @register.filter(name='get_citation_pubdate_fast')

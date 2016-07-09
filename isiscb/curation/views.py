@@ -77,13 +77,16 @@ def quick_create_acrelation(request):
             authority_id=authority_id,
             citation_id=citation_id,
             type_controlled=type_controlled,
-            type_broad_controlled=type_broad_controlled
+            type_broad_controlled=type_broad_controlled,
+            public=True,
+            record_status_value=CuratedMixin.ACTIVE,
         )
 
         response_data = {
             'acrelation': {
                 'id': instance.id,
                 'type_controlled': instance.type_controlled,
+                'get_type_controlled_display': instance.get_type_controlled_display(),
                 'type_broad_controlled': instance.type_broad_controlled,
                 'authority': {
                     'id': instance.authority.id,
@@ -130,9 +133,7 @@ def create_ccrelation_for_citation(request, citation_id):
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
-    ccrelation = None
-    if ccrelation_id:
-        ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
+    ccrelation = None if not ccrelation_id else get_object_or_404(CCRelation, pk=ccrelation_id)
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -244,7 +245,7 @@ def create_acrelation_for_citation(request, citation_id):
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
-    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    acrelation = None if not acrelation_id else get_object_or_404(ACRelation, pk=acrelation_id)
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -286,6 +287,41 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
         return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
     template = loader.get_template('curation/citation_attribute_delete.html')
     return HttpResponse(template.render(context))
+
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def delete_language_for_citation(request, citation_id):
+    # TODO: format?
+    citation = get_object_or_404(Citation, pk=citation_id)
+    language_id = request.GET.get('language', None)
+    if not language_id:
+        raise Http404
+
+    citation.language.remove(language_id)
+    citation.save()
+    return JsonResponse({'result': True})
+
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def add_language_for_citation(request, citation_id):
+    # TODO: format?
+    citation = get_object_or_404(Citation, pk=citation_id)
+    language_id = request.POST.get('language', None)
+    if not language_id:
+        raise Http404
+
+    language = get_object_or_404(Language, pk=language_id)
+    citation.language.add(language)
+    citation.save()
+    result = {
+        'language': {
+            'id': language_id,
+            'name':language.name
+        }
+    }
+    return JsonResponse(result)
 
 
 @staff_member_required
@@ -544,7 +580,7 @@ def citation(request, citation_id):
             form.save()
             if partdetails_form:
                 partdetails_form.save()
-            return HttpResponseRedirect(reverse('citation_list'))
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
 
         context.update({
             'form': form,
@@ -675,12 +711,29 @@ def authority(request, authority_id):
 
 
 @staff_member_required
+def quick_and_dirty_language_search(request):
+    q = request.GET.get('q', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+    queryset = Language.objects.filter(name__istartswith=q)
+    results = [{
+        'id': language.id,
+        'name': language.name,
+        'public': True,
+    } for language in queryset[:20]]
+    return JsonResponse({'results': results})
+
+
+@staff_member_required
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
+    tc = request.GET.get('type', None)
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
 
     queryset = Authority.objects.all()
+    if tc:
+        queryset = queryset.filter(type_controlled=tc.upper())
     for part in q.split():
         queryset = queryset.filter(name__icontains=part)
     results = [{
@@ -691,7 +744,7 @@ def quick_and_dirty_authority_search(request):
         'datestring': _get_datestring_for_authority(obj),
         'url': reverse("curate_authority", args=(obj.id,)),
         'public': obj.public,
-    } for obj in queryset[:20]]
+    } for obj in queryset[:10]]
     return JsonResponse({'results': results})
 
 
@@ -1084,6 +1137,7 @@ def change_is_superuser(request, user_id):
                 messages.add_message(request, messages.ERROR, message)
 
     return redirect('user', user_id=user_id)
+
 
 @check_rules('can_update_user_module')
 def add_zotero_rule(request, role_id):

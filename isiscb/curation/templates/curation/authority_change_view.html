@@ -33,24 +33,79 @@
 <div class="row">
     <div class="col-sm-4">
         <div class="h4">Authority Details</div>
-        {% for field in form %}
-        {% for error in field.errors %}
+        <div class="row">
+            <div class="col-xs-6">
+                {% for error in form.type_controlled.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.type_controlled.label }}</label>
+                    {{ form.type_controlled|addcss:"form-control"}}
+                </div>
+            </div>
+            <div class="col-xs-6">
+                {% for error in form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ form.record_status_value.label }}</label>
+                    {{ form.record_status_value|addcss:"form-control"}}
+                </div>
+            </div>
+        </div>
+
+        {% for error in form.name.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         <div class="form-group">
-            <label>{{ field.label }}</label>
-            {{ field|addcss:"form-control" }}
+            <label>{{ form.name.label }}</label>
+            {{ form.name|addcss:"form-control"}}
+        </div>
 
-            {% if field.name == 'redirect_to' %}
+        {% for error in form.description.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.description.label }}</label>
+            {{ form.description|addcss:"form-control"}}
+        </div>
+
+        {% for error in form.classification_system.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.classification_system.label }}</label>
+            {{ form.classification_system|addcss:"form-control"}}
+        </div>
+
+        {% for error in form.classification_code.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.classification_code.label }}</label>
+            {{ form.classification_code|addcss:"form-control"}}
+        </div>
+
+        {% for error in form.redirect_to.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.redirect_to.label }}</label>
             <input type="text"
                 class="form-control"
                 name="authority-search"
                 autocomplete="off"
                 id="authority-search" />
             <ul class="list-group" id="results-container"></ul>
-            {% endif %}
         </div>
+
+        {% for error in form.record_status_explanation.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
+        <div class="form-group">
+            <label>{{ form.record_status_explanation.label }}</label>
+            {{ form.record_status_explanation|addcss:"form-control"}}
+        </div>
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
@@ -131,12 +186,6 @@
         </div>
     </div>
 
-</div>
-
-<div class="clearfix">
-    <div class="button-group pull-right">
-        <input type="submit" value="Save" class="btn btn-success" />
-    </div>
 </div>
 
 </form>
