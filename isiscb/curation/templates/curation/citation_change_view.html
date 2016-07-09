@@ -4,6 +4,13 @@
 {% load permission_tags %}
 
 {% block content %}
+<script>
+// Use this (with a click event) instead of an anchor.
+var toggleTab = function(name) {
+    $('.nav-tabs a[href="#' + name + '"]').tab('show')
+}
+</script>
+
 <hr />
 {% if not instance.public %}
 <div class="alert alert-danger" role="alert">

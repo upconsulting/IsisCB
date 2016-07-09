@@ -61,9 +61,12 @@ def get_authors_editors(obj):
 
 @register.filter(name='get_citation_pubdate')
 def get_citation_pubdate(obj):
+    print obj
     for attribute in obj.attributes.all():
         if attribute.type_controlled.name == 'PublicationDate':
-            return attribute.value.get_child_class().__unicode__()
+            v = attribute.value.get_child_class().__unicode__()
+            print v, type(v)
+            return v
 
     date = getattr(obj, 'publication_date', None)
     if not date:

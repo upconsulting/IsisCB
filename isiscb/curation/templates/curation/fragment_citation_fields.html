@@ -15,12 +15,12 @@
         </div>
     </div>
     <div class="col-xs-6">
-        {% for error in form.record_status_value.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
         <div class="form-group">
-            <label>{{ form.record_status_value.label }}</label>
-            {{ form.record_status_value|addcss:"form-control" }}
+            <label>Publication date</label>
+            <div class="h5">
+                <a onclick="toggleTab('attributes')" style="cursor: pointer;">{{ instance|get_citation_pubdate }}</a>
+
+            </div>
         </div>
     </div>
 </div>
@@ -191,6 +191,14 @@
 <div class="form-group">
     <label>{{ form.additional_titles.label }}</label>
     {{ form.additional_titles|addcss:"form-control" }}
+</div>
+
+{% for error in form.record_status_value.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.record_status_value.label }}</label>
+    {{ form.record_status_value|addcss:"form-control" }}
 </div>
 
 
