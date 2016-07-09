@@ -20,10 +20,7 @@
 
         {% endif %}
         <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
-        {% if ccrelation.type_free %}
-        <span class="label label-success">{{ ccrelation.type_free }}</span>
-        {% endif %}
-
+        
         {% if instance.id == ccrelation.object.id %}
         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
         {% else %}
