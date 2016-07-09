@@ -56,6 +56,47 @@ def are_related_objects_for_citation_public(citation):
     return True
 
 @register.filter
+def get_authorities(acrelations):
+    authorities = []
+    for acrel in acrelations:
+        authorities.append(acrel.authority)
+    return authorities
+
+@register.filter
+def get_citations(ccrelations):
+    citations = []
+    for ccrel in ccrelations:
+        citations.append(ccrel.object)
+    return citations
+
+@register.filter
+def are_related_authorities_public(acrelations, authorities):
+    for acrel in acrelations:
+        if not acrel.public:
+            return False
+    for authority in authorities:
+        if not authority.public:
+            return False
+    return True
+
+@register.filter
+def are_related_citations_public(ccrelations, citations):
+    for ccrel in ccrelations:
+        if not ccrel.public:
+            return False
+    for citation in citations:
+        if not citation.public:
+            return False
+    return True
+
+@register.filter
+def are_attributes_public(attributes):
+    for attr in attributes:
+        if not attr.public:
+            return False
+    return True
+
+@register.filter
 def are_related_objects_for_authority_public(authority):
     for acrel in authority.acrelations:
         if not acrel.public:

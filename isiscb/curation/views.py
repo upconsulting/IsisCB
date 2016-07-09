@@ -21,6 +21,7 @@ from curation.contrib.views import check_rules
 
 import iso8601
 import rules
+from itertools import chain
 
 
 def _get_datestring_for_authority(authority):
@@ -728,23 +729,34 @@ def quick_and_dirty_language_search(request):
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
     tc = request.GET.get('type', None)
+    N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
 
     queryset = Authority.objects.all()
+    queryset_sw = Authority.objects.all()
     if tc:
         queryset = queryset.filter(type_controlled=tc.upper())
-    for part in q.split():
+        queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
+
+    query_parts = q.split()
+    for part in query_parts:
         queryset = queryset.filter(name__icontains=part)
-    results = [{
-        'id': obj.id,
-        'type': obj.get_type_controlled_display(),
-        'name': obj.name,
-        'description': obj.description,
-        'datestring': _get_datestring_for_authority(obj),
-        'url': reverse("curate_authority", args=(obj.id,)),
-        'public': obj.public,
-    } for obj in queryset[:10]]
+    queryset_sw = queryset_sw.filter(name__istartswith=q)
+    results = []
+    for i, obj in enumerate(chain(queryset_sw, queryset.order_by('name'))):
+        if i == N:
+            break
+
+        results.append({
+            'id': obj.id,
+            'type': obj.get_type_controlled_display(),
+            'name': obj.name,
+            'description': obj.description,
+            'datestring': _get_datestring_for_authority(obj),
+            'url': reverse("curate_authority", args=(obj.id,)),
+            'public': obj.public,
+        })
     return JsonResponse({'results': results})
 
 

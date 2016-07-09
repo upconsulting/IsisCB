@@ -58,6 +58,11 @@ def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
+@register.filter(name='get_authors_editors_preloaded')
+def get_authors_editors_preloaded(acrelations):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
 
 @register.filter(name='get_citation_pubdate')
 def get_citation_pubdate(obj):
