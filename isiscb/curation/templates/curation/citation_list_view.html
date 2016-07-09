@@ -20,13 +20,18 @@
     </thead>
     <tbody>
         {% for object in filter_list %}
-        <tr class="{% if not object.public or not object|are_related_objects_for_citation_public %}notpublic{% endif %}">
+        {% with object.acrelations as acrelations %}
+        {% with acrelations|get_authorities as authorities %}
+        {% with object.ccrelations as ccrelations %}
+        {% with ccrelations|get_citations as related_citations %}
+        {% with object.attributes as attributes %}
+        <tr class="{% if not object.public or not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:citations or not attributes|are_attributes_public %}notpublic{% endif %}">
             <td>
                 <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
                 {% if not object.public %}
                 <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                 {% endif %}
-                {% if not object|are_related_objects_for_citation_public %}
+                {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:citations or not attributes|are_attributes_public %}
                 <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
                 {% endif %}
                 {% if object|is_public_inconsistent %}
@@ -40,7 +45,7 @@
             <td><strong>{{ object|get_citation_title|safe }}</strong></td>
             <td>
                 <a href="{% url "curate_citation" object.id %}?tab=acrelations">
-                    {{ object|get_authors_editors }}
+                    {{ acrelations|get_authors_editors_preloaded }}
                 </a>
             </td>
             <td>
@@ -60,6 +65,11 @@
                 {% if object.created_on %}{{ object.created_on }}{% else %}{{ object.created_on_fm }}{% endif %}
             </td>
         </tr>
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
         {% endfor %}
     </tbody>
 
