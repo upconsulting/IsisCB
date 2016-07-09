@@ -77,4 +77,7 @@ def are_related_objects_for_authority_public(authority):
 
 @register.filter
 def get_dataset_name(ds_id):
-    return Dataset.objects.get(pk=ds_id).name
+    try:
+        return Dataset.objects.get(pk=ds_id).name
+    except ValueError:
+        return 'Error, please update role.'
