@@ -84,6 +84,7 @@ var delete_acrelation = function() {
         $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#acrelation-' + acrelation_id).remove();
+                $('#category-' + acrelation_id).remove();
                 $('#subject-' + acrelation_id).remove();
             },
         });
