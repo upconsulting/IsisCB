@@ -130,9 +130,7 @@ def create_ccrelation_for_citation(request, citation_id):
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
-    ccrelation = None
-    if ccrelation_id:
-        ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
+    ccrelation = None if not ccrelation_id else get_object_or_404(CCRelation, pk=ccrelation_id)
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -244,7 +242,7 @@ def create_acrelation_for_citation(request, citation_id):
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
-    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    acrelation = None if not acrelation_id else get_object_or_404(ACRelation, pk=acrelation_id)
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
