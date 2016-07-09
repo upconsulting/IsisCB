@@ -12,7 +12,7 @@ class CCRelationForm(forms.ModelForm):
     object = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = CCRelation
@@ -42,7 +42,7 @@ class ACRelationForm(forms.ModelForm):
     citation = forms.CharField(widget=forms.HiddenInput())
     """We will set these dynamically in the rendered form."""
 
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = ACRelation
@@ -95,7 +95,7 @@ class ISODateValueForm(forms.ModelForm):
 
 
 class PartDetailsForm(forms.ModelForm):
-    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}))
+    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
 
     def __init__(self, user, citation_id, *args, **kwargs):
         super(PartDetailsForm, self).__init__( *args, **kwargs)
@@ -169,8 +169,8 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset')
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     class Meta:
         model = Citation
@@ -206,14 +206,15 @@ class NoViewInput(forms.TextInput):
 
 class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
+    redirect_to = forms.CharField(widget=forms.HiddenInput(), required = False)
 
     class Meta:
         model = Authority
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
-            'record_status_value', 'record_status_explanation',
+            'record_status_value', 'record_status_explanation', 'redirect_to'
         ]
 
 
@@ -236,6 +237,11 @@ class AuthorityForm(forms.ModelForm):
                 self.fields[field] = forms.CharField(widget=NoViewInput())
                 self.fields[field].widget.attrs['readonly'] = True
 
+    def clean(self):
+        super(AuthorityForm, self).clean()
+        authority_id = self.cleaned_data['redirect_to']
+        self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
+        
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
 

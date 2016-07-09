@@ -580,12 +580,9 @@ def authority(request, authority_id):
 
     authority = Authority.objects.get(id=authority_id)
 
-    if not authority.public:
-        return HttpResponseForbidden()
-
     # Some authority entries are deleted. These should be hidden from public
     #  view.
-    if authority.record_status == 'DL':
+    if authority.record_status == Authority.DELETE or authority.record_status_value == CuratedMixin.INACTIVE:
         return Http404("No such Authority")
 
     # If the user has been redirected from another Authority entry, this should
@@ -598,11 +595,14 @@ def authority(request, authority_id):
 
     # There are several authority entries that redirect to other entries,
     #  usually because the former is a duplicate of the latter.
-    if authority.record_status == 'RD' and authority.redirect_to is not None:
+    if (authority.record_status == Authority.REDIRECT or authority.record_status_value == CuratedMixin.REDIRECT) and authority.redirect_to is not None:
         redirect_kwargs = {'authority_id': authority.redirect_to.id}
         base_url = reverse('authority', kwargs=redirect_kwargs)
         redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
         return HttpResponseRedirect(redirect_url)
+
+    if not authority.public:
+        return HttpResponseForbidden()
 
     template = loader.get_template('isisdata/authority.html')
 

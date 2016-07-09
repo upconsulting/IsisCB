@@ -41,6 +41,15 @@
         <div class="form-group">
             <label>{{ field.label }}</label>
             {{ field|addcss:"form-control" }}
+
+            {% if field.name == 'redirect_to' %}
+            <input type="text"
+                class="form-control"
+                name="authority-search"
+                autocomplete="off"
+                id="authority-search" />
+            <ul class="list-group" id="results-container"></ul>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
@@ -133,6 +142,53 @@
 
 </form>
 <script>
+//# sourceURL=test.js
 $('#id_language').multiSelect()
+
+$(document).ready(function() {
+    var authority_name = "{% if instance.redirect_to %}{{ instance.redirect_to.name }}{% endif %}";
+    if (authority_name.length > 0) {
+        $('#authority-search').val(authority_name);
+    }
+    $('#authority-search').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            success: function(result) {
+                $('#results-container').empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+                    choice_elem += '</li>';
+
+                    $('#results-container').append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#results-container').empty();
+                    $('#authority-search').val(selected_name);
+                    $('#id_authority-redirect_to').val(selected_id);
+                });
+            }
+        });
+    });
+
+});
 </script>
 {% endblock %}
