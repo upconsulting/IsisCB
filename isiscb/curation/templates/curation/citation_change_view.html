@@ -63,6 +63,7 @@ var toggleTab = function(name) {
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
                 <div class="row">
                     <div class="col-sm-6">
+                        {% include "curation/fragment_citation_categories.html" %}
                         {% include "curation/fragment_citation_subjects.html" %}
                     </div>
                     <div class="col-sm-6">

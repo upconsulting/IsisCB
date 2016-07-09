@@ -77,7 +77,9 @@ def quick_create_acrelation(request):
             authority_id=authority_id,
             citation_id=citation_id,
             type_controlled=type_controlled,
-            type_broad_controlled=type_broad_controlled
+            type_broad_controlled=type_broad_controlled,
+            public=True,
+            record_status_value=CuratedMixin.ACTIVE,
         )
 
         response_data = {
@@ -724,10 +726,13 @@ def quick_and_dirty_language_search(request):
 @staff_member_required
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
+    tc = request.GET.get('type', None)
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
 
     queryset = Authority.objects.all()
+    if tc:
+        queryset = queryset.filter(type_controlled=tc.upper())
     for part in q.split():
         queryset = queryset.filter(name__icontains=part)
     results = [{
@@ -738,7 +743,7 @@ def quick_and_dirty_authority_search(request):
         'datestring': _get_datestring_for_authority(obj),
         'url': reverse("curate_authority", args=(obj.id,)),
         'public': obj.public,
-    } for obj in queryset[:20]]
+    } for obj in queryset[:10]]
     return JsonResponse({'results': results})
 
 
@@ -1131,6 +1136,7 @@ def change_is_superuser(request, user_id):
                 messages.add_message(request, messages.ERROR, message)
 
     return redirect('user', user_id=user_id)
+
 
 @check_rules('can_update_user_module')
 def add_zotero_rule(request, role_id):

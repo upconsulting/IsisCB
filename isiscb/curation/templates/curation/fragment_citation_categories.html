@@ -1,0 +1,205 @@
+{% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+<div class="h4">Categories</div>
+<ul class="list-group" id="category-list-group">
+{% if can_view %}
+{% for acrelation in instance.acrelation_set.all %}
+    {% if acrelation.type_controlled == 'CA' %}
+    <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
+        {% if can_update %}
+        <span class="button-group button-group-xs pull-right">
+            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
+            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category"
+                type="button"
+                acrelation-id="{{ acrelation.id }}"
+                acrelation-title="{{ acrelation.authority.name }}"></a>
+        </span>
+        {% endif %}
+
+        {{ acrelation.authority.name }}
+        {% if acrelation.name_for_display_in_citation %}
+        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+        {% endif %}
+        {% if not acrelation.authority.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+        {% endif %}
+        {% if not acrelation.public %}
+        <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+        {% endif %}
+    </li>
+    {% endif %}
+{% endfor %}
+
+{% if can_update %}
+<li class="list-group-item" id="create-category-item" style="visibility: hidden;"></li>
+<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewCategory();">
+    <span class="glyphicon glyphicon-plus"></span> Add a category
+</a>
+{% endif %}
+{% endif %}
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view categorys.
+  </div>
+</li>
+{% endif %}
+
+</ul>
+
+{% endwith %}
+<script>
+var category_creation_container = $('#create-category-item');
+
+var createNewCategory = function() {
+    category_creation_container.empty();
+    var form_group = $('<div class="form-group"></div>');
+    form_group.append('<input class="form-control" id="create-category-input" name="create-category-input" type="text" />');
+    category_creation_container.append(form_group);
+    category_creation_container.append('<ul class="list-group" id="create-category-results-container"></ul>');
+    category_creation_container.css("visibility", "visible");
+
+    $('#create-category-input').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?type=CT&q=" + query, {
+            success: function(result) {
+                var results_container = $('#create-category-results-container');
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
+                    if (r.datestring != null) {
+                        choice_elem += '(' + r.datestring + ')';
+                    }
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+
+                    choice_elem += '</li>';
+
+                    results_container.append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#create-category-results-container').empty();
+                    $('#create-category-input').val(selected_name);
+
+                    var payload = {
+                        'citation_id': "{{ instance.id }}",
+                        'authority_id': selected_id,
+                        'type_controlled': 'CA',    // category.
+                        'type_broad_controlled': 'CT',    // classification term.
+                    };
+
+                    $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
+                        var new_id = result.acrelation.id;
+                        var new_elem = '<li class="list-group-item clearfix" id="category-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        new_elem += '<span class="button-group button-group-xs pull-right">';
+                        new_elem_acr += '<span class="button-group button-group-xs pull-right">';
+                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+                        new_elem_acr += '<span class="label label-primary">category</span> <span class="label label-success">Provides category Content About</span> ';
+                        new_elem += result.acrelation.authority.name;
+                        new_elem_acr += result.acrelation.authority.name;
+                        new_elem += '</li>';
+                        new_elem_acr += '</li>';
+
+                        $('#category-list-group').prepend(new_elem);
+                        $('#acrelation-list-group').prepend(new_elem_acr);
+                        category_creation_container.css("visibility", "hidden");
+                        category_creation_container.empty();
+
+                        bind_acrelation();
+                        bind_category();
+                    }).fail(function(a) {
+                        console.log(a);
+                      })
+                });
+            }
+        });
+    });
+}
+
+</script>
+
+
+<script>
+$(document).ready(function() {
+    bind_category();
+});
+
+var bind_category = function() {
+    $('.delete-category').click(function() {
+        var elem = $(this);
+        var acrelation_id = elem.attr('acrelation-id');
+        var acrelation_title = elem.attr('acrelation-title');
+        $('#category-id-container').val(acrelation_id);
+        $('#delete-category-target-name').html(acrelation_title);
+        $('#delete-category-modal').modal('show');
+    });
+}
+
+var delete_category = function() {
+    $('#delete-category-modal').modal('hide');
+    var acrelation_id = $('#category-id-container').val();
+    if (acrelation_id) {
+        $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+            'success': function(r) {
+                $('#category-' + acrelation_id).remove();
+                $('#acrelation-' + acrelation_id).remove();
+            },
+        });
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-category-modal" tabindex="-1" role="dialog" aria-labelledby="delete-category-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-category-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to remove a category relation with <span class="text-warning" id="delete-category-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority record itself, only the association between that record and this citation.
+                </p>
+                <input type="hidden" id="category-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_category();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
