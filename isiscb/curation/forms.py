@@ -176,7 +176,7 @@ class CitationForm(forms.ModelForm):
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
-              'physical_details', 'language', 'abstract', 'additional_titles',
+              'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to', 'administrator_notes',
         ]

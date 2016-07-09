@@ -65,7 +65,6 @@ $(document).ready(function() {
     bind_acrelation();
 });
 
-
 var bind_acrelation = function() {
     $('.delete-acrelation').click(function() {
         var elem = $(this);
@@ -84,7 +83,9 @@ var delete_acrelation = function() {
         $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#acrelation-' + acrelation_id).remove();
+                $('#category-' + acrelation_id).remove();
                 $('#subject-' + acrelation_id).remove();
+                $('#author-' + acrelation_id).remove();
             },
         });
     }
