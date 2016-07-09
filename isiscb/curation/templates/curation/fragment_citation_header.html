@@ -2,11 +2,11 @@
 
 {% load general_tags %}
 
-<div class="h3">
-    <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance|get_citation_title|safe }}
+<div class="h4">
+    <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance|get_citation_title|safe }}</strong>
 </div>
-<div class="h4">{{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span></div>
+<div class="h5">{{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span></div>
 
 <p>
-<span class="label label-success">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
+<span class="label label-primary">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
 </p>
