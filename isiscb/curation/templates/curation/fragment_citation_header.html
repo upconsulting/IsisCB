@@ -5,8 +5,16 @@
 <div class="h3">
     <span class="text-warning">Citation:</span> {{ instance.id }} | {{ instance|get_citation_title|safe }}
 </div>
-<div class="h4">{{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span></div>
+<div class="clearfix">
+    <div class="button-group pull-right">
+        <input type="submit" value="Save" class="btn btn-success" />
+    </div>
+    <div class="h4">
+        {{ instance|get_citation_pubdate }}: <span class="text-warning">{{ instance|get_authors_editors }}</span>
 
-<p>
-<span class="label label-success">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
-</p>
+    </div>
+    <p class="">
+        <span class="label label-success">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
+    </p>
+
+</div>
