@@ -200,3 +200,11 @@
         </div>
     </div>
 </div>
+
+{% for error in form.administrator_notes.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.administrator_notes.label }}</label>
+    {{ form.administrator_notes|addcss:"form-control" }}
+</div>

@@ -178,10 +178,11 @@ class CitationForm(forms.ModelForm):
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'language', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to',
+              'belongs_to', 'administrator_notes',
         ]
         labels = {
             'belongs_to': 'Dataset',
+            'administrator_notes': 'Staff notes'
         }
 
     def _get_validation_exclusions(self):
@@ -240,8 +241,11 @@ class AuthorityForm(forms.ModelForm):
     def clean(self):
         super(AuthorityForm, self).clean()
         authority_id = self.cleaned_data['redirect_to']
-        self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
-        
+        if authority_id:
+            self.cleaned_data['redirect_to'] = Authority.objects.get(pk=authority_id)
+        else:
+            self.cleaned_data['redirect_to'] = None
+
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
 
