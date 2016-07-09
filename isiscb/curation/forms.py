@@ -18,8 +18,12 @@ class CCRelationForm(forms.ModelForm):
         model = CCRelation
         fields = [
             'type_controlled', 'description', 'data_display_order', 'subject',
-            'object', 'record_status_value', 'record_status_explanation'
+            'object', 'record_status_value', 'record_status_explanation',
+            'administrator_notes',
         ]
+        labels = {
+            'administrator_notes': 'Staff notes'
+        }
 
     def __init__(self, *args, **kwargs):
         super(CCRelationForm, self).__init__(*args, **kwargs)
@@ -50,8 +54,12 @@ class ACRelationForm(forms.ModelForm):
             'type_controlled', 'type_broad_controlled',
             'name_for_display_in_citation', 'data_display_order',
             'confidence_measure', 'authority', 'citation',
-            'record_status_value', 'record_status_explanation'
+            'record_status_value', 'record_status_explanation',
+            'administrator_notes'
         ]
+        labels = {
+            'administrator_notes': 'Staff notes',
+        }
 
     def __init__(self, *args, **kwargs):
         super(ACRelationForm, self).__init__(*args, **kwargs)
@@ -215,8 +223,13 @@ class AuthorityForm(forms.ModelForm):
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
-            'record_status_value', 'record_status_explanation', 'redirect_to'
+            'record_status_value', 'record_status_explanation', 'redirect_to',
+            'administrator_notes',
         ]
+
+        labels = {
+            'administrator_notes': 'Staff notes',
+        }
 
 
     def __init__(self, user, *args, **kwargs):
