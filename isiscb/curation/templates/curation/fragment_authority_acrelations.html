@@ -7,10 +7,42 @@
 {% test_rule 'can_update_authority_field' user permTuple as can_update %}
 {% test_rule 'can_view_authority_field' user permTuple as can_view %}
 
+<div class="form-group">
+    <label>Filter by relation type</label>
+    <select class="form-control" id="acrelation-filter-type" name="acrelation-filter-type">
+        <option value="" selected="selected">---------</option>
+        <option value="AU">Author</option>
+        <option value="ED">Editor</option>
+        <option value="AD">Advisor</option>
+        <option value="CO">Contributor</option>
+        <option value="TR">Translator</option>
+        <option value="SU">Subject</option>
+        <option value="CA">Category</option>
+        <option value="PU">Publisher</option>
+        <option value="SC">School</option>
+        <option value="IN">Institution</option>
+        <option value="ME">Meeting</option>
+        <option value="PE">Periodical</option>
+        <option value="BS">Book Series</option>
+        <option value="CM">Committee Member</option>
+    </select>
+</div>
+<script>
+    $('#acrelation-filter-type').change(function(e) {
+        var selected_type = $('#acrelation-filter-type').val();
+        if (selected_type == "") {
+            $('.acrelation').show();
+        } else {
+            $('.acrelation').hide();
+            $('.acrelation-type-' + selected_type).show();
+        }
+    });
+</script>
+
 <ul class="list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
-    <li class="list-group-item {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.citation.public %}record-notpublic{% endif %}" id="acrelation-{{ acrelation.id }}">
+    <li class="list-group-item acrelation acrelation-type-{{ acrelation.type_controlled }} {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.citation.public %}record-notpublic{% endif %}" id="acrelation-{{ acrelation.id }}">
         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
         {% if acrelation.type_broad_controlled %}
         <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
