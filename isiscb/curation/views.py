@@ -86,6 +86,7 @@ def quick_create_acrelation(request):
             'acrelation': {
                 'id': instance.id,
                 'type_controlled': instance.type_controlled,
+                'get_type_controlled_display': instance.get_type_controlled_display(),
                 'type_broad_controlled': instance.type_broad_controlled,
                 'authority': {
                     'id': instance.authority.id,

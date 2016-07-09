@@ -33,14 +33,16 @@
     {{ form.title|addcss:"form-control" }}
 </div>
 
-<div class="form-group">
+
+{% include "curation/fragment_citation_authors.html" %}
+<!-- <div class="form-group">
     <label>Authors & Editors</label>
     <ul class="list-group" id="authors-editors-list-group">
 
         <a class="h5 list-group-item" href="?tab=acrelations">{{ instance|get_authors_editors }}</a>
 
     </ul>
-</div>
+</div> -->
 
 {% for error in form.edition_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
