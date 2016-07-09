@@ -135,6 +135,7 @@ class AuthorityFilter(django_filters.FilterSet):
     classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
+    linked_data = django_filters.MethodFilter()
 
     class Meta:
         model = Authority
@@ -151,3 +152,15 @@ class AuthorityFilter(django_filters.FilterSet):
             queryset = queryset.filter(name__icontains=part)
 
         return queryset
+
+    def filter_linked_data(self, queryset, value):
+        if not value:
+            return queryset
+        authority_ids = LinkedData.objects\
+                            .filter(universal_resource_name__contains=value)\
+                            .values_list('authorities__id', flat=True)\
+                            .distinct()
+
+        if len(authority_ids) == 1 and authority_ids[0] is None:
+            return queryset.none()
+        return queryset.filter(pk__in=authority_ids)
