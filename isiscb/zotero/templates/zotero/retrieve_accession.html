@@ -64,11 +64,34 @@
                     <div role="tabpanel" class="tab-pane" id="search">
                         <div class="panel">
                             <div class="panel-body">
-                                <div class="form-group">
-                                    <input class="authority-search form-control"
-                                        id="authority-search"
-                                        placeholder="Search for an authority record..." />
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <div class="form-group">
+                                            <input class="authority-search form-control"
+                                                id="authority-search"
+                                                placeholder="Search for an authority record..." />
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <div class="form-group">
+                                            <select class="form-control" id="authority-search-filter-type" name="authority-search-filter-type">
+                                            <option value="" selected="selected">---------</option>
+                                            <option value="PE">Person</option>
+                                            <option value="IN">Institution</option>
+                                            <option value="TI">Time Period</option>
+                                            <option value="GE">Geographic Term</option>
+                                            <option value="SE">Serial Publication</option>
+                                            <option value="CT">Classification Term</option>
+                                            <option value="CO">Concept</option>
+                                            <option value="CW">Creative Work</option>
+                                            <option value="EV">Event</option>
+                                            <option value="CR">Cross-reference</option>
+                                            <option value="PU">Publisher</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                         <ul class="list-group" id="results-container"></ul>
@@ -141,31 +164,53 @@ $('.draftauthority').click(function() {
             target.empty();
 
             response.data.forEach(function(suggestion) {
-                var suggestElem = '<li class="list-group-item">';
-                suggestElem += '<div class="row">';
-
-                suggestElem += '<div class="col-xs-2">';
-                suggestElem += '<span class="button-group button-group-md">';
-                suggestElem += '<a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion" id="authority-suggestion-' + suggestion.id + '" data-suggestion="'+ suggestion.id +'" data-authority="'+ draftauthority_id +'" data-name="' + suggestion.name + '"></a> ';
-                suggestElem += '<a class="glyphicon glyphicon-pencil btn btn-md" href="/curation/authority/' + suggestion.id + '/" target="_blank"></a> ';
-                suggestElem += '</span>';
-                suggestElem += '</div>';
-
-                suggestElem += '<div class="col-xs-10">';
-
-                suggestElem += '<div class="h5">' + suggestion.name + ' (' + suggestion.id + ') <div class="pull-right col-sm-3"><div class="progress" style="height: 14px;"><div class="progress-bar" role="progressbar" aria-valuenow="'+ suggestion.match +'" aria-valuemin="0" aria-valuemax="1" style="width: '+ suggestion.match*100 +'%;"><span class="sr-only">'+ suggestion.match +'</span></div></div></div></div>';
-
-                suggestElem += ' <span class="label label-danger" style="margin-left: 5px;">' + suggestion.type_controlled + '</span> ';
-
-                suggestElem += '<span class="suggestion-reasons">';
+                var suggestElem = `
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                <span class="button-group button-group-md">
+                                    <a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion"
+                                        id="authority-suggestion-` + suggestion.id + `"
+                                        data-suggestion="` + suggestion.id + `"
+                                        data-authority="` + draftauthority_id + `"
+                                        data-name="` + suggestion.name + `">
+                                    </a>
+                                    <a class="glyphicon glyphicon-pencil btn btn-md"
+                                        href="/curation/authority/` + suggestion.id + `/"
+                                        target="_blank">
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="col-xs-10">
+                                <div class="h5">` + suggestion.name + ` (` + suggestion.id + `)
+                                    <div class="pull-right col-sm-3">
+                                        <div class="progress" style="height: 14px;">
+                                            <div class="progress-bar"
+                                                role="progressbar"
+                                                aria-valuenow="`+ suggestion.match +`"
+                                                aria-valuemin="0"
+                                                aria-valuemax="1"
+                                                style="width: `+ suggestion.match*100 +`%;">
+                                                    <span class="sr-only">`+ suggestion.match +`</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="label label-danger"
+                                    style="margin-left: 5px;">
+                                    ` + suggestion.type_controlled + `
+                                </span>
+                                <span class="suggestion-reasons">
+                `;
                 suggestion.reasons.forEach(function(reason) {
                     suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
                 });
-                suggestElem += '</span>';
-                suggestElem += '</div>';
-                suggestElem += '</div>';
-
-                suggestElem += '</li>';
+                suggestElem += `
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                `;
 
                 target.append(suggestElem);
             });
@@ -181,9 +226,18 @@ $('.draftauthority').click(function() {
 
 $(document).ready(function() {
     bindModal();
+    $('#authority-search-filter-type').change(function(e) {
+        $('#authority-search').trigger('keyup');
+    });
     $('#authority-search').on('keyup', function(e) {
         var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+        var filter_type = $('#authority-search-filter-type').val();
+        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?max=20&q=" + query;
+        if (filter_type != "") {
+            search_endpoint += "&type=" + filter_type;
+        }
+
+        $.ajax(search_endpoint, {
             success: function(result) {
                 $('#results-container').empty();
                 result.results.forEach(function(r) {
