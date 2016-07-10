@@ -115,6 +115,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'attributes__value_freeform',
         'attributes__public',
         'acrelation__id',
+        'acrelation__public',
         'acrelation__authority__public',
         'acrelation__authority__id',
         'acrelation__authority__name',
@@ -226,6 +227,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         multivalue_data = defaultdict(list)
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
+            if not a['acrelation__public']:
+                continue
+
             if a['acrelation__authority__name']:
                 name = remove_control_characters(a['acrelation__authority__name'].strip())
             elif a['acrelation__name_for_display_in_citation']:

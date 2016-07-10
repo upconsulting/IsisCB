@@ -218,3 +218,48 @@ def create_authority_for_draft(request):
     }
 
     return JsonResponse({'data': response_data})
+
+
+def _field_data(instance):
+    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+
+def data_draftcitation(request, draftcitation_id):
+    template = loader.get_template('zotero/raw_data.html')
+    draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+    data = _field_data(draftcitation)
+    related_data = [
+        (
+            'Authority Records',
+            [(_field_data(acrelation), _field_data(acrelation.authority))
+             for acrelation in draftcitation.authority_relations.all()]
+        )
+    ]
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'instance': draftcitation,
+        'data': data,
+        'related_data': related_data,
+    })
+    return HttpResponse(template.render(context))
+
+
+def data_draftauthority(request, draftauthority_id):
+    template = loader.get_template('zotero/raw_data.html')
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+    data = _field_data(draftauthority)
+    related_data = [
+        (
+            'Citations',
+            [(_field_data(acrelation), _field_data(acrelation.citation))
+             for acrelation in draftauthority.citation_relations.all()]
+        )
+    ]
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'instance': draftauthority,
+        'data': data,
+        'related_data': related_data,
+    })
+    return HttpResponse(template.render(context))

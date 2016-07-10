@@ -1,5 +1,6 @@
 {% extends "curation/list_view.html" %}
 {% load pagination_tags %}
+{% load addcss %}
 
 
 {% block object_list %}
@@ -17,6 +18,8 @@
             <th>Citations</th>
             <th>Authorities</th>
             <th>Resolved</th>
+            <th>Processed</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -34,6 +37,10 @@
             <td>{{ object.draftcitation_set.count }}</td>
             <td>{{ object.draftauthority_set.count }}</td>
             <td>{{ object.resolved }}</td>
+            <td>{{ object.processed }}</td>
+            <td>
+                {% if object.resolved and not object.processed %}<a class="btn btn-xs btn-success">Ingest</a>{% endif %}
+            </td>
         </tr>
         {% endfor %}
     </tbody>
@@ -41,4 +48,77 @@
     </thead>
 
 </table>
+{% endblock %}
+
+
+{% block filter_form %}
+<form class="form clearfix">
+
+    <div class="row">
+        <div class="col-sm-4">
+            {% for error in objects.form.id.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.id.label }}</label>
+                {{ objects.form.id|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.name.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.name.label }}</label>
+                {{ objects.form.name|addcss:"form-control" }}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            {% for error in objects.form.processed.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.processed.label }}</label>
+                {{ objects.form.processed|addcss:"form-control" }}
+            </div>
+
+            {% for error in objects.form.imported_on.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.imported_on.label }}</label>
+                {{ objects.form.imported_on|addcss:"form-control" }}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            {% for error in objects.form.imported_by.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.imported_by.label }}</label>
+                {{ objects.form.imported_by|addcss:"form-control" }}
+            </div>
+            {% for error in objects.form.ingest_to.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.ingest_to.label }}</label>
+                {{ objects.form.ingest_to|addcss:"form-control" }}
+            </div>
+
+            <div class="btn-group pull-right">
+                <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
+                <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
+        </div>
+    </div>
+
+</form>
+<script>
+$(document).ready(function() {
+    $('#clear-filters').on('click', function() {
+        $('.form-group.clearable input').val('');
+        $('.form-group.clearable select').val('');
+    });
+});
+</script>
 {% endblock %}

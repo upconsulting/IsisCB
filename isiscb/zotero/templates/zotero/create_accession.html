@@ -1,9 +1,7 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 
-
 {% block content %}
-
 <form class="form" action="." method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -21,5 +19,4 @@
 
     <input type="submit" value="Upload" class="btn btn-success" />
 </form>
-
 {% endblock %}

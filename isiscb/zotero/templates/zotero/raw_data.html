@@ -1,0 +1,42 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+<dl class="dl-horizontal">
+    {% for key, value in data %}
+    <dt>{{ key }}</dt>
+    <dd>{{ value }}</dd>
+    {% endfor %}
+</dl>
+
+{% if related_data %}
+{% for heading, related in related_data %}
+<div class="panel">
+    <div class="panel-heading h4">Related {{ heading }}</div>
+    <div class="panel-body">
+        {% for relation_values, related_values in related %}
+        <div class="row">
+            <div class="col-xs-6">
+                <dl class="dl-horizontal">
+                    {% for key, value in relation_values %}
+                    <dt>{{ key }}</dt>
+                    <dd>{{ value }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
+            <div class="col-xs-6">
+                <dl class="dl-horizontal">
+                    {% for key, value in related_values %}
+                    <dt>{{ key }}</dt>
+                    <dd>{{ value }}</dd>
+                    {% endfor %}
+                </dl>
+            </div>
+        </div>
+        <hr />
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock %}

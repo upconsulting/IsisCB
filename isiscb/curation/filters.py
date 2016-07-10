@@ -137,6 +137,8 @@ class AuthorityFilter(django_filters.FilterSet):
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
     linked_data = django_filters.MethodFilter()
 
+    record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+
     class Meta:
         model = Authority
         fields = [
