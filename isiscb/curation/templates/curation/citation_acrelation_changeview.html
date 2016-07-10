@@ -105,6 +105,11 @@
                         autocomplete="off"
                         id="authority-search" />
                 </div>
+                {% if form.instance.authority %}
+                <p style="padding-left: 4px; margin-top: -10px;">
+                  <a href="{% url 'curate_authority' form.instance.authority.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to authority</a>
+                </p>
+                {% endif %}
                 <ul class="list-group" id="results-container"></ul>
             </div>
         </div>

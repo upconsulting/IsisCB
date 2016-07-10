@@ -90,6 +90,11 @@
                         {% if not ccrelation and instance %}value="{{instance|get_citation_title}}"{% endif %}
                         {% if not ccrelation and instance %}disabled{% endif %} />
                 </div>
+                {% if form.instance.subject %}
+                <p style="padding-left: 4px; margin-top: -10px;">
+                  <a href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
+                </p>
+                {% endif %}
                 <ul class="list-group" id="subject-results-container"></ul>
 
 
@@ -110,6 +115,11 @@
                         autocomplete="off"
                         selected-result-target="#id_ccrelation-object" />
                 </div>
+                {% if form.instance.object %}
+                <p style="padding-left: 4px; margin-top: -10px;">
+                  <a href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
+                </p>
+                {% endif %}
                 <ul class="list-group" id="object-results-container"></ul>
             </div>
         </div>

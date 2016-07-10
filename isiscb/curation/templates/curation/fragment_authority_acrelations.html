@@ -43,6 +43,8 @@
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     <li class="list-group-item acrelation acrelation-type-{{ acrelation.type_controlled }} {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.citation.public %}record-notpublic{% endif %}" id="acrelation-{{ acrelation.id }}">
+        <div class="row">
+          <div class="col-md-10">
         <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
         {% if acrelation.type_broad_controlled %}
         <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
@@ -58,15 +60,18 @@
         {% if not acrelation.public %}
         <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
         {% endif %}
+          </div>
+        <div class="col-md-2">
 
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
+        <div class="button-group button-group-xs pull-right">
             <a href="{% url "update_acrelation_for_authority" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
             <a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation"
                 type="button"
                 acrelation-id="{{ acrelation.id }}"
                 acrelation-title="{{ acrelation.citation|get_citation_title|safe }}"></a>
-        </span>
+        </div>
+        </div>
         {% endif %}
     </li>
 {% endfor %}
