@@ -72,8 +72,8 @@
                 {% if linkeddata %}
                 <a href="#"
                     class="btn btn-danger delete-linkeddata"
-                    attribute-id="{{ linkeddata.id }}"
-                    attribute-title="{{ linkeddata.type_controlled.name }}">
+                    linkeddata-id="{{ linkeddata.id }}"
+                    linkeddata-title="{{ linkeddata }}">
                     Delete
                 </a>
                 {% endif %}
@@ -83,77 +83,48 @@
 
 </form>
 
-<div id="value_forms" style="visibility: hidden;">
-    {% for id, form in value_forms %}
-    <div id="form_for_{{id}}">
-        {% for field in form %}
-        {% for error in field.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ field.label }}</label>
-            {{ field|addcss:"form-control" }}
-        </div>
-        {% endfor %}
-    </div>
-    {% endfor %}
-</div>
-<script>
-$('#id_language').multiSelect()
 
-$('#id_attribute-type_controlled').change(function() {
-    var value = $(this).val();
-    console.log(value);
-    var container = $('#value_form_container');
-    container.empty();
-    var form = $('#form_for_' + value).clone();
-    console.log(form);
-    container.append(form);
-});
-</script>
-
-
-{% if attribute %}
+{% if linkeddata %}
 <script>
 $(document).ready(function() {
-    $('.delete-attribute').click(function() {
+    $('.delete-linkeddata').click(function() {
         var elem = $(this);
-        var attribute_id = elem.attr('attribute-id');
-        var attribute_title = elem.attr('attribute-title');
-        $('#attribute-id-container').val(attribute_id);
-        $('#delete-attribute-target-name').html(attribute_title);
-        $('#delete-attribute-modal').modal('show');
+        var linkeddata_id = elem.attr('linkeddata-id');
+        var linkeddata_title = elem.attr('linkeddata-title');
+        $('#linkeddata-id-container').val(linkeddata_id);
+        $('#delete-linkeddata-target-name').html(linkeddata_title);
+        $('#delete-linkeddata-modal').modal('show');
     });
 
 });
 
-var delete_attribute = function() {
-    $('#delete-attribute-modal').modal('hide');
-    var attribute_id = $('#attribute-id-container').val();
-    if (attribute_id) {
-        window.location.replace("{% url "delete_attribute_for_citation" instance.id attribute.id %}?confirm=true");
+var delete_linkeddata = function() {
+    $('#delete-linkeddata-modal').modal('hide');
+    var linkeddata_id = $('#linkeddata-id-container').val();
+    if (linkeddata_id) {
+        window.location.replace("{% url "delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true");
     }
 }
 </script>
 
 
 <!-- Modal -->
-<div class="modal fade" id="delete-attribute-modal" tabindex="-1" role="dialog" aria-labelledby="delete-attribute-modal-label">
+<div class="modal fade" id="delete-linkeddata-modal" tabindex="-1" role="dialog" aria-labelledby="delete-linkeddata-modal-label">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="delete-attribute-modal-label">Are you sure?</h4>
+                <h4 class="modal-title" id="delete-linkeddata-modal-label">Are you sure?</h4>
             </div>
             <div class="modal-body">
                 <p>
-                    You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
+                    You are about to delete the Linked Data entry <span class="text-warning" id="delete-linkeddata-target-name"></span>. Deletion cannot be undone!
                 </p>
-                <input type="hidden" id="attribute-id-container" />
+                <input type="hidden" id="linkeddata-id-container" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
-                <button type="button" class="btn btn-danger" onclick="delete_attribute();">Delete forever</button>
+                <button type="button" class="btn btn-danger" onclick="delete_linkeddata();">Delete forever</button>
             </div>
         </div>
     </div>
