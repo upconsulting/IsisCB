@@ -1,0 +1,162 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+<hr />
+
+<form class="form" action="." method="POST">
+    {% csrf_token %}
+
+    {% include "curation/fragment_citation_header.html" %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                {% for error in linkeddata_form.type_controlled.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ linkeddata_form.type_controlled.label }}</label>
+                    {{ linkeddata_form.type_controlled|addcss:"form-control" }}
+                </div>
+
+                {% for error in linkeddata_form.universal_resource_name.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ linkeddata_form.universal_resource_name.label }}</label>
+                    {{ linkeddata_form.universal_resource_name|addcss:"form-control" }}
+                </div>
+
+                {% for error in linkeddata_form.administrator_notes.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ linkeddata_form.administrator_notes.label }}</label>
+                    {{ linkeddata_form.administrator_notes|addcss:"form-control" }}
+                </div>
+
+                {% for error in linkeddata_form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label>{{ linkeddata_form.record_status_value.label }}</label>
+                    {{ linkeddata_form.record_status_value|addcss:"form-control" }}
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+              {% for error in linkeddata_form.resource_name.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label>{{ linkeddata_form.resource_name.label }}</label>
+                  {{ linkeddata_form.resource_name|addcss:"form-control" }}
+              </div>
+
+              {% for error in linkeddata_form.url.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label>{{ linkeddata_form.url.label }}</label>
+                  {{ linkeddata_form.url|addcss:"form-control" }}
+              </div>
+
+            </div>
+
+        </div>
+        <div class="clearfix">
+            <div class="button-group pull-right">
+                <input type="submit" value="Save" class="btn btn-success" />
+                {% if linkeddata %}
+                <a href="#"
+                    class="btn btn-danger delete-linkeddata"
+                    attribute-id="{{ linkeddata.id }}"
+                    attribute-title="{{ linkeddata.type_controlled.name }}">
+                    Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div id="value_forms" style="visibility: hidden;">
+    {% for id, form in value_forms %}
+    <div id="form_for_{{id}}">
+        {% for field in form %}
+        {% for error in field.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field|addcss:"form-control" }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+<script>
+$('#id_language').multiSelect()
+
+$('#id_attribute-type_controlled').change(function() {
+    var value = $(this).val();
+    console.log(value);
+    var container = $('#value_form_container');
+    container.empty();
+    var form = $('#form_for_' + value).clone();
+    console.log(form);
+    container.append(form);
+});
+</script>
+
+
+{% if attribute %}
+<script>
+$(document).ready(function() {
+    $('.delete-attribute').click(function() {
+        var elem = $(this);
+        var attribute_id = elem.attr('attribute-id');
+        var attribute_title = elem.attr('attribute-title');
+        $('#attribute-id-container').val(attribute_id);
+        $('#delete-attribute-target-name').html(attribute_title);
+        $('#delete-attribute-modal').modal('show');
+    });
+
+});
+
+var delete_attribute = function() {
+    $('#delete-attribute-modal').modal('hide');
+    var attribute_id = $('#attribute-id-container').val();
+    if (attribute_id) {
+        window.location.replace("{% url "delete_attribute_for_citation" instance.id attribute.id %}?confirm=true");
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-attribute-modal" tabindex="-1" role="dialog" aria-labelledby="delete-attribute-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-attribute-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <input type="hidden" id="attribute-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_attribute();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

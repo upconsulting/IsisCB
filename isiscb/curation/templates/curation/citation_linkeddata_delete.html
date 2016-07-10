@@ -1,0 +1,28 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+<hr />
+
+{% include "curation/fragment_citation_header.html" %}
+
+<div class="container-fluid">
+    <div class="h3">Are you sure that you want to delete this Linked Data entry?</div>
+
+    <dl>
+        <dt>Type</dt>
+        <dd>{{ linkeddata.type_controlled.name }}</dd>
+        <dt>Value</dt>
+        <dd>{{ linkeddata.universal_resource_name }}</dd>
+    </dl>
+
+
+    <div class="clearfix">
+        <div class="button-group pull-right">
+            <a href="{% url "delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

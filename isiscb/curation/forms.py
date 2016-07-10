@@ -205,6 +205,24 @@ class CitationForm(forms.ModelForm):
 
         return exclude
 
+class LinkedDataForm(forms.ModelForm):
+
+    class Meta:
+        model = LinkedData
+        fields = [
+            'universal_resource_name', 'resource_name', 'url',
+            'type_controlled', 'record_status_value', 'administrator_notes'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(LinkedDataForm, self).__init__(*args, **kwargs)
+
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+
+    def save(self, *args, **kwargs):
+        super(LinkedDataForm, self).save(*args, **kwargs)
 
 class NoViewInput(forms.TextInput):
 

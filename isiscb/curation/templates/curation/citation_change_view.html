@@ -131,9 +131,7 @@ var toggleTab = function(name) {
                 {% include "curation/fragment_citation_attributes.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
-                {% for linkeddata in instance.linkeddata.all %}
-                    {{ linkeddata }}
-                {% endfor %}
+                {% include "curation/fragment_citation_linkeddata.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
                 {% include "curation/fragment_citation_ccrelations.html" %}
