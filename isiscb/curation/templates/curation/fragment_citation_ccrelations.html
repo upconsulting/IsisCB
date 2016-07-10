@@ -10,7 +10,6 @@
 <ul class="list-group">
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
-
     <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
         {% if instance.id == ccrelation.subject.id %}
         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
@@ -20,7 +19,7 @@
 
         {% endif %}
         <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
-        
+
         {% if instance.id == ccrelation.object.id %}
         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
         {% else %}
@@ -30,6 +29,7 @@
         {% if not ccrelation.object.public %}
         <i class="fa fa-eye-slash" title="The linked record is not public."></i>
         {% endif %}
+
         {% if not ccrelation.public %}
         <i class="fa fa-minus-square" aria-hidden="true" title="This CCRelation is not public."></i>
         {% endif %}
@@ -47,7 +47,7 @@
 {% endfor %}
 {% for ccrelation in instance.relations_to.all %}
 
-    <li class="list-group-item clearfix" id="ccrelation-{{ccrelation.id}}">
+    <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
         {% if instance.id == ccrelation.subject.id %}
         <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
         {% else %}
@@ -64,6 +64,14 @@
         <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
         {% else %}
         the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
+        {% endif %}
+
+        {% if not ccrelation.object.public %}
+        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+        {% endif %}
+
+        {% if not ccrelation.public %}
+        <i class="fa fa-minus-square" aria-hidden="true" title="This CCRelation is not public."></i>
         {% endif %}
 
         {% if can_update %}

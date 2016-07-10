@@ -223,7 +223,6 @@ class ISODateRangeValue(Value):
 
     @staticmethod
     def convert(value):
-        print value
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
             for i in xrange(2):
@@ -538,8 +537,14 @@ class CuratedMixin(models.Model):
         (REDIRECT, 'Redirect'),
         (INACTIVE, 'Inactive'),
     )
-    record_status_value = models.CharField(choices=STATUS_CHOICES, max_length=255, blank=True, null=True)
-    record_status_explanation = models.CharField(max_length=255, blank=True,
+    record_status_value = models.CharField(choices=STATUS_CHOICES,
+                                           max_length=255,
+                                           blank=True,
+                                           null=True,
+                                           default=ACTIVE)
+
+    record_status_explanation = models.CharField(max_length=255,
+                                                 blank=True,
                                                  null=True)
 
     def save(self, *args, **kwargs):
@@ -890,12 +895,24 @@ class Citation(ReferencedEntity, CuratedMixin):
         return CCRelation.objects.filter(public=True).filter(query)
 
     @property
+    def all_ccrelations(self):
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return CCRelation.objects.filter(query)
+
+
+    @property
     def acrelations(self):
         """
         Provides access to related :class:`.ACRelation` instances directly.
         """
         query = Q(citation_id=self.id)
         return ACRelation.objects.filter(public=True).filter(query)
+
+    @property
+    def all_acrelations(self):
+        query = Q(citation_id=self.id)
+        return ACRelation.objects.filter(query)
+
 
     @property
     def get_all_contributors(self):

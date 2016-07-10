@@ -20,18 +20,19 @@
     </thead>
     <tbody>
         {% for object in filter_list %}
-        {% with object.acrelations as acrelations %}
+        {% with object.all_acrelations as acrelations %}
         {% with acrelations|get_authorities as authorities %}
-        {% with object.ccrelations as ccrelations %}
-        {% with ccrelations|get_citations as related_citations %}
+        {% with object.all_ccrelations as ccrelations %}
+        {% with object|get_citations:ccrelations as related_citations %}
         {% with object.attributes as attributes %}
-        <tr class="{% if not object.public or not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:citations or not attributes|are_attributes_public %}notpublic{% endif %}">
+        <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
             <td>
                 <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
                 {% if not object.public %}
                 <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                 {% endif %}
-                {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:citations or not attributes|are_attributes_public %}
+                
+                {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:related_citations or not attributes|are_attributes_public %}
                 <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
                 {% endif %}
                 {% if object|is_public_inconsistent %}

@@ -98,6 +98,11 @@
                         name="citation-search"
                         id="citation-search" />
                 </div>
+                {% if form.instance.citation %}
+                <p style="padding-left: 4px; margin-top: -10px;">
+                  <a href="{% url 'curate_citation' form.instance.citation.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
+                </p>
+                {% endif %}
                 <ul class="list-group" id="results-container"></ul>
             </div>
         </div>
