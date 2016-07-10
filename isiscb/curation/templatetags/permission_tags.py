@@ -63,10 +63,13 @@ def get_authorities(acrelations):
     return authorities
 
 @register.filter
-def get_citations(ccrelations):
+def get_citations(citation, ccrelations):
     citations = []
     for ccrel in ccrelations:
-        citations.append(ccrel.object)
+        if ccrel.subject == citation:
+            citations.append(ccrel.object)
+        else:
+            citations.append(ccrel.subject)
     return citations
 
 @register.filter
@@ -94,6 +97,37 @@ def are_attributes_public(attributes):
     for attr in attributes:
         if not attr.public:
             return False
+    return True
+
+@register.filter
+def are_linked_books_public(citation_id, citations):
+    for citation in citations:
+        if citation.type_controlled == Citation.BOOK:
+            if not citation.public:
+                return False
+
+            query = (Q(subject_id=citation_id) & Q(object_id=citation.id)) | (Q(object_id=citation_id) & Q(subject_id=citation.id))
+            ccrels = CCRelation.objects.filter(query)
+
+            for ccrel in ccrels:
+                if not ccrel.public:
+                    return False
+
+    return True
+
+@register.filter
+def are_linked_journals_public(citation_id, authorities):
+    for authority in authorities:
+        if authority.type_controlled == Authority.SERIAL_PUBLICATION:
+            if not authority.public:
+                return False
+
+            query = Q(authority_id=authority.id) & Q(citation_id=citation_id)
+            acrels = ACRelation.objects.filter(query)
+            for acrel in acrels:
+                if not acrel.public:
+                    return False
+
     return True
 
 @register.filter

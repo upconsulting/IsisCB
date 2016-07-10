@@ -890,12 +890,24 @@ class Citation(ReferencedEntity, CuratedMixin):
         return CCRelation.objects.filter(public=True).filter(query)
 
     @property
+    def all_ccrelations(self):
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return CCRelation.objects.filter(query)
+
+
+    @property
     def acrelations(self):
         """
         Provides access to related :class:`.ACRelation` instances directly.
         """
         query = Q(citation_id=self.id)
         return ACRelation.objects.filter(public=True).filter(query)
+
+    @property
+    def all_acrelations(self):
+        query = Q(citation_id=self.id)
+        return ACRelation.objects.filter(query)
+
 
     @property
     def get_all_contributors(self):
