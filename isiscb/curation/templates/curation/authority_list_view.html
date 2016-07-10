@@ -121,6 +121,14 @@
                 {{ objects.form.classification_hierarchy|addcss:"form-control" }}
             </div>
 
+            {% for error in objects.form.record_status_value.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.record_status_value.label }}</label>
+                {{ objects.form.record_status_value|addcss:"form-control" }}
+            </div>
+
             <div class="btn-group pull-right">
                 <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
                 <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>

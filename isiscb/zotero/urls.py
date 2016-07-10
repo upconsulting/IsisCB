@@ -16,4 +16,7 @@ urlpatterns = [
     url(r'authority/resolve/$', resolve_authority, name='resolve_authority'),
     url(r'authority/create/$', create_authority_for_draft, name='create_authority_for_draft'),
     url(r'authority/similar/$', similar_authorities, name='similar_authorities'),
+
+    url(r'data/citation/(?P<draftcitation_id>[0-9]+)/$', data_draftcitation, name='data_draftcitation'),
+    url(r'data/authority/(?P<draftauthority_id>[0-9]+)/$', data_draftauthority, name='data_draftauthority'),
 ]

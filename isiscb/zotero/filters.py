@@ -27,7 +27,9 @@ filters.LOOKUP_TYPES = [
 
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
+    processed = django_filters.BooleanFilter(name='processed')
 
     class Meta:
         model = ImportAccession
-        fields = ['id', 'name', 'processed', 'imported_on', 'imported_by', 'ingest_to']
+        fields = ['id', 'name', 'processed', 'imported_on',
+                  'imported_by', 'ingest_to']

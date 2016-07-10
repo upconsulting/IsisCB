@@ -999,8 +999,11 @@ class DatabaseHandler(object):
 
     def __del__(self):
         import cPickle as pickle
-        with open('/home/ec2-user/ingest_errors.pickle', 'w') as f:
-            pickle.dump(self.errors, f)
+        try:
+            with open('/home/ec2-user/ingest_errors.pickle', 'w') as f:
+                pickle.dump(self.errors, f)
+        except:
+            pass
 
 class Command(BaseCommand):
     help = 'Update the IsisCB Explore database with FileMaker Pro FMPDSO XML.'
