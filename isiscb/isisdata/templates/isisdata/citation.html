@@ -183,7 +183,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <table class="details">
       {% if citation.linkeddata_public.all|length > 0 %}
       <tr>
-        <td><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
+        <td  style="vertical-align: top"><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
         <td>{% for entry in citation.linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
       </tr>
       {% endif %}
