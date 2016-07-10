@@ -289,6 +289,47 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
     template = loader.get_template('curation/citation_attribute_delete.html')
     return HttpResponse(template.render(context))
 
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=None):
+    citation = get_object_or_404(Citation, pk=citation_id)
+    linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'linkeddata': linkeddata,
+    })
+
+    if request.GET.get('confirm', False):
+        linkeddata.delete()
+
+        if format == 'json':
+            return JsonResponse({'result': True})
+        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+    template = loader.get_template('curation/citation_linkeddata_delete.html')
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format=None):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+        'linkeddata': linkeddata,
+    })
+
+    if request.GET.get('confirm', False):
+        linkeddata.delete()
+
+        if format == 'json':
+            return JsonResponse({'result': True})
+        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+    template = loader.get_template('curation/authority_linkeddata_delete.html')
+    return HttpResponse(template.render(context))
 
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -404,6 +445,93 @@ def delete_attribute_for_authority(request, authority_id, attribute_id, format=N
     template = loader.get_template('curation/authority_attribute_delete.html')
     return HttpResponse(template.render(context))
 
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
+
+    template = loader.get_template('curation/citation_linkeddata_changeview.html')
+    citation = get_object_or_404(Citation, pk=citation_id)
+    linkeddata = None
+
+    if linkeddata_id:
+        linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+        'linkeddata': linkeddata,
+    })
+
+    if request.method == 'GET':
+        if linkeddata:
+            linkeddata_form = LinkedDataForm(instance=linkeddata, prefix='linkeddata')
+        else:
+            linkeddata_form = LinkedDataForm(prefix='linkeddata')
+    elif request.method == 'POST':
+        if linkeddata:    # Update.
+            linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix='linkeddata')
+        else:    # Create.
+            linkeddata_form = LinkedDataForm(request.POST, prefix='linkeddata')
+
+        if linkeddata_form.is_valid():
+            linkeddata_form.instance.subject = citation
+            linkeddata_form.save()
+
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+        else:
+            pass
+    else:
+        redirect('curate_citation', citation_id)
+
+    context.update({
+        'linkeddata_form': linkeddata_form,
+    })
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
+
+    template = loader.get_template('curation/authority_linkeddata_changeview.html')
+    authority = get_object_or_404(Authority, pk=authority_id)
+    linkeddata = None
+
+    if linkeddata_id:
+        linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': authority,
+        'linkeddata': linkeddata,
+    })
+
+    if request.method == 'GET':
+        if linkeddata:
+            linkeddata_form = LinkedDataForm(instance=linkeddata, prefix='linkeddata')
+        else:
+            linkeddata_form = LinkedDataForm(prefix='linkeddata')
+    elif request.method == 'POST':
+        if linkeddata:    # Update.
+            linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix='linkeddata')
+        else:    # Create.
+            linkeddata_form = LinkedDataForm(request.POST, prefix='linkeddata')
+
+        if linkeddata_form.is_valid():
+            linkeddata_form.instance.subject = authority
+            linkeddata_form.save()
+
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+        else:
+            pass
+    else:
+        redirect('curate_authority', authority_id)
+
+    context.update({
+        'linkeddata_form': linkeddata_form,
+    })
+    return HttpResponse(template.render(context))
 
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))

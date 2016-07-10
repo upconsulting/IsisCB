@@ -883,6 +883,10 @@ class Citation(ReferencedEntity, CuratedMixin):
                                   content_type_field='to_model',
                                   object_id_field='to_instance_id')
 
+    @property
+    def linkeddata_public(self):
+        return LinkedData.objects.filter(subject_instance_id=self.pk).filter(public=True)
+
     def __unicode__(self):
         return strip_tags(self.title)
 
@@ -1068,6 +1072,10 @@ class Authority(ReferencedEntity, CuratedMixin):
         related_query_name='authorities',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
+
+    @property
+    def linkeddata_public(self):
+        return LinkedData.objects.filter(subject_instance_id=self.pk).filter(public=True)
 
     def __unicode__(self):
         return self.name

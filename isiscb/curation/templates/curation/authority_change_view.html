@@ -147,9 +147,7 @@
                 {% include "curation/fragment_authority_attributes.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
-                {% for linkeddata in instance.linkeddata.all %}
-                    {{ linkeddata }}
-                {% endfor %}
+                {% include "curation/fragment_authority_linkeddata.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'aarelations' %} active{% endif %}" id="aarelations">
                 <ul class="list-group">
