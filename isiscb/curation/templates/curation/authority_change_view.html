@@ -106,6 +106,14 @@
             <label>{{ form.record_status_explanation.label }}</label>
             {{ form.record_status_explanation|addcss:"form-control"}}
         </div>
+
+        {% for error in form.record_history.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.record_history.label }}</label>
+            {{ form.record_history|addcss:"form-control"}}
+        </div>
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">

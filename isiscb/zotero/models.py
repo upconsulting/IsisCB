@@ -4,8 +4,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.core.urlresolvers import reverse
 
-from isisdata.models import Dataset
+from isisdata.models import Dataset, Citation, Authority
 
 import re
 
@@ -28,6 +29,9 @@ class ImportAccession(models.Model):
     @property
     def resolved(self):
         return self.draftauthority_set.filter(processed=False).count() == 0
+
+    def __unicode__(self):
+        return self.name
 
 
 class ImportedData(models.Model):
@@ -100,6 +104,9 @@ class DraftCitation(ImportedData):
     def __unicode__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('data_draftcitation', args=(self.id,))
+
     resolutions = GenericRelation('InstanceResolutionEvent',
                                   related_query_name='citation_resolutions',
                                   content_type_field='for_model',
@@ -155,6 +162,9 @@ class DraftAuthority(ImportedData):
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('data_draftauthority', args=(self.id,))
 
     @property
     def resolved(self):

@@ -10,11 +10,24 @@
     <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
 </div>
 <div class="h4">Authority Resolution</div>
+
+{% if accession.resolved %}
+<a href="{% url "ingest_accession" accession.id %}?confirmed=true"
+    class="btn btn-success">
+    Perform Ingest
+</a>
+<p class="text-danger">
+    All authority records in this accession have been resolved. Ingesting this
+    accession will create {{ accession.citation_set.count }} new citations in
+    the production database.
+</p>
+{% else %}
 <p class="text-info">
     Use the interface below to resolve authority records from this Zotero accession.
     All authority records must be resolved before citations can be imported into the
     production database.
 </p>
+{% endif %}
 
 <div class="container-fluid">
     <div class="row">

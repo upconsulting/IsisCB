@@ -1,0 +1,23 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+
+    {% block action %}
+    {% if accession.resolved %}
+    <div class="text-success">
+        Successfully ingested {{ ingested|length }} of {{ draftcitations.count }} citations into dataset
+        &nbsp;
+        <a href="{% url "citation_list" %}?zotero_accession={{accession.id}}&belongs_to={{ accession.ingest_to.id }}"
+            class="text-warning">
+            {{ accession.ingest_to.name }}
+        </a>.
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    {% block citationlist %}
+
+    {% endblock %}
+</div>
+{% endblock %}
