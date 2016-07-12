@@ -1,16 +1,29 @@
-from django.test import TestCase
+from unittest import TestCase
+from django.test.client import RequestFactory
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
 import rdflib
 import datetime
 
 from parser import *
 from models import *
 from suggest import *
+from tasks import *
 
 
 # Create your tests here.
 datapath = 'zotero/test_data/IsisCBTest.rdf'
 
 AUTHOR = rdflib.URIRef("http://purl.org/net/biblio#authors")
+
+partdetails_fields = [
+    ('page_start', 'page_begin'),
+    ('page_end', 'page_end'),
+    ('pages_free_text', 'pages_free_text'),
+    ('issue', 'issue_free_text'),
+    ('volume', 'volume_free_text'),
+]
 
 
 class TestSubjects(TestCase):
@@ -135,4 +148,121 @@ class TestSuggest(TestCase):
         papers = read(datapath)
         citations = process(papers, accession)
 
-        
+
+class TestIngest(TestCase):
+    """
+    After all :class:`.DraftAuthority` instances have been resolved for a
+    :class:`.ImportAccession`\, the curator will elect to ingest all of the
+    records in that accession into the production database.
+    """
+
+    def setUp(self):
+        self.dataset = Dataset.objects.create(name='test dataset')
+        self.accession = ImportAccession.objects.create(name='test',
+                                                        ingest_to=self.dataset)
+        self.papers = read(datapath)
+        self.citations = process(self.papers, self.accession)
+
+        # We need a user for the accession.
+        rf = RequestFactory()
+        self.request = rf.get('/hello/')
+        self.user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        self.request.user = self.user
+
+        isodate_type = ContentType.objects.get_for_model(ISODateValue)
+        self.publicationDateType, _ = AttributeType.objects.get_or_create(
+            name='PublicationDate',
+            value_content_type=isodate_type,
+            display_name='Publication date',
+        )
+
+        # The ImportAccession should be fully resolved, so we need to create
+        #  corresponding Authority records ahead of time.
+        for draftauthority in self.accession.draftauthority_set.all():
+            authority = Authority.objects.create(
+                name = draftauthority.name,
+                type_controlled = draftauthority.type_controlled,
+            )
+            InstanceResolutionEvent.objects.create(
+                for_instance = draftauthority,
+                to_instance = authority,
+            )
+        self.accession.draftauthority_set.all().update(processed=True)
+
+    def test_ingest_accession(self):
+        citation = ingest_accession(self.request, self.accession)
+        self.accession.refresh_from_db()
+
+        self.assertEqual(self.accession.citation_set.count(),
+                         self.accession.draftcitation_set.count(),
+                         'did not ingest all citations')
+
+    def test_ingest_citation(self):
+        draftcitation = self.citations[1]
+        citation = ingest_citation(self.request, self.accession, draftcitation)
+
+        self.assertIsInstance(citation.created_on, datetime.datetime,
+                              'created_on not populated correctly')
+        self.assertIsInstance(citation.created_by, User,
+                              'created_by not populated correctly')
+        self.assertIsInstance(citation.publication_date, datetime.date,
+                              'publication_date not populated correctly')
+        self.assertFalse(citation.public,
+                         'new citation is public; should be non-public')
+        self.assertEqual(citation.record_status_value, CuratedMixin.INACTIVE,
+                         'new citation is not inactive')
+        self.assertEqual(citation.title, draftcitation.title,
+                         'title not transferred correctly')
+        self.assertEqual(citation.type_controlled,
+                         draftcitation.type_controlled,
+                         'type_controlled not transferred correctly')
+        self.assertTrue(draftcitation.processed,
+                        'DraftCitation not flagged as processed')
+
+        self.assertEqual(self.accession.ingest_to, citation.belongs_to,
+                         'citation not assigned to the correct dataset')
+
+
+        model_fields = {f.name: type(f) for f in PartDetails._meta.fields}
+        for field, pfield in partdetails_fields:
+            draft_value = getattr(draftcitation, field, None)
+            if model_fields[pfield] is models.IntegerField:
+                try:
+                    draft_value = int(draft_value)
+                except ValueError:
+                    continue
+
+            prod_value = getattr(citation.part_details, pfield, None)
+            self.assertEqual(draft_value, prod_value,
+                             '%s not populated correctly, %s != %s' % \
+                             (pfield, draft_value, prod_value))
+
+        for draft in draftcitation.authority_relations.all():
+            self.assertTrue(draft.processed,
+                            'DraftACRelation not flagged as processed')
+            self.assertEqual(draft.resolutions.count(), 1,
+                             'resolution not created for DraftACRelation')
+
+            prod = draft.resolutions.first().to_instance
+            self.assertEqual(draft.type_controlled, prod.type_controlled,
+                             'type_controlled transferred incorrectly')
+            self.assertEqual(draft.authority.name,
+                             prod.name_for_display_in_citation,
+                             'DraftAuthority name not transferred to ACR')
+
+            self.assertEqual(self.accession.ingest_to, prod.belongs_to)
+
+        attribute = citation.attributes.first()
+        self.assertEqual(attribute.type_controlled, self.publicationDateType,
+                         'attribute has the wrong type')
+        self.assertIsInstance(attribute.value.get_child_class(), ISODateValue,
+                              'attribute value instantiates the wrong class')
+
+        self.assertEqual(attribute.value.get_child_class().as_date,
+                         citation.publication_date,
+                         'publication date attribute incorrect')
+
+    def tearDown(self):
+        self.accession.delete()
+        self.dataset.delete()
+        self.user.delete()

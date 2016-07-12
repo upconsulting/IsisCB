@@ -312,7 +312,7 @@ class ISODateValue(Value):
             except ValueError:
                 pass
         try:
-            return iso8601.parse_date(value)
+            return iso8601.parse_date(value).date()
         except ValueError:
             pass
         raise ValueError('Could not coerce value to datetime: %s' % value)
@@ -597,6 +597,7 @@ class CuratedMixin(models.Model):
 
     dataset_literal = models.CharField(max_length=255, blank=True, null=True)
     belongs_to = models.ForeignKey('Dataset', null=True)
+    zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True)
 
     @property
     def _history_user(self):

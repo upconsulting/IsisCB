@@ -9,13 +9,20 @@ from django.core.urlresolvers import reverse
 
 from isisdata.models import *
 
+from curation.contrib.views import check_rules
+
 from zotero.models import *
 from zotero.filters import *
 from zotero.forms import *
+from zotero import tasks
 from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
 
 import tempfile
+
+
+def _field_data(instance):
+    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
 
 
 @login_required
@@ -83,6 +90,7 @@ def suggest_production_acrelation_json(request, acrelation_id):
     return suggest_authority_json(request, draftAuthority.id)
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def accessions(request):
     """
@@ -102,6 +110,7 @@ def accessions(request):
     return HttpResponse(template.render(context))
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def create_accession(request):
     """
@@ -136,6 +145,7 @@ def create_accession(request):
     return HttpResponse(template.render(context))
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def retrieve_accession(request, accession_id):
     """
@@ -153,6 +163,7 @@ def retrieve_accession(request, accession_id):
     return HttpResponse(template.render(context))
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def similar_authorities(request):
     accession_id = request.GET.get('accession')
@@ -174,6 +185,7 @@ def similar_authorities(request):
 
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def resolve_authority(request):
     authority_id = request.GET.get('authority')
@@ -189,6 +201,7 @@ def resolve_authority(request):
     return JsonResponse({'data': resolution.id})
 
 
+@check_rules('has_zotero_access')
 @staff_member_required
 def create_authority_for_draft(request):
     # authority_id = request.GET.get('authority')
@@ -212,17 +225,39 @@ def create_authority_for_draft(request):
     draftauthority.processed = True
     draftauthority.save()
 
+    for draftlinkeddata in draftauthority.linkeddata.all():
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
+        LinkedData.objects.create(
+            subject = authority,
+            universal_resource_name = draftlinkeddata.value,
+            type_controlled = ldtype
+        )
+    draftauthority.linkeddata.all().update(processed=True)
+
     response_data = {
         'resolution': resolution.id,
         'authority': authority.id,
     }
-
     return JsonResponse({'data': response_data})
 
 
-def _field_data(instance):
-    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+@check_rules('has_zotero_access')
+@staff_member_required
+def data_importaccession(request, accession_id):
+    template = loader.get_template('zotero/raw_data_list.html')
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    queryset = accession.draftcitation_set.all().order_by('title')
 
+
+    context = RequestContext(request, {
+        'accession': accession,
+        'draftcitations':  queryset,
+    })
+    return HttpResponse(template.render(context))
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
 def data_draftcitation(request, draftcitation_id):
     template = loader.get_template('zotero/raw_data.html')
     draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
@@ -244,6 +279,8 @@ def data_draftcitation(request, draftcitation_id):
     return HttpResponse(template.render(context))
 
 
+@check_rules('has_zotero_access')
+@staff_member_required
 def data_draftauthority(request, draftauthority_id):
     template = loader.get_template('zotero/raw_data.html')
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
@@ -262,4 +299,29 @@ def data_draftauthority(request, draftauthority_id):
         'data': data,
         'related_data': related_data,
     })
+    return HttpResponse(template.render(context))
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
+def ingest_accession(request, accession_id):
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    queryset = accession.draftcitation_set.all().order_by('title')
+
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+        'draftcitations': queryset,
+    })
+
+    confirmed = request.GET.get('confirmed', False)
+    if confirmed:
+        ingested = tasks.ingest_accession(request, accession)
+        context.update({'ingested': ingested})
+        template = loader.get_template('zotero/ingest_accession_success.html')
+    else:
+        template = loader.get_template('zotero/ingest_accession_prompt.html')
+
+
     return HttpResponse(template.render(context))

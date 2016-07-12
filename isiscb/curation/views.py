@@ -12,7 +12,8 @@ from django.shortcuts import redirect
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
-from django.forms import modelform_factory
+from django.forms import modelform_factory, formset_factory
+
 
 from isisdata.models import *
 from curation.filters import *
@@ -64,12 +65,91 @@ def datasets(request):
     })
     return HttpResponse(template.render(context))
 
+@staff_member_required
+#@check_rules('can_create_record')
+def create_citation(request):
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+    })
+
+    template = loader.get_template('curation/citation_create_view.html')
+
+    if request.method == 'GET':
+        form = CitationForm(user=request.user)
+
+        context.update({
+            'form': form,
+        })
+        partdetails_form = PartDetailsForm(request.user)
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
+    elif request.method == 'POST':
+        form = CitationForm(request.user, request.POST)
+        partdetails_form = PartDetailsForm(request.user, citation_id = None, data=request.POST)
+
+        if form.is_valid() and partdetails_form.is_valid():
+            form.cleaned_data['public'] = False
+            #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
+            citation = form.save()
+            citation.record_status_value = CuratedMixin.INACTIVE
+            citation.save()
+
+            if partdetails_form:
+                partdetails_form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+        else:
+            context.update({
+                'form' : form,
+                'partdetails_form': partdetails_form,
+            })
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+#@check_rules('can_create_record')
+def create_authority(request):
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+    })
+
+    template = loader.get_template('curation/authority_create_view.html')
+    person_form = None
+    if request.method == 'GET':
+        form = AuthorityForm(user=request.user, prefix='authority')
+
+        context.update({
+            'form': form,
+        })
+    elif request.method == 'POST':
+        authority = Authority()
+        if request.POST.get('authority-type_controlled', '') == Authority.PERSON:
+            authority = Person()
+            person_form = PersonForm(request.user, None, request.POST, instance=authority)
+
+        form = AuthorityForm(request.user, request.POST, prefix='authority', instance=authority)
+        if form.is_valid() and (person_form is None or person_form.is_valid()):
+            if person_form:
+                person_form.save()
+
+            form.cleaned_data['public'] = False
+            form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
+            authority = form.save()
+
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)))
+        else:
+            context.update({
+                'form' : form,
+            })
+    return HttpResponse(template.render(context))
 
 # TODO this method needs to be logged down!
 @staff_member_required
 def quick_create_acrelation(request):
     if request.method == 'POST':
-        print request.POST
         authority_id = request.POST.get('authority_id')
         citation_id = request.POST.get('citation_id')
         type_controlled = request.POST.get('type_controlled')

@@ -33,10 +33,14 @@ rules.add_rule('has_zotero_access', has_zotero_access)
 
 
 urlpatterns = [
+    url(r'^(?i)$', views.dashboard, name='index'),
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
     url(r'^(?i)datasets/$', views.datasets, name='datasets'),
     url(r'^(?i)citation/$', views.citations, name='citation_list'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
+
+    url(r'^(?i)citation/add$', views.create_citation, name="create_citation"),
+    url(r'^(?i)authority/add$', views.create_authority, name="create_authority"),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/$', views.create_ccrelation_for_citation, name='create_ccrelation_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/(?P<ccrelation_id>[A-Z0-9]+)/$', views.ccrelation_for_citation, name='ccrelation_for_citation'),

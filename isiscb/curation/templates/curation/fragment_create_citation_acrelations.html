@@ -1,0 +1,46 @@
+{% load render_object %}
+
+{% load rules %}
+{% load permission_tags %}
+
+
+<div class="form-group">
+    <label>Filter by relation type</label>
+    <select class="form-control" id="acrelation-filter-type" name="acrelation-filter-type">
+        <option value="" selected="selected">---------</option>
+        <option value="AU">Author</option>
+        <option value="ED">Editor</option>
+        <option value="AD">Advisor</option>
+        <option value="CO">Contributor</option>
+        <option value="TR">Translator</option>
+        <option value="SU">Subject</option>
+        <option value="CA">Category</option>
+        <option value="PU">Publisher</option>
+        <option value="SC">School</option>
+        <option value="IN">Institution</option>
+        <option value="ME">Meeting</option>
+        <option value="PE">Periodical</option>
+        <option value="BS">Book Series</option>
+        <option value="CM">Committee Member</option>
+    </select>
+</div>
+<script>
+    $('#acrelation-filter-type').change(function(e) {
+        var selected_type = $('#acrelation-filter-type').val();
+        if (selected_type == "") {
+            $('.acrelation').show();
+        } else {
+            $('.acrelation').hide();
+            $('.acrelation-type-' + selected_type).show();
+        }
+    });
+</script>
+
+<ul class="list-group" id="acrelation-list-group">
+
+    <a class="list-group-item text-muted" href="">
+        <span class="glyphicon glyphicon-plus"></span> Create new relation
+    </a>
+
+
+</ul>

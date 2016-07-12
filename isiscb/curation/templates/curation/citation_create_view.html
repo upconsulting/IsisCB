@@ -1,0 +1,135 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+{% load permission_tags %}
+
+
+{% block content %}
+<script>
+// Use this (with a click event) instead of an anchor.
+var toggleTab = function(name) {
+    $('.nav-tabs a[href="#' + name + '"]').tab('show')
+}
+</script>
+
+<form class="form" action="{% url 'create_citation' %}" method="POST">
+    {% csrf_token %}
+
+{% include "curation/fragment_create_citation_header.html" %}
+
+<div class="row">
+    <div class="col-sm-12">
+        {% include "curation/fragment_create_citation_fields.html" %}
+    </div>
+    <!--
+    <div class="col-sm-8">
+        <ul class="nav nav-tabs nav-justified" role="tablist">
+            <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
+                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+            </li>
+            <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
+                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+            </li>
+            <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
+                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+            </li>
+            <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
+                <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+            </li>
+            <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
+                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+                <div class="row">
+                    <div class="col-sm-6">
+                        {% include "curation/fragment_create_citation_categories.html" %}
+                        {% include "curation/fragment_create_citation_subjects.html" %}
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="h4">&nbsp;</div>
+                        {% for error in form.abstract.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.abstract.label }}</label>
+                            {{ form.abstract|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.description.label }}</label>
+                            {{ form.description|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.physical_details.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.physical_details.label }}</label>
+                            {{ form.physical_details|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.dataset.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.belongs_to.label }}</label>
+                            {{ form.belongs_to|addcss:"form-control" }}
+                        </div>
+
+                        <label>Language(s)</label>
+                        <ul class="list-group" id="language-list-group">
+                            {% for language in instance.language.all %}
+                            <li class="list-group-item clearfix"
+                                id="language-{{ language.id }}">
+                                {{ language }}
+                                <span class="button-group button-group-xs pull-right">
+                                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                                        type="button"
+                                        language-id="{{ language.id }}"
+                                        language-name="{{ language }}"></a>
+                                </span>
+                            </li>
+                            {% endfor %}
+                            <li class="list-group-item" id="create-language-item" style="visibility: hidden;"></li>
+                            <a style="cursor: pointer;" class="list-group-item text-muted" onclick="addLanguage();">
+                                <span class="glyphicon glyphicon-plus"></span> Add a language
+                            </a>
+
+                        </ul>
+
+                    </div>
+
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
+
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
+                {% include "curation/fragment_create_citation_linkeddata.html" %}
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
+                {% include "curation/fragment_create_citation_ccrelations.html" %}
+
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
+                {% include "curation/fragment_create_citation_acrelations.html" %}
+            </div>
+        </div>-->
+    </div>
+</div>
+
+<div>
+  <div class="button-group pull-right" style="padding: 10px;">
+      <input type="submit" value="Create & Continue" class="btn btn-success" />
+  </div>
+</div>
+</form>
+
+
+
+{% endblock %}
