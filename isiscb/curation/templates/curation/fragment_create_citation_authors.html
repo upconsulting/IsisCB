@@ -1,0 +1,124 @@
+{% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+{% load addcss %}
+
+<div class="form-group">
+<label>Authors, Editors, Contributors</label>
+    <ul class="list-group" id="author-list-group">
+
+      <li class="list-group-item" id="create-author-item" style="visibility: hidden;"></li>
+      <a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewauthor();">
+          <span class="glyphicon glyphicon-plus"></span> Add a contributor
+      </a>
+    </ul>
+</div>
+
+<script>
+//# sourceURL=add.js
+var acrel_form_idx = 0;
+var author_creation_container = $('#create-author-item');
+
+
+var createNewauthor = function() {
+    author_creation_container.empty();
+    var select_form_group = $('<div class="form-group"></div>');
+    var input_form_group = $('<div class="form-group"></div>');
+    var select_elem = `
+        <select class="form-control" id="create-author-type" name="create-author-type">
+            <option value="AU" selected="selected">Author</option>
+            <option value="ED">Editor</option>
+            <option value="AD">Advisor</option>
+            <option value="CO">Contributor</option>
+            <option value="TR">Translator</option>
+        </select>`;
+    select_form_group.append(select_elem);
+    input_form_group.append('<input class="form-control" id="create-author-input" name="create-author-input" type="text" />');
+    author_creation_container.append(select_form_group);
+    author_creation_container.append(input_form_group);
+    author_creation_container.append('<ul class="list-group" id="create-author-results-container"></ul>');
+    author_creation_container.css("visibility", "visible");
+
+    $('#create-author-input').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?type=PE&q=" + query, {
+            success: function(result) {
+                var results_container = $('#create-author-results-container');
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
+                    if (r.datestring != null) {
+                        choice_elem += '(' + r.datestring + ')';
+                    }
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+
+                    choice_elem += '</li>';
+
+                    results_container.append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    var selected_type = $('#create-author-type').val();
+                    $('#create-author-results-container').empty();
+                    $('#create-author-input').val(selected_name);
+
+                    var payload = {
+                        'citation_id': "{{ instance.id }}",
+                        'authority_id': selected_id,
+                        'type_controlled': selected_type,
+                        'type_broad_controlled': 'PR',    // Personal Responsibility
+                    };
+
+                        var new_elem = '<li class="list-group-item clearfix" id="author-' + selected_id + '">';
+                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + selected_id + '">';
+                        new_elem += '<span class="button-group button-group-xs pull-right">';
+                        new_elem_acr += '<span class="button-group button-group-xs pull-right">';
+                        new_elem += '<a href="" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem_acr += '<a href="" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-author" type="button" acrelation-id="' + selected_id + '" acrelation-title="' + selected_name + '"></a>'
+                        new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + selected_id + '" acrelation-title="' + selected_name + '"></a>'
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+                        new_elem_acr += '<span class="label label-primary">author</span> <span class="label label-success">Provides author Content About</span> ';
+                        new_elem += '<label class="label label-success">' + selected_type + '</label> ' + selected_name;
+                        new_elem_acr += selected_name;
+                        new_elem += '<input type="hidden" name="author-' + acrel_form_idx + '-id" value="' + selected_id + '" >';
+                        new_elem += '<input type="hidden" name="author-' + acrel_form_idx + '-type" value="' + selected_type + '" >';
+                        new_elem += '<input type="hidden" name="author-' + acrel_form_idx + '-type-broad" value="PR" >';
+                        new_elem += '</li>';
+                        new_elem_acr += '</li>';
+
+                        $('#author-list-group').prepend(new_elem);
+                        $('#acrelation-list-group').prepend(new_elem_acr);
+                        author_creation_container.css("visibility", "hidden");
+                        author_creation_container.empty();
+
+                        acrel_form_idx += 1;
+
+                        bind_acrelation();
+                        bind_author();
+
+                });
+            }
+        });
+    });
+}
+
+</script>

@@ -1,0 +1,107 @@
+{% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+
+<div class="h4">Subjects</div>
+<ul class="list-group" id="subject-list-group">
+
+<li class="list-group-item" id="create-subject-item" style="visibility: hidden;"></li>
+<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewSubject();">
+    <span class="glyphicon glyphicon-plus"></span> Add a subject
+</a>
+
+
+</ul>
+
+<script>
+var subject_creation_container = $('#create-subject-item');
+
+var createNewSubject = function() {
+    subject_creation_container.empty();
+    var form_group = $('<div class="form-group"></div>');
+    form_group.append('<input class="form-control" id="create-subject-input" name="create-subject-input" type="text" />');
+    subject_creation_container.append(form_group);
+    subject_creation_container.append('<ul class="list-group" id="create-subject-results-container"></ul>');
+    subject_creation_container.css("visibility", "visible");
+
+    $('#create-subject-input').on('keyup', function(e) {
+        var query = $(this).val();
+        $.ajax("q=" + query, {
+            success: function(result) {
+                var results_container = $('#create-subject-results-container');
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
+                    if (r.datestring != null) {
+                        choice_elem += '(' + r.datestring + ')';
+                    }
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+
+                    choice_elem += '</li>';
+
+                    results_container.append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#create-subject-results-container').empty();
+                    $('#create-subject-input').val(selected_name);
+
+                    var payload = {
+                        'citation_id': "{{ instance.id }}",
+                        'authority_id': selected_id,
+                        'type_controlled': 'SU',    // subject.
+                        'type_broad_controlled': 'SC',    // subject content.
+                    };
+
+                    $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
+                        var new_id = result.acrelation.id;
+                        var new_elem = '<li class="list-group-item clearfix" id="subject-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        new_elem += '<span class="button-group button-group-xs pull-right">';
+                        new_elem_acr += '<span class="button-group button-group-xs pull-right">';
+                        new_elem += '<a href="" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem_acr += '<a href="" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-subject" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+                        new_elem_acr += '<span class="label label-primary">Subject</span> <span class="label label-success">Provides Subject Content About</span> ';
+                        new_elem += result.acrelation.authority.name;
+                        new_elem_acr += result.acrelation.authority.name;
+                        new_elem += '</li>';
+                        new_elem_acr += '</li>';
+
+                        $('#subject-list-group').prepend(new_elem);
+                        $('#acrelation-list-group').prepend(new_elem_acr);
+                        subject_creation_container.css("visibility", "hidden");
+                        subject_creation_container.empty();
+
+                        bind_acrelation();
+                        bind_subject();
+                    }).fail(function(a) {
+                        console.log(a);
+                      })
+                });
+            }
+        });
+    });
+}
+
+</script>

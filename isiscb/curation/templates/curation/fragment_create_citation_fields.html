@@ -1,0 +1,192 @@
+{% load addcss %}
+{% load render_object %}
+
+
+<div class="h4">Citation Details</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        {% for error in form.type_controlled.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.type_controlled.label }}</label>
+            {{ form.type_controlled|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+
+{% for error in form.title.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.title.label }}</label>
+    {{ form.title|addcss:"form-control" }}
+</div>
+
+{% for error in form.edition_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.edition_details.label }}</label>
+    {{ form.edition_details|addcss:"form-control" }}
+</div>
+
+{% if partdetails_form %}
+<div class="row">
+    <div class="col-xs-4">
+        {% for error in partdetails_form.volume_free_text.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>Volume</label>
+            {{ partdetails_form.volume_free_text|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.volume_begin.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.volume_begin.label }}</label>
+            {{ partdetails_form.volume_begin|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.volume_end.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.volume_end.label }}</label>
+            {{ partdetails_form.volume_end|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-4">
+        {% for error in partdetails_form.issue_free_text.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>Issue</label>
+            {{ partdetails_form.issue_free_text|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.issue_begin.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.issue_begin.label }}</label>
+            {{ partdetails_form.issue_begin|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.issue_end.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.issue_end.label }}</label>
+            {{ partdetails_form.issue_end|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-4">
+        {% for error in partdetails_form.pages_free_text.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>Pages</label>
+            {{ partdetails_form.pages_free_text|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.page_begin.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.page_begin.label }}</label>
+            {{ partdetails_form.page_begin|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.page_end.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.page_end.label }}</label>
+            {{ partdetails_form.page_end|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-4">
+        {% for error in partdetails_form.sort_order.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>Sort order</label>
+            {{ partdetails_form.sort_order|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.extent.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.extent.label }}</label>
+            {{ partdetails_form.extent|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-4">
+        {% for error in partdetails_form.extent_note.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.extent_note.label }}</label>
+            {{ partdetails_form.extent_note|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="form-group">
+    <label>Periodical</label>
+    <div class="h5">
+        <a href="?tab=acrelations"></a>
+    </div>
+</div>
+
+{% for error in form.book_series.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.book_series.label }}</label>
+    {{ form.book_series|addcss:"form-control" }}
+</div>
+
+{% for error in form.additional_titles.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.additional_titles.label }}</label>
+    {{ form.additional_titles|addcss:"form-control" }}
+</div>
+
+{% for error in form.dataset.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.belongs_to.label }}</label>
+    {{ form.belongs_to|addcss:"form-control" }}
+</div>
+
+{% for error in form.administrator_notes.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.administrator_notes.label }}</label>
+    {{ form.administrator_notes|addcss:"form-control" }}
+</div>
