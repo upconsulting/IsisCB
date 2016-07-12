@@ -26,20 +26,34 @@
         {% for object in filter_list %}
         <tr>
             <td>
-                <a href="{% url "retrieve_accession" object.id %}">{{ object.id }}</a>
+                <a href="{% url "data_importaccession" object.id %}">{{ object.id }}</a>
             </td>
             <td>
-                <a href="{% url "retrieve_accession" object.id %}">{{ object.name }}</a>
+                <a href="{% url "data_importaccession" object.id %}">{{ object.name }}</a>
             </td>
             <td>{{ object.imported_on }}</td>
             <td>{{ object.imported_by }}</td>
             <td>{{ object.ingest_to.name }}</td>
-            <td>{{ object.draftcitation_set.count }}</td>
-            <td>{{ object.draftauthority_set.count }}</td>
+            <td>
+                <a href="{% url "data_importaccession" object.id %}">
+                    {{ object.draftcitation_set.count }}
+                </a>
+            </td>
+            <td>
+                <a href="{% url "data_importaccession" object.id %}">
+                    {{ object.draftauthority_set.count }}
+                </a>
+            </td>
             <td>{{ object.resolved }}</td>
             <td>{{ object.processed }}</td>
             <td>
-                {% if object.resolved and not object.processed %}<a class="btn btn-xs btn-success">Ingest</a>{% endif %}
+                {% if object.resolved and not object.processed %}
+                <a href="{% url "ingest_accession" object.id %}"
+                    class="btn btn-xs btn-success">Ingest</a>
+                {% elif not object.resolved and not object.processed %}
+                <a href="{% url "retrieve_accession" object.id %}"
+                    class="btn btn-xs btn-primary">Resolve</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

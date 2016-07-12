@@ -10,6 +10,7 @@ import iso8601
 
 from django_filters import filters
 
+
 filters.LOOKUP_TYPES = [
     ('', '---------'),
     ('exact', 'Is equal to'),
@@ -44,12 +45,14 @@ class CitationFilter(django_filters.FilterSet):
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
+
     class Meta:
         model = Citation
         fields = [
             'id', 'title', 'abstract', 'description',
             'publication_date_from', 'publication_date_to',
-            'author_or_editor', 'periodical', 'record_status'
+            'author_or_editor', 'periodical', 'record_status',
+            'belongs_to', 'zotero_accession',
         ]
         order_by = [
             ('publication_date', 'Publication date (ascending)'),
@@ -116,13 +119,11 @@ class CitationFilter(django_filters.FilterSet):
         return queryset.filter(acrelation__authority__name__icontains=value,
                                acrelation__type_controlled=ACRelation.PUBLISHER)
 
-
     def filter_subject(self, queryset, value):
         if not value:
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
                                acrelation__type_controlled=ACRelation.SUBJECT)
-
 
 
 class AuthorityFilter(django_filters.FilterSet):
@@ -144,7 +145,8 @@ class AuthorityFilter(django_filters.FilterSet):
         fields = [
             'id', 'name', 'type_controlled', 'description',
             'classification_system', 'classification_code',
-            'classification_hierarchy']
+            'classification_hierarchy', 'zotero_accession',
+            'belongs_to']
 
 
     def filter_name(self, queryset, value):

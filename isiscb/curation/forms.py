@@ -172,6 +172,7 @@ class CitationForm(forms.ModelForm):
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
     additional_titles = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
     edition_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
@@ -188,7 +189,7 @@ class CitationForm(forms.ModelForm):
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to', 'administrator_notes',
+              'belongs_to', 'administrator_notes', 'record_history',
         ]
         labels = {
             'belongs_to': 'Dataset',
@@ -237,6 +238,7 @@ class AuthorityForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
     redirect_to = forms.CharField(widget=forms.HiddenInput(), required = False)
+    record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
     class Meta:
         model = Authority
@@ -244,7 +246,7 @@ class AuthorityForm(forms.ModelForm):
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
-            'administrator_notes',
+            'administrator_notes', 'record_history',
         ]
 
         labels = {

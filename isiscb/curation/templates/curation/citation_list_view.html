@@ -201,12 +201,36 @@
                 {{ objects.form.record_status|addcss:"form-control" }}
             </div>
 
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            {% for error in objects.form.zotero_accession.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.zotero_accession.label }}</label>
+                {{ objects.form.zotero_accession|addcss:"form-control" }}
+            </div>
+        </div>
+        <div class="col-sm-4">
+            {% for error in objects.form.belongs_to.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.belongs_to.label }}</label>
+                {{ objects.form.belongs_to|addcss:"form-control" }}
+            </div>
+        </div>
+        <div class="col-sm-4">
             <div class="btn-group pull-right">
                 <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
                 <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
             </div>
         </div>
     </div>
+
 
 </form>
 <script>

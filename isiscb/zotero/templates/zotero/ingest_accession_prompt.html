@@ -1,0 +1,31 @@
+{% extends "zotero/raw_data_list.html" %}
+{% load addcss %}
+
+
+
+{% block action %}
+{% if accession.processed %}
+    <p class="text-danger">
+        This accession has already been ingested into the production database.
+        No further actions may be taken.
+    </p>
+{% else %}
+    {% if accession.resolved %}
+    <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
+        class="btn btn-success">
+        Perform Ingest
+    </a>
+    <p class="text-danger">
+        This action will create {{ accession.citation_set.count }} new
+        citations in the production database.
+    </p>
+    {% else %}
+    <a href="{% url "retrieve_accession" accession.id %}"
+        class="btn btn-primary">Resolve Authority Records</a>
+    <div class="h5 text-danger">
+        Several draft authority records in this accession require resolution before
+        this accession can be ingested into the production database.
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

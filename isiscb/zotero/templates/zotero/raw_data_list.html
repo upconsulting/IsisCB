@@ -1,0 +1,56 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="h3">
+        {{ accession.name }}
+    </div>
+    <div class="h5">Created by <span class="text-warning">{{ accession.imported_by }}</span> on <span class="text-warning">{{ accession.imported_on }}</span>.</div>
+    <div class="h5">Dataset: <span class="text-warning">{{ accession.ingest_to }}</a></div>
+
+    {% block action %}
+    {% if accession.resolved %}
+    <a href="{% url "ingest_accession" accession.id %}"
+        class="btn btn-primary">Ingest Records</a>
+    <div class="h5 text-info">This accession is ready for ingest into the production database.</div>
+    {% else %}
+    <a href="{% url "retrieve_accession" accession.id %}"
+        class="btn btn-primary">Resolve Authority Records</a>
+    <div class="h5 text-danger">
+        Several draft authority records in this accession require resolution before
+        this accession can be ingested into the production database.
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    {% block citationlist %}
+    <ul class="list-group">
+        {% for draftcitation in draftcitations %}
+        <li class="list-group-item">
+            <a class="h4" href="{{ draftcitation.get_absolute_url }}">{{ draftcitation.title }}</a>
+
+            <dl class="dl-horizontal">
+            {% for relation in draftcitation.authority_relations.all %}
+                <dt>{{ relation.get_type_controlled_display }}</dt>
+                <dd>
+                    {% if relation.authority.processed %}
+                    <span style="font-size: 8pt; color: green;" class="glyphicon glyphicon-ok"></span>&nbsp;
+                    {% endif %}
+                    {% if relation.authority.processed %}
+                    <a href="{% url "curate_authority" relation.authority.resolutions.first.to_instance_id %}">
+                    {% endif %}
+                    {{ relation.authority.name }}
+                    {% if relation.authority.processed %}
+                    </a>
+                    {% endif %}
+                    &nbsp;<span class="label label-primary">{{ relation.authority.get_type_controlled_display }}</span>
+                </dd>
+            {% endfor %}
+            </dl>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@ from isisdata.models import *
 from zotero.models import *
 from zotero.filters import *
 from zotero.forms import *
+from zotero import tasks
 from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
 
@@ -212,16 +213,38 @@ def create_authority_for_draft(request):
     draftauthority.processed = True
     draftauthority.save()
 
+    for draftlinkeddata in draftauthority.linkeddata.all():
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
+        LinkedData.objects.create(
+            subject = authority,
+            universal_resource_name = draftlinkeddata.value,
+            type_controlled = ldtype
+        )
+    draftauthority.linkeddata.all().update(processed=True)
+
     response_data = {
         'resolution': resolution.id,
         'authority': authority.id,
     }
-
     return JsonResponse({'data': response_data})
 
 
 def _field_data(instance):
     return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+
+
+def data_importaccession(request, accession_id):
+    template = loader.get_template('zotero/raw_data_list.html')
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    queryset = accession.draftcitation_set.all().order_by('title')
+
+
+    context = RequestContext(request, {
+        'accession': accession,
+        'draftcitations':  queryset,
+    })
+    return HttpResponse(template.render(context))
+
 
 def data_draftcitation(request, draftcitation_id):
     template = loader.get_template('zotero/raw_data.html')
@@ -262,4 +285,27 @@ def data_draftauthority(request, draftauthority_id):
         'data': data,
         'related_data': related_data,
     })
+    return HttpResponse(template.render(context))
+
+
+def ingest_accession(request, accession_id):
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    queryset = accession.draftcitation_set.all().order_by('title')
+
+    context = RequestContext(request, {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+        'draftcitations': queryset,
+    })
+
+    confirmed = request.GET.get('confirmed', False)
+    if confirmed:
+        ingested = tasks.ingest_accession(request, accession)
+        context.update({'ingested': ingested})
+        template = loader.get_template('zotero/ingest_accession_success.html')
+    else:
+        template = loader.get_template('zotero/ingest_accession_prompt.html')
+
+
     return HttpResponse(template.render(context))
