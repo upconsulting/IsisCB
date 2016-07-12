@@ -12,7 +12,8 @@ from django.shortcuts import redirect
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
-from django.forms import modelform_factory
+from django.forms import modelform_factory, formset_factory
+
 
 from isisdata.models import *
 from curation.filters import *
@@ -64,6 +65,48 @@ def datasets(request):
     })
     return HttpResponse(template.render(context))
 
+@staff_member_required
+#@check_rules('can_create_record')
+def create_citation(request):
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+    })
+
+    template = loader.get_template('curation/citation_create_view.html')
+
+    if request.method == 'GET':
+        form = CitationForm(user=request.user)
+
+        context.update({
+            'form': form,
+        })
+        partdetails_form = PartDetailsForm(request.user)
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
+    elif request.method == 'POST':
+        form = CitationForm(request.user, request.POST)
+        partdetails_form = PartDetailsForm(request.user, citation_id = None, data=request.POST)
+
+        if form.is_valid() and partdetails_form.is_valid():
+            form.cleaned_data['public'] = False
+            #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
+            citation = form.save()
+            citation.record_status_value = CuratedMixin.INACTIVE
+            citation.save()
+            
+            if partdetails_form:
+                partdetails_form.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+        else:
+            context.update({
+                'form' : form,
+                'partdetails_form': partdetails_form,
+            })
+
+    return HttpResponse(template.render(context))
 
 # TODO this method needs to be logged down!
 @staff_member_required

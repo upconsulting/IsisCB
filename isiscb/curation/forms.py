@@ -74,7 +74,6 @@ class ACRelationForm(forms.ModelForm):
         citation_id = self.cleaned_data['citation']
         self.cleaned_data['citation'] = Citation.objects.get(pk=citation_id)
 
-
 class ISODateValueForm(forms.ModelForm):
     value = forms.CharField()
 
@@ -105,15 +104,16 @@ class ISODateValueForm(forms.ModelForm):
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
 
-    def __init__(self, user, citation_id, *args, **kwargs):
+    def __init__(self, user, citation_id=None, *args, **kwargs):
         super(PartDetailsForm, self).__init__( *args, **kwargs)
         self.user = user
         self.citation_id = citation_id
 
-        can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
-        can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
+        if citation_id:
+            can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
+            can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
 
-        set_field_access(can_update, can_view, self.fields)
+            set_field_access(can_update, can_view, self.fields)
 
     class Meta:
         model = PartDetails
@@ -123,12 +123,13 @@ class PartDetailsForm(forms.ModelForm):
         exclude = super(PartDetailsForm, self)._get_validation_exclusions()
 
         # remove fields that user isn't allowed to modify
-        can_update = rules.test_rule('can_update_citation_field', self.user, ('part_details', self.citation_id))
-        can_view = rules.test_rule('can_view_citation_field', self.user, ('part_details', self.citation_id))
+        if self.citation_id:
+            can_update = rules.test_rule('can_update_citation_field', self.user, ('part_details', self.citation_id))
+            can_view = rules.test_rule('can_view_citation_field', self.user, ('part_details', self.citation_id))
 
-        for field in self.fields:
-            if not can_update or not can_view:
-                exclude.append(field)
+            for field in self.fields:
+                if not can_update or not can_view:
+                    exclude.append(field)
 
         return exclude
 
@@ -154,18 +155,19 @@ class CitationForm(forms.ModelForm):
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
 
         # disable fields user doesn't have access to
-        for field in self.fields:
-            can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
-            if not can_update:
-                self.fields[field].widget.attrs['readonly'] = True
-                self.fields[field].widget.attrs['disabled'] = True
+        if self.instance.pk:
+            for field in self.fields:
+                can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
+                if not can_update:
+                    self.fields[field].widget.attrs['readonly'] = True
+                    self.fields[field].widget.attrs['disabled'] = True
 
 
-            can_view = rules.test_rule('can_view_citation_field', user, (field, self.instance.pk))
-            if not can_view:
-                self.fields[field] = forms.CharField(widget=NoViewInput())
-                self.fields[field].widget.attrs['readonly'] = True
-                self.fields[field].widget.attrs['disabled'] = True
+                can_view = rules.test_rule('can_view_citation_field', user, (field, self.instance.pk))
+                if not can_view:
+                    self.fields[field] = forms.CharField(widget=NoViewInput())
+                    self.fields[field].widget.attrs['readonly'] = True
+                    self.fields[field].widget.attrs['disabled'] = True
 
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -197,12 +199,12 @@ class CitationForm(forms.ModelForm):
         exclude = super(CitationForm, self)._get_validation_exclusions()
 
         # remove fields that user isn't allowed to modify
-        for field in self.fields:
-            can_update = rules.test_rule('can_update_citation_field', self.user, (field, self.instance.pk))
-            can_view = rules.test_rule('can_view_citation_field', self.user, (field, self.instance.pk))
-            if not can_update or not can_view:
-                exclude.append(field)
-
+        if self.instance.pk:
+            for field in self.fields:
+                can_update = rules.test_rule('can_update_citation_field', self.user, (field, self.instance.pk))
+                can_view = rules.test_rule('can_view_citation_field', self.user, (field, self.instance.pk))
+                if not can_update or not can_view:
+                    exclude.append(field)
         return exclude
 
 class LinkedDataForm(forms.ModelForm):

@@ -5,6 +5,9 @@
 {% load permission_tags %}
 
 {% block object_list %}
+
+<a class="btn btn-primary btn-sm" href="{% url 'create_citation' %}">Create new citation</a>
+
 <table class="table table-responsive table-hover table-curation">
     <thead>
         <tr>
@@ -31,7 +34,7 @@
                 {% if not object.public %}
                 <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                 {% endif %}
-                
+
                 {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:related_citations or not attributes|are_attributes_public %}
                 <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
                 {% endif %}
