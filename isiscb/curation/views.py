@@ -96,7 +96,7 @@ def create_citation(request):
             citation = form.save()
             citation.record_status_value = CuratedMixin.INACTIVE
             citation.save()
-            
+
             if partdetails_form:
                 partdetails_form.save()
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
@@ -106,6 +106,46 @@ def create_citation(request):
                 'partdetails_form': partdetails_form,
             })
 
+    return HttpResponse(template.render(context))
+
+@staff_member_required
+#@check_rules('can_create_record')
+def create_authority(request):
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+    })
+
+    template = loader.get_template('curation/authority_create_view.html')
+    person_form = None
+    if request.method == 'GET':
+        form = AuthorityForm(user=request.user, prefix='authority')
+
+        context.update({
+            'form': form,
+        })
+    elif request.method == 'POST':
+        authority = Authority()
+        if request.POST.get('authority-type_controlled', '') == Authority.PERSON:
+            authority = Person()
+            person_form = PersonForm(request.user, None, request.POST, instance=authority)
+
+        form = AuthorityForm(request.user, request.POST, prefix='authority', instance=authority)
+        if form.is_valid() and (person_form is None or person_form.is_valid()):
+            if person_form:
+                person_form.save()
+
+            form.cleaned_data['public'] = False
+            form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
+            print form.cleaned_data
+            authority = form.save()
+            print type(authority)
+
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)))
+        else:
+            context.update({
+                'form' : form,
+            })
     return HttpResponse(template.render(context))
 
 # TODO this method needs to be logged down!

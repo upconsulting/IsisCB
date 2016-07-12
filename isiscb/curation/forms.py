@@ -261,15 +261,16 @@ class AuthorityForm(forms.ModelForm):
         self.user = user
 
         # disable fields user doesn't have access to
-        for field in self.fields:
-            can_update = rules.test_rule('can_update_authority_field', user, (field, self.instance.pk))
-            if not can_update:
-                self.fields[field].widget.attrs['readonly'] = True
+        if self.instance.pk:
+            for field in self.fields:
+                can_update = rules.test_rule('can_update_authority_field', user, (field, self.instance.pk))
+                if not can_update:
+                    self.fields[field].widget.attrs['readonly'] = True
 
-            can_view = rules.test_rule('can_view_authority_field', user, (field, self.instance.pk))
-            if not can_view:
-                self.fields[field] = forms.CharField(widget=NoViewInput())
-                self.fields[field].widget.attrs['readonly'] = True
+                can_view = rules.test_rule('can_view_authority_field', user, (field, self.instance.pk))
+                if not can_view:
+                    self.fields[field] = forms.CharField(widget=NoViewInput())
+                    self.fields[field].widget.attrs['readonly'] = True
 
     def clean(self):
         super(AuthorityForm, self).clean()
@@ -283,11 +284,12 @@ class AuthorityForm(forms.ModelForm):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
 
         # remove fields that user isn't allowed to modify
-        for field in self.fields:
-            can_update = rules.test_rule('can_update_authority_field', self.user, (field, self.instance.pk))
-            can_view = rules.test_rule('can_view_authority_field', self.user, (field, self.instance.pk))
-            if not can_update or not can_view:
-                exclude.append(field)
+        if self.instance.pk:
+            for field in self.fields:
+                can_update = rules.test_rule('can_update_authority_field', self.user, (field, self.instance.pk))
+                can_view = rules.test_rule('can_view_authority_field', self.user, (field, self.instance.pk))
+                if not can_update or not can_view:
+                    exclude.append(field)
 
         return exclude
 
@@ -300,10 +302,11 @@ class PersonForm(forms.ModelForm):
         self.user = user
         self.authority_id = authority_id
 
-        can_update = rules.test_rule('can_update_authority_field', user, ('person', authority_id))
-        can_view = rules.test_rule('can_view_authority_field', user, ('person', authority_id))
+        if authority_id:
+            can_update = rules.test_rule('can_update_authority_field', user, ('person', authority_id))
+            can_view = rules.test_rule('can_view_authority_field', user, ('person', authority_id))
 
-        set_field_access(can_update, can_view, self.fields)
+            set_field_access(can_update, can_view, self.fields)
 
     class Meta:
         model = Person
@@ -315,13 +318,14 @@ class PersonForm(forms.ModelForm):
     def _get_validation_exclusions(self):
         exclude = super(PersonForm, self)._get_validation_exclusions()
 
-        # remove fields that user isn't allowed to modify
-        can_update = rules.test_rule('can_update_authority_field', self.user, ('person', self.authority_id))
-        can_view = rules.test_rule('can_view_authority_field', self.user, ('person', self.authority_id))
+        if self.authority_id:
+            # remove fields that user isn't allowed to modify
+            can_update = rules.test_rule('can_update_authority_field', self.user, ('person', self.authority_id))
+            can_view = rules.test_rule('can_view_authority_field', self.user, ('person', self.authority_id))
 
-        for field in self.fields:
-            if not can_update or not can_view:
-                exclude.append(field)
+            for field in self.fields:
+                if not can_update or not can_view:
+                    exclude.append(field)
 
         return exclude
 
