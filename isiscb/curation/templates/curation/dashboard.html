@@ -1,1 +1,19 @@
 {% extends "curation/base.html" %}
+
+{% block content %}
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>IsisCB Curation Interface</h1>
+
+    <p>
+      Use the top menu entry "Datasets" to get to a list of all citations or authorities. You can edit and create records from there. Use the menu entry "Zotero" to add new records to IsisCB using an Zotero RDF export.
+    </p>
+    <p>
+      <a class="btn btn-primary" href="{% url 'citation_list' %}">Curate Citations</a>
+      <a class="btn btn-primary" href="{% url 'authority_list' %}">Curate Authorities</a>
+    </p>
+  </div>
+</div>
+
+{% endblock %}
