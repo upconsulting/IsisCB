@@ -137,9 +137,7 @@ def create_authority(request):
 
             form.cleaned_data['public'] = False
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
-            print form.cleaned_data
             authority = form.save()
-            print type(authority)
 
             return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)))
         else:
@@ -152,7 +150,6 @@ def create_authority(request):
 @staff_member_required
 def quick_create_acrelation(request):
     if request.method == 'POST':
-        print request.POST
         authority_id = request.POST.get('authority_id')
         citation_id = request.POST.get('citation_id')
         type_controlled = request.POST.get('type_controlled')
