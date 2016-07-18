@@ -8,6 +8,8 @@ from django.core.urlresolvers import reverse
 
 from isisdata.models import Dataset, Citation, Authority
 
+from itertools import groupby
+
 import re
 
 
@@ -25,6 +27,23 @@ class ImportAccession(models.Model):
     name = models.CharField(max_length=255)
     ingest_to = models.ForeignKey(Dataset, null=True)
     processed = models.BooleanField(default=False)
+
+    @property
+    def citations_ready(self):
+        field = 'authority_relations__authority__processed'
+        qs = self.draftcitation_set.filter(processed=False).values('id', field)
+        key = lambda o: o['id']
+        ready = []
+        for i, group in groupby(sorted(qs, key=key), key=key):
+            records = [o for o in group]
+            if len([o for o in records if not o[field]]) == 0:
+                ready.append(i)
+        return self.draftcitation_set.filter(pk__in=ready)
+
+    @property
+    def citations_remaining(self):
+        return self.draftcitation_set.filter(processed=False)
+
 
     @property
     def resolved(self):
