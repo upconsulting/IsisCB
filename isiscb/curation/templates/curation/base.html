@@ -64,8 +64,8 @@
               <li{% if curation_section == "datasets" %} class="active"{% endif %}>
                 <a href="{% url "datasets" %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Datasets <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}">Citations</a></li>
-                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}">Authorities</a></li>
+                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}?filters=true">Citations</a></li>
+                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}?filters=true">Authorities</a></li>
                 </ul>
               </li>
 
