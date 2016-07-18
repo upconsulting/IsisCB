@@ -282,6 +282,17 @@ $(document).ready(function() {
     });
 });
 
+var selectNextAuthority = function() {
+    $('.draftauthority').first().trigger('click');
+}
+
+var cleanupResolvedAuthority = function(draftauthority_id) {
+    $("#authority-" + draftauthority_id).remove();
+    $('#matching').css('visibility', 'hidden');
+    selectNextAuthority();
+}
+
+
 //
 var bindSuggestions = function() {
     $('.resolve-with-suggestion').click(function(e) {
@@ -349,8 +360,8 @@ var confirmCreateModal = function() {
                 triggerResolveAuthority(di, created_authority_id);
             });
         });
-        $("#authority-" + draftauthority_id).remove();
-        $('#matching').css('visibility', 'hidden');
+
+        cleanupResolvedAuthority(draftauthority_id);
     });
 
 }
@@ -377,8 +388,7 @@ var triggerCreateAuthority = function(draftauthority_id, callback) {
 
 var triggerResolveAuthority = function(draftauthority_id, authority_id) {
     $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
-        $("#authority-" + draftauthority_id).remove();
-        $('#matching').css('visibility', 'hidden');
+        cleanupResolvedAuthority(draftauthority_id);
     })
 }
 
