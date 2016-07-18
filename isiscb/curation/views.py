@@ -811,10 +811,11 @@ def citations(request):
     queryset = filter_queryset(request.user, Citation.objects.all())
     filtered_objects = CitationFilter(request.GET, queryset=queryset)
 
+    filters_active = request.GET.get('filters', False)
+    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
     context.update({
         'objects': filtered_objects,
-        'filters_active': len([v for k, v in request.GET.iteritems()
-                               if len(v) > 0 and k != 'page']) > 0,
+        'filters_active': filters_active,
     })
 
     return HttpResponse(template.render(context))
@@ -863,11 +864,11 @@ def authorities(request):
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
-
+    filters_active = request.GET.get('filters', False)
+    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
     context.update({
         'objects': filtered_objects,
-        'filters_active': len([v for k, v in request.GET.iteritems()
-                               if len(v) > 0 and k != 'page']) > 0,
+        'filters_active': filters_active
     })
 
     return HttpResponse(template.render(context))
