@@ -253,7 +253,14 @@ def create_acrelation_for_authority(request, authority_id):
 
     })
     if request.method == 'GET':
-        form = ACRelationForm(prefix='acrelation', initial={'authority': authority.id, 'name_for_display_in_citation': authority.name})
+        initial = {
+            'authority': authority.id,
+            'name_for_display_in_citation': authority.name
+        }
+        type_controlled = request.GET.get('type_controlled', None)
+        if type_controlled:
+            initial.update({'type_controlled': type_controlled.upper()})
+        form = ACRelationForm(prefix='acrelation', initial=initial)
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
@@ -307,7 +314,13 @@ def create_acrelation_for_citation(request, citation_id):
         'instance': citation,
     })
     if request.method == 'GET':
-        form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+        initial = {
+            'citation': citation.id,
+        }
+        type_controlled = request.GET.get('type_controlled', None)
+        if type_controlled:
+            initial.update({'type_controlled': type_controlled.upper()})
+        form = ACRelationForm(prefix='acrelation', initial=initial)
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
@@ -545,9 +558,19 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
     if request.method == 'GET':
         if linkeddata:
-            linkeddata_form = LinkedDataForm(instance=linkeddata, prefix='linkeddata')
+            linkeddata_form = LinkedDataForm(instance=linkeddata,
+                                             prefix='linkeddata')
         else:
-            linkeddata_form = LinkedDataForm(prefix='linkeddata')
+            initial = {}
+            type_controlled = request.GET.get('type_controlled', None)
+            if type_controlled:
+                q = {'name__istartswith': type_controlled}
+                qs = LinkedDataType.objects.filter(**q)
+                if qs.count() > 0:
+                    initial.update({'type_controlled': qs.first()})
+
+            linkeddata_form = LinkedDataForm(prefix='linkeddata',
+                                             initial=initial)
     elif request.method == 'POST':
         if linkeddata:    # Update.
             linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix='linkeddata')

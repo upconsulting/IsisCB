@@ -53,6 +53,17 @@ def get_citation_title(obj):
     return title
 
 
+@register.filter(name='get_publisher')
+def get_publisher(obj):
+    return obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
+
+
+@register.filter(name='get_isbn')
+def get_isbn(obj):
+    return obj.linkeddata_entries.filter(type_controlled__name='ISBN').first()
+
+
+
 @register.filter(name='get_authors_editors')
 def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations

@@ -110,7 +110,7 @@ var toggleTab = function(name) {
             </li>
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
                 {% block fields_tab %}
                 <div class="row">
                     <div class="col-sm-6">
@@ -118,14 +118,6 @@ var toggleTab = function(name) {
                         {% include "curation/fragment_citation_subjects.html" %}
                     </div>
                     <div class="col-sm-6">
-                        <div class="h4">&nbsp;</div>
-                        {% for error in form.abstract.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.abstract.label }}</label>
-                            {{ form.abstract|addcss:"form-control" }}
-                        </div>
 
                         {% for error in form.description.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
@@ -133,6 +125,14 @@ var toggleTab = function(name) {
                         <div class="form-group">
                             <label>{{ form.description.label }}</label>
                             {{ form.description|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.abstract.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.abstract.label }}</label>
+                            {{ form.abstract|addcss:"form-control" }}
                         </div>
 
 
@@ -148,7 +148,7 @@ var toggleTab = function(name) {
                         <label>Language(s)</label>
                         <ul class="list-group" id="language-list-group">
                             {% for language in instance.language.all %}
-                            <li class="list-group-item clearfix"
+                            <li class="list-group-item language clearfix"
                                 id="language-{{ language.id }}">
                                 {{ language }}
                                 <!-- TODO: implement permission check here. -->
@@ -160,8 +160,8 @@ var toggleTab = function(name) {
                                 </span>
                             </li>
                             {% endfor %}
-                            <li class="list-group-item" id="create-language-item" style="visibility: hidden;"></li>
-                            <a style="cursor: pointer;" class="list-group-item text-muted" onclick="addLanguage();">
+                            <li class="list-group-item" id="create-language-item" style="display: none;"></li>
+                            <a style="cursor: pointer;" class="list-group-item language text-muted" onclick="addLanguage();">
                                 <span class="glyphicon glyphicon-plus"></span> Add a language
                             </a>
 
@@ -172,17 +172,17 @@ var toggleTab = function(name) {
                 </div>
                 {% endblock %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
+            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">
                 {% include "curation/fragment_citation_attributes.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
+            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %} panel-body" id="linkeddata">
                 {% include "curation/fragment_citation_linkeddata.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %}" id="ccrelations">
+            <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %} panel-body" id="ccrelations">
                 {% include "curation/fragment_citation_ccrelations.html" %}
 
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
+            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
                 {% include "curation/fragment_citation_acrelations.html" %}
             </div>
         </div>
@@ -255,7 +255,7 @@ var addLanguage = function() {
     form_group.append('<input class="form-control" id="create-language-input" name="create-language-input" type="text" />');
     language_creation_container.append(form_group);
     language_creation_container.append('<ul class="list-group" id="create-language-results-container"></ul>');
-    language_creation_container.css("visibility", "visible");
+    language_creation_container.css("display", "block");
 
     $('#create-language-input').on('keyup', function(e) {
         var query = $(this).val();
@@ -304,7 +304,7 @@ var addLanguage = function() {
                         new_elem += '</li>';
 
                         $('#language-list-group').prepend(new_elem);
-                        language_creation_container.css("visibility", "hidden");
+                        language_creation_container.css("display", "none");
                         language_creation_container.empty();
 
                         bind_language();

@@ -74,7 +74,7 @@
     </li>
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
+    <a class="list-group-item acrelation text-muted" href="{% url "create_acrelation_for_citation" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
 {% endif %}

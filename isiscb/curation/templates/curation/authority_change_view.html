@@ -135,7 +135,7 @@
         </ul>
 
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
                 {% if person_form %}
                 <div class="col-sm-6">
                     <div class="h4">Person Details</div>
@@ -151,13 +151,13 @@
                 </div>
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
+            <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">
                 {% include "curation/fragment_authority_attributes.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %}" id="linkeddata">
+            <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %} panel-body" id="linkeddata">
                 {% include "curation/fragment_authority_linkeddata.html" %}
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'aarelations' %} active{% endif %}" id="aarelations">
+            <div role="tabpanel" class="tab-pane{% if tab == 'aarelations' %} active{% endif %} panel-body" id="aarelations">
                 <ul class="list-group">
                 {% for aarelation in instance.aarelation_set.all %}
                     <a class="list-group-item">
@@ -186,7 +186,7 @@
                 </ul>
 
             </div>
-            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %}" id="acrelations">
+            <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
                 {% include "curation/fragment_authority_acrelations.html" %}
             </div>
         </div>

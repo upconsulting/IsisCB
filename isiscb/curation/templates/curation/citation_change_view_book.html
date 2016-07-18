@@ -14,24 +14,40 @@
 </div>
 
 <!-- Authors/editors/contributors -->
+{% with instance|get_authors_editors as authors_editors %}
 <div class="form-group">
     <label>Authors, editors, and contributors</label>
     <div>
         <a class="text-warning cursor-link"
-            onclick="toggleTab('acrelations')">{{ instance|get_authors_editors }}</a>
+            onclick="toggleTab('acrelations')">
+            {% if authors_editors %}
+            {{ authors_editors }}
+            {% else %}
+            <em>Add author, editor, or contributor</em>
+            {% endif %}
+
+        </a>
     </div>
 </div>
+{% endwith %}
 
 <!-- Publication date -->
 
-
+{% with instance|get_citation_pubdate as pubdate %}
 <div class="form-group">
-    <label>Authors, editors, and contributors</label>
+    <label>Publication date</label>
     <div>
         <a class="text-warning cursor-link"
-            onclick="toggleTab('attributes')">{{ instance|get_citation_pubdate }}</a>
+            onclick="toggleTab('attributes')">
+            {% if pubdate %}
+            {{ pubdate }}
+            {% else %}
+            <em>Add publication date</em>
+            {% endif %}
+        </a>
     </div>
 </div>
+{% endwith %}
 
 {% for error in form.additional_titles.errors %}
 <div class="alert alert-danger">{{ error }}</div>
@@ -80,7 +96,24 @@
 </div>
 {% endif %}
 
-<!-- Publisher goes here -->
+{% with instance|get_publisher as publisher %}
+<div class="form-group">
+    <label>Publisher</label>
+    <div>
+        {% if publisher %}
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">
+            {{ publisher }}
+        </a>
+        {% else %}
+        <a class="text-warning"
+            href="{% url 'create_acrelation_for_citation' instance.id %}?type_controlled=PU">
+            <span class="gylphicon glyphicon-plus"></span> Add Publisher
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
 
 {% for error in form.book_series.errors %}
 <div class="alert alert-danger">{{ error }}</div>
@@ -90,7 +123,24 @@
     {{ form.book_series|addcss:"form-control" }}
 </div>
 
-<!-- ISBN goes here -->
+{% with instance|get_isbn as isbn %}
+<div class="form-group">
+    <label>ISBN</label>
+    <div>
+        {% if isbn %}
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('linkeddata')">
+            {{ isbn }}
+        </a>
+        {% else %}
+        <a class="text-warning"
+            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=ISBN">
+            <span class="gylphicon glyphicon-plus"></span> Add ISBN
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
 
 
 {% endblock %}

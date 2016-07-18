@@ -6,7 +6,7 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<div class="h4">Categories</div>
+<label>Categories</label>
 <ul class="list-group" id="category-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
@@ -37,8 +37,8 @@
 {% endfor %}
 
 {% if can_update %}
-<li class="list-group-item" id="create-category-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewCategory();">
+<li class="list-group-item" id="create-category-item" style="display: none;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewCategory();">
     <span class="glyphicon glyphicon-plus"></span> Add a category
 </a>
 {% endif %}
@@ -63,7 +63,7 @@ var createNewCategory = function() {
     form_group.append('<input class="form-control" id="create-category-input" name="create-category-input" type="text" />');
     category_creation_container.append(form_group);
     category_creation_container.append('<ul class="list-group" id="create-category-results-container"></ul>');
-    category_creation_container.css("visibility", "visible");
+    category_creation_container.css("display", "block");
 
     $('#create-category-input').on('keyup', function(e) {
         var query = $(this).val();
@@ -72,7 +72,7 @@ var createNewCategory = function() {
                 var results_container = $('#create-category-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -113,8 +113,8 @@ var createNewCategory = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
-                        var new_elem = '<li class="list-group-item clearfix" id="category-' + new_id + '">';
-                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        var new_elem = '<li class="list-group-item acrelation clearfix" id="category-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item acrelation clearfix" id="acrelation-' + new_id + '">';
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
                         new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
@@ -131,7 +131,7 @@ var createNewCategory = function() {
 
                         $('#category-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
-                        category_creation_container.css("visibility", "hidden");
+                        category_creation_container.css("display", "none");
                         category_creation_container.empty();
 
                         bind_acrelation();

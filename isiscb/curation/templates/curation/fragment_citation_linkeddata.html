@@ -35,7 +35,7 @@
     </li>
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url 'create_linkeddata_for_citation' instance.id %}">
+    <a class="list-group-item linkeddata text-muted" href="{% url 'create_linkeddata_for_citation' instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new Linked Data entry
     </a>
 {% endif %}
