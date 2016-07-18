@@ -10,39 +10,54 @@
 <ul class="list-group">
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
+
     <li class="list-group-item ccrelation clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
-        {% if instance.id == ccrelation.subject.id %}
-        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
-        {% else %}
-
-        The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
-
-        {% endif %}
-        <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
-
-        {% if instance.id == ccrelation.object.id %}
-        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
-        {% else %}
-        the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+      <div class="row">
+        {% if can_update %}
+        <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">
         {% endif %}
 
-        {% if not ccrelation.object.public %}
-        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-        {% endif %}
+        <span class="col-sm-11">
 
-        {% if not ccrelation.public %}
-        <i class="fa fa-minus-square" aria-hidden="true" title="This CCRelation is not public."></i>
-        {% endif %}
+          {% if instance.id == ccrelation.subject.id %}
+          <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+          {% else %}
+
+          The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
+
+          {% endif %}
+          <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
+
+          {% if instance.id == ccrelation.object.id %}
+          <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+          {% else %}
+          the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+          {% endif %}
+
+          {% if not ccrelation.object.public %}
+          <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+          {% endif %}
+
+          {% if not ccrelation.public %}
+          <i class="fa fa-minus-square" aria-hidden="true" title="This CCRelation is not public."></i>
+          {% endif %}
+        </span>
 
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation"
-                type="button"
-                ccrelation-id="{{ ccrelation.id }}"
-                ccrelation-title="{{ ccrelation.object|get_citation_title|safe }}"></a>
-        </span>
+        </a>
         {% endif %}
+
+        <span class="col-sm-1 text-right">
+          {% if can_update %}
+          <span class="button-group button-group-xs pull-right">
+              <a class="btn btn-xs glyphicon glyphicon-remove delete delete-ccrelation"
+                  type="button"
+                  ccrelation-id="{{ ccrelation.id }}"
+                  ccrelation-title="{{ ccrelation.object|get_citation_title|safe }}"></a>
+          </span>
+          {% endif %}
+        </span>
+      </div>
     </li>
 {% endfor %}
 {% for ccrelation in instance.relations_to.all %}

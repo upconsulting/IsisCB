@@ -12,26 +12,38 @@
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'CA' %}
     <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
+      <div class="row">
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category"
-                type="button"
-                acrelation-id="{{ acrelation.id }}"
-                acrelation-title="{{ acrelation.authority.name }}"></a>
+        <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+        {% endif %}
+        <span class="col-sm-10">
+          {{ acrelation.authority.name }}
+          {% if acrelation.name_for_display_in_citation %}
+          <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+          {% endif %}
+          {% if not acrelation.authority.public %}
+          <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+          {% endif %}
+          {% if not acrelation.public %}
+          <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+          {% endif %}
         </span>
+
+        {% if can_update %}
+        </a>
         {% endif %}
 
-        {{ acrelation.authority.name }}
-        {% if acrelation.name_for_display_in_citation %}
-        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-        {% endif %}
-        {% if not acrelation.authority.public %}
-        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-        {% endif %}
-        {% if not acrelation.public %}
-        <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
-        {% endif %}
+        <span class="col-sm-2 text-right">
+          {% if can_update %}
+          <span class="button-group button-group-xs">
+              <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category"
+                  type="button"
+                  acrelation-id="{{ acrelation.id }}"
+                  acrelation-title="{{ acrelation.authority.name }}"></a>
+          </span>
+          {% endif %}
+        </span>
+      </div>
     </li>
     {% endif %}
 {% endfor %}
@@ -113,19 +125,43 @@ var createNewCategory = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
-                        var new_elem = '<li class="list-group-item acrelation clearfix" id="category-' + new_id + '">';
-                        var new_elem_acr = '<li class="list-group-item acrelation clearfix" id="acrelation-' + new_id + '">';
-                        new_elem += '<span class="button-group button-group-xs pull-right">';
-                        new_elem_acr += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
-                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        var new_elem = '<li class="list-group-item clearfix" id="category-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        new_elem_acr += '<span class="label label-primary">category</span> <span class="label label-success">Provides category Content About</span> ';
+
+                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
+                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}"' + new_id +  '" >';
+
+                        new_elem += '<div class="row">';
+                        new_elem_acr += '<div class="row">';
+
+                        new_elem += '<span class="col-sm-10">';
+                        new_elem_acr += '<span class="col-sm-10">';
+
+                        new_elem += result.acrelation.authority.name;
+                        new_elem_acr += result.acrelation.authority.name;
+
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+
+                        new_elem += '</a>';
+                        new_elem_acr += '</a>';
+
+                        new_elem += '<span class="col-sm-2 text-right">';
+                        new_elem_acr += '<span class="col-sm-2 text-right">';
+
+                        new_elem += '<span class="button-group button-group-xs">';
+                        new_elem_acr += '<span class="button-group button-group-xs">';
                         new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem += '</span>';
                         new_elem_acr += '</span>';
-                        new_elem_acr += '<span class="label label-primary">category</span> <span class="label label-success">Provides category Content About</span> ';
-                        new_elem += result.acrelation.authority.name;
-                        new_elem_acr += result.acrelation.authority.name;
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+
+                        new_elem += '</div>';
+                        new_elem_acr += '</div>';
+
                         new_elem += '</li>';
                         new_elem_acr += '</li>';
 

@@ -45,6 +45,11 @@ body, p, div, table, input {
     color: red;
 }
 
+a:hover.delete {
+  text-decoration: none;
+  color: #c30f0f;
+}
+
 .notpublic {
   background-color: #e6e4d9;
 }
@@ -87,4 +92,10 @@ body, p, div, table, input {
 
 .glyphicon-plus {
     color: green;
+
+a:hover.list_entry_link {
+    text-decoration: none;
+}
+a:hover.list_entry_link .underlineWhenLinked {
+  text-decoration: underline;
 }
