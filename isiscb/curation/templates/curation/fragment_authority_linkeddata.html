@@ -9,7 +9,7 @@
 <ul class="list-group">
 {% if can_view %}
 {% for linkeddata in instance.linkeddata_entries.all %}
-    <li class="list-group-item" id="linkeddata-{{ linkeddata.id }}">
+    <li class="list-group-item linkeddata" id="linkeddata-{{ linkeddata.id }}">
         {% if linkeddata.type_controlled %}
         <span class="label label-primary">{{ linkeddata.type_controlled.name }}</span>
         {% endif %}

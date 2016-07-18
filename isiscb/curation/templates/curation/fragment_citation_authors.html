@@ -12,7 +12,7 @@
     {% if can_view %}
     {% for acrelation in instance.acrelation_set.all %}
         {% if acrelation.type_broad_controlled == 'PR' %}    <!-- Personal responsibility. -->
-        <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="author-{{ acrelation.id }}">
+        <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="author-{{ acrelation.id }}">
             {% if can_update %}
             <span class="button-group button-group-xs pull-right">
                 <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
@@ -142,7 +142,7 @@ var createNewauthor = function() {
                         new_elem_acr += result.acrelation.authority.name;
                         new_elem += '</li>';
                         new_elem_acr += '</li>';
-                        
+
                         $('#author-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
                         author_creation_container.css("visibility", "hidden");

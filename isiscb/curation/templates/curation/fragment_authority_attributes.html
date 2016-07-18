@@ -10,7 +10,7 @@
 <ul class="list-group">
 {% if can_view %}
 {% for attribute in instance.attributes.all %}
-    <li class="list-group-item {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
+    <li class="list-group-item attribute {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
         <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
         {{ attribute.value.get_child_class }}
         <span class="text-warning">{{ attribute.value_freeform}}</span>
