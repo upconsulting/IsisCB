@@ -146,6 +146,13 @@
                 {{ objects.form.record_status_value|addcss:"form-control" }}
             </div>
 
+            {% for error in objects.form.o.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>{{ objects.form.o.label }}</label>
+                {{ objects.form.o|addcss:"form-control" }}
+            </div>
 
 
             <div class="btn-group pull-right">

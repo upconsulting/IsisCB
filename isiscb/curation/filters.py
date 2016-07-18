@@ -56,7 +56,9 @@ class CitationFilter(django_filters.FilterSet):
         ]
         order_by = [
             ('publication_date', 'Publication date (ascending)'),
-            ('-publication_date', 'Publication date (descending)')
+            ('-publication_date', 'Publication date (descending)'),
+            ('title', 'Title (ascending)'),
+            ('-title', 'Title (descending)')
         ]
 
     def filter_title(self, queryset, value):
@@ -147,6 +149,12 @@ class AuthorityFilter(django_filters.FilterSet):
             'classification_system', 'classification_code',
             'classification_hierarchy', 'zotero_accession',
             'belongs_to']
+
+        order_by = [
+            ('', 'None'),
+            ('name', 'Name (ascending)'),
+            ('-name', 'Name (descending)')
+        ]
 
 
     def filter_name(self, queryset, value):
