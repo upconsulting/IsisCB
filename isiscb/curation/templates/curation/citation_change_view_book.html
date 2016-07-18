@@ -1,0 +1,96 @@
+{% extends "curation/citation_change_view.html" %}
+{% load addcss %}
+{% load render_object %}
+{% load permission_tags %}
+
+{% block citation_panel_left %}
+
+{% for error in form.title.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.title.label }}</label>
+    {{ form.title|addcss:"form-control" }}
+</div>
+
+<!-- Authors/editors/contributors -->
+<div class="form-group">
+    <label>Authors, editors, and contributors</label>
+    <div>
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">{{ instance|get_authors_editors }}</a>
+    </div>
+</div>
+
+<!-- Publication date -->
+
+
+<div class="form-group">
+    <label>Authors, editors, and contributors</label>
+    <div>
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">{{ instance|get_citation_pubdate }}</a>
+    </div>
+</div>
+
+{% for error in form.additional_titles.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.additional_titles.label }}</label>
+    {{ form.additional_titles|addcss:"form-control" }}
+</div>
+
+{% for error in form.edition_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.edition_details.label }}</label>
+    {{ form.edition_details|addcss:"form-control" }}
+</div>
+
+{% for error in form.physical_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.physical_details.label }}</label>
+    {{ form.physical_details|addcss:"form-control" }}
+</div>
+
+{% if partdetails_form %}
+<div class="row">
+    <div class="col-xs-6">
+        {% for error in partdetails_form.extent.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.extent.label }}</label>
+            {{ partdetails_form.extent|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-xs-6">
+        {% for error in partdetails_form.extent_note.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ partdetails_form.extent_note.label }}</label>
+            {{ partdetails_form.extent_note|addcss:"form-control" }}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Publisher goes here -->
+
+{% for error in form.book_series.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.book_series.label }}</label>
+    {{ form.book_series|addcss:"form-control" }}
+</div>
+
+<!-- ISBN goes here -->
+
+
+{% endblock %}

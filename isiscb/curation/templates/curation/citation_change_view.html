@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
 {% load render_object %}
+{% load general_tags %}
 {% load permission_tags %}
 
 
@@ -37,8 +38,58 @@ var toggleTab = function(name) {
 {% include "curation/fragment_citation_header.html" %}
 
 <div class="row">
+    <div class="col-xs-2">
+        <div class="">
+            <strong class="text-warning">{{ instance.id }}</strong>&nbsp;
+            <a class="btn"
+                href="{{ instance|get_uri }}"
+                target="_blank">
+                <span class="glyphicon glyphicon-new-window" style="vertical-align: middle;"></span>
+            </a>
+        </div>
+    </div>
+    <div class="col-xs-2">
+        {% for error in form.type_controlled.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            {{ form.type_controlled|addcss:"form-control" }}
+        </div>
+    </div>
+    <div class="col-md-4 col-xs-2">
+        <div class="row">
+            <div class="col-md-6">
+                {% for error in form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    {{ form.record_status_value|addcss:"form-control" }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                {% for error in form.record_status_explanation.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    {{ form.record_status_explanation|addcss:"form-control" }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-4">
+        <div class="btn-group pull-right">
+            <button class="btn btn-md btn-default">Cancel</button>
+            <input type="submit" value="Save" class="btn btn-md btn-success" />
+            <button class="btn btn-md btn-danger">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <div class="col-sm-4">
+        {% block citation_panel_left %}
         {% include "curation/fragment_citation_fields.html" %}
+        {% endblock %}
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
@@ -60,6 +111,7 @@ var toggleTab = function(name) {
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %}" id="fields">
+                {% block fields_tab %}
                 <div class="row">
                     <div class="col-sm-6">
                         {% include "curation/fragment_citation_categories.html" %}
@@ -83,13 +135,7 @@ var toggleTab = function(name) {
                             {{ form.description|addcss:"form-control" }}
                         </div>
 
-                        {% for error in form.physical_details.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.physical_details.label }}</label>
-                            {{ form.physical_details|addcss:"form-control" }}
-                        </div>
+
 
                         {% for error in form.dataset.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
@@ -124,6 +170,7 @@ var toggleTab = function(name) {
                     </div>
 
                 </div>
+                {% endblock %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %}" id="attributes">
                 {% include "curation/fragment_citation_attributes.html" %}

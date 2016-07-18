@@ -156,6 +156,10 @@ class CitationForm(forms.ModelForm):
 
         # disable fields user doesn't have access to
         if self.instance.pk:
+            # Don't let the user change type_controlled.
+            self.fields['type_controlled'].widget.attrs['readonly'] = True
+            self.fields['type_controlled'].widget.attrs['disabled'] = True
+
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
                 if not can_update:
@@ -168,7 +172,6 @@ class CitationForm(forms.ModelForm):
                     self.fields[field] = forms.CharField(widget=NoViewInput())
                     self.fields[field].widget.attrs['readonly'] = True
                     self.fields[field].widget.attrs['disabled'] = True
-
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -208,6 +211,7 @@ class CitationForm(forms.ModelForm):
                     exclude.append(field)
         return exclude
 
+
 class LinkedDataForm(forms.ModelForm):
 
     class Meta:
@@ -226,6 +230,7 @@ class LinkedDataForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         super(LinkedDataForm, self).save(*args, **kwargs)
+
 
 class NoViewInput(forms.TextInput):
 

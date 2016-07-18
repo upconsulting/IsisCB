@@ -767,7 +767,10 @@ def citation(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    template = loader.get_template('curation/citation_change_view.html')
+    if citation.type_controlled == Citation.BOOK:
+        template = loader.get_template('curation/citation_change_view_book.html')
+    else:
+        template = loader.get_template('curation/citation_change_view.html')
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
@@ -776,8 +779,14 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(request.user, citation_id, instance=citation.part_details)
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK]:
+            part_details = getattr(citation, 'part_details', None)
+            if not part_details:
+                part_details = PartDetails.objects.create()
+                citation.part_details = part_details
+                citation.save()
+
+            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details)
             context.update({
                 'partdetails_form': partdetails_form,
             })
