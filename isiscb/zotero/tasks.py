@@ -65,8 +65,6 @@ def ingest_citation(request, accession, draftcitation):
         ('extent', 'extent_note'),
     ])
 
-
-
     # Gather fields that will be transferred to the production Citation.
     citation_data = {}
     for field, pfield in citation_fields:
@@ -141,13 +139,14 @@ def ingest_citation(request, accession, draftcitation):
         target.zotero_accession = accession
         target.save()
 
+        # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
             '_history_user': request.user,
             'name_for_display_in_citation': draft.name,
             'record_history': _record_history_message(request, accession),
-            'public': False,
-            'record_status_value': CuratedMixin.INACTIVE,
-            'record_status_explanation': u'Inactive by default',
+            'public': True,
+            'record_status_value': CuratedMixin.ACTIVE,
+            'record_status_explanation': u'Active by default',
             'authority': target,
             'citation': citation,
             'type_controlled': relation.type_controlled,
