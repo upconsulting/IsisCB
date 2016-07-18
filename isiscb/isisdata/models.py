@@ -1002,13 +1002,13 @@ class Authority(ReferencedEntity, CuratedMixin):
     controlled type vocabulary.
     """))
 
-    SWP = 'SWP'
-    NEU = 'NEU'
-    MW = 'MW'
+    SWP = 'SWP'    # TODO: this should probably change, but we need to do a
+    NEU = 'NEU'    #  data migration to do this propertly. For now I have
+    MW = 'MW'      #  changed the disply value (below). -EP
     SHOT = 'SHOT'
     SEARCH = 'SAC'
     CLASS_SYSTEM_CHOICES = (
-        (SWP, 'SWP'),
+        (SWP, 'SPW'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
