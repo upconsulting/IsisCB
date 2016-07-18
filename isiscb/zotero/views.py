@@ -213,13 +213,29 @@ def create_authority_for_draft(request):
     accession = get_object_or_404(ImportAccession, pk=accession_id)
 
     # Authority instance from field data.
-    authority = Authority.objects.create(
-        name=draftauthority.name,
-        type_controlled=draftauthority.type_controlled,
-        public=False,
-        belongs_to=accession.ingest_to,
-        record_status_value=CuratedMixin.INACTIVE,
-    )
+    authority_data = {
+        'name': draftauthority.name,
+        'type_controlled': draftauthority.type_controlled,
+        'public': True,
+        'belongs_to': accession.ingest_to,
+        'record_status_value': CuratedMixin.ACTIVE,
+        'record_status_explanation': u'Active by default.',
+        'record_history': tasks._record_history_message(request, accession),
+    }
+
+    #  Note: ISISCB-577 Created authority records should be active by default.
+    if draftauthority.type_controlled == DraftAuthority.PERSON:
+        model_class = Person
+        authority_data.update({
+            'personal_name_last': draftauthority.name_last if draftauthority.name_last else u'',
+            'personal_name_first': draftauthority.name_first if draftauthority.name_first else u'',
+            'personal_name_suffix': draftauthority.name_suffix if draftauthority.name_suffix else u'',
+            'personal_name_preferred': draftauthority.name,
+        })
+    else:
+        model_class = Authority
+
+    authority = model_class.objects.create(**authority_data)
 
     resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
     draftauthority.processed = True
