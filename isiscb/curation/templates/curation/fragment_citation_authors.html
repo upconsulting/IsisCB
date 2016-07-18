@@ -13,27 +13,41 @@
     {% for acrelation in instance.acrelation_set.all %}
         {% if acrelation.type_broad_controlled == 'PR' %}    <!-- Personal responsibility. -->
         <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="author-{{ acrelation.id }}">
+
+          <div class="row">
             {% if can_update %}
-            <span class="button-group button-group-xs pull-right">
-                <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-author"
-                    type="button"
-                    acrelation-id="{{ acrelation.id }}"
-                    acrelation-title="{{ acrelation.authority.name }}"></a>
+            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+            {% endif %}
+            <span class="col-sm-11">
+
+              <label class="label label-success">{{ acrelation.get_type_controlled_display }}</label>
+              {{ acrelation.authority.name }}
+              {% if acrelation.name_for_display_in_citation %}
+              <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+              {% endif %}
+              {% if not acrelation.authority.public %}
+              <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+              {% endif %}
+              {% if not acrelation.public %}
+              <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+              {% endif %}
             </span>
+
+            {% if can_update %}
+            </a>
             {% endif %}
 
-            <label class="label label-success">{{ acrelation.get_type_controlled_display }}</label>
-            {{ acrelation.authority.name }}
-            {% if acrelation.name_for_display_in_citation %}
-            <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-            {% endif %}
-            {% if not acrelation.authority.public %}
-            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-            {% endif %}
-            {% if not acrelation.public %}
-            <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
-            {% endif %}
+            <span class="col-sm-1 text-right">
+              {% if can_update %}
+              <span class="button-group button-group-xs pull-right">
+                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-author"
+                      type="button"
+                      acrelation-id="{{ acrelation.id }}"
+                      acrelation-title="{{ acrelation.authority.name }}"></a>
+              </span>
+              {% endif %}
+            </span>
+          </div>
         </li>
         {% endif %}
     {% endfor %}
@@ -142,7 +156,7 @@ var createNewauthor = function() {
                         new_elem_acr += result.acrelation.authority.name;
                         new_elem += '</li>';
                         new_elem_acr += '</li>';
-                        
+
                         $('#author-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
                         author_creation_container.css("visibility", "hidden");
