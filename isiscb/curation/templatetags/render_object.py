@@ -48,7 +48,10 @@ def get_citation_title(obj):
     if not title:
         for relation in obj.ccrelations:
             if relation.type_controlled in [CCRelation.REVIEW_OF, CCRelation.REVIEWED_BY]:
-                return u'Review: %s' % relation.subject.title if relation.subject.id != obj.id else relation.object.title
+                if relation.subject:
+                    return u'Review: %s' % relation.subject.title if relation.subject.id != obj.id else relation.object.title
+                else:
+                    return u'(no title)'
         return u'Untitled review'
     return title
 
