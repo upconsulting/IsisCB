@@ -10,29 +10,35 @@
     <div class="h5">Dataset: <span class="text-warning">{{ accession.ingest_to }}</a></div>
 
     {% block action %}
-    {% if accession.resolved %}
-    <a href="{% url "ingest_accession" accession.id %}"
-        class="btn btn-primary">Ingest Records</a>
-    <div class="h5 text-info">This accession is ready for ingest into the production database.</div>
-    {% else %}
-    <a href="{% url "retrieve_accession" accession.id %}"
-        class="btn btn-primary">Resolve Authority Records</a>
-    <div class="h5 text-danger">
-        Several draft authority records in this accession require resolution before
-        this accession can be ingested into the production database.
+    <div class="panel-body text-center">
+        <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
+            class="btn btn-success">
+            Ingest <strong>{{ accession.citations_ready.count }}</strong> citations
+        </a>
+        <a href="{% url "retrieve_accession" accession.id %}"
+            class="btn btn-primary">Resolve Authority Records</a>
+
     </div>
-    {% endif %}
     {% endblock %}
 
     {% block citationlist %}
+    <p class="text-info">
+        Citations or authority records marked with a <span style="font-size: 8pt; color: green;" class="glyphicon glyphicon-ok"></span>
+        have already been resolved/added to the production database. Click on a record to see the raw data imported from Zotero.
+    </p>
     <ul class="list-group">
         {% for draftcitation in draftcitations %}
         <li class="list-group-item">
-            <a class="h4" href="{{ draftcitation.get_absolute_url }}">{{ draftcitation.title }}</a>
+            <a class="h4" href="{{ draftcitation.get_absolute_url }}">
+                {% if draftcitation.processed %}
+                <span style="font-size: 12pt; color: green;" class="glyphicon glyphicon-ok"></span>&nbsp;
+                {% endif %}
+                {{ draftcitation.title }}</a>
 
             <dl class="dl-horizontal">
             {% for relation in draftcitation.authority_relations.all %}
-                <dt>{{ relation.get_type_controlled_display }}</dt>
+                <dt>
+                    {{ relation.get_type_controlled_display }}</dt>
                 <dd>
                     {% if relation.authority.processed %}
                     <span style="font-size: 8pt; color: green;" class="glyphicon glyphicon-ok"></span>&nbsp;

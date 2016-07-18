@@ -21,18 +21,13 @@ def ingest_accession(request, accession):
     database.
     """
 
-    if not accession.resolved:
-        raise RuntimeError('Cannot ingest an ImportAccession with unresolved' \
-                         + ' DraftAuthority records')
-
     ingested = []
-    for draftcitation in accession.draftcitation_set.filter(processed=False):
-        try:
-            ingested.append(ingest_citation(request, accession, draftcitation))
-        except Exception as E:
-            print E
-    accession.processed = True
-    accession.save()
+    for draftcitation in accession.citations_ready:
+        ingested.append(ingest_citation(request, accession, draftcitation))
+
+    if accession.citations_remaining.count() == 0:
+        accession.processed = True
+        accession.save()
 
     return ingested
 
@@ -42,9 +37,6 @@ def ingest_citation(request, accession, draftcitation):
     #  simply return the target of the resolution.
     if draftcitation.resolutions.count() > 0:
         return draftcitation.resolutions.first()
-
-    if not accession.resolved:
-        raise RuntimeError('Accession not resolved')
 
     citation_fields = [
         ('title', 'title'),
@@ -132,6 +124,18 @@ def ingest_citation(request, accession, draftcitation):
             value=date,
             attribute=attribute,
         )
+    elif draftcitation.publication_date:
+        # If we cannot parse the publication date as an ISO8601 date, then we
+        #  update the staff notes with the unparseable date so that it is not
+        #  completely lost.
+        message=  u'\nCould not parse publication date in Zotero metadata: %s'\
+                  % draftcitation.publication_date
+        if citation.administrator_notes:
+            citation.administrator_notes += message
+        else:
+            citation.administrator_notes = message
+        citation.save()
+
 
     for relation in draftcitation.authority_relations.all():
         draft = relation.authority

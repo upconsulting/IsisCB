@@ -31,7 +31,7 @@ rules.add_rule('can_access_view_edit', can_access_view_edit)
 
 rules.add_rule('has_zotero_access', has_zotero_access)
 
-
+app_name = "curation"
 urlpatterns = [
     url(r'^(?i)$', views.dashboard, name='index'),
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),

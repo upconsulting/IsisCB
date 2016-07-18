@@ -55,4 +55,5 @@ urlpatterns = [
     url(r'^(?i)help', views.help, name='help'),
     url(r'^(?i)about', views.about, name='about'),
     url(r'^(?i)api', views.api_documentation, name='api'),
+    url(r'^curation/', include('curation.urls', namespace="curation")),
 ]

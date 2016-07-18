@@ -4,16 +4,22 @@
 {% block content %}
 
     {% block action %}
-    {% if accession.resolved %}
-    <div class="text-success">
-        Successfully ingested {{ ingested|length }} of {{ draftcitations.count }} citations into dataset
+    <div class="panel-body text-success text-center">
+        Successfully ingested {{ ingested|length }} of {{ draftcitations.count }} citations{% if accession.ingest_to %} into dataset
         &nbsp;
         <a href="{% url "citation_list" %}?zotero_accession={{accession.id}}&belongs_to={{ accession.ingest_to.id }}"
             class="text-warning">
             {{ accession.ingest_to.name }}
-        </a>.
+        </a>{% endif %}.
     </div>
-    {% endif %}
+
+    <div class="panel-body text-center">
+
+        <a class="btn btn-success" href="{% url "citation_list" %}?zotero_accession={{ accession.id }}">View Production Citations</a>
+        <a class="btn btn-primary" href="{% url "data_importaccession" accession.id %}">Return to Zotero Accession</a>
+
+    </div>
+
     {% endblock %}
 
     {% block citationlist %}
