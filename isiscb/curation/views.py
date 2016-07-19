@@ -792,6 +792,8 @@ def citation(request, citation_id):
 
     if citation.type_controlled == Citation.BOOK:
         template = loader.get_template('curation/citation_change_view_book.html')
+    elif citation.type_controlled == Citation.REVIEW:
+        template = loader.get_template('curation/citation_change_view_review.html')
     else:
         template = loader.get_template('curation/citation_change_view.html')
     partdetails_form = None

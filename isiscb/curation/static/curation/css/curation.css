@@ -24,6 +24,26 @@ body, p, div, table, input {
   border-radius: 1px;
 }
 
+.form-group {
+    margin-bottom: 10px;
+}
+
+.input-sm {
+    padding: 5px 0px;
+  }
+
+input.input-sm, textarea.input-sm {
+  padding: 5px 5px;
+}
+
+.form-horizontal .control-label{
+  text-align:left;
+}
+
+.noFormForms {
+  padding-top: 0px;
+  margin-bottom: 10px;
+}
 
 .brand-logo-container {
     background-color: #012e64;

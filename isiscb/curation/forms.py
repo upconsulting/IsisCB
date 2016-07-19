@@ -159,6 +159,7 @@ class CitationForm(forms.ModelForm):
             # Don't let the user change type_controlled.
             self.fields['type_controlled'].widget.attrs['readonly'] = True
             self.fields['type_controlled'].widget.attrs['disabled'] = True
+            self.fields['title'].widget.attrs['placeholder'] = "No title"
 
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))

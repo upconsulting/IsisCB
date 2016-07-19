@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import SafeText
+from django.db.models import Q
 
 from isisdata.models import *
 
@@ -62,6 +63,9 @@ def get_publisher(obj):
 def get_isbn(obj):
     return obj.linkeddata_entries.filter(type_controlled__name='ISBN').first()
 
+@register.filter(name='get_doi')
+def get_doi(obj):
+    return obj.linkeddata_entries.filter(type_controlled__name='DOI').first()
 
 
 @register.filter(name='get_authors_editors')
@@ -91,6 +95,20 @@ def get_citation_pubdate_fast(obj):
     if not date:
         return 'missing'
     return date.isoformat()[:4]
+
+@register.filter
+def get_reviewed_books(citation):
+    ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEW_OF, subject__id=citation.id))
+    citations =  map(lambda x: x.object, ccrelations)
+
+    ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEWED_BY, object__id=citation.id))
+    citations = citations + map(lambda x: x.subject, ccrelations)
+
+    return citations
+
+@register.filter
+def get_pub_title_and_year(citation):
+    return u"{0}, ({1})".format(citation.title, getattr(citation, 'publication_date', "Date missing"))
 
 
 @register.filter(name='get_citation_periodical')
