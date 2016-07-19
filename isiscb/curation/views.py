@@ -804,7 +804,7 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK]:
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()

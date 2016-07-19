@@ -109,6 +109,19 @@ class PartDetailsForm(forms.ModelForm):
         self.user = user
         self.citation_id = citation_id
 
+        self.fields['volume_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['volume_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['volume_free_text'].widget.attrs['placeholder'] = "Volume"
+        self.fields['issue_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['issue_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['issue_free_text'].widget.attrs['placeholder'] = "Issue"
+        self.fields['page_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['page_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['pages_free_text'].widget.attrs['placeholder'] = "Pages"
+        self.fields['extent'].widget.attrs['placeholder'] = "Extent"
+        self.fields['extent_note'].widget.attrs['placeholder'] = "Extent note"
+
+
         if citation_id:
             can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
             can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
