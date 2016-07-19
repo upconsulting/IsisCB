@@ -9,7 +9,8 @@
 <ul class="list-group">
 {% if can_view %}
 {% for attribute in instance.attributes.all %}
-    <li class="list-group-item {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
+
+    <li class="list-group-item attribute {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "update_attribute_for_citation" instance.id attribute.id%}" class="list_entry_link">

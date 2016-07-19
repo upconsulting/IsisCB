@@ -6,12 +6,12 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<div class="h4">Categories</div>
+<label>Categories</label>
 <ul class="list-group" id="category-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'CA' %}
-    <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
+    <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
@@ -49,8 +49,8 @@
 {% endfor %}
 
 {% if can_update %}
-<li class="list-group-item" id="create-category-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewCategory();">
+<li class="list-group-item" id="create-category-item" style="display: none;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewCategory();">
     <span class="glyphicon glyphicon-plus"></span> Add a category
 </a>
 {% endif %}
@@ -75,7 +75,7 @@ var createNewCategory = function() {
     form_group.append('<input class="form-control" id="create-category-input" name="create-category-input" type="text" />');
     category_creation_container.append(form_group);
     category_creation_container.append('<ul class="list-group" id="create-category-results-container"></ul>');
-    category_creation_container.css("visibility", "visible");
+    category_creation_container.css("display", "block");
 
     $('#create-category-input').on('keyup', function(e) {
         var query = $(this).val();
@@ -84,7 +84,7 @@ var createNewCategory = function() {
                 var results_container = $('#create-category-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -167,7 +167,7 @@ var createNewCategory = function() {
 
                         $('#category-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
-                        category_creation_container.css("visibility", "hidden");
+                        category_creation_container.css("display", "none");
                         category_creation_container.empty();
 
                         bind_acrelation();

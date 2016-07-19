@@ -6,12 +6,12 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<div class="h4">Subjects</div>
+<label>Subjects</label>
 <ul class="list-group" id="subject-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'SU' %}
-    <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
+    <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
@@ -50,8 +50,8 @@
 {% endfor %}
 
 {% if can_update %}
-<li class="list-group-item" id="create-subject-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewSubject();">
+<li class="list-group-item" id="create-subject-item" style="display: none;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewSubject();">
     <span class="glyphicon glyphicon-plus"></span> Add a subject
 </a>
 {% endif %}
@@ -76,7 +76,7 @@ var createNewSubject = function() {
     form_group.append('<input class="form-control" id="create-subject-input" name="create-subject-input" type="text" />');
     subject_creation_container.append(form_group);
     subject_creation_container.append('<ul class="list-group" id="create-subject-results-container"></ul>');
-    subject_creation_container.css("visibility", "visible");
+    subject_creation_container.css("display", "block");
 
     $('#create-subject-input').on('keyup', function(e) {
         var query = $(this).val();
@@ -85,7 +85,7 @@ var createNewSubject = function() {
                 var results_container = $('#create-subject-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -126,6 +126,7 @@ var createNewSubject = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
+
                         var new_elem = '<li class="list-group-item clearfix" id="subject-' + new_id + '">';
                         var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
 
@@ -170,7 +171,7 @@ var createNewSubject = function() {
 
                         $('#subject-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
-                        subject_creation_container.css("visibility", "hidden");
+                        subject_creation_container.css("display", "none");
                         subject_creation_container.empty();
 
                         bind_acrelation();

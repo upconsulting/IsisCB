@@ -12,7 +12,8 @@
     {% if can_view %}
     {% for acrelation in instance.acrelation_set.all %}
         {% if acrelation.type_broad_controlled == 'PR' %}    <!-- Personal responsibility. -->
-        <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="author-{{ acrelation.id }}">
+
+        <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="author-{{ acrelation.id }}">
 
           <div class="row">
             {% if can_update %}

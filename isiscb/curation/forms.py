@@ -109,6 +109,19 @@ class PartDetailsForm(forms.ModelForm):
         self.user = user
         self.citation_id = citation_id
 
+        self.fields['volume_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['volume_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['volume_free_text'].widget.attrs['placeholder'] = "Volume"
+        self.fields['issue_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['issue_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['issue_free_text'].widget.attrs['placeholder'] = "Issue"
+        self.fields['page_begin'].widget.attrs['placeholder'] = "Begin #"
+        self.fields['page_end'].widget.attrs['placeholder'] = "End #"
+        self.fields['pages_free_text'].widget.attrs['placeholder'] = "Pages"
+        self.fields['extent'].widget.attrs['placeholder'] = "Extent"
+        self.fields['extent_note'].widget.attrs['placeholder'] = "Extent note"
+
+
         if citation_id:
             can_update = rules.test_rule('can_update_citation_field', user, ('part_details', citation_id))
             can_view = rules.test_rule('can_view_citation_field', user, ('part_details', citation_id))
@@ -156,6 +169,11 @@ class CitationForm(forms.ModelForm):
 
         # disable fields user doesn't have access to
         if self.instance.pk:
+            # Don't let the user change type_controlled.
+            self.fields['type_controlled'].widget.attrs['readonly'] = True
+            self.fields['type_controlled'].widget.attrs['disabled'] = True
+            self.fields['title'].widget.attrs['placeholder'] = "No title"
+
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
                 if not can_update:
@@ -168,7 +186,6 @@ class CitationForm(forms.ModelForm):
                     self.fields[field] = forms.CharField(widget=NoViewInput())
                     self.fields[field].widget.attrs['readonly'] = True
                     self.fields[field].widget.attrs['disabled'] = True
-
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -208,6 +225,7 @@ class CitationForm(forms.ModelForm):
                     exclude.append(field)
         return exclude
 
+
 class LinkedDataForm(forms.ModelForm):
 
     class Meta:
@@ -226,6 +244,7 @@ class LinkedDataForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         super(LinkedDataForm, self).save(*args, **kwargs)
+
 
 class NoViewInput(forms.TextInput):
 

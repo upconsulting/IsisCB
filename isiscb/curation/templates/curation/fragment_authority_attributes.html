@@ -10,7 +10,8 @@
 <ul class="list-group">
 {% if can_view %}
 {% for attribute in instance.attributes.all %}
-    <li class="list-group-item {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
+
+    <li class="list-group-item attribute {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
 
       <div class="row">
         {% if can_update %}

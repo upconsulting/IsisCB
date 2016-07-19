@@ -9,7 +9,8 @@
 <ul class="list-group">
 {% if can_view %}
 {% for linkeddata in instance.linkeddata_entries.all %}
-    <li class="list-group-item" id="linkeddata-{{ linkeddata.id }}">
+
+    <li class="list-group-item linkeddata" id="linkeddata-{{ linkeddata.id }}">
 
       <div class="row">
         {% if can_update %}

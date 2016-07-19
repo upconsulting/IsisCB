@@ -9,7 +9,8 @@
 <ul class="list-group">
 {% if can_view %}
 {% for linkeddata in instance.linkeddata_entries.all %}
-    <li class="list-group-item" id="linkeddata-{{ linkeddata.id }}">
+
+    <li class="list-group-item linkeddata" id="linkeddata-{{ linkeddata.id }}">
       <div class="row">
         {% if can_update %}
         <a href="{% url 'update_linkeddata_for_citation' instance.pk linkeddata.pk %}" class="list_entry_link">
@@ -48,7 +49,7 @@
     </li>
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url 'create_linkeddata_for_citation' instance.id %}">
+    <a class="list-group-item linkeddata text-muted" href="{% url 'create_linkeddata_for_citation' instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new Linked Data entry
     </a>
 {% endif %}

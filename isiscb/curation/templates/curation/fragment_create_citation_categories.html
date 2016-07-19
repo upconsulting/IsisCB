@@ -6,8 +6,8 @@
 <div class="h4">Categories</div>
 <ul class="list-group" id="category-list-group">
 
-<li class="list-group-item" id="create-category-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewCategory();">
+<li class="list-group-item acrelation" id="create-category-item" style="visibility: hidden;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewCategory();">
     <span class="glyphicon glyphicon-plus"></span> Add a category
 </a>
 </ul>
@@ -30,7 +30,7 @@ var createNewCategory = function() {
                 var results_container = $('#create-category-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -71,8 +71,8 @@ var createNewCategory = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
-                        var new_elem = '<li class="list-group-item clearfix" id="category-' + new_id + '">';
-                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        var new_elem = '<li class="list-group-item acrelation clearfix" id="category-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item acrelation clearfix" id="acrelation-' + new_id + '">';
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
                         new_elem += '<a href="' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';

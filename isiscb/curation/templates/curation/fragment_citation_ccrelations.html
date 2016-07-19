@@ -10,7 +10,8 @@
 <ul class="list-group">
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
-    <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
+
+    <li class="list-group-item ccrelation clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">

@@ -24,6 +24,26 @@ body, p, div, table, input {
   border-radius: 1px;
 }
 
+.form-group {
+    margin-bottom: 10px;
+}
+
+.input-sm {
+    padding: 5px 0px;
+  }
+
+input.input-sm, textarea.input-sm {
+  padding: 5px 5px;
+}
+
+.form-horizontal .control-label{
+  text-align:left;
+}
+
+.noFormForms {
+  padding-top: 0px;
+  margin-bottom: 10px;
+}
 
 .brand-logo-container {
     background-color: #012e64;
@@ -57,6 +77,41 @@ a:hover.delete {
 .record-notpublic {
   background-color: #f1e0e0;
 }
+
+
+/* Reduce padding on related list items */
+.list-group-item.acrelation {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.list-group-item.attribute {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.list-group-item.linkeddata {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.list-group-item.ccrelation {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.list-group-item.language {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.cursor-link {
+    cursor: pointer;
+}
+
+
+.glyphicon-plus {
+    color: green;
 
 a:hover.list_entry_link {
     text-decoration: none;

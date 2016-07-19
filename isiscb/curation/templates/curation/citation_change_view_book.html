@@ -1,0 +1,177 @@
+{% extends "curation/citation_change_view.html" %}
+{% load addcss %}
+{% load render_object %}
+{% load permission_tags %}
+
+{% block citation_panel_left %}
+
+{% for error in form.title.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    {{ form.title|addcss:"form-control" }}
+</div>
+
+<!-- Authors/editors/contributors -->
+{% with instance|get_authors_editors as authors_editors %}
+<div class="noFormForms">
+  <small>
+    <strong>By:</strong>
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">
+            {% if authors_editors %}
+            {{ authors_editors }}
+            {% else %}
+            <em>Add author, editor, or contributor</em>
+            {% endif %}
+
+        </a>
+      </small>
+</div>
+{% endwith %}
+
+<!-- Publication date -->
+
+{% with instance|get_citation_pubdate as pubdate %}
+<div class="noFormForms">
+  <small>
+    <strong>Date:</strong>
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if pubdate %}
+            {{ pubdate }}
+            {% else %}
+            <em>Add publication date</em>
+            {% endif %}
+        </a>
+      </small>
+</div>
+{% endwith %}
+
+
+
+{% for error in form.edition_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+<div class="row">
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">{{ form.edition_details.label }}</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.edition_details|addcss:"form-control input-sm" }}
+  </div>
+</div>
+</div>
+
+{% for error in form.physical_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+  <div class="row">
+    <div class="col-sm-2 text-left">
+      <label class="input-sm">{{ form.physical_details.label }}</label>
+    </div>
+    <div class="col-sm-10">
+      {{ form.physical_details|addcss:"form-control input-sm" }}
+    </div>
+  </div>
+</div>
+
+{% if partdetails_form %}
+<div class="form-group">
+  <div class="row">
+        {% for error in partdetails_form.extent.errors %}
+        <div class="col-sm-12 text-left">
+          <div class="alert alert-danger">{{ error }}</div>
+        </div>
+        {% endfor %}
+        {% for error in partdetails_form.extent_note.errors %}
+        <div class="col-sm-12 text-left">
+          <div class="alert alert-danger">{{ error }}</div>
+        </div>
+        {% endfor %}
+
+          <div class="col-sm-6 form-horizontal">
+            <label class="col-sm-4 control-label input-sm">{{ partdetails_form.extent.label }}</label>
+            <div class="col-sm-8">
+              {{ partdetails_form.extent|addcss:"form-control input-sm" }}
+            </div>
+          </div>
+          <div class="col-sm-6 form-horizontal">
+            <div class="form-group">
+              <label class="col-sm-4 control-label input-sm">{{ partdetails_form.extent_note.label }}</label>
+              <div class="col-sm-8" >
+                {{ partdetails_form.extent_note|addcss:"form-control form-horizontal input-sm" }}
+              </div>
+            </div>
+          </div>
+    </div>
+</div>
+{% endif %}
+
+{% with instance|get_publisher as publisher %}
+<div class="form-group">
+    <div>
+        {% if publisher %}
+        <a class="text-warning cursor-link input-sm"
+            onclick="toggleTab('acrelations')">
+            {{ publisher }}
+        </a>
+        {% else %}
+        <a class="text-warning input-sm"
+            href="{% url 'create_acrelation_for_citation' instance.id %}?type_controlled=PU">
+            <span class="gylphicon glyphicon-plus"></span> Add Publisher
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
+
+{% with instance|get_isbn as isbn %}
+<div class="form-group">
+    <div>
+        {% if isbn %}
+        <a class="text-warning cursor-link input-sm"
+            onclick="toggleTab('linkeddata')">
+            {{ isbn }}
+        </a>
+        {% else %}
+        <a class="text-warning input-sm"
+            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=ISBN">
+            <span class="gylphicon glyphicon-plus"></span> Add ISBN
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
+
+{% for error in form.additional_titles.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+<div class="row">
+    <div class="col-sm-2 text-left">
+      <label class="input-sm ">{{ form.additional_titles.label }}</label>
+    </div>
+    <div class="col-sm-10">
+      {{ form.additional_titles|addcss:"form-control input-sm" }}
+    </div>
+</div>
+</div>
+
+{% for error in form.book_series.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+  <div class="row">
+    <div class="col-sm-2 text-left">
+      <label class="input-sm">{{ form.book_series.label }}</label>
+    </div>
+    <div class="col-sm-10">
+      {{ form.book_series|addcss:"form-control input-sm" }}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
