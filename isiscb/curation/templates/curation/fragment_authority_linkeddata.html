@@ -9,29 +9,44 @@
 <ul class="list-group">
 {% if can_view %}
 {% for linkeddata in instance.linkeddata_entries.all %}
-    <li class="list-group-item" id="linkeddata-{{ linkeddata.id }}">
-        {% if linkeddata.type_controlled %}
-        <span class="label label-primary">{{ linkeddata.type_controlled.name }}</span>
-        {% endif %}
 
-        {{ linkeddata.universal_resource_name }}
-        {% if linkeddata.resource_name %}
-        <span class="text-warning">{{ linkeddata.resource_name }}</span>
-        {% endif %}
+    <li class="list-group-item linkeddata" id="linkeddata-{{ linkeddata.id }}">
 
-        {% if not linkeddata.public %}
-        <i class="fa fa-eye-slash" title="This Linked Data entry is not public."></i>
+      <div class="row">
+        {% if can_update %}
+        <a href="{% url 'update_linkeddata_for_authority' instance.pk linkeddata.pk %}" class="list_entry_link">
         {% endif %}
+        <span class="col-sm-11">
+
+          {% if linkeddata.type_controlled %}
+          <span class="label label-primary">{{ linkeddata.type_controlled.name }}</span>
+          {% endif %}
+
+          {{ linkeddata.universal_resource_name }}
+          {% if linkeddata.resource_name %}
+          <span class="text-warning">{{ linkeddata.resource_name }}</span>
+          {% endif %}
+
+          {% if not linkeddata.public %}
+          <i class="fa fa-eye-slash" title="This Linked Data entry is not public."></i>
+          {% endif %}
+        </span>
 
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url 'update_linkeddata_for_authority' instance.pk linkeddata.pk %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-linkeddata"
-                type="button"
-                linkeddata-id="{{ linkeddata.pk }}"
-                linkeddata-title="{{ linkeddata }}"></a>
-        </span>
+        </a>
         {% endif %}
+
+        <span class="col-sm-1 text-right">
+          {% if can_update %}
+          <span class="button-group button-group-xs">
+              <a class="btn btn-xs glyphicon glyphicon-remove delete delete-linkeddata"
+                  type="button"
+                  linkeddata-id="{{ linkeddata.pk }}"
+                  linkeddata-title="{{ linkeddata }}"></a>
+          </span>
+          {% endif %}
+        </span>
+      </div>
     </li>
 {% endfor %}
 {% if can_update %}

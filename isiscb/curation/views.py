@@ -253,7 +253,14 @@ def create_acrelation_for_authority(request, authority_id):
 
     })
     if request.method == 'GET':
-        form = ACRelationForm(prefix='acrelation', initial={'authority': authority.id, 'name_for_display_in_citation': authority.name})
+        initial = {
+            'authority': authority.id,
+            'name_for_display_in_citation': authority.name
+        }
+        type_controlled = request.GET.get('type_controlled', None)
+        if type_controlled:
+            initial.update({'type_controlled': type_controlled.upper()})
+        form = ACRelationForm(prefix='acrelation', initial=initial)
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
@@ -307,7 +314,13 @@ def create_acrelation_for_citation(request, citation_id):
         'instance': citation,
     })
     if request.method == 'GET':
-        form = ACRelationForm(prefix='acrelation', initial={'citation': citation.id})
+        initial = {
+            'citation': citation.id,
+        }
+        type_controlled = request.GET.get('type_controlled', None)
+        if type_controlled:
+            initial.update({'type_controlled': type_controlled.upper()})
+        form = ACRelationForm(prefix='acrelation', initial=initial)
 
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
@@ -545,9 +558,19 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
     if request.method == 'GET':
         if linkeddata:
-            linkeddata_form = LinkedDataForm(instance=linkeddata, prefix='linkeddata')
+            linkeddata_form = LinkedDataForm(instance=linkeddata,
+                                             prefix='linkeddata')
         else:
-            linkeddata_form = LinkedDataForm(prefix='linkeddata')
+            initial = {}
+            type_controlled = request.GET.get('type_controlled', None)
+            if type_controlled:
+                q = {'name__istartswith': type_controlled}
+                qs = LinkedDataType.objects.filter(**q)
+                if qs.count() > 0:
+                    initial.update({'type_controlled': qs.first()})
+
+            linkeddata_form = LinkedDataForm(prefix='linkeddata',
+                                             initial=initial)
     elif request.method == 'POST':
         if linkeddata:    # Update.
             linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix='linkeddata')
@@ -767,7 +790,12 @@ def citation(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    template = loader.get_template('curation/citation_change_view.html')
+    if citation.type_controlled == Citation.BOOK:
+        template = loader.get_template('curation/citation_change_view_book.html')
+    elif citation.type_controlled == Citation.REVIEW:
+        template = loader.get_template('curation/citation_change_view_review.html')
+    else:
+        template = loader.get_template('curation/citation_change_view.html')
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
@@ -776,8 +804,14 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(request.user, citation_id, instance=citation.part_details)
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW]:
+            part_details = getattr(citation, 'part_details', None)
+            if not part_details:
+                part_details = PartDetails.objects.create()
+                citation.part_details = part_details
+                citation.save()
+
+            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details)
             context.update({
                 'partdetails_form': partdetails_form,
             })
@@ -811,10 +845,11 @@ def citations(request):
     queryset = filter_queryset(request.user, Citation.objects.all())
     filtered_objects = CitationFilter(request.GET, queryset=queryset)
 
+    filters_active = request.GET.get('filters', False)
+    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
     context.update({
         'objects': filtered_objects,
-        'filters_active': len([v for k, v in request.GET.iteritems()
-                               if len(v) > 0 and k != 'page']) > 0,
+        'filters_active': filters_active,
     })
 
     return HttpResponse(template.render(context))
@@ -863,11 +898,11 @@ def authorities(request):
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
-
+    filters_active = request.GET.get('filters', False)
+    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
     context.update({
         'objects': filtered_objects,
-        'filters_active': len([v for k, v in request.GET.iteritems()
-                               if len(v) > 0 and k != 'page']) > 0,
+        'filters_active': filters_active
     })
 
     return HttpResponse(template.render(context))

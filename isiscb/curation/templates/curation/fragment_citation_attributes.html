@@ -9,24 +9,38 @@
 <ul class="list-group">
 {% if can_view %}
 {% for attribute in instance.attributes.all %}
-    <li class="list-group-item {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
-        <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
-        {{ attribute.value.get_child_class }}
-        <span class="text-warning">{{ attribute.value_freeform}}</span>
 
-        {% if not attribute.public %}
-        <i class="fa fa-eye-slash" title="This attribute is not public."></i>
+    <li class="list-group-item attribute {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
+      <div class="row">
+        {% if can_update %}
+        <a href="{% url "update_attribute_for_citation" instance.id attribute.id%}" class="list_entry_link">
         {% endif %}
+        <span class="col-sm-11">
+
+          <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+          {{ attribute.value.get_child_class }}
+          <span class="text-warning">{{ attribute.value_freeform}}</span>
+
+          {% if not attribute.public %}
+          <i class="fa fa-eye-slash" title="This attribute is not public."></i>
+          {% endif %}
+        </span>
 
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url "update_attribute_for_citation" instance.id attribute.id%}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-attribute"
-                type="button"
-                attribute-id="{{ attribute.id }}"
-                attribute-title="{{ attribute.type_controlled.name }}"></a>
-        </span>
+        </a>
         {% endif %}
+
+        <span class="col-sm-1 text-right">
+          {% if can_update %}
+          <span class="button-group button-group-xs">
+              <a class="btn btn-xs glyphicon glyphicon-remove delete delete-attribute"
+                  type="button"
+                  attribute-id="{{ attribute.id }}"
+                  attribute-title="{{ attribute.type_controlled.name }}"></a>
+          </span>
+          {% endif %}
+        </span>
+      </div>
     </li>
 {% endfor %}
 {% if can_update %}

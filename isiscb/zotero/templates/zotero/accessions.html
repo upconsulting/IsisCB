@@ -47,13 +47,13 @@
             <td>{{ object.resolved }}</td>
             <td>{{ object.processed }}</td>
             <td>
-                {% if object.resolved and not object.processed %}
-                <a href="{% url "ingest_accession" object.id %}"
-                    class="btn btn-xs btn-success">Ingest</a>
-                {% elif not object.resolved and not object.processed %}
-                <a href="{% url "retrieve_accession" object.id %}"
-                    class="btn btn-xs btn-primary">Resolve</a>
-                {% endif %}
+                <div class="btn-group btn-group-xs">
+                    <a href="{% url "ingest_accession" object.id %}"
+                        class="btn btn-xs btn-success">Ingest</a>
+
+                    <a href="{% url "retrieve_accession" object.id %}"
+                        class="btn btn-xs btn-primary">Resolve</a>
+                </div>
             </td>
         </tr>
         {% endfor %}

@@ -5,8 +5,8 @@
 <div class="h4">Subjects</div>
 <ul class="list-group" id="subject-list-group">
 
-<li class="list-group-item" id="create-subject-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewSubject();">
+<li class="list-group-item acrelation" id="create-subject-item" style="visibility: hidden;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewSubject();">
     <span class="glyphicon glyphicon-plus"></span> Add a subject
 </a>
 
@@ -31,7 +31,7 @@ var createNewSubject = function() {
                 var results_container = $('#create-subject-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -72,8 +72,8 @@ var createNewSubject = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
-                        var new_elem = '<li class="list-group-item clearfix" id="subject-' + new_id + '">';
-                        var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+                        var new_elem = '<li class="list-group-item acrelation clearfix" id="subject-' + new_id + '">';
+                        var new_elem_acr = '<li class="list-group-item acrelation clearfix" id="acrelation-' + new_id + '">';
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
                         new_elem += '<a href="" class="btn btn-xs glyphicon glyphicon-pencil"></a>';

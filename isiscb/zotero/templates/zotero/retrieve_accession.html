@@ -11,21 +11,17 @@
 </div>
 <div class="h4">Authority Resolution</div>
 
-{% if accession.resolved %}
 <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
     class="btn btn-success">
-    Perform Ingest
+    Ingest <strong>{{ accession.citations_ready.count }}</strong> citations
 </a>
+{% if accession.resolved %}
 <p class="text-danger">
-    All authority records in this accession have been resolved. Ingesting this
-    accession will create {{ accession.citation_set.count }} new citations in
-    the production database.
+    All authority records in this accession have been resolved.
 </p>
 {% else %}
 <p class="text-info">
     Use the interface below to resolve authority records from this Zotero accession.
-    All authority records must be resolved before citations can be imported into the
-    production database.
 </p>
 {% endif %}
 
@@ -282,6 +278,17 @@ $(document).ready(function() {
     });
 });
 
+var selectNextAuthority = function() {
+    $('.draftauthority').first().trigger('click');
+}
+
+var cleanupResolvedAuthority = function(draftauthority_id) {
+    $("#authority-" + draftauthority_id).remove();
+    $('#matching').css('visibility', 'hidden');
+    selectNextAuthority();
+}
+
+
 //
 var bindSuggestions = function() {
     $('.resolve-with-suggestion').click(function(e) {
@@ -349,8 +356,8 @@ var confirmCreateModal = function() {
                 triggerResolveAuthority(di, created_authority_id);
             });
         });
-        $("#authority-" + draftauthority_id).remove();
-        $('#matching').css('visibility', 'hidden');
+
+        cleanupResolvedAuthority(draftauthority_id);
     });
 
 }
@@ -377,8 +384,7 @@ var triggerCreateAuthority = function(draftauthority_id, callback) {
 
 var triggerResolveAuthority = function(draftauthority_id, authority_id) {
     $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
-        $("#authority-" + draftauthority_id).remove();
-        $('#matching').css('visibility', 'hidden');
+        cleanupResolvedAuthority(draftauthority_id);
     })
 }
 

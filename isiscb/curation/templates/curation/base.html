@@ -2,7 +2,7 @@
 {% load rules %}
 
 {% test_rule 'can_view_user_module' user as view_user_module %}
-
+{% test_rule 'has_zotero_access' user as has_zotero_access %}
 
 <html>
     <head>
@@ -64,10 +64,12 @@
               <li{% if curation_section == "datasets" %} class="active"{% endif %}>
                 <a href="{% url "datasets" %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Datasets <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}">Citations</a></li>
-                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}">Authorities</a></li>
+                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}?filters=true">Citations</a></li>
+                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}?filters=true">Authorities</a></li>
                 </ul>
               </li>
+
+              {% if has_zotero_access %}
               <li{% if curation_section == "zotero" %} class="active"{% endif %}>
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Zotero <span class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -75,6 +77,7 @@
                   <li{% if curation_subsection == "draftauthorities" %} class="active"{% endif %}><a href="">Authorities</a></li>
                 </ul>
               </li>
+              {% endif %}
           </ul>
         </div>
       </div>

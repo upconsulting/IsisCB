@@ -6,39 +6,52 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<div class="h4">Subjects</div>
+<label>Subjects</label>
 <ul class="list-group" id="subject-list-group">
 {% if can_view %}
 {% for acrelation in instance.acrelation_set.all %}
     {% if acrelation.type_controlled == 'SU' %}
-    <li class="list-group-item clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
+    <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
+      <div class="row">
         {% if can_update %}
-        <span class="button-group button-group-xs pull-right">
-            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="btn btn-xs glyphicon glyphicon-pencil"></a>
-            <a class="btn btn-xs glyphicon glyphicon-remove delete delete-subject"
-                type="button"
-                acrelation-id="{{ acrelation.id }}"
-                acrelation-title="{{ acrelation.authority.name }}"></a>
-        </span>
+        <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
         {% endif %}
 
-        {{ acrelation.authority.name }}
-        {% if acrelation.name_for_display_in_citation %}
-        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+        <span class="col-sm-10">
+          {{ acrelation.authority.name }}
+          {% if acrelation.name_for_display_in_citation %}
+          <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+          {% endif %}
+          {% if not acrelation.authority.public %}
+          <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+          {% endif %}
+          {% if not acrelation.public %}
+          <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+          {% endif %}
+        </span>
+
+        {% if can_update %}
+        </a>
         {% endif %}
-        {% if not acrelation.authority.public %}
-        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-        {% endif %}
-        {% if not acrelation.public %}
-        <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
-        {% endif %}
+
+        <span class="col-sm-2 text-right">
+          {% if can_update %}
+          <span class="button-group button-group-xs">
+              <a class="btn btn-xs glyphicon glyphicon-remove delete delete-subject"
+                  type="button"
+                  acrelation-id="{{ acrelation.id }}"
+                  acrelation-title="{{ acrelation.authority.name }}"></a>
+          </span>
+          {% endif %}
+        </span>
+      </div>
     </li>
     {% endif %}
 {% endfor %}
 
 {% if can_update %}
-<li class="list-group-item" id="create-subject-item" style="visibility: hidden;"></li>
-<a style="cursor: pointer;" class="list-group-item text-muted" onclick="createNewSubject();">
+<li class="list-group-item" id="create-subject-item" style="display: none;"></li>
+<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewSubject();">
     <span class="glyphicon glyphicon-plus"></span> Add a subject
 </a>
 {% endif %}
@@ -63,7 +76,7 @@ var createNewSubject = function() {
     form_group.append('<input class="form-control" id="create-subject-input" name="create-subject-input" type="text" />');
     subject_creation_container.append(form_group);
     subject_creation_container.append('<ul class="list-group" id="create-subject-results-container"></ul>');
-    subject_creation_container.css("visibility", "visible");
+    subject_creation_container.css("display", "block");
 
     $('#create-subject-input').on('keyup', function(e) {
         var query = $(this).val();
@@ -72,7 +85,7 @@ var createNewSubject = function() {
                 var results_container = $('#create-subject-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
+                    var choice_elem = '<li class="list-group-item acrelation search-result';
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
@@ -113,25 +126,52 @@ var createNewSubject = function() {
 
                     $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
+
                         var new_elem = '<li class="list-group-item clearfix" id="subject-' + new_id + '">';
                         var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
+
+                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
+                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
+
+                        new_elem += '<div class="row">';
+                        new_elem_acr += '<div class="row">';
+
+                        new_elem += '<span class="col-sm-10">';
+                        new_elem_acr += '<span class="col-sm-10">';
+
+                        new_elem_acr += '<span class="label label-primary">Subject</span> <span class="label label-success">Provides Subject Content About</span> ';
+                        new_elem += result.acrelation.authority.name;
+                        new_elem_acr += result.acrelation.authority.name;
+
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+
+                        new_elem += '</a>';
+                        new_elem_acr += '</a>';
+
+                        new_elem += '<span class="col-sm-2 text-right">';
+                        new_elem_acr += '<span class="col-sm-2 text-right">';
+
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
-                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+
                         new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-subject" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem += '</span>';
                         new_elem_acr += '</span>';
-                        new_elem_acr += '<span class="label label-primary">Subject</span> <span class="label label-success">Provides Subject Content About</span> ';
-                        new_elem += result.acrelation.authority.name;
-                        new_elem_acr += result.acrelation.authority.name;
+
+                        new_elem += '</span>';
+                        new_elem_acr += '</span>';
+
+                        new_elem += '</div>';
+                        new_elem_acr += '</div>';
+
                         new_elem += '</li>';
                         new_elem_acr += '</li>';
 
                         $('#subject-list-group').prepend(new_elem);
                         $('#acrelation-list-group').prepend(new_elem_acr);
-                        subject_creation_container.css("visibility", "hidden");
+                        subject_creation_container.css("display", "none");
                         subject_creation_container.empty();
 
                         bind_acrelation();
