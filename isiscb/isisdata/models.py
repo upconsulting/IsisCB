@@ -1008,7 +1008,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     SHOT = 'SHOT'
     SEARCH = 'SAC'
     CLASS_SYSTEM_CHOICES = (
-        (SWP, 'SWP'),
+        (SWP, 'SPW'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
