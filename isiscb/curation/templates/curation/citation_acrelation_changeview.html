@@ -162,11 +162,19 @@
 
                 <div class="form-group">
                     <div class="col-sm-12">
-                    <input type="text"
-                        class="form-control"
-                        name="authority-search"
-                        autocomplete="off"
-                        id="authority-search" />
+                        <div class="input-group">
+                            <input type="text"
+                                class="form-control"
+                                name="authority-search"
+                                autocomplete="off"
+                                id="authority-search">
+                            <span class="input-group-btn">
+                                <a style="color:red;"
+                                    class="btn glyphicon glyphicon-remove enable-search-input"
+                                    data-target="#authority-search">
+                                </a>
+                            </span>
+                        </div>
                       </div>
                 </div>
 
@@ -187,51 +195,64 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var authority_name = "{% if acrelation %}{{ acrelation.authority.name }}{% endif %}";
-    if (authority_name.length > 0) {
-        $('#authority-search').val(authority_name);
-        $('#authority-search').attr('disabled', true);
-    } else {
-        $('#authority-search').on('keyup', function(e) {
-            var query = $(this).val();
-            $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
-                success: function(result) {
+    var authority_name = "{% if acrelation %}{{ acrelation.authority.name|safe }}{% endif %}";
+    var authority_search_input = $('#authority-search');
+
+    var unlockSearchInput = function(e) {
+        var search_input = $($(this).attr('data-target'));
+        search_input.removeAttr('disabled');
+        search_input.trigger('keyup');
+    }
+
+    var triggerSearch = function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            success: function(result) {
+                $('#results-container').empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+                    choice_elem += '</li>';
+
+                    $('#results-container').append(choice_elem);
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
                     $('#results-container').empty();
-                    result.results.forEach(function(r) {
-                        var choice_elem = '<li class="list-group-item search-result';
-                        if (r.public != true) {
-                          choice_elem += ' record-notpublic';
-                        }
-                        choice_elem += '">';
-                        choice_elem += '<span class="button-group button-group-xs">';
-                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
-                        choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                        choice_elem += '</span>';
-                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                        if (r.description != null) {
-                            choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                        }
-                        if (r.public != true) {
-                          choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                        }
-                        choice_elem += '</li>';
+                    authority_search_input.val(selected_name);
+                    $('#id_acrelation-name_for_display_in_citation').val(selected_name);
+                    $('#id_acrelation-authority').val(selected_id);
 
-                        $('#results-container').append(choice_elem);
-                    });
-
-                    $('.select-citation').click(function() {
-                        var selected = $(this);
-                        var selected_id = selected.attr('data-id');
-                        var selected_name = selected.attr('data-name');
-                        $('#results-container').empty();
-                        $('#authority-search').val(selected_name);
-                        $('#id_acrelation-name_for_display_in_citation').val(selected_name);
-                        $('#id_acrelation-authority').val(selected_id);
-                    });
-                }
-            });
+                    authority_search_input.attr('disabled', true);
+                });
+            }
         });
     }
+
+    if (authority_name.length > 0) {
+        authority_search_input.val(authority_name);
+        authority_search_input.attr('disabled', true);
+    } 
+    authority_search_input.on('keyup', triggerSearch);
+    $('.enable-search-input').click(unlockSearchInput);
+
 });
 </script>
 
