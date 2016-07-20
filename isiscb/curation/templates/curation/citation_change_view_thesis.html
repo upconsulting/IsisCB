@@ -13,15 +13,15 @@
 </div>
 
 <!-- Authors/editors/contributors -->
-{% with instance|get_authors_editors as authors_editors %}
+{% with instance|get_authors_advisors as authors_advisor %}
 <div class="noFormForms">
   <small>
     <strong>By:</strong> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
-            {% if authors_editors %}
-            {{ authors_editors }}
+            {% if authors_advisor %}
+            {{ authors_advisor }}
             {% else %}
-            <em>Add author, editor, or contributor</em>
+            <em>Add author, or advisors</em>
             {% endif %}
 
         </a>
@@ -47,23 +47,6 @@
 </div>
 {% endwith %}
 
-<!-- Review of -->
-<div class="noFormForms">
-  <small>
-  <strong>Reviews of: </strong>
-  {% with instance|get_reviewed_books as reviewed_books %}
-  {% if reviewed_books %}
-  {% for book in reviewed_books %}
-  <a class="text-warning cursor-link"
-      onclick="toggleTab('ccrelations')">
-      {{ book|get_pub_title_and_year }},
-  </a>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-  </small>
-</div>
-
 
 {% for error in form.edition_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
@@ -79,34 +62,22 @@
 </div>
 </div>
 
-{% with instance|get_citation_periodical as journal %}
-<div class="noFormForms">
-  <small>
-    <strong>In:</strong> <a class="text-warning cursor-link"
-            onclick="toggleTab('acrelations')">
-            {% if journal %}
-            {{ journal }}
-            {% else %}
-            <em>Add journal</em>
-            {% endif %}
-
-        </a>
-  </small>
-</div>
-{% endwith %}
-
-<!--
 {% for error in form.physical_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
 <div class="form-group">
-    <label>{{ form.physical_details.label }}</label>
-    {{ form.physical_details|addcss:"form-control" }}
+  <div class="row">
+    <div class="col-sm-2 text-left">
+      <label class="input-sm">{{ form.physical_details.label }}</label>
+    </div>
+    <div class="col-sm-10">
+      {{ form.physical_details|addcss:"form-control input-sm" }}
+    </div>
+  </div>
 </div>
--->
 
 {% if partdetails_form %}
-<div class="row">
+<div class="row hidden">
   {% for error in partdetails_form.volume_free_text.errors %}
   <div class="col-xs-12">
     <div class="alert alert-danger">{{ error }}</div>
@@ -140,7 +111,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row hidden">
   {% for error in partdetails_form.issue_free_text.errors %}
   <div class="col-xs-12">
     <div class="alert alert-danger">{{ error }}</div>
@@ -173,7 +144,7 @@
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row hidden">
   {% for error in partdetails_form.pages_free_text.errors %}
   <div class="col-xs-12">
     <div class="alert alert-danger">{{ error }}</div>
@@ -232,7 +203,6 @@
 </div>
 {% endif %}
 
-{{ form.physical_details }}
 {{ form.book_series }}
 <!--
 {% with instance|get_publisher as publisher %}
@@ -255,18 +225,34 @@
 {% endwith %}
 -->
 
-{% with instance|get_doi as doi %}
+{% with instance|get_school as school %}
+<div class="noFormForms">
+  <small>
+    <strong>In:</strong> <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">
+            {% if school %}
+            {{ school }}
+            {% else %}
+            <em>Add school</em>
+            {% endif %}
+
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+{% with instance|get_isbn as isbn %}
 <div class="form-group">
     <div>
-        {% if doi %}
+        {% if isbn %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('linkeddata')">
-            {{ doi }}
+            {{ isbn }}
         </a>
         {% else %}
         <a class="text-warning input-sm"
-            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=DOI">
-            <span class="gylphicon glyphicon-plus"></span> Add DOI
+            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=ISBN">
+            <span class="gylphicon glyphicon-plus"></span> Add ISBN
         </a>
         {% endif %}
     </div>

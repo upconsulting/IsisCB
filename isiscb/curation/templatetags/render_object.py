@@ -59,8 +59,10 @@ def get_citation_title(obj):
 
 @register.filter(name='get_publisher')
 def get_publisher(obj):
-    return obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
-
+    acrel = obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
+    if acrel:
+        return acrel.authority
+    return None
 
 @register.filter(name='get_isbn')
 def get_isbn(obj):
@@ -75,6 +77,12 @@ def get_doi(obj):
 def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
+@register.filter(name='get_authors_advisors')
+def get_authors_advisors(obj):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.ADVISOR]])
+
 
 @register.filter(name='get_authors_editors_preloaded')
 def get_authors_editors_preloaded(acrelations):
@@ -110,6 +118,13 @@ def get_reviewed_books(citation):
     return citations
 
 @register.filter
+def get_including_book(citation):
+    ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.INCLUDES_CHAPTER, object__id=citation.id))
+    citations =  map(lambda x: x.subject, ccrelations)
+
+    return citations
+
+@register.filter
 def get_pub_title_and_year(citation):
     return u"{0}, ({1})".format(citation.title, getattr(citation, 'publication_date', "Date missing"))
 
@@ -118,6 +133,11 @@ def get_pub_title_and_year(citation):
 def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
+
+@register.filter
+def get_school(obj):
+    return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
+        if relation.type_controlled in [ACRelation.SCHOOL]])
 
 
 @register.filter(name='get_date_attributes')

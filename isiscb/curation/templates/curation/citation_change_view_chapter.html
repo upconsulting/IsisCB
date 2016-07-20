@@ -47,24 +47,6 @@
 </div>
 {% endwith %}
 
-<!-- Review of -->
-<div class="noFormForms">
-  <small>
-  <strong>Reviews of: </strong>
-  {% with instance|get_reviewed_books as reviewed_books %}
-  {% if reviewed_books %}
-  {% for book in reviewed_books %}
-  <a class="text-warning cursor-link"
-      onclick="toggleTab('ccrelations')">
-      {{ book|get_pub_title_and_year }},
-  </a>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-  </small>
-</div>
-
-
 {% for error in form.edition_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
@@ -79,15 +61,17 @@
 </div>
 </div>
 
-{% with instance|get_citation_periodical as journal %}
+{% with instance|get_including_book as books %}
 <div class="noFormForms">
   <small>
     <strong>In:</strong> <a class="text-warning cursor-link"
-            onclick="toggleTab('acrelations')">
-            {% if journal %}
-            {{ journal }}
+            onclick="toggleTab('ccrelations')">
+            {% if books %}
+            {% for book in books %}
+            {{ book|get_pub_title_and_year  }}
+            {% endfor %}
             {% else %}
-            <em>Add journal</em>
+            <em>Add Book</em>
             {% endif %}
 
         </a>
@@ -106,7 +90,7 @@
 -->
 
 {% if partdetails_form %}
-<div class="row">
+<div class="row hidden">
   {% for error in partdetails_form.volume_free_text.errors %}
   <div class="col-xs-12">
     <div class="alert alert-danger">{{ error }}</div>
@@ -140,7 +124,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row hidden">
   {% for error in partdetails_form.issue_free_text.errors %}
   <div class="col-xs-12">
     <div class="alert alert-danger">{{ error }}</div>

@@ -3,7 +3,6 @@
 {% load render_object %}
 
 {% block content %}
-<hr />
 
 {% if not form.instance.public %}
 <div class="alert alert-danger" role="alert">
@@ -14,118 +13,168 @@
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-md-5">
+      <div class="row">
+          <div class="col-md-12">
+            <div class="form-group form-inline">
+              <strong class="text-warning">
+              {{ form.instance.id }}</strong> | <strong>ACR record</strong>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              {{ form.record_status_value|addcss:"form-control input-sm" }}
+              &nbsp;
+              {{ form.record_status_explanation|addcss:"form-control input-sm" }}
+            </div>
+            <div class="col-md-12">
+                {% for error in form.record_status_value.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                {% for error in form.record_status_explanation.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="col-md-3">
+      <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+ Back to Citation</a>
+    </div>
+    <div class="col-md-4">
+        <div class="btn-group pull-right">
+            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <input type="submit" value="Save" class="btn btn-sm btn-success" />
+            <a href="#"
+                class="btn btn-danger btn-sm delete-acrelation"
+                acrelation-id="{{ acrelation.id }}"
+                acrelation-title="{{ acrelation.authority.name }}">
+                Delete
+            </a>
+        </div>
+    </div>
+  </div>
+
+
+
     {% include "curation/fragment_citation_header.html" %}
 
-    <div class="container-fluid">
+    <div class="container-fluid form-horizontal">
         <div class="row">
             <div class="col-sm-6">
                 {% for error in form.name_for_display_in_citation.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.name_for_display_in_citation.label }}</label>
-                    {{ form.name_for_display_in_citation|addcss:"form-control" }}
+                    <label class="col-md-4">{{ form.name_for_display_in_citation.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.name_for_display_in_citation|addcss:"form-control" }}
+                    </div>
                 </div>
 
                 {% for error in form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control" }}
+                    <label class="col-md-4">{{ form.type_controlled.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.type_controlled|addcss:"form-control" }}
+                    </div>
                 </div>
 
                 {% for error in form.type_broad_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.type_broad_controlled.label }}</label>
-                    {{ form.type_broad_controlled|addcss:"form-control" }}
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-6">
-                        {% for error in form.data_display_order.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.data_display_order.label }}</label>
-                            {{ form.data_display_order|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-                        {% for error in form.confidence_measure.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.confidence_measure.label }}</label>
-                            {{ form.confidence_measure|addcss:"form-control" }}
-                        </div>
-                    </div>
-
-                </div>
-                <div class="row">
-
-                    <div class="col-xs-6">
-                        {% for error in form.record_status_value.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.record_status_value.label }}</label>
-                            {{ form.record_status_value|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-                        {% for error in form.record_status_explanation.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.record_status_explanation.label }}</label>
-                            {{ form.record_status_explanation|addcss:"form-control" }}
-                        </div>
+                    <label class="col-md-4">{{ form.type_broad_controlled.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.type_broad_controlled|addcss:"form-control" }}
                     </div>
                 </div>
+
+
+                {% for error in form.data_display_order.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-4">{{ form.data_display_order.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.data_display_order|addcss:"form-control" }}
+                    </div>
+                </div>
+
+                {% for error in form.confidence_measure.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-4">{{ form.confidence_measure.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.confidence_measure|addcss:"form-control" }}
+                    </div>
+                </div>
+
 
                 {% for error in form.administrator_notes.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.administrator_notes.label }}</label>
-                    {{ form.administrator_notes|addcss:"form-control" }}
+                    <label class="col-md-12">{{ form.administrator_notes.label }}</label>
+                    <div class="col-md-12">
+                      {{ form.administrator_notes|addcss:"form-control" }}
+                    </div>
                 </div>
                 {{ form.authority }}
                 {{ form.citation }}
             </div>
             <div class="col-sm-6">
+
+              <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
+                <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+              </strong>
+
+              <p>
+                <span class="text-success">{{ instance.get_type_controlled_display }}</span>
+                <br>
+                <em>{{ instance.title }}</em>
+                <br>
+                {% with instance|get_authors_editors as authors_editors %}
+                {% if authors_editors %}
+                            {{ authors_editors }}
+                {% endif %}
+                {% endwith %}
+
+              </p>
+              <hr>
+              <div class="form-horizontal">
+                <strong>Authority record: </strong>{% if form.instance.authority %}<strong class="text-warning">{{ form.instance.authority.id }}</strong> &nbsp;&nbsp;
+                  <a href="{% url 'curate_authority' form.instance.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+              {% endif %}
+
+              {% if form.instance.authority %}
+              <p>
+                <span class="text-success">{{ form.instance.authority.get_type_controlled_display }}</span>
+                <br>
+                {{ form.instance.authority.name }}
+                <br>
+
+
+              </p>
+              {% endif %}
+
                 <div class="form-group">
-                    <label>Authority</label>
+                    <div class="col-sm-12">
                     <input type="text"
                         class="form-control"
                         name="authority-search"
                         autocomplete="off"
                         id="authority-search" />
+                      </div>
                 </div>
-                {% if form.instance.authority %}
-                <p style="padding-left: 4px; margin-top: -10px;">
-                  <a href="{% url 'curate_authority' form.instance.authority.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to authority</a>
-                </p>
-                {% endif %}
+
                 <ul class="list-group" id="results-container"></ul>
+              </div>
             </div>
         </div>
-        <div class="clearfix">
-            <div class="button-group pull-right">
-                <input type="submit" value="Save" class="btn btn-success" />
-                {% if acrelation %}
-                <a href="#"
-                    class="btn btn-danger delete-acrelation"
-                    acrelation-id="{{ acrelation.id }}"
-                    acrelation-title="{{ acrelation.authority.name }}">
-                    Delete
-                </a>
-                {% endif %}
-            </div>
-        </div>
+
     </div>
 
 </form>

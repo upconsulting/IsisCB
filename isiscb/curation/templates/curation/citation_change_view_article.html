@@ -47,24 +47,6 @@
 </div>
 {% endwith %}
 
-<!-- Review of -->
-<div class="noFormForms">
-  <small>
-  <strong>Reviews of: </strong>
-  {% with instance|get_reviewed_books as reviewed_books %}
-  {% if reviewed_books %}
-  {% for book in reviewed_books %}
-  <a class="text-warning cursor-link"
-      onclick="toggleTab('ccrelations')">
-      {{ book|get_pub_title_and_year }},
-  </a>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
-  </small>
-</div>
-
-
 {% for error in form.edition_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
@@ -94,16 +76,6 @@
   </small>
 </div>
 {% endwith %}
-
-<!--
-{% for error in form.physical_details.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.physical_details.label }}</label>
-    {{ form.physical_details|addcss:"form-control" }}
-</div>
--->
 
 {% if partdetails_form %}
 <div class="row">
@@ -287,20 +259,5 @@
 </div>
 </div>
 
-<!--
-{% for error in form.book_series.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-2 text-left">
-      <label class="input-sm">{{ form.book_series.label }}</label>
-    </div>
-    <div class="col-sm-10">
-      {{ form.book_series|addcss:"form-control input-sm" }}
-    </div>
-  </div>
-</div>
--->
 
 {% endblock %}
