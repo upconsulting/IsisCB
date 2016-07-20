@@ -45,6 +45,8 @@ def render_object(obj):
 
 @register.filter(name='get_citation_title')
 def get_citation_title(obj):
+    if not obj:
+        return u'No linked citation'
     title = obj.title
     if not title:
         for relation in obj.ccrelations:
