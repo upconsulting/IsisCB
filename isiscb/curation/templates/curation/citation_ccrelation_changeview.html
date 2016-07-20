@@ -103,14 +103,20 @@
                 {% endfor %}
                 <div class="form-group">
                     <label>Subject</label>
-                    <input type="text"
-                        id="citation-search-subject"
-                        class="form-control citation-search"
-                        name="citation-search"
-                        results-target="#subject-results-container"
-                        selected-result-target="#id_ccrelation-subject"
-                        {% if not ccrelation and instance %}value="{{instance|get_citation_title}}"{% endif %}
-                        {% if not ccrelation and instance %}disabled{% endif %} />
+                    <div class="input-group">
+                        <input type="text"
+                            id="citation-search-subject"
+                            class="form-control citation-search"
+                            name="citation-search"
+                            results-target="#subject-results-container"
+                            selected-result-target="#id_ccrelation-subject">
+                        <span class="input-group-btn">
+                            <a style="color:red;"
+                                class="btn glyphicon glyphicon-remove enable-search-input"
+                                data-target="#citation-search-subject">
+                            </a>
+                        </span>
+                    </div>
                 </div>
                 {% if form.instance.subject %}
                 <p style="padding-left: 4px; margin-top: -10px;">
@@ -136,13 +142,21 @@
                 {% endfor %}
                 <div class="form-group">
                     <label>Object</label>
-                    <input type="text"
-                        id="citation-search-object"
-                        class="form-control citation-search"
-                        name="citation-search"
-                        results-target="#object-results-container"
-                        autocomplete="off"
-                        selected-result-target="#id_ccrelation-object" />
+                    <div class="input-group">
+                        <input type="text"
+                            id="citation-search-object"
+                            class="form-control citation-search"
+                            name="citation-search"
+                            results-target="#object-results-container"
+                            autocomplete="off"
+                            selected-result-target="#id_ccrelation-object">
+                        <span class="input-group-btn">
+                            <a style="color:red;"
+                                class="btn glyphicon glyphicon-remove enable-search-input"
+                                data-target="#citation-search-object">
+                            </a>
+                        </span>
+                    </div>
                 </div>
                 {% if form.instance.object %}
                 <p style="padding-left: 4px; margin-top: -10px;">
@@ -164,41 +178,47 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
-    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title }}{% endif %}";
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title|safe }}{% endif %}";
     var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
-    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title|safe }}{% endif %}";
     var object_id = "{% if ccrelation %}{{ ccrelation.object.id }}{% endif %}";
 
+    var subject_search_input = $('#citation-search-subject');
+    var object_search_input = $('#citation-search-object');
+
     if (subject_id.length > 0) {
-        $('#citation-search-subject').val(subject_name);
-        $('#citation-search-subject').attr('disabled', true);
+        subject_search_input.val(subject_name);
+        subject_search_input.attr('disabled', true);
     }
 
     if (object_id.length > 0) {
-        $('#citation-search-object').val(object_name);
-        $('#citation-search-object').attr('disabled', true);
+        object_search_input.val(object_name);
+        object_search_input.attr('disabled', true);
     }
 
-    $('#swap-subject-object').click(function() {
-        subject_name = $('#citation-search-subject').val();
-        object_name = $('#citation-search-object').val();
+    /**
+      * Swap the subject and the object of the relation.
+      */
+    var swapSubjectObject = function() {
+        subject_name = subject_search_input.val();
+        object_name = object_search_input.val();
         subject_id = $('#id_ccrelation-subject').val();
         object_id = $('#id_ccrelation-object').val();
-        var subject_disabled = $('#citation-search-subject').attr('disabled');
-        var object_disabled = $('#citation-search-object').attr('disabled');
+        var subject_disabled = subject_search_input.attr('disabled');
+        var object_disabled = object_search_input.attr('disabled');
 
-        $('#citation-search-subject').val(object_name);
-        $('#citation-search-object').val(subject_name);
+        subject_search_input.val(object_name);
+        object_search_input.val(subject_name);
         if (object_disabled) {
-            $('#citation-search-subject').attr('disabled', true);
+            subject_search_input.attr('disabled', true);
         } else {
-            $('#citation-search-subject').removeAttr('disabled');
+            subject_search_input.removeAttr('disabled');
         }
 
         if (subject_disabled) {
-            $('#citation-search-object').attr('disabled', true);
+            object_search_input.attr('disabled', true);
         } else {
-            $('#citation-search-object').removeAttr('disabled');
+            object_search_input.removeAttr('disabled');
         }
         $('#id_ccrelation-subject').val(object_id);
         $('#id_ccrelation-object').val(subject_id);
@@ -207,10 +227,18 @@ $(document).ready(function() {
         $('.citation-search').each(function(i, elem) {
             $($(elem).attr('results-target')).empty();
         });
-    });
+    }
 
+    var unlockSearchInput = function(e) {
+        var search_input = $($(this).attr('data-target'));
+        search_input.removeAttr('disabled');
+        search_input.trigger('keyup');
+    }
 
-    $('.citation-search').on('keyup', function(e) {
+    /**
+      * Performs a citation search based on the content of the search input.
+      */
+    var triggerSearch = function(e) {
         var search_input = $(this);
         var query = search_input.val();
         console.log('query', query);
@@ -248,13 +276,20 @@ $(document).ready(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');
+
                     results_container.empty();
                     search_input.val(selected_name);
+                    search_input.attr('disabled', true);
                     id_result_container.val(selected_id);
                 });
             }
         });
-    });
+    }
+
+
+    $('#swap-subject-object').click(swapSubjectObject);
+    $('.citation-search').on('keyup', triggerSearch);
+    $('.enable-search-input').click(unlockSearchInput);
 });
 </script>
 
