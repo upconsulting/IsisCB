@@ -13,7 +13,7 @@
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-<div class="row">
+<div class="row" style="margin-bottom: 20px;">
     <div class="col-md-5">
       <div class="row">
           <div class="col-md-12">
@@ -128,9 +128,8 @@
             <div class="col-sm-6">
 
               <strong>Citation record: </strong><strong class="text-warning">{{ form.instance.citation.id }} &nbsp;&nbsp;
-                <a href="{% url 'curate_citation' form.instance.citation.id %}"><i class="fa fa-external-link" aria-hidden="true"></i>
- </a>
-              </p></strong>
+                <a href="{% url 'curate_citation' form.instance.citation.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+              </strong>
 
               <p>
                 <span class="text-success">{{ form.instance.citation.get_type_controlled_display }}</span>

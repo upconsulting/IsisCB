@@ -8,8 +8,8 @@ import rules
 
 
 class CCRelationForm(forms.ModelForm):
-    subject = forms.CharField(widget=forms.HiddenInput())
-    object = forms.CharField(widget=forms.HiddenInput())
+    subject = forms.CharField(widget=forms.HiddenInput(), required=True)
+    object = forms.CharField(widget=forms.HiddenInput(), required=True)
     """We will set these dynamically in the rendered form."""
 
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
@@ -17,7 +17,7 @@ class CCRelationForm(forms.ModelForm):
     class Meta:
         model = CCRelation
         fields = [
-            'type_controlled', 'description', 'data_display_order', 'subject',
+            'type_controlled', 'data_display_order', 'subject',
             'object', 'record_status_value', 'record_status_explanation',
             'administrator_notes',
         ]
@@ -33,11 +33,13 @@ class CCRelationForm(forms.ModelForm):
 
     def clean(self):
         super(CCRelationForm, self).clean()
-        subject_id = self.cleaned_data['subject']
-        self.cleaned_data['subject'] = Citation.objects.get(pk=subject_id)
+        subject_id = self.cleaned_data.get('subject', None)
+        if subject_id:
+            self.cleaned_data['subject'] = Citation.objects.get(pk=subject_id)
 
-        object_id = self.cleaned_data['object']
-        self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
+        object_id = self.cleaned_data.get('object', None)
+        if object_id:
+            self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
 
 
 
@@ -240,7 +242,7 @@ class LinkedDataForm(forms.ModelForm):
         model = LinkedData
         fields = [
             'universal_resource_name', 'resource_name', 'url',
-            'type_controlled', 'record_status_value', 'administrator_notes'
+            'type_controlled', 'record_status_value', 'record_status_explanation', 'administrator_notes'
         ]
 
     def __init__(self, *args, **kwargs):
