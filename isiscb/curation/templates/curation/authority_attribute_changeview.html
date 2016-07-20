@@ -3,51 +3,71 @@
 {% load render_object %}
 
 {% block content %}
-<hr />
 
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
-    {% include "curation/fragment_authority_header.html" %}
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-5">
+          <div class="row">
+              <div class="col-md-12">
+                <div class="form-group form-inline">
+                  <strong class="text-warning">
+                    {% if attribute_form.instance.id %}{{ attribute_form.instance.id }}{% else %}New{% endif %}</strong> | <strong>Attribute</strong>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  {{ attribute_form.record_status_value|addcss:"form-control input-sm" }}
+                  &nbsp;
+                  {{ attribute_form.record_status_explanation|addcss:"form-control input-sm" }}
+                </div>
+                <div class="col-md-12">
+                    {% for error in attribute_form.record_status_value.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    {% for error in attribute_form.record_status_explanation.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="col-md-3">
+          <a href="{% url 'curate_authority' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+     Back to Authority</a>
+        </div>
+        <div class="col-md-4">
+            <div class="btn-group pull-right">
+                <a href="{% url 'curate_authority' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+                <input type="submit" value="Save" class="btn btn-sm btn-success" />
+                <a href="#"
+                  class="btn btn-danger btn-sm delete-attribute"
+                  attribute-id="{{ attribute.id }}"
+                  attribute-title="{{ attribute.type_controlled.name }}">
+                  Delete
+                </a>
+            </div>
+        </div>
+      </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid form-horizontal">
         <div class="row">
             <div class="col-sm-6">
                 {% for error in attribute_form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ attribute_form.type_controlled.label }}</label>
-                    {{ attribute_form.type_controlled|addcss:"form-control" }}
+                    <label class="col-md-4">{{ attribute_form.type_controlled.label }}</label>
+                    <div class="col-md-8">
+                      {{ attribute_form.type_controlled|addcss:"form-control" }}
+                    </div>
                 </div>
 
                 {% for error in attribute_form.description.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ attribute_form.description.label }}</label>
-                    {{ attribute_form.description|addcss:"form-control" }}
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-6">
-                        {% for error in attribute_form.record_status_value.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ attribute_form.record_status_value.label }}</label>
-                            {{ attribute_form.record_status_value|addcss:"form-control" }}
-                        </div>
-                    </div>
-                    <div class="col-xs-6">
-
-                        {% for error in attribute_form.record_status_explanation.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ attribute_form.record_status_explanation.label }}</label>
-                            {{ attribute_form.record_status_explanation|addcss:"form-control" }}
-                        </div>
+                    <label class="col-md-4">{{ attribute_form.description.label }}</label>
+                    <div class="col-md-8">
+                      {{ attribute_form.description|addcss:"form-control" }}
                     </div>
                 </div>
             </div>
@@ -58,8 +78,10 @@
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="form-group">
-                        <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control" }}
+                        <label class="col-md-3">{{ field.label }}</label>
+                        <div class="col-md-9">
+                          {{ field|addcss:"form-control" }}
+                        </div>
                     </div>
                     {% endfor %}
                 {% else %}
@@ -70,8 +92,10 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ attribute_form.value_freeform.label }}</label>
-                    {{ attribute_form.value_freeform|addcss:"form-control" }}
+                    <label class="col-md-3">{{ attribute_form.value_freeform.label }}</label>
+                    <div class="col-md-9">
+                      {{ attribute_form.value_freeform|addcss:"form-control" }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -97,11 +121,15 @@
     <div id="form_for_{{id}}">
         {% for field in form %}
         {% for error in field.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
+        <div class="col-md-12">
+          <div class="alert alert-danger">{{ error }}</div>
+        </div>
         {% endfor %}
         <div class="form-group">
-            <label>{{ field.label }}</label>
-            {{ field|addcss:"form-control" }}
+            <label class="col-md-3">{{ field.label }}</label>
+            <div class="col-md-9">
+              {{ field|addcss:"form-control" }}
+            </div>
         </div>
         {% endfor %}
     </div>

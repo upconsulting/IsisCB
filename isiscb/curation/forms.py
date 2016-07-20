@@ -8,8 +8,8 @@ import rules
 
 
 class CCRelationForm(forms.ModelForm):
-    subject = forms.CharField(widget=forms.HiddenInput())
-    object = forms.CharField(widget=forms.HiddenInput())
+    subject = forms.CharField(widget=forms.HiddenInput(), required=True)
+    object = forms.CharField(widget=forms.HiddenInput(), required=True)
     """We will set these dynamically in the rendered form."""
 
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
@@ -17,7 +17,7 @@ class CCRelationForm(forms.ModelForm):
     class Meta:
         model = CCRelation
         fields = [
-            'type_controlled', 'description', 'data_display_order', 'subject',
+            'type_controlled', 'data_display_order', 'subject',
             'object', 'record_status_value', 'record_status_explanation',
             'administrator_notes',
         ]
@@ -33,11 +33,13 @@ class CCRelationForm(forms.ModelForm):
 
     def clean(self):
         super(CCRelationForm, self).clean()
-        subject_id = self.cleaned_data['subject']
-        self.cleaned_data['subject'] = Citation.objects.get(pk=subject_id)
+        subject_id = self.cleaned_data.get('subject', None)
+        if subject_id:
+            self.cleaned_data['subject'] = Citation.objects.get(pk=subject_id)
 
-        object_id = self.cleaned_data['object']
-        self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
+        object_id = self.cleaned_data.get('object', None)
+        if object_id:
+            self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
 
 
 
@@ -130,7 +132,7 @@ class PartDetailsForm(forms.ModelForm):
 
     class Meta:
         model = PartDetails
-        exclude =['volume',]
+        exclude =['volume', 'sort_order']
 
     def _get_validation_exclusions(self):
         exclude = super(PartDetailsForm, self)._get_validation_exclusions()
@@ -170,9 +172,17 @@ class CitationForm(forms.ModelForm):
         # disable fields user doesn't have access to
         if self.instance.pk:
             # Don't let the user change type_controlled.
-            self.fields['type_controlled'].widget.attrs['readonly'] = True
-            self.fields['type_controlled'].widget.attrs['disabled'] = True
+            #self.fields['type_controlled'].widget.attrs['readonly'] = True
+            #self.fields['type_controlled'].widget.attrs['disabled'] = True
             self.fields['title'].widget.attrs['placeholder'] = "No title"
+            self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
+
+            if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE]:
+                self.fields['physical_details'].widget = forms.widgets.HiddenInput()
+                self.fields['book_series'].widget = forms.widgets.HiddenInput()
+
+            if self.instance.type_controlled in [Citation.THESIS]:
+                self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
@@ -232,7 +242,7 @@ class LinkedDataForm(forms.ModelForm):
         model = LinkedData
         fields = [
             'universal_resource_name', 'resource_name', 'url',
-            'type_controlled', 'record_status_value', 'administrator_notes'
+            'type_controlled', 'record_status_value', 'record_status_explanation', 'administrator_notes'
         ]
 
     def __init__(self, *args, **kwargs):
