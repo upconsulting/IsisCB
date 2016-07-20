@@ -140,11 +140,19 @@
 
                 <div class="form-group">
                     <div class="col-sm-12">
-                      <input type="text"
-                        class="form-control"
-                        name="citation-search"
-                        id="citation-search" />
-                      </div>
+                        <div class="input-group">
+                            <input type="text"
+                                class="form-control"
+                                name="citation-search"
+                                id="citation-search">
+                            <span class="input-group-btn">
+                                <a style="color:red;"
+                                    class="btn glyphicon glyphicon-remove enable-search-input"
+                                    data-target="#citation-search">
+                                </a>
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <ul class="list-group" id="results-container"></ul>
 
@@ -179,51 +187,63 @@ $('#id_language').multiSelect()
 $(document).ready(function() {
     var citation_name = "{% if acrelation %}{{ acrelation.citation|get_citation_title|safe }}{% endif %}";
     var citation_id = "{% if acrelation %}{{ acrelation.citation.id }}{% endif %}";
-    if (citation_id.length > 0) {
-        $('#citation-search').val(citation_name);
-        $('#citation-search').attr('disabled', true);
-    } else {
-        $('#citation-search').on('keyup', function(e) {
-            var query = $(this).val();
-            $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
-                success: function(result) {
-                    var results_container = $('#results-container');
-                    results_container.empty();
-                    result.results.forEach(function(r) {
-                        var choice_elem = '<li class="list-group-item search-result';
-                        if (r.public != true) {
-                          choice_elem += ' record-notpublic';
-                        }
-                        choice_elem += '">';
-                        choice_elem += '<span class="button-group button-group-xs">';
-                        choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
-                        choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                        choice_elem += '</span>';
-                        choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                        if (r.description != null) {
-                            choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                        }
-                        if (r.public != true) {
-                          choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                        }
-                        choice_elem += '</li>';
 
-                        results_container.append(choice_elem);
+    var citation_search_input = $('#citation-search');
 
-                    });
+    var unlockSearchInput = function(e) {
+        var search_input = $($(this).attr('data-target'));
+        search_input.removeAttr('disabled');
+        search_input.trigger('keyup');
+    }
 
-                    $('.select-citation').click(function() {
-                        var selected = $(this);
-                        var selected_id = selected.attr('data-id');
-                        var selected_name = selected.attr('data-name');
-                        $('#results-container').empty();
-                        $('#citation-search').val(selected_name);
-                        $('#id_acrelation-citation').val(selected_id);
-                    });
-                }
-            });
+    var triggerSearch = function(e) {
+        var query = $(this).val();
+        $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+            success: function(result) {
+                var results_container = $('#results-container');
+                results_container.empty();
+                result.results.forEach(function(r) {
+                    var choice_elem = '<li class="list-group-item search-result';
+                    if (r.public != true) {
+                      choice_elem += ' record-notpublic';
+                    }
+                    choice_elem += '">';
+                    choice_elem += '<span class="button-group button-group-xs">';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    choice_elem += '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    if (r.description != null) {
+                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    }
+                    if (r.public != true) {
+                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    }
+                    choice_elem += '</li>';
+
+                    results_container.append(choice_elem);
+
+                });
+
+                $('.select-citation').click(function() {
+                    var selected = $(this);
+                    var selected_id = selected.attr('data-id');
+                    var selected_name = selected.attr('data-name');
+                    $('#results-container').empty();
+                    citation_search_input.val(selected_name);
+                    $('#id_acrelation-citation').val(selected_id);
+                    citation_search_input.attr('disabled', true);
+                });
+            }
         });
     }
+
+    if (citation_id.length > 0) {
+        citation_search_input.val(citation_name);
+        citation_search_input.attr('disabled', true);
+    }
+    citation_search_input.on('keyup', triggerSearch);
+    $('.enable-search-input').click(unlockSearchInput);
 });
 </script>
 
