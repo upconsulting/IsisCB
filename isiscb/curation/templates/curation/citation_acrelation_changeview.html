@@ -19,7 +19,7 @@
           <div class="col-md-12">
             <div class="form-group form-inline">
               <strong class="text-warning">
-              {{ instance.id }}</strong> | <strong>ACR record</strong>
+              {{ form.instance.id }}</strong> | <strong>ACR record</strong>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               {{ form.record_status_value|addcss:"form-control input-sm" }}
               &nbsp;
@@ -37,12 +37,12 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curate_citation' acrelation.citation.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Citation</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curate_citation' acrelation.citation.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <input type="submit" value="Save" class="btn btn-sm btn-success" />
             <a href="#"
                 class="btn btn-danger btn-sm delete-acrelation"
@@ -127,16 +127,16 @@
             </div>
             <div class="col-sm-6">
 
-              <strong>Citation record: </strong><strong class="text-warning">{{ form.instance.citation.id }} &nbsp;&nbsp;
-                <a href="{% url 'curate_citation' form.instance.citation.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+              <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
+                <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
               </strong>
 
               <p>
-                <span class="text-success">{{ form.instance.citation.get_type_controlled_display }}</span>
+                <span class="text-success">{{ instance.get_type_controlled_display }}</span>
                 <br>
-                <em>{{ form.instance.citation.title }}</em>
+                <em>{{ instance.title }}</em>
                 <br>
-                {% with form.instance.citation|get_authors_editors as authors_editors %}
+                {% with instance|get_authors_editors as authors_editors %}
                 {% if authors_editors %}
                             {{ authors_editors }}
                 {% endif %}
@@ -169,11 +169,7 @@
                         id="authority-search" />
                       </div>
                 </div>
-                {% if form.instance.authority %}
-                <div class="col-sm-12">
 
-                </div>
-                {% endif %}
                 <ul class="list-group" id="results-container"></ul>
               </div>
             </div>
