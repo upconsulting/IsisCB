@@ -794,6 +794,8 @@ def citation(request, citation_id):
         template = loader.get_template('curation/citation_change_view_book.html')
     elif citation.type_controlled == Citation.REVIEW:
         template = loader.get_template('curation/citation_change_view_review.html')
+    elif citation.type_controlled == Citation.CHAPTER:
+        template = loader.get_template('curation/citation_change_view_chapter.html')
     else:
         template = loader.get_template('curation/citation_change_view.html')
     partdetails_form = None
@@ -804,7 +806,7 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW]:
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()

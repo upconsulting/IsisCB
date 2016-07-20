@@ -109,6 +109,13 @@ def get_reviewed_books(citation):
     return citations
 
 @register.filter
+def get_including_book(citation):
+    ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.INCLUDES_CHAPTER, object__id=citation.id))
+    citations =  map(lambda x: x.subject, ccrelations)
+
+    return citations
+
+@register.filter
 def get_pub_title_and_year(citation):
     return u"{0}, ({1})".format(citation.title, getattr(citation, 'publication_date', "Date missing"))
 
