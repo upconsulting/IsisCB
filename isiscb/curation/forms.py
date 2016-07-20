@@ -175,6 +175,11 @@ class CitationForm(forms.ModelForm):
             self.fields['title'].widget.attrs['placeholder'] = "No title"
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
+            if self.instance.type_controlled == Citation.REVIEW:
+                self.fields['physical_details'].widget = forms.widgets.HiddenInput()
+                self.fields['book_series'].widget = forms.widgets.HiddenInput()
+
+
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
                 if not can_update:
