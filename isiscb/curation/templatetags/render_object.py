@@ -56,8 +56,10 @@ def get_citation_title(obj):
 
 @register.filter(name='get_publisher')
 def get_publisher(obj):
-    return obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
-
+    acrel = obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
+    if acrel:
+        return acrel.authority
+    return None
 
 @register.filter(name='get_isbn')
 def get_isbn(obj):
