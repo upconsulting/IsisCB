@@ -75,6 +75,12 @@ def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
+@register.filter(name='get_authors_advisors')
+def get_authors_advisors(obj):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.ADVISOR]])
+
+
 @register.filter(name='get_authors_editors_preloaded')
 def get_authors_editors_preloaded(acrelations):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in acrelations
@@ -124,6 +130,11 @@ def get_pub_title_and_year(citation):
 def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
+
+@register.filter
+def get_school(obj):
+    return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
+        if relation.type_controlled in [ACRelation.SCHOOL]])
 
 
 @register.filter(name='get_date_attributes')

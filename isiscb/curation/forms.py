@@ -130,7 +130,7 @@ class PartDetailsForm(forms.ModelForm):
 
     class Meta:
         model = PartDetails
-        exclude =['volume',]
+        exclude =['volume', 'sort_order']
 
     def _get_validation_exclusions(self):
         exclude = super(PartDetailsForm, self)._get_validation_exclusions()
@@ -170,15 +170,17 @@ class CitationForm(forms.ModelForm):
         # disable fields user doesn't have access to
         if self.instance.pk:
             # Don't let the user change type_controlled.
-            self.fields['type_controlled'].widget.attrs['readonly'] = True
-            self.fields['type_controlled'].widget.attrs['disabled'] = True
+            #self.fields['type_controlled'].widget.attrs['readonly'] = True
+            #self.fields['type_controlled'].widget.attrs['disabled'] = True
             self.fields['title'].widget.attrs['placeholder'] = "No title"
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
-            if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER]:
+            if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE]:
                 self.fields['physical_details'].widget = forms.widgets.HiddenInput()
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
+            if self.instance.type_controlled in [Citation.THESIS]:
+                self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))

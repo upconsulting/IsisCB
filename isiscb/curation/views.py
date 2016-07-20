@@ -796,6 +796,10 @@ def citation(request, citation_id):
         template = loader.get_template('curation/citation_change_view_review.html')
     elif citation.type_controlled == Citation.CHAPTER:
         template = loader.get_template('curation/citation_change_view_chapter.html')
+    elif citation.type_controlled == Citation.ARTICLE:
+        template = loader.get_template('curation/citation_change_view_article.html')
+    elif citation.type_controlled == Citation.THESIS:
+        template = loader.get_template('curation/citation_change_view_thesis.html')
     else:
         template = loader.get_template('curation/citation_change_view.html')
     partdetails_form = None
@@ -806,25 +810,26 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER]:
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()
                 citation.part_details = part_details
                 citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details)
+            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details, prefix='partdetails')
             context.update({
                 'partdetails_form': partdetails_form,
             })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
-        if citation.type_controlled == Citation.ARTICLE and hasattr(citation, 'part_details'):
-            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, instance=citation.part_details)
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
+            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()
             if partdetails_form:
                 partdetails_form.save()
+
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
 
         context.update({
