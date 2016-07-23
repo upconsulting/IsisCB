@@ -74,15 +74,15 @@ var toggleTab = function(name) {
     </div>
     <div class="col-md-5">
         <div class="btn-group pull-right">
-            <button class="btn btn-sm btn-default">Cancel</button>
+            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <input type="submit" value="Save" class="btn btn-sm btn-success" />
-            <button class="btn btn-sm btn-danger">Delete</button>
+            <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-4" style="border-right: 1px dotted #ccc9c9; height: 90%;">
         {% block citation_panel_left %}
         {% include "curation/fragment_citation_fields.html" %}
         {% endblock %}

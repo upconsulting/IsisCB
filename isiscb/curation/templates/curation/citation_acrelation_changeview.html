@@ -169,8 +169,8 @@
                                 autocomplete="off"
                                 id="authority-search">
                             <span class="input-group-btn">
-                                <a style="color:red;"
-                                    class="btn glyphicon glyphicon-remove enable-search-input"
+                                <a
+                                    class="btn glyphicon glyphicon-pencil enable-search-input"
                                     data-target="#authority-search">
                                 </a>
                             </span>
@@ -249,7 +249,7 @@ $(document).ready(function() {
     if (authority_name.length > 0) {
         authority_search_input.val(authority_name);
         authority_search_input.attr('disabled', true);
-    } 
+    }
     authority_search_input.on('keyup', triggerSearch);
     $('.enable-search-input').click(unlockSearchInput);
 

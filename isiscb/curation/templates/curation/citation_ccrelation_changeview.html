@@ -44,16 +44,17 @@
             <div class="btn-group pull-right">
                 <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
                 <input type="submit" value="Save" class="btn btn-sm btn-success" />
+                {% if ccrelation.id %}
                 <a href="#"
                   class="btn btn-danger btn-sm delete-ccrelation"
                   ccrelation-id="{{ ccrelation.id }}"
                   ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}">
                   Delete
                 </a>
+                {% endif %}
             </div>
         </div>
       </div>
-
     {% include "curation/fragment_citation_header.html" %}
 
     <div class="container-fluid form-horizontal">
@@ -101,8 +102,35 @@
                   </div>
                 </div>
                 {% endfor %}
+
+                <div id="subject_info_container">
+                  <div id="subject_info">
+                    <strong>Citation record: </strong>
+                    {% if form.instance.subject %}
+                    <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
+                      <a class="link_to_citation" href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </strong>
+
+                    <p>
+                      <span class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                      <br>
+                      <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
+                      <br>
+                      {% with form.instance.subject|get_authors_editors as authors_editors %}
+                      <span class="show_authors">
+                      {% if authors_editors %}
+                                  {{ authors_editors }}
+                      {% endif %}
+                      </span>
+                      {% endwith %}
+
+                    </p>
+                    {% endif %}
+                  </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Subject</label>
+                  <div class="col-sm-12">
                     <div class="input-group">
                         <input type="text"
                             id="citation-search-subject"
@@ -111,18 +139,16 @@
                             results-target="#subject-results-container"
                             selected-result-target="#id_ccrelation-subject">
                         <span class="input-group-btn">
-                            <a style="color:red;"
-                                class="btn glyphicon glyphicon-remove enable-search-input"
+                            <a
+                                class="btn glyphicon glyphicon-pencil enable-search-input"
                                 data-target="#citation-search-subject">
                             </a>
                         </span>
                     </div>
+                  </div>
                 </div>
-                {% if form.instance.subject %}
-                <p style="padding-left: 4px; margin-top: -10px;">
-                  <a href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
-                </p>
-                {% endif %}
+
+
                 <ul class="list-group" id="subject-results-container"></ul>
 
 
@@ -140,9 +166,43 @@
                   </div>
                 </div>
                 {% endfor %}
+
+                <div id="object_info_container">
+                <div id="object_info">
+                <strong>Citation record: </strong>
+
+                <strong class="text-warning"><span class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
+                  {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
+                  {% if not form.instance.object %}
+                    <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                  {% endif %}
+                </strong>
+
+                <p>
+                  <span class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
+                  <br>
+                  <em class="show_title">{% if form.instance.object %}{{ form.instance.object|get_citation_title }}{% endif %}</em>
+                  <br>
+                  <span class="show_authors">
+                    {% if form.instance.object %}
+                  {% with form.instance.object|get_authors_editors as authors_editors %}
+
+                  {% if authors_editors %}
+                              {{ authors_editors }}
+                  {% endif %}
+
+                  {% endwith %}
+                  {% endif %}
+                  </span>
+
+
+                </p>
+                </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Object</label>
-                    <div class="input-group">
+                    <div class="col-sm-12">
+                      <div class="input-group">
                         <input type="text"
                             id="citation-search-object"
                             class="form-control citation-search"
@@ -151,18 +211,15 @@
                             autocomplete="off"
                             selected-result-target="#id_ccrelation-object">
                         <span class="input-group-btn">
-                            <a style="color:red;"
-                                class="btn glyphicon glyphicon-remove enable-search-input"
+                            <a
+                                class="btn glyphicon glyphicon-pencil enable-search-input"
                                 data-target="#citation-search-object">
                             </a>
                         </span>
                     </div>
+                  </div>
                 </div>
-                {% if form.instance.object %}
-                <p style="padding-left: 4px; margin-top: -10px;">
-                  <a href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
-                </p>
-                {% endif %}
+
                 <ul class="list-group" id="object-results-container"></ul>
             </div>
         </div>
@@ -223,6 +280,13 @@ $(document).ready(function() {
         $('#id_ccrelation-subject').val(object_id);
         $('#id_ccrelation-object').val(subject_id);
 
+        $("#subject_info_container").append($("#object_info"));
+        $("#object_info_container").append($("#subject_info"));
+
+        $("#object_info").attr("id", "temp_id");
+        $("#subject_info").attr("id", "object_info");
+        $("#temp_id").attr("id", "subject_info");
+
 
         $('.citation-search').each(function(i, elem) {
             $($(elem).attr('results-target')).empty();
@@ -257,7 +321,7 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -276,11 +340,28 @@ $(document).ready(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');
+                    var selected_authors = selected.attr('data-authors');
+                    var selected_type = selected.attr('data-type');
+                    var link = "{% url 'citation_list' %}" + selected_id;
 
                     results_container.empty();
                     search_input.val(selected_name);
                     search_input.attr('disabled', true);
                     id_result_container.val(selected_id);
+
+                    var parentCont = $("#subject_info");
+                    // this is butt-ugly, but so what, too tired to do something better
+                    if (search_input.attr("id") == "citation-search-object") {
+                      parentCont = $("#object_info");
+                    }
+
+                    parentCont.find(".show_id").html(selected_id);
+                    parentCont.find(".show_title").html(selected_name);
+                    parentCont.find(".show_authors").html(selected_authors);
+                    parentCont.find(".show_type_controlled").html(selected_type);
+                    parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
+
+
                 });
             }
         });
@@ -293,7 +374,7 @@ $(document).ready(function() {
 });
 </script>
 
-{% if ccrelation %}
+{% if ccrelation.id %}
 <script>
 $(document).ready(function() {
     $('.delete-ccrelation').click(function() {

@@ -45,6 +45,10 @@ input.input-sm, textarea.input-sm {
   margin-bottom: 10px;
 }
 
+.titleInput {
+  background-color: #f7efdf;
+}
+
 .brand-logo-container {
     background-color: #012e64;
      border-radius: 4px;
