@@ -94,22 +94,30 @@
     <div class="alert alert-danger">{{ error }}</div>
   </div>
   {% endfor %}
-    <div class="col-sm-4">
-
-      <div class="form-group">
-          {{ partdetails_form.volume_free_text|addcss:"form-control input-sm" }}
+  <div class="form-group col-xs-4" style="padding: 0px;">
+      <div class="col-sm-3 text-left">
+        <label class="input-sm">Vol.</label>
+      </div>
+      <div class="col-sm-9">
+        {{ partdetails_form.volume_free_text|addcss:"form-control input-sm" }}
       </div>
     </div>
-    <div class="col-xs-4">
-        <div class="form-group">
-            {{ partdetails_form.volume_begin|addcss:"form-control input-sm" }}
-        </div>
+    <div class="form-group col-xs-4" style="padding: 0px;">
+      <div class="col-sm-3 text-left">
+        <label class="input-sm">Nr.</label>
+      </div>
+      <div class="col-xs-9">
+        {{ partdetails_form.volume_begin|addcss:"form-control input-sm" }}
+      </div>
     </div>
-    <div class="col-xs-4">
-      <div class="form-group">
-            {{ partdetails_form.volume_end|addcss:"form-control input-sm" }}
-        </div>
-    </div>
+    <div class="form-group col-xs-4" style="padding: 0px;">
+      <div class="col-sm-3 text-left">
+        <label class="input-sm">to</label>
+      </div>
+      <div class="col-xs-9">
+          {{ partdetails_form.volume_end|addcss:"form-control input-sm" }}
+      </div>
+  </div>
 </div>
 
 <div class="row">
@@ -128,22 +136,30 @@
     <div class="alert alert-danger">{{ error }}</div>
   </div>
   {% endfor %}
-    <div class="col-xs-4">
-        <div class="form-group">
-            {{ partdetails_form.issue_free_text|addcss:"form-control input-sm" }}
-        </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Issue</label>
     </div>
-    <div class="col-xs-4">
-        <div class="form-group">
-            {{ partdetails_form.issue_begin|addcss:"form-control input-sm" }}
-        </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.issue_free_text|addcss:"form-control input-sm" }}
     </div>
-
-    <div class="col-xs-4">
-      <div class="form-group">
-            {{ partdetails_form.issue_end|addcss:"form-control input-sm" }}
-        </div>
+  </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Nr.</label>
     </div>
+    <div class="col-xs-9">
+        {{ partdetails_form.issue_begin|addcss:"form-control input-sm" }}
+    </div>
+  </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">to</label>
+    </div>
+    <div class="col-xs-9">
+        {{ partdetails_form.issue_end|addcss:"form-control input-sm" }}
+    </div>
+  </div>
 </div>
 <div class="row">
   {% for error in partdetails_form.pages_free_text.errors %}
@@ -162,21 +178,30 @@
   </div>
   {% endfor %}
 
-  <div class="col-xs-4">
-        <div class="form-group">
-            {{ partdetails_form.pages_free_text|addcss:"form-control input-sm" }}
-        </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Pages</label>
     </div>
-    <div class="col-xs-4">
-      <div class="form-group">
-            {{ partdetails_form.page_begin|addcss:"form-control input-sm" }}
-        </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.pages_free_text|addcss:"form-control input-sm" }}
     </div>
-    <div class="col-xs-4">
-        <div class="form-group">
-            {{ partdetails_form.page_end|addcss:"form-control input-sm" }}
-        </div>
+  </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Nr.</label>
     </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.page_begin|addcss:"form-control input-sm" }}
+    </div>
+  </div>
+  <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">to</label>
+    </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.page_end|addcss:"form-control input-sm" }}
+    </div>
+  </div>
 </div>
 
 <div class="row">
@@ -191,16 +216,22 @@
   </div>
   {% endfor %}
 
-    <div class="col-xs-5">
-        <div class="form-group">
-            {{ partdetails_form.extent|addcss:"form-control input-sm" }}
-        </div>
+  <div class="form-group col-xs-5" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Extent</label>
     </div>
-    <div class="col-xs-7">
-        <div class="form-group">
-            {{ partdetails_form.extent_note|addcss:"form-control input-sm" }}
-        </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.extent|addcss:"form-control input-sm" }}
     </div>
+  </div>
+  <div class="form-group col-xs-7" style="padding: 0px;">
+    <div class="col-sm-3 text-left">
+      <label class="input-sm">Note</label>
+    </div>
+    <div class="col-xs-9">
+      {{ partdetails_form.extent_note|addcss:"form-control input-sm" }}
+    </div>
+  </div>
 </div>
 {% endif %}
 
