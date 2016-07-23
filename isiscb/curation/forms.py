@@ -197,7 +197,7 @@ class CitationForm(forms.ModelForm):
                     self.fields[field].widget.attrs['readonly'] = True
                     self.fields[field].widget.attrs['disabled'] = True
 
-    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
@@ -210,6 +210,7 @@ class CitationForm(forms.ModelForm):
     belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
+    administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
     title = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
     class Meta:
