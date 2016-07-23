@@ -195,7 +195,12 @@ def create_ccrelation_for_citation(request, citation_id):
         'instance': citation,
     })
     if request.method == 'GET':
+        ccrelation = CCRelation()
+        ccrelation.subject = citation
         form = CCRelationForm(prefix='ccrelation', initial={'subject': citation.id})
+        context.update({
+            'ccrelation': ccrelation,
+        })
 
     elif request.method == 'POST':
         form = CCRelationForm(request.POST, prefix='ccrelation')

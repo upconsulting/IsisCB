@@ -44,12 +44,14 @@
             <div class="btn-group pull-right">
                 <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
                 <input type="submit" value="Save" class="btn btn-sm btn-success" />
+                {% if ccrelation.id %}
                 <a href="#"
                   class="btn btn-danger btn-sm delete-ccrelation"
                   ccrelation-id="{{ ccrelation.id }}"
                   ccrelation-title="{{ ccrelation.subject|get_citation_title|safe }}">
                   Delete
                 </a>
+                {% endif %}
             </div>
         </div>
       </div>
@@ -111,7 +113,7 @@
                             results-target="#subject-results-container"
                             selected-result-target="#id_ccrelation-subject">
                         <span class="input-group-btn">
-                            <a 
+                            <a
                                 class="btn glyphicon glyphicon-pencil enable-search-input"
                                 data-target="#citation-search-subject">
                             </a>
@@ -293,7 +295,7 @@ $(document).ready(function() {
 });
 </script>
 
-{% if ccrelation %}
+{% if ccrelation.id %}
 <script>
 $(document).ready(function() {
     $('.delete-ccrelation').click(function() {
