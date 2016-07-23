@@ -104,29 +104,29 @@
                 {% endfor %}
 
                 <div id="subject_info_container">
-                <div id="subject_info">
-                <strong>Citation record: </strong>
-                {% if form.instance.subject %}
-                <strong class="text-warning"><span id="show_subject_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                  <a id="link_to_subject" href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                </strong>
+                  <div id="subject_info">
+                    <strong>Citation record: </strong>
+                    {% if form.instance.subject %}
+                    <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
+                      <a class="link_to_citation" href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </strong>
 
-                <p>
-                  <span id="show_subject_type_controlled" class="text-success">{{ form.instance.subject.get_type_controlled_display }}</span>
-                  <br>
-                  <em id="show_subject_title">{{ form.instance.subject|get_citation_title }}</em>
-                  <br>
-                  {% with form.instance.subject|get_authors_editors as authors_editors %}
-                  {% if authors_editors %}
-                  <span id="show_subject_authors">
-                              {{ authors_editors }}
-                  </span>
-                  {% endif %}
-                  {% endwith %}
+                    <p>
+                      <span class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                      <br>
+                      <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
+                      <br>
+                      {% with form.instance.subject|get_authors_editors as authors_editors %}
+                      <span class="show_authors">
+                      {% if authors_editors %}
+                                  {{ authors_editors }}
+                      {% endif %}
+                      </span>
+                      {% endwith %}
 
-                </p>
-                {% endif %}
-                </div>
+                    </p>
+                    {% endif %}
+                  </div>
                 </div>
 
                 <div class="form-group">
@@ -171,19 +171,22 @@
                 <div id="object_info">
                 <strong>Citation record: </strong>
                 {% if form.instance.object %}
-                <strong class="text-warning">{{ form.instance.object.id }} &nbsp;&nbsp;
-                  <a href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <strong class="text-warning"><span class="show_id">{{ form.instance.object.id }}</span> &nbsp;&nbsp;
+                  <a class="link_to_citation" href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
                 </strong>
 
                 <p>
-                  <span class="text-success">{{ form.instance.object.get_type_controlled_display }}</span>
+                  <span class="text-success show_type_controlled">{{ form.instance.object.get_type_controlled_display }}</span>
                   <br>
-                  <em>{{ form.instance.object|get_citation_title }}</em>
+                  <em class="show_title">{{ form.instance.object|get_citation_title }}</em>
                   <br>
                   {% with form.instance.object|get_authors_editors as authors_editors %}
+                  <span class="show_authors">
                   {% if authors_editors %}
                               {{ authors_editors }}
+
                   {% endif %}
+                  </span>
                   {% endwith %}
 
                 </p>
@@ -312,7 +315,7 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -331,11 +334,28 @@ $(document).ready(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');
+                    var selected_authors = selected.attr('data-authors');
+                    var selected_type = selected.attr('data-type');
+                    var link = "{% url 'citation_list' %}" + selected_id;
 
                     results_container.empty();
                     search_input.val(selected_name);
                     search_input.attr('disabled', true);
                     id_result_container.val(selected_id);
+
+                    var parentCont = $("#subject_info");
+                    // this is butt-ugly, but so what, too tired to do something better
+                    console.log(search_input.attr("id"));
+                    if (search_input.attr("id") == "citation-search-object") {
+                      parentCont = $("#object_info");
+                    }
+
+                    parentCont.find(".show_id").html(selected_id);
+                    parentCont.find(".show_title").html(selected_name);
+                    parentCont.find(".show_authors").html(selected_authors);
+                    parentCont.find(".show_type_controlled").html(selected_type);
+                    parentCont.find(".link_to_citation").attr("href", link);
+
                 });
             }
         });
