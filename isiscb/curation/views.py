@@ -196,8 +196,16 @@ def create_ccrelation_for_citation(request, citation_id):
     })
     if request.method == 'GET':
         ccrelation = CCRelation()
-        ccrelation.subject = citation
-        form = CCRelationForm(prefix='ccrelation', initial={'subject': citation.id})
+        initial={}
+        if citation.type_controlled == Citation.CHAPTER:
+            ccrelation.object = citation
+            ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
+            initial['type_controlled'] = CCRelation.INCLUDES_CHAPTER
+            initial['object'] = citation.id
+        else:
+            initial['subject'] = citation.id
+            ccrelation.subject = citation
+        form = CCRelationForm(prefix='ccrelation', initial=initial)
         context.update({
             'ccrelation': ccrelation,
         })
