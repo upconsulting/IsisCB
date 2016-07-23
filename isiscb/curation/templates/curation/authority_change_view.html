@@ -86,6 +86,7 @@
             {{ form.classification_code|addcss:"form-control"}}
         </div>
 
+        {{ form.redirect_to }}
         {% for error in form.redirect_to.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
