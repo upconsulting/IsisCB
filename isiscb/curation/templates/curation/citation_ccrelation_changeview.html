@@ -170,27 +170,33 @@
                 <div id="object_info_container">
                 <div id="object_info">
                 <strong>Citation record: </strong>
-                {% if form.instance.object %}
-                <strong class="text-warning"><span class="show_id">{{ form.instance.object.id }}</span> &nbsp;&nbsp;
-                  <a class="link_to_citation" href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+
+                <strong class="text-warning"><span class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
+                  {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
+                  {% if not form.instance.object %}
+                    <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                  {% endif %}
                 </strong>
 
                 <p>
-                  <span class="text-success show_type_controlled">{{ form.instance.object.get_type_controlled_display }}</span>
+                  <span class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
                   <br>
-                  <em class="show_title">{{ form.instance.object|get_citation_title }}</em>
+                  <em class="show_title">{% if form.instance.object %}{{ form.instance.object|get_citation_title }}{% endif %}</em>
                   <br>
-                  {% with form.instance.object|get_authors_editors as authors_editors %}
                   <span class="show_authors">
+                    {% if form.instance.object %}
+                  {% with form.instance.object|get_authors_editors as authors_editors %}
+
                   {% if authors_editors %}
                               {{ authors_editors }}
+                  {% endif %}
 
+                  {% endwith %}
                   {% endif %}
                   </span>
-                  {% endwith %}
+
 
                 </p>
-                {% endif %}
                 </div>
                 </div>
 
@@ -345,7 +351,6 @@ $(document).ready(function() {
 
                     var parentCont = $("#subject_info");
                     // this is butt-ugly, but so what, too tired to do something better
-                    console.log(search_input.attr("id"));
                     if (search_input.attr("id") == "citation-search-object") {
                       parentCont = $("#object_info");
                     }
@@ -354,7 +359,8 @@ $(document).ready(function() {
                     parentCont.find(".show_title").html(selected_name);
                     parentCont.find(".show_authors").html(selected_authors);
                     parentCont.find(".show_type_controlled").html(selected_type);
-                    parentCont.find(".link_to_citation").attr("href", link);
+                    parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
+
 
                 });
             }
