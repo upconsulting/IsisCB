@@ -55,7 +55,6 @@
             </div>
         </div>
       </div>
-
     {% include "curation/fragment_citation_header.html" %}
 
     <div class="container-fluid form-horizontal">
@@ -103,8 +102,35 @@
                   </div>
                 </div>
                 {% endfor %}
+
+                <div id="subject_info_container">
+                <div id="subject_info">
+                <strong>Citation record: </strong>
+                {% if form.instance.subject %}
+                <strong class="text-warning"><span id="show_subject_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
+                  <a id="link_to_subject" href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                </strong>
+
+                <p>
+                  <span id="show_subject_type_controlled" class="text-success">{{ form.instance.subject.get_type_controlled_display }}</span>
+                  <br>
+                  <em id="show_subject_title">{{ form.instance.subject|get_citation_title }}</em>
+                  <br>
+                  {% with form.instance.subject|get_authors_editors as authors_editors %}
+                  {% if authors_editors %}
+                  <span id="show_subject_authors">
+                              {{ authors_editors }}
+                  </span>
+                  {% endif %}
+                  {% endwith %}
+
+                </p>
+                {% endif %}
+                </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Subject</label>
+                  <div class="col-sm-12">
                     <div class="input-group">
                         <input type="text"
                             id="citation-search-subject"
@@ -119,12 +145,10 @@
                             </a>
                         </span>
                     </div>
+                  </div>
                 </div>
-                {% if form.instance.subject %}
-                <p style="padding-left: 4px; margin-top: -10px;">
-                  <a href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
-                </p>
-                {% endif %}
+
+
                 <ul class="list-group" id="subject-results-container"></ul>
 
 
@@ -142,9 +166,34 @@
                   </div>
                 </div>
                 {% endfor %}
+
+                <div id="object_info_container">
+                <div id="object_info">
+                <strong>Citation record: </strong>
+                {% if form.instance.object %}
+                <strong class="text-warning">{{ form.instance.object.id }} &nbsp;&nbsp;
+                  <a href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                </strong>
+
+                <p>
+                  <span class="text-success">{{ form.instance.object.get_type_controlled_display }}</span>
+                  <br>
+                  <em>{{ form.instance.object|get_citation_title }}</em>
+                  <br>
+                  {% with form.instance.object|get_authors_editors as authors_editors %}
+                  {% if authors_editors %}
+                              {{ authors_editors }}
+                  {% endif %}
+                  {% endwith %}
+
+                </p>
+                {% endif %}
+                </div>
+                </div>
+
                 <div class="form-group">
-                    <label>Object</label>
-                    <div class="input-group">
+                    <div class="col-sm-12">
+                      <div class="input-group">
                         <input type="text"
                             id="citation-search-object"
                             class="form-control citation-search"
@@ -159,12 +208,9 @@
                             </a>
                         </span>
                     </div>
+                  </div>
                 </div>
-                {% if form.instance.object %}
-                <p style="padding-left: 4px; margin-top: -10px;">
-                  <a href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-share-square" aria-hidden="true"></i> Go to citation</a>
-                </p>
-                {% endif %}
+
                 <ul class="list-group" id="object-results-container"></ul>
             </div>
         </div>
@@ -224,6 +270,13 @@ $(document).ready(function() {
         }
         $('#id_ccrelation-subject').val(object_id);
         $('#id_ccrelation-object').val(subject_id);
+
+        $("#subject_info_container").append($("#object_info"));
+        $("#object_info_container").append($("#subject_info"));
+
+        $("#object_info").attr("id", "temp_id");
+        $("#subject_info").attr("id", "object_info");
+        $("#temp_id").attr("id", "subject_info");
 
 
         $('.citation-search').each(function(i, elem) {

@@ -205,7 +205,7 @@ def create_ccrelation_for_citation(request, citation_id):
         else:
             initial['subject'] = citation.id
             ccrelation.subject = citation
-        form = CCRelationForm(prefix='ccrelation', initial=initial)
+        form = CCRelationForm(prefix='ccrelation', initial=initial, instance=ccrelation)
         context.update({
             'ccrelation': ccrelation,
         })
