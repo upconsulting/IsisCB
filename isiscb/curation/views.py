@@ -44,6 +44,9 @@ def _get_citation_title(citation):
         return u'Untitled review'
     return title
 
+def _get_authors_editors(citation):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in citation.acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
 @staff_member_required
 def dashboard(request):
@@ -205,7 +208,7 @@ def create_ccrelation_for_citation(request, citation_id):
         else:
             initial['subject'] = citation.id
             ccrelation.subject = citation
-        form = CCRelationForm(prefix='ccrelation', initial=initial)
+        form = CCRelationForm(prefix='ccrelation', initial=initial, instance=ccrelation)
         context.update({
             'ccrelation': ccrelation,
         })
@@ -1366,6 +1369,7 @@ def quick_and_dirty_citation_search(request):
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
         'title': _get_citation_title(obj),
+        'authors': _get_authors_editors(obj),
         'datestring': _get_datestring_for_citation(obj),
         'description': obj.description,
         'url': reverse("curate_citation", args=(obj.id,)),
