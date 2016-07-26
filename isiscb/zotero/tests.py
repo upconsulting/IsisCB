@@ -39,7 +39,7 @@ class TestSubjects(TestCase):
         instance = ImportAccession.objects.create(name='TestAccession')
         citations = process(papers, instance)
         for citation in citations:
-            for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.SUBJECT):
+            for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.CATEGORY):
                 if acrelation.authority.name == 'testauthority':
                     self.assertEqual(acrelation.authority.resolutions.count(), 1)
 
