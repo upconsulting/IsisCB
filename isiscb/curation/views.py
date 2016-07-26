@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
+from django.core.cache import caches
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 
@@ -806,6 +807,25 @@ def citation(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
+    user_cache = caches['default']
+    result_list = user_cache.get('result_list', None)
+    request_params = user_cache.get('request_params', "")
+
+    if request_params:
+        context.update({
+            'request_params': request_params,
+        })
+
+    if result_list:
+        index = result_list.index(citation)
+        next = result_list[index+1] if len(result_list) > index+1 else None
+        previous = result_list[index-1] if index > 0 else None
+
+        context.update({
+            'next': next,
+            'previous': previous,
+        })
+
     if citation.type_controlled == Citation.BOOK:
         template = loader.get_template('curation/citation_change_view_book.html')
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
@@ -870,6 +890,14 @@ def citations(request):
 
     filters_active = request.GET.get('filters', False)
     filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+
+
+    # 'search_results_cache' is the database cache
+    #  (see production_settings.py).
+    user_cache = caches['default']
+    user_cache.set('result_list', list(filtered_objects.qs.all()))
+    user_cache.set('request_params', request.META['QUERY_STRING'])
+
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
