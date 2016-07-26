@@ -1188,6 +1188,11 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object).
     """))
 
+    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, CONTRIBUTOR, TRANSLATOR]
+    SUBJECT_CONTENT_TYPES = [SUBJECT, CATEGORY]
+    INSTITUTIONAL_HOST_TYPES = [PUBLISHER, SCHOOL, INSTITUTION]
+    PUBLICATION_HOST_TYPES = [PERIODICAL, BOOK_SERIES]
+
     PERSONAL_RESPONS = 'PR'
     SUBJECT_CONTENT = 'SC'
     INSTITUTIONAL_HOST = 'IH'
@@ -1291,6 +1296,18 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     def __unicode__(self):
         values = (self.citation, self._render_type_controlled(), self.authority)
         return u'{0} - {1} - {2}'.format(*values)
+
+    def save(self, *args, **kwargs):
+        if self.type_controlled is not None:
+            if self.type_controlled in self.PERSONAL_RESPONS_TYPES:
+                self.type_broad_controlled = self.PERSONAL_RESPONS
+            elif self.type_controlled in self.SUBJECT_CONTENT_TYPES:
+                self.type_broad_controlled = self.SUBJECT_CONTENT
+            elif self.type_controlled in self.INSTITUTIONAL_HOST_TYPES:
+                self.type_broad_controlled = self.INSTITUTIONAL_HOST
+            elif self.type_controlled in self.PUBLICATION_HOST_TYPES:
+                self.type_broad_controlled = self.PUBLICATION_HOST
+        super(ACRelation, self).save(*args, **kwargs)
 
 
 class AARelation(ReferencedEntity, CuratedMixin):

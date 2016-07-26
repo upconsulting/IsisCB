@@ -53,7 +53,7 @@ class ACRelationForm(forms.ModelForm):
     class Meta:
         model = ACRelation
         fields = [
-            'type_controlled', 'type_broad_controlled',
+            'type_controlled', 
             'name_for_display_in_citation', 'data_display_order',
             'confidence_measure', 'authority', 'citation',
             'record_status_value', 'record_status_explanation',
