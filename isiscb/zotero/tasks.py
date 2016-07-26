@@ -136,10 +136,55 @@ def ingest_citation(request, accession, draftcitation):
             citation.administrator_notes = message
         citation.save()
 
+    for relation in draftcitation.relations_from.all():
+        draft_target = relation.object
+        target = draft_target.resolutions.first().to_instance
+        ccr_data = {
+            '_history_user': request.user,
+            'public': True,
+            'record_history': _record_history_message(request, accession),
+            'record_status_value': CuratedMixin.ACTIVE,
+            'record_status_explanation': u'Active by default',
+            'subject': citation,
+            'object': target,
+            'type_controlled': relation.type_controlled,
+            'belongs_to': accession.ingest_to,
+            'zotero_accession': accession,
+        }
+        ccrelation = CCRelation.objects.create(**ccr_data)
+        InstanceResolutionEvent.objects.create(
+            for_instance = relation,
+            to_instance = ccrelation,
+        )
+    for relation in draftcitation.relations_to.all():
+        draft_target = relation.subject
+        target = draft_target.resolutions.first().to_instance
+        ccr_data = {
+            '_history_user': request.user,
+            'public': True,
+            'record_history': _record_history_message(request, accession),
+            'record_status_value': CuratedMixin.ACTIVE,
+            'record_status_explanation': u'Active by default',
+            'subject': target,
+            'object': citation,
+            'type_controlled': relation.type_controlled,
+            'belongs_to': accession.ingest_to,
+            'zotero_accession': accession,
+        }
+        ccrelation = CCRelation.objects.create(**ccr_data)
+        InstanceResolutionEvent.objects.create(
+            for_instance = relation,
+            to_instance = ccrelation,
+        )
+
 
     for relation in draftcitation.authority_relations.all():
         draft = relation.authority
-        target = draft.resolutions.first().to_instance
+        try:
+            target = draft.resolutions.first().to_instance
+        except AttributeError:    # No resolution target.
+            continue
+
         target.zotero_accession = accession
         target.save()
 

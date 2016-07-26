@@ -33,8 +33,7 @@ class TestBookReviews(TestCase):
     Zotero. The foaf:surname of the target "author" can contain either an
 
     """
-
-    def test_process_bookreviews(self):
+    def setUp(self):
         isbn_type, _ = LinkedDataType.objects.get_or_create(name='ISBN')
         identifiers = [u'CBB001552823', u'CBB001202302', u'CBB001510022',
                        u'CBB001422653', u'CBB001551200']
@@ -55,6 +54,9 @@ class TestBookReviews(TestCase):
                                       type_controlled=isbn_type,
                                       subject=test_book)
 
+    def test_process_bookreviews(self):
+
+
 
         book_data = 'zotero/test_data/IsisReviewExamples.rdf'
         papers = read(book_data)
@@ -67,7 +69,7 @@ class TestBookReviews(TestCase):
         type_counts = Counter()
         for citation in citations:
             type_counts[citation.type_controlled] += 1
-            if citation.type_controlled == Citation.CHAPTER:
+            if citation.type_controlled == Citation.REVIEW:
                 self.assertGreater(citation.relations_to.count(), 0)
                 relation = citation.relations_to.first()
                 self.assertEqual(relation.type_controlled,
@@ -75,12 +77,31 @@ class TestBookReviews(TestCase):
 
         self.assertEqual(type_counts[Citation.REVIEW], 8)
 
+    def test_ingest_reviews(self):
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        accession = ImportAccession.objects.create(name='TestAccession')
+        book_data = 'zotero/test_data/IsisReviewExamples.rdf'
+
+        for citation in process(read(book_data), accession):
+            new_citation = ingest_citation(request, accession, citation)
+
+            self.assertGreater(new_citation.relations_to.count(), 0)
+
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 class TestBookChapters(TestCase):

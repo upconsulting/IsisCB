@@ -830,7 +830,7 @@ def process_ccrelations(citations, originals, accession):
 
                 found = True
 
-        elif citation.type_controlled == Citation.ARTICLE:
+        else:
             if hasattr(original, 'review_of'):
                 identifiers = getattr(original, 'review_of')
                 citation.type_controlled = Citation.REVIEW
@@ -862,9 +862,11 @@ def process_ccrelations(citations, originals, accession):
                             if target is None:
                                 continue
 
-                            _draft_linkage(citation, target, DraftCCRelation.REVIEWED_BY,
-                                           accession)
+
                             found = True
+
+                    _draft_linkage(citation, target, DraftCCRelation.REVIEWED_BY,
+                                   accession)
 
 
 def process_paper(paper, instance):
