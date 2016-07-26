@@ -600,6 +600,7 @@ def process_authorities(paper, instance):
                     part_of = instance,
                 )
                 draftACRelations.append(relation)
+
         elif type(field_value) is list and len(field_value) > 0 and type(field_value[0]) is tuple:
             authority_id = None
             authority = None
@@ -630,6 +631,10 @@ def process_authorities(paper, instance):
                                 authority_id = authority.id
                             except Authority.DoesNotExist:
                                 pass
+
+                            # Even though this originates in a dc.subject field,
+                            #  these should be linked as categories.
+                            acrelation_type = ACRelation.CATEGORY
 
                 # Use the Authority's name, if available. Otherwise just use
                 #  whatever we found in Zotero.
