@@ -98,7 +98,7 @@ def accessions(request):
     whether all authorities have been resolved for a batch.
     """
 
-    queryset = ImportAccession.objects.filter(processed=False)
+    queryset = ImportAccession.objects.all().order_by('-imported_on')
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
 
     context = RequestContext(request, {

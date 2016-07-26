@@ -4,6 +4,11 @@
 
 
 {% block object_list %}
+<style>
+.glyphicon-ok {
+    color: green;
+}
+</style>
 <div style="margin-bottom: 15px; margin-top: 15px;">
     <a href="{% url "create_accession" %}" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Upload RDF</a>
 </div>
@@ -19,7 +24,7 @@
             <th>Authorities</th>
             <th>Resolved</th>
             <th>Processed</th>
-            <th></th>
+            <th class="col-xs-2"></th>
         </tr>
     </thead>
     <tbody>
@@ -34,18 +39,18 @@
             <td>{{ object.imported_on }}</td>
             <td>{{ object.imported_by }}</td>
             <td>{{ object.ingest_to.name }}</td>
-            <td>
+            <td class="text-center">
                 <a href="{% url "data_importaccession" object.id %}">
                     {{ object.draftcitation_set.count }}
                 </a>
             </td>
-            <td>
+            <td class="text-center">
                 <a href="{% url "data_importaccession" object.id %}">
                     {{ object.draftauthority_set.count }}
                 </a>
             </td>
-            <td>{{ object.resolved }}</td>
-            <td>{{ object.processed }}</td>
+            <td class="text-center">{% if object.resolved %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
+            <td class="text-center">{% if object.processed %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
             <td>
                 <div class="btn-group btn-group-xs">
                     <a href="{% url "ingest_accession" object.id %}"
