@@ -5,6 +5,7 @@ from django.db import models
 
 import rdflib
 import datetime
+from collections import Counter
 
 from parser import *
 from models import *
@@ -26,6 +27,128 @@ partdetails_fields = [
 ]
 
 
+class TestBookReviews(TestCase):
+    """
+    Reviews are linked to book citations via the "reviewed author" field in
+    Zotero. The foaf:surname of the target "author" can contain either an
+
+    """
+    def setUp(self):
+        isbn_type, _ = LinkedDataType.objects.get_or_create(name='ISBN')
+        identifiers = [u'CBB001552823', u'CBB001202302', u'CBB001510022',
+                       u'CBB001422653', u'CBB001551200']
+        isbns = [u'9782853672665', u'9782021111293', u'9783319121017',
+                 u'CBB001552823', u'CBB001202302', u'9789004225534',
+                 u'CBB001510022', u'CBB001422653', u'CBB001551200',
+                 u'9783515104418', u'9788387992842']
+
+        for identifier in identifiers:
+            test_book = Citation.objects.create(title='A Test Citation',
+                                                type_controlled=Citation.BOOK,
+                                                id=identifier)
+        for isbn in isbns:
+            test_book = Citation.objects.create(title='A Test Citation',
+                                                type_controlled=Citation.BOOK)
+
+            LinkedData.objects.create(universal_resource_name=isbn,
+                                      type_controlled=isbn_type,
+                                      subject=test_book)
+
+    def test_process_bookreviews(self):
+
+
+
+        book_data = 'zotero/test_data/IsisReviewExamples.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        # There is one book in this dataset, and the chapters are chapter of
+        #  this book.
+
+        type_counts = Counter()
+        for citation in citations:
+            type_counts[citation.type_controlled] += 1
+            if citation.type_controlled == Citation.REVIEW:
+                self.assertGreater(citation.relations_to.count(), 0)
+                relation = citation.relations_to.first()
+                self.assertEqual(relation.type_controlled,
+                                 CCRelation.REVIEWED_BY)
+
+        self.assertEqual(type_counts[Citation.REVIEW], 8)
+
+    def test_ingest_reviews(self):
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        accession = ImportAccession.objects.create(name='TestAccession')
+        book_data = 'zotero/test_data/IsisReviewExamples.rdf'
+
+        for citation in process(read(book_data), accession):
+            new_citation = ingest_citation(request, accession, citation)
+
+            self.assertGreater(new_citation.relations_to.count(), 0)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
+
+
+class TestBookChapters(TestCase):
+    """
+    Chapters are linked to book citations via the "Book title" field in Zotero.
+    This is represented as dc.isPartOf -> bib:Book.
+    """
+
+    def test_process_bookchapters(self):
+        test_book = Citation.objects.create(title='A Test Citation',
+                                            type_controlled=Citation.BOOK)
+        isbn_type, _ = LinkedDataType.objects.get_or_create(name='ISBN')
+        LinkedData.objects.create(universal_resource_name='9783110225784',
+                                  type_controlled=isbn_type,
+                                  subject=test_book)
+
+
+        book_data = 'zotero/test_data/BookChapterExamples.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        # There is one book in this dataset, and the chapters are chapter of
+        #  this book.
+        book = [c for c in citations if c.type_controlled == Citation.BOOK][0]
+
+        type_counts = Counter()
+        for citation in citations:
+            type_counts[citation.type_controlled] += 1
+            if citation.type_controlled == Citation.CHAPTER:
+                self.assertGreater(citation.relations_to.count(), 0)
+                relation = citation.relations_to.first()
+                self.assertEqual(relation.type_controlled,
+                                 CCRelation.INCLUDES_CHAPTER)
+
+
+        self.assertEqual(type_counts[Citation.BOOK], 1)
+        self.assertEqual(type_counts[Citation.CHAPTER], 6)
+
+    def tearDown(self):
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
 class TestSubjects(TestCase):
     def test_parse_subjects(self):
         papers = read('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
@@ -39,9 +162,16 @@ class TestSubjects(TestCase):
         instance = ImportAccession.objects.create(name='TestAccession')
         citations = process(papers, instance)
         for citation in citations:
-            for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.SUBJECT):
+            for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.CATEGORY):
                 if acrelation.authority.name == 'testauthority':
                     self.assertEqual(acrelation.authority.resolutions.count(), 1)
+
+    def tearDown(self):
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
 
 
 
@@ -109,6 +239,13 @@ class TestParse(TestCase):
             self.assertEqual(len(paper.documentType), 2)
             self.assertIn(paper.documentType, ZoteroParser.document_types.values())
 
+    def tearDown(self):
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
 
 class TestIngest(TestCase):
     def setUp(self):
@@ -140,6 +277,13 @@ class TestIngest(TestCase):
         self.assertGreater(len(citations), 0)
         self.assertIsInstance(citations[0], DraftCitation)
 
+    def tearDown(self):
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
 
 class TestSuggest(TestCase):
     def test_suggest_citation_by_linkeddata(self):
@@ -147,6 +291,13 @@ class TestSuggest(TestCase):
         accession.save()
         papers = read(datapath)
         citations = process(papers, accession)
+
+    def tearDown(self):
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
 
 
 class TestIngest(TestCase):
@@ -266,3 +417,9 @@ class TestIngest(TestCase):
         self.accession.delete()
         self.dataset.delete()
         self.user.delete()
+
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()

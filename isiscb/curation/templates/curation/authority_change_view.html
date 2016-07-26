@@ -90,14 +90,21 @@
         {% for error in form.redirect_to.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.redirect_to.label }}</label>
+
+        <div class="form-group row">
+            <label class="col-sm-12">{{ form.redirect_to.label }}</label>
+            <div class="col-sm-11">
             <input type="text"
                 class="form-control"
                 name="authority-search"
                 autocomplete="off"
                 id="authority-search" />
-            <ul class="list-group" id="results-container"></ul>
+                <ul class="list-group" id="results-container"></ul>
+              </div>
+              <div class="col-sm-1">
+            <span id="remove_redirect" class="glyphicon glyphicon-remove" style="color: red; padding-top: 7px; margin-left: -10px;"
+              ></span>
+            </div>
         </div>
 
         {% for error in form.record_status_explanation.errors %}
@@ -244,6 +251,10 @@ $(document).ready(function() {
         });
     });
 
+    $('#remove_redirect').on("click", function(e) {
+        $('#id_authority-redirect_to').val("");
+        $('#authority-search').val("");
+    });
 });
 </script>
 {% endblock %}

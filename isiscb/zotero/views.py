@@ -98,7 +98,7 @@ def accessions(request):
     whether all authorities have been resolved for a batch.
     """
 
-    queryset = ImportAccession.objects.filter(processed=False)
+    queryset = ImportAccession.objects.all().order_by('-imported_on')
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
 
     context = RequestContext(request, {
@@ -124,7 +124,12 @@ def create_accession(request):
     template = loader.get_template('zotero/create_accession.html')
 
     if request.method == 'GET':
-        form = ImportAccessionForm()
+        try:
+            initial = {'ingest_to': Dataset.objects.get(name='Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)')}
+        except Dataset.DoesNotExist:
+            initial = {}
+
+        form = ImportAccessionForm(initial=initial)
 
     elif request.method == 'POST':
         form = ImportAccessionForm(request.POST, request.FILES)

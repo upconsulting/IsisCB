@@ -81,16 +81,6 @@
                     </div>
                 </div>
 
-                {% for error in form.type_broad_controlled.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ form.type_broad_controlled.label }}</label>
-                    <div class="col-md-8">
-                      {{ form.type_broad_controlled|addcss:"form-control" }}
-                    </div>
-                </div>
-
 
                 {% for error in form.data_display_order.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
