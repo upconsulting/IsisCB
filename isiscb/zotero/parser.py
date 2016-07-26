@@ -43,6 +43,8 @@ BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
 JOURNAL = rdflib.term.URIRef(BIBLIO + 'Journal')
 WEBSITE = rdflib.term.URIRef(ZOTERO + 'Website')
 
+REVIEWED_AUTHORS = rdflib.term.URIRef(ZOTERO + 'reviewedAuthors')
+
 # TODO: We don't have the right relation types to support WEBSITE yet!
 PARTOF_TYPES = [
     (BOOK, 'book'),
@@ -321,7 +323,8 @@ class ZoteroParser(RDFParser):
         ('isPartOf', rdflib.URIRef("http://purl.org/dc/terms/isPartOf")),
         ('pages', rdflib.URIRef("http://purl.org/net/biblio#pages")),
         ('documentType',
-         rdflib.URIRef("http://www.zotero.org/namespaces/export#itemType"))]
+         rdflib.URIRef("http://www.zotero.org/namespaces/export#itemType")),
+        ('review_of', REVIEWED_AUTHORS)]
 
     reject_if = lambda self, x: not hasattr(x, 'documentType')
 
@@ -367,7 +370,10 @@ class ZoteroParser(RDFParser):
         else:
             name, ident_value = tuple(unicode(value).split(' '))
             name = name.lower()
-        self.set_value(name, ident_value)
+            if name == 'isbn':
+                ident_value = ident_value.replace('-', '')
+            self.set_value(name, ident_value)
+
 
     def handle_link(self, value):
         """
@@ -501,7 +507,7 @@ class ZoteroParser(RDFParser):
                     name = name.lower()
                     if name == 'isbn':
                         self.set_value('partof__identifier',
-                                       (name, ident_value))
+                                       (name, ident_value.replace('-', '')))
                     else:
                         self.set_value(name, ident_value)
                 except ValueError:
@@ -519,6 +525,15 @@ class ZoteroParser(RDFParser):
 
     def handle_pages(self, value):
         return tuple(value.split('-'))
+
+    def handle_review_of(self, value):
+        """
+        IsisCB uses this field to denote reviewed works. "Author" surnames will
+        be either production identifiers (e.g. CBB00...) or ISBNs.
+        """
+
+        return zip(*self.handle_authors_full(value))[0]
+
 
     def postprocess_pages(self, entry):
         if type(entry.pages) not in [tuple, list]:
@@ -739,6 +754,41 @@ def process_attributes(paper, instance):
     return attributes
 
 
+def _get_citation_by_linkeddata(ident_field, ident_value):
+    qs = LinkedData.objects.filter(**{
+        'type_controlled__name__icontains': ident_field,
+        'universal_resource_name': ident_value
+    })
+    if qs.count() == 0:
+        return
+
+    linkeddata_entry = qs.first()
+    return linkeddata_entry.subject
+
+
+def _draft_linkage(citation, target, relation_type, accession):
+    # To maintain consistency in later steps, we will create a
+    #  "dummy" DraftCitation based on this production Citation.
+    draft_target = DraftCitation.objects.create(**{
+        'title': target.title,
+        'type_controlled': target.type_controlled,
+        'part_of': accession,
+    })
+    # This DraftCitation is resolved from the start, since we
+    #  have already decided what it refers to.
+    InstanceResolutionEvent.objects.create(**{
+        'for_instance': draft_target,
+        'to_instance': target
+    })
+
+    return DraftCCRelation.objects.create(**{
+        'subject': draft_target,
+        'object': citation,
+        'type_controlled': relation_type,
+        'part_of': accession,
+    })
+
+
 def process_ccrelations(citations, originals, accession):
     """
     Attempt to match up book chapters and book reviews with their respective
@@ -748,62 +798,61 @@ def process_ccrelations(citations, originals, accession):
     books = [(c, o) for c, o in zip(citations, originals)
              if c.type_controlled == Citation.BOOK]
 
-    ccrelations = []    # TODO: we may not need to maintain references to these.
-
     # We assume that ``citations`` and ``originals`` are the same shape, in the
     #  same order.
     for citation, original in zip(citations, originals):
         found = False
         if citation.type_controlled == Citation.CHAPTER:
+            if not hasattr(original, 'partof__identifier'):
+                continue
+                
             ident_field, ident_value = original.partof__identifier
+
             for book, original_book in books:
                 if getattr(original_book, ident_field) == ident_value:
-                    ccrelations.append(DraftCCRelation.objects.create(**{
+                    DraftCCRelation.objects.create(**{
                         'subject': book,
                         'object': citation,
                         'type_controlled': DraftCCRelation.INCLUDES_CHAPTER,
                         'part_of': accession,
-                    }))
+                    })
                     found = True
                     break
 
             if not found:   # Look in the production database, via LinkedData.
-                qs = LinkedData.objects.filter(**{
-                    'type_controlled__name__icontains': ident_field,
-                    'universal_resource_name': ident_value
-                })
-                if qs.count() == 0:
+                production_target = _get_citation_by_linkeddata(ident_field,
+                                                                ident_value)
+                if production_target is None:
                     continue
 
-                linkeddata_entry = qs.first()
-                production_target = linkeddata_entry.subject
+                _draft_linkage(citation, production_target,
+                               DraftCCRelation.INCLUDES_CHAPTER, accession)
 
-                # To maintain consistency in later steps, we will create a
-                #  "dummy" DraftCitation based on this production Citation.
-                draft_target = DraftCitation.objects.create(**{
-                    'title': production_target.title,
-                    'type_controlled': production_target.type_controlled,
-                    'part_of': accession,
-                })
-                # This DraftCitation is resolved from the start, since we
-                #  have already decided what it refers to.
-                InstanceResolutionEvent.objects.create(**{
-                    'for_instance': draft_target,
-                    'to_instance': production_target
-                })
-
-                ccrelations.append(DraftCCRelation.objects.create(**{
-                    'subject': draft_target,
-                    'object': citation,
-                    'type_controlled': DraftCCRelation.INCLUDES_CHAPTER,
-                    'part_of': accession,
-                }))
                 found = True
 
-        # elif citation.type_controlled == Citation.REVIEW:
+        elif citation.type_controlled == Citation.ARTICLE:
+            if hasattr(original, 'review_of'):
+                identifiers = getattr(original, 'review_of')
+                citation.type_controlled = Citation.REVIEW
+                citation.save()
 
+                targets = []
+                for identifier in identifiers:
+                    if identifier.startswith('CBB'):    # Production citation.
+                        try:
+                            target = Citation.objects.get(pk=identifier)
+                        except Citation.DoesNotExist:
+                            print 'Could not find citation with id', identifier
+                            continue
 
-    return ccrelations
+                    else:    # ISBN.
+                        target = _get_citation_by_linkeddata('isbn', identifier)
+                        if target is None:
+                            continue
+
+                    _draft_linkage(citation, target, DraftCCRelation.REVIEWED_BY,
+                                   accession)
+                    found = True
 
 
 def process_paper(paper, instance):
