@@ -805,7 +805,7 @@ def process_ccrelations(citations, originals, accession):
         if citation.type_controlled == Citation.CHAPTER:
             if not hasattr(original, 'partof__identifier'):
                 continue
-                
+
             ident_field, ident_value = original.partof__identifier
 
             for book, original_book in books:
@@ -846,13 +846,25 @@ def process_ccrelations(citations, originals, accession):
                             continue
 
                     else:    # ISBN.
-                        target = _get_citation_by_linkeddata('isbn', identifier)
-                        if target is None:
-                            continue
+                        found = False
+                        for book, original_book in books:
+                            if getattr(original_book, 'isbn') == identifier:
+                                DraftCCRelation.objects.create(**{
+                                    'subject': book,
+                                    'object': citation,
+                                    'type_controlled': DraftCCRelation.REVIEWED_BY,
+                                    'part_of': accession,
+                                })
+                                found = True
+                                break
+                        if not found:
+                            target = _get_citation_by_linkeddata('isbn', identifier)
+                            if target is None:
+                                continue
 
-                    _draft_linkage(citation, target, DraftCCRelation.REVIEWED_BY,
-                                   accession)
-                    found = True
+                            _draft_linkage(citation, target, DraftCCRelation.REVIEWED_BY,
+                                           accession)
+                            found = True
 
 
 def process_paper(paper, instance):
