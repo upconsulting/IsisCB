@@ -808,7 +808,7 @@ def citation(request, citation_id):
 
     if citation.type_controlled == Citation.BOOK:
         template = loader.get_template('curation/citation_change_view_book.html')
-    elif citation.type_controlled == Citation.REVIEW:
+    elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
         template = loader.get_template('curation/citation_change_view_review.html')
     elif citation.type_controlled == Citation.CHAPTER:
         template = loader.get_template('curation/citation_change_view_chapter.html')
