@@ -1,0 +1,471 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687008">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0021-1753"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Casado</foaf:surname>
+                        <foaf:givenname>Santos</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9782021111293</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12768"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687008</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>375-376</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Sebastian Vincent Grevsmühl. La Terre vue d’en haut: L’invention de l’environnement global.</dc:title>
+        <z:shortTitle>Sebastian Vincent Grevsmühl. La Terre vue d’en haut</z:shortTitle>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0021-1753">
+        <prism:volume>107</prism:volume>
+        <prism:number>2</prism:number>
+        <dc:title>Isis</dc:title>
+        <dc:identifier>ISSN 0021-1753</dc:identifier>
+        <dcterms:alternative>Isis</dcterms:alternative>
+        <dc:identifier>DOI 10.1086/687008</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_12768">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687008</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687009">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687009</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Condrau</foaf:surname>
+                        <foaf:givenname>Flurin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>CBB001202302</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>CBB001552823</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12762"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687009</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>377-379</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Joanna Bourke. The Story of Pain: From Prayer to Painkillers.; Keith Wailoo. Pain: A Political History.</dc:title>
+        <z:shortTitle>Joanna Bourke. The Story of Pain</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12762">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687009</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687011">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687011</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dijksterhuis</foaf:surname>
+                        <foaf:givenname>Fokko Jan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9783319121017</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12770"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687011</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>383-384</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Vincenzo De Risi, ed. Mathematizing Space: The Objects of Geometry from Antiquity to the Early Modern Age.</dc:title>
+        <z:shortTitle>Vincenzo De Risi, ed. Mathematizing Space</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12770">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687011</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687219">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687219</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hunter</foaf:surname>
+                        <foaf:givenname>Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>CBB001510022</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9789004225534</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12761"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687219</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>365-372</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Editing Early Modern Scientific Correspondence: The Way Forward</dc:title>
+        <z:shortTitle>Editing Early Modern Scientific Correspondence</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12761">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687219</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687012">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687012</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Jullien</foaf:surname>
+                        <foaf:givenname>Vincent</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9782853672665</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12767"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687012</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>374-375</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>A. Papadopoulos; G. Théret, eds. La théorie des lignes parallèles de Johann Heinrich Lambert.</dc:title>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12767">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687012</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687176">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687176</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Szulakowska</foaf:surname>
+                        <foaf:givenname>Urszula</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9788387992842</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12763"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687176</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>379-380</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Rafał T. Prinke. Zwodniczy ogród błędów: Piśmiennictwo alchemiczne do końca XVIII wieku [The Deceptive Garden of Errors: Alchemical Writings until the End of the Eighteenth Century].</dc:title>
+        <z:shortTitle>Rafał T. Prinke. Zwodniczy ogród błędów</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12763">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687176</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687014">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687014</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Timmermann</foaf:surname>
+                        <foaf:givenname>Carsten</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9783515104418</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12766"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687014</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>373-374</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Robert Jütte, ed. Medical Pluralism: Past—Present—Future.</dc:title>
+        <z:shortTitle>Robert Jütte, ed. Medical Pluralism</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12766">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687014</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.journals.uchicago.edu/doi/abs/10.1086/687007">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>107</prism:volume>
+                <prism:number>2</prism:number>
+                <dc:title>Isis</dc:title>
+                <dc:identifier>ISSN 0021-1753</dc:identifier>
+                <dcterms:alternative>Isis</dcterms:alternative>
+                <dc:identifier>DOI 10.1086/687007</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tobies</foaf:surname>
+                        <foaf:givenname>Renate</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>CBB001422653</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>CBB001551200</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_12764"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687007</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>382-383</bib:pages>
+        <dc:date>June 1, 2016</dc:date>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <z:libraryCatalog>journals.uchicago.edu (Atypon)</z:libraryCatalog>
+        <dc:title>Magdolna Hargittai. Women Scientists: Reflections, Challenges, and Breaking Boundaries.; Paola Govoni; Zelda Alice Franceschi, eds. Writing about Lives in Science: (Auto)Biography, Gender, and Genre.</dc:title>
+        <z:shortTitle>Magdolna Hargittai. Women Scientists</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_12764">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.journals.uchicago.edu/doi/abs/10.1086/687007</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-05 16:13:37</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>
