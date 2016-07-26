@@ -1,0 +1,246 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/">
+    <bib:BookSection rdf:about="#item_1234">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>Goy, Ina</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>43-60</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Epigenetic Theories: Caspar Friedrich Wolff and Immanuel Kant</dc:title>
+    </bib:BookSection>
+    <bib:BookSection rdf:about="urn:isbn:978-3-11-022578-5">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-4</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>Goy, Ina</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>43-60</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Epigenetic Theories: Caspar Friedrich Wolff and Immanuel Kant</dc:title>
+    </bib:BookSection>
+    <bib:BookSection rdf:about="#item_7811">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>203-220</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Kant’s Theory of Biology and the Argument from Design</dc:title>
+    </bib:BookSection>
+    <bib:Book rdf:about="#item_8416">
+        <z:itemType>book</z:itemType>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <dc:subject>&lt;i&gt;Critique of the Power of Judgment&lt;/i&gt;</dc:subject>
+        <dc:subject>=360-130=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Biology [4857]</dc:subject>
+        <dc:subject>Kant, Immanuel (1724-1804) [10085]</dc:subject>
+        <dc:subject>Metaphysics [14808]</dc:subject>
+        <dc:subject>Nature [16335]</dc:subject>
+        <dc:subject>Philosophy [15453]</dc:subject>
+        <dc:subject>Teleology [4805]</dc:subject>
+        <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>During the last twenty years, Kant's theory of biology has increasingly attracted the attention of scholars and developed into a field which is growing rapidly in importance within Kant studies. The volumepresents fifteen interpretative essays written by experts working in the field, covering topics from seventeenth- and eighteenth-century biological theories, the development of the philosophy of biology in Kant's writings, the theory of organisms in Kant's Critique of the Power of Judgment, and current perspectives on the teleology of nature.</dcterms:abstract>
+        <dc:title>Kant's Theory of Biology</dc:title>
+        <z:numPages>321</z:numPages>
+    </bib:Book>
+    <bib:BookSection rdf:about="#item_7971">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Watkins</foaf:surname>
+                        <foaf:givenname>Eric</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>1-24</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Introduction</dc:title>
+    </bib:BookSection>
+    <bib:BookSection rdf:about="#item_8383">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ginsborg</foaf:surname>
+                        <foaf:givenname>Hannah</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>269-274</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Oughts without Intentions: A Kantian Approach to Biological Functions</dc:title>
+    </bib:BookSection>
+    <bib:BookSection rdf:about="#item_8279">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-3-11-022578-5</dc:identifier>
+                <dc:title>Kant's Theory of Biology</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fisher</foaf:surname>
+                        <foaf:givenname>Mark</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goy</foaf:surname>
+                        <foaf:givenname>Ina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:pages>25-42</bib:pages>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Metaphysics and Physiology in Kant’s Attitude towards Theories of Preformation</dc:title>
+    </bib:BookSection>
+</rdf:RDF>

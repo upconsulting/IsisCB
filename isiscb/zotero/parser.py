@@ -1,21 +1,10 @@
-import os
-import re
+import os, re, iso8601, rdflib, codecs, chardet, unicodedata, logging, csv
 import xml.etree.ElementTree as ET
-import iso8601
-import rdflib
-
-import codecs
-import chardet
-import unicodedata
-
-import logging
 
 from datetime import datetime
 
 from models import *
-from isisdata.models import Authority, Citation, ACRelation
-
-import csv
+from isisdata.models import Authority, Citation, ACRelation, LinkedData, LinkedDataType
 
 
 subjectIDMap = {}
@@ -203,10 +192,14 @@ class IterParser(BaseParser):
         # Multiline fields are represented as lists of values.
         if hasattr(self.data[-1], tag):
             value = getattr(self.data[-1], tag)
+
             if tag in self.concat_fields:
                 value = ' '.join([value, unicode(data)])
             elif type(value) is list:
-                value.append(data)
+                if type(data) is list:
+                    value += data
+                else:
+                    value.append(data)
             elif value not in [None, '']:
                 value = [value, data]
         else:
@@ -261,15 +254,22 @@ class RDFParser(BaseParser):
             tag = self.tags[tag]
 
         if data is not None:
+
             # Multiline fields are represented as lists of values.
             if hasattr(self.data[-1], tag):
                 value = getattr(self.data[-1], tag)
                 if tag in self.concat_fields:
                     value = ' '.join([value, data])
                 elif type(value) is list:
-                    value.append(data)
+                    if type(data) is list:
+                        value += data
+                    else:
+                        value.append(data)
                 elif value not in [None, '']:
-                    value = [value, data]
+                    if type(data) is list:
+                        value = [value] + data
+                    else:
+                        value = [value, data]
             else:
                 value = data
 
@@ -364,6 +364,10 @@ class ZoteroParser(RDFParser):
         ident_type = self.graph.value(subject=value, predicate=TYPE_ELEM)
         if ident_type == URI_ELEM:
             self.set_value('uri', identifier)
+        else:
+            name, ident_value = tuple(unicode(value).split(' '))
+            name = name.lower()
+        self.set_value(name, ident_value)
 
     def handle_link(self, value):
         """
@@ -407,7 +411,9 @@ class ZoteroParser(RDFParser):
     def handle_authors_full(self, value):
         authors = [self.handle_author(o) for s, p, o
                    in self.graph.triples((value, None, None))]
-        return [a for a in authors if a is not None]
+        authors = [a for a in authors if a is not None]
+
+        return authors
 
     def handle_abstract(self, value):
         """
@@ -448,15 +454,20 @@ class ZoteroParser(RDFParser):
         try:
             forename = norm([e[2] for e in forename_iter][0])
         except IndexError:
-            forename = ''
+            forename = u''
 
         try:
             surname = norm([e[2] for e in surname_iter][0])
         except IndexError:
-            surname = ''
+            surname = u''
 
-        if surname == '' and forename == '':
+        if surname == u'' and forename == u'':
             return
+        if forename == u'':
+            surname_parts = [p.strip() for p in surname.split(',')]
+            if len(surname_parts) > 1:
+                surname = surname_parts[0]
+                forename = u' '.join(surname_parts[1:])
         return surname, forename
 
     def handle_editors(self, value):
@@ -487,7 +498,12 @@ class ZoteroParser(RDFParser):
                 #       "DOI 10.1017/S0039484"
                 try:
                     name, ident_value = tuple(unicode(o).split(' '))
-                    self.set_value(name.lower(), ident_value)
+                    name = name.lower()
+                    if name == 'isbn':
+                        self.set_value('partof__identifier',
+                                       (name, ident_value))
+                    else:
+                        self.set_value(name, ident_value)
                 except ValueError:
                     pass
             elif p == TITLE:
@@ -518,6 +534,8 @@ class ZoteroParser(RDFParser):
         setattr(entry, 'pageStart', start)
         setattr(entry, 'pageEnd', end)
         del entry.pages
+
+
 
 
 def read(path):
@@ -579,7 +597,6 @@ def process_authorities(paper, instance):
     for authority_type, acrelation_type, field, relation_model, relation_field in authority_fields:
         if not hasattr(paper, field):
             continue
-
         field_value = getattr(paper, field)
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
@@ -681,10 +698,11 @@ def process_linkeddata(paper, instance):
         (DraftCitationLinkedData, [
             ('uri', 'uri'),
             ('doi', 'doi'),
-        ]),
-        (DraftAuthorityLinkedData, [
             ('isbn', 'isbn'),
             ('issn', 'issn'),
+        ]),
+        (DraftAuthorityLinkedData, [
+
         ])
     ]
 
@@ -719,6 +737,73 @@ def process_attributes(paper, instance):
             )
             attributes.append(attribute)
     return attributes
+
+
+def process_ccrelations(citations, originals, accession):
+    """
+    Attempt to match up book chapters and book reviews with their respective
+    books.
+    """
+
+    books = [(c, o) for c, o in zip(citations, originals)
+             if c.type_controlled == Citation.BOOK]
+
+    ccrelations = []    # TODO: we may not need to maintain references to these.
+
+    # We assume that ``citations`` and ``originals`` are the same shape, in the
+    #  same order.
+    for citation, original in zip(citations, originals):
+        found = False
+        if citation.type_controlled == Citation.CHAPTER:
+            ident_field, ident_value = original.partof__identifier
+            for book, original_book in books:
+                if getattr(original_book, ident_field) == ident_value:
+                    ccrelations.append(DraftCCRelation.objects.create(**{
+                        'subject': book,
+                        'object': citation,
+                        'type_controlled': DraftCCRelation.INCLUDES_CHAPTER,
+                        'part_of': accession,
+                    }))
+                    found = True
+                    break
+
+            if not found:   # Look in the production database, via LinkedData.
+                qs = LinkedData.objects.filter(**{
+                    'type_controlled__name__icontains': ident_field,
+                    'universal_resource_name': ident_value
+                })
+                if qs.count() == 0:
+                    continue
+
+                linkeddata_entry = qs.first()
+                production_target = linkeddata_entry.subject
+
+                # To maintain consistency in later steps, we will create a
+                #  "dummy" DraftCitation based on this production Citation.
+                draft_target = DraftCitation.objects.create(**{
+                    'title': production_target.title,
+                    'type_controlled': production_target.type_controlled,
+                    'part_of': accession,
+                })
+                # This DraftCitation is resolved from the start, since we
+                #  have already decided what it refers to.
+                InstanceResolutionEvent.objects.create(**{
+                    'for_instance': draft_target,
+                    'to_instance': production_target
+                })
+
+                ccrelations.append(DraftCCRelation.objects.create(**{
+                    'subject': draft_target,
+                    'object': citation,
+                    'type_controlled': DraftCCRelation.INCLUDES_CHAPTER,
+                    'part_of': accession,
+                }))
+                found = True
+
+        # elif citation.type_controlled == Citation.REVIEW:
+
+
+    return ccrelations
 
 
 def process_paper(paper, instance):
@@ -765,7 +850,7 @@ def process_paper(paper, instance):
         attribute.save()
 
     draftCitation.save()
-    return draftCitation
+    return draftCitation, paper
 
 
 def process(papers, instance):
@@ -773,4 +858,6 @@ def process(papers, instance):
 
     """
 
-    return [process_paper(paper, instance) for paper in papers]
+    citations, papers = zip(*[process_paper(paper, instance) for paper in papers])
+    process_ccrelations(citations, papers, instance)
+    return citations
