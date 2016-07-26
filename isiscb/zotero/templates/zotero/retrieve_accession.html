@@ -122,6 +122,12 @@
 
 <script src="{% static 'zotero/js/spin.min.js' %}"></script>
 <script src="{% static 'zotero/js/jquery.spin.js' %}"></script>
+<script>
+// Use this (with a click event) instead of an anchor.
+var toggleTab = function(name) {
+    $('.nav-tabs a[href="#' + name + '"]').tab('show')
+}
+</script>
 
 <script>
 var opts = {
@@ -150,6 +156,8 @@ var opts = {
 var selected_authority, selected_authority_name;
 
 $('.draftauthority').click(function() {
+    toggleTab('suggest');
+
     var elem = $(this);
     $('.selected').removeClass('selected');
 
@@ -234,9 +242,11 @@ $('.draftauthority').click(function() {
 
 $(document).ready(function() {
     bindModal();
+
     $('#authority-search-filter-type').change(function(e) {
         $('#authority-search').trigger('keyup');
     });
+
     $('#authority-search').on('keyup', function(e) {
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
