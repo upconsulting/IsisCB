@@ -821,6 +821,7 @@ def citation(request, citation_id):
 
     citations_page = paginator.page(page)
 
+
     # ok, let's start the whole pagination/next/previous dance :op
     # this should probably be in it's own method
     # next time...
@@ -834,8 +835,7 @@ def citation(request, citation_id):
             # this is a fix for the duplicate results issue
             # is this more stable than having a running index for the record
             # looked at? I don't know, but this work, so I say it's stable enough!
-            if prev_index and index != 0 and index != 39 and (index != prev_index + 1 and index != prev_index -1):
-                index = None
+            index = _get_corrected_index(prev_index, index)
 
         # if current citation is not on current page (page turns)
         # check if it's on next page
@@ -844,16 +844,22 @@ def citation(request, citation_id):
             result_list = list(citations_page.object_list)
             # update current page number
             if citation in result_list:
-                page = page+1
                 index = result_list.index(citation)
-                user_cache.set('citation_page', page)
 
-                if 'page=' + str(page-1) in request_params:
-                    request_params = request_params.replace('page=' + str(page-1), 'page=' + str(page))
-                else:
-                    request_params = request_params + "&page=" + str(page)
+                # this is a fix for the duplicate results issue
+                # is this more stable than having a running index for the record
+                # looked at? I don't know, but this work, so I say it's stable enough!
+                index = _get_corrected_index(prev_index, index)
+                if index != None:
+                    page = page+1
+                    user_cache.set('citation_page', page)
 
-                user_cache.set('request_params', request_params)
+                    if 'page=' + str(page-1) in request_params:
+                        request_params = request_params.replace('page=' + str(page-1), 'page=' + str(page))
+                    else:
+                        request_params = request_params + "&page=" + str(page)
+
+                    user_cache.set('request_params', request_params)
 
         # check if it's on previous page
         if index == None and page > 1:
@@ -958,6 +964,17 @@ def citation(request, citation_id):
 
     return HttpResponse(template.render(context))
 
+def _get_corrected_index(prev_index, index):
+    # this is a fix for the duplicate results issue
+    # is this more stable than having a running index for the record
+    # looked at? I don't know, but this work, so I say it's stable enough!
+    if prev_index != None:
+        if ((index == 0 and prev_index != 1 and prev_index != 39) or
+          (index == 39 and  prev_index != 0 and prev_index != 38) or
+          (index != 0 and index != 39 and index != prev_index + 1 and index != prev_index -1)):
+            return None
+    return index
+
 @staff_member_required
 def citations(request):
     context = RequestContext(request, {
@@ -981,6 +998,7 @@ def citations(request):
     user_cache.set('request_params', request.META['QUERY_STRING'])
     user_cache.set('get_request', request.GET)
     user_cache.set('citation_page', int(currentPage))
+    user_cache.set('prev_index', None)
 
     context.update({
         'objects': filtered_objects,
