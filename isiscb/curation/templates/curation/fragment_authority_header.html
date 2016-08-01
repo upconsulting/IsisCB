@@ -2,20 +2,41 @@
 
 {% load general_tags %}
 
+<div class="row">
+<div class="col-md-4">
 <div class="h4">
     <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance.name|safe }}</strong>
 </div>
+<div class="h5">
+    <span class="text-warning">{{ instance.get_type_controlled_display }}:</span> {{ instance|get_date_attributes }}
+</div>
+<p class="">
+    <span class="label label-primary">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
+</p>
+</div>
 
-<div class="clearfix">
+<div class="col-md-4 text-center">
+  {% if previous %}
+  <a href="{% url 'curate_authority' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+  {% endif %}
+  &nbsp; &nbsp; &nbsp;
+  <a href="{% url 'authority_list' %}?{{ request_params }}"><i class="fa fa-reply" aria-hidden="true"></i>
+
+    Back to List
+  </a>
+  &nbsp; &nbsp; &nbsp;
+  {% if next %}
+  <a href="{% url 'curate_authority' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+  {% endif %}
+</div>
+
+<div class="col-md-4">
     <div class="button-group pull-right">
         <input type="submit" value="Save" class="btn btn-success" />
     </div>
 
-    <div class="h5">
-        <span class="text-warning">{{ instance.get_type_controlled_display }}:</span> {{ instance|get_date_attributes }}
-    </div>
 
-    <p class="">
-        <span class="label label-primary">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
-    </p>
+
+
+</div>
 </div>
