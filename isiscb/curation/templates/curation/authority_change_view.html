@@ -43,6 +43,7 @@
                     {{ form.type_controlled|addcss:"form-control"}}
                 </div>
             </div>
+
             <div class="col-xs-6">
                 {% for error in form.record_status_value.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
