@@ -16,7 +16,7 @@
 {% with instance|get_authors_editors as authors_editors %}
 <div class="noFormForms">
   <small>
-    <strong>By:</strong>
+    <label>By:</label>
         <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
@@ -35,7 +35,7 @@
 {% with instance|get_citation_pubdate as pubdate %}
 <div class="noFormForms">
   <small>
-    <strong>Date:</strong>
+    <label>Date:</label>
         <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
