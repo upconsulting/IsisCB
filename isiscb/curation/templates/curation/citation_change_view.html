@@ -4,7 +4,6 @@
 {% load general_tags %}
 {% load permission_tags %}
 
-
 {% block content %}
 <script>
 // Use this (with a click event) instead of an anchor.
@@ -70,9 +69,20 @@ var toggleTab = function(name) {
       </div>
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-4 text-center">
+      {% if previous %}
+      <a href="{% url 'curate_citation' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+      {% endif %}
+      &nbsp; &nbsp; &nbsp;
+      <a href="{% url 'citation_list' %}?{{ request_params }}"><i class="fa fa-reply" aria-hidden="true"></i>
+
+Back to List </a>
+      &nbsp; &nbsp; &nbsp;
+      {% if next %}
+      <a href="{% url 'curate_citation' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+      {% endif %}
     </div>
-    <div class="col-md-5">
+    <div class="col-md-3">
         <div class="btn-group pull-right">
             <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <input type="submit" value="Save" class="btn btn-sm btn-success" />

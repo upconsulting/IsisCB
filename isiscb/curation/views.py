@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
+from django.core.cache import caches
+from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 
@@ -806,6 +808,25 @@ def citation(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
+    user_cache = caches['default']
+    page = user_cache.get('citation_page', 1)
+    get_request = user_cache.get('get_request', None)
+    queryset = filter_queryset(request.user, Citation.objects.all())
+
+    filtered_objects = CitationFilter(get_request, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, 40)
+
+    citations_page = paginator.page(page)
+
+
+    # ok, let's start the whole pagination/next/previous dance :op
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'prev_index', 'citation_page', 'request_params')
+
+    request_params = user_cache.get('request_params', "")
+    context.update({
+        'request_params': request_params,
+    })
+
     if citation.type_controlled == Citation.BOOK:
         template = loader.get_template('curation/citation_change_view_book.html')
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
@@ -856,6 +877,105 @@ def citation(request, citation_id):
 
     return HttpResponse(template.render(context))
 
+def _build_next_and_prev(context, current_obj, objects_page, paginator, page, cache_prev_index_key, cache_page_key, cache_request_param_key):
+    if objects_page:
+        user_cache = caches['default']
+        request_params = user_cache.get(cache_request_param_key, "")
+
+        result_list = list(objects_page.object_list)
+        prev_index = user_cache.get(cache_prev_index_key, None)
+        index = None
+        if current_obj in result_list:
+            index = result_list.index(current_obj)
+
+            # this is a fix for the duplicate results issue
+            # is this more stable than having a running index for the record
+            # looked at? I don't know, but this work, so I say it's stable enough!
+            index = _get_corrected_index(prev_index, index)
+
+        # if current citation is not on current page (page turns)
+        # check if it's on next page
+        if index == None and paginator.num_pages > page:
+            objects_page = paginator.page(page+1)
+            result_list = list(objects_page.object_list)
+            # update current page number
+            if current_obj in result_list:
+                index = result_list.index(current_obj)
+
+                # this is a fix for the duplicate results issue
+                # is this more stable than having a running index for the record
+                # looked at? I don't know, but this work, so I say it's stable enough!
+                index = _get_corrected_index(prev_index, index)
+                if index != None:
+                    page = page+1
+                    user_cache.set(cache_page_key, page)
+                    if 'page=' + str(page-1) in request_params:
+                        request_params = request_params.replace('page=' + str(page-1), 'page=' + str(page))
+                    else:
+                        request_params = request_params + "&page=" + str(page)
+
+                    user_cache.set(cache_request_param_key, request_params)
+
+        # check if it's on previous page
+        if index == None and page > 1:
+            objects_page = paginator.page(page-1)
+            result_list = list(objects_page.object_list)
+            # update current page number
+            if current_obj in result_list:
+                page = page-1
+                index = result_list.index(current_obj)
+                user_cache.set(cache_page_key, page)
+
+                # update back to list link
+                if 'page=' + str(page+1) in request_params:
+                    request_params = request_params.replace('page=' + str(page+1), 'page=' + str(page))
+                else:
+                    request_params = request_params + "&page=" + str(page)
+
+                user_cache.set(cache_request_param_key, request_params)
+
+        # let's get next and previous if we have an index
+        if index != None:
+            # store current index for duplication issue
+            user_cache.set(cache_prev_index_key, index)
+
+            next = result_list[index+1] if len(result_list) > index+1 else None
+            # if next is not on this page, get the next one
+            if not next:
+                # if there are more pages
+                # take the first element from the next page
+                if paginator.num_pages > page:
+                    objects_page = paginator.page(page+1)
+                    next_page = list(objects_page.object_list)
+                    if len(next_page) > 0:
+                        next = next_page[0]
+
+            previous = result_list[index-1] if index > 0 else None
+            # if previous is on previous page
+            if not previous:
+                # if we're not on the first page
+                if page > 1:
+                    objects_page = paginator.page(page-1)
+                    prev_page = list(objects_page.object_list)
+                    if len(prev_page) > 0:
+                        previous = prev_page[len(prev_page)-1]
+
+            context.update({
+                'next': next,
+                'previous': previous,
+            })
+
+def _get_corrected_index(prev_index, index):
+    # this is a fix for the duplicate results issue
+    # is this more stable than having a running index for the record
+    # looked at? I don't know, but this work, so I say it's stable enough!
+    if prev_index != None:
+        if ((index == 0 and prev_index != 1 and prev_index != 39) or
+          (index == 39 and  prev_index != 0 and prev_index != 38) or
+          (index != 0 and index != 39 and index != prev_index + 1 and index != prev_index -1)):
+            return None
+    return index
+
 @staff_member_required
 def citations(request):
     context = RequestContext(request, {
@@ -867,9 +987,20 @@ def citations(request):
 
     queryset = filter_queryset(request.user, Citation.objects.all())
     filtered_objects = CitationFilter(request.GET, queryset=queryset)
+    currentPage = request.GET.get('page', 1)
 
     filters_active = request.GET.get('filters', False)
     filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+
+
+    # 'search_results_cache' is the database cache
+    #  (see production_settings.py).
+    user_cache = caches['default']
+    user_cache.set('request_params', request.META['QUERY_STRING'])
+    user_cache.set('get_request', request.GET)
+    user_cache.set('citation_page', int(currentPage))
+    user_cache.set('prev_index', None)
+
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
@@ -918,6 +1049,13 @@ def authorities(request):
         'curation_subsection': 'authorities',
     })
 
+    user_cache = caches['default']
+    user_cache.set('authority_request_params', request.META['QUERY_STRING'])
+    user_cache.set('authority_get_request', request.GET)
+    currentPage = request.GET.get('page', 1)
+    user_cache.set('authority_page', int(currentPage))
+    user_cache.set('authority_prev_index', None)
+
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
@@ -943,11 +1081,27 @@ def authority(request, authority_id):
     template = loader.get_template('curation/authority_change_view.html')
     person_form = None
     if request.method == 'GET':
+
+        user_cache = caches['default']
+        page = user_cache.get('authority_page', 1)
+        get_request = user_cache.get('authority_get_request', None)
+
+        queryset = filter_queryset(request.user, Authority.objects.all())
+
+        filtered_objects = AuthorityFilter(get_request, queryset=queryset)
+        paginator = Paginator(filtered_objects.qs, 40)
+
+        authority_page = paginator.page(page)
+
+        _build_next_and_prev(context, authority, authority_page, paginator, page, 'authority_prev_index', 'authority_page', 'authority_request_params')
+        request_params = user_cache.get('authority_request_params', "")
+
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.user, authority_id, instance=authority.person)
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
         context.update({
+            'request_params': request_params,
             'form': form,
             'instance': authority,
             'person_form': person_form,

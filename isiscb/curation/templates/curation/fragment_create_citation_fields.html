@@ -122,15 +122,15 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-xs-4">
+  <!--  <div class="col-xs-4">
         {% for error in partdetails_form.sort_order.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         <div class="form-group">
             <label>Sort order</label>
-            {{ partdetails_form.sort_order|addcss:"form-control" }}
+            {{ partdetails_form.sort_order }}
         </div>
-    </div>
+    </div>-->
     <div class="col-xs-4">
         {% for error in partdetails_form.extent.errors %}
         <div class="alert alert-danger">{{ error }}</div>
@@ -152,12 +152,12 @@
 </div>
 {% endif %}
 
-<div class="form-group">
+<!--<div class="form-group">
     <label>Periodical</label>
     <div class="h5">
         <a href="?tab=acrelations"></a>
     </div>
-</div>
+</div>-->
 
 {% for error in form.book_series.errors %}
 <div class="alert alert-danger">{{ error }}</div>
