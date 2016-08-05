@@ -16,7 +16,7 @@
 {% with instance|get_authors_advisors as authors_advisor %}
 <div class="noFormForms">
   <small>
-    <strong>By:</strong> <a class="text-warning cursor-link"
+    <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_advisor %}
             {{ authors_advisor }}
@@ -34,7 +34,7 @@
 {% with instance|get_citation_pubdate as pubdate %}
 <div class="noFormForms">
   <small>
-   <strong>Date:</strong>
+   <label>Date:</label>
       <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
@@ -228,7 +228,7 @@
 {% with instance|get_school as school %}
 <div class="noFormForms">
   <small>
-    <strong>In:</strong> <a class="text-warning cursor-link"
+    <label>In:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if school %}
             {{ school }}
