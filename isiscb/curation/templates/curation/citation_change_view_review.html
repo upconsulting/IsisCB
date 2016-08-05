@@ -16,7 +16,7 @@
 {% with instance|get_authors_editors as authors_editors %}
 <div class="noFormForms">
   <small>
-    <strong>By:</strong> <a class="text-warning cursor-link"
+    <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
             {{ authors_editors }}
@@ -34,7 +34,7 @@
 {% with instance|get_citation_pubdate as pubdate %}
 <div class="noFormForms">
   <small>
-   <strong>Date:</strong>
+   <label>Date:</label>
       <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
@@ -50,7 +50,7 @@
 <!-- Review of -->
 <div class="noFormForms">
   <small>
-  <strong>Reviews of: </strong>
+  <label>Reviews of: </label>
   {% with instance|get_reviewed_books as reviewed_books %}
   {% if reviewed_books %}
   {% for book in reviewed_books %}
@@ -82,7 +82,7 @@
 {% with instance|get_citation_periodical as journal %}
 <div class="noFormForms">
   <small>
-    <strong>In:</strong> <a class="text-warning cursor-link"
+    <label>In:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if journal %}
             {{ journal }}

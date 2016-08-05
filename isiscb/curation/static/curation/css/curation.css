@@ -1,5 +1,31 @@
 body, p, div, table, input {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Verdana', sans-serif;
+  font-color: #000;
+}
+
+body, table {
+  background-color: #f3f5f7;
+}
+
+.form-control {
+  color: #000;
+}
+
+.text-warning {
+  color: #00386b;
+}
+
+label {
+  color: #3e3e3e;
+  font-weight: normal;
+}
+
+.list-group a {
+  color: #000;
+}
+
+.maintable {
+  background-color: #f3f5f7;
 }
 
 .nav-curation>li.active>a,
@@ -13,7 +39,7 @@ body, p, div, table, input {
 }
 
 .navbar-brand {
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Verdana', sans-serif;
 }
 
 .navbar-curation .icon-bar {
@@ -46,7 +72,7 @@ input.input-sm, textarea.input-sm {
 }
 
 .titleInput {
-  background-color: #f7efdf;
+  /*background-color: #f7efdf;*/
 }
 
 .brand-logo-container {
@@ -80,6 +106,14 @@ a:hover.delete {
 
 .record-notpublic {
   background-color: #f1e0e0;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+  background-color: #f3f5f7;
+}
+
+.nav-tabs.nav-justified>.active>a, .nav-tabs.nav-justified>.active>a:focus, .nav-tabs.nav-justified>.active>a:hover {
+  border-bottom-color: #f3f5f7;
 }
 
 

@@ -20,18 +20,18 @@
         <span class="col-sm-11">
 
           {% if instance.id == ccrelation.subject.id %}
-          <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+          <span class="text">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
           {% else %}
 
-          The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
+          The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text">{{ ccrelation.subject|get_citation_title|safe }} ({{ ccrelation.subject|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.subject|get_authors_editors }}</span>
 
           {% endif %}
           <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
 
           {% if instance.id == ccrelation.object.id %}
-          <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+          <span class="text">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
           {% else %}
-          the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
+          the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
           {% endif %}
 
           {% if not ccrelation.object.public %}
@@ -71,10 +71,10 @@
         <span class="col-sm-11">
 
           {% if instance.id == ccrelation.subject.id %}
-          <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
+          <span class="text">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
           {% else %}
 
-          The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.subject|get_citation_title|safe }}</span>
+          The <span class="label label-success">{{ ccrelation.subject.get_type_controlled_display }}</span> <span class="text">{{ ccrelation.subject|get_citation_title|safe }}</span>
 
           {% endif %}
           <span class="label label-primary">{{ ccrelation.get_type_controlled_display }}</span>
@@ -83,9 +83,9 @@
           {% endif %}
 
           {% if instance.id == ccrelation.object.id %}
-          <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
+          <span class="text">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
           {% else %}
-          the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ ccrelation.object|get_citation_title|safe }}</span>.
+          the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text ">{{ ccrelation.object|get_citation_title|safe }}</span>.
           {% endif %}
 
           {% if not ccrelation.object.public %}
