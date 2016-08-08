@@ -158,12 +158,12 @@
                 {{ objects.form.periodical|addcss:"form-control" }}
             </div>
 
-            {% for error in objects.form.o.errors %}
+            {% for error in objects.form.order.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group clearable">
-                <label>{{ objects.form.o.label }}</label>
-                {{ objects.form.o|addcss:"form-control" }}
+                <label>{{ objects.form.order.label }}</label>
+                {{ objects.form.order|addcss:"form-control" }}
             </div>
 
         </div>

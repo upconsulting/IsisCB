@@ -1010,6 +1010,7 @@ def citations(request):
 
     return HttpResponse(template.render(context))
 
+
 def filter_queryset(user, queryset):
     roles = IsisCBRole.objects.filter(users__pk=user.pk)
 

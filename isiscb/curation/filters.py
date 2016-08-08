@@ -26,6 +26,10 @@ filters.LOOKUP_TYPES = [
 ]
 
 
+class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilter):
+    pass
+
+
 class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
@@ -45,6 +49,13 @@ class CitationFilter(django_filters.FilterSet):
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
+    order_by = [
+        ('publication_date', 'Publication date (ascending)'),
+        ('-publication_date', 'Publication date (descending)'),
+        ('title', 'Title (ascending)'),
+        ('-title', 'Title (descending)')
+    ]
+    order = ChoiceMethodFilter(name='order', choices=order_by)
 
     class Meta:
         model = Citation
@@ -54,12 +65,14 @@ class CitationFilter(django_filters.FilterSet):
             'author_or_editor', 'periodical', 'record_status',
             'belongs_to', 'zotero_accession',
         ]
-        order_by = [
-            ('publication_date', 'Publication date (ascending)'),
-            ('-publication_date', 'Publication date (descending)'),
-            ('title', 'Title (ascending)'),
-            ('-title', 'Title (descending)')
-        ]
+
+    def filter_order(self, queryset, value):
+        if not value:
+            return queryset
+        if value.endswith('title'):
+            return queryset.order_by('%srelations_from__subject__title' % ('-' if value.startswith('-') else ''),
+                                              '%srelations_to__subject__title' % ('-' if value.startswith('-') else '')).order_by(value)
+        return queryset.order_by(value)
 
     def filter_title(self, queryset, value):
         if not value:
