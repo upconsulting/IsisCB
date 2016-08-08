@@ -818,7 +818,6 @@ def citation(request, citation_id):
 
     citations_page = paginator.page(page)
 
-
     # ok, let's start the whole pagination/next/previous dance :op
     _build_next_and_prev(context, citation, citations_page, paginator, page, 'prev_index', 'citation_page', 'request_params')
 
@@ -969,6 +968,9 @@ def _get_corrected_index(prev_index, index):
     # this is a fix for the duplicate results issue
     # is this more stable than having a running index for the record
     # looked at? I don't know, but this work, so I say it's stable enough!
+    if prev_index == index:
+        return index
+
     if prev_index != None:
         if ((index == 0 and prev_index != 1 and prev_index != 39) or
           (index == 39 and  prev_index != 0 and prev_index != 38) or
