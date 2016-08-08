@@ -711,10 +711,10 @@ def process_authorities(paper, instance):
 def process_linkeddata(paper, instance):
     linkeddata_fields = [    # Maps LD.type_controlled.name -> Zotero field.
         (DraftCitationLinkedData, [
-            ('uri', 'uri'),
-            ('doi', 'doi'),
-            ('isbn', 'isbn'),
-            ('issn', 'issn'),
+            ('URI', 'uri'),
+            ('DOI', 'doi'),
+            ('ISBN', 'isbn'),
+            ('ISSN', 'issn'),
         ]),
         (DraftAuthorityLinkedData, [
 

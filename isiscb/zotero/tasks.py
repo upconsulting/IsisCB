@@ -175,7 +175,7 @@ def ingest_citation(request, accession, draftcitation):
 
 
     for draftlinkeddata in draftcitation.linkeddata.all():
-        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
         LinkedData.objects.create(
             subject = citation,
             universal_resource_name = draftlinkeddata.value,
@@ -217,7 +217,7 @@ def ingest_ccrelations(request, accession, ingested):
         source = ingest_citation(request, accession, draft_source)    # Get.
         draft_target = relation.object
         target = ingest_citation(request, accession, draft_target)
-        
+
         ccr_data = {
             '_history_user': request.user,
             'public': True,
