@@ -89,7 +89,11 @@ class TestBookReviews(TestCase):
         for citation in process(read(book_data), accession):
             new_citation = ingest_citation(request, accession, citation)
 
-            self.assertGreater(new_citation.relations_to.count(), 0)
+            # CCRelations are no longer created in tasks.ingest_citation; they
+            #  are now handled by tasks.ingest_ccrelations, which is called by
+            #  tasks.ingest_accession. This is to prevent circular recursion
+            #  when attempting to resolve dependencies.
+            self.assertEqual(new_citation.relations_to.count(), 0)
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -142,11 +146,16 @@ class TestBookChapters(TestCase):
         self.assertEqual(type_counts[Citation.CHAPTER], 6)
 
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 class TestSubjects(TestCase):
@@ -167,11 +176,16 @@ class TestSubjects(TestCase):
                     self.assertEqual(acrelation.authority.resolutions.count(), 1)
 
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 
@@ -240,11 +254,16 @@ class TestParse(TestCase):
             self.assertIn(paper.documentType, ZoteroParser.document_types.values())
 
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 class TestIngest(TestCase):
@@ -278,11 +297,16 @@ class TestIngest(TestCase):
         self.assertIsInstance(citations[0], DraftCitation)
 
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 class TestSuggest(TestCase):
@@ -293,11 +317,16 @@ class TestSuggest(TestCase):
         citations = process(papers, accession)
 
     def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
 
 
 class TestIngest(TestCase):
@@ -418,6 +447,57 @@ class TestIngest(TestCase):
         self.dataset.delete()
         self.user.delete()
 
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
+
+
+class TestAccessionProperties(TestCase):
+    def setUp(self):
+        rf = RequestFactory()
+        self.request = rf.get('/hello/')
+        self.user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        self.request.user = self.user
+
+    def test_citations_ready(self):
+        accession = ImportAccession.objects.create(name='accession')
+        draftauthority = DraftAuthority.objects.create(name='testauthority', part_of=accession)
+        draftcitation = DraftCitation.objects.create(title='testcitation', part_of=accession)
+        draftcitation2 = DraftCitation.objects.create(title='testcitation2', part_of=accession)
+        DraftACRelation.objects.create(authority=draftauthority, citation=draftcitation, type_controlled=DraftACRelation.AUTHOR, part_of=accession)
+        DraftCCRelation.objects.create(subject=draftcitation, object=draftcitation2, part_of=accession)
+
+        # draftcitation2 has no ACRelations, so should be ready from the start.
+        self.assertEqual(len(accession.citations_ready), 1)
+
+        authority = Authority.objects.create(name='testtest', type_controlled=Authority.PERSON)
+        InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+        draftauthority.processed = True
+        draftauthority.save()
+
+        # Now draftcitation is ready, since the target of its one ACRelation is
+        #  resolved.
+        self.assertEqual(len(accession.citations_ready), 2)
+
+        citations_before = Citation.objects.count()
+        ccrelations_before = CCRelation.objects.count()
+        ingest_accession(self.request, accession)
+        self.assertEqual(citations_before + 2, Citation.objects.count())
+        self.assertEqual(ccrelations_before + 1, CCRelation.objects.count())
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
