@@ -40,6 +40,7 @@ SUBJECT = rdflib.URIRef(DC + u"subject")
 
 
 BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
+ZBOOK = rdflib.term.URIRef(ZOTERO + 'Book')
 JOURNAL = rdflib.term.URIRef(BIBLIO + 'Journal')
 WEBSITE = rdflib.term.URIRef(ZOTERO + 'Website')
 
@@ -47,6 +48,7 @@ REVIEWED_AUTHORS = rdflib.term.URIRef(ZOTERO + 'reviewedAuthors')
 
 # TODO: We don't have the right relation types to support WEBSITE yet!
 PARTOF_TYPES = [
+    (ZBOOK, 'book'),
     (BOOK, 'book'),
     (JOURNAL, 'journal'),
 ]

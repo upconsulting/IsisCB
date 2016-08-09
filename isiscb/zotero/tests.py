@@ -113,6 +113,14 @@ class TestBookChapters(TestCase):
     Chapters are linked to book citations via the "Book title" field in Zotero.
     This is represented as dc.isPartOf -> bib:Book.
     """
+    def test_process_bookchapters2(self):
+        book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+        type_counts = Counter([c.type_controlled for c in citations])
+        self.assertEqual(type_counts[Citation.BOOK], 1)
+        self.assertEqual(type_counts[Citation.CHAPTER], 2)
 
     def test_process_bookchapters(self):
         test_book = Citation.objects.create(title='A Test Citation',
