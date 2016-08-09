@@ -385,7 +385,7 @@ class ZoteroParser(RDFParser):
 
     def handle_date(self, value):
         """
-        Attempt to coerced date to ISO8601.
+        Attempt to coerce date to ISO8601.
         """
         try:
             return iso8601.parse_date(unicode(value))
@@ -395,6 +395,9 @@ class ZoteroParser(RDFParser):
                     # TODO: remove str coercion.
                     return datetime.strptime(unicode(value), datefmt).date()
                 except ValueError:
+                    match = re.search('([0-9]{4})', value)
+                    if match:
+                        return int(match.groups()[0])
                     return value
 
     def handle_documentType(self, value):

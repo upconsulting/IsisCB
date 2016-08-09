@@ -7,9 +7,11 @@ import codecs
 
 register = template.Library()
 
+
 @register.filter
 def get_nr_of_citations(authority):
     return ACRelation.objects.filter(authority=authority, citation__public=True).distinct('citation_id').count()
+
 
 @register.filter
 def encode_query(query):
@@ -17,15 +19,18 @@ def encode_query(query):
         return ''
     return urllib.quote(query)
 
+
 @register.filter
 def decode_query(query):
     if not query:
         return ''
     return urllib.unquote(query)
 
+
 @register.filter
 def include_facet(url, arg):
     return url.replace(arg, "").replace("&&", "&")
+
 
 @register.filter
 def create_exclude_facet_string(facet, field):

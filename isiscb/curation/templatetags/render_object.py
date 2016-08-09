@@ -66,19 +66,23 @@ def get_publisher(obj):
         return acrel.authority
     return None
 
+
 @register.filter(name='get_isbn')
 def get_isbn(obj):
     return obj.linkeddata_entries.filter(type_controlled__name='ISBN').first()
+
 
 @register.filter(name='get_doi')
 def get_doi(obj):
     return obj.linkeddata_entries.filter(type_controlled__name='DOI').first()
 
 
+
 @register.filter(name='get_authors_editors')
 def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
 
 @register.filter(name='get_authors_advisors')
 def get_authors_advisors(obj):
@@ -109,6 +113,7 @@ def get_citation_pubdate_fast(obj):
         return 'missing'
     return date.isoformat()[:4]
 
+
 @register.filter
 def get_reviewed_books(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEW_OF, subject__id=citation.id))
@@ -119,12 +124,14 @@ def get_reviewed_books(citation):
 
     return citations
 
+
 @register.filter
 def get_including_book(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.INCLUDES_CHAPTER, object__id=citation.id))
     citations =  map(lambda x: x.subject, ccrelations)
 
     return citations
+
 
 @register.filter
 def get_pub_title_and_year(citation):
@@ -135,6 +142,7 @@ def get_pub_title_and_year(citation):
 def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
+
 
 @register.filter
 def get_school(obj):

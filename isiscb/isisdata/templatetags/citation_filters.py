@@ -4,6 +4,7 @@ from isisdata.templatetags.app_filters import *
 
 register = template.Library()
 
+
 @register.filter
 def get_page_string(citation):
     if citation.type_controlled != Citation.CHAPTER:
@@ -18,6 +19,7 @@ def get_page_string(citation):
         return "p. " + str(page_end_string)
     return ""
 
+
 @register.filter
 def join_authors(authors, postfix):
     author_names = []
@@ -25,11 +27,13 @@ def join_authors(authors, postfix):
         author_names.append(contributor_as_string(author) + postfix)
     return "; ".join(author_names)
 
+
 @register.filter
 def get_editors(citation):
     if citation:
         return citation.acrelation_set.filter(type_controlled__in=['ED'])
     return citation
+
 
 @register.filter
 def join_names_with_postfix(name_list, postfix):
@@ -37,6 +41,7 @@ def join_names_with_postfix(name_list, postfix):
     for name in name_list:
         names.append(name + postfix)
     return "; ".join(names)
+
 
 @register.filter
 def get_book_title(citation):
@@ -47,6 +52,7 @@ def get_book_title(citation):
             return parent_relation[0].subject.title
 
     return ""
+
 
 @register.filter
 def contributor_with_role_as_string(acrelation):

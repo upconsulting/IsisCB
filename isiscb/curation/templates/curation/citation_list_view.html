@@ -46,7 +46,7 @@
                 {% endif %}
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
-            <td><strong>{{ object|get_citation_title|safe }}</strong></td>
+            <td>{{ object.title_for_sort }}| {{ object|get_citation_title|safe }}</td>
             <td>
                 <a href="{% url "curate_citation" object.id %}?tab=acrelations">
                     {{ acrelations|get_authors_editors_preloaded }}
@@ -158,12 +158,12 @@
                 {{ objects.form.periodical|addcss:"form-control" }}
             </div>
 
-            {% for error in objects.form.order.errors %}
+            {% for error in objects.form.o.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group clearable">
-                <label>{{ objects.form.order.label }}</label>
-                {{ objects.form.order|addcss:"form-control" }}
+                <label>{{ objects.form.o.label }}</label>
+                {{ objects.form.o|addcss:"form-control" }}
             </div>
 
         </div>
