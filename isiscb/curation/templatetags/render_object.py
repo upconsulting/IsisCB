@@ -68,11 +68,12 @@ def get_publisher(obj):
 
 @register.filter(name='get_isbn')
 def get_isbn(obj):
-    return obj.linkeddata_entries.filter(type_controlled__name='ISBN').first()
+    return obj.linkeddata_entries.filter(type_controlled__name__icontains='isbn').first()
 
 @register.filter(name='get_doi')
 def get_doi(obj):
-    return obj.linkeddata_entries.filter(type_controlled__name='DOI').first()
+    print obj.linkeddata_entries.all()
+    return obj.linkeddata_entries.filter(type_controlled__name__icontains='doi').first()
 
 
 @register.filter(name='get_authors_editors')
