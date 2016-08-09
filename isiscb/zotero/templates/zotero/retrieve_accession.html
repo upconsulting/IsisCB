@@ -13,7 +13,7 @@
 
 <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
     class="btn btn-success">
-    Ingest <strong>{{ accession.citations_ready.count }}</strong> citations
+    Ingest citations
 </a>
 {% if accession.resolved %}
 <p class="text-danger">
@@ -63,6 +63,9 @@
                     <li role="presentation">
                         <a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a>
                     </li>
+                    <li role="presentation">
+                        <a href="#skip" aria-controls="skip" role="tab" data-toggle="tab">Skip</a>
+                    </li>
                 </ul>
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="suggest">
@@ -110,6 +113,16 @@
                                 <p class="text-info">
                                     Do you want to create a new authority record in the production database?
                                     <div class="btn btn-md btn-success resolve-with-create">Create</div>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="skip">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="text-info">
+                                    Do you want to forego resolving this authority?
+                                    <div class="btn btn-md btn-success resolve-with-skip">Skip</div>
                                 </p>
                             </div>
                         </div>
@@ -168,6 +181,7 @@ $('.draftauthority').click(function() {
     selected_authority_name = elem.attr('data-name');
 
     bindCreateNew();
+    bindSkip();
 
     $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {
@@ -323,6 +337,8 @@ var bindSearchSelect = function() {
     });
 }
 
+
+
 var getSimilarAuthorities = function(draftauthority_id, callback) {
     $.get('{% url "similar_authorities" %}?draftauthority=' + draftauthority_id + '&accession={{ accession.id }}', function(result) {
         callback(result.data.count, result.data.draftauthorities);
@@ -372,6 +388,23 @@ var confirmCreateModal = function() {
 
 }
 
+var confirmSkipModal = function() {
+    $('#prompt-skip-modal').modal('hide');
+    var draftauthority_id = $('#draftauthority-id-container-skip').val();
+    triggerSkipAuthority(draftauthority_id, function() {
+        getSimilarAuthorities(draftauthority_id, function(count, ids) {
+            ids.forEach(function(di) {
+                triggerSkipAuthority(di, function() {
+                    cleanupResolvedAuthority(di)
+                });
+            });
+        });
+
+        cleanupResolvedAuthority(draftauthority_id);
+    });
+
+}
+
 var bindCreateNew = function() {
     $('.resolve-with-create').click(function(e) {
         var suggestElem = $(this);
@@ -386,9 +419,30 @@ var bindCreateNew = function() {
     });
 }
 
+
+var bindSkip = function() {
+    $('.resolve-with-skip').click(function(e) {
+        var suggestElem = $(this);
+        getSimilarAuthorities(selected_authority, function(count, ids) {
+            $('#draftauthority-id-container-skip').val(selected_authority);
+            // $('#authority-id-container-create').val(suggestion_id);
+            $('#similar_authority_count-skip').text(count);
+            $('#draftauthority_name-skip').text(selected_authority_name);
+            // $('#authority_name-create').text(sname);
+            $('#prompt-skip-modal').modal('show');
+        });
+    });
+}
+
 var triggerCreateAuthority = function(draftauthority_id, callback) {
     $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&draftauthority=' + draftauthority_id, function(result) {
         callback(result.data.authority);
+    });
+}
+
+var triggerSkipAuthority = function(draftauthority_id, callback) {
+    $.get('{% url "skip_authority_for_draft" %}?accession={{ accession.id }}&draftauthority=' + draftauthority_id, function(result) {
+        callback();
     });
 }
 
@@ -462,6 +516,33 @@ var bindModal = function() {
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Take me back!</button>
                 <button type="button" class="btn btn-success" onclick="confirmCreateModal();">Resolve</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="prompt-skip-modal" tabindex="-1" role="dialog" aria-labelledby="prompt-skip-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="prompt-skip-modal-label">Resolve Draft Authority</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to skip resolving this draft authority with a production authority record:
+                    <span class="text-warning" id="draftauthority_name-skip"></span>.
+                </p>
+                <p>
+                    <input name="bulkapply" id="bulkapply-skip" type="checkbox"></input> Apply this resolution to <span class="label label-primary" id="similar_authority_count-skip"></span>
+                    similar draft authorities.
+                </p>
+                <input type="hidden" id="draftauthority-id-container-skip" />
+                <input type="hidden" id="authority-id-container-skip" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-success" onclick="confirmSkipModal();">Skip</button>
             </div>
         </div>
     </div>
