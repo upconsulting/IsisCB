@@ -20,18 +20,9 @@ from oauth2_provider.models import AbstractApplication
 
 from isisdata.utils import *
 
-import copy
-import datetime
-import iso8601
-import pickle
-import uuid
+import copy, datetime, iso8601, pickle, uuid, urlparse, re, bleach, unidecode
 from random import randint
-import urlparse
-import re
-import bleach
-import unidecode
-import string
-import unicodedata
+import string, unicodedata
 from urlparse import urlsplit
 
 from openurl.models import Institution
@@ -687,17 +678,19 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     # Allowing blank values is not ideal, but many existing records lack titles.
     title = models.CharField(max_length=2000, blank=True,
-                             help_text=help_text("""
-    The name to be used to identify the resource. For reviews that traditionally
-    have no title, this should be added as something like "[Review of Title
-    (Year) by Author]"."""))
+                             help_text="The name to be used to identify the"
+                             " resource. For reviews that traditionally have no"
+                             " title, this should be added as something like"
+                             " '[Review of Title (Year) by Author]'.")
+
+    title_for_sort = models.CharField(max_length=2000, blank=True, null=True)
 
     additional_titles = models.TextField(blank=True, null=True,
-                                         help_text=help_text("""
-    Additional titles (not delimited, free text)."""))
+                                         help_text="Additional titles (not"
+                                         " delimited, free text).")
     book_series = models.CharField(max_length=255, blank=True, null=True,
-                                   help_text=help_text("""
-    Used for books, and potentially other works in a series."""))
+                                   help_text="Used for books, and potentially"
+                                   " other works in a series.")
 
     @property
     def normalized_title(self):

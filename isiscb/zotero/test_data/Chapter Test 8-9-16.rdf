@@ -1,0 +1,165 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:vcard="http://nwalsh.com/rdf/vCard#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/">
+    <bib:BookSection rdf:about="urn:isbn:978-1-874267-62-1">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-1-874267-62-1</dc:identifier>
+                <dc:title>Thinking Through the Environment: Green Approaches to Global History</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Cambridge</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>White Horse Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Myllyntaus</foaf:surname>
+                        <foaf:givenname>Timo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pál</foaf:surname>
+                        <foaf:givenname>Viktor</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=375-123=</dc:subject>
+        <dc:subject>1945</dc:subject>
+        <dc:subject>Hungary [5127]</dc:subject>
+        <dc:subject>Water supply [1678]</dc:subject>
+        <bib:pages>268-288</bib:pages>
+        <dc:date>20 Jun. 2011</dc:date>
+        <z:libraryCatalog>Amazon</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>To Act or Not to Act: Water Problems in North-East Hungary After 1945</dc:title>
+    </bib:BookSection>
+    <bib:BookSection rdf:about="#item_7540">
+        <z:itemType>bookSection</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Book>
+                <dc:identifier>ISBN 978-1-874267-62-1</dc:identifier>
+                <dc:title>Thinking Through the Environment: Green Approaches to Global History</dc:title>
+            </bib:Book>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Cambridge</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>White Horse Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Myllyntaus</foaf:surname>
+                        <foaf:givenname>Timo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Poliwoda</foaf:surname>
+                        <foaf:givenname>Guido</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=350-123=</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>19th century [12]</dc:subject>
+        <dc:subject>1784-1845</dc:subject>
+        <dc:subject>Disasters [2519]</dc:subject>
+        <dc:subject>Flood control [21887]</dc:subject>
+        <dc:subject>Saxony [23352]</dc:subject>
+        <bib:pages>218-240</bib:pages>
+        <dc:date>20 Jun. 2011</dc:date>
+        <z:libraryCatalog>Amazon</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dc:title>Times of Flood, Times of Favour: Disaster Management and the Social Response to Catastrophic Floods: The Example of Saxony (1784-1845)</dc:title>
+    </bib:BookSection>
+    <bib:Book rdf:about="#item_7526">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Cambridge</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>White Horse Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Myllyntaus</foaf:surname>
+                        <foaf:givenname>Timo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <dcterms:isReferencedBy rdf:resource="#item_7528"/>
+        <link:link rdf:resource="#item_7527"/>
+        <dc:subject>=123=</dc:subject>
+        <dc:subject>Africa [5097]</dc:subject>
+        <dc:subject>Asia [5102]</dc:subject>
+        <dc:subject>Australia [5103]</dc:subject>
+        <dc:subject>enviro</dc:subject>
+        <dc:subject>Environmental history [16244]</dc:subject>
+        <dc:subject>Europe [5119]</dc:subject>
+        <dc:subject>North America [5141]</dc:subject>
+        <dc:subject>Science and politics [1142]</dc:subject>
+        <dc:identifier>ISBN 978-1-874267-62-1</dc:identifier>
+        <dc:date>20 Jun. 2011</dc:date>
+        <z:libraryCatalog>Amazon</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Thinking through the Environment: Green Approaches to Global History is a collection offering global perspectives on the intersections of mind and environment across a variety of discourses - from history and politics to the visual arts and architecture. Its geographical coverage extends to locations in Africa, Asia, Australia, Europe and North America. A primary aim of the volume is, through the presentation of research cases, to gather an appropriate methodological arsenal for the study of environmental history. Among its concerns are interdisciplinarity, eco-biography, the relationship of political and environmental history and culturally varied interpretations and appreciations of space - from Bangladesh to the Australian outback. The approaches of the indigenous peoples of Lapland, Mount Kilimanjaro and elsewhere to their environments are scrutinised in several chapters. Balancing survival - both in terms of resource exploitation and of response to natural catastrophes - and environmental protection is shown to be an issue for more and less developed societies, as illustrated by chapters on Sami reindeer herding, Sudanese cattle husbandry and flooding and water resource-use in several parts of Europe. As the title suggests, the volume exposes the lenses - tinted by culture and history - through which humans consider environments; and also foregrounds the importance of rigor- ous 'thinking through' of the lessons of environmental history and the challenges of the environmental future.</dcterms:abstract>
+        <dc:title>Thinking Through the Environment: Green Approaches to Global History</dc:title>
+        <z:shortTitle>Thinking Through the Environment</z:shortTitle>
+        <z:numPages>314</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_7528">
+        <rdf:value>&lt;p&gt;TOC&lt;/p&gt;
+&lt;p&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;Preface : Methods in environmental&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;history&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;/ Timo Myllyntaus -- Interdisciplinarity as disciplinary co-operation : a plea for the future of environmental&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;history&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;/ Fiona Watson -- Living in nature : biography and environmental&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;history&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;/ Donald Worster -- The Nazis and the&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;environment&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;: a relevant topic? / Frank Uekötter -- The culture of space : temporal precincts of a vernacular architecture in the Chittagong Hills / Dilshad Rahat Ara -- Perceptions of place and deep time in the Australian desert : using art in environmental&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;history&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;/ Libby Robin -- Desertification : a significant problem? Diverse environmental literacy in the North Kordofan area in Sudan / Anu Eskonheimo --&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;Thinking&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;through&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;memoryscapes : symbolic environmental potency on Mount Kilimanjaro, Tanzania / Timothy Clark -- Oral&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;/span&gt;&lt;span class=&quot;matchterm0&quot; style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; background: #ffff66;&quot;&gt;history&lt;/span&gt;&lt;span style=&quot;color: #000000; font-family: Arial, Helvetica, sans-serif; font-size: small; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: #ffffff;&quot;&gt;&lt;span class=&quot;Apple-converted-space&quot;&gt;&amp;nbsp;&lt;/span&gt;and individual environmental experiences / Leena Rossi -- Ancestors' wisdom or desktop reindeer management? The role of traditional ecological knowledge in contemproary reindeer herding / Helena Ruotsala -- Identity politics and alliance building between the Sami delegation and conservationists in the Kessi forest dispute / Jukka Nyyssönen -- Reconstruction and analysis of the flood catastrophe along the River Neckar (South-West Germany) in October 1824 / Jochen Seidel [and others] -- Times of flood, times of favour : disaster management and the social response to catastrophic floods : the example of Saxony (1784-1845) / Guido Poliwoda -- From natural to modified rivers and back? Timber floating in northern Sweden in 1850-1980 and the use of historical knowledge in today's ecological stream restoration / Erik Törnlund -- To act or not to act : water problems in north-east Hungary after 1945 / Viktor Pál.&lt;/span&gt;&lt;/p&gt;</rdf:value>
+    </bib:Memo>
+    <z:Attachment rdf:about="#item_7527">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.amazon.co.uk/Thinking-Through-Environment-Approaches-History/dp/1874267626</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-08-01 22:50:30</dcterms:dateSubmitted>
+        <dc:title>Amazon.com Link</dc:title>
+    </z:Attachment>
+</rdf:RDF>
