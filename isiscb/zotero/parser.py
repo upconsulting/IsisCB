@@ -618,6 +618,13 @@ def process_authorities(paper, instance):
         if not hasattr(paper, field):
             continue
         field_value = getattr(paper, field)
+
+        # If the target of this relation is a book, then we have no need to
+        #  create an Authority or ACRelation here; it will be handled elsewhere.
+        if field == 'partof__title':
+            if getattr(paper, 'partof__type', None) == 'book':
+                continue
+
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
             for last, first in field_value:
