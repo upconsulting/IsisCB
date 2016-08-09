@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from isisdata.models import *
 from zotero.models import *
 
@@ -21,9 +23,12 @@ def ingest_accession(request, accession):
     database.
     """
 
-    ingested = []
+    ingested = []    # These will be production Citation instances.
+    ingested_draft_ids = []    # These will be DraftCitation ids.
     for draftcitation in accession.citations_ready:
         ingested.append(ingest_citation(request, accession, draftcitation))
+        ingested_draft_ids.append(draftcitation.id)
+    ingest_ccrelations(request, accession, ingested_draft_ids)
 
     if accession.citations_remaining.count() == 0:
         accession.processed = True
@@ -36,7 +41,7 @@ def ingest_citation(request, accession, draftcitation):
     # If the citation is already resolved, there is nothing to do here: we
     #  simply return the target of the resolution.
     if draftcitation.resolutions.count() > 0:
-        return draftcitation.resolutions.first()
+        return draftcitation.resolutions.first().to_instance
 
     citation_fields = [
         ('title', 'title'),
@@ -100,6 +105,7 @@ def ingest_citation(request, accession, draftcitation):
         citation_data.update({'part_details': partdetails})
 
     citation = Citation.objects.create(**citation_data)
+    InstanceResolutionEvent.objects.create(for_instance=draftcitation, to_instance=citation)
 
     date = None
     if draftcitation.publication_date:
@@ -107,7 +113,11 @@ def ingest_citation(request, accession, draftcitation):
             try:
                 date = iso8601.parse_date(draftcitation.publication_date).date()
             except iso8601.ParseError:
-                date = None
+                match = re.search('([0-9]{4})', draftcitation.publication_date)
+                if match:
+                    date = match.groups()[0]
+                else:
+                    date = None
         elif type(draftcitation.publication_date) is datetime.datetime:
             date = draftcitation.publication_date.date()
 
@@ -136,57 +146,18 @@ def ingest_citation(request, accession, draftcitation):
             citation.administrator_notes = message
         citation.save()
 
-    for relation in draftcitation.relations_from.all():
-        draft_target = relation.object
-        target = draft_target.resolutions.first().to_instance
-        ccr_data = {
-            '_history_user': request.user,
-            'public': True,
-            'record_history': _record_history_message(request, accession),
-            'record_status_value': CuratedMixin.ACTIVE,
-            'record_status_explanation': u'Active by default',
-            'subject': citation,
-            'object': target,
-            'type_controlled': relation.type_controlled,
-            'belongs_to': accession.ingest_to,
-            'zotero_accession': accession,
-        }
-        ccrelation = CCRelation.objects.create(**ccr_data)
-        InstanceResolutionEvent.objects.create(
-            for_instance = relation,
-            to_instance = ccrelation,
-        )
-    for relation in draftcitation.relations_to.all():
-        draft_target = relation.subject
-        target = draft_target.resolutions.first().to_instance
-        ccr_data = {
-            '_history_user': request.user,
-            'public': True,
-            'record_history': _record_history_message(request, accession),
-            'record_status_value': CuratedMixin.ACTIVE,
-            'record_status_explanation': u'Active by default',
-            'subject': target,
-            'object': citation,
-            'type_controlled': relation.type_controlled,
-            'belongs_to': accession.ingest_to,
-            'zotero_accession': accession,
-        }
-        ccrelation = CCRelation.objects.create(**ccr_data)
-        InstanceResolutionEvent.objects.create(
-            for_instance = relation,
-            to_instance = ccrelation,
-        )
-
-
     for relation in draftcitation.authority_relations.all():
         draft = relation.authority
         try:
             target = draft.resolutions.first().to_instance
-        except AttributeError:    # No resolution target.
-            continue
-
-        target.zotero_accession = accession
-        target.save()
+        except AttributeError:    # No resolution target. We create a "headless"
+            target = None         #  ACRelation.
+            citation.record_history += u"\n\nThe attempt to match the name %s in the %s field was skipped." % (draft.name, relation.get_type_controlled_display())
+            citation.save()
+            
+        if target:
+            target.zotero_accession = accession
+            target.save()
 
         # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
@@ -211,7 +182,7 @@ def ingest_citation(request, accession, draftcitation):
 
 
     for draftlinkeddata in draftcitation.linkeddata.all():
-        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
         LinkedData.objects.create(
             subject = citation,
             universal_resource_name = draftlinkeddata.value,
@@ -226,3 +197,48 @@ def ingest_citation(request, accession, draftcitation):
     accession.save()
 
     return citation
+
+
+def ingest_ccrelations(request, accession, ingested):
+    """
+    Ingest :class:`.DraftCCRelation` instances among "ready"
+    :class:`.DraftCitation`\s.
+
+    Parameters
+    ----------
+    request
+    accession : :class:`.ImportAccession`
+    ingested : list
+        List of :class:`.DraftCitation` ids.
+
+    Returns
+    -------
+    None
+    """
+
+    # Both source and target must be ingested, and no other resolution for this
+    #  DraftCCRelation may exist.
+    query = Q(subject_id__in=ingested) & Q(object_id__in=ingested) & Q(resolutions=None)
+    for relation in accession.draftccrelation_set.filter(query):
+        draft_source = relation.subject
+        source = ingest_citation(request, accession, draft_source)    # Get.
+        draft_target = relation.object
+        target = ingest_citation(request, accession, draft_target)
+
+        ccr_data = {
+            '_history_user': request.user,
+            'public': True,
+            'record_history': _record_history_message(request, accession),
+            'record_status_value': CuratedMixin.ACTIVE,
+            'record_status_explanation': u'Active by default',
+            'subject': source,
+            'object': target,
+            'type_controlled': relation.type_controlled,
+            'belongs_to': accession.ingest_to,
+            'zotero_accession': accession,
+        }
+        ccrelation = CCRelation.objects.create(**ccr_data)
+        InstanceResolutionEvent.objects.create(
+            for_instance = relation,
+            to_instance = ccrelation,
+        )

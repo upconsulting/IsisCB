@@ -157,3 +157,8 @@ a:hover.list_entry_link {
 a:hover.list_entry_link .underlineWhenLinked {
   text-decoration: underline;
 }
+
+
+.input-shaded {
+    background-color: #ccc;
+}

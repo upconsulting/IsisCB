@@ -40,6 +40,7 @@ SUBJECT = rdflib.URIRef(DC + u"subject")
 
 
 BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
+ZBOOK = rdflib.term.URIRef(ZOTERO + 'Book')
 JOURNAL = rdflib.term.URIRef(BIBLIO + 'Journal')
 WEBSITE = rdflib.term.URIRef(ZOTERO + 'Website')
 
@@ -47,6 +48,7 @@ REVIEWED_AUTHORS = rdflib.term.URIRef(ZOTERO + 'reviewedAuthors')
 
 # TODO: We don't have the right relation types to support WEBSITE yet!
 PARTOF_TYPES = [
+    (ZBOOK, 'book'),
     (BOOK, 'book'),
     (JOURNAL, 'journal'),
 ]
@@ -385,7 +387,7 @@ class ZoteroParser(RDFParser):
 
     def handle_date(self, value):
         """
-        Attempt to coerced date to ISO8601.
+        Attempt to coerce date to ISO8601.
         """
         try:
             return iso8601.parse_date(unicode(value))
@@ -395,6 +397,9 @@ class ZoteroParser(RDFParser):
                     # TODO: remove str coercion.
                     return datetime.strptime(unicode(value), datefmt).date()
                 except ValueError:
+                    match = re.search('([0-9]{4})', value)
+                    if match:
+                        return int(match.groups()[0])
                     return value
 
     def handle_documentType(self, value):
@@ -613,6 +618,13 @@ def process_authorities(paper, instance):
         if not hasattr(paper, field):
             continue
         field_value = getattr(paper, field)
+
+        # If the target of this relation is a book, then we have no need to
+        #  create an Authority or ACRelation here; it will be handled elsewhere.
+        if field == 'partof__title':
+            if getattr(paper, 'partof__type', None) == 'book':
+                continue
+
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
             for last, first in field_value:
@@ -711,10 +723,10 @@ def process_authorities(paper, instance):
 def process_linkeddata(paper, instance):
     linkeddata_fields = [    # Maps LD.type_controlled.name -> Zotero field.
         (DraftCitationLinkedData, [
-            ('uri', 'uri'),
-            ('doi', 'doi'),
-            ('isbn', 'isbn'),
-            ('issn', 'issn'),
+            ('URI', 'uri'),
+            ('DOI', 'doi'),
+            ('ISBN', 'isbn'),
+            ('ISSN', 'issn'),
         ]),
         (DraftAuthorityLinkedData, [
 

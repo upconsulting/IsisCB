@@ -30,13 +30,18 @@ class ImportAccession(models.Model):
 
     @property
     def citations_ready(self):
-        field = 'authority_relations__authority__processed'
-        qs = self.draftcitation_set.filter(processed=False).values('id', field)
+        fields = ['authority_relations__authority__processed',
+                  'authority_relations__authority__id']
+        qs = self.draftcitation_set.filter(processed=False).values('id', *fields)
         key = lambda o: o['id']
         ready = []
         for i, group in groupby(sorted(qs, key=key), key=key):
-            records = [o for o in group]
-            if len([o for o in records if not o[field]]) == 0:
+            instance_ready = True
+            for o in group:
+                if o['authority_relations__authority__id'] and not o['authority_relations__authority__processed']:
+                    instance_ready = False
+                    break
+            if instance_ready:
                 ready.append(i)
         return self.draftcitation_set.filter(pk__in=ready)
 
@@ -229,6 +234,11 @@ class DraftCCRelation(ImportedData):
 
     subject = models.ForeignKey('DraftCitation', related_name='relations_from')
     object = models.ForeignKey('DraftCitation', related_name='relations_to')
+
+    resolutions = GenericRelation('InstanceResolutionEvent',
+                                  related_query_name='ccrelation_resolutions',
+                                  content_type_field='for_model',
+                                  object_id_field='for_instance_id')
 
 
 class DraftACRelation(ImportedData):

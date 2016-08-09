@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 register = template.Library()
 
+
 @register.filter
 def get_coins_dict(citation):
     metadata_dict = {}
@@ -34,6 +35,7 @@ def get_coins_dict(citation):
 
     metadata_dict['rft.date'] = [get_pub_year(citation)]
     return metadata_dict
+
 
 @register.filter
 def get_metatag_fields(citation):

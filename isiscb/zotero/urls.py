@@ -20,6 +20,7 @@ urlpatterns = [
 
     url(r'authority/resolve/$', resolve_authority, name='resolve_authority'),
     url(r'authority/create/$', create_authority_for_draft, name='create_authority_for_draft'),
+    url(r'authority/skip/$', skip_authority_for_draft, name='skip_authority_for_draft'),
     url(r'authority/similar/$', similar_authorities, name='similar_authorities'),
 
 

@@ -208,12 +208,25 @@ def resolve_authority(request):
 
 @check_rules('has_zotero_access')
 @staff_member_required
-def create_authority_for_draft(request):
-    # authority_id = request.GET.get('authority')
+def skip_authority_for_draft(request):
     draftauthority_id = request.GET.get('draftauthority')
     accession_id = request.GET.get('accession')
 
-    # authority = get_object_or_404(Authority, pk=authority_id)
+    draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    print 'skip_authority_for_draft', draftauthority.id, accession.id
+    draftauthority.processed = True
+    draftauthority.save()
+    return JsonResponse({'data': None})
+
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
+def create_authority_for_draft(request):
+    draftauthority_id = request.GET.get('draftauthority')
+    accession_id = request.GET.get('accession')
+
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     accession = get_object_or_404(ImportAccession, pk=accession_id)
 

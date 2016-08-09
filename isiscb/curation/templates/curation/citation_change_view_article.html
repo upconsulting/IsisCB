@@ -4,7 +4,11 @@
 {% load permission_tags %}
 
 {% block citation_panel_left %}
-
+<style>
+.input-shaded {
+    background-color: #ccc;
+}
+</style>
 {% for error in form.title.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
@@ -104,18 +108,18 @@
     </div>
     <div class="form-group col-xs-4" style="padding: 0px;">
       <div class="col-sm-3 text-left">
-        <label class="input-sm">Nr.</label>
+        <label class="input-sm">From</label>
       </div>
       <div class="col-xs-9">
-        {{ partdetails_form.volume_begin|addcss:"form-control input-sm" }}
+        {{ partdetails_form.volume_begin|addcss:"form-control input-sm input-shaded" }}
       </div>
     </div>
-    <div class="form-group col-xs-4" style="padding: 0px;">
+    <div class="form-group col-xs-4">
       <div class="col-sm-3 text-left">
         <label class="input-sm">to</label>
       </div>
       <div class="col-xs-9">
-          {{ partdetails_form.volume_end|addcss:"form-control input-sm" }}
+          {{ partdetails_form.volume_end|addcss:"form-control input-sm input-shaded" }}
       </div>
   </div>
 </div>
@@ -146,10 +150,10 @@
   </div>
   <div class="form-group col-xs-4" style="padding: 0px;">
     <div class="col-sm-3 text-left">
-      <label class="input-sm">Nr.</label>
+      <label class="input-sm">From</label>
     </div>
     <div class="col-xs-9">
-        {{ partdetails_form.issue_begin|addcss:"form-control input-sm" }}
+        {{ partdetails_form.issue_begin|addcss:"form-control input-sm input-shaded" }}
     </div>
   </div>
   <div class="form-group col-xs-4" style="padding: 0px;">
@@ -157,7 +161,7 @@
       <label class="input-sm">to</label>
     </div>
     <div class="col-xs-9">
-        {{ partdetails_form.issue_end|addcss:"form-control input-sm" }}
+        {{ partdetails_form.issue_end|addcss:"form-control input-sm input-shaded" }}
     </div>
   </div>
 </div>
@@ -188,10 +192,10 @@
   </div>
   <div class="form-group col-xs-4" style="padding: 0px;">
     <div class="col-sm-3 text-left">
-      <label class="input-sm">Nr.</label>
+      <label class="input-sm">From</label>
     </div>
     <div class="col-xs-9">
-      {{ partdetails_form.page_begin|addcss:"form-control input-sm" }}
+      {{ partdetails_form.page_begin|addcss:"form-control input-sm input-shaded" }}
     </div>
   </div>
   <div class="form-group col-xs-4" style="padding: 0px;">
@@ -199,7 +203,7 @@
       <label class="input-sm">to</label>
     </div>
     <div class="col-xs-9">
-      {{ partdetails_form.page_end|addcss:"form-control input-sm" }}
+      {{ partdetails_form.page_end|addcss:"form-control input-sm input-shaded" }}
     </div>
   </div>
 </div>

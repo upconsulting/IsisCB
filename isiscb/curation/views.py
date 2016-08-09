@@ -846,7 +846,7 @@ def citation(request, citation_id):
             'form': form,
             'instance': citation,
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS]:
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()
@@ -1009,6 +1009,7 @@ def citations(request):
     })
 
     return HttpResponse(template.render(context))
+
 
 def filter_queryset(user, queryset):
     roles = IsisCBRole.objects.filter(users__pk=user.pk)

@@ -236,6 +236,15 @@ class UserRegistrationForm(forms.Form):
     captcha = CaptchaField()
     next = forms.CharField(widget=forms.HiddenInput(), required=False)
 
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        try:
+            existing_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return username
+
+        raise forms.ValidationError(u'Username "%s" is already in use.' % username)
+
 
 class UserProfileForm(forms.Form):
     email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
