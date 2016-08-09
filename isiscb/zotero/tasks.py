@@ -113,7 +113,11 @@ def ingest_citation(request, accession, draftcitation):
             try:
                 date = iso8601.parse_date(draftcitation.publication_date).date()
             except iso8601.ParseError:
-                date = None
+                match = re.search('([0-9]{4})', draftcitation.publication_date)
+                if match:
+                    date = match.groups()[0]
+                else:
+                    date = None
         elif type(draftcitation.publication_date) is datetime.datetime:
             date = draftcitation.publication_date.date()
 
@@ -146,11 +150,14 @@ def ingest_citation(request, accession, draftcitation):
         draft = relation.authority
         try:
             target = draft.resolutions.first().to_instance
-        except AttributeError:    # No resolution target.
-            continue
-
-        target.zotero_accession = accession
-        target.save()
+        except AttributeError:    # No resolution target. We create a "headless"
+            target = None         #  ACRelation.
+            citation.record_history += u"\n\nThe attempt to match the name %s in the %s field was skipped." % (draft.name, relation.get_type_controlled_display())
+            citation.save()
+            
+        if target:
+            target.zotero_accession = accession
+            target.save()
 
         # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
