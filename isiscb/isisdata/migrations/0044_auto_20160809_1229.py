@@ -16,8 +16,9 @@ def update_title_for_sort(apps, schema_editor):
     CCRelation = apps.get_model("isisdata", "CCRelation")
 
     def get_title(obj):
-        title = obj.title
-        if not title:
+        if obj.title:
+            return obj.title
+        else:
             title_parts = []
             for relation in get_related(obj):
                 if relation.type_controlled =='RO' and relation.object and relation.object.title:
@@ -25,29 +26,22 @@ def update_title_for_sort(apps, schema_editor):
                 if relation.type_controlled == 'RB' and relation.subject and relation.subject.title:
                     title_parts.append(relation.subject.title)
             return u' '.join(title_parts)
-        return title
 
     def get_related(obj):
         query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
         return CCRelation.objects.filter(query)
 
-    # qs_with_titles = Citation.objects.filter(~Q(title=u''))
-    # print 'Migrating %i citations with titles' % qs_with_titles.count()
-    # for i in xrange(0, qs_with_titles.count(), 5000):
-    #     print '\r', i,
-    #     sys.stdout.flush()
-    #     with transaction.atomic():
-    #         for citation in qs_with_titles[i:i+5000]:
-    #             citation.title_for_sort = normalize(citation.title)
-    #             citation.save()
-
-    qs_without_titles = Citation.objects.all()
-    print 'Migrating %i citations' % qs_without_titles.count()
-    for i in xrange(0, qs_without_titles.count(), 5000):
+    # If we don't order by ID, the queryset will shift on every inner iteration. 
+    qs = Citation.objects.all().order_by('id')
+    N = qs.count()
+    CHUNK = 500
+    print 'Migrating %i citations' % N
+    for i in xrange(0, N + 1, CHUNK):
         print '\r', i,
         sys.stdout.flush()
         with transaction.atomic():
-            for citation in qs_without_titles[i:i+5000]:
+            # -vv- The database read is here. -vv-
+            for citation in qs[i:i+CHUNK]:
                 citation.title_for_sort = normalize(get_title(citation))
                 citation.save()
 
