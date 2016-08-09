@@ -1305,9 +1305,12 @@ class UserRegistrationView(FormView):
         return initial
 
     def register(self, **cleaned_data):
-        User.objects.create_user(cleaned_data['username'],
+        new_user = User.objects.create_user(cleaned_data['username'],
                                  cleaned_data['email'],
                                  cleaned_data['password1'])
+        profile = UserProfile()
+        profile.user = new_user
+        profile.save()
 
         # Automatically log the user in.
         user = authenticate(username=cleaned_data['username'],
