@@ -10,7 +10,7 @@
 </div>
 {% endif %}
 
-<form class="form" action="." method="POST">
+<form id="ccrelation_form" class="form" action="." method="POST">
     {% csrf_token %}
 
     <div class="row" style="margin-bottom: 20px;">
@@ -43,7 +43,7 @@
         <div class="col-md-4">
             <div class="btn-group pull-right">
                 <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
-                <input type="submit" value="Save" class="btn btn-sm btn-success" />
+                <a href="#" class="btn btn-sm btn-success save-ccrelation" >Save</a>
                 {% if ccrelation.id %}
                 <a href="#"
                   class="btn btn-danger btn-sm delete-ccrelation"
@@ -95,6 +95,11 @@
                 {{ form.object }}
             </div>
             <div class="col-sm-6">
+
+              <div class="text-right">
+                <a href="{% url 'create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
+              </div>
+
                 {% for error in form.subject.errors %}
                 <div class="col-md-12">
                   <div class="alert alert-danger">
@@ -112,7 +117,7 @@
                     </strong>
 
                     <p>
-                      <span class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                      <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
                       <br>
                       <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
                       <br>
@@ -179,7 +184,7 @@
                 </strong>
 
                 <p>
-                  <span class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
+                  <span {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
                   <br>
                   <em class="show_title">{% if form.instance.object %}{{ form.instance.object|get_citation_title }}{% endif %}</em>
                   <br>
@@ -227,13 +232,30 @@
 
 </form>
 
+<div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i> CCRelation Incomplete</h4>
+      </div>
+      <div class="modal-body">
+        <p id="modal_text"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel Save</button>
+        <button id="save_confirmed" type="button" class="btn btn-default">Yes, Save!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
 $('#id_language').multiSelect()
 </script>
 
 <script>
-
+//# sourceURL=ccrel.js
 $(document).ready(function() {
     var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title|safe }}{% endif %}";
     var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
@@ -321,7 +343,7 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '" data-type_id="' + r.type_id + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -342,6 +364,7 @@ $(document).ready(function() {
                     var selected_name = selected.attr('data-name');
                     var selected_authors = selected.attr('data-authors');
                     var selected_type = selected.attr('data-type');
+                    var selected_type_id = selected.attr('data-type_id');
                     var link = "{% url 'citation_list' %}" + selected_id;
 
                     results_container.empty();
@@ -359,6 +382,7 @@ $(document).ready(function() {
                     parentCont.find(".show_title").html(selected_name);
                     parentCont.find(".show_authors").html(selected_authors);
                     parentCont.find(".show_type_controlled").html(selected_type);
+                    parentCont.find(".show_type_controlled").attr("data-type_id", selected_type_id);
                     parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
 
 
@@ -367,6 +391,66 @@ $(document).ready(function() {
         });
     }
 
+    $('#ccrelation_form').on('keyup keypress', function(e) {
+      var keyCode = e.keyCode || e.which;
+      if (keyCode === 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    $('.save-ccrelation').click(function() {
+      var rel_type = $('#id_ccrelation-type_controlled').val();
+      var subject_info = $('#subject_info');
+      var object_info = $('#object_info');
+      var subject_type = subject_info.find('.show_type_controlled');
+      var object_type = object_info.find('.show_type_controlled');
+      var subject_type_id = '';
+      var object_type_id = '';
+      if (subject_type != undefined) {
+        subject_type_id = subject_type.attr('data-type_id');
+      }
+      if (object_type != undefined) {
+        object_type_id = object_type.attr('data-type_id');
+      }
+
+      if (rel_type == 'IC' && subject_type_id != 'BO') {
+        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your subject is not a book.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (rel_type == 'IC' && object_type_id != 'CH') {
+        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your object is not a chapter.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (rel_type == 'ISA' && subject_type_id != 'AR') {
+        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your subject is not an article.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (rel_type == 'ISA' && object_type_id != 'AR') {
+        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your object is not an article.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (rel_type == 'RB' && subject_type_id != 'BO' && subject_type_id != 'WE' && subject_type_id != 'TH') {
+        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your subject is not a book, website, or thesis.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (rel_type == 'RB' && object_type_id != 'RE') {
+        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your object is not a review.");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      // if no warnings, save
+      $('#ccrelation_form').submit();
+    });
+
+    $('#save_confirmed').click(function() {
+      $('#ccrelation_form').submit();
+    });
 
     $('#swap-subject-object').click(swapSubjectObject);
     $('.citation-search').on('keyup', triggerSearch);
@@ -385,7 +469,6 @@ $(document).ready(function() {
         $('#delete-ccrelation-target-name').html(ccrelation_title);
         $('#delete-ccrelation-modal').modal('show');
     });
-
 });
 
 var delete_ccrelation = function() {

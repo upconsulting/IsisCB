@@ -14,6 +14,20 @@ class CCRelationForm(forms.ModelForm):
 
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
+    INCLUDES_CHAPTER = 'IC'
+    INCLUDES_SERIES_ARTICLE = 'ISA'
+    REVIEWED_BY = 'RB'
+    RESPONDS_TO = 'RE'
+    ASSOCIATED_WITH = 'AS'
+    TYPE_CHOICES = (
+        (INCLUDES_CHAPTER, 'Includes Chapter'),
+        (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (RESPONDS_TO, 'Responds To'),
+        (ASSOCIATED_WITH, 'Is Associated With'),
+        (REVIEWED_BY, 'Is Reviewed By')
+    )
+    type_controlled = forms.ChoiceField(choices=TYPE_CHOICES)
+
     class Meta:
         model = CCRelation
         fields = [

@@ -810,7 +810,7 @@ def citation(request, citation_id):
 
     user_cache = caches['default']
     page = user_cache.get('citation_page', 1)
-    get_request = user_cache.get('get_request', None)
+    get_request = user_cache.get('citation_get_request', None)
     queryset = filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
@@ -819,9 +819,9 @@ def citation(request, citation_id):
     citations_page = paginator.page(page)
 
     # ok, let's start the whole pagination/next/previous dance :op
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'prev_index', 'citation_page', 'request_params')
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params')
 
-    request_params = user_cache.get('request_params', "")
+    request_params = user_cache.get('citation_request_params', "")
     context.update({
         'request_params': request_params,
     })
@@ -998,10 +998,10 @@ def citations(request):
     # 'search_results_cache' is the database cache
     #  (see production_settings.py).
     user_cache = caches['default']
-    user_cache.set('request_params', request.META['QUERY_STRING'])
-    user_cache.set('get_request', request.GET)
+    user_cache.set('citation_request_params', request.META['QUERY_STRING'])
+    user_cache.set('citation_get_request', request.GET)
     user_cache.set('citation_page', int(currentPage))
-    user_cache.set('prev_index', None)
+    user_cache.set('citation_prev_index', None)
 
     context.update({
         'objects': filtered_objects,
@@ -1167,10 +1167,18 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(name__icontains=part)
     queryset_sw = queryset_sw.filter(name__istartswith=q)
     results = []
+    result_ids = []
     for i, obj in enumerate(chain(queryset_sw, queryset.order_by('name'))):
+        # for some reason some query results have duplicates
+        # and unique doesn't seem to really fix it, so this workaround
+        if obj.id in result_ids:
+            # make sure we still return 10 results although we're skipping one
+            N += 1
+            continue
         if i == N:
             break
 
+        result_ids.append(obj.id)
         results.append({
             'id': obj.id,
             'type': obj.get_type_controlled_display(),
@@ -1521,10 +1529,11 @@ def quick_and_dirty_citation_search(request):
 
     queryset = Citation.objects.all()
     for part in q.split():
-        queryset = queryset.filter(title__icontains=part)
+        queryset = queryset.filter(title_for_sort__icontains=part)
     results = [{
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
+        'type_id':obj.type_controlled,
         'title': _get_citation_title(obj),
         'authors': _get_authors_editors(obj),
         'datestring': _get_datestring_for_citation(obj),
