@@ -1529,10 +1529,11 @@ def quick_and_dirty_citation_search(request):
 
     queryset = Citation.objects.all()
     for part in q.split():
-        queryset = queryset.filter(title__icontains=part)
+        queryset = queryset.filter(title_for_sort__icontains=part)
     results = [{
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
+        'type_id':obj.type_controlled,
         'title': _get_citation_title(obj),
         'authors': _get_authors_editors(obj),
         'datestring': _get_datestring_for_citation(obj),
