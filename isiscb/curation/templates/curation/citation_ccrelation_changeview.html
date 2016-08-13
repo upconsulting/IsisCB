@@ -95,6 +95,11 @@
                 {{ form.object }}
             </div>
             <div class="col-sm-6">
+
+              <div class="text-right">
+                <a href="{% url 'create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
+              </div>
+              
                 {% for error in form.subject.errors %}
                 <div class="col-md-12">
                   <div class="alert alert-danger">

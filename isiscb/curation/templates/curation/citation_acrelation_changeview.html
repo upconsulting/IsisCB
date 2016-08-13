@@ -134,6 +134,9 @@
 
               </p>
               <hr>
+              <div class="text-right">
+                <a href="{% url 'create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+              </div>
               <div class="form-horizontal">
                 <strong>Authority record: </strong>{% if form.instance.authority %}<strong class="text-warning">{{ form.instance.authority.id }}</strong> &nbsp;&nbsp;
                   <a href="{% url 'curate_authority' form.instance.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
