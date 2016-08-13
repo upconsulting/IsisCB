@@ -107,26 +107,36 @@
               </div>
             <div class="col-sm-6">
 
-              <strong>Citation record: </strong><strong class="text-warning">{{ form.instance.citation.id }} &nbsp;&nbsp;
-                {% if form.instance.citation %}
-                <a href="{% url 'curate_citation' form.instance.citation.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                {% endif %}
-              </strong>
+              <div class="text-right">
+                <a href="{% url 'create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
+              </div>
 
-              {% if form.instance.citation %}
-              <p>
-                <span class="text-success">{{ form.instance.citation.get_type_controlled_display }}</span>
-                <br>
-                <em>{{ form.instance.citation.title }}</em>
-                <br>
-                {% with form.instance.citation|get_authors_editors as authors_editors %}
-                {% if authors_editors %}
-                            {{ authors_editors }}
-                {% endif %}
-                {% endwith %}
+              <div id="citation_info_container">
+                <div id="citation_info">
+                  <strong>Citation record: </strong><strong class="text-warning"><span class="show_id">{{ form.instance.citation.id }}</span> &nbsp;&nbsp;
+                    <a class="link_to_citation" {% if form.instance.citation %}href="{% url 'curate_citation' form.instance.citation.id %}"{% endif %}><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                  </strong>
 
-              </p>
-              {% endif %}
+                  <p>
+                    <span class="text-success show_type_controlled">{% if form.instance.citation %}
+                    {{ form.instance.citation.get_type_controlled_display }}{% endif %}</span>
+                    <br>
+                    <em  class="show_title">{% if form.instance.citation %}
+                    {{ form.instance.citation.title }}{% endif %}</em>
+                    <br>
+                    <span class="show_authors">
+                    {% if form.instance.citation %}
+                    {% with form.instance.citation|get_authors_editors as authors_editors %}
+                    {% if authors_editors %}
+                          {{ authors_editors }}
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
+                    </span>
+
+                  </p>
+                </div>
+              </div>
 
                 <div class="form-group">
                     <div class="col-sm-12">
@@ -199,7 +209,7 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -219,10 +229,22 @@ $(document).ready(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');
+                    var selected_authors = selected.attr('data-authors');
+                    var selected_type = selected.attr('data-type');
+                    var link = "{% url 'citation_list' %}" + selected_id;
+
                     $('#results-container').empty();
                     citation_search_input.val(selected_name);
                     $('#id_acrelation-citation').val(selected_id);
                     citation_search_input.attr('disabled', true);
+
+                    var parentCont = $("#citation_info");
+
+                    parentCont.find(".show_id").html(selected_id);
+                    parentCont.find(".show_title").html(selected_name);
+                    parentCont.find(".show_authors").html(selected_authors);
+                    parentCont.find(".show_type_controlled").html(selected_type);
+                    parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
                 });
             }
         });
