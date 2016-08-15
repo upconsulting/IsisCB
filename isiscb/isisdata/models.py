@@ -692,6 +692,10 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    help_text="Used for books, and potentially"
                                    " other works in a series.")
 
+    def save(self, *args, **kwargs):
+        self.title_for_sort = normalize(unidecode.unidecode(self.title))
+        super(Citation, self).save(*args, **kwargs)
+
     @property
     def normalized_title(self):
         """
@@ -937,6 +941,12 @@ class Authority(ReferencedEntity, CuratedMixin):
     name = models.CharField(max_length=1000, help_text=help_text("""
     Name, title, or other main term for the authority as will be displayed.
     """))
+
+    name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.name_for_sort = normalize(unidecode.unidecode(self.name))
+        super(Authority, self).save(*args, **kwargs)
 
     @property
     def normalized_name(self):
