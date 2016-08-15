@@ -8,6 +8,7 @@ from django.db import transaction
 from isisdata.utils import normalize
 
 import sys
+from unidecode import unidecode
 from itertools import chain
 
 
@@ -31,7 +32,7 @@ def update_title_for_sort(apps, schema_editor):
         query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
         return CCRelation.objects.filter(query)
 
-    # If we don't order by ID, the queryset will shift on every inner iteration. 
+    # If we don't order by ID, the queryset will shift on every inner iteration.
     qs = Citation.objects.all().order_by('id')
     N = qs.count()
     CHUNK = 500
@@ -42,7 +43,7 @@ def update_title_for_sort(apps, schema_editor):
         with transaction.atomic():
             # -vv- The database read is here. -vv-
             for citation in qs[i:i+CHUNK]:
-                citation.title_for_sort = normalize(get_title(citation))
+                citation.title_for_sort = normalize(unidecode(get_title(citation)))
                 citation.save()
 
 

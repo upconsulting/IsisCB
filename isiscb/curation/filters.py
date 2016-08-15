@@ -166,8 +166,8 @@ class AuthorityFilter(django_filters.FilterSet):
 
         order_by = [
             ('', 'None'),
-            ('name', 'Name (ascending)'),
-            ('-name', 'Name (descending)')
+            ('name_for_sort', 'Name (ascending)'),
+            ('-name_for_sort', 'Name (descending)')
         ]
 
 

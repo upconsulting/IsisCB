@@ -16,7 +16,6 @@ from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
-
 from isisdata.models import *
 from curation.filters import *
 from curation.forms import *
@@ -1164,8 +1163,8 @@ def quick_and_dirty_authority_search(request):
 
     query_parts = q.split()
     for part in query_parts:
-        queryset = queryset.filter(name__icontains=part)
-    queryset_sw = queryset_sw.filter(name__istartswith=q)
+        queryset = queryset.filter(name_for_sort__icontains=part)
+    queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     results = []
     result_ids = []
     for i, obj in enumerate(chain(queryset_sw, queryset.order_by('name'))):
