@@ -667,18 +667,23 @@ def process_authorities(paper, instance):
                             # * Invert the values: 340, 140 -> 140, 340
                             # * Build a new string: 140, 340 -> "140-340"
                             lookup = '-'.join([partB, partA])
+                        else:
+                            lookup = value.replace('=', '').strip()
 
+                        try:
                             # * Search for an Authority with that
                             #   classification_code: "140-340" -> CBA000131150
-                            try:
-                                authority = Authority.objects.get(classification_code=lookup)
-                                authority_id = authority.id
-                            except Authority.DoesNotExist:
-                                pass
+                            authority = Authority.objects.filter(classification_code=lookup).first()
+                            authority_id = authority.id
 
                             # Even though this originates in a dc.subject field,
                             #  these should be linked as categories.
                             acrelation_type = ACRelation.CATEGORY
+
+                        except Authority.DoesNotExist:
+                            pass
+
+
 
                 # Use the Authority's name, if available. Otherwise just use
                 #  whatever we found in Zotero.
