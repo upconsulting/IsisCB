@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from django import forms
 
 from isisdata.models import *
+from curation import actions
 
 import rules
 
@@ -505,3 +506,38 @@ class AttributeForm(forms.ModelForm):
         if self.instance.id:
             self.fields['type_controlled'].initial = self.instance.type_controlled
         super(AttributeForm, self).save(*args, **kwargs)
+
+
+class BulkActionForm(forms.Form):
+    def apply(self):
+        selected_actions = self.cleaned_data.get('action')
+        queryset = self.cleaned_data.get('queryset')
+        for action_name in selected_actions:
+            action_value = self.cleaned_data.get(action_name)
+            action = getattr(actions, action_name)()
+            action.apply(queryset, action_value)
+
+
+# Emulates django's modelform_factory
+def bulk_action_form_factory(form=BulkActionForm, **kwargs):
+    attrs = {}    # For the form's Meta inner class.
+
+    # For the Media inner class.
+    media_attrs = {'js': ('curation/js/bulkaction.js', )}
+
+    parent = (object,)
+    if hasattr(form, 'Meta'):
+        parent = (form.Meta, object)
+    Meta = type(str('Meta'), parent, attrs)
+    Media = type(str('Media'), (object,), media_attrs)
+    form_class_attrs = {'Meta': Meta, 'Media': Media}
+    action_choices = []
+    for action_class in actions.AVAILABLE_ACTIONS:
+        action = action_class()
+        action_choices.append((action_class.__name__, action.label))
+        form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
+
+    form_class_attrs['action'] = forms.MultipleChoiceField(choices=action_choices)
+    form_class_attrs['queryset'] = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
+                                                                  widget=forms.widgets.MultipleHiddenInput())
+    return type(form)('BulkChangeForm', (form,), form_class_attrs)

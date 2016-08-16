@@ -1,0 +1,88 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load addcss %}
+
+{% block content %}
+<div class="h2">Bulk edit</div>
+
+<p class="text-warning">
+    You have selected {{ queryset.count }} citation records for bulk editing.
+    Select one or more actions at left, set values for those actions as desired,
+    and then click "apply".
+</p>
+
+<form class="form" action="{% url "citation-bulk-action" %}?confirmed=true" method="POST">
+    {% csrf_token %}
+    {% for error in form.non_field_errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-xs-6">
+            {% with form.action as field %}
+            {% for error in field.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field|addcss:"form-control"}}
+            </div>
+            {% endwith %}
+
+            {% with form.queryset as field %}
+            {% for error in field.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                {{ field|addcss:"form-control"}}
+            </div>
+            {% endwith %}
+            <p class="text-muted">Hold the <kbd class="kbd">shift</kbd> key to select multiple actions.</p>
+        </div>
+
+        <div class="col-xs-6">
+
+            {% for field in form %}
+                {% if field.label != 'Action' %}
+                <div class="action-value-container" id="container_{{field.name}}">
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field|addcss:"form-control action-value"}}
+                    </div>
+                </div>
+                {% endif %}
+
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal">
+            Apply
+        </button>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="confirmModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Are you sure?</h4>
+                </div>
+            <div class="modal-body">
+                <p>You are about to apply the following actions to {{queryset.count}} citations:</p>
+                <ul class="list-group" id="confirm-action-list">
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <input type="submit" value="Apply" class="btn btn-success" />
+            </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    {{ form.media }}
+</form>
+{% endblock %}

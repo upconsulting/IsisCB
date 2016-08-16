@@ -6,80 +6,100 @@
 
 {% block object_list %}
 
-<a class="btn btn-primary btn-sm" href="{% url 'create_citation' %}">Create new citation record</a>
 
-<table class="table table-responsive table-hover table-curation">
-    <thead>
-        <tr>
-            <th width="5%">ID</th>
-            <th width="5%">Type</th>
-            <th>Title</th>
-            <th>Author/Editor(s)</th>
-            <th width="5%">Published</th>
-            <th width="15%">Periodical</th>
-            <th width="12%">Modified</th>
-            <th width="12%">Created</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for object in filter_list %}
-        {% with object.all_acrelations as acrelations %}
-        {% with acrelations|get_authorities as authorities %}
-        {% with object.all_ccrelations as ccrelations %}
-        {% with object|get_citations:ccrelations as related_citations %}
-        {% with object.attributes as attributes %}
-        <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
-            <td>
-                <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
-                {% if not object.public %}
-                <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
-                {% endif %}
+<form action="{% url "citation-bulk-action" %}" method="POST">
+    {% csrf_token %}
+    <a class="btn btn-primary btn-sm" href="{% url 'create_citation' %}">Create new citation record</a>
+    <input class="btn btn-success btn-sm" type="submit" value="Bulk change" />
+    <a class="btn btn-primary btn-sm" href="{% url 'citation-bulk-select' %}">Bulk select</a>
+    <table class="table table-responsive table-hover table-curation">
+        <thead>
+            <tr>
+                <th width="5%">
+                    <input type="checkbox" name="select_all" id="select_all" />
+                    <script>
+                    $('#select_all').change(function(e) {
+                        if ($(this).prop('checked')) {
+                            $('.queryset-checkbox').prop('checked', true);
+                        } else {
+                            $('.queryset-checkbox').prop('checked', false);
+                        }
+                    });
+                    </script>
+                </th>
+                <th width="5%">ID</th>
+                <th width="5%">Type</th>
+                <th>Title</th>
+                <th>Author/Editor(s)</th>
+                <th width="5%">Published</th>
+                <th width="15%">Periodical</th>
+                <th width="12%">Modified</th>
+                <th width="12%">Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in filter_list %}
+            {% with object.all_acrelations as acrelations %}
+            {% with acrelations|get_authorities as authorities %}
+            {% with object.all_ccrelations as ccrelations %}
+            {% with object|get_citations:ccrelations as related_citations %}
+            {% with object.attributes as attributes %}
+            <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
+                <td>
+                    <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
+                </td>
+                <td>
+                    <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
+                    {% if not object.public %}
+                    <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
+                    {% endif %}
 
-                {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:related_citations or not attributes|are_attributes_public %}
-                <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
-                {% endif %}
-                {% if object|is_public_inconsistent %}
-                <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
-                {% endif %}
-                {% if object.record_status_value == 'Redirect' %}
-                <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
-                {% endif %}
-            </td>
-            <td>{{ object.get_type_controlled_display }}</td>
-            <td>{{ object|get_citation_title|safe }}</td>
-            <td>
-                <a href="{% url "curate_citation" object.id %}?tab=acrelations">
-                    {{ acrelations|get_authors_editors_preloaded }}
-                </a>
-            </td>
-            <td>
-                <a href="{% url "curate_citation" object.id %}?tab=attributes">
-                    {{ object|get_citation_pubdate_fast }}
-                </a>
-            </td>
-            <td>
-                <a href="{% url "curate_citation" object.id %}?tab=acrelations">
-                    {{ object|get_citation_periodical }}
-                </a>
-            </td>
-            <td>
-                {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
-            </td>
-            <td>
-                {% if object.created_on %}{{ object.created_on }}{% else %}{{ object.created_on_fm }}{% endif %}
-            </td>
-        </tr>
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
-        {% endfor %}
-    </tbody>
+                    {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:related_citations or not attributes|are_attributes_public %}
+                    <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
+                    {% endif %}
+                    {% if object|is_public_inconsistent %}
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
+                    {% endif %}
+                    {% if object.record_status_value == 'Redirect' %}
+                    <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
+                    {% endif %}
+                </td>
+                <td>{{ object.get_type_controlled_display }}</td>
+                <td>{{ object|get_citation_title|safe }}</td>
+                <td>
+                    <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                        {{ acrelations|get_authors_editors_preloaded }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url "curate_citation" object.id %}?tab=attributes">
+                        {{ object|get_citation_pubdate_fast }}
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                        {{ object|get_citation_periodical }}
+                    </a>
+                </td>
+                <td>
+                    {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
+                </td>
+                <td>
+                    {% if object.created_on %}{{ object.created_on }}{% else %}{{ object.created_on_fm }}{% endif %}
+                </td>
+            </tr>
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endfor %}
+        </tbody>
 
-    </thead>
+        </thead>
 
-</table>
+    </table>
+</form>
 {% endblock %}
 
 {% block filter_form %}
