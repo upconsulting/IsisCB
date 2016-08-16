@@ -1010,12 +1010,14 @@ class Authority(ReferencedEntity, CuratedMixin):
     MW = 'MW'      #  changed the disply value (below). -EP
     SHOT = 'SHOT'
     SEARCH = 'SAC'
+    PROPER_NAME = 'PN'
     CLASS_SYSTEM_CHOICES = (
         (SWP, 'SPW'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
-        (SEARCH, 'SAC')
+        (SEARCH, 'SAC'),
+        (PROPER_NAME, 'Proper name')
     )
     classification_system = models.CharField(max_length=4, blank=True,
                                              null=True, default=SWP,
