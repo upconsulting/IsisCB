@@ -16,7 +16,6 @@ from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
-
 from isisdata.models import *
 from curation.filters import *
 from curation.forms import *
@@ -980,6 +979,11 @@ def _get_corrected_index(prev_index, index):
 
 @staff_member_required
 def citations(request):
+    filter_params = request.GET
+    ids = None
+    if request.method == 'POST':
+        ids = [i.strip() for i in request.POST.get('ids').split(',')]
+
     context = RequestContext(request, {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
@@ -988,7 +992,10 @@ def citations(request):
     template = loader.get_template('curation/citation_list_view.html')
 
     queryset = filter_queryset(request.user, Citation.objects.all())
-    filtered_objects = CitationFilter(request.GET, queryset=queryset)
+    if ids is not None:
+        queryset = queryset.filter(pk__in=ids)
+    filtered_objects = CitationFilter(filter_params, queryset=queryset)
+
     currentPage = request.GET.get('page', 1)
 
     filters_active = request.GET.get('filters', False)
@@ -1164,8 +1171,8 @@ def quick_and_dirty_authority_search(request):
 
     query_parts = q.split()
     for part in query_parts:
-        queryset = queryset.filter(name__icontains=part)
-    queryset_sw = queryset_sw.filter(name__istartswith=q)
+        queryset = queryset.filter(name_for_sort__icontains=part)
+    queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     results = []
     result_ids = []
     for i, obj in enumerate(chain(queryset_sw, queryset.order_by('name'))):
@@ -1597,3 +1604,41 @@ def add_zotero_rule(request, role_id):
         rule = ZoteroRule.objects.create(role_id=role_id)
 
     return redirect('role', role_id=role.pk)
+
+
+@staff_member_required
+def bulk_select_citation(request):
+    template = loader.get_template('curation/bulk_select_citation.html')
+    context = RequestContext(request, {})
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def bulk_action(request):
+    """
+    User has selected some number of records.
+    """
+    template = loader.get_template('curation/bulkaction.html')
+    form_class = bulk_action_form_factory()
+    context = RequestContext(request, {})
+
+    if request.method == 'POST':
+        pks = request.POST.getlist('queryset')
+        queryset = Citation.objects.filter(pk__in=pks)
+        context.update({'queryset': queryset})
+        if request.GET.get('confirmed', False):
+            # Perform the selected action.
+            # form = bulk_action_form_factory(
+            form = form_class(request.POST)
+            form.fields['queryset'].initial = queryset.values_list('id', flat=True)
+            if form.is_valid():
+                form.apply()
+                return HttpResponseRedirect(reverse('citation_list'))
+        else:
+            # Prompt to select an action that will be applied to those records.
+            form = form_class()
+            form.fields['queryset'].initial = queryset.values_list('id', flat=True)
+    context.update({
+        'form': form,
+    })
+    return HttpResponse(template.render(context))

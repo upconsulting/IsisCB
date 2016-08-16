@@ -281,6 +281,7 @@ class FMPDSOParser(object):
             'WHITROW CLASSIFICATION SYSTEM (1913-1999)': 'MW',
             'FORUM FOR THE HISTORY OF SCIENCE IN AMERICA': 'FHSA',
             'SEARCH APP CONCEPT': 'SAC',
+            'PROPER NAME': 'PN',
         },
         'type_broad_controlled': {
             'acrelation': {
@@ -761,6 +762,7 @@ class DatabaseHandler(object):
 
         except Exception as E:
             self.errors.append(('authority', E.__repr__(), authority_id, authority_data))
+            print authority_data
             raise E
         self._tick('authority')
 

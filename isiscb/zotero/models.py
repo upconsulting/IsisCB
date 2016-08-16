@@ -7,6 +7,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.core.urlresolvers import reverse
 
 from isisdata.models import Dataset, Citation, Authority
+from isisdata.utils import normalize
+from unidecode import unidecode
 
 from itertools import groupby
 
@@ -179,6 +181,8 @@ class DraftAuthority(ImportedData):
     type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
                                        null=True, blank=True)
 
+    name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+
     resolutions = GenericRelation('InstanceResolutionEvent',
                                   related_query_name='authority_resolutions',
                                   content_type_field='for_model',
@@ -197,6 +201,11 @@ class DraftAuthority(ImportedData):
     class Meta:
         verbose_name = 'draft authority record'
         verbose_name_plural = 'draft authority records'
+
+    def save(self, *args, **kwargs):
+        self.name_for_sort = normalize(unidecode(self.name))
+        super(DraftAuthority, self).save(*args, **kwargs)
+
 
 
 class DraftCCRelation(ImportedData):

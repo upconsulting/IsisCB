@@ -52,12 +52,12 @@ def suggest_authority_by_resolutions(draftAuthority):
     hits = []
 
     # Find similar DraftAuthority instances.
-    fuzzy_names = Q(name__icontains=draftAuthority.name) | Q(name__in=draftAuthority.name)
+    fuzzy_names = Q(name_for_sort__icontains=draftAuthority.name) | Q(name_for_sort__in=draftAuthority.name)
     for v in draftAuthority.name.split(' '):    # Look at parts of the name.
         if len(v) > 2:
             # startswith is about as broad as we can go without getting flooded
             #  by extraneous results.
-            fuzzy_names |= Q(name__istartswith=v)
+            fuzzy_names |= Q(name_for_sort__istartswith=v)
     queryset = DraftAuthority.objects.filter(processed=True).filter(fuzzy_names)
 
     resolutions = defaultdict(list)
@@ -156,7 +156,7 @@ def suggest_authority(draftAuthority):
     hits += suggest_by_linkeddata(draftAuthority)
     hits += suggest_authority_by_resolutions(draftAuthority)
     # hits += suggest_by_attributes(draftAuthority)
-    hits += suggest_by_field(draftAuthority, 'name', Authority, 'name', scramble=True)
+    hits += suggest_by_field(draftAuthority, 'name', Authority, 'name_for_sort', scramble=True)
     return aggregate_hits(hits)
 
 

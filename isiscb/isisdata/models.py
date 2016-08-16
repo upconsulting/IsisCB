@@ -692,6 +692,10 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    help_text="Used for books, and potentially"
                                    " other works in a series.")
 
+    def save(self, *args, **kwargs):
+        self.title_for_sort = normalize(unidecode.unidecode(self.title))
+        super(Citation, self).save(*args, **kwargs)
+
     @property
     def normalized_title(self):
         """
@@ -938,6 +942,12 @@ class Authority(ReferencedEntity, CuratedMixin):
     Name, title, or other main term for the authority as will be displayed.
     """))
 
+    name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.name_for_sort = normalize(unidecode.unidecode(self.name))
+        super(Authority, self).save(*args, **kwargs)
+
     @property
     def normalized_name(self):
         """
@@ -1000,12 +1010,14 @@ class Authority(ReferencedEntity, CuratedMixin):
     MW = 'MW'      #  changed the disply value (below). -EP
     SHOT = 'SHOT'
     SEARCH = 'SAC'
+    PROPER_NAME = 'PN'
     CLASS_SYSTEM_CHOICES = (
         (SWP, 'SPW'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
-        (SEARCH, 'SAC')
+        (SEARCH, 'SAC'),
+        (PROPER_NAME, 'Proper name')
     )
     classification_system = models.CharField(max_length=4, blank=True,
                                              null=True, default=SWP,
