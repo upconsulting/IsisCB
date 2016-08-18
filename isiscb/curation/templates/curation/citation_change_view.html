@@ -74,8 +74,8 @@ var toggleTab = function(name) {
       <a href="{% url 'curate_citation' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
       {% endif %}
       &nbsp; &nbsp; &nbsp;
-      <a href="{% url 'citation_list' %}?{{ request_params }}"><i class="fa fa-reply" aria-hidden="true"></i>
 
+      <a href="{% url 'citation_list' %}?page={{request_params.page}}"><i class="fa fa-reply" aria-hidden="true"></i>
 Back to List </a>
       &nbsp; &nbsp; &nbsp;
       {% if next %}
@@ -259,6 +259,7 @@ var delete_language = function() {
 
 
 <script>
+
 var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {

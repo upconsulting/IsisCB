@@ -33,7 +33,7 @@ class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilte
 class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
-    id = django_filters.CharFilter(name='id', lookup_type='exact')
+    id = django_filters.MethodFilter(name='id', lookup_type='exact')
     title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
     publication_date_from = django_filters.MethodFilter()
@@ -74,6 +74,14 @@ class CitationFilter(django_filters.FilterSet):
     #         return queryset.order_by('%srelations_from__subject__title' % ('-' if value.startswith('-') else ''),
     #                                           '%srelations_to__subject__title' % ('-' if value.startswith('-') else '')).order_by(value)
     #     return queryset.order_by(value)
+
+    def filter_id(self, queryset, value):
+        if not value:
+            return queryset
+
+        ids = [i.strip() for i in value.split(',')]
+        queryset = queryset.filter(pk__in=ids)
+        return queryset
 
     def filter_title(self, queryset, value):
         if not value:

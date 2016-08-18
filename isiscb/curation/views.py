@@ -809,7 +809,7 @@ def citation(request, citation_id):
 
     user_cache = caches['default']
     page = user_cache.get('citation_page', 1)
-    get_request = user_cache.get('citation_get_request', None)
+    get_request = user_cache.get('citation_filters', None)
     queryset = filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
@@ -824,7 +824,7 @@ def citation(request, citation_id):
     context.update({
         'request_params': request_params,
     })
-
+    
     if citation.type_controlled == Citation.BOOK:
         template = loader.get_template('curation/citation_change_view_book.html')
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
@@ -907,10 +907,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
                 if index != None:
                     page = page+1
                     user_cache.set(cache_page_key, page)
-                    if 'page=' + str(page-1) in request_params:
-                        request_params = request_params.replace('page=' + str(page-1), 'page=' + str(page))
-                    else:
-                        request_params = request_params + "&page=" + str(page)
+                    request_params['page'] = page
 
                     user_cache.set(cache_request_param_key, request_params)
 
@@ -925,10 +922,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
                 user_cache.set(cache_page_key, page)
 
                 # update back to list link
-                if 'page=' + str(page+1) in request_params:
-                    request_params = request_params.replace('page=' + str(page+1), 'page=' + str(page))
-                else:
-                    request_params = request_params + "&page=" + str(page)
+                request_params['page'] = page
 
                 user_cache.set(cache_request_param_key, request_params)
 
@@ -979,10 +973,20 @@ def _get_corrected_index(prev_index, index):
 
 @staff_member_required
 def citations(request):
-    filter_params = request.GET
-    ids = None
+    additional_params_names = ["page"]
+    all_params = {}
+
+    user_cache = caches['default']
     if request.method == 'POST':
-        ids = [i.strip() for i in request.POST.get('ids').split(',')]
+        filter_params = request.POST
+    elif request.method == 'GET':
+        filter_params = user_cache.get('citation_filters', {})
+        for key in additional_params_names:
+            all_params[key] = request.GET.get(key, '')
+
+    #ids = None
+    #if request.method == 'POST':
+    #    ids = [i.strip() for i in request.POST.get('ids').split(',')]
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -992,23 +996,28 @@ def citations(request):
     template = loader.get_template('curation/citation_list_view.html')
 
     queryset = filter_queryset(request.user, Citation.objects.all())
-    if ids is not None:
-        queryset = queryset.filter(pk__in=ids)
+    #if ids is not None:
+    #    queryset = queryset.filter(pk__in=ids)
+
     filtered_objects = CitationFilter(filter_params, queryset=queryset)
 
-    currentPage = request.GET.get('page', 1)
 
     filters_active = request.GET.get('filters', False)
     filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
 
+    if filtered_objects.form.is_valid():
+        request_params = filtered_objects.form.cleaned_data
+        for key in request_params:
+            all_params[key] = request_params[key]
 
-    # 'search_results_cache' is the database cache
-    #  (see production_settings.py).
-    user_cache = caches['default']
-    user_cache.set('citation_request_params', request.META['QUERY_STRING'])
-    user_cache.set('citation_get_request', request.GET)
-    user_cache.set('citation_page', int(currentPage))
-    user_cache.set('citation_prev_index', None)
+        currentPage = all_params.get('page', 1)
+        if not currentPage:
+            currentPage = 1
+
+        user_cache.set('citation_request_params', all_params)
+        user_cache.set('citation_filters', request_params)
+        user_cache.set('citation_page', int(currentPage))
+        user_cache.set('citation_prev_index', None)
 
     context.update({
         'objects': filtered_objects,
