@@ -1189,6 +1189,7 @@ def quick_and_dirty_authority_search(request):
         results.append({
             'id': obj.id,
             'type': obj.get_type_controlled_display(),
+            'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
             'datestring': _get_datestring_for_authority(obj),
