@@ -10,7 +10,9 @@
 </div>
 {% endif %}
 
-<form class="form" action="." method="POST">
+{{ form.errors }}
+
+<form id="acrelation_form" class="form" action="." method="POST">
     {% csrf_token %}
 
 <div class="row" style="margin-bottom: 20px;">
@@ -43,7 +45,7 @@
     <div class="col-md-4">
         <div class="btn-group pull-right">
             <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
-            <input type="submit" value="Save" class="btn btn-sm btn-success" />
+            <a href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
             <a href="#"
                 class="btn btn-danger btn-sm delete-acrelation"
                 acrelation-id="{{ acrelation.id }}"
@@ -122,7 +124,7 @@
               </strong>
 
               <p>
-                <span class="text-success">{{ instance.get_type_controlled_display }}</span>
+                <span id="citation_type_full" data-code-type="{{ instance.type_controlled }}" class="text-success">{{ instance.get_type_controlled_display }}</span>
                 <br>
                 <em>{{ instance.title }}</em>
                 <br>
@@ -138,21 +140,22 @@
                 <a href="{% url 'create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
               </div>
               <div class="form-horizontal">
-                <strong>Authority record: </strong>{% if form.instance.authority %}<strong class="text-warning">{{ form.instance.authority.id }}</strong> &nbsp;&nbsp;
-                  <a href="{% url 'curate_authority' form.instance.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
-              {% endif %}
-
-              {% if form.instance.authority %}
-              <p>
-                <span class="text-success">{{ form.instance.authority.get_type_controlled_display }}</span>
-                <br>
-                {{ form.instance.authority.name }}
-                <br>
+                <div id="authority_info">
+                  <strong>Authority record: </strong><strong class="text-warning">{% if form.instance.authority %}{{ form.instance.authority.id }}{% endif %}</strong> &nbsp;&nbsp;
+                    <a id="authority_link" href="{% if form.instance.authority %}{% url 'curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
 
 
-              </p>
-              {% endif %}
 
+                  <p>
+                    <span id="authority_type_full" {% if form.instance.authority %}data-type-code="{{ form.instance.authority.type_controlled }}"{% endif %}< class="text-success">{% if form.instance.authority %}{{ form.instance.authority.get_type_controlled_display }}{% endif %}</span>
+                    <br>
+                    <span {% if form.instance.authority %}data-type="{{form.instance.authority.type_controlled}}"{% endif %} id="authority_name">{% if form.instance.authority %}{{ form.instance.authority.name }}{% endif %}</span>
+                    <br>
+
+
+                  </p>
+
+              </div>
                 <div class="form-group">
                     <div class="col-sm-12">
                         <div class="input-group">
@@ -180,13 +183,30 @@
 
 </form>
 
+<div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i> ACRelation Incomplete</h4>
+      </div>
+      <div class="modal-body">
+        <p id="modal_text"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel Save</button>
+        <button id="save_confirmed" type="button" class="btn btn-default">Yes, Save!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
 $('#id_language').multiSelect()
 </script>
 
 <script>
-
+//# sourceURL=save.js
 $(document).ready(function() {
     var authority_name = "{% if acrelation %}{{ acrelation.authority.name|safe }}{% endif %}";
     var authority_search_input = $('#authority-search');
@@ -209,7 +229,7 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '" data-type="' +r.type +'" data-type-code="' + r.type_code + '" ></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
                     choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
@@ -228,10 +248,16 @@ $(document).ready(function() {
                     var selected = $(this);
                     var selected_id = selected.attr('data-id');
                     var selected_name = selected.attr('data-name');
+                    var selected_type = selected.attr('data-type');
+                    var selected_type_code = selected.attr('data-type-code');
+
                     $('#results-container').empty();
                     authority_search_input.val(selected_name);
                     $('#id_acrelation-name_for_display_in_citation').val(selected_name);
                     $('#id_acrelation-authority').val(selected_id);
+                    $('#authority_type_full').text(selected_type);
+                    $('#authority_type_full').attr('data-type-code', selected_type_code);
+                    $('#authority_name').text(selected_name);
 
                     authority_search_input.attr('disabled', true);
                 });
@@ -246,6 +272,68 @@ $(document).ready(function() {
     authority_search_input.on('keyup', triggerSearch);
     $('.enable-search-input').click(unlockSearchInput);
 
+    $('.save-acrelation').click(function() {
+      var authority_id = $('#id_acrelation-authority').val();
+      var citation_id = $('#id_acrelation-citation').val();
+
+      var possible_authority_types = {
+        'AU':['PE', "IN"],
+        'ED':['PE', "IN"],
+        'CO':['PE'],
+        'AD':['PE'],
+        'TR':['PE'],
+        'CM':['PE'],
+        "SU":['CO', "TI", "PE", "GE", "CR", "IN"],
+        "CA":["CT"],
+        "PU":["IN"],
+        "SC":["IN"],
+        "PE":["SE"]
+      };
+
+      var possible_citation_types = {
+        'AD':['TH'],
+        'CM':["TH"]
+      };
+
+      if (citation_id == '') {
+        $('#modal_text').text("You did not select a citation for this ACRelation. Are you sure you want to save?");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+      if (authority_id == '') {
+        $('#modal_text').text("You did not select an authority for this ACRelation. Are you sure you want to save?");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+
+      var acrel_type = $('#id_acrelation-type_controlled').val();
+      var acrel_type_full = $('#id_acrelation-type_controlled option:selected').text();
+      var accepted_types = possible_authority_types[acrel_type];
+      var selected_type = $('#authority_type_full').attr('data-type-code');
+      var selected_type_full = $("#authority_type_full").text();
+
+      if (accepted_types != undefined && !accepted_types.includes(selected_type)) {
+        $('#modal_text').text("You selected '" + acrel_type_full + "' as relationship type but the authority you chose is of type '" + selected_type_full + "'. Are you sure you want to save?");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+
+      var accepted_citation_types = possible_citation_types[acrel_type];
+      var selected_citation_type = $("#citation_type_full").attr("data-type-code");
+      var selected_citation_type_full = $("#citation_type_full").text();
+      if (accepted_citation_types != undefined && !accepted_citation_types.includes(selected_citation_type)) {
+        $('#modal_text').text("You selected '" + acrel_type_full + "' as relationship type but the citation of this ACRelation is of type '" + selected_citation_type_full + "'. Are you sure you want to save?");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+
+      $('#acrelation_form').submit();
+
+    });
+
+    $('#save_confirmed').click(function() {
+      $('#acrelation_form').submit();
+    });
 });
 </script>
 

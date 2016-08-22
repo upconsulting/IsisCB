@@ -59,11 +59,37 @@ class CCRelationForm(forms.ModelForm):
 
 
 class ACRelationForm(forms.ModelForm):
-    authority = forms.CharField(widget=forms.HiddenInput())
-    citation = forms.CharField(widget=forms.HiddenInput())
+    authority = forms.CharField(widget=forms.HiddenInput(), required=False)
+    citation = forms.CharField(widget=forms.HiddenInput(), required=False)
     """We will set these dynamically in the rendered form."""
 
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
+
+    AUTHOR = 'AU'
+    EDITOR = 'ED'
+    ADVISOR = 'AD'
+    CONTRIBUTOR = 'CO'
+    TRANSLATOR = 'TR'
+    SUBJECT = 'SU'
+    CATEGORY = 'CA'
+    PUBLISHER = 'PU'
+    SCHOOL = 'SC'
+    PERIODICAL = 'PE'
+    COMMITTEE_MEMBER = 'CM'
+    TYPE_CHOICES = (
+        (AUTHOR, 'Author'),
+        (EDITOR, 'Editor'),
+        (ADVISOR, 'Advisor'),
+        (CONTRIBUTOR, 'Contributor'),
+        (TRANSLATOR, 'Translator'),
+        (SUBJECT, 'Subject'),
+        (CATEGORY, 'Category'),
+        (PUBLISHER, 'Publisher'),
+        (SCHOOL, 'School'),
+        (PERIODICAL, 'Periodical'),
+        (COMMITTEE_MEMBER, 'Committee Member'),
+    )
+    type_controlled = forms.ChoiceField(choices=TYPE_CHOICES, required=False)
 
     confidence_measure = forms.TypedChoiceField(**{
         'choices': [
@@ -96,10 +122,16 @@ class ACRelationForm(forms.ModelForm):
 
     def clean(self):
         super(ACRelationForm, self).clean()
-        authority_id = self.cleaned_data['authority']
-        self.cleaned_data['authority'] = Authority.objects.get(pk=authority_id)
-        citation_id = self.cleaned_data['citation']
-        self.cleaned_data['citation'] = Citation.objects.get(pk=citation_id)
+        authority_id = self.cleaned_data.get('authority', None)
+        if authority_id:
+            self.cleaned_data['authority'] = Authority.objects.get(pk=authority_id)
+        else:
+            self.cleaned_data['authority'] = None
+        citation_id = self.cleaned_data.get('citation', None)
+        if citation_id:
+            self.cleaned_data['citation'] = Citation.objects.get(pk=citation_id)
+        else:
+            self.cleaned_data['citation'] = None
 
 class ISODateValueForm(forms.ModelForm):
     value = forms.CharField()
