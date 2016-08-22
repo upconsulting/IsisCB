@@ -124,7 +124,7 @@
               </strong>
 
               <p>
-                <span class="text-success">{{ instance.get_type_controlled_display }}</span>
+                <span id="citation_type_full" data-code-type="{{ instance.type_controlled }}" class="text-success">{{ instance.get_type_controlled_display }}</span>
                 <br>
                 <em>{{ instance.title }}</em>
                 <br>
@@ -312,8 +312,17 @@ $(document).ready(function() {
       var selected_type = $('#authority_type_full').attr('data-type-code');
       var selected_type_full = $("#authority_type_full").text();
 
-      if (!accepted_types.includes(selected_type)) {
+      if (accepted_types != undefined && !accepted_types.includes(selected_type)) {
         $('#modal_text').text("You selected '" + acrel_type_full + "' as relationship type but the authority you chose is of type '" + selected_type_full + "'. Are you sure you want to save?");
+        $('#save_confirm_modal').modal('show');
+        return;
+      }
+
+      var accepted_citation_types = possible_citation_types[acrel_type];
+      var selected_citation_type = $("#citation_type_full").attr("data-type-code");
+      var selected_citation_type_full = $("#citation_type_full").text();
+      if (accepted_citation_types != undefined && !accepted_citation_types.includes(selected_citation_type)) {
+        $('#modal_text').text("You selected '" + acrel_type_full + "' as relationship type but the citation of this ACRelation is of type '" + selected_citation_type_full + "'. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
