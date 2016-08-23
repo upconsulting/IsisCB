@@ -703,6 +703,10 @@ def process_authorities(paper, instance):
                 )
                 draftACRelations.append(relation)
         else:
+            if type(field_value) is tuple:
+                if len([v for v in field_value if v]) == 1:
+                    field_value = field_value[0]
+            print authority_type, acrelation_type, field, relation_model, relation_field, field_value
             entity = DraftAuthority(
                 name = field_value.title(),
                 type_controlled = authority_type,
