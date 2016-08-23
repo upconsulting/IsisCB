@@ -133,6 +133,7 @@ class ACRelationForm(forms.ModelForm):
         else:
             self.cleaned_data['citation'] = None
 
+
 class ISODateValueForm(forms.ModelForm):
     value = forms.CharField()
 
@@ -573,3 +574,18 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
     form_class_attrs['queryset'] = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
                                                                   widget=forms.widgets.MultipleHiddenInput())
     return type(form)('BulkChangeForm', (form,), form_class_attrs)
+
+
+class CitationCollectionForm(forms.ModelForm):
+    citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
+                                               widget=forms.widgets.MultipleHiddenInput(),
+                                               required=False)
+
+    class Meta:
+        model = CitationCollection
+        exclude = ('created', 'createdBy')
+
+
+class SelectCitationCollectionForm(forms.Form):
+    collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
+    citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(), widget=forms.widgets.MultipleHiddenInput())

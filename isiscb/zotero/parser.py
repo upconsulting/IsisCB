@@ -614,6 +614,7 @@ def process_authorities(paper, instance):
 
     draftAuthorities = []
     draftACRelations = []
+    relationsSeen = set()    # So that we don't create duplicates.
     for authority_type, acrelation_type, field, relation_model, relation_field in authority_fields:
         if not hasattr(paper, field):
             continue
@@ -628,8 +629,12 @@ def process_authorities(paper, instance):
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
             for last, first in field_value:
+                entity_name = ('%s %s' % (first, last)).title()
+                if (acrelation_type, entity_name) in relationsSeen:
+                    continue
+
                 entity = DraftAuthority(
-                    name = ('%s %s' % (first, last)).title(),
+                    name = entity_name,
                     name_last = last.title(),
                     name_first = first.title(),
                     type_controlled = authority_type,
@@ -644,6 +649,7 @@ def process_authorities(paper, instance):
                     part_of = instance,
                 )
                 draftACRelations.append(relation)
+                relationsSeen.add((acrelation_type, entity_name))
 
         elif type(field_value) is list and len(field_value) > 0 and type(field_value[0]) is tuple:
             authority_id = None
@@ -680,10 +686,14 @@ def process_authorities(paper, instance):
                             #  these should be linked as categories.
                             acrelation_type = ACRelation.CATEGORY
 
+                entity_name = getattr(authority, 'name', value)
+                if (acrelation_type, entity_name) in relationsSeen:
+                    continue
+
                 # Use the Authority's name, if available. Otherwise just use
                 #  whatever we found in Zotero.
                 entity = DraftAuthority.objects.create(
-                    name=getattr(authority, 'name', value),
+                    name=entity_name,
                     type_controlled=authority_type,
                     part_of=instance,
                     processed=True if authority else False
@@ -702,7 +712,14 @@ def process_authorities(paper, instance):
                     part_of = instance,
                 )
                 draftACRelations.append(relation)
+                relationsSeen.add((acrelation_type, entity_name))
         else:
+            if type(field_value) is tuple:
+                if len([v for v in field_value if v]) == 1:
+                    field_value = field_value[0]
+            if (acrelation_type, field_value.title()) in relationsSeen:
+                continue
+
             entity = DraftAuthority(
                 name = field_value.title(),
                 type_controlled = authority_type,
@@ -717,6 +734,8 @@ def process_authorities(paper, instance):
                 part_of = instance,
             )
             draftACRelations.append(relation)
+            relationsSeen.add((acrelation_type, field_value.title()))
+
     return draftAuthorities, draftACRelations
 
 

@@ -17,6 +17,7 @@ from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
+from isisdata.utils import strip_punctuation
 from curation.filters import *
 from curation.forms import *
 from curation.contrib.views import check_rules
@@ -982,7 +983,9 @@ def citations(request):
     filter_params = request.GET
     ids = None
     if request.method == 'POST':
-        ids = [i.strip() for i in request.POST.get('ids').split(',')]
+        ids_raw = request.POST.get('ids')
+        if ids_raw is not None:
+            ids = [i.strip() for i in ids_raw.split(',')]
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -1169,7 +1172,7 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
 
-    query_parts = q.split()
+    query_parts = strip_punctuation(q).split()
     for part in query_parts:
         queryset = queryset.filter(name_for_sort__icontains=part)
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
@@ -1642,4 +1645,61 @@ def bulk_action(request):
     context.update({
         'form': form,
     })
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def create_citation_collection(request):
+    template = loader.get_template('curation/citation_collection_create.html')
+    context = RequestContext(request, {})
+
+    if request.method == 'POST':
+        pks = request.POST.getlist('queryset', request.POST.getlist('citations'))
+        queryset = Citation.objects.filter(pk__in=pks)
+        if request.GET.get('confirmed', False):
+            form = CitationCollectionForm(request.POST)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.citations.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('citation_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = CitationCollectionForm({'citations': queryset})
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return HttpResponse(template.render(context))
+
+
+@staff_member_required
+def add_citation_collection(request):
+    template = loader.get_template('curation/citation_collection_add.html')
+    context = RequestContext(request, {})
+
+    if request.method == 'POST':
+        pks = request.POST.getlist('queryset', request.POST.getlist('citations'))
+        queryset = Citation.objects.filter(pk__in=pks)
+
+        form = SelectCitationCollectionForm(request.POST)
+        if form.is_valid():
+            collection = form.cleaned_data['collection']
+        # if collection:
+            collection.citations.add(*queryset)
+
+            # TODO: add filter paramter to select collection.
+            return HttpResponseRedirect(reverse('citation_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectCitationCollectionForm({'citations': queryset})
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
     return HttpResponse(template.render(context))
