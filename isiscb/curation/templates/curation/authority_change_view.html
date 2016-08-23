@@ -209,14 +209,26 @@
 $('#id_language').multiSelect()
 
 $(document).ready(function() {
+    var lastSearch = $.now();
+    var waiting = false;
+
     var authority_name = "{% if instance.redirect_to %}{{ instance.redirect_to.name }}{% endif %}";
     if (authority_name.length > 0) {
         $('#authority-search').val(authority_name);
     }
     $('#authority-search').on('keyup', function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+        lastSearch = $.now();
+        waiting = true;
+        
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
+                waiting = false;
+
                 $('#results-container').empty();
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result';

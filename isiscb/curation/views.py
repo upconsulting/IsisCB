@@ -17,6 +17,7 @@ from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
+from isisdata.utils import strip_punctuation
 from curation.filters import *
 from curation.forms import *
 from curation.contrib.views import check_rules
@@ -1169,7 +1170,7 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
 
-    query_parts = q.split()
+    query_parts = strip_punctuation(q).split()
     for part in query_parts:
         queryset = queryset.filter(name_for_sort__icontains=part)
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)

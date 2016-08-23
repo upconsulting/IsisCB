@@ -269,10 +269,20 @@ var addLanguage = function() {
     language_creation_container.append('<ul class="list-group" id="create-language-results-container"></ul>');
     language_creation_container.css("display", "block");
 
+    var lastSearch = $.now();
+    var waiting = false;
+
     $('#create-language-input').on('keyup', function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_language_search" %}?q=" + query, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
+                waiting = false;
+                
                 var results_container = $('#create-language-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {

@@ -140,11 +140,9 @@ $('#id_language').multiSelect()
 
 $('#id_attribute-type_controlled').change(function() {
     var value = $(this).val();
-    console.log(value);
     var container = $('#value_form_container');
     container.empty();
     var form = $('#form_for_' + value).clone();
-    console.log(form);
     container.append(form);
 });
 </script>
