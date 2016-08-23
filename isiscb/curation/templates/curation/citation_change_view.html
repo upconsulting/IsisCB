@@ -74,8 +74,8 @@ var toggleTab = function(name) {
       <a href="{% url 'curate_citation' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
       {% endif %}
       &nbsp; &nbsp; &nbsp;
-      <a href="{% url 'citation_list' %}?{{ request_params }}"><i class="fa fa-reply" aria-hidden="true"></i>
 
+      <a href="{% url 'citation_list' %}?page={{request_params.page}}"><i class="fa fa-reply" aria-hidden="true"></i>
 Back to List </a>
       &nbsp; &nbsp; &nbsp;
       {% if next %}
@@ -259,6 +259,7 @@ var delete_language = function() {
 
 
 <script>
+
 var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {
@@ -269,10 +270,20 @@ var addLanguage = function() {
     language_creation_container.append('<ul class="list-group" id="create-language-results-container"></ul>');
     language_creation_container.css("display", "block");
 
+    var lastSearch = $.now();
+    var waiting = false;
+
     $('#create-language-input').on('keyup', function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_language_search" %}?q=" + query, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
+                waiting = false;
+                
                 var results_container = $('#create-language-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {

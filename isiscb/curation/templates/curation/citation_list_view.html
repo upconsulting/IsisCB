@@ -5,13 +5,28 @@
 {% load permission_tags %}
 
 {% block object_list %}
+<script>
+$('body').ready(function() {
+    var form = $('#bulk-form');
+    $('#collection-create').click(function() {
+        form.attr('action', '{% url "create-citation-collection" %}');
+        form.submit();
+    });
+    $('#collection-add').click(function() {
+        form.attr('action', '{% url "add-citation-collection" %}');
+        form.submit();
+    });
+});
+</script>
 
-
-<form action="{% url "citation-bulk-action" %}" method="POST">
+<form action="{% url "citation-bulk-action" %}" method="POST" id="bulk-form">
     {% csrf_token %}
     <a class="btn btn-primary btn-sm" href="{% url 'create_citation' %}">Create new citation record</a>
     <input class="btn btn-success btn-sm" type="submit" value="Bulk change" />
     <a class="btn btn-primary btn-sm" href="{% url 'citation-bulk-select' %}">Bulk select</a>
+    <a class="btn btn-primary btn-sm" href="#" id="collection-create">Create new collection</a>
+    <a class="btn btn-primary btn-sm" href="#" id="collection-add">Add to existing collection</a>
+
     <table class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
@@ -103,7 +118,8 @@
 {% endblock %}
 
 {% block filter_form %}
-<form class="form clearfix">
+<form action="{% url 'citation_list' %}" class="form clearfix" method="POST">
+  {% csrf_token %}
     <div class="row">
         <div class="col-sm-4">
             {% for error in objects.form.id.errors %}
@@ -244,6 +260,13 @@
             </div>
         </div>
         <div class="col-sm-4">
+            {% for error in objects.form.in_collections.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>In collection(s)</label>
+                {{ objects.form.in_collections|addcss:"form-control" }}
+            </div>
             <div class="btn-group pull-right">
                 <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
                 <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
