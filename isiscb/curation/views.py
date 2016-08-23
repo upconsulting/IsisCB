@@ -1003,9 +1003,8 @@ def citations(request):
 
     filtered_objects = CitationFilter(filter_params, queryset=queryset)
 
-
-    filters_active = request.GET.get('filters', False)
-    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+    filters_active = filter_params
+    filters_active = len([v for k, v in filter_params.iteritems() if v != None and len(v) > 0 and k != 'page']) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
