@@ -321,10 +321,15 @@ $(document).ready(function() {
         search_input.trigger('keyup');
     }
 
+    var lastSearch = $.now();
+    var waiting = false;
+
     /**
       * Performs a citation search based on the content of the search input.
       */
     var triggerSearch = function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+        
         var search_input = $(this);
         var query = search_input.val();
         console.log('query', query);
@@ -333,8 +338,12 @@ $(document).ready(function() {
         var id_result_container = $($(this).attr('selected-result-target'));
 
         $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
-                console.log('success', results_container);
+                waiting = false;
+
                 results_container.empty();
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result';

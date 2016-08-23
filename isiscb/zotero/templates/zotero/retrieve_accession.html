@@ -255,6 +255,8 @@ $('.draftauthority').click(function() {
 });
 
 $(document).ready(function() {
+    var lastSearch = $.now();
+    var waiting = false;
     bindModal();
 
     $('#authority-search-filter-type').change(function(e) {
@@ -262,6 +264,10 @@ $(document).ready(function() {
     });
 
     $('#authority-search').on('keyup', function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+        lastSearch = $.now();
+        waiting = true;
+
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
         var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?max=20&q=" + query;
@@ -270,7 +276,11 @@ $(document).ready(function() {
         }
 
         $.ajax(search_endpoint, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
+                waiting = false;
                 $('#results-container').empty();
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result">';
