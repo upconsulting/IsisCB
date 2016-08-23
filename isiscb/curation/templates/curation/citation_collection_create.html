@@ -1,0 +1,34 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load addcss %}
+
+{% block content %}
+<div class="h2">Create a new citation collection</div>
+
+<p class="text-warning">
+    This will create a new citation collection with {{ queryset.count }} citations.
+    You can add more citations later.
+</p>
+
+<form class="form" action="?confirmed=true" method="POST">
+    {% csrf_token %}
+
+    {% for field in form %}
+    {% if field.label == 'Citations' %}
+    {{ field }}
+    {% else %}
+
+    {% for error in field.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field|addcss:"form-control" }}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div class="text-center">
+        <input type="submit" class="btn btn-success" value="Create" />
+    </div>
+</form>
+{% endblock %}

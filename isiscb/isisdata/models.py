@@ -1769,6 +1769,22 @@ class Annotation(models.Model):
         return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
 
 
+class CitationCollection(models.Model):
+    """
+    An arbitrary group of :class:`.Citation` instances.
+    """
+
+    name = models.CharField(max_length=255, blank=True, null=True)
+    citations = models.ManyToManyField('Citation', related_name='in_collections')
+    createdBy = models.ForeignKey(User, related_name='citation_collections')
+    created = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.name, self.createdBy.username)
+
+
+
 def linkify(s, *args, **kwargs):
     def shorten_display(attrs, new=False):
         """
@@ -1880,7 +1896,9 @@ class UserProfile(models.Model):
     A user can 'claim' an Authority record, asserting that the record refers to
     theirself."""))
 
+
 # ---------------------- Curation models ----------------------------
+
 
 class IsisCBRole(models.Model):
     """
@@ -1910,6 +1928,7 @@ class IsisCBRole(models.Model):
     @property
     def zotero_rules(self):
         return ZoteroRule.objects.filter(role=self.pk)
+
 
 class AccessRule(models.Model):
     """
@@ -1982,6 +2001,7 @@ class UserModuleRule(AccessRule):
         (UPDATE, 'Update'),
     )
     module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
 
 class ZoteroRule(AccessRule):
     """
