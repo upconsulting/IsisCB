@@ -118,7 +118,8 @@ $('body').ready(function() {
 {% endblock %}
 
 {% block filter_form %}
-<form class="form clearfix">
+<form action="{% url 'citation_list' %}" class="form clearfix" method="POST">
+  {% csrf_token %}
     <div class="row">
         <div class="col-sm-4">
             {% for error in objects.form.id.errors %}
