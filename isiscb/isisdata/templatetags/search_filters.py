@@ -10,7 +10,7 @@ register = template.Library()
 
 @register.filter
 def get_nr_of_citations(authority):
-    return ACRelation.objects.filter(authority=authority, citation__public=True).distinct('citation_id').count()
+    return ACRelation.objects.filter(authority=authority, citation__public=True, public=True).distinct('citation_id').count()
 
 
 @register.filter

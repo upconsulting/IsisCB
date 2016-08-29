@@ -610,7 +610,7 @@ def authority(request, authority_id):
     acrelation_qs = ACRelation.objects.filter(public=True)
     related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
                                              .order_by('-citation__publication_date')[:show_nr]
-    related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'])\
+    related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
                                                   .distinct('citation_id')\
                                                   .count()
 
