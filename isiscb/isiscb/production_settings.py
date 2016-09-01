@@ -205,7 +205,6 @@ STATICFILES_STORAGE = 'custom_storages.StaticStorage'
 STATIC_URL = "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 STATIC_URL ='/static/'
 
-# STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 
