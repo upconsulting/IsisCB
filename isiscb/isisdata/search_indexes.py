@@ -246,7 +246,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if a['acrelation__type_controlled'] == ACRelation.SUBJECT:
                 multivalue_data['subjects'].append(name)
                 multivalue_data['subject_ids'].append(ident)
-                
+
                 if a['acrelation__authority__type_controlled'] == Authority.TIME_PERIOD:
                     multivalue_data['time_periods'].append(name)
                     multivalue_data['time_period_ids'].append(ident)
@@ -466,7 +466,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
 
 class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
-    text = indexes.CharField(document=True, use_template=True)
+    text = indexes.CharField(document=True)
     name = indexes.CharField(model_attr='name', indexed=False)
     description = indexes.CharField(model_attr='description', null=True, indexed=False)
     attributes = indexes.MultiValueField(indexed=False)
@@ -477,6 +477,14 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def get_model(self):
         return Authority
+
+    def prepare_text(self, obj):
+        document = u'\n'.join([
+            obj.normalized_name,
+            obj.normalized_description,
+        ] + [attr.value_freeform for attr in obj.attributes.all()])
+        print document
+        return document
 
     def load_all_queryset(self):
         """
