@@ -183,6 +183,10 @@ $('.draftauthority').click(function() {
     bindCreateNew();
     bindSkip();
 
+    // Reset search.
+    $('#results-container').empty();
+    $('#authority-search').val('');
+
     $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {
             elem.find('.suggestion-status').spin(opts);
