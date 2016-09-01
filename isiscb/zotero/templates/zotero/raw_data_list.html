@@ -44,7 +44,7 @@
                     {% if relation.authority.processed %}
                     <span style="font-size: 8pt; color: green;" class="glyphicon glyphicon-ok"></span>&nbsp;
                     {% endif %}
-                    {% if relation.authority.processed %}
+                    {% if relation.authority.processed and relation.authority.resolutions.count > 0 %}
                     <a href="{% url "curate_authority" relation.authority.resolutions.first.to_instance_id %}">
                     {% endif %}
                     {{ relation.authority.name }}
