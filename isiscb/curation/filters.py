@@ -39,6 +39,7 @@ def filter_in_collections(queryset, value):
 
     return queryset.filter(q)
 
+
 class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
 

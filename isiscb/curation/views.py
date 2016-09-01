@@ -4,7 +4,7 @@ from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
 
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse #, HttpResponseForbidden, Http404, , JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.core.cache import caches
@@ -972,23 +972,57 @@ def _get_corrected_index(prev_index, index):
             return None
     return index
 
+
+class QueryDictWrapper(object):
+    def __init__(self, querydict, extra={}):
+        self.extra = {}
+        self.extra.update(extra)
+        self.qd = querydict
+
+    def __getitem__(self, key):
+        if key in self.qd:
+            return self.qd.get(key)
+        return self.extra.get(key)
+
+    def iteritems(self):
+        from itertools import chain
+        return chain(self.qd.iteritems(), self.extra.iteritems())
+
+    def get(self, key, default=None):
+        value = self.__getitem__(key)
+        if not value:
+            return default
+        return value
+
+    def getlist(self, key):
+        if key in self.qd:
+            return self.qd.getlist(key)
+        return [self.extra.get[key]]
+
+    def __setitem__(self, key, value):
+        if key in qd:
+            self.qd[key] = value    # this will throw an exception
+        self.extra[key] = value
+
+
 @staff_member_required
 def citations(request):
-    additional_params_names = ["page"]
+    additional_params_names = ["page", "zotero_accession"]
     all_params = {}
 
     user_cache = caches['default']
     if request.method == 'POST':
-        filter_params = request.POST
+        filter_params = QueryDict(request.POST.urlencode(), mutable=True)
     elif request.method == 'GET':
         filter_params = user_cache.get('citation_filters', {})
         for key in additional_params_names:
             all_params[key] = request.GET.get(key, '')
 
+    if 'zotero_accession' in request.GET:
+        filter_params['zotero_accession'] = request.GET.get('zotero_accession')
     #ids = None
     #if request.method == 'POST':
     #    ids = [i.strip() for i in request.POST.get('ids').split(',')]
-
 
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -998,8 +1032,6 @@ def citations(request):
     template = loader.get_template('curation/citation_list_view.html')
 
     queryset = filter_queryset(request.user, Citation.objects.all())
-    #if ids is not None:
-    #    queryset = queryset.filter(pk__in=ids)
 
     filtered_objects = CitationFilter(filter_params, queryset=queryset)
 
