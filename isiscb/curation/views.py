@@ -876,10 +876,11 @@ def citation(request, citation_id):
 
     return HttpResponse(template.render(context))
 
+
 def _build_next_and_prev(context, current_obj, objects_page, paginator, page, cache_prev_index_key, cache_page_key, cache_request_param_key):
     if objects_page:
         user_cache = caches['default']
-        request_params = user_cache.get(cache_request_param_key, "")
+        request_params = user_cache.get(cache_request_param_key, {})
 
         result_list = list(objects_page.object_list)
         prev_index = user_cache.get(cache_prev_index_key, None)
