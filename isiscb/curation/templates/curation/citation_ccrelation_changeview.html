@@ -415,32 +415,32 @@ $(document).ready(function() {
       }
 
       if (rel_type == 'IC' && subject_type_id != 'BO') {
-        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your subject is not a book.");
+        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your subject is not a book. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
       if (rel_type == 'IC' && object_type_id != 'CH') {
-        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your object is not a chapter.");
+        $('#modal_text').text("You selected 'Includes Chapter' as type for this CCRelation, but your object is not a chapter. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
       if (rel_type == 'ISA' && subject_type_id != 'AR') {
-        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your subject is not an article.");
+        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your subject is not an article. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
       if (rel_type == 'ISA' && object_type_id != 'AR') {
-        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your object is not an article.");
+        $('#modal_text').text("You selected 'Includes Series Article' as type for this CCRelation, but your object is not an article. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
       if (rel_type == 'RB' && subject_type_id != 'BO' && subject_type_id != 'WE' && subject_type_id != 'TH') {
-        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your subject is not a book, website, or thesis.");
+        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your subject is not a book, website, or thesis. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }
       if (rel_type == 'RB' && object_type_id != 'RE') {
-        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your object is not a review.");
+        $('#modal_text').text("You selected 'Is Reviewed By' as type for this CCRelation, but your object is not a review. Are you sure you want to save?");
         $('#save_confirm_modal').modal('show');
         return;
       }

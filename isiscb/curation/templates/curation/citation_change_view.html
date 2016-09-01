@@ -31,7 +31,7 @@ var toggleTab = function(name) {
 </div>
 {% endif %}
 
-<form class="form" action="." method="POST">
+<form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_citation_header.html" %}
@@ -41,7 +41,7 @@ var toggleTab = function(name) {
       <div class="row">
           <div class="col-md-12">
             <div class="form-group form-inline">
-              <strong>
+              <strong id="citation_type" data-type="{{instance.type_controlled}}">
  {{ instance.get_type_controlled_display }}</strong>:
               <strong class="text-warning">{{ instance.id }}</strong>
               &nbsp;
@@ -230,10 +230,6 @@ var delete_language = function() {
         });
     }
 }
-
-$('.citation_submit').click(function() {
-  
-});
 </script>
 
 <!-- Modal -->
@@ -280,6 +276,7 @@ $('.citation_submit').click(function() {
 </div><!-- /.modal -->
 
 <script>
+//# sourceURL=script.js
 var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {
@@ -349,6 +346,80 @@ var addLanguage = function() {
         });
     });
 }
+
+$('.citation_submit').click(function() {
+
+  var citation_type = $('#citation_type').attr("data-type");
+
+  var warnings = [];
+
+  if ($("#author_editors") == undefined || $("#author_editors").text() == '') {
+    warnings.push("You did not add an author or editor.");
+  }
+
+  if ($("#id_title").val() == '' && citation_type != "RE") {
+    warnings.push("You did not enter a title.");
+  }
+
+  var categoryList = $("#category-list-group li");
+  var subjectList = $("#subject-list-group li");
+  if (categoryList.length <= 1 && subjectList.length <= 1) {
+    warnings.push("You did not add any categories or subjects.");
+  }
+
+  if ($("#publication_date") == undefined || $("#publication_date").text() == '' || $("#publication_date").text() == 'missing') {
+    warnings.push("You did not add a publication date.");
+  }
+
+  if ($("#id_belongs_to").val() == '') {
+    warnings.push("You did not specify a dataset.");
+  }
+
+  var languageList = $("#language-list-group li");
+  if (languageList.length <= 1) {
+    warnings.push("You did not select a language.");
+  }
+
+  if (citation_type == "RE" || citation_type == "AR" || citation_type == "ES") {
+    if ($("#journal") == undefined || $("#journal").text() == '') {
+      warnings.push("You did not specify a periodical.");
+    }
+
+    if ($("#id_partdetails-volume_free_text").val() == "") {
+      warnings.push("You did not specify a volumne.");
+    }
+
+    if ($("#id_partdetails-pages_free_text").val() == "") {
+      warnings.push("You did not specify a page range.");
+    }
+
+    if ($("#doi") == undefined || $("#doi").text() == "") {
+      warnings.push("You did not specify a DOI.");
+    }
+  }
+
+  // TODO: still missing review, book, thesis, chapter
+
+  if (warnings.length > 0) {
+    var start = "<p>The following issues were found. Are you sure you want to save this citation?</p>";
+    var list = "<ul>";
+    for (var warn in warnings) {
+      list = list.concat("<li>" + warnings[warn] + "</li>");
+    }
+    list = list.concat("</ul>");
+
+    $('#modal_text').html(start + list);
+
+    $('#save_confirm_modal').modal('show');
+    return;
+  }
+
+  $('#citation_form').submit();
+});
+
+$('#save_confirmed').click(function() {
+  $('#citation_form').submit();
+});
 
 </script>
 

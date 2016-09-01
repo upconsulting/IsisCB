@@ -20,11 +20,10 @@
         <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
-            {{ authors_editors }}
+            <span id="author_editors">{{ authors_editors }}</span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
-
         </a>
       </small>
 </div>
@@ -39,7 +38,7 @@
         <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
-            {{ pubdate }}
+            <span id="publication_date">{{ pubdate }}</a>
             {% else %}
             <em>Add publication date</em>
             {% endif %}
