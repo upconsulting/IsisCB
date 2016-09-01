@@ -36,11 +36,11 @@
                     data-id="{{ authority.id }}"
                     data-name="{{ authority.name }}">
                     <div class="h5">
-                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> {{ authority.name }}
+                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
                     </div>
 
-                    <dl class="dl-horizontal">
+                    <dl class="dl">
                         <dt>Title</dt>
                         <dd>{{ acrelation.citation.title }}</dd>
                         <dt>Abstract</dt>
@@ -183,6 +183,10 @@ $('.draftauthority').click(function() {
     bindCreateNew();
     bindSkip();
 
+    // Reset search.
+    $('#results-container').empty();
+    $('#authority-search').val('');
+
     $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {
             elem.find('.suggestion-status').spin(opts);
@@ -192,58 +196,61 @@ $('.draftauthority').click(function() {
 
             var target = $('.suggestion-results-list');
             target.empty();
-
-            response.data.forEach(function(suggestion) {
-                var suggestElem = `
-                    <li class="list-group-item">
-                        <div class="row">
-                            <div class="col-xs-2">
-                                <span class="button-group button-group-md">
-                                    <a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion"
-                                        id="authority-suggestion-` + suggestion.id + `"
-                                        data-suggestion="` + suggestion.id + `"
-                                        data-authority="` + draftauthority_id + `"
-                                        data-name="` + suggestion.name + `">
-                                    </a>
-                                    <a class="glyphicon glyphicon-pencil btn btn-md"
-                                        href="/curation/authority/` + suggestion.id + `/"
-                                        target="_blank">
-                                    </a>
-                                </span>
-                            </div>
-                            <div class="col-xs-10">
-                                <div class="h5">` + suggestion.name + ` (` + suggestion.id + `)
-                                    <div class="pull-right col-sm-3">
-                                        <div class="progress" style="height: 14px;">
-                                            <div class="progress-bar"
-                                                role="progressbar"
-                                                aria-valuenow="`+ suggestion.match +`"
-                                                aria-valuemin="0"
-                                                aria-valuemax="1"
-                                                style="width: `+ suggestion.match*100 +`%;">
-                                                    <span class="sr-only">`+ suggestion.match +`</span>
+            if (response.data.length == 0) {
+                target.append('<div class="alert alert-warning">No matches found</div>');
+            } else {
+                response.data.forEach(function(suggestion) {
+                    var suggestElem = `
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <span class="button-group button-group-md">
+                                        <a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion"
+                                            id="authority-suggestion-` + suggestion.id + `"
+                                            data-suggestion="` + suggestion.id + `"
+                                            data-authority="` + draftauthority_id + `"
+                                            data-name="` + suggestion.name + `">
+                                        </a>
+                                        <a class="glyphicon glyphicon-pencil btn btn-md"
+                                            href="/curation/authority/` + suggestion.id + `/"
+                                            target="_blank">
+                                        </a>
+                                    </span>
+                                </div>
+                                <div class="col-xs-10">
+                                    <div class="h5"><a href="/isis/authority/`+suggestion.id+`/" target="_blank">` + suggestion.name + ` (` + suggestion.id + `)</a>
+                                        <div class="pull-right col-sm-3">
+                                            <div class="progress" style="height: 14px;">
+                                                <div class="progress-bar"
+                                                    role="progressbar"
+                                                    aria-valuenow="`+ suggestion.match +`"
+                                                    aria-valuemin="0"
+                                                    aria-valuemax="1"
+                                                    style="width: `+ suggestion.match*100 +`%;">
+                                                        <span class="sr-only">`+ suggestion.match +`</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <span class="label label-danger"
+                                        style="margin-left: 5px;">
+                                        ` + suggestion.type_controlled + `
+                                    </span>
+                                    <span class="suggestion-reasons">
+                    `;
+                    suggestion.reasons.forEach(function(reason) {
+                        suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
+                    });
+                    suggestElem += `
+                                    </span>
                                 </div>
-                                <span class="label label-danger"
-                                    style="margin-left: 5px;">
-                                    ` + suggestion.type_controlled + `
-                                </span>
-                                <span class="suggestion-reasons">
-                `;
-                suggestion.reasons.forEach(function(reason) {
-                    suggestElem += '<span class="label label-success">' + reason[0] + '|' + reason[1] + '</span>';
-                });
-                suggestElem += `
-                                </span>
                             </div>
-                        </div>
-                    </li>
-                `;
+                        </li>
+                    `;
 
-                target.append(suggestElem);
-            });
+                    target.append(suggestElem);
+                });
+            }
 
             $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
                 $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
@@ -288,7 +295,7 @@ $(document).ready(function() {
                     choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation resolve-with-search" data-id="' + r.id + '" data-name="' + r.name + '" data-suggestion="' + r.id + '" data-authority="' + selected_authority + '" data-name="' + r.name + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong><a href="/isis/authority/'+r.id+'/" target="_blank">' + r.name + '</a></strong> <span class="label label-default">' + r.datestring + '</span>';
                     if (r.description != null) {
                         choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                     }

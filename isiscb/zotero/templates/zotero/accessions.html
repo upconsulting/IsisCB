@@ -53,11 +53,13 @@
             <td class="text-center">{% if object.processed %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
             <td>
                 <div class="btn-group btn-group-xs">
-                    <a href="{% url "ingest_accession" object.id %}"
-                        class="btn btn-xs btn-success">Ingest</a>
-
                     <a href="{% url "retrieve_accession" object.id %}"
                         class="btn btn-xs btn-primary">Resolve</a>
+                    <a href="{% url "ingest_accession" object.id %}"
+                        class="btn btn-xs btn-success">Ingest</a>
+                    <a href="{% url "citation_list" %}?zotero_accession={{ object.id}}"
+                        class="btn btn-xs btn-warning">View</a>
+
                 </div>
             </td>
         </tr>

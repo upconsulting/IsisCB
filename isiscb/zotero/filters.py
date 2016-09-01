@@ -1,7 +1,7 @@
 import django_filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from zotero.models import *
 from isisdata.helper_methods import strip_punctuation
@@ -28,6 +28,7 @@ filters.LOOKUP_TYPES = [
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
+    imported_by = django_filters.ModelChoiceFilter(name='imported_by', queryset=User.objects.annotate(num_accessions=Count('importaccession')).filter(num_accessions__gt=0))
 
     class Meta:
         model = ImportAccession

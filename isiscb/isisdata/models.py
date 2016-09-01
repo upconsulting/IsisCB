@@ -1005,14 +1005,19 @@ class Authority(ReferencedEntity, CuratedMixin):
     controlled type vocabulary.
     """))
 
-    SWP = 'SWP'    # TODO: this should probably change, but we need to do a
-    NEU = 'NEU'    #  data migration to do this propertly. For now I have
-    MW = 'MW'      #  changed the disply value (below). -EP
+
+    SPWT = 'SPWT'
+    SPWC = 'SPWC'
+    NEU = 'NEU'
+    MW = 'MW'
     SHOT = 'SHOT'
     SEARCH = 'SAC'
     PROPER_NAME = 'PN'
+    GUE = 'GUE'
     CLASS_SYSTEM_CHOICES = (
-        (SWP, 'SPW'),
+        (SPWT, 'Weldon Thesaurus Terms (2002-present)'),
+        (SPWC, 'Weldon Classification System (2002-present)'),
+        (GUE, 'Guerlac Committee Classification System (1953-2001)'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
@@ -1020,7 +1025,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (PROPER_NAME, 'Proper name')
     )
     classification_system = models.CharField(max_length=4, blank=True,
-                                             null=True, default=SWP,
+                                             null=True, default=SPWC,
                                              choices=CLASS_SYSTEM_CHOICES,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
