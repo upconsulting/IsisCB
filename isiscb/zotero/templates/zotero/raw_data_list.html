@@ -11,12 +11,13 @@
 
     {% block action %}
     <div class="panel-body text-center">
+        <a href="{% url "retrieve_accession" accession.id %}"
+            class="btn btn-primary">Resolve Authority Records</a>
         <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
             class="btn btn-success">
             Ingest <strong>{{ accession.citations_ready.count }}</strong> citations
         </a>
-        <a href="{% url "retrieve_accession" accession.id %}"
-            class="btn btn-primary">Resolve Authority Records</a>
+
 
     </div>
     {% endblock %}
@@ -43,7 +44,7 @@
                     {% if relation.authority.processed %}
                     <span style="font-size: 8pt; color: green;" class="glyphicon glyphicon-ok"></span>&nbsp;
                     {% endif %}
-                    {% if relation.authority.processed %}
+                    {% if relation.authority.processed and relation.authority.resolutions.count > 0 %}
                     <a href="{% url "curate_authority" relation.authority.resolutions.first.to_instance_id %}">
                     {% endif %}
                     {{ relation.authority.name }}

@@ -149,6 +149,14 @@ Back to List </a>
                             {{ form.administrator_notes|addcss:"form-control" }}
                         </div>
 
+                        {% for error in form.record_history.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.record_history.label }}</label>
+                            {{ form.record_history|addcss:"form-control" }}
+                        </div>
+
                         {% for error in form.dataset.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
@@ -283,7 +291,7 @@ var addLanguage = function() {
             },
             success: function(result) {
                 waiting = false;
-                
+
                 var results_container = $('#create-language-results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {
