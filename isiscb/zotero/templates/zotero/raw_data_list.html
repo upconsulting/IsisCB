@@ -11,12 +11,13 @@
 
     {% block action %}
     <div class="panel-body text-center">
+        <a href="{% url "retrieve_accession" accession.id %}"
+            class="btn btn-primary">Resolve Authority Records</a>
         <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
             class="btn btn-success">
             Ingest <strong>{{ accession.citations_ready.count }}</strong> citations
         </a>
-        <a href="{% url "retrieve_accession" accession.id %}"
-            class="btn btn-primary">Resolve Authority Records</a>
+
 
     </div>
     {% endblock %}
