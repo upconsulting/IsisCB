@@ -244,7 +244,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
             multivalue_data['authorities'].append(name)
             if a['acrelation__type_controlled'] == ACRelation.SUBJECT:
-
+                multivalue_data['subjects'].append(name)
+                multivalue_data['subject_ids'].append(ident)
+                
                 if a['acrelation__authority__type_controlled'] == Authority.TIME_PERIOD:
                     multivalue_data['time_periods'].append(name)
                     multivalue_data['time_period_ids'].append(ident)
@@ -252,8 +254,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     multivalue_data['geographics'].append(name)
                     multivalue_data['geographic_ids'].append(ident)
                 else:
-                    multivalue_data['subjects'].append(name)
-                    multivalue_data['subject_ids'].append(ident)
+
 
                     if a['acrelation__authority__type_controlled'] == Authority.INSTITUTION:
                         multivalue_data['subject_institutions'].append(name)
