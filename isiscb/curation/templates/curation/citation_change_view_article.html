@@ -23,7 +23,7 @@
     <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
-            {{ authors_editors }}
+            <span id="author_editors">{{ authors_editors }}</span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
@@ -42,7 +42,7 @@
       <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
-            {{ pubdate }}
+            <span id="publication_date">{{ pubdate }}</span>
             {% else %}
             <em>Add publication date</em>
             {% endif %}
@@ -71,7 +71,7 @@
     <label>In:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if journal %}
-            {{ journal }}
+            <span id="journal">{{ journal }}</span>
             {% else %}
             <em>Add journal</em>
             {% endif %}
@@ -268,7 +268,7 @@
         {% if doi %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('linkeddata')">
-            {{ doi }}
+            <span id="doi">{{ doi }}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"
