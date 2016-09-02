@@ -115,7 +115,7 @@
         {% if publisher %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('acrelations')">
-            {{ publisher.name }}
+            <span id="publisher">{{ publisher.name }}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"
@@ -133,7 +133,7 @@
         {% if isbn %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('linkeddata')">
-            {{ isbn }}
+            <span id="isbn">{{ isbn }}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"

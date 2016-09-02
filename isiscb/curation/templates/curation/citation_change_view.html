@@ -416,7 +416,49 @@ $('.citation_submit').click(function() {
     }
   }
 
-  // TODO: still missing review, book, thesis, chapter
+  if (citation_type == "RE" || citation_type == "ES") {
+    var citationsBox = $("#ccrelations");
+    //TODO: this is really ugly and nees a better solution!
+    var bookLinks = citationsBox.find("span.label:contains('Book')");
+
+    if (bookLinks.length < 1) {
+      warnings.push("You did not add a CCRelation to a book.");
+    }
+  }
+
+  if (citation_type == "BO") {
+    if ($("#publisher") == undefined || $("#publisher").text() == '') {
+      warnings.push("You did not specify a publisher.");
+    }
+    if ($('#id_physical_details').val() == "") {
+      warnings.push("You did not enter any physical details.");
+    }
+    if ($("#isbn") == undefined || $("#isbn").text() == '') {
+      warnings.push("You did not add an ISBN number.");
+    }
+  }
+
+  if (citation_type == "TH") {
+    if ($('#id_physical_details').val() == "") {
+      warnings.push("You did not enter any physical details.");
+    }
+    if ($("#school") == undefined || $("#school").text() == '') {
+      warnings.push("You did not specify a school.");
+    }
+  }
+
+  if (citation_type == "CH") {
+    var citationsBox = $("#ccrelations");
+    //TODO: this is really ugly and nees a better solution!
+    var bookLinks = citationsBox.find("span.label:contains('Book')");
+    if (bookLinks.length < 1) {
+      warnings.push("You did not add a CCRelation to a book.");
+    }
+
+    if ($('#id_partdetails-pages_free_text').val() == "") {
+      warnings.push("You did not enter any page information.");
+    }
+  }
 
   if (warnings.length > 0) {
     var start = "<p>The following issues were found. Are you sure you want to save this citation?</p>";
