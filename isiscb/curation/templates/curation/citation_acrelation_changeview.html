@@ -147,7 +147,7 @@
 
 
                   <p>
-                    <span id="authority_type_full" {% if form.instance.authority %}data-type-code="{{ form.instance.authority.type_controlled }}"{% endif %}< class="text-success">{% if form.instance.authority %}{{ form.instance.authority.get_type_controlled_display }}{% endif %}</span>
+                    <span id="authority_type_full" {% if form.instance.authority %}data-type-code="{{ form.instance.authority.type_controlled }}"{% endif %} class="text-success">{% if form.instance.authority %}{{ form.instance.authority.get_type_controlled_display }}{% endif %}</span>
                     <br>
                     <span {% if form.instance.authority %}data-type="{{form.instance.authority.type_controlled}}"{% endif %} id="authority_name">{% if form.instance.authority %}{{ form.instance.authority.name }}{% endif %}</span>
                     <br>
@@ -232,7 +232,7 @@ $(document).ready(function() {
             },
             success: function(result) {
                 waiting = false;
-                
+
                 $('#results-container').empty();
                 result.results.forEach(function(r) {
                     var choice_elem = '<li class="list-group-item search-result';
