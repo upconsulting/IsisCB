@@ -269,10 +269,10 @@ class FMPDSOParser(object):
 
     mappings = {
         'classification_system': {
-            'WELDON THESAURUS TERMS (2002-PRESENT)': 'SWP',
-            'WELDON THESAURUS': 'SWP',
-            'WELDON CLASSIFICATION SYSTEM (2002-PRESENT)': 'SWP',
-            'SWP': 'SWP',
+            'WELDON THESAURUS TERMS (2002-PRESENT)': 'SPWT',
+            'WELDON THESAURUS': 'SPWT',
+            'WELDON CLASSIFICATION SYSTEM (2002-PRESENT)': 'SPWC',
+            'SWP': 'SPWC',
             'NEU': 'NEU',
             'MW': 'MW',
             'SHOT': 'SHOT',

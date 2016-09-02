@@ -30,10 +30,20 @@ class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilte
     pass
 
 
+def filter_in_collections(queryset, value):
+    if not value:
+        return queryset
+    q = Q()
+    for collection in value:
+        q |= Q(in_collections=collection)
+
+    return queryset.filter(q)
+
+
 class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
-    id = django_filters.CharFilter(name='id', lookup_type='exact')
+    id = django_filters.MethodFilter(name='id', lookup_type='exact')
     title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
     publication_date_from = django_filters.MethodFilter()
@@ -47,8 +57,8 @@ class CitationFilter(django_filters.FilterSet):
     subject = django_filters.MethodFilter()
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    in_collections = django_filters.ModelMultipleChoiceFilter(name='in_collections', queryset=CitationCollection.objects.all(), action=filter_in_collections)
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
-
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
 
@@ -58,7 +68,7 @@ class CitationFilter(django_filters.FilterSet):
             'id', 'title', 'abstract', 'description',
             'publication_date_from', 'publication_date_to',
             'author_or_editor', 'periodical', 'record_status',
-            'belongs_to', 'zotero_accession',
+            'belongs_to', 'zotero_accession', 'in_collections',
         ]
         order_by = [
             ('publication_date', 'Publication date (ascending)'),
@@ -74,6 +84,14 @@ class CitationFilter(django_filters.FilterSet):
     #         return queryset.order_by('%srelations_from__subject__title' % ('-' if value.startswith('-') else ''),
     #                                           '%srelations_to__subject__title' % ('-' if value.startswith('-') else '')).order_by(value)
     #     return queryset.order_by(value)
+
+    def filter_id(self, queryset, value):
+        if not value:
+            return queryset
+
+        ids = [i.strip() for i in value.split(',')]
+        queryset = queryset.filter(pk__in=ids)
+        return queryset
 
     def filter_title(self, queryset, value):
         if not value:

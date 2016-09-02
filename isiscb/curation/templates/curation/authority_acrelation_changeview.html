@@ -185,6 +185,9 @@ $('#id_language').multiSelect()
 <script>
 
 $(document).ready(function() {
+    var lastSearch = $.now();
+    var waiting = false;
+
     var citation_name = "{% if acrelation %}{{ acrelation.citation|get_citation_title|safe }}{% endif %}";
     var citation_id = "{% if acrelation %}{{ acrelation.citation.id }}{% endif %}";
 
@@ -197,9 +200,17 @@ $(document).ready(function() {
     }
 
     var triggerSearch = function(e) {
+        if ($.now() - lastSearch < 500 || waiting) return;
+        lastSearch = $.now();
+        waiting = true;
+
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+            failure: function(result) {
+                waiting = false;
+            },
             success: function(result) {
+                waiting = false;
                 var results_container = $('#results-container');
                 results_container.empty();
                 result.results.forEach(function(r) {

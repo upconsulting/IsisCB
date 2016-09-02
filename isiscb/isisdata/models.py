@@ -1005,14 +1005,19 @@ class Authority(ReferencedEntity, CuratedMixin):
     controlled type vocabulary.
     """))
 
-    SWP = 'SWP'    # TODO: this should probably change, but we need to do a
-    NEU = 'NEU'    #  data migration to do this propertly. For now I have
-    MW = 'MW'      #  changed the disply value (below). -EP
+
+    SPWT = 'SPWT'
+    SPWC = 'SPWC'
+    NEU = 'NEU'
+    MW = 'MW'
     SHOT = 'SHOT'
     SEARCH = 'SAC'
     PROPER_NAME = 'PN'
+    GUE = 'GUE'
     CLASS_SYSTEM_CHOICES = (
-        (SWP, 'SPW'),
+        (SPWT, 'Weldon Thesaurus Terms (2002-present)'),
+        (SPWC, 'Weldon Classification System (2002-present)'),
+        (GUE, 'Guerlac Committee Classification System (1953-2001)'),
         (NEU, 'Neu'),
         (MW, 'MW'),
         (SHOT, 'SHOT'),
@@ -1020,7 +1025,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (PROPER_NAME, 'Proper name')
     )
     classification_system = models.CharField(max_length=4, blank=True,
-                                             null=True, default=SWP,
+                                             null=True, default=SPWC,
                                              choices=CLASS_SYSTEM_CHOICES,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
@@ -1769,6 +1774,22 @@ class Annotation(models.Model):
         return u'{0} {1}'.format(self.created_by.username, self.created_on.strftime('on %d %b, %Y at %I:%M %p'))
 
 
+class CitationCollection(models.Model):
+    """
+    An arbitrary group of :class:`.Citation` instances.
+    """
+
+    name = models.CharField(max_length=255, blank=True, null=True)
+    citations = models.ManyToManyField('Citation', related_name='in_collections')
+    createdBy = models.ForeignKey(User, related_name='citation_collections')
+    created = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.name, self.createdBy.username)
+
+
+
 def linkify(s, *args, **kwargs):
     def shorten_display(attrs, new=False):
         """
@@ -1880,7 +1901,9 @@ class UserProfile(models.Model):
     A user can 'claim' an Authority record, asserting that the record refers to
     theirself."""))
 
+
 # ---------------------- Curation models ----------------------------
+
 
 class IsisCBRole(models.Model):
     """
@@ -1910,6 +1933,7 @@ class IsisCBRole(models.Model):
     @property
     def zotero_rules(self):
         return ZoteroRule.objects.filter(role=self.pk)
+
 
 class AccessRule(models.Model):
     """
@@ -1982,6 +2006,7 @@ class UserModuleRule(AccessRule):
         (UPDATE, 'Update'),
     )
     module_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
 
 class ZoteroRule(AccessRule):
     """

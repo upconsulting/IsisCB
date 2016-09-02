@@ -19,6 +19,7 @@
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
     {% block filter_form %}
     <form class="form clearfix">
+      {% csrf_token %}
         {% for field in objects.form %}
         <div class="form-group clearable">
             <label>{{ field.label }}</label>
