@@ -36,7 +36,7 @@ var toggleTab = function(name) {
 
 {% include "curation/fragment_citation_header.html" %}
 
-<div class="row">
+<div id="citationView" class="row">
     <div class="col-md-5">
       <div class="row">
           <div class="col-md-12">
@@ -100,19 +100,19 @@ Back to List </a>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
             </li>
             <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
             </li>
             <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
             </li>
             <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
             </li>
         </ul>
         <div class="tab-content">
