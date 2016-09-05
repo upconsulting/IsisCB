@@ -24,6 +24,8 @@
 </div>
 {% endif %}
 
+<div id="authorityView" >
+
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
@@ -204,6 +206,8 @@
 </div>
 
 </form>
+</div>
+
 <script>
 //# sourceURL=test.js
 $('#id_language').multiSelect()
@@ -220,7 +224,7 @@ $(document).ready(function() {
         if ($.now() - lastSearch < 500 || waiting) return;
         lastSearch = $.now();
         waiting = true;
-        
+
         var query = $(this).val();
         $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
             failure: function(result) {
