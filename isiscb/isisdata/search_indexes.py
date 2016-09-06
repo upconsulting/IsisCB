@@ -490,12 +490,11 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         Add pre-loading of related fields using select_related and
         prefetch_related.
         """
-        return Authority.objects.all()
-        # .prefetch_related(
-        #         Prefetch("attributes",
-        #                  queryset=AttributeType.objects.select_related(
-        #                     "value_freeform"))
-        #     )
+        return Authority.objects.all().prefetch_related(
+                Prefetch("attributes",
+                         queryset=AttributeType.objects.select_related(
+                            "value_freeform"))
+            )
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
