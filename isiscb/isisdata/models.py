@@ -1014,14 +1014,16 @@ class Authority(ReferencedEntity, CuratedMixin):
     SEARCH = 'SAC'
     PROPER_NAME = 'PN'
     GUE = 'GUE'
+    FHSA = 'FHSA'
     CLASS_SYSTEM_CHOICES = (
         (SPWT, 'Weldon Thesaurus Terms (2002-present)'),
         (SPWC, 'Weldon Classification System (2002-present)'),
         (GUE, 'Guerlac Committee Classification System (1953-2001)'),
         (NEU, 'Neu'),
-        (MW, 'MW'),
-        (SHOT, 'SHOT'),
-        (SEARCH, 'SAC'),
+        (MW, 'Whitrow Classification System (1913-1999)'),
+        (SHOT, 'SHOT Thesaurus Terms'),
+        (FHSA, 'Forum for the History of Science in America'),
+        (SEARCH, 'Search App Concept'),
         (PROPER_NAME, 'Proper name')
     )
     classification_system = models.CharField(max_length=4, blank=True,
