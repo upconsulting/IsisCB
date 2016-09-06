@@ -354,7 +354,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return None
 
     def prepare_text(self, data):
-        document = u'\n'.join([
+        document = u' '.join([
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
@@ -479,11 +479,10 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return Authority
 
     def prepare_text(self, obj):
-        document = u'\n'.join([
+        document = u' '.join([
             obj.normalized_name,
             obj.normalized_description,
         ] + [attr.value_freeform for attr in obj.attributes.all()])
-        print document
         return document
 
     def load_all_queryset(self):
