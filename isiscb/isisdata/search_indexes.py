@@ -138,6 +138,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return Citation
 
     def build_queryset(self, **kwargs):
+        # return Citation.objects.filter(acrelation__authority__id='CBA000113906', public=True)    # Horse.
         return Citation.objects.filter(public=True)
 
     def preprocess_queryset(self, qs):
@@ -175,6 +176,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         # We need to able to __getitem__, below.
         data = [row for row in data]
+        print data
         self.prepared_data = {
             ID: identifier,
             DJANGO_CT: 'isisdata.citation',
@@ -483,7 +485,6 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
             obj.normalized_name,
             obj.normalized_description,
         ] + [attr.value_freeform for attr in obj.attributes.all()])
-        print document
         return document
 
     def load_all_queryset(self):
@@ -491,12 +492,11 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         Add pre-loading of related fields using select_related and
         prefetch_related.
         """
-        return Authority.objects.all()
-        # .prefetch_related(
-        #         Prefetch("attributes",
-        #                  queryset=AttributeType.objects.select_related(
-        #                     "value_freeform"))
-        #     )
+        return Authority.objects.prefetch_related(
+                Prefetch("attributes",
+                         queryset=AttributeType.objects.select_related(
+                            "value_freeform"))
+            )
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
