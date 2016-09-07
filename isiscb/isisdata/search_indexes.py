@@ -138,6 +138,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return Citation
 
     def build_queryset(self, **kwargs):
+        # return Citation.objects.filter(acrelation__authority__id='CBA000113906', public=True)    # Horse.
         return Citation.objects.filter(public=True)
 
     def preprocess_queryset(self, qs):
@@ -175,6 +176,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         # We need to able to __getitem__, below.
         data = [row for row in data]
+        print data
         self.prepared_data = {
             ID: identifier,
             DJANGO_CT: 'isisdata.citation',
