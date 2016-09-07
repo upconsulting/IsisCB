@@ -356,7 +356,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return None
 
     def prepare_text(self, data):
-        document = u'\n'.join([
+        document = u' '.join([
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
@@ -481,7 +481,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return Authority
 
     def prepare_text(self, obj):
-        document = u'\n'.join([
+        document = u' '.join([
             obj.normalized_name,
             obj.normalized_description,
         ] + [attr.value_freeform for attr in obj.attributes.all()])
@@ -492,7 +492,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         Add pre-loading of related fields using select_related and
         prefetch_related.
         """
-        return Authority.objects.prefetch_related(
+        return Authority.objects.all().prefetch_related(
                 Prefetch("attributes",
                          queryset=AttributeType.objects.select_related(
                             "value_freeform"))
