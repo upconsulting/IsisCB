@@ -31,17 +31,17 @@ var toggleTab = function(name) {
 </div>
 {% endif %}
 
-<form class="form" action="." method="POST">
+<form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_citation_header.html" %}
 
-<div class="row">
+<div id="citationView" class="row">
     <div class="col-md-5">
       <div class="row">
           <div class="col-md-12">
             <div class="form-group form-inline">
-              <strong>
+              <strong id="citation_type" data-type="{{instance.type_controlled}}">
  {{ instance.get_type_controlled_display }}</strong>:
               <strong class="text-warning">{{ instance.id }}</strong>
               &nbsp;
@@ -85,7 +85,7 @@ Back to List </a>
     <div class="col-md-3">
         <div class="btn-group pull-right">
             <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
-            <input type="submit" value="Save" class="btn btn-sm btn-success" />
+            <a class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
     </div>
@@ -100,19 +100,19 @@ Back to List </a>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
             </li>
             <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
             </li>
             <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
             </li>
             <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -265,9 +265,26 @@ var delete_language = function() {
     </div>
 </div>
 
+<div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i> Citation Incomplete</h4>
+      </div>
+      <div class="modal-body">
+        <p id="modal_text"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel Save</button>
+        <button id="save_confirmed" type="button" class="btn btn-default">Yes, Save!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
-
+//# sourceURL=script.js
 var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {
@@ -347,6 +364,122 @@ var addLanguage = function() {
         });
     });
 }
+
+$('.citation_submit').click(function() {
+
+  var citation_type = $('#citation_type').attr("data-type");
+
+  var warnings = [];
+
+  if ($("#author_editors") == undefined || $("#author_editors").text() == '') {
+    warnings.push("You did not add an author or editor.");
+  }
+
+  if ($("#id_title").val() == '' && citation_type != "RE") {
+    warnings.push("You did not enter a title.");
+  }
+
+  var categoryList = $("#category-list-group li");
+  var subjectList = $("#subject-list-group li");
+  if (categoryList.length <= 1 && subjectList.length <= 1) {
+    warnings.push("You did not add any categories or subjects.");
+  }
+
+  if ($("#publication_date") == undefined || $("#publication_date").text() == '' || $("#publication_date").text() == 'missing') {
+    warnings.push("You did not add a publication date.");
+  }
+
+  if ($("#id_belongs_to").val() == '') {
+    warnings.push("You did not specify a dataset.");
+  }
+
+  var languageList = $("#language-list-group li");
+  if (languageList.length <= 1) {
+    warnings.push("You did not select a language.");
+  }
+
+  if (citation_type == "RE" || citation_type == "AR" || citation_type == "ES") {
+    if ($("#journal") == undefined || $("#journal").text() == '') {
+      warnings.push("You did not specify a periodical.");
+    }
+
+    if ($("#id_partdetails-volume_free_text").val() == "") {
+      warnings.push("You did not specify a volumne.");
+    }
+
+    if ($("#id_partdetails-pages_free_text").val() == "") {
+      warnings.push("You did not specify a page range.");
+    }
+
+    if ($("#doi") == undefined || $("#doi").text() == "") {
+      warnings.push("You did not specify a DOI.");
+    }
+  }
+
+  if (citation_type == "RE" || citation_type == "ES") {
+    var citationsBox = $("#ccrelations");
+    //TODO: this is really ugly and nees a better solution!
+    var bookLinks = citationsBox.find("span.label:contains('Book')");
+
+    if (bookLinks.length < 1) {
+      warnings.push("You did not add a CCRelation to a book.");
+    }
+  }
+
+  if (citation_type == "BO") {
+    if ($("#publisher") == undefined || $("#publisher").text() == '') {
+      warnings.push("You did not specify a publisher.");
+    }
+    if ($('#id_physical_details').val() == "") {
+      warnings.push("You did not enter any physical details.");
+    }
+    if ($("#isbn") == undefined || $("#isbn").text() == '') {
+      warnings.push("You did not add an ISBN number.");
+    }
+  }
+
+  if (citation_type == "TH") {
+    if ($('#id_physical_details').val() == "") {
+      warnings.push("You did not enter any physical details.");
+    }
+    if ($("#school") == undefined || $("#school").text() == '') {
+      warnings.push("You did not specify a school.");
+    }
+  }
+
+  if (citation_type == "CH") {
+    var citationsBox = $("#ccrelations");
+    //TODO: this is really ugly and nees a better solution!
+    var bookLinks = citationsBox.find("span.label:contains('Book')");
+    if (bookLinks.length < 1) {
+      warnings.push("You did not add a CCRelation to a book.");
+    }
+
+    if ($('#id_partdetails-pages_free_text').val() == "") {
+      warnings.push("You did not enter any page information.");
+    }
+  }
+
+  if (warnings.length > 0) {
+    var start = "<p>The following issues were found. Are you sure you want to save this citation?</p>";
+    var list = "<ul>";
+    for (var warn in warnings) {
+      list = list.concat("<li>" + warnings[warn] + "</li>");
+    }
+    list = list.concat("</ul>");
+
+    $('#modal_text').html(start + list);
+
+    $('#save_confirm_modal').modal('show');
+    return;
+  }
+
+  $('#citation_form').submit();
+});
+
+$('#save_confirmed').click(function() {
+  $('#citation_form').submit();
+});
 
 </script>
 
