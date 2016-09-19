@@ -41,7 +41,7 @@ def filter_in_collections(queryset, value):
 
 
 class CitationFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR
+    strict = STRICTNESS.RETURN_NO_RESULTS
 
     id = django_filters.MethodFilter(name='id', lookup_type='exact')
     title = django_filters.MethodFilter(name='title', lookup_type='icontains')
@@ -161,7 +161,7 @@ class CitationFilter(django_filters.FilterSet):
 
 
 class AuthorityFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR
+    strict = STRICTNESS.RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(name='id', lookup_type='exact')
     name = django_filters.MethodFilter()
