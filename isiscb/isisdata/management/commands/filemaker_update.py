@@ -684,6 +684,21 @@ class DatabaseHandler(object):
             partdetails_data_fixed[key] = value
         return partdetails_data_fixed
 
+    def _handle_dataset(self, literal):
+        if type(literal) in [str, unicode]:
+            match = re.search('([^(]+)[(](.+)[)]', literal)
+            if match:
+                datasetname, editorname  = match.groups()
+                dataset, _ = Dataset.objects.get_or_create(name=datasetname)
+                subdataset, _ = Dataset.objects.get_or_create(name=literal,
+                                                              defaults={'belongs_to': dataset})
+                return 'belongs_to', subdataset
+            else:
+                dataset, _ = Dataset.objects.get_or_create(name=literal)
+                return 'belongs_to', dataset
+        return 'dataset_literal', literal
+
+
     def handle_citation(self, fielddata, extra):
         """
         Create or update a :class:`.Citation` with ``fielddata``.
@@ -699,6 +714,12 @@ class DatabaseHandler(object):
         citation_data = self._prepare_data(Citation, fielddata)
         citation_id = citation_data.pop('id')    # Don't want this in update.
         language_id = citation_data.pop('language_id', None)
+
+        dataset = citation_data.pop('dataset', None)
+        if dataset:
+            key, value = self._handle_dataset(dataset)
+            citation_data['dataset_literal'] = dataset
+            citation_data[key] = value
 
         try:
             citation, created = Citation.objects.update_or_create(
