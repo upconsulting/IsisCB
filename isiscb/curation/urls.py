@@ -33,7 +33,7 @@ rules.add_rule('has_zotero_access', has_zotero_access)
 
 app_name = "curation"
 urlpatterns = [
-    url(r'^(?i)$', views.dashboard, name='index'),
+    url(r'^(?i)$', views.dashboard, name='curation-index'),
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
     url(r'^(?i)datasets/$', views.datasets, name='datasets'),
     url(r'^(?i)citation/$', views.citations, name='citation_list'),
