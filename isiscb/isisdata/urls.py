@@ -42,7 +42,6 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
     url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='index'),
-    url(r'^curation/', include('curation.urls', namespace="curation")),
     url(r'^(?i)(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
     url(r'^(?i)user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
@@ -56,5 +55,5 @@ urlpatterns = [
     url(r'^(?i)help', views.help, name='help'),
     url(r'^(?i)about', views.about, name='about'),
     url(r'^(?i)api', views.api_documentation, name='api'),
-
+    url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
