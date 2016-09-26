@@ -174,7 +174,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         if type(obj) is Citation:
             identifier = citation.id
             data = Citation.objects.filter(pk=citation.id).values(*self.data_fields)
-        identifier, data = obj      # groupby yields keys and iterators.
+        else:
+            identifier, data = obj      # groupby yields keys and iterators.
 
         # We need to able to __getitem__, below.
         data = [row for row in data]
