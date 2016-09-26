@@ -172,8 +172,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         Fetches and adds/alters data before indexing.
         """
         if type(obj) is Citation:
-            identifier = citation.id
-            data = Citation.objects.filter(pk=citation.id).values(*self.data_fields)
+            identifier = obj.id
+            data = Citation.objects.filter(pk=obj.id).values(*self.data_fields)
         else:
             identifier, data = obj      # groupby yields keys and iterators.
 
