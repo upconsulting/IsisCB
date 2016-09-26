@@ -32,6 +32,7 @@ django-oauth-toolkit
 django-cors-headers
 unidecode
 django-filter==0.11
+django-filters==0.2.1
 django-ipware
 djangorestframework-filters
 chardet
