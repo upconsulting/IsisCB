@@ -842,9 +842,11 @@ def citation(request, citation_id):
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
+        tracking_entries = Tracking.objects.filter(subject_instance_id=citation_id)
         context.update({
             'form': form,
             'instance': citation,
+            'tracking_entries': tracking_entries,
         })
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
@@ -1153,11 +1155,15 @@ def authority(request, authority_id):
             person_form = PersonForm(request.user, authority_id, instance=authority.person)
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
+
+        tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
+
         context.update({
             'request_params': request_params,
             'form': form,
             'instance': authority,
             'person_form': person_form,
+            'tracking_entries': tracking_entries,
         })
 
 
