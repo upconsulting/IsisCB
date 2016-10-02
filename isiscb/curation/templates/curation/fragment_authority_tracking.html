@@ -1,0 +1,44 @@
+{% load render_object %}
+
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'tracking'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_authority_field' user permTuple as can_update %}
+{% test_rule 'can_view_authority_field' user permTuple as can_view %}
+
+<ul class="list-group">
+{% if can_view %}
+{% for tracking in tracking_entries %}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <span class="label label-info">{{ tracking.get_type_controlled_display }}</span> {{ tracking.tracking_info }}
+  </div>
+  <div class="panel-body">
+    {% if tracking.notes %}
+      {{ tracking.notes }}
+    {% else %}
+      <small>No details provided.</small>
+    {% endif %}
+  </div>
+</div>
+
+{% endfor %}
+
+{% if can_update %}
+
+{% endif %}
+{% endif %}
+
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view tracking records.
+  </div>
+</li>
+{% endif %}
+</ul>
+
+
+{% endwith %}

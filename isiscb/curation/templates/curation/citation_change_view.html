@@ -114,6 +114,9 @@ Back to List </a>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
                 <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
             </li>
+            <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
+                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab">Tracking</a>
+            </li>
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
@@ -204,6 +207,9 @@ Back to List </a>
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
                 {% include "curation/fragment_citation_acrelations.html" %}
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'tracking' %} active{% endif %} panel-body" id="tracking">
+                {% include "curation/fragment_citation_tracking.html" %}
             </div>
         </div>
     </div>
