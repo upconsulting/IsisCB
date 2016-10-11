@@ -7,6 +7,12 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
+{% if can_update %}
+<div class="text-right" style="margin-bottom: 20px;">
+<a href="{% url 'tracking-citation' instance.id %}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span> Create Tracking Record</a>
+</div>
+{% endif %}
+
 {% if can_view %}
 {% for tracking in tracking_entries %}
 
@@ -24,9 +30,6 @@
 </div>
 
 {% endfor %}
-{% if can_update %}
-
-{% endif %}
 {% endif %}
 {% if not can_view %}
 <li class="list-group-item">

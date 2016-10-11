@@ -47,6 +47,8 @@ urlpatterns = [
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),
     url(r'^(?i)citation/select$', views.bulk_select_citation, name='citation-bulk-select'),
 
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking$', views.tracking_for_citation, name='tracking-citation'),
+
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/$', views.create_ccrelation_for_citation, name='create_ccrelation_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/(?P<ccrelation_id>[A-Z0-9]+)/$', views.ccrelation_for_citation, name='ccrelation_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/(?P<ccrelation_id>[A-Z0-9]+)/delete/$', views.delete_ccrelation_for_citation, name='delete_ccrelation_for_citation'),
