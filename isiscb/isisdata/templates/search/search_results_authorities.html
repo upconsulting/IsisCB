@@ -23,6 +23,7 @@
 
 
     {% for result in page.authority.object_list %}
+    {% if result.id %}
     <p>
           <span class="glyphicon glyphicon-bookmark"></span>
           [{{ result.authority_type }}]
@@ -34,7 +35,8 @@
 
           <span class="visible-print-inline">({% url 'authority' result.id|get_pk %})</span>
 
-        </p>
+    </p>
+    {% endif %}
     {% empty %}
         <p>No results found.</p>
     {% endfor %}

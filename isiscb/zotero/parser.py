@@ -1,4 +1,4 @@
-import os, re, iso8601, rdflib, codecs, chardet, unicodedata, logging, csv
+import os, re, iso8601, rdflib, codecs, chardet, unicodedata, logging, csv, copy
 import xml.etree.ElementTree as ET
 
 from datetime import datetime
@@ -616,6 +616,8 @@ def process_authorities(paper, instance):
     draftACRelations = []
     relationsSeen = set()    # So that we don't create duplicates.
     for authority_type, acrelation_type, field, relation_model, relation_field in authority_fields:
+        original_acrelation_type = copy.copy(acrelation_type)
+
         if not hasattr(paper, field):
             continue
         field_value = getattr(paper, field)
@@ -713,6 +715,7 @@ def process_authorities(paper, instance):
                 )
                 draftACRelations.append(relation)
                 relationsSeen.add((acrelation_type, entity_name))
+                acrelation_type = copy.copy(original_acrelation_type)
         else:
             if type(field_value) is tuple:
                 if len([v for v in field_value if v]) == 1:

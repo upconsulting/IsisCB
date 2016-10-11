@@ -31,9 +31,10 @@ elasticstack
 django-oauth-toolkit
 django-cors-headers
 unidecode
-django-filter
+django-filter==0.11
+django-filters==0.2.1
 django-ipware
-djangorestframework-filters
+djangorestframework-filters==0.6.0
 chardet
 rdflib
 -e git://github.com/erickpeirson/django-pagination@master#egg=django-pagination

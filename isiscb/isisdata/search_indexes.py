@@ -171,8 +171,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
         Fetches and adds/alters data before indexing.
         """
-
-        identifier, data = obj      # groupby yields keys and iterators.
+        if type(obj) is Citation:
+            identifier = obj.id
+            data = Citation.objects.filter(pk=obj.id).values(*self.data_fields)
+        else:
+            identifier, data = obj      # groupby yields keys and iterators.
 
         # We need to able to __getitem__, below.
         data = [row for row in data]

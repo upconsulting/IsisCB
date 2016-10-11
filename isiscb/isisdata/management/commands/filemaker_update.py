@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationError
 from django.contrib.contenttypes.models import ContentType
+from django.db.utils import IntegrityError
 from isisdata.models import *
 
 import datetime, iso8601, string
@@ -683,6 +684,21 @@ class DatabaseHandler(object):
             partdetails_data_fixed[key] = value
         return partdetails_data_fixed
 
+    def _handle_dataset(self, literal):
+        if type(literal) in [str, unicode]:
+            match = re.search('([^(]+)[(](.+)[)]', literal)
+            if match:
+                datasetname, editorname  = match.groups()
+                dataset, _ = Dataset.objects.get_or_create(name=datasetname)
+                subdataset, _ = Dataset.objects.get_or_create(name=literal,
+                                                              defaults={'belongs_to': dataset})
+                return 'belongs_to', subdataset
+            else:
+                dataset, _ = Dataset.objects.get_or_create(name=literal)
+                return 'belongs_to', dataset
+        return 'dataset_literal', literal
+
+
     def handle_citation(self, fielddata, extra):
         """
         Create or update a :class:`.Citation` with ``fielddata``.
@@ -698,6 +714,13 @@ class DatabaseHandler(object):
         citation_data = self._prepare_data(Citation, fielddata)
         citation_id = citation_data.pop('id')    # Don't want this in update.
         language_id = citation_data.pop('language_id', None)
+
+        dataset = citation_data.pop('dataset', None)
+        if dataset:
+            key, value = self._handle_dataset(dataset)
+            citation_data['dataset_literal'] = dataset
+            citation_data[key] = value
+
         try:
             citation, created = Citation.objects.update_or_create(
                 pk=citation_id,
@@ -753,17 +776,32 @@ class DatabaseHandler(object):
         else:
             model = Authority
 
-        authority_id = authority_data['id']
         try:
             authority, created = model.objects.update_or_create(
-                pk=authority_id,
+                pk=authority_data['id'],
                 defaults=authority_data
             )
 
         except Exception as E:
-            self.errors.append(('authority', E.__repr__(), authority_id, authority_data))
-            print authority_data
-            raise E
+            # If this record redirects to a record that has not yet been
+            #  created, update_or_create() will throw an IntegrityError.
+            if type(E) is IntegrityError and authority_data.get('record_status_value').lower() == 'redirect':
+                redirect_to = authority_data.get('redirect_to_id')
+                Authority.objects.create(**{
+                    'pk': redirect_to,
+                    'type_controlled': authority_data.get('type_controlled'),
+                    'public': True,
+                    'record_status_value': 'Active',
+                })
+                try:
+                    authority, created = model.objects.update_or_create(
+                        pk=authority_data['id'],
+                        defaults=authority_data
+                    )
+                except Exception as E:
+                    self.errors.append(('authority', E.__repr__(), authority_data['id'], authority_data))
+                    print authority_data
+                    raise E
         self._tick('authority')
 
     def handle_ccrelation(self, fielddata, extra):
