@@ -385,6 +385,32 @@ class AuthorityForm(forms.ModelForm):
 
         return exclude
 
+class CitationTrackingForm(forms.ModelForm):
+
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TYPE_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+
+    type_controlled = forms.ChoiceField(required=True,
+                                       choices=TYPE_CHOICES)
+
+    class Meta:
+        model = Tracking
+        fields = [
+            'tracking_info', 'notes', 'type_controlled'
+        ]
+
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)

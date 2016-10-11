@@ -143,6 +143,9 @@
             <li role="presentation"{% if tab == 'aarelations' %} class="active"{% endif %}>
                 <a href="#aarelations" aria-controls="aarelations" role="tab" data-toggle="tab">Related Authorities</a>
             </li>
+            <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
+                <a href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab">Tracking</a>
+            </li>
         </ul>
 
         <div class="tab-content">
@@ -199,6 +202,9 @@
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
                 {% include "curation/fragment_authority_acrelations.html" %}
+            </div>
+            <div role="tabpanel" class="tab-pane{% if tab == 'tracking' %} active{% endif %} panel-body" id="tracking">
+                {% include "curation/fragment_authority_tracking.html" %}
             </div>
         </div>
     </div>

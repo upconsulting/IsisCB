@@ -380,6 +380,36 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     template = loader.get_template('curation/citation_acrelation_changeview.html')
     return HttpResponse(template.render(context))
 
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def tracking_for_citation(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+    })
+
+    template = loader.get_template('curation/citation_tracking_create.html')
+
+    if request.method == "POST":
+        form = CitationTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
+        if form.is_valid():
+            tracking = form.save(commit=False)
+            tracking.subject = citation
+            tracking.save()
+            return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
+    else:
+        # just always shows tracking form if not post
+        form = CitationTrackingForm(prefix='tracking', initial={'subject': citation_id})
+
+
+    context.update({
+        'form': form,
+    })
+
+    return HttpResponse(template.render(context))
 
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -842,9 +872,11 @@ def citation(request, citation_id):
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
+        tracking_entries = Tracking.objects.filter(subject_instance_id=citation_id)
         context.update({
             'form': form,
             'instance': citation,
+            'tracking_entries': tracking_entries,
         })
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
@@ -1153,11 +1185,15 @@ def authority(request, authority_id):
             person_form = PersonForm(request.user, authority_id, instance=authority.person)
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
+
+        tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
+
         context.update({
             'request_params': request_params,
             'form': form,
             'instance': authority,
             'person_form': person_form,
+            'tracking_entries': tracking_entries,
         })
 
 

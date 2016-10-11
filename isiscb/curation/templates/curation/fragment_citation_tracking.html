@@ -1,0 +1,43 @@
+{% load render_object %}
+
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'tracking_entries'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+{% if can_update %}
+<div class="text-right" style="margin-bottom: 20px;">
+<a href="{% url 'tracking-citation' instance.id %}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span> Create Tracking Record</a>
+</div>
+{% endif %}
+
+{% if can_view %}
+{% for tracking in tracking_entries %}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <span class="label label-info">{{ tracking.get_type_controlled_display }}</span> {{ tracking.tracking_info }}
+  </div>
+  <div class="panel-body">
+    {% if tracking.notes %}
+      {{ tracking.notes }}
+    {% else %}
+      <small>No details provided.</small>
+    {% endif %}
+  </div>
+</div>
+
+{% endfor %}
+{% endif %}
+{% if not can_view %}
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view tracking records.
+  </div>
+</li>
+{% endif %}
+</ul>
+
+{% endwith %}
