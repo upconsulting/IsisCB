@@ -3,6 +3,10 @@
 {% load metadata_filters %}
 {% block title %}Search{% endblock %}
 
+{% block meta_tags %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
 {% block extra_head %}
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 
