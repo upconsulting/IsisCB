@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /isis/
+Allow: /isis/citation
+Allow: /isis/authority
+Allow: /isis/about
+Allow: /isis/help
+Allow: /isis/user
