@@ -8,6 +8,7 @@ from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
 from django.views.generic.base import RedirectView
+from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 from rest_framework import routers
 from oauth2_provider import views as oauth_views
@@ -41,6 +42,7 @@ urlpatterns = [
     url(r'^(?i)history/$', views.search_history, name='search_history'),
     url(r'^(?i)history/saved/$', views.search_saved, name='search_saved'),
     url(r'^$', views.home, name='home'),
+    url(r'^robots\.txt$', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
     url(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     url(r'^(?i)autocomplete/', include('autocomplete_light.urls')),
     url(r'^(?i)login/$',  # TODO: can we simplify this?

@@ -1,6 +1,5 @@
 from django.conf.urls import url, include
 from django.views.decorators.cache import cache_page
-from django.views.generic import TemplateView
 from haystack.forms import FacetedSearchForm
 from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
@@ -57,5 +56,4 @@ urlpatterns = [
     url(r'^(?i)about', views.about, name='about'),
     url(r'^(?i)api', views.api_documentation, name='api'),
     url(r'^curation/', include('curation.urls', namespace="curation")),
-    url(r'^robots\.txt$', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
 ]
