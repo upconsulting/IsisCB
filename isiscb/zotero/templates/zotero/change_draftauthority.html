@@ -1,0 +1,22 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+<form class="form" action="{% if next %}?next={{next}}{% endif %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% for field in form %}
+
+    {% for error in field.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field|addcss:"form-control" }}
+    </div>
+
+    {% endfor %}
+
+    <input type="submit" value="Upload" class="btn btn-success" />
+</form>
+{% endblock %}

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'data/accession/(?P<accession_id>[0-9]+)/$', data_importaccession, name='data_importaccession'),
     url(r'data/citation/(?P<draftcitation_id>[0-9]+)/$', data_draftcitation, name='data_draftcitation'),
     url(r'data/authority/(?P<draftauthority_id>[0-9]+)/$', data_draftauthority, name='data_draftauthority'),
+    url(r'data/authority/(?P<draftauthority_id>[0-9]+)/edit/$', change_draftauthority, name='change_draftauthority'),
 
     url(r'accession/$', accessions, name='accessions'),
     url(r'accession/create/$', create_accession, name='create_accession'),
