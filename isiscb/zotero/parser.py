@@ -1,4 +1,5 @@
 import os, re, iso8601, rdflib, codecs, chardet, unicodedata, logging, csv, copy
+from unidecode import unidecode
 import xml.etree.ElementTree as ET
 
 from datetime import datetime
@@ -547,6 +548,9 @@ class ZoteroParser(RDFParser):
         return journal
 
     def handle_pages(self, value):
+        value = value.toPython()
+        if type(value) is unicode:
+            value = unidecode(value)
         return tuple(value.split('-'))
 
     def handle_review_of(self, value):

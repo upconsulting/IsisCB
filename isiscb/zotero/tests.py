@@ -27,6 +27,38 @@ partdetails_fields = [
 ]
 
 
+class TestPages(TestCase):
+    """
+    Sometimes we get unicode oddities in the page numbers.
+    """
+
+    def test_page_number(self):
+        """
+        Both of these journal articles should have clear start and end pages.
+
+        """
+        book_data = 'zotero/test_data/Journal test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            self.assertTrue(citation.page_start is not None)
+            self.assertTrue(citation.page_end is not None)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
 class TestPublisher(TestCase):
     """
     Information about publisher should be retained.
