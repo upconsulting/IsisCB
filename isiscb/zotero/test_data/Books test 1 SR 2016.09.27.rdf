@@ -1,0 +1,1597 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:vcard="http://nwalsh.com/rdf/vCard#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/">
+    <bib:Book rdf:about="urn:isbn:978-1-4214-1954-1">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Baltimore</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Johns Hopkins University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ackerknecht</foaf:surname>
+                        <foaf:givenname>Erwin H.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98666"/>
+        <dc:subject>=150=</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:identifier>ISBN 978-1-4214-1954-1</dc:identifier>
+        <dc:date>2016</dc:date>
+        <dc:description>OCLC: 917131634</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Erwin H. Ackerknecht’s A Short History of Medicine is a concise narrative, long appreciated by students in the history of medicine, medical students, historians, and medical professionals as well as all those seeking to understand the history of medicine.
+
+Covering the broad sweep of discoveries from parasitic worms to bacilli and x-rays, and highlighting physicians and scientists from Hippocrates and Galen to Pasteur, Koch, and Roentgen, Ackerknecht narrates Western and Eastern civilization’s work at identifying and curing disease. He follows these discoveries from the library to the bedside, hospital, and laboratory, illuminating how basic biological sciences interacted with clinical practice over time. But his story is more than one of laudable scientific and therapeutic achievement. Ackerknecht also points toward the social, ecological, economic, and political conditions that shape the incidence of disease. Improvements in health, Ackerknecht argues, depend on more than laboratory knowledge: they also require that we improve the lives of ordinary men and women by altering social conditions such as poverty and hunger.
+
+This revised and expanded edition includes a new foreword and concluding biographical essay by Charles E. Rosenberg, Ackerknecht’s former student and a distinguished historian of medicine. A new bibliographic essay by Lisa Haushofer explores recent scholarship in the history of medicine.</dcterms:abstract>
+        <dc:title>A Short History of Medicine</dc:title>
+        <z:numPages>247</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98666">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Edition: Revised and expanded edition.
+Contents: Paleopathology and paleomedicine -- Primitive medicine -- Medicine of ancient civilizations -- Ancient India and China -- Greek medicine : physicians, priests, philosophers --
+Greek medicine : Hippocratic medicine -- Greek medicine : Alexandria and Rome -- Medieval medicine -- Renaissance medicine -- Medicine in the seventeenth century -- Medicine in the eighteenth century -- The clinical schools of the first half of the nineteenth century -- The basic sciences during the nineteenth century -- Clinical medicine of the second half of the nineteenth century -- Microbiology -- Surgery and gynecology in the nineteenth century -- The new specialism of the nineteenth century -- Public health and professional developments in the nineteenth century -- Medicine in the United States prior to 1900 -- Epilogue : trends in twentieth-century medicine.
+Note(s): Includes bibliographical references and index.
+Class Descriptors: LC: R131; Dewey: 610.9; NLM:                WZ 40
+Responsibility: Erwin H. Ackerknecht ; foreword and concluding essay by Charles E. Rosenberg ; bibliographic essay by Lisa Haushofer.
+Vendor Info: Baker and Taylor YBP Library Services Coutts Information Services Brodart (BTCP YANK COUT BROD)
+Entry: 20150803
+Update: 20160628
+Provider: OCLC
+  1(6)    2 Primitive Medicine     7(7)    3 Medicine of Ancient Civilizations     14(13)    4 Ancient India and China     27(9)    5 Greek Medicine: Physicians, Priests, Philosophers     36(7)    6
+Greek Medicine: Hippocratic Medicine     43(7)    7 Greek Medicine: Alexandria and Rome     50(12)    8 Medieval Medicine     62(12)    9 Renaissance Medicine     74(15)    10 Medicine in the Seventeenth Century     89(13)    11 Medicine in the Eighteenth Century     102(13)    12 The Clinical Schools of the First Half of the Nineteenth Century     115(10)    13 The Basic Sciences during the Nineteenth Century     125(10)    14 Clinical Medicine of the Second Half of the Nineteenth Century     135(4)    15 Microbiology     139(9)    16 Surgery and Gynecology in the Nineteenth Century     148(7)    17 The New Specialism of the Nineteenth Century     155(13)    18 Public Health and Professional Developments in the Nineteenth Century     168(6)    19 Medicine in the United States</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-415-85642-3">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Abingdon</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Routledge</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Adam</foaf:surname>
+                        <foaf:givenname>Alison</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=360-140=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century, early [15]</dc:subject>
+        <dc:subject>Criminology [4886]</dc:subject>
+        <dc:subject>Forensic sciences [20138]</dc:subject>
+        <dc:subject>Great Britain [185]</dc:subject>
+        <dc:subject>Police; criminal justice departments [CBA000117160]</dc:subject>
+        <dc:subject>Professions and professionalization [4762]</dc:subject>
+        <dc:subject>Science and law [14901]</dc:subject>
+        <dc:identifier>ISBN 978-0-415-85642-3</dc:identifier>
+        <dc:date>2016</dc:date>
+        <dc:description>OCLC: 910914670</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <dcterms:abstract>This book offers a history of the development of forensic sciences, centred on the UK, but with consideration of continental and colonial influences, from around 1880 to approximately 1940. This period was central to the formation of a separate discipline of forensic science with a distinct professional identity and this book charts the strategies of the new forensic scientists to gain an authoritative voice in the courtroom and to forge a professional identity in the space between forensic medicine, scientific policing, and independent expert witnessing. In so doing, it improves our understanding of how forensic science developed as it did.</dcterms:abstract>
+        <dc:title>A History of Forensic Science: British Beginnings in the Twentieth Century</dc:title>
+        <z:shortTitle>A History of Forensic Science</z:shortTitle>
+        <z:numPages>236</z:numPages>
+    </bib:Book>
+    <bib:Book rdf:about="urn:isbn:978-3-8376-2468-7">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>Science studies</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Bielefeld</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Transcript-Verl.</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Adams</foaf:surname>
+                        <foaf:givenname>Andrea</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97139"/>
+        <dc:subject>=360-151=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Germany [5123]</dc:subject>
+        <dc:subject>Mental disorders and diseases [15091]</dc:subject>
+        <dc:subject>Psychiatry [5041]</dc:subject>
+        <dc:subject>Racism [3836]</dc:subject>
+        <dc:subject>Science and race [1152]</dc:subject>
+        <dc:identifier>ISBN 978-3-8376-2468-7</dc:identifier>
+        <dc:date>2013</dc:date>
+        <dc:description>OCLC: 852550641</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>German</z:language>
+        <dcterms:abstract>Gibt es einen Zusammenhang zwischen 'Rasse' und psychischen Leiden? Diese Frage beschäftigte deutschsprachige Psychiater und andere Ärzte im späten 19. und beginnenden 20. Jahrhundert. Andrea Adams rekonstruiert diese wissenschaftliche Auseinandersetzung, analysiert die Vielfalt an Positionen und Themen sowie die Aushandlungs- und Stabilisierungsprozesse, die für die Produktion von Wissen über 'Rasse' und Psychopathologie notwendig waren. Ihre Studie unternimmt erstmals eine umfassende wissenschaftshistorische Betrachtung von 'Rassenforschung' innerhalb des psychiatrischen Feldes und ordnet sie in den breiteren Kontext der Wissenschafts- und Psychiatriegeschichte sowie der historischen Rassismusforschung ein.</dcterms:abstract>
+        <dc:title>Psychopathologie Und&quot; Rasse&quot;: Verhandlungen Über &quot;Rassische&quot;differenz in Der Erforschung Psychischer Leiden (1890-1933)</dc:title>
+        <z:shortTitle>Psychopathologie und&quot; Rasse&quot;</z:shortTitle>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97139">
+        <rdf:value>Access: http://bvbr.bib-bvb.de:8991/F?func=service&amp;doc_library=BVB01&amp;local_base=BVB01&amp;doc_number=026214758&amp;line_number=0001&amp;func_code=DB_RECORDS&amp;service_type=MEDIA
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Edition: 1. Aufl.
+Access: Materials specified:      Inhaltsverzeichnis
+http: //bvbr.bib-bvb.de:8991/F?func=service&amp;doc_library=BVB01&amp;local_base=BVB01&amp;doc_number=026214758&amp;line_number=0001&amp;func_code=DB_RECORDS&amp;service_type=MEDIA
+Materials specified: Inhaltstext http://deposit.d-nb.de/cgi-bin/dokserv?id=4314353&amp;prov=M&amp;dok_var=1&amp;dok_ext=htm
+http: //deposit.d-nb.de/cgi-bin/dokserv?id=4314353&amp;prov=M&amp;dok_var=1&amp;dok_ext=htm Materials specified:      01
+Time: Geschichte 1890-1933.
+Geographic: Germany -- Race relations.
+General Info: National bibliography no: 13,N19
+Class Descriptors: Dewey: 305.8009041
+Responsibility: Andrea Adams.
+Material Type: Internet resource (url)
+Date of Entry: 20130611
+Update: 20160420
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-4214-1356-3">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>How Things Worked</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Baltimore</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Johns Hopkins University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Adams</foaf:surname>
+                        <foaf:givenname>Sean P.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96569"/>
+        <dc:subject>=360-160=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Combustion; fire [19003]</dc:subject>
+        <dc:subject>Heating; ventilation [22082]</dc:subject>
+        <dc:subject>Industrialization [16049]</dc:subject>
+        <dc:subject>United States [5161]</dc:subject>
+        <dc:identifier>ISBN 978-1-4214-1356-3</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Home Fires tells the fascinating story of how changes in home heating over the nineteenth century spurred the growth of networks that helped remake American society. Sean Patrick Adams reconstructs the ways in which the &quot;industrial hearth&quot; appeared in American cities, the methods that entrepreneurs in home heating markets used to convince consumers that their product designs and fuel choices were superior, and how elite, middle-class, and poor Americans responded to these overtures. Adams depicts the problem of dwindling supplies of firewood and the search for alternatives; the hazards of cutting, digging, and drilling in the name of home heating; the trouble and expense of moving materials from place to place; the rise of steam power; the growth of an industrial economy; and economic efficiency questions, both at the individual household and regional levels. Home Fires makes it clear that debates over energy sources, energy policy, and company profit margins have been around a long time. The challenge of staying warm in the industrializing North becomes a window into the complex world of energy transitions, economic change, and emerging consumerism. Readers will understand the struggles of urban families as they sought to adapt to the ever-changing nineteenth-century industrial landscape. This perspective allows for a unique view of the development of an industrial society not just from the ground up but from the hearth up&quot;-- &quot;Using the challenge of staying warm in the industrializing North as a window into the complex world of energy transitions, economic change, and emerging consumerism, Sean Patrick Adams presents the development of new home heating methods in order to trace connections between structural transformations in the American economy and the experience of average Americans at home. How, in fact, did Country and Hearth negotiate this industrial makeover? Home Fires, the inaugural publication in the new series How Things Worked, lets students see how. Though seemingly simple, the question of home heating prods students to think about natural resources (first wood, then, coal, then oil), logistics, and evolving business practices. Adams depicts the problem of dwindling supplies of firewood and the search for alternatives; the hazards of cutting, digging, and drilling in the name of home heating; the trouble and expense of moving materials from place to place; changing technological means, chiefly the rise of steam power; the rise of an industrial economy; and economic questions, both household and macro. It becomes increasingly clear that debates over energy sources, energy policy, and company profit margins have been around a long time.</dcterms:abstract>
+        <dc:title>Home Fires: How Americans Kept Warm in the Nineteenth Century</dc:title>
+        <z:shortTitle>Home fires</z:shortTitle>
+        <z:numPages>183</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96569">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Prologue: The Urban Hearth -- How the Industrial Economy Made the Stove -- How Mineral Heat Came to American Cities -- How the Coal Trade Made Heat Cheap -- How the Industrial Hearth Defied Control -- How Steam Heat Found its Limits -- Epilogue: The Industrial Hearth -- Appendix: Abbreviations of Archives Consulted.
+1421413582 Other: 40023526161 LCCN:               2013-37988
+Geographic: United States -- Social conditions -- 19th century. United States -- Social life and customs -- 19th century. United States -- Economic conditions -- 19th century. USA.
+Note(s): Includes bibliographical references (pages 153-177) and index./ Includes bibliographical references and index.
+Class Descriptors: LC: TH7216.U5; Dewey: 697.0973/09034
+Responsibility: Sean Patrick Adams.
+Vendor Info: Brodart Baker and Taylor Coutts Information Services YBP Library Services (BROD BTCP COUT YANK)
+Entry: 20131203
+Update: 20160301
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-62534-070-2">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Amherst</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>University of Massachusetts Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Adelman</foaf:surname>
+                        <foaf:givenname>Rebecca A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98493"/>
+        <dc:subject>=380-160=</dc:subject>
+        <dc:subject>21st century [17]</dc:subject>
+        <dc:subject>Communication technology [16144]</dc:subject>
+        <dc:subject>Surveillance [22978]</dc:subject>
+        <dc:subject>Terrorism [16494]</dc:subject>
+        <dc:identifier>ISBN 978-1-62534-070-2</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Since the 9/11 attacks on U.S. soil, American citizenship has been redefined by the visual images associated with the Global War on Terror (GWOT). Rebecca A. Adelman contends that, in viewing images such as security footage of the 9/11 hijackers, film portrayals of the attacks and subsequent wars, memorials commemorating the attacks, and even graphics associated with increased security in airports, American citizens have been recast as militarized spectators, brought together through the production, circulation, and consumption of these visual artifacts. Beyond the Checkpoint reveals that the visual is essential to the prosecution of the GWOT domestically and abroad, and that it functions as a crucial mechanism in the ongoing formation of the U.S. state itself and an essential component of contemporary American citizenship.
+
+Tracing the connections between citizenship and spectatorship, and moving beyond the close reading of visual representations, this book focuses on the institutions and actors that create, monitor, and regulate the visual landscape of the GWOT. Adelman looks around and through common images to follow the complex patterns of practice by which institutions and audiences engage them in various contexts. In the process, she proposes a new methodology for studying visual cultures of conflict, and related phenomena like violence, terror, and suffering that are notoriously difficult to represent.
+
+Attending to previously unanalyzed dimensions of this conflict, this book illustrates the complexity of GWOT visual culture and the variegated experiences of citizenship that result as Americans navigate this terrain. - See more at: http://www.umass.edu/umpress/title/beyond-checkpoint#sthash.ks5ATO0G.dpuf</dcterms:abstract>
+        <dc:title>Beyond the Checkpoint: Visual Practices in America's Global War on Terror</dc:title>
+        <z:shortTitle>Beyond the checkpoint</z:shortTitle>
+        <z:numPages>268</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98493">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: One. Illuminating -- Two. Dimensional -- Three. Diagnostic -- Four. Temporal -- Five. Juridical.
+Note(s): Includes bibliographical references and index.
+Class Descriptors: LC: HV6432; Dewey: 363.325/160973
+Responsibility: Rebecca A. Adelman.
+Vendor Info: Brodart Baker and Taylor Coutts Information Services YBP Library Services (BROD BTCP COUT YANK)
+Entry: 20131212
+Update: 20160205
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-231-16664-5">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>New York</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Columbia University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Aggarwal</foaf:surname>
+                        <foaf:givenname>Neil Krishan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97699"/>
+        <dc:subject>=375-151=</dc:subject>
+        <dc:subject>Ethics [15526]</dc:subject>
+        <dc:subject>Health [15598]</dc:subject>
+        <dc:subject>Prisoners [1697]</dc:subject>
+        <dc:subject>Psychology [15479]</dc:subject>
+        <dc:subject>Science and war; science and the military [1161]</dc:subject>
+        <dc:subject>United States [5161]</dc:subject>
+        <dc:identifier>ISBN 978-0-231-16664-5</dc:identifier>
+        <dc:date>2015, (c)2015</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Neil Krishan Aggarwal's timely study finds that mental-health and biomedical professionals have created new forms of knowledge and practice in their desire to understand and fight terrorism. In the process, the state has used psychiatrists and psychologists to furnish knowledge on undesirable populations, and psychiatrists and psychologists have protected state interests.
+
+Professional interpretation, like all interpretations, is subject to cultural forces. Drawing on cultural psychiatry and medical anthropology, Aggarwal analyzes the transformation of definitions for normal and abnormal behavior in a vast array of sources: government documents, professional bioethical debates, legal motions and opinions, psychiatric and psychological scholarship, media publications, and policy briefs. Critical themes emerge on the use of mental health in awarding or denying disability to returning veterans, characterizing the confinement of Guantánamo detainees, contextualizing the actions of suicide bombers, portraying Muslim and Arab populations in psychiatric and psychological scholarship, illustrating bioethical issues in the treatment of detainees, and supplying the knowledge and practice to deradicalize terrorists. Throughout, Aggarwal explores this fascinating, troublesome transformation of mental-health science into a potential instrument of counterterrorism</dcterms:abstract>
+        <dc:title>Mental Health in the War on Terror: Culture, Science, and Statecraft</dc:title>
+        <z:shortTitle>Mental health in the war on terror</z:shortTitle>
+        <z:numPages>214</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97699">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Mental health, culture, and power in the war on terror -- Bioethics and the conduct of mental health professionals in the war on terror -- The meanings of symptoms and services for Guantanamo detainees -- Depictions of Arabs and Muslims in psychodynamic scholarship -- Depictions of suicide bombers in the mental health scholarship -- Knowledge and practice in war on terror deradicalization programs.
+Geographic: United States. USA.
+Note(s): Includes bibliographical references (pages 173-204) and index.
+Class Descriptors: LC: RC451.4.P7; Dewey: 616.890086/97; NLM:                2015 B-257; WA 305 AA1
+Responsibility: Neil Krishan Aggarwal.
+Vendor Info: Brodart Baker and Taylor Coutts Information Services Ingram YBP Library Services (BROD BTCP COUT INGR YANK)
+Entry: 20140530
+Update: 20160226
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-253-01304-0">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Bloomington</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Indiana University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Akyeampong</foaf:surname>
+                        <foaf:givenname>Emmanuel Kwaku</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>Kleinman, Arthur</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hill</foaf:surname>
+                        <foaf:givenname>Allan G.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <dcterms:isReferencedBy rdf:resource="#item_97487"/>
+        <dc:subject>=360-151=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Africa [5097]</dc:subject>
+        <dc:subject>Hospitals and clinics [4942]</dc:subject>
+        <dc:subject>Medicine and politics [15102]</dc:subject>
+        <dc:subject>Psychology [15479]</dc:subject>
+        <dc:subject>Public health [1065]</dc:subject>
+        <dc:subject>Therapeutic practice; therapy; treatment [5081]</dc:subject>
+        <dc:identifier>ISBN 978-0-253-01304-0</dc:identifier>
+        <dc:date>2015</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>In many African countries, mental health issues, including the burden of serious mental illness and trauma, have not been adequately addressed. These essays shed light on the treatment of common and chronic mental disorders, including mental illness and treatment in the current climate of economic and political instability, access to health care, access to medicines, and the impact of HIV-AIDS and other chronic illness on mental health. While problems are rampant and carry real and devastating consequences, this volume promotes an understanding of the African mental health landscape in service.</dcterms:abstract>
+        <dc:title>The Culture of Mental Illness and Psychiatric Practice in Africa</dc:title>
+        <z:numPages>349</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97487">
+        <rdf:value>&lt;p&gt;Access: http://search.ebscohost.com/login.aspx?direct=true&amp;amp;scope=site&amp;amp;db=nlebk&amp;amp;db=nlabk&amp;amp;AN=984391 External Resources: Cite This Item Search for versions with same title and author | Advanced options ... Contents: A historical overview of psychiatry in Africa / Emmanuel Akyeampong -- Common mental disorders in Sub-Saharan Africa : the triad of depression, anxiety, and somatization / Vikram Patel and Dan J. Stein -- Schizophrenia and psychosis in West Africa / Ursula M. Read, Victor C.K. Doku, and Ama de-Graft Aikins -- Mental illness and destitution in Ghana : a social-psychological perspective / Ama de-Graft Aikins -- Children and adolescent mental health in South Africa / Alan Flisher, Andrew Dawes, Zuhayr Kafaar, Crick Lund, Katherine Sorsdahl, Bronwyn Myers, Rita Thom, and Soraya Seedat -- Some aspects of mental illness in French-speaking West Africa / René Collignon -- Women's self-reported mental health in Accra, Ghana / Allan G. Hill and Victoria de Menil -- One thing leads to another : sex, AIDS, and mental health reform in South Africa / Pamela Y. Collins -- Health care professionals' mental health and well-being in the era of HIV/AIDS : perspectives from Sub-Saharan Africa / Giuseppe Raviola -- The role of traditional healers in mental health care in Africa / Elialilia Okello and Seggane Musisi -- Improving access to psychiatric medicines in Africa / Shoba Raja, Sarah Kippen Wood, and Michael R. Reich -- Child soldiers and community reconciliation in postwar Sierra Leone : African psychiatry in the twenty-first century / William P. Murphy -- Using mixed methods to plan and evaluate mental health programs for war-affected children in Sub-Saharan Africa / Theresa Betancourt. Access: Materials specified: EBSCOhost http://search.ebscohost.com/login.aspx?direct=true&amp;amp;scope=site&amp;amp;db=nlebk&amp;amp;db=nlabk&amp;amp;AN=984391 http: //public.eblib.com/choice/PublicFullRecord.aspx?p=2032798 Materials specified: Ebook Library http: //alltitles.ebrary.com/Doc?id=11051519 Materials specified: ebrary Materials specified: ebrary http://site.ebrary.com/id/11051519 Materials specified: JSTOR http://www.jstor.org/stable/10.2307/j.ctt16gz69f Geographic: Africa. Note(s): Includes bibliographical references and index. General Info: Other format available: Print version:; Culture of mental illness and psychiatric practice in Africa Class Descriptors: LC: RC451.A43; Dewey: 362.196890096; NLM: WM 140 Responsibility: edited by Emmanuel Akyeampong, Allan G. Hill, and Arthur Kleinman. Vendor Info: EBSCOhost EBL - Ebook Library ebrary YBP Library Services (EBSC EBLB EBRY YANK) Material Type: Document (dct); Internet resource (url); eBook (ebk) Date of Entry: 20150427 Update: 20160304 Provider: OCLC Reconciliation in Postwar Sierra Leone: African Psychiatry in the Twenty-First Century · William P. Murphy, 282, 13 Using Mixed Methods to Plan and Evaluate Mental Health Programs for War-Affected Children in Sub-Saharan Africa · Theresa Betancourt, 311, Contributors, 333, Index, 337, Excerpted from The Culture of Mental Illness and Psychiatric Practice in Africa by Emmanuel Akyeampong, Allan G. Hill, Arthur Kleinman. Copyright (c) 2015 Indiana University Press. Excerpted by permission of Indiana University Press. All rights reserved. No part of this excerpt may be reproduced or reprinted without permission in writing from the publisher.Excerpts are provided by Dial-A-Book Inc. solely for the personal use of visitors to this web site. ( ) Excerpt The Culture of Mental Illness and Psychiatric Practice in Africa By Emmanuel Akyeampong, Allan G. Hill, Arthur Kleinman Indiana University Press Copyright (c) 2015 Indiana University Press All rights reserved. ISBN: 978-0-253-01304-0 CHAPTER 1 A HISTORICAL OVERVIEW OF PSYCHIATRY IN AFRICA EMMANUEL AKYEAMPONG Mental illness is a phenomenon in all societies. The predominance of preliterate societies in sub-Saharan Africa before the nineteenth century meant fewer written records on medical systems that could enable us to study mental illness in precolonial Africa and the efficacy of traditional African therapeutic systems. Diviners, priests, and healers (including herbalists) have a long tradition of healing in Africa, and their practice certainly predated the colonial encounter. Their skills were particularly indispensable in the case of mental illnesses, which many African societies even in the 1980s ascribed to supernatural causes such as witchcraft or offenses against the gods and ancestors (Odejide, Oyewunmi, and Ohaeri 1989, 709). It is, however, with the colonial encounter that we have our first studies of the African mind, usually by colonial psychiatrists and medical practitioners, and by extension of African healing traditions by curious Western medical men. The racial context of colonialism informed psychiatry, coloring psychiatric observations with racial prejudice and bias. Colonial psychiatry became not just a scientific interrogation of mental illness among Africans, but also an endeavor to explain the African psyche and cultures. Or, to be more precise, &quot;African culture,&quot; since key practitioners of colonial psychiatry, such as John Carothers, assumed a common African culture that had produced a generic African individual. Consequently, sweeping statements could be made about the African psyche, such as: &quot;The psychology of the African is essentially the psychology of the African child. The pattern of his mental development is defined by the time he reaches adolescence and little remains to be said&quot; (Carothers 1953, 106). Perhaps, this should not surprise us. Foucault (1988, chap. 9) reminds us of how the positivism of the nineteenth century, which cloaked psychiatry in the discourse of science, obscured the reality of psychiatry's foundations at the end of the eighteenth century in family and authority, law, and social and moral order. Colonial rule appealed to psychiatry's authoritative predisposition. By the 1980s the psychiatrist and medical anthropologist Arthur Kleinman would critique the strong turn toward biology in psychiatry and the push back against culture, as advances in psychoactive medications in the previous two decades had generated excitement in the field about finding the magic bullet for every psychiatric ailment (Kleinman 1988, 1). Colonial psychiatry in the first half of&lt;/p&gt;</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-3-7965-2631-2">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+               <foaf:name>Basel Schwabe</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Albrecht</foaf:surname>
+                        <foaf:givenname>Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Holzhey</foaf:surname>
+                        <foaf:givenname>Helmut</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ueberweg</foaf:surname>
+                        <foaf:givenname>Friedrich</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96721"/>
+        <dc:subject>=350-102=</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Germany [5123]</dc:subject>
+        <dc:subject>Philosophy [15453]</dc:subject>
+        <dc:identifier>ISBN 978-3-7965-2631-2</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>German</z:language>
+        <dcterms:abstract>The 18th century - a century full of surprises, even in philosophy, if you look closer again. Plus loads this history of philosophy a special degree. It shows the factory-oriented and detail exactly how in the German-speaking countries, but also in the north and east of Europe forming a target on Enlightenment thinking unfolded. thereby become visible and the traditions whose erosion promoted the Enlightenment critique until this process at the end of the 18th century to the awareness both of the conditions such as the limits of human thinking led. Subscribed in the band mental Panorama lets the contexts emerge, was where thought then philosophically: jurisprudence, theology, pedagogy, the new descriptive and to a certain degree already established exact sciences. Thus one finds one of 61 experts wrote, for reading and looking up encouraging overall presentation of leading by the 18th century way of philosophy in Central, Northern and Eastern Europe. There is nothing like it.</dcterms:abstract>
+        <dc:title>Grundriss der Geschichte der Philosophie: Die Philosophie des 18. Jahrhunderts</dc:title>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96721">
+        <rdf:value>Access: http://www.gbv.de/dms/weimar/toc/810550199_toc.pdf
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Edition: Völlig neu bearb. Ausg.
+In: 5,5,1.2014 (DE-601)125378890
+Access: http://www.gbv.de/dms/weimar/toc/810550199_toc.pdf Contact:             V:DE-601;DE-Wim2 Materials specified: -Q-GBV
+Class Descriptors: Dewey: 100
+Responsibility: begr. von Friedrich Ueberweg. Hrsg. von Helmut Holzhey
+Entry: 20141203
+Update: 20151208
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-107-05942-9">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>New York, NY, USA</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Cambridge University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Albu</foaf:surname>
+                        <foaf:givenname>Emily</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98731"/>
+        <dc:subject>=320-121=</dc:subject>
+        <dc:subject>Cartography  [204]</dc:subject>
+        <dc:subject>Holy Roman Empire [588]</dc:subject>
+        <dc:subject>Maps; atlases [4718]</dc:subject>
+        <dc:subject>Medieval [851]</dc:subject>
+        <dc:identifier>ISBN 978-1-107-05942-9</dc:identifier>
+        <dc:date>2014</dc:date>
+        <dc:description>OCLC: 892039813</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>The Peutinger Map remains the sole medieval survivor of an imperial world-mapping tradition. It depicts most of the inhabited world as it was known to the ancients, from Britain's southern coastline to the farthest reaches of Alexander's conquests in India, showing rivers, lakes, islands, and mountains while also naming regions and the peoples who once claimed the landscape. Onto this panorama, the mapmaker has plotted the ancient Roman road network, with hundreds of images along the route and distances marked from point to point. This book challenges the artifact's self-presentation as a Roman map by examining its medieval contexts of crusade, imperial ambitions, and competition between the German-Roman Empire and the papacy.</dcterms:abstract>
+        <dc:title>The Medieval Peutinger Map: Imperial Roman Revival in a German Empire</dc:title>
+        <z:shortTitle>The medieval Peutinger map</z:shortTitle>
+        <z:numPages>169</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98731">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Introduction -- Roman roads and Roman perceptions of space -- The battle of the maps -- Christian maps and the Peutinger Map -- German emperors, Crusades, and an imperial map -- Images and the medieval map -- Conclusion : Roman roads and Romanitas : the medieval map in the Holy Roman Empire.
+Named Person: Peutinger, Konrad, 1465-1546 or 1547. Peutinger, Konrad, 1465-1546 or 1547. Genre/Form:         Early maps.
+Time: Medeltiden
+Geographic: Romerska riket. Tyskland.
+Title Subject: Tabula Peutinger.
+Note(s): Includes bibliographical references and index.
+Class Descriptors: LC: G1033; GA205; Dewey: 912.37
+Responsibility: Emily Albu.
+Vendor Info: YBP Library Services (YANK)
+Entry: 20140224
+Update: 20160227
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-4724-3263-6">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                        <vcard:locality>Farnham Surrey ; Burlington</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Ashgate</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Albury</foaf:surname>
+                        <foaf:givenname>W. R.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=330-1=</dc:subject>
+        <dc:subject>Book of the courtier (1528)</dc:subject>
+        <dc:subject>Castiglione, Baldassarre (1478 –1529)</dc:subject>
+        <dc:subject>Courts and courtiers [16397]</dc:subject>
+        <dc:subject>Early modern [15223]</dc:subject>
+        <dc:subject>Patronage [17483]</dc:subject>
+        <dc:subject>Science and literature [1137]</dc:subject>
+        <dc:subject>Science and politics [1142]</dc:subject>
+        <dc:identifier>ISBN 978-1-4724-3263-6</dc:identifier>
+        <dc:date>2014</dc:date>
+        <dc:subject>
+           <dcterms:LCC><rdf:value>BJ1604 .A43 2014</rdf:value></dcterms:LCC>
+        </dc:subject>
+        <z:libraryCatalog>Library of Congress ISBN</z:libraryCatalog>
+        <dcterms:abstract>Castiglione’s Book of the Courtier (Il libro del cortegiano, 1528), a dialogue in which the interlocutors attempt to describe the perfect courtier, was one of the most influential books of the Renaissance. In recent decades a number of postmodern readings of this work have appeared, emphasizing what is often characterized as the playful indeterminacy of the text, and seeking to detect inconsistencies which are interpreted as signs of anxiety or bad faith in its presentation.In contrast to these postmodern readings, the present study conducts an experiment. What understanding does one gain of Castiglione’s book if one attempts an early modern reading? The author approaches The Book of the Courtier as a text in which some of its most important aspects are intentionally concealed and veiled in allegory. W.R. Albury argues that this early modern reading of The Book of the Courtier enables us to recover a serious political message which has a great deal of contemporary relevance and which is lost from sight when the work is approached primarily as a courtly etiquette book, or as a lament for the lost influence of the aristocracy in an age when autocratic nation-states were coming into being, or as an impersonal textual field upon which a free play of transformations and deconstructions may be performed.</dcterms:abstract>
+        <dc:title>Castiglione's Allegory: Veiled Policy in the &lt;i&gt;Book of the Courtier (1528)&lt;/i&gt;</dc:title>
+        <z:shortTitle>Castiglione's allegory</z:shortTitle>
+        <z:numPages>275</z:numPages>
+    </bib:Book>
+    <bib:Book rdf:about="urn:isbn:978-0-8032-4484-9">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>The Mexican experience</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Lincoln, Nebraska</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>University of Nebraska Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Alegre</foaf:surname>
+                        <foaf:givenname>Robert F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97923"/>
+        <dc:subject>=370-160=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Labor and laborers [15001]</dc:subject>
+        <dc:subject>Mexico  [844]</dc:subject>
+        <dc:subject>Railroads  [1087]</dc:subject>
+        <dc:identifier>ISBN 978-0-8032-4484-9</dc:identifier>
+        <dc:date>2013</dc:date>
+        <dc:description>OCLC: 839395914</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Despite the Mexican government's projected image of prosperity and modernity in the years following World War II, workers who felt that Mexico's progress had come at their expense became increasingly discontented. From 1948 to 1958, unelected and often corrupt officials of STFRM, the railroad workers' union, collaborated with the ruling Institutionalized Revolutionary Party (PRI) to freeze wages for the rank and file. In response, members of STFRM staged a series of labor strikes in 1958 and 1959 that inspired a nationwide working-class movement. The Mexican army crushed the last strike on March 26, 1959, and union members discovered that in the context of the Cold War, exercising their constitutional right to organize and strike appeared radical, even subversive. Railroad Radicals in Cold War Mexico examines a pivotal moment in post-World War II Mexican history. This study of railroad labor activism argues that the railway strikes of the 1950s constituted the first and boldest challenge to PRI rule and marked the beginning of mass dissatisfaction with the ruling party. In addition, Robert F. Alegre gives the wives of the railroad workers a narrative place in this history by incorporating issues of gender identity in his analysis&quot;-- &quot;An in-depth study of railroad labor activism in the context of Mexico's Cold War experience.</dcterms:abstract>
+        <dc:title>Railroad Radicals in Cold War Mexico: Gender, Class, and Memory</dc:title>
+        <z:shortTitle>Railroad radicals in Cold War Mexico</z:shortTitle>
+        <z:numPages>275</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97923">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Time: 1900 - 1999
+Geographic: Mexico -- History -- 20th century. Mexiko. Mexico.
+Note(s): Includes bibliographical references (pages 255-266) and index.
+Class Descriptors: LC: HD6534.R1; Dewey: 331.88/11385097209045
+Responsibility: Robert F. Alegre ; foreword by Elena Poniatowska.
+Vendor Info: Brodart Baker and Taylor Coutts Information Services YBP Library Services (BROD BTCP COUT YANK)
+Entry: 20130719
+Update: 20160407
+Provider: OCLC
+List of Illustrations     viii  Foreword  ix     Elena Poniatowska    Acknowledgments  xiii    List of Abbreviations     xix    Map of Mexico     xx  Introduction: The Working Class in Cold War Mexico  1(22)    1 &quot;The Mexican Revolution Was Made on the Rails&quot;: Revolutionary Nationalism, Class Formation, and the Early Impact of the Cold War     23(42)    2 &quot;Born into the Railway&quot;: Patriarchy, Community, and Underground Activism in the 1950s     65(37)    3 &quot;Who Is Mr. Nobody?&quot;: The Rise of Democratic Unionism     102(39)    4 The &quot;War of Position&quot;: The Making of a Strike</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-7748-2504-7">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Vancouver ; Toronto</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>UBC Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Alexander</foaf:surname>
+                        <foaf:givenname>Jeffrey W.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97710"/>
+        <dc:subject>=370-163=</dc:subject>
+        <dc:subject>Agriculture [15538]</dc:subject>
+        <dc:subject>Beer industry; beer making [18101]</dc:subject>
+        <dc:subject>Japan [5131]</dc:subject>
+        <dc:identifier>ISBN 978-0-7748-2504-7</dc:identifier>
+        <dc:date>2013</dc:date>
+        <dc:description>OCLC: 851238273</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>This book is the very first in English to explore beer’s steady rise to become Japan’s “beverage of the masses.” Based on his extensive translations of Japanese-language source material, author Jeffrey W. Alexander reveals how Japanese brewers adopted and domes- ticated beer in just a few generations, despite its entirely foreign origins.
+
+Brewed in Japan explores the start of beer brewing in Japan, the many challenges facing major brewers during the Second World War, and the postwar industry’s continuing evolution through craft beer and innovative beer-like products. Written not simply for Japan specialists, this book will appeal to beer industry professionals, craft beer enthusiasts, and anyone with an interest in Japanese history and culture.
+
+Featuring nearly 300 pages of text, dozens of photographs and period advertisements, and a vast bibliography, Brewed in Japan is both a close analysis of Japan’s leading brewing firms and a reveal- ing look at the fascinating country in which they do business.</dcterms:abstract>
+        <dc:title>Brewed in Japan: The Evolution of the Japanese Beer Industry</dc:title>
+        <z:shortTitle>Brewed in Japan</z:shortTitle>
+        <z:numPages>302</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97710">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Foreign influences : the origins of Japan's beer brewing industry, 1868-1906 -- Keeping up appearances : maintaining beer's German authenticity, 1906-36 -- Brewing self-sufficiency : beer, empire, and the wartime command economy, 1937-45 -- &quot;The taste of home&quot; : beer as postwar Japanese commodity, 1945-72 -- Learning from Japan : &quot;Orion beer&quot; and Okinawan consumer identity, 1945-72 -- Indigenous brews : innovation, entrepreneurship, and beer's continuing evolution since the 1970s.
+Geographic: Japan. Japan.
+Note(s): Includes bibliographical references and index./ Issued also in electronic format.
+Class Descriptors: LC: HD9397.J32; Dewey: 338.4/7663420952; NLC:                HD9397 J32
+Responsibility: Jeffrey W. Alexander.
+Vendor Info: YBP Library Services Baker and Taylor Coutts Information Services (YANK BTCP COUT)
+Entry: 20130626
+Update: 20151025
+Provider: OCLC
+List of Illustrations     ix  Acknowledgments  xi  Introduction: Beer's Evolution into a Japanese Commodity  1(5)    1 Foreign Influences: The Origins of Japan's Beer Brewing Industry, 1868-1906</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-262-29440-9">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+           <foaf:Organization><foaf:name>MIT Press</foaf:name></foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Allenby</foaf:surname>
+                        <foaf:givenname>Braden R.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Sarewitz</foaf:surname>
+                        <foaf:givenname>Daniel</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_98471"/>
+        <dc:subject>=375-160=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>21st century [17]</dc:subject>
+        <dc:subject>Definition of human; human nature [15631]</dc:subject>
+        <dc:subject>Humanism [15649]</dc:subject>
+        <dc:subject>Human-machine interaction [14934]</dc:subject>
+        <dc:subject>Progress, ideas of [15901]</dc:subject>
+        <dc:subject>Technology and society [15504]</dc:subject>
+        <dc:identifier>ISBN 978-0-262-29440-9</dc:identifier>
+        <dc:date>2011-04-22</dc:date>
+        <z:libraryCatalog>Google Books</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>In The Techno-Human Condition, Braden Allenby and Daniel Sarewitz explore what it means to be human in an era of incomprehensible technological complexity and change. They argue that if we are to have any prospect of managing that complexity, we will need to escape the shackles of current assumptions about rationality, progress, and certainty, even as we maintain a commitment to fundamental human values.Humans have been co-evolving with their technologies since the dawn of prehistory. What is different now is that we have moved beyond external technological interventions to transform ourselves from the inside out -- even as we also remake the Earth system itself. Coping with this new reality, say Allenby and Sarewitz, means liberating ourselves from such categories as &quot;human,&quot; &quot;technological,&quot; and &quot;natural&quot; to embrace a new techno-human relationship.</dcterms:abstract>
+        <dc:title>The Techno-Human Condition</dc:title>
+        <z:numPages>235</z:numPages>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_98471">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://books.google.com/books?id=I6YysPEgyYIC</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-07-31 00:39:42</dcterms:dateSubmitted>
+        <dc:title>Google Books Link</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Book rdf:about="urn:isbn:978-959-05-0731-1">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>Historia de la ciencia</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>La Habana, Cuba</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Editorial Científico-Técnica</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Altshuler</foaf:surname>
+                        <foaf:givenname>José</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98652"/>
+        <dc:subject>=360-161=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Communication technology [16144]</dc:subject>
+        <dc:subject>Cross-national interaction [301]</dc:subject>
+        <dc:subject>Cuba [16189]</dc:subject>
+        <dc:identifier>ISBN 978-959-05-0731-1</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>Spanish</z:language>
+        <dcterms:abstract>In describing the checkered history of Cuba’s international communications, José Altshuler provides sufficient detail to satisfy any hardware buff, balanced by a nuanced view of the political context of Cuba’s development as an independent modern nation. [</dcterms:abstract>
+        <dc:title>Las Comunicaciones Internacionales De Cuba: Del Correo Marítimo Al Satélite</dc:title>
+        <z:shortTitle>Las comunicaciones internacionales de Cuba</z:shortTitle>
+        <z:numPages>148</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98652">
+        <rdf:value>&lt;p&gt;External Resources: Cite This Item Search for versions with same title and author | Advanced options ... Geographic: Cuba. Note(s): Includes bibliographical references (pages [129]-140) and indexes. Class Descriptors: LC: HE225.A2 Responsibility: José Altshuler. Entry: 20160121 Update: 20160220 Provider: OCLC&lt;/p&gt;</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-107-67119-5">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+               <foaf:name>New York, NY, USA Cambridge University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Amadae</foaf:surname>
+                        <foaf:givenname>S. M. VerfasserIn</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97670"/>
+        <dc:subject>=375-102=</dc:subject>
+        <dc:subject>20th century, late [16]</dc:subject>
+        <dc:subject>Game theory [494]</dc:subject>
+        <dc:subject>Neoliberalism [32934]</dc:subject>
+        <dc:subject>Philosophy [15453]</dc:subject>
+        <dc:subject>Political economy [18070]</dc:subject>
+        <dc:subject>Political science [15632]</dc:subject>
+        <dc:identifier>ISBN 978-1-107-67119-5</dc:identifier>
+        <dc:date>2016</dc:date>
+        <dc:description>OCLC: 938444527</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Is capitalism inherently predatory? Must there be winners and losers? Is public interest outdated and free-riding rational? Is consumer choice the same as self-determination? Must bargainers abandon the no-harm principle? Prisoners of Reason recalls that classical liberal capitalism exalted the no-harm principle. Although imperfect and exclusionary, modern liberalism recognized individual human dignity alongside individuals' responsibility to respect others. Neoliberalism, by contrast, views life as ceaseless struggle. Agents vie for scarce resources in antagonistic competition in which every individual seeks dominance. This political theory is codified in non-cooperative game theory; the neoliberal citizen and consumer is the strategic rational actor. Rational choice justifies ends irrespective of means. Money becomes the medium of all value. Solidarity and good will are invalidated. Relationships are conducted on a quid pro quo basis. However, agents can freely opt out of this cynical race to the bottom by embracing a more expansive range of coherent action.</dcterms:abstract>
+        <dc:title>Prisoners of Reason Game Theory and Neoliberal Political Economy</dc:title>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97670">
+        <rdf:value>Access: http://www.gbv.de/dms/bowker/toc/9781107671195.pdf
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Access: http://www.gbv.de/dms/bowker/toc/9781107671195.pdf Contact:             V:DE-601;Bowker Materials specified: Inhaltsverzeichnis
+Identifier: Game theory; Political aspects; International relations; Neoliberalism; Political science; Philosophy; Social choice; Political aspects
+Note(s): Includes bibliographical references and index
+Class Descriptors: LC: HB144; Dewey: 320.01/5193
+Responsibility: S. M. Amadae (Massachusetts Institute of Technology)
+Entry: 20150728
+Update: 20160519
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-8265-2020-3">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Nashville</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Vanderbilt University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Amador</foaf:surname>
+                        <foaf:givenname>José</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98878"/>
+        <dc:subject>=360-152=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century, early [15]</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:subject>North America [5141]</dc:subject>
+        <dc:subject>Public health [1065]</dc:subject>
+        <dc:identifier>ISBN 978-0-8265-2020-3</dc:identifier>
+        <dc:date>2015</dc:date>
+        <dc:description>OCLC: 878667496</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Health of Empire is a transnational history of public health and intellectual thought following the U.S. imperial expansion of 1898. Jose Amador shows that physicians and intellectuals in Cuba, Puerto Rico, and Brazil, and not just itinerant American health officials, defined the political and cultural terms of public health campaigns.</dcterms:abstract>
+        <dc:title>Medicine and Nation Building in the Americas, 1890-1940</dc:title>
+        <z:numPages>219</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98878">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Cautionary tales : narratives of disease, danger, and possibility -- Beyond yellow fever eradication : nation and racial gatekeeping in cuba -- The pursuit of health : colonialism and hookworm eradication in Puerto Rico -- Converging missions : public health bandeiras and rockefeller philanthropy in Brazil -- A turn to culture : public health legacies and transnational academic circuits.
+Time: 1800-1999
+Geographic: Latin America -- Social conditions. Latin America -- History -- 19th century. Latin America -- History -- 20th century. Americas. Latin America. North America.
+Note(s): Includes bibliographical references (pages 191-210) and index.
+General Info: Awards:             Norman L. and Roselea J. Goldberg Prize
+Class Descriptors: LC: R464.5; Dewey: 362.109/034; NLM:                2015 C-685; WA 540 DA1
+Responsibility: Jos� Amador.
+Vendor Info: Brodart Baker and Taylor YBP Library Services YBP Library Services (BROD BTCP YANK YANK)
+Entry: 20140423
+Update: 20160509
+Provider: OCLC
+Part II: Crossings, 2. Beyond Yellow Fever Eradication Nation and Racial Gatekeeping in Cuba, 39, 3. The Pursuit of Health Colonialism and Hookworm Eradication in Puerto Rico, 68, 4. Converging Missions Public Health Bandeiras and Rockefeller Philanthropy in Brazil, 95, Part III: Legacies, 5. A Turn to Culture Public Health Legacies and Transnational Academic Circuits, 121, Conclusion: Disentangling Transnational Histories, 151, Notes, 159, Bibliography, 191, Index, 211,   Excerpted from Medicine and Nation Building in the Americas, 1890–1940 by Jos&amp;#233; Amador. Copyright (c) 2015 Vanderbilt University Press. Excerpted by permission of Vanderbilt University Press. All rights reserved. No part of this excerpt may be reproduced or reprinted without permission in writing from the publisher.Excerpts are provided by Dial-A-Book Inc. solely for the personal use of visitors to this web site.   (  ) Excerpt Medicine and Nation Building in the Americas, 1890–1940 By Jos&amp;#233; Amador Vanderbilt University Press  Copyright (c) 2015 Vanderbilt University Press All rights reserved. ISBN: 978-0-8265-2020-3 CHAPTER 1 Cautionary Tales Narratives of Disease, Danger, and Possibility When in 1913 the thirty-two-year-old Cuban criminologist Fernando Ortiz published Entre cubanos, psicologia tropical (Among Cubans, tropical psychology), a short collection of essays about the political and social crisis of his country, he was participating in a conversation that had troubled intellectuals living in tropical America since the 1880s. He opened the book by offering his words to the &quot;somnolent sons of the tropics.&quot; In a place punished by a sizzling sun, he lamented, &quot;sleeping sickness&quot; prevented even the most enlightened citizens from confronting national problems. The use of natural and medical imagery to represent unnecessary suffering was only one of the narrative strategies that scientifically minded writers employed to call for reform. The other strategy proposed remedial action and appeared just a few lines later when Ortiz invited both &quot;great thinkers&quot; and &quot;humble laborers&quot; to join in the &quot;regenerative task&quot; of the nation. While Ortiz used metaphors of decline and progress to analyze Cuban society, Entre cubanos was part of a new cluster of narratives undertaken by intellectuals preoccupied with attaining tropical modernity. Ortiz's remarks were emblematic of the ways organic analogies held a powerful sway over social thinkers who believed they were uniquely qualified for diagnosing and treating social and political pathologies. Through scientific discourse, cautionary tales challenged readers to connect their actions to the maladies of society. The tension between demise and progress dotted the writings of physicians, lawyers, journalists, engineers, and social scientists across the tropics in the late nineteenth and early twentieth centuries. In the decades before and after the end of slavery, intellectuals in Cuba, Puerto Rico, and Brazil used various narrative forms to explore how European ideas about environmental and racial degeneration applied to&amp;#8212;or broke down in&amp;#8212;plantation societies. Because science provided writers with endless possibilities in terms of envisioning the progress of society, they were unwilling to accept that modernity could never be achieved in the tropics. Their challenge was to borrow and adapt from European theories while securing the possibility of redemption. To complicate matters, they had to wrestle with the unfolding effects of slave emancipation, accelerated urbanization, and rapid political change. Under these circumstances, Cuban, Puerto Rican, and Brazilian intellectuals engaged in what historian Nancy Leys Stepan describes as the &quot;selective appropriation and re-elaboration of European theories of places, peoples, and diseases.&quot; Through the naturalist novel, the medical treaty, the criminological tract, and the hygienic manual, they employed the language of science to forge a bond between the reader who could help and the people suffering from the evils of plantation societies. By implicating readers in this suffering and warning them about the consequences of inaction, these narratives inaugurated new forms of calling for public engagement. It is not surprising that cautionary tales gained popularity as theories of disease were being tested by the new disciplines of bacteriology and tropical medicine. This convergence captured the imagination of intellectuals who popularized the lessons of science to engender a reform consciousness among the reading public. Confident that science provided the tools to expose the lineaments of causality, intellectuals identified the pathologies of society and associated them to particular people and spaces. Racialized ideas of proper behavior always hovered over these narratives, calling attention to the transgression of racial, class, and sexual boundaries. Writers registered their ambivalence toward these transgressions in texts that portrayed society as a sick organism. Their cautionary narratives thus followed the formulaic structure of a clinical case study. They began with the identification of a social malady, included a discussion of its treatment, and ended in death and devastation. These narratives also made clear that this dire outcome could be easily avoided. An enlightened narrator or character usually offered a model of ameliorative action, making intelligible the promise of redemption to readers even if within the text it was never achieved. Like the best cautionary tales, their pages warned educated readers about potential despair in order to persuade them that what the country needed was a forceful new government, one that would use science to promote stability, rationality, and the law. Because cautionary narratives were cultural products that arose within a particular historical context, to write about them is necessarily to write about the politics of representation. The work of historian Thomas Laqueur serves to clarify how material and ideological conditions exert influence on writers who seek a politics of reform. In his analysis of the humanitarian narrative in the eighteenth and early nineteenth centuries, Laqueur argues that scientific discourse provided a way to represent both the causes of suffering&amp;#8212;disease, pollution, exploitation&amp;#8212;and models of &quot;precise social action.&quot; Yet Laqueur warns that the representation of suffering bodies in itself does not necessarily elicit a &quot;particular moral response.&quot; The humanitarian narrative achieves this objective when the possibility of positive human agency is represented in a particular social context that compels readers to reevaluate their actions. This same call to action is at the heart of cautionary tales written in societies struggling with the demise of slavery. While the primary preoccupation of Cuban, Puerto Rican, and Brazilian writers was to invalidate claims about the impossibility of tropical modernity, they still had to grapple with the reality of slavery as a recent memory, plantation agriculture as an exclusive source of wealth, and nature as a seemingly endless repository of disease. Their challenge was how to represent the possibility of building a modern, tropical society. If European theories of race and climate precluded this possibility, intellectuals in tropical America did more than simply translate and transplant those theories. Their writings reformulated those principles to transcend those determinisms and promote reformists' campaigns. This is the story of their ideological efforts&amp;#8212;a story of authors telling stories about the sick and corrupt character of society to open a space of possibility. These efforts were taken up by prominent and less-known intellectuals and crossed a wide array of literary genres. Cautionary tales, even at their most tragic, affirmed the survival of society because intellectuals engaged scientific and medical theories on their own terms. Maneuvering Science Writers in Cuba, Puerto Rico, and Brazil attempted to escape the rigidity of deterministic theories originally developed in Europe at a time when economic and political unrest at home seemed impossible to avoid. Since the mid-nineteenth century, pressures from European powers, abolitionists, free people of color, and slaves themselves had cleared the way for the overthrow of slavery and the disruption of plantation economies. These efforts had culminated in the complete abolition of slavery in Cuba (1886), Puerto Rico (1873), and Brazil (1888). The abolition debate involved more than the demise of slavery. It involved a reappraisal of society and political turmoil. From the late 1860s to the late 1890s, Cubans and Puerto Ricans used abolition to redefine, through both military and political means, their colonial relation with Spain. In Cuba, the wars of independence precipitated the military intervention of the United States in 1898. The intervention resulted in an imperial transition that shifted power over Cuba and Puerto Rico from Spain to the United States. In Brazil, emancipation also led to swift political changes. One year after slavery ended, Brazilians saw the demise of the empire and the birth of a conservative, oligarchic republic. Despite the distinct dynamics that shaped the political destinies of each society, intellectuals across the region girdled their reform programs in cautionary tales that evoked social and medical anxieties to explore the merits of scientific governance.</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-374-53499-8">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>New York, NY</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Farrar, Straus and Giroux</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Amir</foaf:surname>
+                        <foaf:givenname>Alexander</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=340-103=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>Calculus [4866]</dc:subject>
+        <dc:subject>Counter-Reformation [CBA000120654]</dc:subject>
+        <dc:subject>Early modern [15223]</dc:subject>
+        <dc:subject>Galilei, Galileo (1564-1642) [8931]</dc:subject>
+        <dc:subject>Jesuits [5750]</dc:subject>
+        <dc:subject>Mathematics [4972]</dc:subject>
+        <dc:subject>Natural philosophy [15663]</dc:subject>
+        <dc:subject>Reformation [15648]</dc:subject>
+        <dc:subject>Renaissance  [1098]</dc:subject>
+        <dc:subject>Science and politics [1142]</dc:subject>
+        <dc:subject>Science and religion [1153]</dc:subject>
+        <dc:identifier>ISBN 978-0-374-53499-8</dc:identifier>
+        <dc:date>2015</dc:date>
+        <dc:description>OCLC: 846545899</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <dcterms:abstract>The epic battle over a mathematical concept that shook the old order and shaped the world as we know it. On August 10, 1632, five leaders of the Society of Jesus convened in a somber Roman palazzo to pass judgment on a simple idea: that a continuous line is composed of distinct and limitlessly tiny parts. The doctrine would become the foundation of calculus, but on that fateful day the judges ruled that it was forbidden. With the stroke of a pen they set off a war for the soul of the modern world. Amir Alexander's Infinitesimal is the story of the struggle that pitted Europe's entrenched powers against voices for tolerance and change. It takes us from the bloody religious strife of the sixteenth century to the battlefields of the English civil war and the fierce confrontations between leading thinkers like Galileo and Hobbes. We see how a small mathematical disagreement became a contest over the nature of the heavens and the earth: Was the world entirely known and ruled by a divinely sanctioned rationality and hierarchy? Or was it a vast and mysterious place, ripe for exploration? The legitimacy of popes and kings, as well as our modern beliefs in human liberty and progressive science, hung in the balance; the answer hinged on the infinitesimal. Pulsing with drama and excitement, Infinitesimal will forever change the way you look at a simple line--and celebrates the spirit of discovery, innovation, and intellectual achievement</dcterms:abstract>
+        <dc:title>Infinitesimal: How a Dangerous Mathematical Theory Shaped the Modern World</dc:title>
+        <z:shortTitle>Infinitesimal</z:shortTitle>
+        <z:numPages>352</z:numPages>
+    </bib:Book>
+    <bib:Book rdf:about="urn:isbn:978-0-253-01494-8">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Series>
+               <dc:title>China Medical Board centennial series;</dc:title>
+            </bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Bloomington</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Indiana University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:editors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Andrews</foaf:surname>
+                        <foaf:givenname>Bridie</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bullock</foaf:surname>
+                        <foaf:givenname>Mary Brown</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:editors>
+        <dcterms:isReferencedBy rdf:resource="#item_97278"/>
+        <dc:subject>=370-150=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>China [5111]</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:subject>Osteopathic medicine [17522]</dc:subject>
+        <dc:subject>Public health [1065]</dc:subject>
+        <dc:identifier>ISBN 978-0-253-01494-8</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>This volume examines important aspects of China''s century-long search to provide appropriate and effective health care for its people. Four subjects-disease and healing, encounters and accommodations, institutions and professions, and people''s health-organize discussions across case studies of schistosomiasis, tuberculosis, mental health, and tobacco and health. Among the book's significant conclusions are the importance of barefoot doctors in disseminating western medicine, the improvements in medical health and services during the long Sino-Japanese war, and the important role of the Chine.</dcterms:abstract>
+        <dc:title>Medical Transitions in Twentieth-Century China</dc:title>
+        <z:numPages>435</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97278">
+        <rdf:value>Access: http://public.eblib.com/choice/publicfullrecord.aspx?p=1782270
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: China's exceptional health transitions : overcoming the four horsemen of the apocalypse / Lincoln Chen and Ling Chen -- Changing patterns of diseases and longevity : the evolution of health in twentieth-century Beijing / Daqing Zhang -- Maternal and child health in nineteenth- to twenty-first-century China / Tina Phillips Johnson and Yi-Li Wu -- Tobacco smoking and health in twentieth-century China / Carol Benedict -- Epidemics and public health in twentieth-century China : plague, smallpox, and AIDS / Xinzhong Yu -- Schistosomiasis / Miriam Gross and Kawai Fan -- Tuberculosis control in Shanghai : bringing health to the masses, 1928-present / Rachel Core -- The development of psychiatric services in China : Christianity, Communism, and community / Veronica Pearson -- Foreign models of medicine in twentieth-century China / Xi Gao -- John B. Grant : public health and state medicine / Liping Bu -- The influence of war on China's modern health systems / Nicole Elizabeth Barnes and John R. Watt -- The institutionalization of Chinese medicine / Volker Scheid and Sean Hsiang-Lin Lei -- Barefoot doctors and the provision of rural health care / Xiaoping Fang -- A case study of transnational flows of Chinese medical professionals : China medical board and Rockefeller Foundation Fellows / Mary Brown Bullock -- The development of modern nursing in China / Sonya Grypma and Cheng Zhen -- The evolution of the hospital in twentieth-century China / Michelle Renshaw -- Conclusions : the history of medicine in twentieth-century China / Bridie Andrews.
+Access: Materials specified:    Ebook Library http://public.eblib.com/choice/publicfullrecord.aspx?p=1782270
+Materials specified: ebrary http://site.ebrary.com/id/10929469
+Materials specified: EBSCOhost http://search.ebscohost.com/login.aspx?direct=true&amp;scope=site&amp;db=nlebk&amp;db=nlabk&amp;AN=845353
+Materials specified: JSTOR http://www.jstor.org/stable/10.2307/j.ctt16f992b
+Materials specified: Project MUSE http://muse.jhu.edu/books/9780253014948/
+Time: 1900 - 1999
+Geographic: China.
+Note(s): Includes bibliographical references and index.
+General Info: Other format available: Print version:
+Class Descriptors: LC: R601; Dewey: 610.951; NLM:                    WZ 70 JC6
+Responsibility: edited by Bridie Andrews and Mary Brown Bullock.
+Vendor Info: EBL - Ebook Library ebrary EBSCOhost Project MUSE YBP Library Services (EBLB EBRY EBSC MUSE YANK)
+Material Type: Document (dct); Internet resource (url); eBook (ebk)
+Date of Entry: 20141001
+Update: 20160402
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-7748-2432-3">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+           <foaf:Organization><foaf:name>UBC Press</foaf:name></foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Andrews</foaf:surname>
+                        <foaf:givenname>Bridie</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_97933"/>
+        <dc:subject>=230-150=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>1850-1960</dc:subject>
+        <dc:subject>China [5111]</dc:subject>
+        <dc:subject>Cross-cultural comparison [299]</dc:subject>
+        <dc:subject>East Asia, civilization and culture [382]</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:subject>Medicine, Chinese traditional [15535]</dc:subject>
+        <dc:identifier>ISBN 978-0-7748-2432-3</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>Google Books</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>Medical care in nineteenth-century China was spectacularly pluralistic: herbalists, shamans, bone-setters, midwives, priests, and a few medical missionaries from the West all competed for patients. This book examines the dichotomy between &quot;Western&quot; and &quot;Chinese&quot; medicine, showing how it has been greatly exaggerated. As missionaries went to lengths to make their medicine more acceptable to Chinese patients, modernizers of Chinese medicine worked to become more &quot;scientific&quot; by eradicating superstition and creating modern institutions. Andrews challenges the supposed superiority of Western medicine in China while showing how &quot;traditional&quot; Chinese medicine was deliberately created in the image of a modern scientific practice.</dcterms:abstract>
+        <dc:title>The Making of Modern Chinese Medicine, 1850-1960</dc:title>
+        <z:numPages>294</z:numPages>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_97933">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://books.google.com/books?id=AjYtnQEACAAJ</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-05-25 18:41:05</dcterms:dateSubmitted>
+        <dc:title>Google Books Link</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Book rdf:about="urn:isbn:978-0-19-875515-9">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>New York, NY</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Oxford University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Anduaga</foaf:surname>
+                        <foaf:givenname>Aitor</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=370-120=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Atmosphere (Earth) [1528]</dc:subject>
+        <dc:subject>Earth sciences [378]</dc:subject>
+        <dc:subject>Engineering [15505]</dc:subject>
+        <dc:subject>Geophysics [CBA000114398]</dc:subject>
+        <dc:subject>Industry [17439]</dc:subject>
+        <dc:subject>Physics [5031]</dc:subject>
+        <dc:subject>Realism [1089]</dc:subject>
+        <dc:subject>Science and economics [1123]</dc:subject>
+        <dc:subject>Social construction; constructivism [558]</dc:subject>
+        <dc:identifier>ISBN 978-0-19-875515-9</dc:identifier>
+        <dc:date>2016</dc:date>
+        <dc:description>OCLC: 937391193</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <dcterms:abstract>Have industry and commerce affected the concepts, values, and epistemic foundations of different sciences? If so, how and to what extent? This book suggests that the most significant influence of industry on science, in the two case studies treated here, had to do with the issue of realism. These two cases deal with the elucidation of the layers of the upper atmosphere and the Earth’s crust. Using wave propagation as the common thread, this book simultaneously analyses the emergence of realist attitudes towards the entities of the ionosphere and the Earth’s crust. However, what was it that led physicists and engineers to adopt realist attitudes? This book suggests that a new kind of realism—one with social and cultural origins—is the answer: a preliminary, entity realism responding to specific commercial and engineering interests; i.e. a realism that was neither strictly instrumental nor exclusively operational. The book has two parts: while Part I focuses on the study of the ionosphere and how the British radio industry affected ionospheric physics, Part II focuses on the study of the Earth’s crust and how the American oil industry affected crustal seismology.</dcterms:abstract>
+        <dc:title>Geophysics, Realism, and Industry: How Commercial Interests Shaped Geophysical Conceptions, 1900-1960</dc:title>
+        <z:shortTitle>Geophysics, Realism, and Industry</z:shortTitle>
+        <z:numPages>339</z:numPages>
+    </bib:Book>
+    <bib:Book rdf:about="urn:isbn:978-3-515-10917-8">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>Medizingeschichte</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Stuttgart</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Franz Steiner Verlag</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ankele</foaf:surname>
+                        <foaf:givenname>Monika</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Brinkschulte</foaf:surname>
+                        <foaf:givenname>Eva</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96530"/>
+        <dc:subject>=360-151=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Germany [5123]</dc:subject>
+        <dc:subject>Mental disorders and diseases [15091]</dc:subject>
+        <dc:subject>Psychiatric hospitals [15941]</dc:subject>
+        <dc:subject>Psychiatry [5041]</dc:subject>
+        <dc:subject>Public health [1065]</dc:subject>
+        <dc:identifier>ISBN 978-3-515-10917-8</dc:identifier>
+        <dc:date>2015</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>German</z:language>
+        <dcterms:abstract>Like no other treatment approach has to work as a therapeutic agent accompanied the institution psychiatry from the start and continues to have - albeit in highly modified form -. Their place in therapy offer psychiatric institutions Despite this outstanding place occupied they occupied and assumes she's not been widely studied. This band the first time provides a historical overview of the therapeutic concept of work and its importance for the treatment of the mentally ill since the early 19th century until the Nazi period. The contributions illuminate close to the source and with different emphases, the practice of occupational therapy in individual institutions and put this into the context of political, economic and social developments of their time. Thus, breaks and continuities of work therapy concept, changing objectives as well as the diverse effects of its application visible. Sociological and philosophical approaches also enhance the views of the different concepts of work and their functionalization by psychiatry.</dcterms:abstract>
+        <dc:title>Arbeitsrhythmus und Anstaltsalltag: Arbeit in der Psychiatrie vom frühen 19. Jahrhundert bis in die NS-Zeit</dc:title>
+        <z:shortTitle>Arbeitsrhythmus und Anstaltsalltag</z:shortTitle>
+        <z:numPages>237</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96530">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Einführung -- Arbeitsrhythmus und Anstaltsalltag : eine Einführung in den Sammelband / Monika Ankele -- &quot;Arbeit&quot; und &quot;Anstalt&quot; : eine Multiperspektivische Betrachtung Zweier Konzepte -- Arbeit und Arbeitstherapie : historisch geleitete Assoziationen / Heinz-Peter Schmiedebach, Eva Brinkschulte -- Neutralisierung &quot;sozialer&quot; Folgen psychischer Krankheit oder : &quot;Die Irrenanstalt nach allen ihren Beziehungen&quot;? Arbeit und die Irrenanstalt als Organisation, ca. 1830-1930 / Kai Sammet -- Patientenarbeit vor dem Ersten Weltkrieg : Therapie und Ökonomie -- Patientenarbeit in ländlichen psychiatrischen Anstalten im Spannungsfeld zwischen therapeutischem Zweck und ökonomischem Nutzen / Thomas Müller -- &quot;Heilsam, förderlich, wirtschaftlich&quot; : zur Rechtfertigung, Durchfuhrung und Aneignung der Arbeitstherapie in der Landes-Heil- und Pflegeanstalt Uchtspringe 1894-1914 / Anna Urbach -- &quot;Praktiken der Normalisierung&quot; : Erziehung, Beschulung und Berufsvorbereitung &quot;bildungsfähiger schwachsinniger&quot; Kinder in den Wittenauer Heilstätten / Petra Fuchs -- Arbeitstherapie in der Weimarer Zeit : Politische Debatten und Ethische Diskurse -- Der
+Worumwille von Arbeit als Therapie : zur Anthropologie und Ethik psychiatrischer Arbeitstherapie der Weimarer Zeit / Mathias Wirth -- &quot;(...) dass diese Heilmethode auch von anderen als ärztlichen Gesichtspunkten aus bewertet und beurteilt werden muss&quot; : zu den sozial- und gesellschaftspolitischen Debatten um die psychiatrische Arbeitstherapie in der Weimarer Zeit / Monika Ankele -- Arbeit in
+der Psychiatrie im Nationalsozialismus : Leistungsparameter und Selektionskriterium -- Rhythmus des Lebens : Arbeit in psychiatrischen Institutionen im Nationalsozialismus zwischen Normalisierung und Selektion / Maike Rotzoll -- An der Schwelle von Inklusion und Exklusion : zur Bedeutung der Kategorie &quot;Arbeit&quot; in der psychiatrischen Einweisungspraxis 1941-1945 / Stefanie Coché -- Personenregister -- Ortsregister -- Verzeichnis der Autorinnen und Autoren.
+Time: 1800 - 1999
+Geographic: Germany.
+Note(s): Includes bibliographical references and indexes.
+Class Descriptors: LC: RC450.G3
+Responsibility: Monika Ankele / Eva Brinkschulte (Hg.).
+Vendor Info: Baker and Taylor Otto Harrassowitz YBP Library Services (BTCP HARR YANK)
+Entry: 20150424
+Update: 20160125
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-521-80619-0">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Cambridge ; New York</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Cambridge University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Antognazza</foaf:surname>
+                        <foaf:givenname>Maria Rosa</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96408"/>
+        <dc:subject>=340-1=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Biographies [4623]</dc:subject>
+        <dc:subject>Germany [5123]</dc:subject>
+        <dc:subject>History of philosophy [CBA000130304]</dc:subject>
+        <dc:subject>Leibniz, Gottfried Wilhelm von (1646-1716) [10514]</dc:subject>
+        <dc:identifier>ISBN 978-0-521-80619-0</dc:identifier>
+        <dc:date>2009</dc:date>
+        <dc:description>OCLC: 183162215</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>&quot;Of all the thinkers of the century of genius that inaugurated modern philosophy, none lived an intellectual life more rich and varied than Gottfried Wilhelm Leibniz (1646-1716). Trained as a jurist and employed as a counsellor, librarian, and historian, he made famous contributions to logic, mathematics, physics, and metaphysics, yet viewed his own aspirations as ultimately ethical and theological, and married these theoretical concerns with politics, diplomacy, and an equally broad range of practical reforms: juridical, economic, administrative, technological, medical, and ecclesiastical.&quot; &quot;Maria Rosa Antognazza's pioneering biography not only surveys the full breadth and depth of these theoretical interests and practical activities; it also weaves them together for the first time into a unified portrait of this unique thinker and the world from which he came.&quot;--Jacket.</dcterms:abstract>
+        <dc:title>Leibniz: An Intellectual Biography</dc:title>
+        <z:shortTitle>Leibniz</z:shortTitle>
+        <z:numPages>623</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96408">
+        <rdf:value>Access: http://catdir.loc.gov/catdir/enhancements/fy0808/2007048443-t.html
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Part I. Youthful vocations (1646-1676) -- The birth of a vision : background, childhood, and education (July 1646-February 1667) -- The vision broadens : Nuremberg, Frankfurt, and Mainz (March 1667-March 1672) -- Old wine in new bottles : Paris, London, and Holland (March 1672-December 1676) -- Part II. Dreams and reality (1676-1716) -- A universal genius as librarian, historian, and mining engineer : Hanover and Lower Saxony (December 1676-October 1687) -- In the footsteps of the Guelfs : Southern Germany, Austria, and Italy (November 1687-June 1690) --
+Back under the Guelf dukes : Hanover and Wolfenb�ttel (June 1690-February 1698) -- Between brother and sister : Hanover and Berlin (February 1698-February 1705) -- Light and shadows : Hanover, Berlin, Wolfenb�ttel, Vienna (February 1705-September 1714) -- Epilogue : last years in Hanover (September 1714-November 1716).
+Access: Materials specified:      Table of contentshttp://catdir.loc.gov/catdir/enhancements/fy0808/2007048443-t.html
+Materials specified: Table of contentshttp://bvbr.bib-bvb.de:8991/F?func=service&amp;doc_library=BVB01&amp;local_base=BVB01&amp;doc_number=016585208&amp;line_number=0001&amp;func_code=DB_RECORDS&amp;service_type=MEDIA
+Materials specified: Book review (H-Net)http://www.h-net.org/reviews/showrev.php?id=26412
+Materials specified: Contributor biographical informationhttp://catdir.loc.gov/catdir/enhancements/fy0808/2007048443-b.html
+Materials specified: Publisher descriptionhttp://catdir.loc.gov/catdir/enhancements/fy0808/2007048443-d.html
+Named Person: Leibniz, Gottfried Wilhelm, Freiherr von, 1646-1716. Leibniz -- Gottfried Wilhelm -- Freiherr von -- 1646-1716. Leibniz -- Gottfried Wilhelm -- Freiherr von -- 1646-1716. Leibniz, Gottfried Wilhelm, Freiherr von, 1646-1716. Leibniz, Gottfried Wilhelm, 1646-1716. Leibniz, Gottfried Wilhelm.
+Named Corp: Whitman College -- Memorial bookplates -- Class of 1937. Genre/Form:               Biographie.
+Note(s): Includes bibliographical references (pages 565-599) and index.
+General Info: National bibliography no: GBA868214; 09,A37,0061
+Class Descriptors: LC: B2597; Dewey: 193; B
+Responsibility: Maria Rosa Antognazza.
+Vendor Info: Baker &amp; Taylor Brodart Baker and Taylor Coutts Information Services YBP Library Services (BKTY BROD BTCP COUT YANK) 39.95 $45.00 Status:                   active
+Material Type: Biography (bio); Internet resource (url)
+Date of Entry: 20071126
+Update: 20160714
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-84-00-09802-5">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Series>
+                <dc:title>Theatrum Naturae. Colección de historial natural</dc:title>
+            </bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Madrid</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>CSIC ; Doce Calles</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Aragón Albillos</foaf:surname>
+                        <foaf:givenname>Santiago</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_97412"/>
+        <dc:subject>=370-42=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Museums [16160]</dc:subject>
+        <dc:subject>Natural history [913]</dc:subject>
+        <dc:subject>Spain [5155]</dc:subject>
+        <dc:subject>Taxidermy [21270]</dc:subject>
+        <dc:identifier>ISBN 978-84-00-09802-5</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>Spanish</z:language>
+        <dcterms:abstract>This book reviews the history of the National Museum of Natural Sciences in Madrid, from its beginnings as a cabinet of natural history in times of Carlos III until the end of the Civil War, using the collections of naturalized animals storyline. Mounts the brothers Jose Maria and Luis Benedito Vives made to the Museum in the early twentieth century monopolize much of the content of the work.</dcterms:abstract>
+        <dc:title>En La Piel De Un Animal: El Museo Nacional De Ciencias Naturales Y Sus Colecciones De Taxidermia</dc:title>
+        <z:shortTitle>En la piel de un animal</z:shortTitle>
+        <z:numPages>291</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_97412">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Edition: 1a. ed.
+Named Corp: Museo Nacional de Ciencias Naturales (España) -- Historia Museo Nacional de Ciencias Naturales (Spain) -- History. Museo Nacional de Ciencias Naturales (Spain) Genre/Form:         History
+Geographic: Spain
+Class Descriptors: LC: QH
+Responsibility: Santiago Aragón Albillos
+Vendor Info: Puvill Libros Iberbook International S.L. (PUVL IBER)
+Entry: 20140828
+Update: 20150703
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-226-27568-0">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+               <foaf:name>University of Chicago Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Arnaud</foaf:surname>
+                        <foaf:givenname>Sabine</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_96857"/>
+        <dc:subject>=340-150=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>1670</dc:subject>
+        <dc:subject>1820</dc:subject>
+        <dc:subject>France [5121]</dc:subject>
+        <dc:subject>French Revolution of 1789 [17704]</dc:subject>
+        <dc:subject>Hysteria  [344]</dc:subject>
+        <dc:subject>Therapeutic practice; therapy; treatment [5081]</dc:subject>
+        <dc:subject>Therapeutics [5082]</dc:subject>
+        <dc:subject>Western world, civilization and culture [17626]</dc:subject>
+        <dc:subject>Women in medicine [1432]</dc:subject>
+        <dc:identifier>ISBN 978-0-226-27568-0</dc:identifier>
+        <dc:date>2015-10-14</dc:date>
+        <z:libraryCatalog>Google Books</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>These days, hysteria is known as a discredited diagnosis that was used to group and pathologize a wide range of conditions and behaviors in women. But for a long time, it was seen as a legitimate category of medical problem—and one that, originally, was applied to men as often as to women.  In On Hysteria, Sabine Arnaud traces the creation and rise of hysteria, from its invention in the eighteenth century through nineteenth-century therapeutic practice. Hysteria took shape, she shows, as a predominantly aristocratic malady, only beginning to cross class boundaries (and be limited to women) during the French Revolution. Unlike most studies of the role and status of medicine and its categories in this period, On Hysteria focuses not on institutions but on narrative strategies and writing—the ways that texts in a wide range of genres helped to build knowledge through misinterpretation and recontextualized citation.  Powerfully interdisciplinary, and offering access to rare historical material for the first time in English, On Hysteria will speak to scholars in a wide range of fields, including the history of science, French studies, and comparative literature.</dcterms:abstract>
+        <dc:title>On Hysteria: The Invention of a Medical Category Between 1670 and 1820</dc:title>
+        <z:shortTitle>On Hysteria</z:shortTitle>
+        <z:numPages>364</z:numPages>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_96857">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://books.google.com/books?id=QttoCgAAQBAJ</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-04-05 00:22:57</dcterms:dateSubmitted>
+        <dc:title>Google Books Link</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Book rdf:about="urn:isbn:978-2-7132-2419-5">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Series>
+                <dc:title>En temps &amp; lieux.</dc:title>
+                <dc:identifier>48</dc:identifier>
+            </bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Paris</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Éd. de l'École des hautes études en sciences sociales</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Arnaud</foaf:surname>
+                        <foaf:givenname>Sabine Auteur</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98937"/>
+        <dc:subject>=350-150=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>France [5121]</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:subject>Mental disorders and diseases [15091]</dc:subject>
+        <dc:subject>Physicians; doctors [818]</dc:subject>
+        <dc:identifier>ISBN 978-2-7132-2419-5</dc:identifier>
+        <dc:date>2014, (c)2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>French</z:language>
+        <dcterms:abstract>’hystérie au XVIIIe siècle nous mène loin des mises en scène de Charcot et des cures de Freud. C’est le moment même de l’invention d’une catégorie pour identifier une maladie nerveuse frappant les gens du monde, hommes et femmes, et les lettrés en particulier. Mais comment établir une pathologie dont la caractérisation commence par le nombre infini de symptômes ? Des textes médicaux aux ouvrages littéraires, métaphores, citations, et anecdotes sont mises à contribution. De l’animal indocile emprunté au Timée, à un « je ne sais quoi », d’un protée à un caméléon, ou à une hydre, médecins et hommes de lettres rivalisent dans son écriture. Un jour courtisans, ils s’inventent le lendemain citoyens fervents d’une nation nouvelle ; leurs écrits déclinent l’hystérie au fur et à mesure des modes et des passions et cristallisent les craintes et les rêves d’un temps.
+Découvrir ces conceptions nous porte à apprécier la médecine telle qu’elle s’écrivait au XVIIIe siècle. S’éloignant à grand pas des traités à systèmes, les médecins s’adressent alors à leurs patients au nom d’une sensibilité partagée, et publient dialogues, autobiographies et correspondances pour faciliter cet échange. Ils présentent ainsi une image de l’acte médical fondée dans la prévenance et le récit de soi. À nous de déceler les enjeux d’un diagnostic pour une médecine en pleine transformation.</dcterms:abstract>
+        <dc:title>L'invention De L'hystérie Au Temps Des Lumières 1670-1820</dc:title>
+        <z:numPages>347</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98937">
+        <rdf:value>Access: http://catalogue.bnf.fr/ark:/12148/cb437662459
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Dissertation: Texte remanié de : Thèse de doctorat : Histoire et civilisations : Paris, EHESS : 2007.
+Access: Materials specified: Notice et cote du catalogue de la Bibliothèque nationale de France http://catalogue.bnf.fr/ark:/12148/cb437662459
+Time: 17e siècle 18e siècle
+Geographic: Frankreich.
+Note(s): Bibliogr. p. 295-[343]. Notes bibliogr.
+Class Descriptors: LC: RC532; Dewey: 616.852 4
+Responsibility: Sabine Arnaud.
+Material Type: Thesis/dissertation (deg)
+Entry: 20140304
+Update: 20141027
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-1-107-12697-8">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>Science in history</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Cambridge, United Kingdom</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Cambridge University Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Arnold</foaf:surname>
+                        <foaf:givenname>David</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96438"/>
+        <dc:subject>=360-123=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>India  [619]</dc:subject>
+        <dc:subject>Poisoning [16083]</dc:subject>
+        <dc:subject>Pollution  [1040]</dc:subject>
+        <dc:subject>Toxins and antitoxins [31185]</dc:subject>
+        <dc:identifier>ISBN 978-1-107-12697-8</dc:identifier>
+        <dc:date>2016</dc:date>
+        <dc:description>OCLC: 937366161</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>Toxic Histories combines social, scientific, medical and environmental history to demonstrate the critical importance of poison and pollution to colonial governance, scientific authority and public anxiety in India between the 1830s and 1950s. Against the background of India's 'poison culture' and periodic 'poison panics', David Arnold considers why many familiar substances came to be regarded under colonialism as dangerous poisons. As well as the criminal uses of poison, Toxic Histories shows how European and Indian scientists were instrumental in creating a distinctive system of forensic toxicology and medical jurisprudence designed for Indian needs and conditions, and how local as well as universal poison knowledge could serve constructive scientific and medical purposes. Arnold reflects on how the 'fear of a poisoned world' spilt over into concerns about contamination and pollution, giving ideas of toxicity a wider social and political significance that has continued into India's postcolonial era.</dcterms:abstract>
+        <dc:title>Toxic Histories: Poison and Pollution in Modern India</dc:title>
+        <z:shortTitle>Toxic histories</z:shortTitle>
+        <z:numPages>241</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96438">
+        <rdf:value>Access: http://assets.cambridge.org/97811071/26978/cover/9781107126978.jpg
+External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Introduction: poison traces -- 1. The social life of poisons -- 2. The imperial pharmakon -- 3. Panics and scares -- 4. Toxic evidence -- 5. Intimate histories -- 6. Embracing toxicity -- 7. Polluted places, poisoned lives -- Conclusion.
+Access: Materials specified: Cover image http://assets.cambridge.org/97811071/26978/cover/9781107126978.jpg
+Geographic: India. India
+Note(s): Includes bibliographical references (pages 212-236) and index.
+Class Descriptors: LC: RA1197.I4; Dewey: 615.9/50954; NLM:                 2016 D-658; QW 511 JI4
+Responsibility: David Arnold.
+Vendor Info: Coutts Information Services YBP Library Services YBP Library Services (COUT YANK YANK)
+Entry: 20160203
+Update: 20160708
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-226-04971-7">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Chicago</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>University of Chicago Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Aronowitz</foaf:surname>
+                        <foaf:givenname>Robert</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_96970"/>
+        <dc:subject>=380-150=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>21st century [17]</dc:subject>
+        <dc:subject>Cancer; tumors [15065]</dc:subject>
+        <dc:subject>Disease and diseases [15224]</dc:subject>
+        <dc:subject>Health [15598]</dc:subject>
+        <dc:subject>Health care [15707]</dc:subject>
+        <dc:subject>HIV [15054]</dc:subject>
+        <dc:subject>Medicine [4977]</dc:subject>
+        <dc:subject>Risk [22960]</dc:subject>
+        <dc:identifier>ISBN 978-0-226-04971-7</dc:identifier>
+        <dc:date>2015-09-16</dc:date>
+        <z:libraryCatalog>Google Books</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>Will ever-more sensitive screening tests for cancer lead to longer, better lives?  Will anticipating and trying to prevent the future complications of chronic disease lead to better health?  Not always, says Robert Aronowitz in Risky Medicine. In fact, it often is hurting us.    Exploring the transformation of health care over the last several decades that has led doctors to become more attentive to treating risk than treating symptoms or curing disease, Aronowitz shows how many aspects of the health system and clinical practice are now aimed at risk reduction and risk control. He argues that this transformation has been driven in part by the pharmaceutical industry, which benefits by promoting its products to the larger percentage of the population at risk for a particular illness, rather than the smaller percentage who are actually affected by it. Meanwhile, for those suffering from chronic illness, the experience of risk and disease has been conflated by medical practitioners who focus on anticipatory treatment as much if not more than on relieving suffering caused by disease. Drawing on such controversial examples as HPV vaccines, cancer screening programs, and the cancer survivorship movement, Aronowitz argues that patients and their doctors have come to believe, perilously, that far too many medical interventions are worthwhile because they promise to control our fears and reduce uncertainty.      Risky Medicine is a timely call for a skeptical response to medicine’s obsession with risk, as well as for higher standards of evidence for risk-reducing interventions and a rebalancing of health care to restore an emphasis on the actual curing of and caring for people suffering from disease.</dcterms:abstract>
+        <dc:title>Risky Medicine: Our Quest to Cure Fear and Uncertainty</dc:title>
+        <z:shortTitle>Risky Medicine</z:shortTitle>
+        <z:numPages>285</z:numPages>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_96970">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://books.google.com/books?id=618FrgEACAAJ</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-04-12 21:06:37</dcterms:dateSubmitted>
+        <dc:title>Google Books Link</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Book rdf:about="urn:isbn:978-0-87417-953-8">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Reno, Nevada</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>University of Nevada Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Arrigo</foaf:surname>
+                        <foaf:givenname>Anthony F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_98319"/>
+        <dc:subject>=370-160=</dc:subject>
+        <dc:subject>20th century [14]</dc:subject>
+        <dc:subject>Dams [16349]</dc:subject>
+        <dc:subject>Modernization [14998]</dc:subject>
+        <dc:subject>Technology and culture [20001]</dc:subject>
+        <dc:subject>United States [5161]</dc:subject>
+        <dc:identifier>ISBN 978-0-87417-953-8</dc:identifier>
+        <dc:date>2014</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>The mighty Hoover Dam, starting as a dream of land developers and farmers, became the most ambitious civil engineering project of the Great Depression. This landmark in the middle of the Mojave Desert, holding back the largest man-made lake in America, also became, like Mount Rushmore or the Empire State Building, a visual and cultural icon. The power and meanings of this icon came not through a single image but via myriad visual representations, in government propaganda, advertising, journalism, and art. Even before it was built, these images were used to shape the public’s perception of the project and frame the dam as the linchpin to an expanding American economic empire in the desert Southwest. Anthony F. Arrigo has researched a wide array of primary sources and archival materials to trace the project from its earliest representations in illustrations to the documentary photography of its construction and later depictions of the structure in commercial promotions, fine art photography, and paintings. Analyzing Hoover Dam through the trajectory of imagery across several decades, rather than the narrative of its construction, illuminates the underlying cultural and ecological imperatives in the drive to build it, including the influence of religious doctrine and the American agrarian movement. Arrigo also discusses various portrayals of laborers, women, minority groups, nature, and technology in this imagery. In time, the visual icon of power and domination was commercialized to sell cars, vacations, and more. Imaging Hoover Dam is an important work in both visual rhetoric and media studies. It will also intrigue readers interested in such varied topics as the history of the American Southwest, the Great Depression and the New Deal, social and environmental issues, and American popular culture.</dcterms:abstract>
+        <dc:title>Imaging Hoover Dam: the Making of a Cultural Icon</dc:title>
+        <z:shortTitle>Imaging Hoover Dam</z:shortTitle>
+        <z:numPages>297</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_98319">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Nature, culture, and the divine right of transformation -- Natural disasters and political adversity -- Illustrating the Dam -- Picturing the sublime -- The unseen -- Imaging labor -- Advertising and tourism.
+Geographic: Hoover Dam (Ariz. and Nev.) -- In art. Hoover Dam (Ariz. and Nev.) -- In popular culture. Hoover Dam.
+Note(s): Includes bibliographical references (pages 271-289) and index.
+Class Descriptors: LC: N8214.5.U6; Dewey: 704.9/4479313
+Responsibility: Anthony F. Arrigo.
+Vendor Info: Brodart Baker and Taylor YBP Library Services (BROD BTCP YANK)
+Material Type: Government publication (gpb); State or province government publication (sgp)
+Entry: 20140418
+Update: 20151216
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-0-8248-3583-5">
+        <z:itemType>book</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Series><dc:title>Spatial habitus</dc:title></bib:Series>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Honolulu</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>University of Hawai`i Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ashraf</foaf:surname>
+                        <foaf:givenname>Kazi Khaleed</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_99318"/>
+        <dc:subject>=160=</dc:subject>
+        <dc:subject>Architecture  [75]</dc:subject>
+        <dc:subject>Buddhism [15193]</dc:subject>
+        <dc:subject>India  [619]</dc:subject>
+        <dc:subject>Technology and art [15199]</dc:subject>
+        <dc:subject>Technology and culture [20001]</dc:subject>
+        <dc:identifier>ISBN 978-0-8248-3583-5</dc:identifier>
+        <dc:date>2013</dc:date>
+        <dc:description>OCLC: 830682701</dc:description>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>English</z:language>
+        <dcterms:abstract>The Hermit's Hut offers an original insight into the profound relationship between architecture and asceticism. Although architecture continually responds to ascetic compulsions, as in its frequent encounter with the question of excess and less, it is typically considered separate from asceticism. In contrast, this innovative book explores the rich and mutual ways in which asceticism and architecture are played out in each other's practices. The question of asceticism is also considered--as neither a religious discourse nor a specific cultural tradition but as a perennial issue in the practice of culture. The work convincingly traces the influences from early Indian asceticism to Zen Buddhism to the Japanese teahouse--the latter opening the door to modern minimalism. As the book's title suggests, the protagonist of the narrative is the nondescript hermit's hut. Relying primarily on Buddhist materials, the author provides a complex narrative that stems from this simple structure, showing how the significance of the hut resonates widely and how the question of dwelling is central to ascetic imagination. In exploring the conjunctions of architecture and asceticism, he breaks new ground by presenting ascetic practice as fundamentally an architectural project, namely the fabrication of a &quot;last&quot; hut. Through the conception of the last hut, he looks at the ascetic challenge of arriving at the edge of civilization and its echoes in the architectural quest for minimalism. The most vivid example comes from a well-known Buddhist text where the Buddha describes the ultimate ascetic moment, or nirvana, in cataclysmic terms using architectural metaphors: &quot;The roof-rafters will be shattered,&quot; the Buddha declares, and the architect will &quot;no longer build the house again.&quot; As the book compellingly shows, the physiological and spiritual transformation of the body is deeply intertwined with the art of building.</dcterms:abstract>
+        <dc:title>The Hermit's Hut: Architecture and Asceticism in India</dc:title>
+        <z:shortTitle>The hermit's hut</z:shortTitle>
+        <z:numPages>222</z:numPages>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_99318">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Introduction : The architecture of ascetism -- Asceticism and architecture -- Home in the ascetic imagination -- The Buddha's house -- The two houses: body and building in the ascetic imagination -- Asceticism and the primitive hut -- A hut with many meanings -- The end of architecture.
+Geographic: India.
+Note(s): Includes bibliographical references (pages 207-215) and index.
+Class Descriptors: LC: NA6001; Dewey: 720.1/08
+Responsibility: Kazi K. Ashraf.
+Vendor Info: Brodart Baker and Taylor Coutts Information Services Worldwide Books YBP Library Services (BROD BTCP COUT WWBK YANK)
+Material Type: Government publication (gpb); State or province government publication (sgp)
+Entry: 20130301
+Update: 20151216
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+    <bib:Book rdf:about="urn:isbn:978-2-89448-797-6">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Quebec</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>Septentrion</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Asselin</foaf:surname>
+                        <foaf:givenname>Alain</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cayouette</foaf:surname>
+                        <foaf:givenname>Jacques</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mathieu</foaf:surname>
+                        <foaf:givenname>Jacques</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dcterms:isReferencedBy rdf:resource="#item_96974"/>
+        <dc:subject>=131=</dc:subject>
+        <dc:subject>Canada [5110]</dc:subject>
+        <dc:subject>Colonialism  [246]</dc:subject>
+        <dc:subject>Indigenous peoples [31073]</dc:subject>
+        <dc:subject>Plants [22149]</dc:subject>
+        <dc:subject>Science and culture [18001]</dc:subject>
+        <dc:subject>Science, general histories [1169]</dc:subject>
+        <dc:subject>Travel; exploration [454]</dc:subject>
+        <dc:identifier>ISBN 978-2-89448-797-6</dc:identifier>
+        <dc:date>2014-2015</dc:date>
+        <z:libraryCatalog>OCLC WorldCat FirstSearch</z:libraryCatalog>
+        <z:language>French</z:language>
+        <dcterms:abstract>Le Vinland que les Vikings visitent vers l'an 1000 pourrait-il se situer dans la région de Québec? En 1534, Jacques Cartier décrit l'usage du maïs, du tabac et d'une mystérieuse plante, l'annedda, qui guérirait du scorbut et de la syphilis. Mais quel est donc ce miraculeux conifère? Quel usage fait-on de la gomme de sapin dans les églises en Europe? Quelle sorte de chapelet mangeaient donc les Amérindiens?
+
+Il est stimulant de constater que plusieurs questions concernant les premières observations des plantes canadiennes demeurent sans réponse et requièrent encore des efforts de recherche. Cette histoire détaillée, palpitante et pleine de rebondissements, est aussi riche en informations scientifiques, culturelles et historiques souvent méconnues.</dcterms:abstract>
+        <dc:title>Curieuses histoires de plantes du Canada</dc:title>
+    </bib:Book>
+    <bib:Memo rdf:about="#item_96974">
+        <rdf:value>External Resources: Cite This Item Search for versions with same title and author | Advanced options ...
+Contents: Tome 1. [without special title] -- tome 2. 1670-1760.
+Geographic: Canada.
+Note(s): Includes bibliographical references and indexes.
+Class Descriptors: LC: QK201; Dewey: 581
+Responsibility: Alain Asselin, Jacques Cayouette &amp; Jacques Mathieu.
+Vendor Info: Coutts Information Services (COUT)
+Entry: 20150423
+Update: 20160214
+Provider: OCLC</rdf:value>
+    </bib:Memo>
+</rdf:RDF>

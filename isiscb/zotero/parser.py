@@ -114,7 +114,8 @@ class BaseParser(object):
             processor_name = 'postprocess_{0}'.format(field)
             if hasattr(self.data[-1], field) and hasattr(self, processor_name):
                 getattr(self, processor_name)(self.data[-1])
-
+        if hasattr(self, 'postprocess_partof'):
+            self.postprocess_partof(self.data[-1])
         if hasattr(self, 'reject_if'):
             if self.reject_if(self.data[-1]):
                 del self.data[-1]
@@ -555,7 +556,10 @@ class ZoteroParser(RDFParser):
         setattr(entry, 'pageEnd', end)
         del entry.pages
 
-
+    def postprocess_partof(self, entry):
+        if getattr(entry, 'documentType', None) == DraftCitation.BOOK:
+            if hasattr(entry, 'partof__title'):
+                entry.book_series = entry.partof__title
 
 
 def read(path):
@@ -627,6 +631,8 @@ def process_authorities(paper, instance):
         if field == 'partof__title':
             if getattr(paper, 'partof__type', None) == 'book':
                 continue
+            if getattr(paper, 'documentType') == DraftCitation.BOOK:
+                acrelation_type = ACRelation.BOOK_SERIES
 
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
@@ -914,6 +920,7 @@ def process_paper(paper, instance):
         ('pages_free_text', 'pagesFreeText'),
         ('volume', 'volume'),
         ('issue', 'issue'),
+        ('book_series', 'book_series'),
     ]
     draftCitation = DraftCitation(part_of = instance)
 

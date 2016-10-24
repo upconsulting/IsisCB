@@ -27,6 +27,90 @@ partdetails_fields = [
 ]
 
 
+
+
+class TestBookSeries(TestCase):
+    """
+    """
+    def setUp(self):
+        codes = [
+            '=151-360=',
+            '=102-375=',
+            '=150-340=',
+            '=102-350=',
+            '=103-340=',
+            '=160-370=',
+            '=160-375=',
+            '=151-375=',
+            '=121-320=',
+            '=120-370=',
+            '=123-360=',
+            '=160-360=',
+            '=161-360=',
+            '=150=',
+            '=160-380=',
+            '=1-330=',
+            '=150-370=',
+            '=1-340=',
+            '=131=',
+            '=150-380=',
+            '=42-370=',
+            '=151-360=',
+            '=152-360=',
+            '=151-360=',
+            '=160=',
+            '=150-230=',
+            '=160-370=',
+            '=150-350=',
+            '=163-370=',
+            '=140-360=',
+            ]
+
+        for code in codes:
+            Authority.objects.create(
+                name='The real %s' % code,
+                type_controlled=DraftAuthority.CONCEPT,
+                classification_code=code.replace('=', ''),
+            )
+
+    def test_process_bookseries(self):
+        """
+        If we ingest a citation that is part of something else, we should use
+        BOOK_SERIES for the ACRelation.
+
+        We're also double-checking that percent-encoded subject codes are
+        resolved correctly.
+        """
+        book_data = 'zotero/test_data/Books test 1 SR 2016.09.27.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            type_counts = Counter()
+            for rel in citation.authority_relations.all():
+                type_counts[rel.type_controlled] += 1
+                if rel.type_controlled == DraftACRelation.SUBJECT:
+                    # We have matched all percent-encoded subject authorities.
+                    self.assertFalse(rel.authority.name.startswith('='))
+            if citation.book_series is not None:
+                self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+
+
 class TestBookReviews(TestCase):
     """
     Reviews are linked to book citations via the "reviewed author" field in

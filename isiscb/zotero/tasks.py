@@ -48,6 +48,7 @@ def ingest_citation(request, accession, draftcitation):
         ('description', 'description'),
         ('abstract', 'abstract'),
         ('type_controlled', 'type_controlled'),
+        ('book_series', 'book_series'),
     ]
     partdetails_fields = [
         ('page_start', 'page_begin'),
@@ -154,7 +155,7 @@ def ingest_citation(request, accession, draftcitation):
             target = None         #  ACRelation.
             citation.record_history += u"\n\nThe attempt to match the name %s in the %s field was skipped." % (draft.name, relation.get_type_controlled_display())
             citation.save()
-            
+
         if target:
             target.zotero_accession = accession
             target.save()

@@ -126,6 +126,7 @@ class DraftCitation(ImportedData):
     pages_free_text = models.CharField(max_length=100, blank=True, null=True)
     volume = models.CharField(max_length=100, blank=True, null=True)
     issue = models.CharField(max_length=100, blank=True, null=True)
+    book_series = models.CharField(max_length=255, blank=True, null=True)
 
     def __unicode__(self):
         return self.title
