@@ -64,7 +64,7 @@
                         <a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggestions</a>
                     </li>
                     <li role="presentation">
-                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a>
+                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab" id="search-tab">Search</a>
                     </li>
                     <li role="presentation">
                         <a href="#create" aria-controls="create" role="tab" class="resolve-with-create">Create</a>
@@ -128,6 +128,11 @@
 var toggleTab = function(name) {
     $('.nav-tabs a[href="#' + name + '"]').tab('show')
 }
+
+$('#search-tab').on('shown.bs.tab', function(e) {
+    console.log('Show search tab');
+    $('#authority-search').focus();
+});
 </script>
 
 <script>
