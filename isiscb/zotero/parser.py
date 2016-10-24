@@ -1,4 +1,5 @@
 import os, re, iso8601, rdflib, codecs, chardet, unicodedata, logging, csv, copy
+from unidecode import unidecode
 import xml.etree.ElementTree as ET
 
 from datetime import datetime
@@ -37,6 +38,9 @@ ISSUE = rdflib.term.URIRef(PRISM + u'number')
 IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
 SUBJECT = rdflib.URIRef(DC + u"subject")
+
+PUBLISHER = rdflib.URIRef(DC + u"publisher")
+NAME = rdflib.URIRef(FOAF + u"name")
 
 
 BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
@@ -114,7 +118,8 @@ class BaseParser(object):
             processor_name = 'postprocess_{0}'.format(field)
             if hasattr(self.data[-1], field) and hasattr(self, processor_name):
                 getattr(self, processor_name)(self.data[-1])
-
+        if hasattr(self, 'postprocess_partof'):
+            self.postprocess_partof(self.data[-1])
         if hasattr(self, 'reject_if'):
             if self.reject_if(self.data[-1]):
                 del self.data[-1]
@@ -324,9 +329,11 @@ class ZoteroParser(RDFParser):
         ('title', rdflib.URIRef("http://purl.org/dc/elements/1.1/title")),
         ('isPartOf', rdflib.URIRef("http://purl.org/dc/terms/isPartOf")),
         ('pages', rdflib.URIRef("http://purl.org/net/biblio#pages")),
+        ('extent', rdflib.URIRef("http://www.zotero.org/namespaces/export#numPages")),
         ('documentType',
          rdflib.URIRef("http://www.zotero.org/namespaces/export#itemType")),
-        ('review_of', REVIEWED_AUTHORS)]
+        ('review_of', REVIEWED_AUTHORS),
+        ('publisher', PUBLISHER)]
 
     reject_if = lambda self, x: not hasattr(x, 'documentType')
 
@@ -376,6 +383,18 @@ class ZoteroParser(RDFParser):
                 ident_value = ident_value.replace('-', '')
             self.set_value(name, ident_value)
 
+    def handle_extent(self, value):
+        try:
+            value = eval(value)
+        except NameError:    # Not numeric.
+            return 0
+
+        if type(value) is float:
+            value = round(float)
+        try:
+            return int(value)
+        except ValueError:
+            return 0
 
     def handle_link(self, value):
         """
@@ -529,6 +548,9 @@ class ZoteroParser(RDFParser):
         return journal
 
     def handle_pages(self, value):
+        value = value.toPython()
+        if type(value) is unicode:
+            value = unidecode(value)
         return tuple(value.split('-'))
 
     def handle_review_of(self, value):
@@ -539,6 +561,11 @@ class ZoteroParser(RDFParser):
 
         return zip(*self.handle_authors_full(value))[0]
 
+    def handle_publisher(self, value):
+        for s, p, o in self.graph.triples((value, None, None)):
+            if p == NAME:
+                return o.toPython()
+        return None
 
     def postprocess_pages(self, entry):
         if type(entry.pages) not in [tuple, list]:
@@ -555,7 +582,10 @@ class ZoteroParser(RDFParser):
         setattr(entry, 'pageEnd', end)
         del entry.pages
 
-
+    def postprocess_partof(self, entry):
+        if getattr(entry, 'documentType', None) == DraftCitation.BOOK:
+            if hasattr(entry, 'partof__title'):
+                entry.book_series = entry.partof__title
 
 
 def read(path):
@@ -608,6 +638,7 @@ def process_authorities(paper, instance):
         (Authority.PERSON, ACRelation.TRANSLATOR, 'translators', DraftACRelation, 'citation'),
         (Authority.SERIAL_PUBLICATION, ACRelation.PERIODICAL, 'partof__title', DraftACRelation, 'citation'),
         (Authority.CONCEPT, ACRelation.SUBJECT, 'subjects', DraftACRelation, 'citation'),
+        (Authority.PUBLISHER, ACRelation.PUBLISHER, 'publisher', DraftACRelation, 'citation'),
 
         # ('DraftACRelation', 'authority', ACRelation.PERIODICAL)),('DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER)),
     ]
@@ -627,6 +658,8 @@ def process_authorities(paper, instance):
         if field == 'partof__title':
             if getattr(paper, 'partof__type', None) == 'book':
                 continue
+            if getattr(paper, 'documentType') == DraftCitation.BOOK:
+                acrelation_type = ACRelation.BOOK_SERIES
 
         # TODO: make this more DRY.
         if type(field_value) is list and authority_type == 'PE':
@@ -914,6 +947,8 @@ def process_paper(paper, instance):
         ('pages_free_text', 'pagesFreeText'),
         ('volume', 'volume'),
         ('issue', 'issue'),
+        ('extent', 'extent'),
+        ('book_series', 'book_series'),
     ]
     draftCitation = DraftCitation(part_of = instance)
 

@@ -27,6 +27,186 @@ partdetails_fields = [
 ]
 
 
+class TestPages(TestCase):
+    """
+    Sometimes we get unicode oddities in the page numbers.
+    """
+
+    def test_page_number(self):
+        """
+        Both of these journal articles should have clear start and end pages.
+
+        """
+        book_data = 'zotero/test_data/Journal test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            self.assertTrue(citation.page_start is not None)
+            self.assertTrue(citation.page_end is not None)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+class TestPublisher(TestCase):
+    """
+    Information about publisher should be retained.
+    """
+
+    def test_publisher_info(self):
+        """
+        Both of the books in this document have publishers, so we should expect
+        corresponding ACRelations.
+        """
+        book_data = 'zotero/test_data/Book test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            type_counts = Counter()
+            for rel in citation.authority_relations.all():
+                type_counts[rel.type_controlled] += 1
+            self.assertEqual(type_counts[DraftACRelation.PUBLISHER], 1)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+class TestExtent(TestCase):
+    """
+    z:numPages should be interpreted as DraftCitation.extent.
+    """
+
+    def test_parse_extent(self):
+        """
+        Both of the books in this document should have ``extent`` data.
+        """
+        book_data = 'zotero/test_data/Book test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            self.assertGreater(citation.extent, 0)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+
+
+class TestBookSeries(TestCase):
+    """
+    """
+    def setUp(self):
+        codes = [
+            '=151-360=',
+            '=102-375=',
+            '=150-340=',
+            '=102-350=',
+            '=103-340=',
+            '=160-370=',
+            '=160-375=',
+            '=151-375=',
+            '=121-320=',
+            '=120-370=',
+            '=123-360=',
+            '=160-360=',
+            '=161-360=',
+            '=150=',
+            '=160-380=',
+            '=1-330=',
+            '=150-370=',
+            '=1-340=',
+            '=131=',
+            '=150-380=',
+            '=42-370=',
+            '=151-360=',
+            '=152-360=',
+            '=151-360=',
+            '=160=',
+            '=150-230=',
+            '=160-370=',
+            '=150-350=',
+            '=163-370=',
+            '=140-360=',
+            ]
+
+        for code in codes:
+            Authority.objects.create(
+                name='The real %s' % code,
+                type_controlled=DraftAuthority.CONCEPT,
+                classification_code=code.replace('=', ''),
+            )
+
+    def test_process_bookseries(self):
+        """
+        If we ingest a citation that is part of something else, we should use
+        BOOK_SERIES for the ACRelation.
+
+        We're also double-checking that percent-encoded subject codes are
+        resolved correctly.
+        """
+        book_data = 'zotero/test_data/Books test 1 SR 2016.09.27.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            type_counts = Counter()
+            for rel in citation.authority_relations.all():
+                type_counts[rel.type_controlled] += 1
+                if rel.type_controlled == DraftACRelation.SUBJECT:
+                    # We have matched all percent-encoded subject authorities.
+                    self.assertFalse(rel.authority.name.startswith('='))
+            if citation.book_series is not None:
+                self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+
+
 class TestBookReviews(TestCase):
     """
     Reviews are linked to book citations via the "reviewed author" field in

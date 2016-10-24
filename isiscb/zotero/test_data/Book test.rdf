@@ -1,0 +1,98 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:vcard="http://nwalsh.com/rdf/vCard#">
+    <bib:Book rdf:about="urn:isbn:978-0-7524-9101-1">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+               <foaf:name>History Press</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bailey</foaf:surname>
+                        <foaf:givenname>Michael R.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_17603"/>
+        <dc:subject>=360-160=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>1800-1850</dc:subject>
+        <dc:subject>America [15654]</dc:subject>
+        <dc:subject>Design [18048]</dc:subject>
+        <dc:subject>Engineering [15505]</dc:subject>
+        <dc:subject>Europe [5119]</dc:subject>
+        <dc:subject>Great Britain [185]</dc:subject>
+        <dc:subject>Locomotives, steam [22246]</dc:subject>
+        <dc:subject>Railroads  [1087]</dc:subject>
+        <dc:identifier>ISBN 978-0-7524-9101-1</dc:identifier>
+        <dc:date>2014-02-25</dc:date>
+        <z:libraryCatalog>Google Books</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>The steam locomotive is a machine that has inspired imagination, innovation and invention from the time of its origination and continues to evoke passion in enthusiasts today.Here Michael R. Bailey, expertly and in fascinating detail, describes the development of the steam locomotive during its pioneering first half-century until 1850 by exploring the surviving locomotives that may be seen in Britain, Europe, and North and South America. In addition to surviving relics, he also takes a look at operable replicas, which fill many gaps in international collections, to provide continuity in this evolutionary story.Exploring in depth each example’s operational and preservation history, along with design characteristics, component materials and modifications made, no detail is left unmentioned. With unparalleled detail, incredibly stunning images and a list of museums housing all of the world’s oldest locomotives, this truly is a volume that no student of railway history should be without.</dcterms:abstract>
+        <dc:title>Loco Motion: The World's Oldest Steam Locomotives</dc:title>
+        <z:shortTitle>Loco Motion</z:shortTitle>
+        <z:numPages>216</z:numPages>
+    </bib:Book>
+    <z:Attachment rdf:about="#item_17603">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://books.google.com/books?id=wbGjMQEACAAJ</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-08-08 22:20:54</dcterms:dateSubmitted>
+        <dc:title>Google Books Link</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Book rdf:about="urn:isbn:978-2-7355-0805-1">
+        <z:itemType>book</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Paris</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>CTHS</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Blond</foaf:surname>
+                        <foaf:givenname>Stéphane</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>=350-121=</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Cartography  [204]</dc:subject>
+        <dc:subject>France [5121]</dc:subject>
+        <dc:subject>Geography [4925]</dc:subject>
+        <dc:subject>Maps; atlases [4718]</dc:subject>
+        <dc:identifier>ISBN 978-2-7355-0805-1</dc:identifier>
+        <dc:date>2014</dc:date>
+        <dc:description>{alt. title: The atlas Trudaine. Powers, maps and technical knowledge in the Enlightenment}</dc:description>
+        <z:libraryCatalog>Library of Congress ISBN</z:libraryCatalog>
+        <dcterms:abstract>Made in the eighteenth century, said the atlas Trudaine refers to more than three thousand manuscripts plans that include roads and bridges, the construction and management rested with the King of France. This work, following an administrative order, contains underlying issues and policy intentions as the saying &quot;to govern is to anticipate&quot; the card becomes a powerful projection means in the future, an essential tool for govern.
+
+Stéphane Blonde offers a reading of this exceptional source by registering at the crossroads of the administrative history, history of technical knowledge, geography and cartography. The many illustrations he offers the study are a feast for the eyes and mind. No need to be a specialist to understand the importance of this work to look at the atlas Trudaine is - somehow - to explore the territory past to understand the present territory.</dcterms:abstract>
+        <dc:title>L'atlas De Trudaine: Pouvoirs, Cartes Et Savoirs Techniques Au Siècle Des Lumières</dc:title>
+        <z:shortTitle>L'atlas de Trudaine</z:shortTitle>
+        <z:numPages>412</z:numPages>
+    </bib:Book>
+</rdf:RDF>

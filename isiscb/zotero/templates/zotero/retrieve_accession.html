@@ -31,14 +31,20 @@
             <ul class="list-group">
                 {% for authority in accession.draftauthority_set.all|filter_unresolved %}
                 {% with authority.citation_relations.first as acrelation %}
-                <a class="list-group-item clearfix draftauthority"
+                <div class="list-group-item clearfix"
                     id="authority-{{ authority.id }}"
                     data-id="{{ authority.id }}"
                     data-name="{{ authority.name }}">
-                    <div class="h5">
+                    <a class="glyphicon glyphicon-pencil"
+                        href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
+                    <a class="draftauthority"
+                        id="authority-{{ authority.id }}-link"
+                        data-id="{{ authority.id }}"
+                        data-name="{{ authority.name }}">
                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                    </div>
+                    </a>
+
 
                     <dl class="dl">
                         <dt>Title</dt>
@@ -46,7 +52,7 @@
                         <dt>Abstract</dt>
                         <dd>{{ acrelation.citation.abstract|truncatechars:200 }}</dd>
                     </dl>
-                </a>
+                </div>
                 {% endwith %}
                 {% endfor %}
             </ul>
@@ -58,13 +64,13 @@
                         <a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggestions</a>
                     </li>
                     <li role="presentation">
-                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a>
+                        <a href="#search" aria-controls="search" role="tab" data-toggle="tab" id="search-tab">Search</a>
                     </li>
                     <li role="presentation">
-                        <a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a>
+                        <a href="#create" aria-controls="create" role="tab" class="resolve-with-create">Create</a>
                     </li>
                     <li role="presentation">
-                        <a href="#skip" aria-controls="skip" role="tab" data-toggle="tab">Skip</a>
+                        <a href="#skip" aria-controls="skip" role="tab" class="resolve-with-skip">Skip</a>
                     </li>
                 </ul>
                 <div class="tab-content">
@@ -107,26 +113,8 @@
                         </div>
                         <ul class="list-group" id="results-container"></ul>
                     </div>
-                    <div role="tabpanel" class="tab-pane" id="create">
-                        <div class="panel">
-                            <div class="panel-body">
-                                <p class="text-info">
-                                    Do you want to create a new authority record in the production database?
-                                    <div class="btn btn-md btn-success resolve-with-create">Create</div>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="skip">
-                        <div class="panel">
-                            <div class="panel-body">
-                                <p class="text-info">
-                                    Do you want to forego resolving this authority?
-                                    <div class="btn btn-md btn-success resolve-with-skip">Skip</div>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>
@@ -140,6 +128,11 @@
 var toggleTab = function(name) {
     $('.nav-tabs a[href="#' + name + '"]').tab('show')
 }
+
+$('#search-tab').on('shown.bs.tab', function(e) {
+    console.log('Show search tab');
+    $('#authority-search').focus();
+});
 </script>
 
 <script>
@@ -174,7 +167,7 @@ $('.draftauthority').click(function() {
     var elem = $(this);
     $('.selected').removeClass('selected');
 
-    elem.addClass('selected');
+    elem.parent().addClass('selected');
     var draftauthority_id = elem.attr('data-id');
 
     selected_authority = draftauthority_id;
