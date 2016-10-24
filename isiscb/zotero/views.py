@@ -144,7 +144,6 @@ def create_accession(request):
 
             papers = zparser.read(path)
             zparser.process(papers, instance=instance)
-            raise 
             return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
