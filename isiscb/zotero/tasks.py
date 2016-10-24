@@ -56,6 +56,7 @@ def ingest_citation(request, accession, draftcitation):
         ('pages_free_text', 'pages_free_text'),
         ('issue', 'issue_free_text'),
         ('volume', 'volume_free_text'),
+        ('extent', 'extent'),
     ]
     int_only_fields = dict([
         ('page_start', 'pages_free_text'),

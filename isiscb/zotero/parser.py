@@ -38,6 +38,9 @@ IDENT = rdflib.URIRef(DC + u"identifier")
 TITLE = rdflib.term.URIRef(DC + u'title')
 SUBJECT = rdflib.URIRef(DC + u"subject")
 
+PUBLISHER = rdflib.URIRef(DC + u"publisher")
+NAME = rdflib.URIRef(FOAF + u"name")
+
 
 BOOK = rdflib.term.URIRef(BIBLIO + 'Book')
 ZBOOK = rdflib.term.URIRef(ZOTERO + 'Book')
@@ -325,9 +328,11 @@ class ZoteroParser(RDFParser):
         ('title', rdflib.URIRef("http://purl.org/dc/elements/1.1/title")),
         ('isPartOf', rdflib.URIRef("http://purl.org/dc/terms/isPartOf")),
         ('pages', rdflib.URIRef("http://purl.org/net/biblio#pages")),
+        ('extent', rdflib.URIRef("http://www.zotero.org/namespaces/export#numPages")),
         ('documentType',
          rdflib.URIRef("http://www.zotero.org/namespaces/export#itemType")),
-        ('review_of', REVIEWED_AUTHORS)]
+        ('review_of', REVIEWED_AUTHORS),
+        ('publisher', PUBLISHER)]
 
     reject_if = lambda self, x: not hasattr(x, 'documentType')
 
@@ -377,6 +382,18 @@ class ZoteroParser(RDFParser):
                 ident_value = ident_value.replace('-', '')
             self.set_value(name, ident_value)
 
+    def handle_extent(self, value):
+        try:
+            value = eval(value)
+        except NameError:    # Not numeric.
+            return 0
+
+        if type(value) is float:
+            value = round(float)
+        try:
+            return int(value)
+        except ValueError:
+            return 0
 
     def handle_link(self, value):
         """
@@ -540,6 +557,11 @@ class ZoteroParser(RDFParser):
 
         return zip(*self.handle_authors_full(value))[0]
 
+    def handle_publisher(self, value):
+        for s, p, o in self.graph.triples((value, None, None)):
+            if p == NAME:
+                return o.toPython()
+        return None
 
     def postprocess_pages(self, entry):
         if type(entry.pages) not in [tuple, list]:
@@ -612,6 +634,7 @@ def process_authorities(paper, instance):
         (Authority.PERSON, ACRelation.TRANSLATOR, 'translators', DraftACRelation, 'citation'),
         (Authority.SERIAL_PUBLICATION, ACRelation.PERIODICAL, 'partof__title', DraftACRelation, 'citation'),
         (Authority.CONCEPT, ACRelation.SUBJECT, 'subjects', DraftACRelation, 'citation'),
+        (Authority.PUBLISHER, ACRelation.PUBLISHER, 'publisher', DraftACRelation, 'citation'),
 
         # ('DraftACRelation', 'authority', ACRelation.PERIODICAL)),('DraftCCRelation', 'object', CCRelation.INCLUDES_CHAPTER)),
     ]
@@ -920,6 +943,7 @@ def process_paper(paper, instance):
         ('pages_free_text', 'pagesFreeText'),
         ('volume', 'volume'),
         ('issue', 'issue'),
+        ('extent', 'extent'),
         ('book_series', 'book_series'),
     ]
     draftCitation = DraftCitation(part_of = instance)

@@ -27,6 +27,70 @@ partdetails_fields = [
 ]
 
 
+class TestPublisher(TestCase):
+    """
+    Information about publisher should be retained.
+    """
+
+    def test_publisher_info(self):
+        """
+        Both of the books in this document have publishers, so we should expect
+        corresponding ACRelations.
+        """
+        book_data = 'zotero/test_data/Book test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            type_counts = Counter()
+            for rel in citation.authority_relations.all():
+                type_counts[rel.type_controlled] += 1
+            self.assertEqual(type_counts[DraftACRelation.PUBLISHER], 1)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
+class TestExtent(TestCase):
+    """
+    z:numPages should be interpreted as DraftCitation.extent.
+    """
+
+    def test_parse_extent(self):
+        """
+        Both of the books in this document should have ``extent`` data.
+        """
+        book_data = 'zotero/test_data/Book test.rdf'
+        papers = read(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = process(papers, instance)
+
+        for citation in citations:
+            self.assertGreater(citation.extent, 0)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
 
 
 class TestBookSeries(TestCase):
