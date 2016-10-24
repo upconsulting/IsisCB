@@ -61,10 +61,10 @@
                         <a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a>
                     </li>
                     <li role="presentation">
-                        <a href="#create" aria-controls="create" role="tab" data-toggle="tab">Create</a>
+                        <a href="#create" aria-controls="create" role="tab" class="resolve-with-create">Create</a>
                     </li>
                     <li role="presentation">
-                        <a href="#skip" aria-controls="skip" role="tab" data-toggle="tab">Skip</a>
+                        <a href="#skip" aria-controls="skip" role="tab" class="resolve-with-skip">Skip</a>
                     </li>
                 </ul>
                 <div class="tab-content">
@@ -107,26 +107,8 @@
                         </div>
                         <ul class="list-group" id="results-container"></ul>
                     </div>
-                    <div role="tabpanel" class="tab-pane" id="create">
-                        <div class="panel">
-                            <div class="panel-body">
-                                <p class="text-info">
-                                    Do you want to create a new authority record in the production database?
-                                    <div class="btn btn-md btn-success resolve-with-create">Create</div>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="skip">
-                        <div class="panel">
-                            <div class="panel-body">
-                                <p class="text-info">
-                                    Do you want to forego resolving this authority?
-                                    <div class="btn btn-md btn-success resolve-with-skip">Skip</div>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>
