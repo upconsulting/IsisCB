@@ -359,3 +359,27 @@ def ingest_accession(request, accession_id):
 
 
     return HttpResponse(template.render(context))
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
+def change_draftauthority(request, draftauthority_id):
+    authority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+    if request.method == 'POST':
+        form = DraftAuthorityForm(request.POST, instance=authority)
+        if form.is_valid():
+            form.save()
+            last = request.GET.get('next', None)
+            if last:
+                return HttpResponseRedirect(last)
+            return HttpResponseRedirect(reverse('data_draftauthority', args=(authority.id,)))
+    elif request.method == 'GET':
+        form = DraftAuthorityForm(instance=authority)
+
+    context = RequestContext(request, {
+        'form': form,
+        'authority': authority,
+        'next': request.GET.get('next', None)
+    })
+    template = loader.get_template('zotero/change_draftauthority.html')
+    return HttpResponse(template.render(context))

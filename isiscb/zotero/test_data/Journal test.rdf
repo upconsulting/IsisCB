@@ -1,0 +1,128 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://journals.cambridge.org/article_S0007087416000017">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1474-001X"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bulstrode</foaf:surname>
+                        <foaf:givenname>Jenny</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_9633"/>
+        <dc:subject>=360-120=</dc:subject>
+        <dc:subject>19th century [13]</dc:subject>
+        <dc:subject>Archaeology [4843]</dc:subject>
+        <dc:subject>Evans, John (1823-1908) [31512]</dc:subject>
+        <dc:subject>Great Britain [185]</dc:subject>
+        <dc:subject>Paper and paper industry [17963]</dc:subject>
+        <dc:subject>Time [14978]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/article_S0007087416000017</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1–25</bib:pages>
+        <dc:date>March 2016</dc:date>
+        <dcterms:dateSubmitted>2016-03-18 15:17:45</dcterms:dateSubmitted>
+        <z:libraryCatalog>Cambridge Journals Online</z:libraryCatalog>
+        <dcterms:abstract>For geologists and antiquaries of the late 1850s debates over ancient stone tools were frustrated by a lack of accepted criteria. The artefacts were hard to interpret. It was not self-evident how to judge whether they were ancient or modern, natural or man-made; or indeed whether stone tools could pre-date the use of metal tools at all. Antiquary and papermaker John Evans provided a system that offered to resolve these issues. His criteria and his use of re-enactment, making his own stone implements, gained acceptance among flint experts across fluid disciplinary boundaries and enabled authoritative interpretations of the underdetermined objects. This paper explores how Evans drew on the concerns of his industrial culture to make sense of prehistoric artefacts and support his claim to access the past through his own actions. Situated industrial concerns provided the resources for his flint work: from a patent dispute with astronomer and fellow industrialist Warren de la Rue, through his role in the Victorian arms trade, to the struggle to displace skilled manual labour in his factories. Evans is remembered for pioneering the techniques and classificatory system of modern Palaeolithic archaeology and as one of the founders of the re-enactment science of experimental flint knapping. His work played a significant role in helping reconceive the antiquity of man, yet the system of proof for this grand claim was deeply situated in his industrial culture. This paper explores how the industrial resources of a Victorian papermaker made human history.</dcterms:abstract>
+        <dc:title>The Industrial Archaeology of Deep Time</dc:title>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1474-001X">
+        <prism:volume>49</prism:volume>
+        <prism:number>01</prism:number>
+        <dc:title>The British Journal for the History of Science</dc:title>
+        <dc:identifier>ISSN 1474-001X</dc:identifier>
+        <dc:identifier>DOI 10.1017/S0007087416000017</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_9633">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/action/displayAbstract?aid=10239286</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-03-18 15:17:45</dcterms:dateSubmitted>
+        <dc:title>Cambridge Journals Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://journals.cambridge.org/article_S0007087416000303">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>49</prism:volume>
+                <prism:number>01</prism:number>
+                <dc:title>The British Journal for the History of Science</dc:title>
+                <dc:identifier>ISSN 1474-001X</dc:identifier>
+                <dc:identifier>DOI 10.1017/S0007087416000303</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Colonna</foaf:surname>
+                        <foaf:givenname>Federica Turriziani</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780226141879</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780226046945</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780674736894</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_9637"/>
+        <dc:subject>=360-133=</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/article_S0007087416000303</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>107–113</bib:pages>
+        <dc:date>March 2016</dc:date>
+        <dcterms:dateSubmitted>2016-03-18 15:17:45</dcterms:dateSubmitted>
+        <z:libraryCatalog>Cambridge Journals Online</z:libraryCatalog>
+        <dcterms:abstract>During the early 1870s a young zoologist who worked as a Privatdozent delivering lectures at different Prussian universities invested much of his family wealth and solicited his fellows' contributions to establish a research facility by the sea. The young zoologist happened to be called Anton Dohrn. From the time it opened its doors, the Anton Dohrn Zoological Station – or Naples Zoological Station, as it was originally called – played a crucial role in shaping life sciences as it facilitated research aimed at explaining the mechanics of inheritance. During the last quarter of the nineteenth century and the first decades of the twentieth, zoologists attempted to explain how evolutionary changes occur within a population and become stabilized. In so doing, they looked at developmental processes as well as environmental pressure, coming up with different hypotheses to explain inheritance. In some cases, their research was highly speculative, whereas in other cases they conducted cytological observations to identify the material basis of heredity. Research on evolution and development has been carried out in different places, and zoological stations like the one in Naples have played a major role in this story. However, numerous biological institutions active at the turn of the twentieth century have not received much attention from historians.</dcterms:abstract>
+        <dc:title>Heredity, evolution and development in their (epistemic) environment at the turn of the nineteenth century</dc:title>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_9637">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://journals.cambridge.org/action/displayAbstract?aid=10239445</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-03-18 15:17:45</dcterms:dateSubmitted>
+        <dc:title>Cambridge Journals Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>

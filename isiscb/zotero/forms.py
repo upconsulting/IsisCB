@@ -15,3 +15,9 @@ class ImportAccessionForm(forms.ModelForm):
     class Meta:
         model = ImportAccession
         fields = ['name', 'ingest_to', 'zotero_rdf']
+
+
+class DraftAuthorityForm(forms.ModelForm):
+    class Meta:
+        model = DraftAuthority
+        fields = ['name', 'type_controlled']
