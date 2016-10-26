@@ -12,9 +12,11 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.template import RequestContext, loader
+from django.utils.translation import get_language
 
 import uuid
 import base64, zlib
+import locale
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
@@ -570,6 +572,58 @@ def about(request):
 
     context = RequestContext(request, {
         'active': 'about',
+    })
+    return HttpResponse(template.render(context))
+
+def statistics(request):
+    """
+    View for statistics page
+    """
+    template = loader.get_template('isisdata/statistics.html')
+
+    # set timeout to one day
+    cache_timeout = 86400
+
+    user_cache = caches['default']
+    citations_count = user_cache.get('statistics_citation')
+    if not citations_count:
+        citations_count = Citation.objects.filter(public=True).count()
+        user_cache.set('statistics_citation', citations_count, cache_timeout)
+
+    authority_count = user_cache.get('statistics_authority')
+    if not authority_count:
+        authority_count = Authority.objects.filter(public=True).count()
+        user_cache.set('statistics_authority', authority_count, cache_timeout)
+
+    acrelation_count = user_cache.get('statistics_acrelation')
+    if not acrelation_count:
+        acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
+        user_cache.set('statistics_acrelation', acrelation_count, cache_timeout)
+
+    ccrelation_count = user_cache.get('statistics_ccrelation')
+    if not ccrelation_count:
+        ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+        user_cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
+
+    aarelation_count = user_cache.get('statistics_aarelation')
+    if not aarelation_count:
+        aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+        user_cache.set('statistics_aarelation', aarelation_count, cache_timeout)
+
+
+    # by citation type
+    books_count = user_cache.get('statistics_book')
+    if not books_count:
+        books_count = Citation.objects.filter(public=True, type_controlled='BO').count()
+        user_cache.set('statistics_book', books_count, cache_timeout)
+
+    context = RequestContext(request, {
+        'active': 'about',
+        'citations_count': citations_count,
+        'authority_count': authority_count,
+        'relation_count': acrelation_count + ccrelation_count + aarelation_count,
+
+        'books_count': books_count,
     })
     return HttpResponse(template.render(context))
 

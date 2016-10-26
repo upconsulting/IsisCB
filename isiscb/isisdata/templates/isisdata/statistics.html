@@ -1,0 +1,80 @@
+{% extends "isisdata/__base.html" %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="row" ng-app="commentsApp">
+<!--  <div class="col-sm-3 col-md-2">
+    <div class="menu">
+      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+  </div>-->
+
+  <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-10">
+    <h3><i>IsisCB Explore</i> statistics (updated on October 23, 2016)</h3>
+  </div>
+  <div class="col-sm-1"></div>
+
+  <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-10 main">
+
+
+
+<h4>Size and scope of the dataset</h4>
+
+<p>Types of records:</p>
+
+<ul>
+<li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
+<li>Authority records: {{ authority_count|intcomma }}</li>
+<li>Relationships: {{ relation_count|intword }}</li>
+</ul>
+
+<p>Temporal scope of the bibliographical data:</p>
+
+<p>...</p>
+
+<p>Curators of the bibliographical data: </p>
+
+<ul>
+<li>Citations to works curated by John Neu (1970-1999): 119,000</li>
+
+<li>Citations to works curated by Joy Harvey (2000-2001): 4,800</li>
+
+<li>Citations to works curated by Stephen Weldon (2002-present): 79,800</li>
+
+<li>Citations to works curated for the Society for the History of Technology: 1,700</li>
+</ul>
+
+<p>Citations:</p>
+
+<ul>
+<li>Books: {{ books_count|intcomma }}</li>
+
+<li>Journal articles: 75,000</li>
+
+<li>Chapters: 21,000</li>
+
+<li>Reviews: 49,000</li>
+
+<li>Theses: 6,500</li>
+</ul>
+
+<p>Authorities</p>
+
+<ul>
+  <li>Persons: 50,000</li>
+  <li>Places 50,000</li>
+  <li>Topics: 50,000</li>
+
+</ul>
+
+  </div>
+</div>
+
+{% endblock %}
