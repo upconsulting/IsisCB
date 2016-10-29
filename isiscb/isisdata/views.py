@@ -584,48 +584,94 @@ def statistics(request):
     # set timeout to one day
     cache_timeout = 86400
 
-    user_cache = caches['default']
-    citations_count = user_cache.get('statistics_citation')
+    cache = caches['default']
+    citations_count = cache.get('statistics_citation')
     if not citations_count:
         citations_count = Citation.objects.filter(public=True).count()
-        user_cache.set('statistics_citation', citations_count, cache_timeout)
+        cache.set('statistics_citation', citations_count, cache_timeout)
 
-    authority_count = user_cache.get('statistics_authority')
+    authority_count = cache.get('statistics_authority')
     if not authority_count:
         authority_count = Authority.objects.filter(public=True).count()
-        user_cache.set('statistics_authority', authority_count, cache_timeout)
+        cache.set('statistics_authority', authority_count, cache_timeout)
 
-    acrelation_count = user_cache.get('statistics_acrelation')
+    acrelation_count = cache.get('statistics_acrelation')
     if not acrelation_count:
         acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
-        user_cache.set('statistics_acrelation', acrelation_count, cache_timeout)
+        cache.set('statistics_acrelation', acrelation_count, cache_timeout)
 
-    ccrelation_count = user_cache.get('statistics_ccrelation')
+    ccrelation_count = cache.get('statistics_ccrelation')
     if not ccrelation_count:
         ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        user_cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
+        cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
 
-    aarelation_count = user_cache.get('statistics_aarelation')
+    aarelation_count = cache.get('statistics_aarelation')
     if not aarelation_count:
         aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        user_cache.set('statistics_aarelation', aarelation_count, cache_timeout)
+        cache.set('statistics_aarelation', aarelation_count, cache_timeout)
 
 
     # by citation type
-    books_count = user_cache.get('statistics_book')
-    if not books_count:
-        books_count = Citation.objects.filter(public=True, type_controlled='BO').count()
-        user_cache.set('statistics_book', books_count, cache_timeout)
+    books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
+    articles_count = _get_count_citation_type('statistics_article', "AR", cache_timeout)
+    chapters_count = _get_count_citation_type('statistics_chapter', "CH", cache_timeout)
+    reviews_count = _get_count_citation_type('statistics_review', "RE", cache_timeout)
+    theses_count = _get_count_citation_type('statistics_thesis', "TH", cache_timeout)
+
+    # by authority type
+    persons_count = _get_count_authority_type('statistics_person', "PE", cache_timeout)
+    institutions_count = _get_count_authority_type('statistics_institution', "IN", cache_timeout)
+    time_periods_count = _get_count_authority_type('statistics_time_period', "TI", cache_timeout)
+    geographic_terms_count = _get_count_authority_type('statistics_geographic_term', "GE", cache_timeout)
+    serial_publications_count = _get_count_authority_type('statistics_serial_publication', "SE", cache_timeout)
+    classification_terms_count = _get_count_authority_type('statistics_classification_term', "CT", cache_timeout)
+    concepts_count = _get_count_authority_type('statistics_concepts', "CO", cache_timeout)
+    creative_works_count = _get_count_authority_type('statistics_creative_work', "CW", cache_timeout)
+    events_count = _get_count_authority_type('statistics_event', "EV", cache_timeout)
+    crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
+    publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
 
     context = RequestContext(request, {
         'active': 'about',
         'citations_count': citations_count,
         'authority_count': authority_count,
         'relation_count': acrelation_count + ccrelation_count + aarelation_count,
-
+        # citation types
         'books_count': books_count,
+        'articles_count': articles_count,
+        'chapters_count': chapters_count,
+        'reviews_count': reviews_count,
+        'theses_count': theses_count,
+        # authority types
+        'persons_count': persons_count,
+        'institutions_count': institutions_count,
+        'time_periods_count': time_periods_count,
+        'geographic_terms_count': geographic_terms_count,
+        'serial_publications_count': serial_publications_count,
+        'classification_terms_count': classification_terms_count,
+        'concepts_count': concepts_count,
+        'creative_works_count': creative_works_count,
+        'events_count': events_count,
+        'crossreferences_count': crossreferences_count,
+        'publishers_count': publishers_count,
     })
     return HttpResponse(template.render(context))
+
+def _get_count_citation_type(cache_name, citation_type, cache_timeout):
+    cache = caches['default']
+    count = cache.get(cache_name)
+    if not count:
+        count = Citation.objects.filter(public=True, type_controlled=citation_type).count()
+        cache.set(cache_name, count, cache_timeout)
+    return count
+
+def _get_count_authority_type(cache_name, authority_type, cache_timeout):
+    cache = caches['default']
+    count = cache.get(cache_name)
+    if not count:
+        count = Authority.objects.filter(public=True, type_controlled=authority_type).count()
+        cache.set(cache_name, count, cache_timeout)
+    return count
 
 def authority(request, authority_id):
     """

@@ -30,9 +30,9 @@
 <p>Types of records:</p>
 
 <ul>
-<li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
-<li>Authority records: {{ authority_count|intcomma }}</li>
-<li>Relationships: {{ relation_count|intword }}</li>
+  <li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
+  <li>Authority records: {{ authority_count|intcomma }}</li>
+  <li>Relationships: {{ relation_count|intword }}</li>
 </ul>
 
 <p>Temporal scope of the bibliographical data:</p>
@@ -42,35 +42,28 @@
 <p>Curators of the bibliographical data: </p>
 
 <ul>
-<li>Citations to works curated by John Neu (1970-1999): 119,000</li>
-
-<li>Citations to works curated by Joy Harvey (2000-2001): 4,800</li>
-
-<li>Citations to works curated by Stephen Weldon (2002-present): 79,800</li>
-
-<li>Citations to works curated for the Society for the History of Technology: 1,700</li>
+  <li>Citations to works curated by John Neu (1970-1999): 119,000</li>
+  <li>Citations to works curated by Joy Harvey (2000-2001): 4,800</li>
+  <li>Citations to works curated by Stephen Weldon (2002-present): 79,800</li>
+  <li>Citations to works curated for the Society for the History of Technology: 1,700</li>
 </ul>
 
 <p>Citations:</p>
 
 <ul>
-<li>Books: {{ books_count|intcomma }}</li>
-
-<li>Journal articles: 75,000</li>
-
-<li>Chapters: 21,000</li>
-
-<li>Reviews: 49,000</li>
-
-<li>Theses: 6,500</li>
+  <li>Books: {{ books_count|intcomma }}</li>
+  <li>Journal articles: {{ articles_count|intcomma }}</li>
+  <li>Chapters: {{ chapters_count|intcomma }}</li>
+  <li>Reviews: {{ reviews_count|intcomma }}</li>
+  <li>Theses: {{ theses_count|intcomma }}</li>
 </ul>
 
 <p>Authorities</p>
 
 <ul>
-  <li>Persons: 50,000</li>
-  <li>Places 50,000</li>
-  <li>Topics: 50,000</li>
+  <li>Persons: {{ persons_count|intcomma }}</li>
+  <li>Places: {{ geographic_terms_count|intcomma }}</li>
+  <li>Topics: {{ concepts_count|intcomma }}</li>
 
 </ul>
 
