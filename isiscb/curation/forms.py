@@ -458,13 +458,17 @@ class RoleForm(forms.ModelForm):
 
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset_values = Dataset.objects.all()
+    dataset = forms.ChoiceField(required=True)
 
-    choices = set()
-    for ds in dataset_values:
-        choices.add((ds.pk, ds.name))
+    def __init__(self, *args, **kwargs):
+        super(DatasetRuleForm, self).__init__( *args, **kwargs)
 
-    dataset = forms.ChoiceField(choices = choices, required=True)
+        dataset_values = Dataset.objects.all()
+        choices = set()
+        for ds in dataset_values:
+            choices.add((ds.pk, ds.name))
+        self.fields['dataset'].choices = choices
+
 
     class Meta:
         model = DatasetRule
@@ -475,13 +479,16 @@ class DatasetRuleForm(forms.ModelForm):
 
 
 class AddRoleForm(forms.Form):
-    roles = IsisCBRole.objects.all()
+    role = forms.ChoiceField(required=True)
 
-    choices = []
-    for role in roles:
-        choices.append((role.pk, role.name))
+    def __init__(self, *args, **kwargs):
+        super(AddRoleForm, self).__init__( *args, **kwargs)
 
-    role = forms.ChoiceField(choices = choices, required=True)
+        roles = IsisCBRole.objects.all()
+        choices = []
+        for role in roles:
+            choices.append((role.pk, role.name))
+        self.fields['role'].choices = choices
 
 class CRUDRuleForm(forms.ModelForm):
 
@@ -496,14 +503,18 @@ class CRUDRuleForm(forms.ModelForm):
 
 class FieldRuleCitationForm(forms.ModelForm):
 
-    all_citation_fields = Citation._meta.get_fields()
+    field_name = forms.ChoiceField(required = True)
 
-    choices = []
-    for field in all_citation_fields:
-        choices.append((field.name, field.name))
-    choices.sort()
+    def __init__(self, *args, **kwargs):
+        super(FieldRuleCitationForm, self).__init__( *args, **kwargs)
 
-    field_name = forms.ChoiceField(choices = choices, required = True)
+        all_citation_fields = Citation._meta.get_fields()
+        choices = []
+        for field in all_citation_fields:
+            choices.append((field.name, field.name))
+        choices.sort()
+        self.fields['field_name'].choices = choices
+
 
     class Meta:
         model = FieldRule
@@ -512,14 +523,19 @@ class FieldRuleCitationForm(forms.ModelForm):
         ]
 
 class FieldRuleAuthorityForm(forms.ModelForm):
-    all_authority_fields = Authority._meta.get_fields()
 
-    authority_choices = []
-    for field in all_authority_fields:
-        authority_choices.append((field.name, field.name))
-    authority_choices.sort()
+    field_name = forms.ChoiceField(required = True)
 
-    field_name = forms.ChoiceField(choices = authority_choices, required = True)
+    def __init__(self, *args, **kwargs):
+        super(FieldRuleAuthorityForm, self).__init__( *args, **kwargs)
+
+        all_authority_fields = Authority._meta.get_fields()
+
+        authority_choices = []
+        for field in all_authority_fields:
+            authority_choices.append((field.name, field.name))
+        authority_choices.sort()
+        self.fields['field_name'].choices = authority_choices
 
     class Meta:
         model = FieldRule
