@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^resolver/(?P<citation_id>[A-Z]+[0-9]+)/$', views.get_linkresolver_url, name='linkresolver'),
     url(r'^(?i)help', views.help, name='help'),
     url(r'^(?i)about', views.about, name='about'),
+    url(r'^(?i)statistics', views.statistics, name='statistics'),
     url(r'^(?i)api', views.api_documentation, name='api'),
     url(r'^curation/', include('curation.urls', namespace="curation")),
 ]

@@ -38,7 +38,13 @@
                 <ul class="nav navbar-nav navbar-nav-home">
 
                     <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
-                    <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                    <li class="{% if active == 'about' %}active{% endif %}" class="dropdown">
+                        <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="{% url "about" %}">About IsisCB Explore</a></li>
+                          <li><a href="{% url "statistics" %}">Statistics </a></li>
+                        </ul>
+                    </li>
                     <li><a href="http://isiscb.org">Blog</a></li>
                     <li class="{% if active == 'help' %}active{% endif %}"><a href="{% url "help" %}">Help</a></li>
                     <li class="dropdown">
