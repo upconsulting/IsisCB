@@ -581,7 +581,7 @@ def statistics(request):
     """
     template = loader.get_template('isisdata/statistics.html')
 
-    # set timeout to one day
+    # set timeout (in sec) to one day
     cache_timeout = 86400
 
     cache = caches['default']
@@ -610,6 +610,10 @@ def statistics(request):
         aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
         cache.set('statistics_aarelation', aarelation_count, cache_timeout)
 
+    # by curator
+    curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
+    curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
+    curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
 
     # by citation type
     books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
@@ -636,6 +640,10 @@ def statistics(request):
         'citations_count': citations_count,
         'authority_count': authority_count,
         'relation_count': acrelation_count + ccrelation_count + aarelation_count,
+        # curators
+        'curator_neu_count': curator_neu_count,
+        'curator_harvey_count': curator_harvey_count,
+        'curator_weldon_count': curator_weldon_count,
         # citation types
         'books_count': books_count,
         'articles_count': articles_count,
@@ -670,6 +678,17 @@ def _get_count_authority_type(cache_name, authority_type, cache_timeout):
     count = cache.get(cache_name)
     if not count:
         count = Authority.objects.filter(public=True, type_controlled=authority_type).count()
+        cache.set(cache_name, count, cache_timeout)
+    return count
+
+def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
+    cache = caches['default']
+    count = cache.get(cache_name)
+    if not count:
+        ds = Dataset.objects.filter(name__icontains=curator_str)
+        citations_count = Citation.objects.filter(belongs_to=ds).count()
+        authorities_count = Authority.objects.filter(belongs_to=ds).count()
+        count = citations_count + authorities_count
         cache.set(cache_name, count, cache_timeout)
     return count
 
