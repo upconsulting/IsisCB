@@ -7,88 +7,84 @@
 <div class="row" ng-app="commentsApp">
 
   <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-10">
-    <h3><i>IsisCB Explore</i> statistics (updated on October 23, 2016)</h3>
+    <h3><i>IsisCB Explore</i> statistics</h3>
   </div>
   <div class="col-sm-1"></div>
 
   <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-10 main">
 
+    <h5>Types of records:</h5>
 
+    <ul>
+      <li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
+      <li>Authority records: {{ authority_count|intcomma }}</li>
+      <li>Relationships: {{ relation_count|intword }}</li>
+    </ul>
 
-<h4>Size and scope of the dataset</h4>
+    <h5 style="margin-top: 25px;">Temporal scope of the bibliographical data:</h5>
 
-<p>Types of records:</p>
+    <p>The temporal scope of the bibliographical data ranges from about 1972 to the present.</p>
 
-<ul>
-  <li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
-  <li>Authority records: {{ authority_count|intcomma }}</li>
-  <li>Relationships: {{ relation_count|intword }}</li>
-</ul>
+    <h5 style="margin-top: 25px;">Curators of the bibliographical data: </h5>
 
-<p>Temporal scope of the bibliographical data:</p>
+    <ul>
+      <li>Citations to works curated by John Neu (1970-1999): {{curator_neu_count|intcomma}}</li>
+      <li>Citations to works curated by Joy Harvey (2000-2001): {{ curator_harvey_count|intcomma }}</li>
+      <li>Citations to works curated by Stephen Weldon (2002-present): {{ curator_weldon_count|intcomma }}</li>
+      <li>Citations to works curated for the Society for the History of Technology: 1,700</li>
+    </ul>
 
-<p>...</p>
+    <h5 style="margin-top: 25px;">Citations:</h5>
 
-<p>Curators of the bibliographical data: </p>
+    <ul>
+      <li>Books: {{ books_count|intcomma }}</li>
+      <li>Journal articles: {{ articles_count|intcomma }}</li>
+      <li>Chapters: {{ chapters_count|intcomma }}</li>
+      <li>Reviews: {{ reviews_count|intcomma }}</li>
+      <li>Theses: {{ theses_count|intcomma }}</li>
+    </ul>
 
-<ul>
-  <li>Citations to works curated by John Neu (1970-1999): {{curator_neu_count|intcomma}}</li>
-  <li>Citations to works curated by Joy Harvey (2000-2001): {{ curator_harvey_count|intcomma }}</li>
-  <li>Citations to works curated by Stephen Weldon (2002-present): {{ curator_weldon_count|intcomma }}</li>
-  <li>Citations to works curated for the Society for the History of Technology: 1,700</li>
-</ul>
+    <h5 style="margin-top: 25px;">Authorities</h5>
 
-<p>Citations:</p>
+    <ul>
+      <li>Persons: {{ persons_count|intcomma }}</li>
 
-<ul>
-  <li>Books: {{ books_count|intcomma }}</li>
-  <li>Journal articles: {{ articles_count|intcomma }}</li>
-  <li>Chapters: {{ chapters_count|intcomma }}</li>
-  <li>Reviews: {{ reviews_count|intcomma }}</li>
-  <li>Theses: {{ theses_count|intcomma }}</li>
-</ul>
+      {% if institutions_count > 0 %}
+      <li>Institutions: {{ institutions_count|intcomma }}</li>
+      {% endif %}
 
-<p>Authorities</p>
+      <li>Geographic Terms: {{ geographic_terms_count|intcomma }}</li>
+      <li>Concepts: {{ concepts_count|intcomma }}</li>
 
-<ul>
-  <li>Persons: {{ persons_count|intcomma }}</li>
+      {% if time_periods_count > 0 %}
+      <li>Time Periods: {{ time_periods_count|intcomma }}</li>
+      {% endif %}
 
-  {% if institutions_count > 0 %}
-  <li>Institutions: {{ institutions_count|intcomma }}</li>
-  {% endif %}
+      {% if serial_publications_count > 0 %}
+      <li>Serial Publications: {{ serial_publications_count|intcomma }}</li>
+      {% endif %}
 
-  <li>Geographic Terms: {{ geographic_terms_count|intcomma }}</li>
-  <li>Concepts: {{ concepts_count|intcomma }}</li>
+      {% if classification_terms_count > 0 %}
+      <li>Classification Terms: {{ classification_terms_count|intcomma }}</li>
+      {% endif %}
 
-  {% if time_periods_count > 0 %}
-  <li>Time Periods: {{ time_periods_count|intcomma }}</li>
-  {% endif %}
+      {% if creative_works_count > 0 %}
+      <li>Creative Works: {{ creative_works_count|intcomma }}</li>
+      {% endif %}
 
-  {% if serial_publications_count > 0 %}
-  <li>Serial Publications: {{ serial_publications_count|intcomma }}</li>
-  {% endif %}
+      {% if events_count > 0 %}
+      <li>Events: {{ events_count|intcomma }}</li>
+      {% endif %}
 
-  {% if classification_terms_count > 0 %}
-  <li>Classification Terms: {{ classification_terms_count|intcomma }}</li>
-  {% endif %}
+      {% if crossreferences_count > 0 %}
+      <li>Cross References: {{ crossreferences_count|intcomma }}</li>
+      {% endif %}
 
-  {% if creative_works_count > 0 %}
-  <li>Creative Works: {{ creative_works_count|intcomma }}</li>
-  {% endif %}
+      {% if publishers_count > 0 %}
+      <li>Publisher: {{ publishers_count|intcomma }}</li>
+      {% endif %}
 
-  {% if events_count > 0 %}
-  <li>Events: {{ events_count|intcomma }}</li>
-  {% endif %}
-
-  {% if crossreferences_count > 0 %}
-  <li>Cross References: {{ crossreferences_count|intcomma }}</li>
-  {% endif %}
-
-  {% if publishers_count > 0 %}
-  <li>Publisher: {{ publishers_count|intcomma }}</li>
-  {% endif %}
-
-</ul>
+    </ul>
 
   </div>
 </div>

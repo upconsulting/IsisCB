@@ -686,6 +686,7 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
     count = cache.get(cache_name)
     if not count:
         ds = Dataset.objects.filter(name__icontains=curator_str)
+        # TODO: check that ds is not a list
         citations_count = Citation.objects.filter(belongs_to=ds).count()
         authorities_count = Authority.objects.filter(belongs_to=ds).count()
         count = citations_count + authorities_count
