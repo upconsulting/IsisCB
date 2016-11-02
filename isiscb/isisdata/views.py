@@ -614,7 +614,7 @@ def statistics(request):
     curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
     curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
     curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
-    curator_moon_count = _get_count_by_dataset('curators_weldon',"(Suzanne Moon, ed.)", cache_timeout)
+    curator_moon_count = _get_count_by_dataset('curators_moon',"(Suzanne Moon, ed.)", cache_timeout)
 
     # by citation type
     books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
