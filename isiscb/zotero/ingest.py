@@ -8,7 +8,7 @@ DOCUMENT_TYPE_DEFAULT = DraftCitation.ARTICLE
 DOCUMENT_TYPES = {
     'journalarticle': DraftCitation.ARTICLE,
     'article': DraftCitation.ARTICLE,
-    'book': DraftCitation.BOOK,
+    'book': Citation.BOOK,
     'thesis': DraftCitation.THESIS,
     'booksection': DraftCitation.CHAPTER,
     'webpage': DraftCitation.WEBSITE,
@@ -99,7 +99,7 @@ def _get_pages_data(entry):
     }
 
 
-def _get_dtype(entry):
+def _get_dtype(entry, default=DOCUMENT_TYPE_DEFAULT):
     """
     Generate data for :prop:`.DraftCitation.type_controlled`\.
 
@@ -114,11 +114,11 @@ def _get_dtype(entry):
     _key = entry.get('type_controlled')
     if type(_key) is list:
         _key = _key[0]
-    _key = _key.lower()
-    print _key
+    if _key:
+        _key = _key.lower()
 
     return {
-        'type_controlled': DOCUMENT_TYPES.get(_key, DOCUMENT_TYPE_DEFAULT)
+        'type_controlled': DOCUMENT_TYPES.get(_key, default)
     }
 
 
@@ -418,7 +418,23 @@ def _related_citation(datum, draft_citation, ccrelation_type, books={}):
             _resolve(draft_altcitation, reviewed_citation)
 
     if not draft_altcitation:    # Nothing to do; just bail.
-        return None, None
+        if 'title' not in datum:
+            return None, None
+        title = datum.get('title')
+        draft_altcitation = None
+        for book in books.values():
+            if book.title == title:
+                draft_altcitation = book
+                print draft_altcitation.type_controlled
+                print draft_altcitation.part_of == draft_citation.part_of
+                break
+        if not draft_altcitation:
+            draft_altcitation = DraftCitation.objects.create(
+                title = title,
+                type_controlled = _get_dtype(datum, Citation.BOOK)['type_controlled'],
+                part_of = draft_citation.part_of
+            )
+            generate_citation_linkeddata(datum, draft_altcitation)
 
     draft_ccrelation = DraftCCRelation.objects.create(
         subject = draft_altcitation,
@@ -589,4 +605,5 @@ def process(parser, accession):
     for draft_citation in draft_citations:
         generate_reviewed_works_relations(entry, draft_citation, draft_citation_map)
         generate_book_chapter_relations(entry, draft_citation, draft_citation_map)
-    return draft_citations
+    accession.refresh_from_db()
+    return accession.draftcitation_set.all()
