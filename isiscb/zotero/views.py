@@ -48,10 +48,12 @@ def suggest_authority_json(request, authority_id):
     suggestions = []
     for suggestion in suggest_authority(draftAuthority):
         instance = Authority.objects.get(pk=suggestion['id'])
+        related_citations = instance.acrelation_set.values_list('citation__title', flat=True)[:10]
         suggestion.update({
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
+            'related_citations': list(related_citations),
             })
         suggestions.append(suggestion)
         if len(suggestions) > 30:
