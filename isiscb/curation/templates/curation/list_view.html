@@ -6,10 +6,10 @@
 {% block content %}
 {% autopaginate objects.qs 40 as filter_list %}
 
-<div class="clearfix">
+<div class="clearfix" style="margin-bottom: 20px;">
     <div class="btn-group pull-right">
         <button data-toggle="collapse"
-            class="btn btn-primary"
+            class="btn btn-sm btn-primary"
             data-target="#filters">
             Show/hide filters
         </button>
@@ -17,8 +17,10 @@
 </div>
 
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
+  <div class="panel panel-default">
+  <div class="panel-body">
     {% block filter_form %}
-    <form class="form clearfix">
+    <form class="form-horizontal clearfix">
       {% csrf_token %}
         {% for field in objects.form %}
         <div class="form-group clearable">
@@ -27,8 +29,8 @@
         </div>
         {% endfor %}
         <div class="btn-group pull-right">
-            <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-            <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            <input class="btn btn-primary btn-sm" type="submit" value="Apply Filters"></input>
+            <button class="btn btn-warning btn-sm" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
         </div>
     </form>
     <script>
@@ -40,6 +42,8 @@
     });
     </script>
     {% endblock %}
+    </div>
+  </div>
 </div>
 
 <div class="text-center asdf">

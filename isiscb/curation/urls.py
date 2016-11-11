@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^(?i)citation/add$', views.create_citation, name="create_citation"),
     url(r'^(?i)authority/add$', views.create_authority, name="create_authority"),
 
+    url(r'^(?i)citation/collection/search$', views.search_collections, name='search-collections'),
     url(r'^(?i)citation/collection$', views.create_citation_collection, name='create-citation-collection'),
     url(r'^(?i)citation/collection/add$', views.add_citation_collection, name='add-citation-collection'),
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),

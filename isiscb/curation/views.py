@@ -1282,6 +1282,17 @@ def quick_and_dirty_authority_search(request):
 def dataset(request, dataset_id=None):
     return HttpResponse('')
 
+@staff_member_required
+def search_collections(request):
+    q = request.GET.get('query', None)
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+    queryset = CitationCollection.objects.filter(name__icontains=q)
+    results = [{
+        'id': col.id,
+        'label': col.name,
+    } for col in queryset[:20]]
+    return JsonResponse(results, safe=False)
 
 @staff_member_required
 @check_rules('can_view_user_module')

@@ -2,6 +2,7 @@ import django_filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
 from django.db.models import Q
+from django import forms
 
 from isisdata.models import *
 from isisdata.helper_methods import strip_punctuation
@@ -28,7 +29,6 @@ filters.LOOKUP_TYPES = [
 
 class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilter):
     pass
-
 
 def filter_in_collections(queryset, value):
     if not value:
@@ -57,10 +57,18 @@ class CitationFilter(django_filters.FilterSet):
     subject = django_filters.MethodFilter()
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
-    in_collections = django_filters.ModelMultipleChoiceFilter(name='in_collections', queryset=CitationCollection.objects.all(), action=filter_in_collections)
+    in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
+
+    def __init__(self, *args, **kwargs):
+        super(CitationFilter, self).__init__(*args, **kwargs)
+        in_coll = self.data.get('in_collections', None)
+        if in_coll:
+            collection = CitationCollection.objects.get(pk=in_coll)
+            if collection:
+                self.collection_name = collection.name
 
     class Meta:
         model = Citation
