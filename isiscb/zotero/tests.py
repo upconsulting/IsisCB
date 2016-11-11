@@ -622,6 +622,9 @@ class TestIngest(TestCase):
             self.assertEqual(self.accession.ingest_to, prod.belongs_to)
 
         attribute = citation.attributes.first()
+        self.assertIsInstance(attribute.value_freeform, unicode)
+        self.assertEqual(len(attribute.value_freeform), 4,
+                         "ISISCB-736: freeform value should be four-digit year")
         self.assertEqual(attribute.type_controlled, self.publicationDateType,
                          'attribute has the wrong type')
         self.assertIsInstance(attribute.value.get_child_class(), ISODateValue,
