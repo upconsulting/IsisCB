@@ -50,6 +50,7 @@ def suggest_authority_json(request, authority_id):
         instance = Authority.objects.get(pk=suggestion['id'])
         suggestion.update({
             'name': instance.name,
+            'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
             })
         suggestions.append(suggestion)

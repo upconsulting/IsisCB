@@ -157,6 +157,7 @@ def suggest_authority(draftAuthority):
     hits += suggest_authority_by_resolutions(draftAuthority)
     # hits += suggest_by_attributes(draftAuthority)
     hits += suggest_by_field(draftAuthority, 'name', Authority, 'name_for_sort', scramble=True)
+    print hits[0]
     return aggregate_hits(hits)
 
 
