@@ -1,0 +1,592 @@
+from isisdata.models import *
+from zotero.models import *
+from zotero.parse import ZoteroIngest
+
+import re, os, csv
+
+DOCUMENT_TYPE_DEFAULT = DraftCitation.ARTICLE
+DOCUMENT_TYPES = {
+    'journalarticle': DraftCitation.ARTICLE,
+    'article': DraftCitation.ARTICLE,
+    'book': DraftCitation.BOOK,
+    'thesis': DraftCitation.THESIS,
+    'booksection': DraftCitation.CHAPTER,
+    'webpage': DraftCitation.WEBSITE,
+}
+
+
+# These fields can be mapped directly onto the DraftCitation model.
+CITATION_FIELDS = [
+    'title', 'abstract', 'publication_date', 'type_controlled',
+    'type_controlled', 'volume', 'issue', 'extent'
+]
+
+# These fields can be mapped directly onto the DraftAuthority model.
+AUTHORITY_FIELDS = [
+    'name', 'name_first', 'name_last'
+]
+
+
+GENERIC_ACRELATIONS = [
+    ('authors', Authority.PERSON, ACRelation.AUTHOR),
+    ('editors', Authority.PERSON, ACRelation.EDITOR),
+    ('series_editors', Authority.PERSON, ACRelation.EDITOR),
+    ('contributors', Authority.PERSON, ACRelation.CONTRIBUTOR),
+    ('translators', Authority.PERSON, ACRelation.TRANSLATOR),
+]
+
+
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../AuthorityIDmap.tab'), 'rU') as f:
+    reader = csv.reader(f, delimiter='\t')
+    SUBJECT_ID_MAP = {int(row[1]): row[0] for row in reader}
+
+
+_resolve = lambda d, p: InstanceResolutionEvent.objects.create(for_instance=d,
+                                                               to_instance=p)
+"""
+Create an :class:`.InstanceResolutionEvent` for draft ``d`` to production
+instance ``p``.
+"""
+
+
+def _get(entry, key, default=None):
+    """
+    Get ``key`` from ``entry``, and join values into a single object.
+
+    Parameters
+    ----------
+    entry : dict
+    key : str
+    default : object
+
+    Returns
+    -------
+    object
+    """
+    value = entry.get(key, default)
+
+    if type(value) is list:
+        return value[0] if len(value) == 1 else u'; '.join(value)
+    return value
+
+
+def _get_pages_data(entry):
+    """
+    Generate data for :prop:`.DraftCitation.page_start`\, :prop:`.page_end`\,
+    and :prop:`.pages_free_text`\.
+
+    Parameters
+    ----------
+    entry : dict
+
+    Returns
+    -------
+    dict
+    """
+    value = _get(entry, 'pages', None)
+    if type(value) not in [tuple, list]:
+        page_start, page_end, pages_free_text = value, None, value
+    else:
+        try:    # ISISCB-395: Skip malformed page numbers.
+            page_start, page_end = value
+            pages_free_text = u'-'.join(map(unicode, list(value)))
+        except ValueError:    # free_text only.
+            page_start, page_end, pages_free_text = value[0], None, value[0]
+    return {
+        'page_start': page_start,
+        'page_end': page_end,
+        'pages_free_text': pages_free_text,
+    }
+
+
+def _get_dtype(entry):
+    """
+    Generate data for :prop:`.DraftCitation.type_controlled`\.
+
+    Parameters
+    ----------
+    entry : dict
+
+    Returns
+    -------
+    dict
+    """
+    _key = entry.get('type_controlled')
+    if type(_key) is list:
+        _key = _key[0]
+    _key = _key.lower()
+    print _key
+
+    return {
+        'type_controlled': DOCUMENT_TYPES.get(_key, DOCUMENT_TYPE_DEFAULT)
+    }
+
+
+def generate_citation_linkeddata(entry, draft_citation):
+    """
+    Generate new :class:`.DraftCitationLinkedData` instances from field-data.
+
+    Parameters
+    ----------
+    entry : dict
+    draft_citation : :class:`.DraftCitation`
+
+    Returns
+    -------
+    list
+        A list of :class:`.DraftCitationLinkedData` instances.
+    """
+
+    _cast = lambda datum: DraftCitationLinkedData.objects.create(
+        name = datum[0].upper(),
+        value = datum[1],
+        citation = draft_citation,
+        part_of = draft_citation.part_of,
+    )
+    return map(_cast, entry.get('linkeddata', []))
+
+
+def generate_authority_linkeddata(entry, draft_authority):
+    """
+    Generate new :class:`.DraftAuthorityLinkedData` instances from field-data.
+
+    Parameters
+    ----------
+    entry : dict
+    draft_authority : :class:`.DraftAuthority`
+
+    Returns
+    -------
+    list
+        A list of :class:`.DraftAuthorityLinkedData` instances.
+    """
+
+    _cast = lambda datum: DraftAuthorityLinkedData.objects.create(
+        name = datum[0].upper(),
+        value = datum[1],
+        authority = draft_authority,
+        part_of = draft_authority.part_of,
+    )
+    return map(_cast, entry.get('linkeddata', []))
+
+
+def generate_draftcitation(entry, accession):
+    """
+    Generate a new :class:`.DraftCitation` using the field-data in ``entry``.
+
+    Parameters
+    ----------
+    entry : dict
+    accession : :class:`.ImportAcession`
+
+    Returns
+    -------
+    :class:`.DraftCitation`
+    """
+
+    draft_citation_data = {
+        'part_of': accession,
+    }
+    draft_citation_data.update(dict(map(
+        lambda key: (key, _get(entry, key)), CITATION_FIELDS)
+    ))
+
+    draft_citation_data.update(_get_pages_data(entry))
+    draft_citation_data.update(_get_dtype(entry))
+    if draft_citation_data.get('type_controlled') == DraftCitation.BOOK:
+        part_of_data = _get(entry, 'part_of')
+        if part_of_data:
+            draft_citation_data['book_series'] = part_of_data.get('title')
+    return DraftCitation.objects.create(**draft_citation_data)
+
+
+def _find_mapped_authority(label, ident):
+    """
+    Attempt to find an existing :class:`.Authority` using the lookup
+    ``SUBJECT_ID_MAP``.
+    """
+    try:    # ident should be an int; otherwise we're barking up the wrong tree.
+        pk = SUBJECT_ID_MAP.get(int(ident), None)
+    except (TypeError, ValueError):
+        return
+    if pk:
+        try:
+            return Authority.objects.get(pk=pk)
+        except Authority.DoesNotExist:
+            return
+
+
+def _find_encoded_authority(label, ident):
+    """
+    Attempt to find an existing :class:`.Authority` using an equals-encoded
+    classification code.
+    """
+    if not label.startswith('='):
+        return
+
+    # * Parse the string: "=340-140=" -> 340, 140
+    m = re.match('=([0-9]+)-([0-9]+)=', label)
+
+    # Invert the values: 340, 140 -> 140, 340
+    lookup = '-'.join(m.groups()[::-1]) if m else label.replace('=', '').strip()
+
+    # Search for an Authority with that classification_code: "140-340".
+    # .first() will return None if no matching Authority is found.
+    return Authority.objects.filter(classification_code=lookup).first()
+
+
+def _find_explicit_authority(label, ident):
+    """
+    Attempt to find an existing :class:`.Authority` using an explicit
+    identifier.
+    """
+
+    # There may be typos.
+    label = label.strip() if label else ''
+    ident = ident.strip() if ident else ''
+
+    if not ident.startswith('C') and not label.startswith('C'):
+        return    # Neither label nor ident contain a pk identifier.
+
+    for value in [label, ident]:
+        try:
+            return Authority.objects.get(pk=value)
+        except Authority.DoesNotExist:
+            continue
+    return    # Nothing found.
+
+
+# These functions can be used to find existing Authority records. The second
+#  element of each tuple is (optionally) a value for ACRelation.type_controlled
+#  that should be enforced for this record (i.e. it should override any other
+#  explicit value).
+SUBJECT_AUTHORITY_RESOLVERS = [
+    (_find_mapped_authority, ACRelation.SUBJECT),
+    (_find_encoded_authority, ACRelation.CATEGORY),
+    (_find_explicit_authority, ACRelation.SUBJECT),
+]
+
+def check_for_authority_reference(label, ident, resolvers=SUBJECT_AUTHORITY_RESOLVERS):
+    """
+    Check datum for a reference to an existing :class:`.Authority` using the
+    functions in ``resolvers``.
+
+    Parameters
+    ----------
+    datum : tuple
+    resolvers : list
+        Must contain callables that accepts two arguments, and return
+
+    Returns
+    -------
+
+    """
+    candidate = None
+    for _func, relation_type in resolvers:
+        candidate = _func(label, ident)
+        if candidate:
+            break
+    return candidate, relation_type
+
+
+def generate_subject_acrelations(entry, draft_citation):
+    authority_type = Authority.CONCEPT
+
+    def _cast(datum):
+        label, ident = datum
+        authority, acrelation_type = check_for_authority_reference(label, ident)
+        draft_authority = DraftAuthority.objects.create(
+            name=label,
+            type_controlled=authority_type,
+            part_of=draft_citation.part_of,
+            processed=True if authority else False
+        )
+        if authority:
+            _resolve(draft_authority, authority)
+
+        draft_acrelation = DraftACRelation.objects.create(**{
+            'authority': draft_authority,
+            'citation': draft_citation,
+            'part_of': draft_citation.part_of,
+            'type_controlled': acrelation_type
+        })
+        return draft_authority, draft_acrelation
+    return map(_cast, list(set(entry.get('subjects', []))))
+
+
+def generate_publisher_acrelations(entry, draft_citation):
+    # ('publisher', Authority.PUBLISHER, ACRelation.PUBLISHER)
+    def _cast(datum):
+        draft_authority = DraftAuthority.objects.create(
+            name = datum,
+            type_controlled = Authority.PUBLISHER,
+            part_of = draft_citation.part_of,
+        )
+        draft_acrelation = DraftACRelation.objects.create(
+            type_controlled = ACRelation.PUBLISHER,
+            citation = draft_citation,
+            authority = draft_authority,
+            part_of = draft_citation.part_of,
+        )
+        return draft_authority, draft_acrelation
+    return map(_cast, entry.get('publisher', []))
+
+
+def generate_generic_acrelations(entry, field, draft_citation, authority_type,
+                                acrelation_type):
+    """
+    Generate new :class:`.DraftAuthority` and :class:`.DraftACRelation`
+    instances from field-data.
+
+    Parameters
+    ----------
+    entry : dict
+    field : str
+        Name of the field in ``entry`` containing authority data.
+    draft_citation : :class:`.DraftCitation`
+    authority_type : str
+        Must be a valid value for :prop:`.DraftAuthority.type_controlled`\.
+    acrelation_type : str
+        Must be a valid value for :prop:`.DraftACRelation.type_controlled`\.
+
+    Returns
+    -------
+    list
+        Items are (:class:`.DraftAuthority`\, :class:`.DraftACRelation`) tuples.
+
+    """
+    def _cast(datum):
+        instance_data = {k: datum.get(k) for k in AUTHORITY_FIELDS}
+        instance_data.update({
+            'type_controlled': authority_type,
+            'part_of': draft_citation.part_of
+        })
+        draft_authority = DraftAuthority.objects.create(**instance_data)
+
+        draft_acrelation = DraftACRelation.objects.create(**{
+            'authority': draft_authority,
+            'citation': draft_citation,
+            'part_of': draft_citation.part_of,
+            'type_controlled': acrelation_type
+        })
+        return draft_authority, draft_acrelation
+    return map(_cast, entry.get(field, []))
+
+
+def _related_citation(datum, draft_citation, ccrelation_type, books={}):
+    # We used handle_name to process reviewed works, so this looks odd.
+    identifier = datum.get('name', '').strip()
+    if not identifier:
+        ldata = datum.get('linkeddata', None)
+        if ldata:
+            identifier = ldata[0][1]
+    if not identifier:
+        return None, None
+
+    # This may refer to a Book that we are adding in this accession.
+    draft_altcitation = books.get(identifier, None)
+
+    # Sometimes explicit Citation IDs are used.
+    if not draft_altcitation:
+        reviewed_citation = None
+        if identifier.startswith('CBB'):
+            try:
+                reviewed_citation = Citation.objects.get(pk=identifier)
+            except Citation.DoesNotExist:
+                pass
+
+        # In other cases, the identifier is an ISBN; query by LinkedData.
+        if not reviewed_citation and identifier:
+            linkeddata = LinkedData.objects.filter(
+                type_controlled__name__icontains = 'isbn',
+                universal_resource_name = identifier).first()
+            if linkeddata:
+                reviewed_citation = linkeddata.subject
+
+        if reviewed_citation:
+            # We have a Citation, but need a DraftCitation so that we can
+            #  create a DraftCCRelation.
+            draft_altcitation = DraftCitation.objects.create(
+                title = reviewed_citation.title,
+                type_controlled = reviewed_citation.type_controlled,
+                part_of = draft_citation.part_of,
+            )
+
+            # This DraftCitation is already resolved, since we have
+            #  identified the record of interest in the production
+            #  database.
+            _resolve(draft_altcitation, reviewed_citation)
+
+    if not draft_altcitation:    # Nothing to do; just bail.
+        return None, None
+
+    draft_ccrelation = DraftCCRelation.objects.create(
+        subject = draft_altcitation,
+        object = draft_citation,
+        type_controlled = ccrelation_type,
+        part_of = draft_citation.part_of
+    )
+    return draft_altcitation, draft_ccrelation
+
+
+def generate_book_chapter_relations(entry, draft_citation, books={}):
+    """
+    Generate :class:`.DraftCCRelation` instances specifically for book chapters.
+
+    If a containing book is found, then ``draft_citation`` will be re-typed as a
+    Chapter.
+
+    Attempts to match reviewed works against (1) citations in this ingest batch,
+    (2) citations with matching IDs, and (3) citations with matching linked
+    data.
+    """
+    _is_a_book = lambda datum: _get_dtype(datum)['type_controlled'] == DraftCitation.BOOK
+    data = [datum for datum in entry.get('part_of', []) if _is_a_book(datum)]
+    if not data:
+        return []
+
+    draft_citation.type_controlled = DraftCitation.CHAPTER
+    draft_citation.save()
+    ctype = DraftCCRelation.INCLUDES_CHAPTER
+    _cast = lambda datum: _related_citation(datum, draft_citation, ctype, books)
+    return [result for result in map(_cast, data) if result[0] and result[1]]
+
+
+def generate_reviewed_works_relations(entry, draft_citation, books={}):
+    """
+    Generate :class:`.DraftCCRelation` instances specifically for reviews.
+
+    If reviews are found, then ``draft_citation`` will be re-typed as a
+    Review.
+
+    Attempts to match reviewed works against (1) citations in this ingest batch,
+    (2) citations with matching IDs, and (3) citations with matching linked
+    data.
+    """
+    data = entry.get('reviewed_works', [])
+    if data:    # This is a Review, regardless of what Zotero might way.
+        draft_citation.type_controlled = DraftCitation.REVIEW
+        draft_citation.save()
+
+    ctype = DraftCCRelation.REVIEWED_BY
+    _cast = lambda datum: _related_citation(datum, draft_citation, ctype, books)
+    return [result for result in map(_cast, data) if result[0] and result[1]]
+
+
+def generate_part_of_relations(entry, draft_citation):
+    """
+    Generate :class:`.DraftACRelation`\s based on "part of" entries in the data.
+
+    Skips chapter and review relations.
+    """
+    data = entry.get('part_of', [])
+    def _cast(datum):
+        _type = _get_dtype(datum)['type_controlled']
+        if _type == DraftCitation.BOOK:
+            return None, None
+        else:
+            if _get(datum, 'type_controlled').lower() == 'journal':
+                _type = Authority.SERIAL_PUBLICATION
+                _rel_type = ACRelation.PERIODICAL
+            elif _get(datum, 'type_controlled').lower() == 'series':
+                _type = Authority.SERIAL_PUBLICATION
+                _rel_type = ACRelation.BOOK_SERIES
+            else:
+                return None, None
+
+            draft_authority = DraftAuthority.objects.create(
+                name = _get(datum, 'title'),
+                type_controlled = _type,
+                part_of = draft_citation.part_of,
+            )
+            _linkeddata = generate_authority_linkeddata(datum, draft_authority)
+
+            draft_acrelation = DraftACRelation.objects.create(
+                authority = draft_authority,
+                citation = draft_citation,
+                type_controlled = _rel_type,
+                part_of = draft_citation.part_of,
+            )
+            return draft_authority, draft_acrelation
+        return None, None
+    return [result for result in map(_cast, data) if result[0] and result[1]]
+
+
+def generate_authorities_and_relations(entry, accession, draft_citation):
+    """
+    Generate new :class:`.DraftAuthority` instances and corresponding
+    :class:`.DraftACRelation`\s to ``draft_citation``.
+
+    Parameters
+    ----------
+    entry : dict
+    accession : :class:`.ImportAccession`
+    draft_citation : :class:`.DraftCitation`
+
+    Returns
+    -------
+    tuple
+    """
+
+    # Build DraftAuthority and DraftACRelation.
+    authorities, acrelations = process_authorities(paper, instance)
+    for acrelation in acrelations:
+        acrelation.citation = draftCitation
+        acrelation.save()
+
+    # Linked Data for both the Citation and Authorities.
+    linkedData = process_linkeddata(paper, instance)
+    for ldEntry in linkedData:
+        if type(ldEntry) is DraftCitationLinkedData:
+            ldEntry.citation = draftCitation
+            ldEntry.save()
+        elif type(ldEntry) is DraftAuthorityLinkedData:
+            for authority in authorities:
+                if authority.type_controlled == 'SE':
+                    ldEntry.authority = authority
+                    ldEntry.save()
+
+    # Build DraftAttributes.
+    attributes = process_attributes(paper, instance)
+    for attribute in attributes:
+        attribute.citation = draftCitation
+        attribute.save()
+
+    draftCitation.save()
+    return draftCitation, paper
+
+
+
+def process_entry(entry, accession):
+    draft_citation = generate_draftcitation(entry, accession)
+
+    acrelations = generate_subject_acrelations(entry, draft_citation)
+    for field, authority_type, acrelation_type in GENERIC_ACRELATIONS:
+        if draft_citation.type_controlled == DraftCitation.BOOK and field == 'part_of':
+            continue
+        acrelations += generate_generic_acrelations(entry, field,
+                                                    draft_citation,
+                                                    authority_type,
+                                                    acrelation_type)
+    acrelations += generate_publisher_acrelations(entry, draft_citation)
+    generate_part_of_relations(entry, draft_citation)
+    return draft_citation
+
+
+def process(parser, accession):
+    draft_citation_map = {}
+    draft_citations = []
+    from pprint import pprint
+    for entry in parser:
+        # pprint(entry)
+        draft_citation = process_entry(entry, accession)
+
+        draft_citation_map[draft_citation.id] = draft_citation
+        for linkeddata in draft_citation.linkeddata.all():
+            draft_citation_map[linkeddata.universal_resource_name] = draft_citation
+        draft_citations.append(draft_citation)
+
+    for draft_citation in draft_citations:
+        generate_reviewed_works_relations(entry, draft_citation, draft_citation_map)
+        generate_book_chapter_relations(entry, draft_citation, draft_citation_map)
+    return draft_citations

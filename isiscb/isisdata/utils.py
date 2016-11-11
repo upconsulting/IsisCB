@@ -40,7 +40,8 @@ def normalize(s):
     """
     if not s:
         return ''
-
+    if type(s) is str:
+        s = s.decode('utf-8')
     return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
 
 
