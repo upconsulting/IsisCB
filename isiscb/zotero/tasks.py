@@ -130,7 +130,7 @@ def ingest_citation(request, accession, draftcitation):
         attribute = Attribute.objects.create(
             type_controlled=pubdatetype,
             source=citation,
-            value_freeform=draftcitation.publication_date
+            value_freeform=date.year
         )
         vvalue = ISODateValue.objects.create(
             value=date,
