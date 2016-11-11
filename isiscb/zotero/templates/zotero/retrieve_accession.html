@@ -161,6 +161,14 @@ var opts = {
 
 var selected_authority, selected_authority_name;
 
+var format_citations = function(related_citations) {
+    var _doc = '';
+    related_citations.forEach(function(rel_cit) {
+        _doc += "<div class='related-citation'>" + rel_cit + "</div>";
+    })
+    return _doc;
+}
+
 $('.draftauthority').click(function() {
     toggleTab('suggest');
 
@@ -192,7 +200,9 @@ $('.draftauthority').click(function() {
             if (response.data.length == 0) {
                 target.append('<div class="alert alert-warning">No matches found</div>');
             } else {
+
                 response.data.forEach(function(suggestion) {
+                    console.log(suggestion);
                     var suggestElem = `
                         <li class="list-group-item">
                             <div class="row">
@@ -204,14 +214,17 @@ $('.draftauthority').click(function() {
                                             data-authority="` + draftauthority_id + `"
                                             data-name="` + suggestion.name + `">
                                         </a>
-                                        <a class="glyphicon glyphicon-pencil btn btn-md"
-                                            href="/curation/authority/` + suggestion.id + `/"
-                                            target="_blank">
-                                        </a>
                                     </span>
                                 </div>
                                 <div class="col-xs-10">
-                                    <div class="h5"><a href="/isis/authority/`+suggestion.id+`/" target="_blank">` + suggestion.name + ` (` + suggestion.id + `)</a>
+                                    <div class="h5">
+                                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                                            class="suggested-authority-anchor"
+                                            target="_blank"
+                                            data-toggle="tooltip"
+                                            data-html="true"
+                                            data-placement="left"
+                                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
                                         <div class="pull-right col-sm-3">
                                             <div class="progress" style="height: 14px;">
                                                 <div class="progress-bar"
@@ -242,6 +255,10 @@ $('.draftauthority').click(function() {
                     `;
 
                     target.append(suggestElem);
+                });
+
+                $('.suggested-authority-anchor[data-toggle="tooltip"]').tooltip({
+                    template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
                 });
             }
 
@@ -468,11 +485,37 @@ var bindModal = function() {
         $('#authority-search').val('');
     });
 }
+
+
 </script>
 
 <style>
 .selected {
     background-color: orange;
+}
+
+.related-citations-tooltip {
+    background-color: white;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+.related-citations-tooltip .tooltip-inner {
+    background-color: white;
+    color: black;
+    text-align: left;
+    max-width: 300px;
+    width: 300px;
+}
+
+.related-citations-tooltip .tooltip-inner p {
+    width: 300px;
+}
+
+.related-citation {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 8pt;
 }
 </style>
 
