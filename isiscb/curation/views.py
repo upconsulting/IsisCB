@@ -18,6 +18,7 @@ from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
 from isisdata.utils import strip_punctuation
+from zotero.models import ImportAccession
 from curation.filters import *
 from curation.forms import *
 from curation.contrib.views import check_rules
@@ -1285,14 +1286,23 @@ def dataset(request, dataset_id=None):
 @staff_member_required
 def search_collections(request):
     q = request.GET.get('query', None)
-    if not q or len(q) < 3:
-        return JsonResponse({'results': []})
     queryset = CitationCollection.objects.filter(name__icontains=q)
     results = [{
         'id': col.id,
         'label': col.name,
     } for col in queryset[:20]]
     return JsonResponse(results, safe=False)
+
+@staff_member_required
+def search_zotero_accessions(request):
+    q = request.GET.get('query', None)
+    queryset = ImportAccession.objects.filter(name__icontains=q)
+    results = [{
+        'id': accession.id,
+        'label': accession.name,
+    } for accession in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
 
 @staff_member_required
 @check_rules('can_view_user_module')

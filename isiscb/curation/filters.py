@@ -5,6 +5,7 @@ from django.db.models import Q
 from django import forms
 
 from isisdata.models import *
+from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
 import six
 import iso8601
@@ -58,6 +59,7 @@ class CitationFilter(django_filters.FilterSet):
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
+    zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
@@ -66,9 +68,21 @@ class CitationFilter(django_filters.FilterSet):
         super(CitationFilter, self).__init__(*args, **kwargs)
         in_coll = self.data.get('in_collections', None)
         if in_coll:
-            collection = CitationCollection.objects.get(pk=in_coll)
-            if collection:
-                self.collection_name = collection.name
+            try:
+                collection = CitationCollection.objects.get(pk=in_coll)
+                if collection:
+                    self.collection_name = collection.name
+            except CitationCollection.DoesNotExist:
+                self.collection_name = "Collection could not be found."
+
+        zotero_acc = self.data.get('zotero_accession', None)
+        if zotero_acc:
+            try:
+                accession = ImportAccession.objects.get(pk=zotero_acc)
+                if accession:
+                    self.zotero_accession_name = accession.name
+            except ImportAccession.DoesNotExist:
+                self.zotero_accession_name = "Zotero accession could not be found."
 
     class Meta:
         model = Citation
