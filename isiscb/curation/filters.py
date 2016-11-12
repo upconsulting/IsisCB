@@ -60,6 +60,7 @@ class CitationFilter(django_filters.FilterSet):
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
+    belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
@@ -83,6 +84,15 @@ class CitationFilter(django_filters.FilterSet):
                     self.zotero_accession_name = accession.name
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
+
+        dataset = self.data.get('belongs_to', None)
+        if dataset:
+            try:
+                ds = Dataset.objects.get(pk=dataset)
+                if ds:
+                    self.dataset_name = ds.name
+            except Dataset.DoesNotExist:
+                self.dataset_name = "Dataset could not be found."
 
     class Meta:
         model = Citation

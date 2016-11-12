@@ -1303,6 +1303,15 @@ def search_zotero_accessions(request):
     } for accession in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+@staff_member_required
+def search_datasets(request):
+    q = request.GET.get('query', None)
+    queryset = Dataset.objects.filter(name__icontains=q)
+    results = [{
+        'id': ds.id,
+        'label': ds.name,
+    } for ds in queryset[:20]]
+    return JsonResponse(results, safe=False)
 
 @staff_member_required
 @check_rules('can_view_user_module')
