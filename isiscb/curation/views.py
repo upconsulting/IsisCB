@@ -18,6 +18,7 @@ from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
 from isisdata.utils import strip_punctuation
+from zotero.models import ImportAccession
 from curation.filters import *
 from curation.forms import *
 from curation.contrib.views import check_rules
@@ -1282,6 +1283,38 @@ def quick_and_dirty_authority_search(request):
 def dataset(request, dataset_id=None):
     return HttpResponse('')
 
+@staff_member_required
+def search_collections(request):
+    q = request.GET.get('query', None)
+    queryset = CitationCollection.objects.filter(name__icontains=q)
+    results = [{
+        'id': col.id,
+        'label': col.name,
+    } for col in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
+from django.utils import formats
+
+@staff_member_required
+def search_zotero_accessions(request):
+    q = request.GET.get('query', None)
+    queryset = ImportAccession.objects.filter(name__icontains=q)
+    results = [{
+        'id': accession.id,
+        'label': accession.name,
+        'date': accession.imported_on
+    } for accession in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
+@staff_member_required
+def search_datasets(request):
+    q = request.GET.get('query', None)
+    queryset = Dataset.objects.filter(name__icontains=q)
+    results = [{
+        'id': ds.id,
+        'label': ds.name,
+    } for ds in queryset[:20]]
+    return JsonResponse(results, safe=False)
 
 @staff_member_required
 @check_rules('can_view_user_module')
