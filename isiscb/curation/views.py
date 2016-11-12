@@ -1293,6 +1293,8 @@ def search_collections(request):
     } for col in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+from django.utils import formats
+
 @staff_member_required
 def search_zotero_accessions(request):
     q = request.GET.get('query', None)
@@ -1300,6 +1302,7 @@ def search_zotero_accessions(request):
     results = [{
         'id': accession.id,
         'label': accession.name,
+        'date': accession.imported_on
     } for accession in queryset[:20]]
     return JsonResponse(results, safe=False)
 

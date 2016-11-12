@@ -82,6 +82,7 @@ class CitationFilter(django_filters.FilterSet):
                 accession = ImportAccession.objects.get(pk=zotero_acc)
                 if accession:
                     self.zotero_accession_name = accession.name
+                    self.zotero_accession_date = accession.imported_on
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
