@@ -43,12 +43,27 @@ $(document).ready(function() {
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
+        highlightFilters();
     });
 
     $("#submit-form-btn").on('click', function() {
       $("#filter_form").submit();
     });
+
+    highlightFilters();
 });
+
+function highlightFilters() {
+  $('#filter_form .form-group').each(function(idx, element) {
+    if ($(element).find(".form-control").val() != '') {
+      $(element).addClass("is-applied");
+    }
+    else {
+      $(element).removeClass("is-applied");
+    }
+  });
+}
+
 </script>
 
 </div>
