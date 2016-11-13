@@ -22,11 +22,12 @@ $('body').ready(function() {
 
 <form action="{% url "citation-bulk-action" %}" method="POST" id="bulk-form">
     {% csrf_token %}
-    <a class="btn btn-primary btn-sm" href="{% url 'create_citation' %}">Create new citation record</a>
-    <input class="btn btn-success btn-sm" type="submit" value="Bulk change" />
-    <a class="btn btn-primary btn-sm" href="{% url 'citation-bulk-select' %}">Bulk select</a>
-    <a class="btn btn-primary btn-sm" href="#" id="collection-create">Create new collection</a>
-    <a class="btn btn-primary btn-sm" href="#" id="collection-add">Add to existing collection</a>
+    &nbsp;&nbsp;
+    <a class="btn btn-primary btn-xs" href="{% url 'create_citation' %}">Create new citation record</a>
+    <input class="btn btn-success btn-xs" type="submit" value="Bulk change" />
+    <a class="btn btn-primary btn-xs" href="{% url 'citation-bulk-select' %}">Bulk select</a>
+    <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
+    <a class="btn btn-primary btn-xs" href="#" id="collection-add">Add to existing collection</a>
 
     <table class="table table-responsive table-hover table-curation">
         <thead>
@@ -119,7 +120,7 @@ $('body').ready(function() {
 {% endblock %}
 
 {% block filter_form %}
-<form action="{% url 'citation_list' %}" class="form-horizontal clearfix" method="POST">
+<form id="filter_form" action="{% url 'citation_list' %}" class="form-horizontal clearfix" method="POST" style="margin-bottom: 0px; margin-top: 10px;">
   {% csrf_token %}
     <div>
         <div class="col-sm-4">
@@ -194,8 +195,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">Record Type</label>
-              <div class="col-sm-10">
+              <label class="col-md-3 control-label">Rec. Type</label>
+              <div class="col-sm-9">
                 {{ objects.form.type_controlled|addcss:"form-control" }}
               </div>
           </div>
@@ -204,8 +205,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">{{ objects.form.record_status.label }}</label>
-              <div class="col-sm-10">
+              <label class="col-md-3 control-label">Rec. Status</label>
+              <div class="col-sm-9">
                 {{ objects.form.record_status|addcss:"form-control" }}
               </div>
           </div>
@@ -214,8 +215,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">{{ objects.form.zotero_accession.label }}</label>
-              <div class="col-sm-10">
+              <label class="col-md-3 control-label">Zotero Acc.</label>
+              <div class="col-sm-9">
                 {{ objects.form.zotero_accession|addcss:"form-control" }}
                 <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
               </div>
@@ -225,8 +226,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">Database</label>
-              <div class="col-sm-10">
+              <label class="col-md-3 control-label">Database</label>
+              <div class="col-sm-9">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
                 <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
@@ -236,8 +237,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">Collection</label>
-              <div class="col-sm-10">
+              <label class="col-md-3 control-label">Collection</label>
+              <div class="col-sm-9">
                 {{ objects.form.in_collections}}
                 <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
               </div>
@@ -298,27 +299,12 @@ $('body').ready(function() {
                 </div>
             </div>
         </div>
-    </div>
-    <div>
-        <div class="col-sm-12">
-
-            <div class="btn-group pull-right">
-                <input class="btn btn-primary btn-sm" type="submit" value="Apply Filters"></input>
-                <button class="btn btn-warning btn-sm" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-            </div>
-        </div>
-    </div>
-
-
+      </div>
+      </div>
 </form>
 <script>
 $(document).ready(function() {
   //# sourceURL=source.js
-    $('#clear-filters').on('click', function() {
-        $('.form-group.clearable input').val('');
-        $('.form-group.clearable select').val('');
-    });
-
     /* in collection javascript */
     $('#in_collections_input').bootcomplete({
         url:'{% url 'search-collections' %}',
@@ -345,7 +331,12 @@ $(document).ready(function() {
         }
     });
 
-    $('#zotero_accession_input').val("{{objects.zotero_accession_name}} (" + new Date("{{ objects.zotero_accession_date|date:"c" }}").toLocaleString() + ")");
+    var date = "{{ objects.zotero_accession_date|date:"c" }}";
+    var append = "";
+    if (date != null && date != "") {
+      append = " (" + new Date().toLocaleString() + ")";
+    }
+    $('#zotero_accession_input').val("{{objects.zotero_accession_name}}" + append);
 
     /* 'belongs to' javascript */
     $('#belongs_to_input').bootcomplete({

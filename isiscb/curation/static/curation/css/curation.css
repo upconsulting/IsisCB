@@ -16,6 +16,10 @@ a {
   color: #032544;
 }
 
+.pagination {
+    margin: 10px 0;
+}
+
 .form-control {
   color: #000;
 }
