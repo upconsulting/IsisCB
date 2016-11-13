@@ -29,7 +29,9 @@ $('body').ready(function() {
     <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
     <a class="btn btn-primary btn-xs" href="#" id="collection-add">Add to existing collection</a>
 
-    <table class="table table-responsive table-hover table-curation">
+    <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
+
+    <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
                 <th width="5%">
