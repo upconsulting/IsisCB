@@ -1089,6 +1089,7 @@ def citations(request):
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
+        'result_count': filtered_objects.count()
     })
 
     return HttpResponse(template.render(context))
