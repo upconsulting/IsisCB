@@ -284,8 +284,8 @@ class TestLanguageParsing(TestCase):
         for model in [DraftCitation, DraftAuthority, DraftACRelation,
                       DraftCCRelation, ImportAccession, DraftCitationLinkedData,
                       DraftAuthorityLinkedData, Authority, AttributeType,
-                      Attribute, Language]:
-                    model.objects.all().delete()
+                      User, Attribute, Language]:
+            model.objects.all().delete()
 
 
 class TestBookReviews(TestCase):
@@ -1100,4 +1100,140 @@ class TestImportMethods(TestCase):
                       DraftCCRelation, ImportAccession, DraftCitationLinkedData,
                       DraftAuthorityLinkedData, Authority, AttributeType,
                       Attribute]:
+            model.objects.all().delete()
+
+
+class TestExtraDataParsing(TestCase):
+    """
+    Curators may want to pass additional data in Zotero records, beyond what
+    is supported by the Zotero scheme. To do this, they may insert key/value
+    pairs in curly braces in certain fields.
+    """
+
+    def test_find_extra_data(self):
+        """
+        :meth:`.IngestManager.find_extra_data` parses strings for explicit
+        key/value data in curly braces, and returns the data as a list.
+        """
+
+        raw = 'Some freeform text {key:value}'
+        data = ingest.IngestManager.find_extra_data(raw)
+        self.assertIsInstance(data, list)
+        self.assertIn('key', dict(data))
+        self.assertEqual(dict(data).get('key'), 'value')
+
+    def test_apply_extra_data(self):
+        """
+        :meth:`.IngestManager.apply_extra_data` handles parsed key/value pairs
+        and returns a callable that will update a model instance accordingly.
+        The callable should return the instance that was passed.
+        """
+
+        class DummyObject(object):
+            pass
+
+        raw = 'Some freeform text {name:The Best Name}'
+        data = ingest.IngestManager.find_extra_data(raw)
+        func = ingest.IngestManager.apply_extra_data(data)
+
+        obj = func(DummyObject())
+        self.assertEqual(obj.name, "The Best Name")
+
+
+    def test_match_extra_viaf(self):
+        """
+        :meth:`.IngestManager.apply_extra_data` should operate on VIAF IDs.
+        """
+
+        raw = 'Some freeform text {viaf:76382712}'
+        data = ingest.IngestManager.find_extra_data(raw)
+        func = ingest.IngestManager.apply_extra_data(data)
+
+        obj = DraftAuthority.objects.create(
+            name = 'Pratchett, Terry, 1948-2015',
+            type_controlled = DraftAuthority.PERSON,
+            part_of = ImportAccession.objects.create(name='TestAccession')
+        )
+
+        obj = func(obj)
+        self.assertEqual(obj.linkeddata.count(), 1)
+        self.assertEqual(obj.linkeddata.first().value, 'http://viaf.org/viaf/76382712')
+
+    def test_match_is_applied_during_ingest(self):
+        """
+        When creating :class:`.DraftACRelation`\s during ingest, authority
+        names are parsed for VIAF IDs.
+        """
+        accession = ImportAccession.objects.create(name='Test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+
+
+        data = {
+            u'authors': [{
+                u'name_first': u'Fokko Jan',
+                u'name': u'Fokko Jan Dijksterhuis {viaf:76382712}',
+                u'name_last': u'Dijksterhuis'
+            },{
+                u'name_first': u'Carsten',
+                u'name': u'Carsten Timmermann {viaf:76382713}',
+                u'name_last': u'Timmermann'
+            }]
+        }
+
+        results = ingest.IngestManager.generate_generic_acrelations(
+            data, 'authors', draftcitation, DraftAuthority.PERSON,
+            DraftACRelation.AUTHOR)
+        draftcitation.refresh_from_db()
+        for relation in draftcitation.authority_relations.all():
+            self.assertEqual(relation.authority.linkeddata.count(), 1)
+
+    def test_viaf_data_survives_to_production(self):
+        """
+        When accessioned from Zotero to IsisData, linkeddata for authorities
+        persist.
+        """
+        accession = ImportAccession.objects.create(name='Test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+            u'authors': [{
+                u'name_first': u'Fokko Jan',
+                u'name': u'Fokko Jan Dijksterhuis {viaf:76382712}',
+                u'name_last': u'Dijksterhuis'
+            },{
+                u'name_first': u'Carsten',
+                u'name': u'Carsten Timmermann {viaf:76382713}',
+                u'name_last': u'Timmermann'
+            }]
+        }
+        ingest.IngestManager.generate_generic_acrelations(
+            data, 'authors', draftcitation, DraftAuthority.PERSON,
+            DraftACRelation.AUTHOR)
+        draftcitation.refresh_from_db()
+        for relation in draftcitation.authority_relations.all():
+            auth = Authority.objects.create(name=relation.authority.name, type_controlled=relation.authority.type_controlled)
+            ingest.IngestManager.resolve(relation.authority, auth)
+
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        new_citation = ingest_citation(request, accession, draftcitation)
+
+        for relation in new_citation.acrelation_set.all():
+            self.assertEqual(relation.authority.linkeddata_entries.count(), 1)
+
+    def tearDown(self):
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      User, Attribute]:
             model.objects.all().delete()

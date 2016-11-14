@@ -87,11 +87,13 @@ class IngestManager(object):
         return self.draft_citation_hash[_combined_key]
 
     @staticmethod
-    def _resolve(d, p):
+    def resolve(d, p):
         """
         Create an :class:`.InstanceResolutionEvent` for draft ``d`` to
         production instance ``p``.
         """
+        d.processed = True
+        d.save()
         return InstanceResolutionEvent.objects.create(for_instance=d,
                                                       to_instance=p)
 
@@ -167,6 +169,68 @@ class IngestManager(object):
         return {
             'type_controlled': DOCUMENT_TYPES.get(_key, default)
         }
+
+    @staticmethod
+    def find_extra_data(raw):
+        """
+        Parses strings for explicit key/value data in curly braces, and returns
+        the data as a list of (key, value) tuples.
+
+        Parameters
+        ----------
+        raw : str
+
+        Returns
+        -------
+        list
+        """
+        return [tuple(match.split(':')) for match in re.findall(ur'\{([^\{]+)\}', raw)]
+
+    @staticmethod
+    def _update_field(key, value):
+        def _call(obj):
+            setattr(obj, key, value)
+            return obj
+        return _call
+
+    @staticmethod
+    def _set_viaf_linkeddata(key, value):
+        if not value.startswith('http'):
+            value = u'http://viaf.org/viaf/%s' % value
+        def _update_viaf_linkeddata(obj):
+            DraftAuthorityLinkedData.objects.create(
+                authority=obj,
+                name=key,
+                value=value,
+                part_of=obj.part_of
+            )
+            obj.refresh_from_db()
+            return obj
+        return _update_viaf_linkeddata
+
+    EXTRA_DATA_HANDLERS = {
+        'name': _update_field.__func__,
+        'viaf': _set_viaf_linkeddata.__func__,
+    }
+
+    @staticmethod
+    def apply_extra_data(data):
+        """
+        Handles parsed key/value pairs and returns a callable that will update
+        a model instance accordingly. The callable should return the instance
+        that was passed.
+        """
+
+        def _update(obj):
+            for key, value in data:
+                handler = IngestManager.EXTRA_DATA_HANDLERS.get(key, None)
+                if handler:
+                    obj = handler(key, value)(obj)
+            if hasattr(obj, 'save'):
+                obj.save()
+            return obj
+        return _update
+
 
     @staticmethod
     def generate_language_relations(entry, draft_citation):
@@ -377,7 +441,7 @@ class IngestManager(object):
                 processed=True if authority else False
             )
             if authority:
-                IngestManager._resolve(draft_authority, authority)
+                IngestManager.resolve(draft_authority, authority)
 
             draft_acrelation = DraftACRelation.objects.create(**{
                 'authority': draft_authority,
@@ -438,6 +502,13 @@ class IngestManager(object):
             })
             draft_authority = DraftAuthority.objects.create(**instance_data)
 
+            # Extra data about the authority instance may be included in the
+            #  ``name`` field.
+            extra = IngestManager.find_extra_data(instance_data.get('name', ''))
+            if extra:
+                _apply = IngestManager.apply_extra_data(extra)
+                draft_authority = _apply(draft_authority)
+
             draft_acrelation = DraftACRelation.objects.create(**{
                 'authority': draft_authority,
                 'citation': draft_citation,
@@ -491,7 +562,7 @@ class IngestManager(object):
                 # This DraftCitation is already resolved, since we have
                 #  identified the record of interest in the production
                 #  database.
-                IngestManager._resolve(draft_altcitation, reviewed_citation)
+                IngestManager.resolve(draft_altcitation, reviewed_citation)
 
         if not draft_altcitation:
             if 'title' not in datum:

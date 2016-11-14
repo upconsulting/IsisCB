@@ -1,3 +1,11 @@
+"""
+These functions are mostly related to transitioning data from the Zotero app
+to the IsisData app.
+
+TODO: many of these functions could use refactoring, or at least modularizing
+for easier testing.
+"""
+
 from django.db.models import Q
 
 from isisdata.models import *
@@ -151,8 +159,6 @@ def ingest_citation(request, accession, draftcitation):
             attribute=attribute,
         )
 
-
-
     elif draftcitation.publication_date:
         # If we cannot parse the publication date as an ISO8601 date, then we
         #  update the staff notes with the unparseable date so that it is not
@@ -177,6 +183,17 @@ def ingest_citation(request, accession, draftcitation):
         if target:
             target.zotero_accession = accession
             target.save()
+
+            # Transfer any linkeddata from the DraftAuthority to the production
+            #  Authority.
+            for draftlinkeddata in draft.linkeddata.all():
+                ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
+                LinkedData.objects.create(
+                    subject = target,
+                    universal_resource_name = draftlinkeddata.value,
+                    type_controlled = ldtype
+                )
+            draft.linkeddata.all().update(processed=True)
 
         # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
