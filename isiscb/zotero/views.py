@@ -14,7 +14,7 @@ from curation.contrib.views import check_rules
 from zotero.models import *
 from zotero.filters import *
 from zotero.forms import *
-from zotero import tasks
+from zotero import tasks, parse, ingest
 from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
 
@@ -145,8 +145,7 @@ def create_accession(request):
                 destination.write(form.cleaned_data['zotero_rdf'].file.read())
                 path = destination.name
 
-            papers = zparser.read(path)
-            zparser.process(papers, instance=instance)
+            ingest.IngestManager(parse.ZoteroIngest(path), instance).process()
             return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
