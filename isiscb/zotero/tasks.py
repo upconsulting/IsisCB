@@ -34,7 +34,7 @@ def ingest_accession(request, accession):
 
     ingested = []    # These will be production Citation instances.
     ingested_draft_ids = []    # These will be DraftCitation ids.
-    for draftcitation in accession.citations_ready:
+    for draftcitation in accession.citations_ok:
         ingested.append(ingest_citation(request, accession, draftcitation))
         ingested_draft_ids.append(draftcitation.id)
     ingest_ccrelations(request, accession, ingested_draft_ids)
@@ -227,9 +227,6 @@ def ingest_citation(request, accession, draftcitation):
     draftcitation.linkeddata.all().update(processed=True)
 
     draftcitation.authority_relations.all().update(processed=True)
-
-
-
 
     draftcitation.processed = True
     draftcitation.save()
