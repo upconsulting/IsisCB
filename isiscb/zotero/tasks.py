@@ -219,6 +219,7 @@ def ingest_citation(request, accession, draftcitation):
     ld_created = set([])
     for linkeddata in citation.linkeddata_entries.all():
         ld_created.add(linkeddata.universal_resource_name)
+        
     for draftlinkeddata in draftcitation.linkeddata.all():
         _key = draftlinkeddata.value
         if _key in ld_created:
