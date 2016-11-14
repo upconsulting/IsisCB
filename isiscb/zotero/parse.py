@@ -19,6 +19,7 @@ from rdflib.namespace import DC, FOAF, DCTERMS, split_uri
 BIB = Namespace('http://purl.org/net/biblio#')
 RSS = Namespace('http://purl.org/rss/1.0/modules/link/')
 ZOTERO = Namespace('http://www.zotero.org/namespaces/export#')
+PRISM = Namespace('http://prismstandard.org/namespaces/1.2/basic/')
 
 RESOURCE_CLASSES = [
     BIB.Illustration, BIB.Recording, BIB.Legislation, BIB.Document,
@@ -36,7 +37,8 @@ FIELD_NAMES = dict([
     (RDF.type, u'type_controlled'),
     (ZOTERO.itemType, u'type_controlled'),
     (ZOTERO.numPages, u'extent'),
-
+    (PRISM.volume, u'volume'),
+    (PRISM.number, u'issue'),
     (DCTERMS.dateSubmitted, u'date_submitted'),
     (DC.identifier, u'linkeddata'),
 
