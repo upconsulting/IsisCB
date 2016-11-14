@@ -215,6 +215,79 @@ class TestBookSeries(TestCase):
         DraftCCRelation.objects.all().delete()
 
 
+class TestLanguageParsing(TestCase):
+    def test_parse_language(self):
+        """
+        ISISCB-749 Should parse Language from Zotero metadata.
+
+        All of the chapters in this dataset have language fields.
+        """
+        book_data = 'zotero/test_data/Chapter Test 8-9-16.rdf'
+        for entry in ZoteroIngest(book_data):
+            if entry.get('type_controlled')[0].lower() == 'booksection':
+                self.assertIn('language', entry)
+
+    def test_process_language(self):
+        """
+        ISISCB-749 IngestManager should use language data to attempt to fill
+        :prop:`.DraftCitation.language`\.
+        """
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        language = Language.objects.create(id='TL', name='TestLanguage')
+        data = {
+            'language': ['TL'],
+        }
+        ingest.IngestManager.generate_language_relations(data, draftcitation)
+        draftcitation.refresh_from_db()
+        self.assertEqual(draftcitation.language, language,
+                         "Should match language by ID.")
+
+        data = {
+            'language': ['TestLanguage'],
+        }
+        ingest.IngestManager.generate_language_relations(data, draftcitation)
+        draftcitation.refresh_from_db()
+        self.assertEqual(draftcitation.language, language,
+                         "Otherwise, should match language by ID.")
+
+    def test_accession_language(self):
+        """
+        :prop:`.DraftCitation.language` should be used to fill
+        :class:`.Citation.language`\.
+        """
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        language = Language.objects.create(id='TL', name='TestLanguage')
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        data = {
+            'language': ['TL'],
+        }
+        ingest.IngestManager.generate_language_relations(data, draftcitation)
+        draftcitation.refresh_from_db()
+        new_citation = ingest_citation(request, accession, draftcitation)
+        self.assertEqual(new_citation.language.first(), language)
+
+    def tearDown(self):
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute, Language]:
+                    model.objects.all().delete()
+
+
 class TestBookReviews(TestCase):
     """
     Reviews are linked to book citations via the "reviewed author" field in
@@ -242,9 +315,8 @@ class TestBookReviews(TestCase):
                                       type_controlled=isbn_type,
                                       subject=test_book)
 
+
     def test_process_bookreviews(self):
-
-
 
         book_data = 'zotero/test_data/IsisReviewExamples.rdf'
         papers = ZoteroIngest(book_data)
@@ -257,7 +329,6 @@ class TestBookReviews(TestCase):
         type_counts = Counter()
         for citation in citations:
             type_counts[citation.type_controlled] += 1
-            print citation.type_controlled
             if citation.type_controlled == Citation.REVIEW:
                 self.assertGreater(citation.relations_to.count(), 0)
                 relation = citation.relations_to.first()
