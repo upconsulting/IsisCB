@@ -584,9 +584,7 @@ class IngestManager(object):
                     'type_controlled': IngestManager._get_dtype(datum, Citation.BOOK)['type_controlled'],
                     'part_of': draft_citation.part_of
                 }, ldata, None, datum)
-                # draft_altcitation = DraftCitation.objects.create(
-                #
-                # )
+                
                 IngestManager.generate_citation_linkeddata(datum, draft_altcitation)
 
         draft_ccrelation = DraftCCRelation.objects.create(

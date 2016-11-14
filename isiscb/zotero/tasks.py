@@ -216,8 +216,12 @@ def ingest_citation(request, accession, draftcitation):
             to_instance = acrelation,
         )
 
-
+    ld_created = set([])
     for draftlinkeddata in draftcitation.linkeddata.all():
+        _key = (draftlinkeddata.name.upper(), draftlinkeddata.value)
+        if _key in ld_created:
+            continue
+        ld_created.add(_key)
         ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
         LinkedData.objects.create(
             subject = citation,
