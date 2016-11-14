@@ -591,7 +591,7 @@ class TestIngest(TestCase):
             if model_fields[pfield] is models.IntegerField:
                 try:
                     draft_value = int(draft_value)
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
 
             prod_value = getattr(citation.part_details, pfield, None)
