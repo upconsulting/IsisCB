@@ -10,12 +10,14 @@
         <link rel="stylesheet" href="{% static "isisdata/bootstrap-3.3.5/css/bootstrap.min.css" %}" type="text/css" />
         <link rel="stylesheet" href="{% static "curation/css/curation.css" %}" />
         <link rel="stylesheet" href="{% static "curation/css/multi-select.css" %}" />
+        <link rel="stylesheet" href="{% static "curation/css/bootcomplete.css" %}" />
 
         <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
 
         <script src="{% static "isisdata/js/jquery-1.11.3.min.js" %}" type="text/javascript"></script>
         <script src="{% static "curation/js/jquery.multi-select.js" %}" type="text/javascript"></script>
+        <script src="{% static "curation/js/jquery.bootcomplete.js" %}" type="text/javascript"></script>
         <script src="{% static "isisdata/bootstrap-3.3.5/js/bootstrap.min.js" %}" type="text/javascript"></script>
         <script>
         // Django needs CSRF for AJAX POST requests.
@@ -83,7 +85,7 @@
       </div>
     </nav>
 
-    <div class="container-fluid" style="margin-top: 70px;">
+    <div class="container-fluid" style="margin-top: 60px;">
       <div class="row">
         <div class="col-sm-12">
         {% block content %}

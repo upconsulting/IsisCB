@@ -2,8 +2,10 @@ import django_filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
 from django.db.models import Q
+from django import forms
 
 from isisdata.models import *
+from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
 import six
 import iso8601
@@ -28,7 +30,6 @@ filters.LOOKUP_TYPES = [
 
 class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilter):
     pass
-
 
 def filter_in_collections(queryset, value):
     if not value:
@@ -57,10 +58,43 @@ class CitationFilter(django_filters.FilterSet):
     subject = django_filters.MethodFilter()
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
-    in_collections = django_filters.ModelMultipleChoiceFilter(name='in_collections', queryset=CitationCollection.objects.all(), action=filter_in_collections)
+    in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
+    zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
+    belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
+
+    def __init__(self, *args, **kwargs):
+        super(CitationFilter, self).__init__(*args, **kwargs)
+
+        in_coll = self.data.get('in_collections', None)
+        if in_coll:
+            try:
+                collection = CitationCollection.objects.get(pk=in_coll)
+                if collection:
+                    self.collection_name = collection.name
+            except CitationCollection.DoesNotExist:
+                self.collection_name = "Collection could not be found."
+
+        zotero_acc = self.data.get('zotero_accession', None)
+        if zotero_acc:
+            try:
+                accession = ImportAccession.objects.get(pk=zotero_acc)
+                if accession:
+                    self.zotero_accession_name = accession.name
+                    self.zotero_accession_date = accession.imported_on
+            except ImportAccession.DoesNotExist:
+                self.zotero_accession_name = "Zotero accession could not be found."
+
+        dataset = self.data.get('belongs_to', None)
+        if dataset:
+            try:
+                ds = Dataset.objects.get(pk=dataset)
+                if ds:
+                    self.dataset_name = ds.name
+            except Dataset.DoesNotExist:
+                self.dataset_name = "Dataset could not be found."
 
     class Meta:
         model = Citation
@@ -77,13 +111,31 @@ class CitationFilter(django_filters.FilterSet):
             ('-title_for_sort', 'Title (descending)')
         ]
 
-    # def filter_order(self, queryset, value):
-    #     if not value:
-    #         return queryset
-    #     if value.endswith('title'):
-    #         return queryset.order_by('%srelations_from__subject__title' % ('-' if value.startswith('-') else ''),
-    #                                           '%srelations_to__subject__title' % ('-' if value.startswith('-') else '')).order_by(value)
-    #     return queryset.order_by(value)
+
+    def get_ordering_field(self):
+        if self._meta.order_by:
+            if isinstance(self._meta.order_by, (list, tuple)):
+                if isinstance(self._meta.order_by[0], (list, tuple)):
+                    # e.g. (('field', 'Display name'), ...)
+                    choices = [(f[0], f[1]) for f in self._meta.order_by]
+                else:
+                    choices = []
+                    for f in self._meta.order_by:
+                        if f[0] == '-':
+                            label = _('%s (descending)' % capfirst(f[1:]))
+                        else:
+                            label = capfirst(f)
+                        choices.append((f, label))
+            else:
+                # add asc and desc field names
+                # use the filter's label if provided
+                choices = []
+                for f, fltr in self.filters.items():
+                    choices.extend([
+                        (f, fltr.label or capfirst(f)),
+                        ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
+                    ])
+            return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
 
     def filter_id(self, queryset, value):
         if not value:
