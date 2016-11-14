@@ -48,9 +48,9 @@ $('body').ready(function() {
                 </th>
                 <th width="5%">ID</th>
                 <th width="5%">Type</th>
-                <th>Title</th>
+                <th>Title  <span style="cursor: pointer;" id="sort_title"></span></th>
                 <th>Author/Editor(s)</th>
-                <th width="5%">Published</th>
+                <th width="8%">Published <span style="cursor: pointer;" id="sort_published"></span></th>
                 <th width="15%">Periodical</th>
                 <th width="12%">Modified</th>
                 <th width="12%">Created</th>
@@ -119,6 +119,46 @@ $('body').ready(function() {
 
     </table>
 </form>
+<script>
+  $(document).ready(function() {
+    var sortOrder = $("#id_o").val();
+
+    if (sortOrder == "-publication_date") {
+      $("#sort_published").addClass("fa fa-sort-amount-desc");
+      $("#sort_published").attr("title", "Click to sort by publication date ascending.")
+    } else {
+      $("#sort_published").addClass("fa fa-sort-amount-asc");
+      $("#sort_published").attr("title", "Click to sort by publication date descending.")
+    }
+
+    if (sortOrder == '-title_for_sort') {
+      $("#sort_title").addClass("fa fa-sort-amount-desc");
+      $("#sort_title").attr("title", "Click to sort by title date ascending.")
+    } else {
+      $("#sort_title").addClass("fa fa-sort-amount-asc");
+      $("#sort_title").attr("title", "Click to sort by title date descending.")
+    }
+
+    $("#sort_published").on('click', function() {
+      if (sortOrder == "-publication_date") {
+        $("#id_o").val('publication_date');
+      } else {
+        $("#id_o").val('-publication_date');
+      }
+      $('#filter_form').submit();
+    });
+
+    $("#sort_title").on('click', function() {
+      if (sortOrder == "-title_for_sort") {
+        $("#id_o").val('title_for_sort');
+      } else {
+        $("#id_o").val('-title_for_sort');
+      }
+      $('#filter_form').submit();
+    });
+
+  });
+</script>
 {% endblock %}
 
 {% block filter_form %}
@@ -249,16 +289,7 @@ $('body').ready(function() {
         </div>
 
         <div class="col-sm-4">
-
-          {% for error in objects.form.o.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">{{ objects.form.o.label }}</label>
-              <div class="col-sm-10">
-                {{ objects.form.o|addcss:"form-control" }}
-              </div>
-          </div>
+          {{ objects.form.o }}
 
           {% for error in objects.form.abstract.errors %}
           <div class="alert alert-warning">{{ error }}</div>

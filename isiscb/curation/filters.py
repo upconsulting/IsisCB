@@ -67,6 +67,7 @@ class CitationFilter(django_filters.FilterSet):
 
     def __init__(self, *args, **kwargs):
         super(CitationFilter, self).__init__(*args, **kwargs)
+
         in_coll = self.data.get('in_collections', None)
         if in_coll:
             try:
@@ -110,13 +111,31 @@ class CitationFilter(django_filters.FilterSet):
             ('-title_for_sort', 'Title (descending)')
         ]
 
-    # def filter_order(self, queryset, value):
-    #     if not value:
-    #         return queryset
-    #     if value.endswith('title'):
-    #         return queryset.order_by('%srelations_from__subject__title' % ('-' if value.startswith('-') else ''),
-    #                                           '%srelations_to__subject__title' % ('-' if value.startswith('-') else '')).order_by(value)
-    #     return queryset.order_by(value)
+
+    def get_ordering_field(self):
+        if self._meta.order_by:
+            if isinstance(self._meta.order_by, (list, tuple)):
+                if isinstance(self._meta.order_by[0], (list, tuple)):
+                    # e.g. (('field', 'Display name'), ...)
+                    choices = [(f[0], f[1]) for f in self._meta.order_by]
+                else:
+                    choices = []
+                    for f in self._meta.order_by:
+                        if f[0] == '-':
+                            label = _('%s (descending)' % capfirst(f[1:]))
+                        else:
+                            label = capfirst(f)
+                        choices.append((f, label))
+            else:
+                # add asc and desc field names
+                # use the filter's label if provided
+                choices = []
+                for f, fltr in self.filters.items():
+                    choices.extend([
+                        (f, fltr.label or capfirst(f)),
+                        ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
+                    ])
+            return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
 
     def filter_id(self, queryset, value):
         if not value:

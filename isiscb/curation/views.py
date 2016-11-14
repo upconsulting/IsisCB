@@ -1049,6 +1049,8 @@ def citations(request):
         filter_params = QueryDict(request.POST.urlencode(), mutable=True)
     elif request.method == 'GET':
         filter_params = user_cache.get('citation_filters', {})
+        if not 'o' in filter_params.keys():
+            filter_params['o'] = 'publication_date'
         for key in additional_params_names:
             all_params[key] = request.GET.get(key, '')
 
