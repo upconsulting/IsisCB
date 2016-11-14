@@ -54,6 +54,7 @@ FIELD_NAMES = dict([
     (DCTERMS.subject, u'subjects'),
     (ZOTERO.reviewedAuthors, u'reviewed_works'),
     (DC.publisher, u'publisher'),
+    (ZOTERO.language, 'language'),
 ])
 
 

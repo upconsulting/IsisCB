@@ -110,6 +110,10 @@ def ingest_citation(request, accession, draftcitation):
     citation = Citation.objects.create(**citation_data)
     InstanceResolutionEvent.objects.create(for_instance=draftcitation, to_instance=citation)
 
+    # ISISCB-749 Language should be preserved from Zotero records.
+    if draftcitation.language:
+        citation.language.add(draftcitation.language)
+
     date = None
     if draftcitation.publication_date:
         if type(draftcitation.publication_date) in [str, unicode]:
@@ -206,6 +210,10 @@ def ingest_citation(request, accession, draftcitation):
     draftcitation.linkeddata.all().update(processed=True)
 
     draftcitation.authority_relations.all().update(processed=True)
+
+
+
+
     draftcitation.processed = True
     draftcitation.save()
 

@@ -169,9 +169,28 @@ class IngestManager(object):
         }
 
     @staticmethod
+    def generate_language_relations(entry, draft_citation):
+        """
+        If language data is available, attempt to populate
+        :prop:`.DraftCitation.language`\.
+        """
+        literal = IngestManager._get(entry, 'language')
+        try:
+            language = Language.objects.get(id=literal)
+        except Language.DoesNotExist:
+            try:
+                language = Language.objects.get(name=literal)
+            except Language.DoesNotExist:
+                return
+
+        draft_citation.language = language
+        draft_citation.save()
+
+    @staticmethod
     def generate_citation_linkeddata(entry, draft_citation):
         """
-        Generate new :class:`.DraftCitationLinkedData` instances from field-data.
+        Generate new :class:`.DraftCitationLinkedData` instances from
+        field-data.
 
         Parameters
         ----------
