@@ -1237,3 +1237,39 @@ class TestExtraDataParsing(TestCase):
                       DraftAuthorityLinkedData, Authority, AttributeType,
                       User, Attribute]:
             model.objects.all().delete()
+
+
+class BookSeriesShouldBeSkippedAutomatically(TestCase):
+    """
+    From ISISCB-734:
+
+    > During Authority matching. Do not attempt to match book series items to
+    > periodicals. These should all be skipped. They end up as text in the free
+    > text field, which is fine.
+
+    """
+
+    def test_generate_part_of_relations(self):
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+            'part_of':  [{
+                u'linkeddata': [(u'ISSN', u'0191-6599')],
+                u'title': u'History of European Ideas',
+                u'type_controlled': u'Journal'
+            }, {
+                u'title': u'En temps & lieux.',
+                u'type_controlled': u'Series'
+            }],
+        }
+
+        result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
+        self.assertEqual(len(result), 2, "Should yield two records")
+
+        for authority, relation in result:
+            if relation.type_controlled == ACRelation.BOOK_SERIES:
+                self.assertTrue(authority.processed)

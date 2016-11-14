@@ -661,10 +661,13 @@ class IngestManager(object):
                 else:
                     return None, None
 
+                # Per ISISCB-734, DraftAuthorities that are the target of a
+                #  Book Series relation should be processed by default.
                 draft_authority = DraftAuthority.objects.create(
                     name = IngestManager._get(datum, 'title'),
                     type_controlled = _type,
                     part_of = draft_citation.part_of,
+                    processed = _rel_type == ACRelation.BOOK_SERIES
                 )
                 _linkeddata = IngestManager.generate_authority_linkeddata(datum, draft_authority)
 
