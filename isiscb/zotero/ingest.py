@@ -240,10 +240,10 @@ class IngestManager(object):
         """
         literal = IngestManager._get(entry, 'language')
         try:
-            language = Language.objects.get(id=literal)
+            language = Language.objects.get(id=literal.lower())
         except Language.DoesNotExist:
             try:
-                language = Language.objects.get(name=literal)
+                language = Language.objects.get(name=literal.title())
             except Language.DoesNotExist:
                 return
 
@@ -584,7 +584,7 @@ class IngestManager(object):
                     'type_controlled': IngestManager._get_dtype(datum, Citation.BOOK)['type_controlled'],
                     'part_of': draft_citation.part_of
                 }, ldata, None, datum)
-                
+
                 IngestManager.generate_citation_linkeddata(datum, draft_altcitation)
 
         draft_ccrelation = DraftCCRelation.objects.create(
