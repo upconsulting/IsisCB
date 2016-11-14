@@ -9,6 +9,8 @@ register = template.Library()
 def get_page_string(citation):
     if citation.type_controlled != Citation.CHAPTER:
         return ""
+    if not citation.part_detais:
+        return ""
     page_start_string = citation.part_details.page_begin
     page_end_string = citation.part_details.page_end
     if page_start_string and page_end_string:

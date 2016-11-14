@@ -93,6 +93,11 @@ class DraftCitation(ImportedData):
     description = models.TextField(null=True, blank=True)
     abstract = models.TextField(null=True, blank=True)
 
+    source_data = models.TextField(null=True, blank=True)
+    """
+    Raw data from which this record was generated.
+    """
+
     BOOK = 'BO'
     ARTICLE = 'AR'
     CHAPTER = 'CH'

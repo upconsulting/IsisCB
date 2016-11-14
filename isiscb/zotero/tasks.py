@@ -5,6 +5,7 @@ from zotero.models import *
 
 import iso8601
 
+
 def _record_history_message(request, accession):
     template = u'Created from Zotero accession {0}, performed at {1} by {2}.' \
              + u' Subsequently ingested by {3}.'
@@ -124,18 +125,30 @@ def ingest_citation(request, accession, draftcitation):
             date = draftcitation.publication_date.date()
 
     if date:
+        if type(date) in [unicode, str]:
+            date = iso8601.parse_date(date).date()
         citation.publication_date = date
-
-        pubdatetype = AttributeType.objects.get(name='PublicationDate')
+        pubdatetype, _ = AttributeType.objects.get_or_create(
+            name='PublicationDate',
+            defaults={
+                'value_content_type': ContentType.objects.get_for_model(ISODateValue)
+            })
+        if type(date) in [datetime.datetime, datetime.date]:
+            value_freeform = date.year
+        elif type(date) in [str, unicode]:
+            value_freeform = date[:4]
         attribute = Attribute.objects.create(
             type_controlled=pubdatetype,
             source=citation,
-            value_freeform=date.year
+            value_freeform=value_freeform
         )
         vvalue = ISODateValue.objects.create(
             value=date,
             attribute=attribute,
         )
+
+
+
     elif draftcitation.publication_date:
         # If we cannot parse the publication date as an ISO8601 date, then we
         #  update the staff notes with the unparseable date so that it is not

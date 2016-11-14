@@ -3,14 +3,22 @@ from django.test.client import RequestFactory
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-import rdflib
-import datetime
+import rdflib, datetime, tempfile, types, os
 from collections import Counter
 
-from parser import *
-from models import *
+
+from zotero.models import *
 from suggest import *
 from tasks import *
+from zotero.parse import ZoteroIngest
+from zotero import ingest
+
+from rdflib import Graph, Literal, BNode, Namespace, RDF, URIRef
+from rdflib.namespace import DC, FOAF, DCTERMS
+
+BIB = Namespace('http://purl.org/net/biblio#')
+RSS = Namespace('http://purl.org/rss/1.0/modules/link/')
+ZOTERO = Namespace('http://www.zotero.org/namespaces/export#')
 
 
 # Create your tests here.
@@ -38,9 +46,9 @@ class TestPages(TestCase):
 
         """
         book_data = 'zotero/test_data/Journal test.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
         for citation in citations:
             self.assertTrue(citation.page_start is not None)
@@ -70,9 +78,9 @@ class TestPublisher(TestCase):
         corresponding ACRelations.
         """
         book_data = 'zotero/test_data/Book test.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
         for citation in citations:
             type_counts = Counter()
@@ -103,9 +111,9 @@ class TestExtent(TestCase):
         Both of the books in this document should have ``extent`` data.
         """
         book_data = 'zotero/test_data/Book test.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
         for citation in citations:
             self.assertGreater(citation.extent, 0)
@@ -178,11 +186,13 @@ class TestBookSeries(TestCase):
         resolved correctly.
         """
         book_data = 'zotero/test_data/Books test 1 SR 2016.09.27.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
+        self.assertGreater(len(citations), 0)
         for citation in citations:
+            citation.refresh_from_db()
             type_counts = Counter()
             for rel in citation.authority_relations.all():
                 type_counts[rel.type_controlled] += 1
@@ -203,8 +213,6 @@ class TestBookSeries(TestCase):
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
-
-
 
 
 class TestBookReviews(TestCase):
@@ -239,9 +247,9 @@ class TestBookReviews(TestCase):
 
 
         book_data = 'zotero/test_data/IsisReviewExamples.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
         # There is one book in this dataset, and the chapters are chapter of
         #  this book.
@@ -249,6 +257,7 @@ class TestBookReviews(TestCase):
         type_counts = Counter()
         for citation in citations:
             type_counts[citation.type_controlled] += 1
+            print citation.type_controlled
             if citation.type_controlled == Citation.REVIEW:
                 self.assertGreater(citation.relations_to.count(), 0)
                 relation = citation.relations_to.first()
@@ -266,7 +275,7 @@ class TestBookReviews(TestCase):
         accession = ImportAccession.objects.create(name='TestAccession')
         book_data = 'zotero/test_data/IsisReviewExamples.rdf'
 
-        for citation in process(read(book_data), accession):
+        for citation in ingest.process(ZoteroIngest(book_data), accession):
             new_citation = ingest_citation(request, accession, citation)
 
             # CCRelations are no longer created in tasks.ingest_citation; they
@@ -295,13 +304,45 @@ class TestBookChapters(TestCase):
     """
     def test_process_bookchapters2(self):
         book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
         type_counts = Counter([c.type_controlled for c in citations])
         self.assertEqual(type_counts[Citation.BOOK], 1)
         self.assertEqual(type_counts[Citation.CHAPTER], 2)
         instance.refresh_from_db()
+
+    def test_process_bookchapters_resolve(self):
+        book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
+        papers = ZoteroIngest(book_data)
+        accession = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, accession).process()
+
+        accession.refresh_from_db()
+
+        # The ImportAccession should be fully resolved, so we need to create
+        #  corresponding Authority records ahead of time.
+        for draftauthority in accession.draftauthority_set.all():
+            authority = Authority.objects.create(
+                name = draftauthority.name,
+                type_controlled = draftauthority.type_controlled,
+            )
+            InstanceResolutionEvent.objects.create(
+                for_instance = draftauthority,
+                to_instance = authority,
+            )
+        accession.draftauthority_set.all().update(processed=True)
+
+        #  We need a user for the accession.
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        prod_citations = ingest_accession(request, accession)
+        for citation in prod_citations:
+            self.assertGreater(citation.relations_from.count() + citation.relations_to.count(), 0)
+
 
     def test_process_bookchapters(self):
         test_book = Citation.objects.create(title='A Test Citation',
@@ -313,9 +354,9 @@ class TestBookChapters(TestCase):
 
 
         book_data = 'zotero/test_data/BookChapterExamples.rdf'
-        papers = read(book_data)
+        papers = ZoteroIngest(book_data)
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
 
         # There is one book in this dataset, and the chapters are chapter of
         #  this book.
@@ -331,34 +372,30 @@ class TestBookChapters(TestCase):
                                  CCRelation.INCLUDES_CHAPTER)
 
 
-        self.assertEqual(type_counts[Citation.BOOK], 1)
+        self.assertEqual(type_counts[Citation.BOOK], 2, "There are two unique"
+                         "ISBNs, thus two unique books.")
         self.assertEqual(type_counts[Citation.CHAPTER], 6)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute, User, Citation, ACRelation, CCRelation]:
+            model.objects.all().delete()
 
 
 class TestSubjects(TestCase):
     def test_parse_subjects(self):
-        papers = read('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
+        papers = ZoteroIngest('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
         for paper in papers:
-            self.assertIn('subjects', paper.__dict__)
+            self.assertIn('subjects', paper)
 
     def test_process_subjects(self):
         Authority.objects.create(name='testauthority', classification_code='140-340')
 
-        papers = read('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
+        papers = ZoteroIngest('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
         instance = ImportAccession.objects.create(name='TestAccession')
-        citations = process(papers, instance)
+        citations = ingest.IngestManager(papers, instance).process()
         for citation in citations:
             for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.CATEGORY):
                 if acrelation.authority.name == 'testauthority':
@@ -378,132 +415,16 @@ class TestSubjects(TestCase):
 
 
 
-class TestParse(TestCase):
-    def test_parse(self):
-        """
-        There should not be a Paper for every relevant entry in the RDF.
-        """
-        papers = read(datapath)
-
-        graph = rdflib.Graph()
-        graph.parse(datapath)
-        expected = 0
-        for element in ZoteroParser.entry_elements:
-            query = 'SELECT * WHERE { ?p a %s }' % element
-            expected += len([r[0] for r in graph.query(query)])
-
-        self.assertNotEqual(len(papers), expected)
-
-    def test_parse_authors(self):
-        """
-        There should be a unique author for each unique author in the RDF.
-        """
-        papers = read(datapath)
-
-
-        parsed_authors = set([])    # Unique authors.
-        parsed_authorships = 0      # Paper-Author associations.
-        for paper in papers:
-            parsed_authorships += len(paper.authors_full)
-            for author in paper.authors_full:
-                parsed_authors.add(author)
-
-        graph = rdflib.Graph()
-        graph.parse(datapath)
-        expected_authors = set([])    # Unique authors.
-        expected_authorships = 0      # Paper-Author associations.
-        for s, p, o in graph.triples((None, AUTHOR, None)):
-            expected_authors.add(o)
-            expected_authorships += 1
-
-        self.assertEqual(len(parsed_authors), len(expected_authors))
-        self.assertEqual(parsed_authorships, expected_authorships)
-
-    def test_parse_titles(self):
-        """
-        Each entry should have a title.
-        """
-        papers = read(datapath)
-        for paper in papers:
-            self.assertGreater(len(paper.title), 0)
-
-    def test_parse_dates(self):
-        """
-        Each entry should have a date.
-        """
-        papers = read(datapath)
-        for paper in papers:
-            self.assertTrue(hasattr(paper, 'date'))
-
-    def test_parse_types(self):
-        papers = read(datapath)
-        for paper in papers:
-            self.assertTrue(hasattr(paper, 'documentType'))
-            self.assertEqual(len(paper.documentType), 2)
-            self.assertIn(paper.documentType, ZoteroParser.document_types.values())
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
-
-
-class TestIngest(TestCase):
-    def setUp(self):
-        self.instance = ImportAccession.objects.create(name='TestAccession')
-
-    def test_process_paper(self):
-        papers = read(datapath)
-        for paper in papers:
-            draftCitation = process_paper(paper, self.instance)
-            self.assertIsInstance(draftCitation, DraftCitation)
-
-    def test_handle_authorities(self):
-        papers = read(datapath)
-
-        for paper in papers:
-            authorities, acrelations = process_authorities(paper, self.instance)
-            self.assertGreater(len(authorities), 0)
-            self.assertGreater(len(acrelations), 0)
-
-    def test_handle_linkeddata(self):
-        papers = read(datapath)
-        for paper in papers:
-            ldentries = process_linkeddata(paper, self.instance)
-
-    def test_process(self):
-        papers = read(datapath)
-        citations = process(papers, self.instance)
-
-        self.assertGreater(len(citations), 0)
-        self.assertIsInstance(citations[0], DraftCitation)
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
-
-
 class TestSuggest(TestCase):
     def test_suggest_citation_by_linkeddata(self):
+        """
+        TODO: complete this.
+        """
         accession = ImportAccession(name='test')
         accession.save()
-        papers = read(datapath)
-        citations = process(papers, accession)
+
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(ZoteroIngest(datapath), instance).process()
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -529,8 +450,9 @@ class TestIngest(TestCase):
         self.dataset = Dataset.objects.create(name='test dataset')
         self.accession = ImportAccession.objects.create(name='test',
                                                         ingest_to=self.dataset)
-        self.papers = read(datapath)
-        self.citations = process(self.papers, self.accession)
+        instance = ImportAccession.objects.create(name='TestAccession')
+
+        self.citations = ingest.IngestManager(ZoteroIngest(datapath), self.accession).process()
 
         # We need a user for the accession.
         rf = RequestFactory()
@@ -542,7 +464,6 @@ class TestIngest(TestCase):
         self.publicationDateType, _ = AttributeType.objects.get_or_create(
             name='PublicationDate',
             value_content_type=isodate_type,
-            display_name='Publication date',
         )
 
         # The ImportAccession should be fully resolved, so we need to create
@@ -574,8 +495,9 @@ class TestIngest(TestCase):
                               'created_on not populated correctly')
         self.assertIsInstance(citation.created_by, User,
                               'created_by not populated correctly')
-        self.assertIsInstance(citation.publication_date, datetime.date,
-                              'publication_date not populated correctly')
+        if citation.publication_date:
+            self.assertIsInstance(citation.publication_date, datetime.date,
+                                  'publication_date not populated correctly')
         self.assertFalse(citation.public,
                          'new citation is public; should be non-public')
         self.assertEqual(citation.record_status_value, CuratedMixin.INACTIVE,
@@ -639,16 +561,11 @@ class TestIngest(TestCase):
         self.dataset.delete()
         self.user.delete()
 
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute, User, Citation, ACRelation, CCRelation]:
+            model.objects.all().delete()
 
 
 class TestAccessionProperties(TestCase):
@@ -695,3 +612,421 @@ class TestAccessionProperties(TestCase):
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
+
+
+class TestZoteroIngesterRDFOnlyReviews(TestCase):
+    def test_parse_zotero_rdf(self):
+        from pprint import pprint
+        ingester = ZoteroIngest("zotero/test_data/Chapter Test 8-9-16.rdf")
+
+        # for datum in ingester:
+        #     pprint(datum)
+
+
+
+class TestImportMethods(TestCase):
+    def test_get_dtype(self):
+        """
+        :func:`zotero.ingest.IngestManager._get_dtype` is a private function that
+        extracts field-data  for :prop`.DraftCitation.type_controlled` from a
+        parsed entry.
+        """
+        for dtype, value in ingest.DOCUMENT_TYPES.iteritems():
+            entry = {
+                'type_controlled': [dtype],
+            }
+            data = ingest.IngestManager._get_dtype(entry)
+            self.assertIn('type_controlled', data)
+            self.assertEqual(data.get('type_controlled'), value)
+
+        data = ingest.IngestManager._get_dtype({})
+        self.assertEqual(data.get('type_controlled'), DraftCitation.ARTICLE,
+                         "type_controlled should default to Article.")
+
+    def test_get_pages_data(self):
+        """
+        :func:`zotero.ingest.IngestManager._get_pages_data` is a private function that
+        extracts field-data  for for ``page_start``, ``page_end``, and
+        ``pages_free_text`` from a  parsed entry.
+        """
+
+        # Both start and end available.
+        data = ingest.IngestManager._get_pages_data({'pages':[('1', '2')]})
+        self.assertEqual(data.get('page_start'), '1')
+        self.assertEqual(data.get('page_end'), '2')
+        self.assertEqual(data.get('pages_free_text'), u'1-2')
+
+        # Single value available.
+        data = ingest.IngestManager._get_pages_data({'pages':[u'555']})
+        self.assertEqual(data.get('page_start'), u'555')
+        self.assertEqual(data.get('page_end'), None)
+        self.assertEqual(data.get('pages_free_text'), u'555')
+
+        # Single value available.
+        data = ingest.IngestManager._get_pages_data({'pages':[(u'555',)]})
+        self.assertEqual(data.get('page_start'), u'555')
+        self.assertEqual(data.get('page_end'), None)
+        self.assertEqual(data.get('pages_free_text'), u'555')
+
+    def test_generate_generic_acrelationss(self):
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+            u'authors': [{
+                u'name_first': u'Fokko Jan',
+                u'name': u'Fokko Jan Dijksterhuis',
+                u'name_last': u'Dijksterhuis'
+            },{
+                u'name_first': u'Carsten',
+                u'name': u'Carsten Timmermann',
+                u'name_last': u'Timmermann'
+            }]
+        }
+
+        results = ingest.IngestManager.generate_generic_acrelations(
+            data, 'authors', draftcitation, DraftAuthority.PERSON,
+            DraftACRelation.AUTHOR)
+        self.assertEqual(len(results), 2, "Should create two DraftACRelations.")
+        self.assertIsInstance(results[0], tuple,
+                              "Should return two objects per relation.")
+        self.assertIsInstance(results[0][0], DraftAuthority,
+                              "The first object is the DraftAuthority"
+                              " instance.")
+        self.assertIsInstance(results[0][1], DraftACRelation,
+                              "The second object is the DraftACRelation"
+                              " instance.")
+        for draft_authority, draft_relation in results:
+            self.assertEqual(draft_relation.citation, draftcitation,
+                             "The DraftACRelation should be linked to the"
+                             " passed DraftCitation.")
+            self.assertEqual(draft_relation.type_controlled,
+                             DraftACRelation.AUTHOR,
+                             "The DraftACRelation should have the correct"
+                             " type.")
+            self.assertEqual(draft_authority.type_controlled,
+                             DraftAuthority.PERSON,
+                             "The DraftAuthority should have the correct type.")
+
+    def test_generate_reviewed_works_relations(self):
+        """
+
+        If reviews are found, then ``draft_citation`` will be re-typed as a
+        Review.
+
+        Attempts to match reviewed works against (1) citations in this ingest batch,
+        (2) citations with matching IDs, and (3) citations with matching linked
+        data.
+        """
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        manager = ingest.IngestManager([], accession)
+        try:
+            r = manager.generate_reviewed_works_relations({}, draftcitation)
+        except:
+            self.fail("Should not choke on nonsensical data, but rather fail"
+                      " quietly.")
+        self.assertEqual(draftcitation.type_controlled, DraftCitation.ARTICLE,
+                         "If no review is found, type should not be changed.")
+
+        data = {'reviewed_works': [{'name': 'nonsense'}]}
+
+        try:
+            r = manager.generate_reviewed_works_relations(data, draftcitation)
+        except:
+            self.fail("Should not choke on nonsensical data, but rather fail"
+                      " quietly.")
+        self.assertEqual(len(r), 0,
+                         "If the identifier can't be resolved into something"
+                         " meaningful, should simply bail.")
+        draftcitation.refresh_from_db()
+
+
+        data = {
+            'reviewed_works': [{'name': '12345678'}]
+        }
+        alt_draftcitation = DraftCitation.objects.create(**{
+            'title': 'Alt',
+            'type_controlled': DraftCitation.BOOK,
+            'part_of': accession,
+        })
+
+        manager.draft_citation_map = {'12345678': alt_draftcitation}
+        r = manager.generate_reviewed_works_relations(data, draftcitation)
+        self.assertEqual(len(r), 1, "If a matching citation is found in this"
+                                    " accession, it should be associated.")
+        draftcitation.refresh_from_db()
+        self.assertEqual(draftcitation.type_controlled, DraftCitation.REVIEW,
+                         "If a review is found, type should be review.")
+
+        citation = Citation.objects.create(
+            title = 'A real citation',
+            type_controlled = Citation.BOOK,
+        )
+        data = {
+            'reviewed_works': [{'name': citation.id}]
+        }
+
+        r = manager.generate_reviewed_works_relations(data, draftcitation)
+        self.assertEqual(len(r), 1, "If a matching citation is found in the"
+                                    " database, it should be associated.")
+        self.assertEqual(r[0][0].resolutions.first().to_instance, citation)
+        draftcitation.refresh_from_db()
+        self.assertEqual(draftcitation.type_controlled, DraftCitation.REVIEW,
+                         "If a review is found, type should be review.")
+
+    def test_generate_book_chapter_relations(self):
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+            u'part_of': [{
+                u'linkeddata': [(u'ISBN', u'9781874267621')],
+                u'title': u'Thinking Through the Environment: Green Approaches to Global History',
+                u'type_controlled': u'Book'
+            }],
+        }
+        manager = ingest.IngestManager([], accession)
+        result = manager.generate_book_chapter_relations(data, draftcitation)
+
+        alt_draftcitation = DraftCitation.objects.create(**{
+            'title': u'Thinking Through the Environment: Green Approaches to Global History',
+            'type_controlled': DraftCitation.BOOK,
+            'part_of': accession,
+        })
+
+        manager.draft_citation_map = {'9781874267621': alt_draftcitation}
+        r = manager.generate_book_chapter_relations(data, draftcitation)
+        self.assertEqual(len(r), 1, "If a matching citation is found in this"
+                                    " accession, it should be associated.")
+        draftcitation.refresh_from_db()
+        self.assertEqual(draftcitation.type_controlled, DraftCitation.CHAPTER,
+                         "If a book is found, type should be chapter.")
+
+    def test_generate_part_of_relations(self):
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+            'part_of':  [{
+                u'linkeddata': [(u'ISSN', u'0191-6599')],
+                u'title': u'History of European Ideas',
+                u'type_controlled': u'Journal'
+            }, {
+                u'title': u'En temps & lieux.',
+                u'type_controlled': u'Series'
+            }],
+        }
+
+        result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
+        self.assertEqual(len(result), 2, "Should yield two records")
+
+
+    def test_generate_citation_linkeddata(self):
+        """
+        :func:`zotero.ingest.IngestManager.generate_citation_linkeddata` creates new
+        :class:`.DraftCitationLinkedData` instances from a parsed entry.
+        """
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+        data = {
+             u'linkeddata': [
+                (u'URI',
+                 u'http://www.journals.uchicago.edu/doi/abs/10.1086/687176'),
+                (u'ISSN', u'0021-1753'),
+             ]
+        }
+        linkeddata = ingest.IngestManager.generate_citation_linkeddata(data, draftcitation)
+        self.assertEqual(len(linkeddata), 2, "Should create two records.")
+        for linkeddatum in linkeddata:
+            self.assertIsInstance(linkeddatum, DraftCitationLinkedData,
+                                  "Should return DraftCitationLinkedData"
+                                  " instances.")
+            self.assertEqual(linkeddatum.citation, draftcitation,
+                             "Should point to the passed DraftCitation.")
+
+        try:
+            ingest.IngestManager.generate_citation_linkeddata({}, draftcitation)
+        except:
+            self.fail("Should not choke when no linkeddata are present.")
+
+    def test_generate_draftcitation(self):
+        """
+        :func:`zotero.ingest.IngestManager.generate_draftcitation` creates a new
+        :class:`.DraftCitation` instance from a parsed entry.
+        """
+        _title = u'The Test Title'
+        _date = datetime.datetime.now()
+        _vol = u'5'
+        _iss = u'1'
+        _abstract = u'A very abstract abstract'
+        data = {
+            u'title': [_title],
+            u'type_controlled': [u'Book'],
+            u'publication_date': [_date],
+            u'pages': [('373', '374')],
+            u'volume': [_vol],
+            u'issue': [_iss],
+            u'abstract': [_abstract],
+        }
+        accession = ImportAccession.objects.create(name=u'test')
+        manager = ingest.IngestManager([], accession)
+        draft_citation = manager.generate_draftcitation(data, accession)
+        self.assertIsInstance(draft_citation, DraftCitation,
+                              "generate_draftcitation should return a"
+                              " DraftCitation instance.")
+        self.assertEqual(draft_citation.title, _title)
+        self.assertEqual(draft_citation.type_controlled, DraftCitation.BOOK)
+        self.assertEqual(draft_citation.volume, _vol)
+        self.assertEqual(draft_citation.issue, _iss)
+        self.assertEqual(draft_citation.abstract, _abstract)
+        self.assertEqual(draft_citation.page_start, '373')
+        self.assertEqual(draft_citation.page_end, '374')
+        self.assertEqual(draft_citation.pages_free_text, '373-374')
+
+    def test_find_mapped_authority(self):
+        """
+        :func:`zotero.ingest.IngestManager._find_mapped_authority` attempts to find an
+        :class:`.Authority` record using the table in
+        ``zotero/AuthorityIDmap.tab``.
+        """
+
+        authority = Authority.objects.create(
+            name = 'test_authority',
+            type_controlled = Authority.PERSON,
+            id = 'CBA000113709'
+        )
+        candidate = ingest.IngestManager._find_mapped_authority('Whoops', '13')
+        self.assertEqual(candidate, authority,
+                         "Should return the corresponding authority.")
+
+        self.assertEqual(ingest.IngestManager._find_mapped_authority('Whoops', '12'), None,
+                         "If not found, should return None.")
+
+    def test_find_encoded_authority(self):
+        """
+        :func:`zotero.ingest.IngestManager._find_encoded_authority` attempts to find an
+        :class:`.Authority` record using an equals-encoded classification code.
+        """
+
+        authority = Authority.objects.create(
+            name = 'test_authority',
+            type_controlled = Authority.PERSON,
+            id = 'CBA000113709',
+            classification_code='55-56'
+        )
+        authority2 = Authority.objects.create(
+            name = 'test_authority2',
+            type_controlled = Authority.PERSON,
+            id = 'CBA000113710',
+            classification_code='6'
+        )
+        candidate = ingest.IngestManager._find_encoded_authority('=56-55=', None)
+        self.assertEqual(candidate, authority,
+                         "Should return the corresponding authority.")
+
+        candidate = ingest.IngestManager._find_encoded_authority('=6=', None)
+        self.assertEqual(candidate, authority2,
+                         "Should return the corresponding authority.")
+
+        self.assertEqual(ingest.IngestManager._find_encoded_authority('=55-56=', None), None,
+                         "If not found, should return None.")
+    def test_find_explicit_authority(self):
+        """
+        :func:`zotero.ingest.IngestManager._find_explicit_authority` attempts to find an
+        existing :class:`.Authority` using an explicit identifier.
+        """
+        authority = Authority.objects.create(
+            name = 'test_authority',
+            type_controlled = Authority.PERSON,
+            id = 'CBA000113709',
+            classification_code='55-56'
+        )
+        candidate = ingest.IngestManager._find_explicit_authority('CBA000113709', None)
+        self.assertEqual(candidate, authority,
+                         "Should return the corresponding authority when"
+                         " the identifier is passed as the label.")
+
+        candidate = ingest.IngestManager._find_explicit_authority(None, 'CBA000113709')
+        self.assertEqual(candidate, authority,
+                         "Should return the corresponding authority when"
+                         " the identifier is passed as the identifier.")
+
+        candidate = ingest.IngestManager._find_explicit_authority(None, ' CBA000113709')
+        self.assertEqual(candidate, authority,
+                         "Should be tolerant of whitespace.")
+
+    def test_generate_subject_acrelations(self):
+        accession = ImportAccession.objects.create(name=u'test')
+        draftcitation = DraftCitation.objects.create(
+            title = 'Test',
+            type_controlled = DraftCitation.ARTICLE,
+            part_of = accession,
+        )
+
+        data = {
+            u'subjects': [
+                (u'National Socialism', u'1145'),
+                (u'1938', None),
+                (u'T\xf6nnies, Ferdinand', u'CBA000102771'),
+                (u'=370-140=', None)
+            ],
+        }
+
+        nat_soc = Authority.objects.create(name='National Socialism', id='CBA000114074', type_controlled=Authority.CONCEPT)
+        ferdinand = Authority.objects.create(name=u'T\xf6nnies, Ferdinand', id='CBA000102771', type_controlled=Authority.PERSON)
+        something = Authority.objects.create(name='Something', classification_code='140-370', type_controlled=Authority.PERSON)
+
+        results = ingest.IngestManager.generate_subject_acrelations(data, draftcitation)
+        self.assertEqual(len(results), 4, "Should return four results")
+        for da, dac in results:
+            if da.name != '1938':
+                self.assertEqual(da.resolutions.count(), 1)
+
+    def test_check_for_authority_reference(self):
+        data = {
+            u'subjects': [
+                (u'moral philosophy', u'CBA000120197'),
+                (u'Science and civilization', u'1122'),
+                (u'Enlightenment', u'416'),
+                (u'Montesquieu, Charles de Secondat, Baron de (1689-1755)',
+                u'11244'),
+                (u'18th century', u'12'),
+                (u'Diderot, Denis (1713-1784)', u'8290'),
+                (u'Raynal, Guillaume (1713-1796)', u'12117'),
+                (u'Colonialism', u'246'),
+                (u'=6=', None)
+            ],
+        }
+
+    def test_source_data_is_preserved(self):
+        book_data = 'zotero/test_data/Book test.rdf'
+        papers = ZoteroIngest(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+        for citation in citations:
+            self.assertNotEqual(citation.source_data, 'null')
+
+    def tearDown(self):
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute]:
+            model.objects.all().delete()
