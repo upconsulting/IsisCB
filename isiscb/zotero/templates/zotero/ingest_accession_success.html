@@ -14,9 +14,14 @@
     </div>
 
     <div class="panel-body text-center">
+        <form method="POST" action="{% url "citation_list" %}">
+            {% csrf_token %}
+            <input type="hidden" name="zotero_accession" value="{{ accession.id }}" />
 
-        <a class="btn btn-success" href="{% url "citation_list" %}?zotero_accession={{ accession.id }}">View Production Citations</a>
-        <a class="btn btn-primary" href="{% url "data_importaccession" accession.id %}">Return to Zotero Accession</a>
+            <input type="submit" class="btn btn-success" href="?zotero_accession=" value="View Production Citations" />
+
+            <a class="btn btn-primary" href="{% url "data_importaccession" accession.id %}">Return to Zotero Accession</a>
+        </form>
 
     </div>
 

@@ -43,6 +43,7 @@ def filter_in_collections(queryset, value):
 
 class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RETURN_NO_RESULTS
+    # strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
     id = django_filters.MethodFilter(name='id', lookup_type='exact')
     title = django_filters.MethodFilter(name='title', lookup_type='icontains')
@@ -78,6 +79,7 @@ class CitationFilter(django_filters.FilterSet):
                 self.collection_name = "Collection could not be found."
 
         zotero_acc = self.data.get('zotero_accession', None)
+
         if zotero_acc:
             try:
                 accession = ImportAccession.objects.get(pk=zotero_acc)
@@ -213,7 +215,7 @@ class CitationFilter(django_filters.FilterSet):
 
 
 class AuthorityFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RETURN_NO_RESULTS
+    strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(name='id', lookup_type='exact')
     name = django_filters.MethodFilter()

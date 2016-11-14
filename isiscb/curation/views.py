@@ -47,9 +47,11 @@ def _get_citation_title(citation):
         return u'Untitled review'
     return title
 
+
 def _get_authors_editors(citation):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in citation.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
 
 @staff_member_required
 def dashboard(request):
@@ -61,6 +63,7 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 def datasets(request):
     """
@@ -70,6 +73,7 @@ def datasets(request):
         'curation_section':'datasets',
     })
     return HttpResponse(template.render(context))
+
 
 @staff_member_required
 #@check_rules('can_create_record')
@@ -114,6 +118,7 @@ def create_citation(request):
 
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 #@check_rules('can_create_record')
 def create_authority(request):
@@ -151,6 +156,7 @@ def create_authority(request):
                 'form' : form,
             })
     return HttpResponse(template.render(context))
+
 
 # TODO this method needs to be logged down!
 @staff_member_required
@@ -1053,9 +1059,10 @@ def citations(request):
             filter_params['o'] = 'publication_date'
         for key in additional_params_names:
             all_params[key] = request.GET.get(key, '')
-
-    if 'zotero_accession' in request.GET:
-        filter_params['zotero_accession'] = request.GET.get('zotero_accession')
+    if 'o' not in filter_params:
+        filter_params['o'] = 'title_for_sort'
+    # if 'zotero_accession' in request.GET:
+    #     filter_params['zotero_accession'] = request.GET.get('zotero_accession')
     #ids = None
     #if request.method == 'POST':
     #    ids = [i.strip() for i in request.POST.get('ids').split(',')]
