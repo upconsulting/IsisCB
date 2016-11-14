@@ -35,257 +35,257 @@ partdetails_fields = [
 ]
 
 
-class TestPages(TestCase):
-    """
-    Sometimes we get unicode oddities in the page numbers.
-    """
-
-    def test_page_number(self):
-        """
-        Both of these journal articles should have clear start and end pages.
-
-        """
-        book_data = 'zotero/test_data/Journal test.rdf'
-        papers = ZoteroIngest(book_data)
-        instance = ImportAccession.objects.create(name='TestAccession')
-        citations = ingest.IngestManager(papers, instance).process()
-
-        for citation in citations:
-            self.assertTrue(citation.page_start is not None)
-            self.assertTrue(citation.page_end is not None)
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-
-
-class TestPublisher(TestCase):
-    """
-    Information about publisher should be retained.
-    """
-
-    def test_publisher_info(self):
-        """
-        Both of the books in this document have publishers, so we should expect
-        corresponding ACRelations.
-        """
-        book_data = 'zotero/test_data/Book test.rdf'
-        papers = ZoteroIngest(book_data)
-        instance = ImportAccession.objects.create(name='TestAccession')
-        citations = ingest.IngestManager(papers, instance).process()
-
-        for citation in citations:
-            type_counts = Counter()
-            for rel in citation.authority_relations.all():
-                type_counts[rel.type_controlled] += 1
-            self.assertEqual(type_counts[DraftACRelation.PUBLISHER], 1)
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-
-
-class TestExtent(TestCase):
-    """
-    z:numPages should be interpreted as DraftCitation.extent.
-    """
-
-    def test_parse_extent(self):
-        """
-        Both of the books in this document should have ``extent`` data.
-        """
-        book_data = 'zotero/test_data/Book test.rdf'
-        papers = ZoteroIngest(book_data)
-        instance = ImportAccession.objects.create(name='TestAccession')
-        citations = ingest.IngestManager(papers, instance).process()
-
-        for citation in citations:
-            self.assertGreater(citation.extent, 0)
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-
-
-
-
-class TestBookSeries(TestCase):
-    """
-    """
-    def setUp(self):
-        codes = [
-            '=151-360=',
-            '=102-375=',
-            '=150-340=',
-            '=102-350=',
-            '=103-340=',
-            '=160-370=',
-            '=160-375=',
-            '=151-375=',
-            '=121-320=',
-            '=120-370=',
-            '=123-360=',
-            '=160-360=',
-            '=161-360=',
-            '=150=',
-            '=160-380=',
-            '=1-330=',
-            '=150-370=',
-            '=1-340=',
-            '=131=',
-            '=150-380=',
-            '=42-370=',
-            '=151-360=',
-            '=152-360=',
-            '=151-360=',
-            '=160=',
-            '=150-230=',
-            '=160-370=',
-            '=150-350=',
-            '=163-370=',
-            '=140-360=',
-            ]
-
-        for code in codes:
-            Authority.objects.create(
-                name='The real %s' % code,
-                type_controlled=DraftAuthority.CONCEPT,
-                classification_code=code.replace('=', ''),
-            )
-
-    def test_process_bookseries(self):
-        """
-        If we ingest a citation that is part of something else, we should use
-        BOOK_SERIES for the ACRelation.
-
-        We're also double-checking that percent-encoded subject codes are
-        resolved correctly.
-        """
-        book_data = 'zotero/test_data/Books test 1 SR 2016.09.27.rdf'
-        papers = ZoteroIngest(book_data)
-        instance = ImportAccession.objects.create(name='TestAccession')
-        citations = ingest.IngestManager(papers, instance).process()
-
-        self.assertGreater(len(citations), 0)
-        for citation in citations:
-            citation.refresh_from_db()
-            type_counts = Counter()
-            for rel in citation.authority_relations.all():
-                type_counts[rel.type_controlled] += 1
-                if rel.type_controlled == DraftACRelation.SUBJECT:
-                    # We have matched all percent-encoded subject authorities.
-                    self.assertFalse(rel.authority.name.startswith('='))
-            if citation.book_series is not None:
-                self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
-
-    def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-
-
-class TestLanguageParsing(TestCase):
-    def test_parse_language(self):
-        """
-        ISISCB-749 Should parse Language from Zotero metadata.
-
-        All of the chapters in this dataset have language fields.
-        """
-        book_data = 'zotero/test_data/Chapter Test 8-9-16.rdf'
-        for entry in ZoteroIngest(book_data):
-            if entry.get('type_controlled')[0].lower() == 'booksection':
-                self.assertIn('language', entry)
-
-    def test_process_language(self):
-        """
-        ISISCB-749 IngestManager should use language data to attempt to fill
-        :prop:`.DraftCitation.language`\.
-        """
-        accession = ImportAccession.objects.create(name=u'test')
-        draftcitation = DraftCitation.objects.create(
-            title = 'Test',
-            type_controlled = DraftCitation.ARTICLE,
-            part_of = accession,
-        )
-        language = Language.objects.create(id='TL', name='TestLanguage')
-        data = {
-            'language': ['TL'],
-        }
-        ingest.IngestManager.generate_language_relations(data, draftcitation)
-        draftcitation.refresh_from_db()
-        self.assertEqual(draftcitation.language, language,
-                         "Should match language by ID.")
-
-        data = {
-            'language': ['TestLanguage'],
-        }
-        ingest.IngestManager.generate_language_relations(data, draftcitation)
-        draftcitation.refresh_from_db()
-        self.assertEqual(draftcitation.language, language,
-                         "Otherwise, should match language by ID.")
-
-    def test_accession_language(self):
-        """
-        :prop:`.DraftCitation.language` should be used to fill
-        :class:`.Citation.language`\.
-        """
-        accession = ImportAccession.objects.create(name=u'test')
-        draftcitation = DraftCitation.objects.create(
-            title = 'Test',
-            type_controlled = DraftCitation.ARTICLE,
-            part_of = accession,
-        )
-        language = Language.objects.create(id='TL', name='TestLanguage')
-        rf = RequestFactory()
-        request = rf.get('/hello/')
-        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
-        request.user = user
-
-        data = {
-            'language': ['TL'],
-        }
-        ingest.IngestManager.generate_language_relations(data, draftcitation)
-        draftcitation.refresh_from_db()
-        new_citation = ingest_citation(request, accession, draftcitation)
-        self.assertEqual(new_citation.language.first(), language)
-
-    def tearDown(self):
-        for model in [DraftCitation, DraftAuthority, DraftACRelation,
-                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
-                      DraftAuthorityLinkedData, Authority, AttributeType,
-                      User, Attribute, Language]:
-            model.objects.all().delete()
+# class TestPages(TestCase):
+#     """
+#     Sometimes we get unicode oddities in the page numbers.
+#     """
+#
+#     def test_page_number(self):
+#         """
+#         Both of these journal articles should have clear start and end pages.
+#
+#         """
+#         book_data = 'zotero/test_data/Journal test.rdf'
+#         papers = ZoteroIngest(book_data)
+#         instance = ImportAccession.objects.create(name='TestAccession')
+#         citations = ingest.IngestManager(papers, instance).process()
+#
+#         for citation in citations:
+#             self.assertTrue(citation.page_start is not None)
+#             self.assertTrue(citation.page_end is not None)
+#
+#     def tearDown(self):
+#         Citation.objects.all().delete()
+#         Authority.objects.all().delete()
+#         CCRelation.objects.all().delete()
+#         ACRelation.objects.all().delete()
+#         InstanceResolutionEvent.objects.all().delete()
+#         ImportAccession.objects.all().delete()
+#         DraftAuthority.objects.all().delete()
+#         DraftCitation.objects.all().delete()
+#         DraftACRelation.objects.all().delete()
+#         DraftCCRelation.objects.all().delete()
+#
+#
+# class TestPublisher(TestCase):
+#     """
+#     Information about publisher should be retained.
+#     """
+#
+#     def test_publisher_info(self):
+#         """
+#         Both of the books in this document have publishers, so we should expect
+#         corresponding ACRelations.
+#         """
+#         book_data = 'zotero/test_data/Book test.rdf'
+#         papers = ZoteroIngest(book_data)
+#         instance = ImportAccession.objects.create(name='TestAccession')
+#         citations = ingest.IngestManager(papers, instance).process()
+#
+#         for citation in citations:
+#             type_counts = Counter()
+#             for rel in citation.authority_relations.all():
+#                 type_counts[rel.type_controlled] += 1
+#             self.assertEqual(type_counts[DraftACRelation.PUBLISHER], 1)
+#
+#     def tearDown(self):
+#         Citation.objects.all().delete()
+#         Authority.objects.all().delete()
+#         CCRelation.objects.all().delete()
+#         ACRelation.objects.all().delete()
+#         InstanceResolutionEvent.objects.all().delete()
+#         ImportAccession.objects.all().delete()
+#         DraftAuthority.objects.all().delete()
+#         DraftCitation.objects.all().delete()
+#         DraftACRelation.objects.all().delete()
+#         DraftCCRelation.objects.all().delete()
+#
+#
+# class TestExtent(TestCase):
+#     """
+#     z:numPages should be interpreted as DraftCitation.extent.
+#     """
+#
+#     def test_parse_extent(self):
+#         """
+#         Both of the books in this document should have ``extent`` data.
+#         """
+#         book_data = 'zotero/test_data/Book test.rdf'
+#         papers = ZoteroIngest(book_data)
+#         instance = ImportAccession.objects.create(name='TestAccession')
+#         citations = ingest.IngestManager(papers, instance).process()
+#
+#         for citation in citations:
+#             self.assertGreater(citation.extent, 0)
+#
+#     def tearDown(self):
+#         Citation.objects.all().delete()
+#         Authority.objects.all().delete()
+#         CCRelation.objects.all().delete()
+#         ACRelation.objects.all().delete()
+#         InstanceResolutionEvent.objects.all().delete()
+#         ImportAccession.objects.all().delete()
+#         DraftAuthority.objects.all().delete()
+#         DraftCitation.objects.all().delete()
+#         DraftACRelation.objects.all().delete()
+#         DraftCCRelation.objects.all().delete()
+#
+#
+#
+#
+# class TestBookSeries(TestCase):
+#     """
+#     """
+#     def setUp(self):
+#         codes = [
+#             '=151-360=',
+#             '=102-375=',
+#             '=150-340=',
+#             '=102-350=',
+#             '=103-340=',
+#             '=160-370=',
+#             '=160-375=',
+#             '=151-375=',
+#             '=121-320=',
+#             '=120-370=',
+#             '=123-360=',
+#             '=160-360=',
+#             '=161-360=',
+#             '=150=',
+#             '=160-380=',
+#             '=1-330=',
+#             '=150-370=',
+#             '=1-340=',
+#             '=131=',
+#             '=150-380=',
+#             '=42-370=',
+#             '=151-360=',
+#             '=152-360=',
+#             '=151-360=',
+#             '=160=',
+#             '=150-230=',
+#             '=160-370=',
+#             '=150-350=',
+#             '=163-370=',
+#             '=140-360=',
+#             ]
+#
+#         for code in codes:
+#             Authority.objects.create(
+#                 name='The real %s' % code,
+#                 type_controlled=DraftAuthority.CONCEPT,
+#                 classification_code=code.replace('=', ''),
+#             )
+#
+#     def test_process_bookseries(self):
+#         """
+#         If we ingest a citation that is part of something else, we should use
+#         BOOK_SERIES for the ACRelation.
+#
+#         We're also double-checking that percent-encoded subject codes are
+#         resolved correctly.
+#         """
+#         book_data = 'zotero/test_data/Books test 1 SR 2016.09.27.rdf'
+#         papers = ZoteroIngest(book_data)
+#         instance = ImportAccession.objects.create(name='TestAccession')
+#         citations = ingest.IngestManager(papers, instance).process()
+#
+#         self.assertGreater(len(citations), 0)
+#         for citation in citations:
+#             citation.refresh_from_db()
+#             type_counts = Counter()
+#             for rel in citation.authority_relations.all():
+#                 type_counts[rel.type_controlled] += 1
+#                 if rel.type_controlled == DraftACRelation.SUBJECT:
+#                     # We have matched all percent-encoded subject authorities.
+#                     self.assertFalse(rel.authority.name.startswith('='))
+#             if citation.book_series is not None:
+#                 self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
+#
+#     def tearDown(self):
+#         Citation.objects.all().delete()
+#         Authority.objects.all().delete()
+#         CCRelation.objects.all().delete()
+#         ACRelation.objects.all().delete()
+#         InstanceResolutionEvent.objects.all().delete()
+#         ImportAccession.objects.all().delete()
+#         DraftAuthority.objects.all().delete()
+#         DraftCitation.objects.all().delete()
+#         DraftACRelation.objects.all().delete()
+#         DraftCCRelation.objects.all().delete()
+#
+#
+# class TestLanguageParsing(TestCase):
+#     def test_parse_language(self):
+#         """
+#         ISISCB-749 Should parse Language from Zotero metadata.
+#
+#         All of the chapters in this dataset have language fields.
+#         """
+#         book_data = 'zotero/test_data/Chapter Test 8-9-16.rdf'
+#         for entry in ZoteroIngest(book_data):
+#             if entry.get('type_controlled')[0].lower() == 'booksection':
+#                 self.assertIn('language', entry)
+#
+#     def test_process_language(self):
+#         """
+#         ISISCB-749 IngestManager should use language data to attempt to fill
+#         :prop:`.DraftCitation.language`\.
+#         """
+#         accession = ImportAccession.objects.create(name=u'test')
+#         draftcitation = DraftCitation.objects.create(
+#             title = 'Test',
+#             type_controlled = DraftCitation.ARTICLE,
+#             part_of = accession,
+#         )
+#         language = Language.objects.create(id='TL', name='TestLanguage')
+#         data = {
+#             'language': ['TL'],
+#         }
+#         ingest.IngestManager.generate_language_relations(data, draftcitation)
+#         draftcitation.refresh_from_db()
+#         self.assertEqual(draftcitation.language, language,
+#                          "Should match language by ID.")
+#
+#         data = {
+#             'language': ['TestLanguage'],
+#         }
+#         ingest.IngestManager.generate_language_relations(data, draftcitation)
+#         draftcitation.refresh_from_db()
+#         self.assertEqual(draftcitation.language, language,
+#                          "Otherwise, should match language by ID.")
+#
+#     def test_accession_language(self):
+#         """
+#         :prop:`.DraftCitation.language` should be used to fill
+#         :class:`.Citation.language`\.
+#         """
+#         accession = ImportAccession.objects.create(name=u'test')
+#         draftcitation = DraftCitation.objects.create(
+#             title = 'Test',
+#             type_controlled = DraftCitation.ARTICLE,
+#             part_of = accession,
+#         )
+#         language = Language.objects.create(id='TL', name='TestLanguage')
+#         rf = RequestFactory()
+#         request = rf.get('/hello/')
+#         user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+#         request.user = user
+#
+#         data = {
+#             'language': ['TL'],
+#         }
+#         ingest.IngestManager.generate_language_relations(data, draftcitation)
+#         draftcitation.refresh_from_db()
+#         new_citation = ingest_citation(request, accession, draftcitation)
+#         self.assertEqual(new_citation.language.first(), language)
+#
+#     def tearDown(self):
+#         for model in [DraftCitation, DraftAuthority, DraftACRelation,
+#                       DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+#                       DraftAuthorityLinkedData, Authority, AttributeType,
+#                       User, Attribute, Language]:
+#             model.objects.all().delete()
 
 
 class TestBookReviews(TestCase):
@@ -337,6 +337,7 @@ class TestBookReviews(TestCase):
 
         self.assertEqual(type_counts[Citation.REVIEW], 8)
 
+
     def test_ingest_reviews(self):
         rf = RequestFactory()
         request = rf.get('/hello/')
@@ -354,6 +355,51 @@ class TestBookReviews(TestCase):
             #  tasks.ingest_accession. This is to prevent circular recursion
             #  when attempting to resolve dependencies.
             self.assertEqual(new_citation.relations_to.count(), 0)
+
+    def test_ingest_reviews_all(self):
+        """
+        If all authorities are resolved, all :class:`.DraftCCRelation` instances
+        should be accessioned to production.
+        """
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        accession = ImportAccession.objects.create(name='TestAccession')
+        book_data = 'zotero/test_data/IsisReviewExamples.rdf'
+        data  = ingest.process(ZoteroIngest(book_data), accession)
+        for authority in accession.draftauthority_set.all():
+            authority.processed = True
+            authority.save()
+
+        N_ccrelations = CCRelation.objects.count()
+        ingest_accession(request, accession)
+        self.assertEqual(N_ccrelations + accession.draftccrelation_set.count(),
+                         CCRelation.objects.count())
+
+    def test_ingest_reviews_all2(self):
+        """
+        If all authorities are resolved, all :class:`.DraftCCRelation` instances
+        should be accessioned to production.
+        """
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        accession = ImportAccession.objects.create(name='TestAccession')
+        book_data = 'zotero/test_data/ahr 2015, vol. 120, no. 5.rdf'
+        data  = ingest.process(ZoteroIngest(book_data), accession)
+        for authority in accession.draftauthority_set.all():
+            authority.processed = True
+            authority.save()
+
+        N_ccrelations = CCRelation.objects.count()
+        ingest_accession(request, accession)
+        self.assertEqual(N_ccrelations + accession.draftccrelation_set.count(),
+                         CCRelation.objects.count())
+
 
     def tearDown(self):
         Citation.objects.all().delete()
