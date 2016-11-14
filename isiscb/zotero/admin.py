@@ -17,7 +17,7 @@ from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 
 from zotero.models import *
-from zotero.parser import read, process
+
 from zotero.suggest import *
 from zotero.serializers import *
 
