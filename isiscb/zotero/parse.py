@@ -378,10 +378,24 @@ class ZoteroIngest(object):
         ident_type = self.graph.value(subject=node, predicate=RDF.type)
         # if ident_type == DCTERMS.URI:
         #     return 'uri', identifier
+
+        # Some identifiers are compound objects, with explicit types and values.
         if ident_type and identifier:
             if type(ident_type) is URIRef:
                 ident_type = self._relabel_predicate(ident_type)
             return predicate, (ident_type, self._to_python(identifier))
+
+        # Others simply encode the type and value in the target node itself.
+        else:
+            try:
+                name, ident_value = tuple(unicode(node).split(' '))
+                name = name.upper()
+                if name in ['ISSN', 'ISBN']:
+                    if name == 'ISBN':
+                        ident_value = ident_value.replace('-', '')
+                return predicate, (name, ident_value)
+            except ValueError:
+                pass
         return None, None
 
     def handle_link(self, predicate, node):

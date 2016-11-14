@@ -40,3 +40,4 @@ rdflib
 -e git://github.com/erickpeirson/django-pagination@master#egg=django-pagination
 Markdown==2.6.6
 rules
+jsonpickle

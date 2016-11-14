@@ -95,7 +95,7 @@ class DraftCitation(ImportedData):
 
     source_data = models.TextField(null=True, blank=True)
     """
-    Raw RDF/XML from which this record was generated.
+    Raw data from which this record was generated.
     """
 
     BOOK = 'BO'
