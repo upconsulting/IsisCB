@@ -737,6 +737,7 @@ class IngestManager(object):
         acrelations += IngestManager.generate_publisher_acrelations(
             entry, draft_citation)
         IngestManager.generate_part_of_relations(entry, draft_citation)
+        IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation
 
     def process(self):
