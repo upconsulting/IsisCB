@@ -6,19 +6,26 @@
 {% block content %}
 {% autopaginate objects.qs 40 as filter_list %}
 
+<div class="panel panel-default">
+<div class="panel-body" style="padding: 8px;">
+
 <div class="clearfix">
-    <div class="btn-group pull-right">
-        <button data-toggle="collapse"
-            class="btn btn-primary"
-            data-target="#filters">
-            Show/hide filters
-        </button>
-    </div>
+  <div class="btn-group pull-right" style="margin-left: 10px;">
+      <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+      <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+  </div>
+  <div class="btn-group pull-right">
+      <button data-toggle="collapse"
+          class="btn btn-xs btn-primary"
+          data-target="#filters">
+          <i class="fa fa-filter" aria-hidden="true"></i> Show/hide filters
+      </button>
+  </div>
 </div>
 
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
     {% block filter_form %}
-    <form class="form clearfix">
+    <form id="filter_form" class="form-horizontal clearfix">
       {% csrf_token %}
         {% for field in objects.form %}
         <div class="form-group clearable">
@@ -26,20 +33,40 @@
             {{ field|addcss:"form-control" }}
         </div>
         {% endfor %}
-        <div class="btn-group pull-right">
-            <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-            <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-        </div>
+
     </form>
-    <script>
-    $(document).ready(function() {
-        $('#clear-filters').on('click', function() {
-            $('.form-group.clearable input').val('');
-            $('.form-group.clearable select').val('');
-        });
-    });
-    </script>
     {% endblock %}
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#clear-filters').on('click', function() {
+        $('.form-group.clearable input').val('');
+        $('.form-group.clearable select').val('');
+        highlightFilters();
+    });
+
+    $("#submit-form-btn").on('click', function() {
+      $("#filter_form").submit();
+    });
+
+    highlightFilters();
+});
+
+function highlightFilters() {
+  $('#filter_form .form-group').each(function(idx, element) {
+    if ($(element).find(".form-control").val() != '') {
+      $(element).addClass("is-applied");
+    }
+    else {
+      $(element).removeClass("is-applied");
+    }
+  });
+}
+
+</script>
+
+</div>
 </div>
 
 <div class="text-center asdf">
