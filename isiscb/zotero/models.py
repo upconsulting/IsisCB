@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.urlresolvers import reverse
 
-from isisdata.models import Dataset, Citation, Authority
+from isisdata.models import Dataset, Citation, Authority, Language
 from isisdata.utils import normalize
 from unidecode import unidecode
 
@@ -93,6 +93,11 @@ class DraftCitation(ImportedData):
     description = models.TextField(null=True, blank=True)
     abstract = models.TextField(null=True, blank=True)
 
+    source_data = models.TextField(null=True, blank=True)
+    """
+    Raw data from which this record was generated.
+    """
+
     BOOK = 'BO'
     ARTICLE = 'AR'
     CHAPTER = 'CH'
@@ -128,6 +133,8 @@ class DraftCitation(ImportedData):
     issue = models.CharField(max_length=100, blank=True, null=True)
     book_series = models.CharField(max_length=255, blank=True, null=True)
     extent = models.PositiveIntegerField(blank=True, null=True)
+
+    language = models.ForeignKey(Language, blank=True, null=True)
 
     def __unicode__(self):
         return self.title

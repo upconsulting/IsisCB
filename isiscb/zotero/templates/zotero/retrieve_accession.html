@@ -34,13 +34,15 @@
                 <div class="list-group-item clearfix"
                     id="authority-{{ authority.id }}"
                     data-id="{{ authority.id }}"
-                    data-name="{{ authority.name }}">
+                    data-name="{{ authority.name }}"
+                    data-type="{{ authority.type_controlled }}">
                     <a class="glyphicon glyphicon-pencil"
                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
                     <a class="draftauthority"
                         id="authority-{{ authority.id }}-link"
                         data-id="{{ authority.id }}"
-                        data-name="{{ authority.name }}">
+                        data-name="{{ authority.name }}"
+                        data-type="{{ authority.type_controlled }}">
                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
                     </a>
@@ -180,6 +182,7 @@ $('.draftauthority').click(function() {
 
     selected_authority = draftauthority_id;
     selected_authority_name = elem.attr('data-name');
+    selected_authority_type = elem.attr('data-type');
 
     bindCreateNew();
     bindSkip();
@@ -187,6 +190,8 @@ $('.draftauthority').click(function() {
     // Reset search.
     $('#results-container').empty();
     $('#authority-search').val('');
+    $('#authority-search-filter-type').val(selected_authority_type);
+
 
     $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
         beforeSend: function(response) {

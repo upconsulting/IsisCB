@@ -1,9 +1,18 @@
+"""
+These functions are mostly related to transitioning data from the Zotero app
+to the IsisData app.
+
+TODO: many of these functions could use refactoring, or at least modularizing
+for easier testing.
+"""
+
 from django.db.models import Q
 
 from isisdata.models import *
 from zotero.models import *
 
 import iso8601
+
 
 def _record_history_message(request, accession):
     template = u'Created from Zotero accession {0}, performed at {1} by {2}.' \
@@ -109,6 +118,10 @@ def ingest_citation(request, accession, draftcitation):
     citation = Citation.objects.create(**citation_data)
     InstanceResolutionEvent.objects.create(for_instance=draftcitation, to_instance=citation)
 
+    # ISISCB-749 Language should be preserved from Zotero records.
+    if draftcitation.language:
+        citation.language.add(draftcitation.language)
+
     date = None
     if draftcitation.publication_date:
         if type(draftcitation.publication_date) in [str, unicode]:
@@ -124,18 +137,28 @@ def ingest_citation(request, accession, draftcitation):
             date = draftcitation.publication_date.date()
 
     if date:
+        if type(date) in [unicode, str]:
+            date = iso8601.parse_date(date).date()
         citation.publication_date = date
-
-        pubdatetype = AttributeType.objects.get(name='PublicationDate')
+        pubdatetype, _ = AttributeType.objects.get_or_create(
+            name='PublicationDate',
+            defaults={
+                'value_content_type': ContentType.objects.get_for_model(ISODateValue)
+            })
+        if type(date) in [datetime.datetime, datetime.date]:
+            value_freeform = date.year
+        elif type(date) in [str, unicode]:
+            value_freeform = date[:4]
         attribute = Attribute.objects.create(
             type_controlled=pubdatetype,
             source=citation,
-            value_freeform=date.year
+            value_freeform=value_freeform
         )
         vvalue = ISODateValue.objects.create(
             value=date,
             attribute=attribute,
         )
+
     elif draftcitation.publication_date:
         # If we cannot parse the publication date as an ISO8601 date, then we
         #  update the staff notes with the unparseable date so that it is not
@@ -160,6 +183,17 @@ def ingest_citation(request, accession, draftcitation):
         if target:
             target.zotero_accession = accession
             target.save()
+
+            # Transfer any linkeddata from the DraftAuthority to the production
+            #  Authority.
+            for draftlinkeddata in draft.linkeddata.all():
+                ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
+                LinkedData.objects.create(
+                    subject = target,
+                    universal_resource_name = draftlinkeddata.value,
+                    type_controlled = ldtype
+                )
+            draft.linkeddata.all().update(processed=True)
 
         # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
@@ -193,6 +227,10 @@ def ingest_citation(request, accession, draftcitation):
     draftcitation.linkeddata.all().update(processed=True)
 
     draftcitation.authority_relations.all().update(processed=True)
+
+
+
+
     draftcitation.processed = True
     draftcitation.save()
 

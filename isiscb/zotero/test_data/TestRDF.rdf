@@ -1,0 +1,2032 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3629777/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1545-8547"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kalueff</foaf:surname>
+                        <foaf:givenname>Allan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gebhardt</foaf:surname>
+                        <foaf:givenname>Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stewart</foaf:surname>
+                        <foaf:givenname>Adam Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cachat</foaf:surname>
+                        <foaf:givenname>Jonathan M.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Brimmer</foaf:surname>
+                        <foaf:givenname>Mallorie</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Chawla</foaf:surname>
+                        <foaf:givenname>Jonathan S.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Craddock</foaf:surname>
+                        <foaf:givenname>Cassandra</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kyzar</foaf:surname>
+                        <foaf:givenname>Evan J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Roth</foaf:surname>
+                        <foaf:givenname>Andrew</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Landsman</foaf:surname>
+                        <foaf:givenname>Samuel</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gaikwad</foaf:surname>
+                        <foaf:givenname>Siddharth</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Robinson</foaf:surname>
+                        <foaf:givenname>Kyle</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Baatrup</foaf:surname>
+                        <foaf:givenname>Erik</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tierney</foaf:surname>
+                        <foaf:givenname>Keith</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shamchuk</foaf:surname>
+                        <foaf:givenname>Angela</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Norton</foaf:surname>
+                        <foaf:givenname>William</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Miller</foaf:surname>
+                        <foaf:givenname>Noam</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nicolson</foaf:surname>
+                        <foaf:givenname>Teresa</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Braubach</foaf:surname>
+                        <foaf:givenname>Oliver</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gilman</foaf:surname>
+                        <foaf:givenname>Charles P.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pittman</foaf:surname>
+                        <foaf:givenname>Julian</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Rosemberg</foaf:surname>
+                        <foaf:givenname>Denis B.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gerlai</foaf:surname>
+                        <foaf:givenname>Robert</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Echevarria</foaf:surname>
+                        <foaf:givenname>David</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lamb</foaf:surname>
+                        <foaf:givenname>Elisabeth</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Neuhauss</foaf:surname>
+                        <foaf:givenname>Stephan C.F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Weng</foaf:surname>
+                        <foaf:givenname>Wei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bally-Cuif</foaf:surname>
+                        <foaf:givenname>Laure</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Schneider</foaf:surname>
+                        <foaf:givenname>Henning</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_44"/>
+        <dc:title>Towards a Comprehensive Catalog of Zebrafish Behavior 1.0 and Beyond</dc:title>
+        <dcterms:abstract>Zebrafish (Danio rerio) are rapidly gaining popularity in translational neuroscience and behavioral research. Physiological similarity to mammals, ease of genetic manipulations, sensitivity to pharmacological and genetic factors, robust behavior, low cost, and potential for high-throughput screening contribute to the growing utility of zebrafish models in this field. Understanding zebrafish behavioral phenotypes provides important insights into neural pathways, physiological biomarkers, and genetic underpinnings of normal and pathological brain function. Novel zebrafish paradigms continue to appear with an encouraging pace, thus necessitating a consistent terminology and improved understanding of the behavioral repertoire. What can zebrafish ‘do’, and how does their altered brain function translate into behavioral actions? To help address these questions, we have developed a detailed catalog of zebrafish behaviors (Zebrafish Behavior Catalog, ZBC) that covers both larval and adult models. Representing a beginning of creating a more comprehensive ethogram of zebrafish behavior, this effort will improve interpretation of published findings, foster cross-species behavioral modeling, and encourage new groups to apply zebrafish neurobehavioral paradigms in their research. In addition, this glossary creates a framework for developing a zebrafish neurobehavioral ontology, ultimately to become part of a unified animal neurobehavioral ontology, which collectively will contribute to better integration of biological data within and across species.</dcterms:abstract>
+        <bib:pages>70-86</bib:pages>
+        <dc:date>2013-3</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3629777/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23590400
+PMCID: PMC3629777</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1545-8547">
+        <dc:title>Zebrafish</dc:title>
+        <prism:volume>10</prism:volume>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Zebrafish</dcterms:alternative>
+        <dc:identifier>DOI 10.1089/zeb.2012.0861</dc:identifier>
+        <dc:identifier>ISSN 1545-8547</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_44">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3629777/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673592/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>2</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0828</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Paquette</foaf:surname>
+                        <foaf:givenname>Colleen E.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kent</foaf:surname>
+                        <foaf:givenname>Michael L.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Buchner</foaf:surname>
+                        <foaf:givenname>Cari</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tanguay</foaf:surname>
+                        <foaf:givenname>Robert L.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Guillemin</foaf:surname>
+                        <foaf:givenname>Karen</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mason</foaf:surname>
+                        <foaf:givenname>Timothy J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peterson</foaf:surname>
+                        <foaf:givenname>Tracy S.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_47"/>
+        <dc:title>A Retrospective Study of the Prevalence and Classification of Intestinal Neoplasia in Zebrafish (Danio Rerio)</dc:title>
+        <dcterms:abstract>For over a decade, spontaneous intestinal neoplasia has been observed in zebrafish (Danio rerio) submitted to the ZIRC (Zebrafish International Resource Center) diagnostic service. In addition, zebrafish displayed preneoplastic intestinal changes including hyperplasia, dysplasia, and enteritis. A total of 195 zebrafish, representing 2% of the total fish submitted to the service, were diagnosed with these lesions. Neoplastic changes were classified either as adenocarcinoma or small cell carcinoma, with a few exceptions (carcinoma not otherwise specified, tubular adenoma, and tubulovillous adenoma). Tumor prevalence appeared similarly distributed between sexes and generally occurred in zebrafish greater than 1 year of age, although neoplastic changes were observed in fish 6 months of age. Eleven lines displayed these preneoplastic and neoplastic changes, including wild-types and mutants. Affected zebrafish originated from 18 facilities, but the majority of fish were from a single zebrafish research facility (hereafter referred to as the primary facility) that has submitted numerous samples to the ZIRC diagnostic service. Zebrafish from the primary facility submitted as normal sentinel fish demonstrate that these lesions are most often subclinical. Fish fed the diet from the primary facility and held at another location did not develop intestinal lesions, indicating that diet is not the etiologic agent.</dcterms:abstract>
+        <bib:pages>228-236</bib:pages>
+        <dc:date>2013-6</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673592/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23544991
+PMCID: PMC3673592</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_47">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673592/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760023/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>3</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2013.0886</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mikut</foaf:surname>
+                        <foaf:givenname>Ralf</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dickmeis</foaf:surname>
+                        <foaf:givenname>Thomas</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Driever</foaf:surname>
+                        <foaf:givenname>Wolfgang</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Geurts</foaf:surname>
+                        <foaf:givenname>Pierre</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hamprecht</foaf:surname>
+                        <foaf:givenname>Fred A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kausler</foaf:surname>
+                        <foaf:givenname>Bernhard X.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ledesma-Carbayo</foaf:surname>
+                        <foaf:givenname>Maria J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Maree</foaf:surname>
+                        <foaf:givenname>Raphael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mikula</foaf:surname>
+                        <foaf:givenname>Karol</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pantazis</foaf:surname>
+                        <foaf:givenname>Periklis</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ronneberger</foaf:surname>
+                        <foaf:givenname>Olaf</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Santos</foaf:surname>
+                        <foaf:givenname>Andres</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stotzka</foaf:surname>
+                        <foaf:givenname>Rainer</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Strahle</foaf:surname>
+                        <foaf:givenname>Uwe</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peyrieras</foaf:surname>
+                        <foaf:givenname>Nadine</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_50"/>
+        <dc:title>Automated Processing of Zebrafish Imaging Data: A Survey</dc:title>
+        <dcterms:abstract>Due to the relative transparency of its embryos and larvae, the zebrafish is an ideal model organism for bioimaging approaches in vertebrates. Novel microscope technologies allow the imaging of developmental processes in unprecedented detail, and they enable the use of complex image-based read-outs for high-throughput/high-content screening. Such applications can easily generate Terabytes of image data, the handling and analysis of which becomes a major bottleneck in extracting the targeted information. Here, we describe the current state of the art in computational image analysis in the zebrafish system. We discuss the challenges encountered when handling high-content image data, especially with regard to data quality, annotation, and storage. We survey methods for preprocessing image data for further analysis, and describe selected examples of automated image analysis, including the tracking of cells during embryogenesis, heartbeat detection, identification of dead embryos, recognition of tissues and anatomical landmarks, and quantification of behavioral patterns of adult fish. We review recent examples for applications using such methods, such as the comprehensive analysis of cell lineages during early development, the generation of a three-dimensional brain atlas of zebrafish larvae, and high-throughput drug screens based on movement patterns. Finally, we identify future challenges for the zebrafish image analysis community, notably those concerning the compatibility of algorithms and data formats for the assembly of modular analysis pipelines.</dcterms:abstract>
+        <bib:pages>401-421</bib:pages>
+        <dc:date>2013-9</dc:date>
+        <z:shortTitle>Automated Processing of Zebrafish Imaging Data</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760023/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23758125
+PMCID: PMC3760023</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_50">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760023/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673615/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>2</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0817</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yee</foaf:surname>
+                        <foaf:givenname>Nelson S.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kazi</foaf:surname>
+                        <foaf:givenname>Abid A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yee</foaf:surname>
+                        <foaf:givenname>Rosemary K.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_53"/>
+        <dc:title>Translating Discovery in Zebrafish Pancreatic Development to Human Pancreatic Cancer: Biomarkers, Targets, Pathogenesis, and Therapeutics</dc:title>
+        <dcterms:abstract>Experimental studies in the zebrafish have greatly facilitated understanding of genetic regulation of the early developmental events in the pancreas. Various approaches using forward and reverse genetics, chemical genetics, and transgenesis in zebrafish have demonstrated generally conserved regulatory roles of mammalian genes and discovered novel genetic pathways in exocrine pancreatic development. Accumulating evidence has supported the use of zebrafish as a model of human malignant diseases, including pancreatic cancer. Studies have shown that the genetic regulators of exocrine pancreatic development in zebrafish can be translated into potential clinical biomarkers and therapeutic targets in human pancreatic adenocarcinoma. Transgenic zebrafish expressing oncogenic K-ras and zebrafish tumor xenograft model have emerged as valuable tools for dissecting the pathogenetic mechanisms of pancreatic cancer and for drug discovery and toxicology. Future analysis of the pancreas in zebrafish will continue to advance understanding of the genetic regulation and biological mechanisms during organogenesis. Results of those studies are expected to provide new insights into how aberrant developmental pathways contribute to formation and growth of pancreatic neoplasia, and hopefully generate valid biomarkers and targets as well as effective and safe therapeutics in pancreatic cancer.</dcterms:abstract>
+        <bib:pages>132-146</bib:pages>
+        <dc:date>2013-6</dc:date>
+        <z:shortTitle>Translating Discovery in Zebrafish Pancreatic Development to Human Pancreatic Cancer</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673615/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23682805
+PMCID: PMC3673615</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_53">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673615/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049776/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1932-6203"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cachat</foaf:surname>
+                        <foaf:givenname>Jonathan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stewart</foaf:surname>
+                        <foaf:givenname>Adam</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Utterback</foaf:surname>
+                        <foaf:givenname>Eli</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hart</foaf:surname>
+                        <foaf:givenname>Peter</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gaikwad</foaf:surname>
+                        <foaf:givenname>Siddharth</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wong</foaf:surname>
+                        <foaf:givenname>Keith</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kyzar</foaf:surname>
+                        <foaf:givenname>Evan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wu</foaf:surname>
+                        <foaf:givenname>Nadine</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kalueff</foaf:surname>
+                        <foaf:givenname>Allan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_57"/>
+        <link:link rdf:resource="#item_56"/>
+        <dc:title>Three-Dimensional Neurophenotyping of Adult Zebrafish Behavior</dc:title>
+        <dcterms:abstract>The use of adult zebrafish (Danio rerio) in neurobehavioral research is rapidly expanding. The present large-scale study applied the newest video-tracking and data-mining technologies to further examine zebrafish anxiety-like phenotypes. Here, we generated temporal and spatial three-dimensional (3D) reconstructions of zebrafish locomotion, globally assessed behavioral profiles evoked by several anxiogenic and anxiolytic manipulations, mapped individual endpoints to 3D reconstructions, and performed cluster analysis to reconfirm behavioral correlates of high- and low-anxiety states. The application of 3D swim path reconstructions consolidates behavioral data (while increasing data density) and provides a novel way to examine and represent zebrafish behavior. It also enables rapid optimization of video tracking settings to improve quantification of automated parameters, and suggests that spatiotemporal organization of zebrafish swimming activity can be affected by various experimental manipulations in a manner predicted by their anxiolytic or anxiogenic nature. Our approach markedly enhances the power of zebrafish behavioral analyses, providing innovative framework for high-throughput 3D phenotyping of adult zebrafish behavior.</dcterms:abstract>
+        <dc:date>2011-3-7</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049776/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 21408171
+PMCID: PMC3049776</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1932-6203">
+        <dc:title>PLoS ONE</dc:title>
+        <prism:volume>6</prism:volume>
+        <prism:number>3</prism:number>
+        <dcterms:alternative>PLoS One</dcterms:alternative>
+        <dc:identifier>DOI 10.1371/journal.pone.0017597</dc:identifier>
+        <dc:identifier>ISSN 1932-6203</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_57">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/57/Cachat et al. - 2011 - Three-Dimensional Neurophenotyping of Adult Zebraf.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049776/pdf/PONE-D-10-01957.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_56">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049776/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760054/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>3</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0781</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Challa</foaf:surname>
+                        <foaf:givenname>Anil Kumar</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Chatti</foaf:surname>
+                        <foaf:givenname>Kiranam</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_59"/>
+        <dc:title>Conservation and Early Expression of Zebrafish Tyrosine Kinases Support the Utility of Zebrafish as a Model for Tyrosine Kinase Biology</dc:title>
+        <dcterms:abstract>Tyrosine kinases have significant roles in cell growth, apoptosis, development, and disease. To explore the use of zebrafish as a vertebrate model for tyrosine kinase signaling and to better understand their roles, we have identified all of the tyrosine kinases encoded in the zebrafish genome and quantified RNA expression of selected tyrosine kinases during early development. Using profile hidden Markov model analysis, we identified 122 zebrafish tyrosine kinase genes and proposed unambiguous gene names where needed. We found them to be organized into 39 nonreceptor and 83 receptor type, and 30 families consistent with human tyrosine kinase family assignments. We found five human tyrosine kinase genes (epha1, bmx, fgr, srm, and insrr) with no identifiable zebrafish ortholog, and one zebrafish gene (yrk) with no identifiable human ortholog. We also found that receptor tyrosine kinase genes were duplicated more often than nonreceptor tyrosine kinase genes in zebrafish. We profiled expression levels of 30 tyrosine kinases representing all families using direct digital detection at different stages during the first 24 hours of development. The profiling experiments clearly indicate regulated expression of tyrosine kinases in the zebrafish, suggesting their role during early embryonic development. In summary, our study has resulted in the first comprehensive description of the zebrafish tyrosine kinome.</dcterms:abstract>
+        <bib:pages>264-274</bib:pages>
+        <dc:date>2013-9</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760054/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23234507
+PMCID: PMC3760054</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_59">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3760054/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3308716/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>9</prism:volume>
+                <prism:number>1</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2011.0712</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cantas</foaf:surname>
+                        <foaf:givenname>Leon</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>S?rby</foaf:surname>
+                        <foaf:givenname>Jan Roger Torp</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Alestrom</foaf:surname>
+                        <foaf:givenname>Peter</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>S?rum</foaf:surname>
+                        <foaf:givenname>Henning</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_62"/>
+        <dc:title>Culturable Gut Microbiota Diversity in Zebrafish</dc:title>
+        <dcterms:abstract>The zebrafish (Danio rerio) is an increasingly used laboratory animal model in basic biology and biomedicine, novel drug development, and toxicology. The wide use has increased the demand for optimized husbandry protocols to ensure animal health care and welfare. The knowledge about the correlation between culturable zebrafish intestinal microbiota and health in relation to environmental factors and management procedures is very limited. A semi-quantitative level of growth of individual types of bacteria was determined and associated with sampling points. A total of 72 TAB line zebrafish from four laboratories (Labs A–D) in the Zebrafish Network Norway were used. Diagnostic was based on traditional bacterial culture methods and biochemical characterization using commercial kits, followed by 16S rDNA gene sequencing from pure subcultures. Also selected Gram-negative isolates were analyzed for antibiotic susceptibility to 8 different antibiotics. A total of 13 morphologically different bacterial species were the most prevalent: Aeromonas hydrophila, Aeromonas sobria, Vibrio parahaemolyticus, Photobacterium damselae, Pseudomonas aeruginosa, Pseudomonas fluorescens, Pseudomonas luteola, Comamonas testosteroni, Ochrobactrum anthropi, Staphylococcus cohnii, Staphylococcus epidermidis, Staphylococcus capitis, and Staphylococcus warneri. Only Lab B had significantly higher levels of total bacterial growth (OR=2.03), whereas numbers from Lab C (OR=1.01) and Lab D (OR=1.12) were found to be similar to the baseline Lab A. Sexually immature individuals had a significantly higher level of harvested total bacterial growth than mature fish (OR=0.82), no statistically significant differences were found between male and female fish (OR=1.01), and the posterior intestinal segment demonstrated a higher degree of culturable bacteria than the anterior segment (OR=4.1). Multiple antibiotic (&gt;3) resistance was observed in 17% of the strains. We propose that a rapid conventional diagnostic bacteriological assay on the culturable microbiota profiles can be designed and used as quality measure of the husbandry routines of a zebrafish facility to ensure a bacterial standard safeguarding the zebrafish health and welfare.</dcterms:abstract>
+        <bib:pages>26-37</bib:pages>
+        <dc:date>2012-3</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3308716/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 22428747
+PMCID: PMC3308716</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_62">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3308716/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3825550/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1073-6085"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Umemoto</foaf:surname>
+                        <foaf:givenname>Noriko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Yuhei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shimada</foaf:surname>
+                        <foaf:givenname>Yasuhito</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yamanaka</foaf:surname>
+                        <foaf:givenname>Yukiko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kishi</foaf:surname>
+                        <foaf:givenname>Seiya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ito</foaf:surname>
+                        <foaf:givenname>Saki</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Okamori</foaf:surname>
+                        <foaf:givenname>Kana</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nakamura</foaf:surname>
+                        <foaf:givenname>Yuuki</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kuroyanagi</foaf:surname>
+                        <foaf:givenname>Junya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenname>Zi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zang</foaf:surname>
+                        <foaf:givenname>Liqing</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wang</foaf:surname>
+                        <foaf:givenname>Zhipeng</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Norihiro</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tanaka</foaf:surname>
+                        <foaf:givenname>Toshio</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_66"/>
+        <link:link rdf:resource="#item_65"/>
+        <dc:title>Fluorescent-Based Methods for Gene Knockdown and Functional Cardiac Imaging in Zebrafish</dc:title>
+        <dcterms:abstract>A notable advantage of zebrafish as a model organism is the ease of gene knockdown using morpholino antisense oligonucleotide (MO). However, zebrafish morphants injected with MO for a target protein often show heterogeneous phenotypes, despite controlling the injection volume of the MO solution in all embryos. We developed a method for estimating the quantity of MO injected into each living morphant, based on the co-injection of a control MO labeled with the fluorophore lissamine. By applying this method for knockdown of cardiac troponin T (tnnt2a) in zebrafish, we could efficiently select the partial tnnt2a-depleted zebrafish with a decreased heart rate and impairment of cardiac contraction. To investigate cardiac impairment of the tnnt2a morphant, we performed fluorescent cardiac imaging using Bodipy-ceramide. Cardiac image analysis showed moderate reduction of tnnt2a impaired diastolic distensibility and decreased contraction and relaxation velocities. To the best of our knowledge, this is the first report to analyze the role of tnnt2a in cardiac function in tnnt2a-depleted living animals. Our combinatorial approach can be applied for analyzing the molecular function of any protein associated with human cardiac diseases.</dcterms:abstract>
+        <bib:pages>131-142</bib:pages>
+        <dc:date>2013</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3825550/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23674069
+PMCID: PMC3825550</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1073-6085">
+        <dc:title>Molecular Biotechnology</dc:title>
+        <prism:volume>55</prism:volume>
+        <prism:number>2</prism:number>
+        <dcterms:alternative>Mol Biotechnol</dcterms:alternative>
+        <dc:identifier>DOI 10.1007/s12033-013-9664-6</dc:identifier>
+        <dc:identifier>ISSN 1073-6085</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_66">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/66/Umemoto et al. - 2013 - Fluorescent-Based Methods for Gene Knockdown and F.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3825550/pdf/9664.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_65">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3825550/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673616/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>2</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0784</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hu</foaf:surname>
+                        <foaf:givenname>Bo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Chen</foaf:surname>
+                        <foaf:givenname>Hao</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Liu</foaf:surname>
+                        <foaf:givenname>Xiuping</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenname>Chengjin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cole</foaf:surname>
+                        <foaf:givenname>Gregory J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lee</foaf:surname>
+                        <foaf:givenname>Ju-Ahng</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Chen</foaf:surname>
+                        <foaf:givenname>Xiaoxin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_68"/>
+        <dc:title>Transgenic Overexpression of cdx1b Induces Metaplastic Changes of Gene Expression in Zebrafish Esophageal Squamous Epithelium</dc:title>
+        <dcterms:abstract>Cdx2 has been suggested to play an important role in Barrett's esophagus or intestinal metaplasia (IM) in the esophagus. To investigate whether transgenic overexpression of cdx1b, the functional equivalent of mammalian Cdx2 in zebrafish, may lead to IM of zebrafish esophageal squamous epithelium, a transgenic zebrafish system was developed by expressing cdx1b gene under the control of zebrafish keratin 5 promoter (krt5p). Gene expression in the esophageal squamous epithelium of wild-type and transgenic zebrafish was analyzed by Affymetrix microarray and confirmed by in situ hybridization. Morphology, mucin expression, cell proliferation, and apoptosis were analyzed by hematoxylin &amp; eosin (HE) staining, Periodic acid Schiff (PAS) Alcian blue staining, proliferating cell nuclear antigen (PCNA) immunohistochemical staining, and TUNEL assay as well. cdx1b was found to be overexpressed in the nuclei of esophageal squamous epithelial cells of the transgenic zebrafish. Ectopic expression of cdx1b disturbed the development of this epithelium in larval zebrafish and induced metaplastic changes in gene expression in the esophageal squamous epithelial cells of adult zebrafish, that is, up-regulation of intestinal differentiation markers and down-regulation of squamous differentiation markers. However, cdx1b failed to induce histological IM, or to modulate cell proliferation and apoptosis in the squamous epithelium of adult transgenic zebrafish.</dcterms:abstract>
+        <bib:pages>218-227</bib:pages>
+        <dc:date>2013-6</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673616/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23672288
+PMCID: PMC3673616</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_68">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3673616/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670565/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>10</prism:volume>
+                <prism:number>1</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0830</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zamora</foaf:surname>
+                        <foaf:givenname>Lilliann Y.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lu</foaf:surname>
+                        <foaf:givenname>Zhongmin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_71"/>
+        <dc:title>Alcohol-Induced Morphological Deficits in the Development of Octavolateral Organs of the Zebrafish (Danio rerio)</dc:title>
+        <dcterms:abstract>Prenatal alcohol exposure is known to have many profound detrimental effects on human fetal development (fetal alcohol spectrum disorders), which may manifest as lifelong disabilities. However, how alcohol affects the auditory/vestibular system is still largely unknown. This is the first study to investigate morphological effects of alcohol on the developing octavolateral system (the inner ear and lateral line) using the zebrafish, Danio rerio. Zebrafish embryos of 2 hours post fertilization (hpf) were treated in 2% alcohol for 48 hours and screened at 72 hpf for morphological defects of the inner ear and lateral line. Octavolateral organs from both alcohol-treated and control zebrafish were examined using light, confocal, and scanning electron microscopy. We observed several otolith phenotypes for alcohol-treated zebrafish including zero, one, two abnormal, two normal, and multiple otoliths. Results of this study show that alcohol treatment during early development impairs the inner ear (smaller ear, abnormal otoliths, and fewer sensory hair cells) and the lateral line (smaller neuromasts, fewer neuromasts and hair cells per neuromast, and shorter kinocilia of hair cells). Early embryonic alcohol exposure may also result in defects in hearing, balance, and hydrodynamic function of zebrafish.</dcterms:abstract>
+        <bib:pages>52-61</bib:pages>
+        <dc:date>2013-3</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670565/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23461415
+PMCID: PMC3670565</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_71">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670565/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3159961/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1877-1173"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bibliowicz</foaf:surname>
+                        <foaf:givenname>Jonathan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tittle</foaf:surname>
+                        <foaf:givenname>Rachel K.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gross</foaf:surname>
+                        <foaf:givenname>Jeffrey M.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_74"/>
+        <dc:title>Towards a better understanding of human eye disease: insights from the zebrafish, Danio rerio</dc:title>
+        <dcterms:abstract>Visual impairment and blindness is widespread across the human population, and the development of therapies for ocular pathologies is of high priority. The zebrafish represents a valuable model organism for studying human ocular disease; it is utilized in eye research to understand underlying developmental processes, to identify potential causative genes for human disorders, and to develop therapies. Zebrafish eyes are similar in morphology, physiology, gene expression and function to human eyes. Furthermore, zebrafish are highly amenable to laboratory research. This review outlines the use of zebrafish as a model for human ocular diseases such as colobomas, glaucoma, cataracts, photoreceptor degeneration, as well as dystrophies of the cornea and retinal pigmented epithelium.</dcterms:abstract>
+        <bib:pages>287-330</bib:pages>
+        <dc:date>2011</dc:date>
+        <z:shortTitle>Towards a better understanding of human eye disease</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3159961/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 21377629
+PMCID: PMC3159961</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1877-1173">
+        <dc:title>Progress in molecular biology and translational science</dc:title>
+        <prism:volume>100</prism:volume>
+        <dcterms:alternative>Prog Mol Biol Transl Sci</dcterms:alternative>
+        <dc:identifier>DOI 10.1016/B978-0-12-384878-9.00007-8</dc:identifier>
+        <dc:identifier>ISSN 1877-1173</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_74">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3159961/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807752/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1471-2202"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Watanabe</foaf:surname>
+                        <foaf:givenname>Kohei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Yuhei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nomoto</foaf:surname>
+                        <foaf:givenname>Tsuyoshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Umemoto</foaf:surname>
+                        <foaf:givenname>Noriko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenname>Zi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenname>Beibei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kuroyanagi</foaf:surname>
+                        <foaf:givenname>Junya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shimada</foaf:surname>
+                        <foaf:givenname>Yasuhito</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shintou</foaf:surname>
+                        <foaf:givenname>Taichi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Okano</foaf:surname>
+                        <foaf:givenname>Mie</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Miyazaki</foaf:surname>
+                        <foaf:givenname>Takeshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Imamura</foaf:surname>
+                        <foaf:givenname>Takeshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tanaka</foaf:surname>
+                        <foaf:givenname>Toshio</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_78"/>
+        <link:link rdf:resource="#item_77"/>
+        <dc:title>In vivo assessment of the permeability of the blood-brain barrier and blood-retinal barrier to fluorescent indoline derivatives in zebrafish</dc:title>
+        <dcterms:abstract>Background
+Successful delivery of compounds to the brain and retina is a challenge in the development of therapeutic drugs and imaging agents. This challenge arises because internalization of compounds into the brain and retina is restricted by the blood–brain barrier (BBB) and blood-retinal barrier (BRB), respectively. Simple and reliable in vivo assays are necessary to identify compounds that can easily cross the BBB and BRB.
+
+Methods
+We developed six fluorescent indoline derivatives (IDs) and examined their ability to cross the BBB and BRB in zebrafish by in vivo fluorescence imaging. These fluorescent IDs were administered to live zebrafish by immersing the zebrafish larvae at 7-8 days post fertilization in medium containing the ID, or by intracardiac injection. We also examined the effect of multidrug resistance proteins (MRPs) on the permeability of the BBB and BRB to the ID using MK571, a selective inhibitor of MRPs.
+
+Results
+The permeability of these barriers to fluorescent IDs administered by simple immersion was comparable to when administered by intracardiac injection. Thus, this finding supports the validity of drug administration by simple immersion for the assessment of BBB and BRB permeability to fluorescent IDs. Using this zebrafish model, we demonstrated that the length of the methylene chain in these fluorescent IDs significantly affected their ability to cross the BBB and BRB via MRPs.
+
+Conclusions
+We demonstrated that in vivo assessment of the permeability of the BBB and BRB to fluorescent IDs could be simply and reliably performed using zebrafish. The structure of fluorescent IDs can be flexibly modified and, thus, the permeability of the BBB and BRB to a large number of IDs can be assessed using this zebrafish-based assay. The large amount of data acquired might be useful for in silico analysis to elucidate the precise mechanisms underlying the interactions between chemical structure and the efflux transporters at the BBB and BRB. In turn, understanding these mechanisms may lead to the efficient design of compounds targeting the brain and retina.</dcterms:abstract>
+        <bib:pages>101</bib:pages>
+        <dc:date>2012-8-16</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807752/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 22894547
+PMCID: PMC3807752</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1471-2202">
+        <dc:title>BMC Neuroscience</dc:title>
+        <prism:volume>13</prism:volume>
+        <dcterms:alternative>BMC Neurosci</dcterms:alternative>
+        <dc:identifier>DOI 10.1186/1471-2202-13-101</dc:identifier>
+        <dc:identifier>ISSN 1471-2202</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_78">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/78/Watanabe et al. - 2012 - In vivo assessment of the permeability of the bloo.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807752/pdf/1471-2202-13-101.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_77">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3807752/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3195883/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0028-3908"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stewart</foaf:surname>
+                        <foaf:givenname>Adam</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gaikwad</foaf:surname>
+                        <foaf:givenname>Siddharth</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kyzar</foaf:surname>
+                        <foaf:givenname>Evan</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Green</foaf:surname>
+                        <foaf:givenname>Jeremy</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Roth</foaf:surname>
+                        <foaf:givenname>Andrew</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kalueff</foaf:surname>
+                        <foaf:givenname>Allan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_81"/>
+        <link:link rdf:resource="#item_80"/>
+        <dc:title>Modeling anxiety using adult zebrafish: A conceptual review</dc:title>
+        <dcterms:abstract>Zebrafish (Danio rerio) are rapidly emerging as a useful animal model in neurobehavioral research. Mounting evidence shows the suitability of zebrafish to model various aspects of anxiety-related states. Here, we evaluate established and novel approaches to uncover the molecular substrates, genetic pathways and neural circuits of anxiety using adult zebrafish. Experimental approaches to modeling anxiety in zebrafish include novelty-based paradigms, pharmacological and genetic manipulations, as well as innovative video-tracking, 3D-reconstructions and bioinformatics-based searchable databases and omics-based tools. Complementing traditional rodent models of anxiety, we provide a conceptual framework for the wider application of zebrafish and other aquatic models in anxiety research.</dcterms:abstract>
+        <bib:pages>135-143</bib:pages>
+        <dc:date>2012-1</dc:date>
+        <z:shortTitle>Modeling anxiety using adult zebrafish</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3195883/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 21843537
+PMCID: PMC3195883</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0028-3908">
+        <dc:title>Neuropharmacology</dc:title>
+        <prism:volume>62</prism:volume>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Neuropharmacology</dcterms:alternative>
+        <dc:identifier>DOI 10.1016/j.neuropharm.2011.07.037</dc:identifier>
+        <dc:identifier>ISSN 0028-3908</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_81">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/81/Stewart et al. - 2012 - Modeling anxiety using adult zebrafish A conceptu.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3195883/pdf/1471-2202-13-101.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_80">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3195883/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945357/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>BMC Neuroscience</dc:title>
+                <prism:volume>11</prism:volume>
+                <dcterms:alternative>BMC Neurosci</dcterms:alternative>
+                <dc:identifier>DOI 10.1186/1471-2202-11-116</dc:identifier>
+                <dc:identifier>ISSN 1471-2202</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Watanabe</foaf:surname>
+                        <foaf:givenname>Kohei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Yuhei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Oka</foaf:surname>
+                        <foaf:givenname>Takehiko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nomoto</foaf:surname>
+                        <foaf:givenname>Tsuyoshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kon</foaf:surname>
+                        <foaf:givenname>Tetsuo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shintou</foaf:surname>
+                        <foaf:givenname>Taichi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hirano</foaf:surname>
+                        <foaf:givenname>Minoru</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shimada</foaf:surname>
+                        <foaf:givenname>Yasuhito</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Umemoto</foaf:surname>
+                        <foaf:givenname>Noriko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kuroyanagi</foaf:surname>
+                        <foaf:givenname>Junya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wang</foaf:surname>
+                        <foaf:givenname>Zhipeng</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenname>Zi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Norihiro</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Miyazaki</foaf:surname>
+                        <foaf:givenname>Takeshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Imamura</foaf:surname>
+                        <foaf:givenname>Takeshi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tanaka</foaf:surname>
+                        <foaf:givenname>Toshio</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_84"/>
+        <link:link rdf:resource="#item_83"/>
+        <dc:title>In vivo imaging of zebrafish retinal cells using fluorescent coumarin derivatives</dc:title>
+        <dcterms:abstract>Background
+The zebrafish visual system is a good research model because the zebrafish retina is very similar to that of humans in terms of the morphologies and functions. Studies of the retina have been facilitated by improvements in imaging techniques. In vitro techniques such as immunohistochemistry and in vivo imaging using transgenic zebrafish have been proven useful for visualizing specific subtypes of retinal cells. In contrast, in vivo imaging using organic fluorescent molecules such as fluorescent sphingolipids allows non-invasive staining and visualization of retinal cells en masse. However, these fluorescent molecules also localize to the interstitial fluid and stain whole larvae.
+
+Results
+We screened fluorescent coumarin derivatives that might preferentially stain neuronal cells including retinal cells. We identified four coumarin derivatives that could be used for in vivo imaging of zebrafish retinal cells. The retinas of living zebrafish could be stained by simply immersing larvae in water containing 1 μg/ml of a coumarin derivative for 30 min. By using confocal laser scanning microscopy, the lamination of the zebrafish retina was clearly visualized. Using these coumarin derivatives, we were able to assess the development of the zebrafish retina and the morphological abnormalities induced by genetic or chemical interventions. The coumarin derivatives were also suitable for counter-staining of transgenic zebrafish expressing fluorescent proteins in specific subtypes of retinal cells.
+
+Conclusions
+The coumarin derivatives identified in this study can stain zebrafish retinal cells in a relatively short time and at low concentrations, making them suitable for in vivo imaging of the zebrafish retina. Therefore, they will be useful tools in genetic and chemical screenings using zebrafish to identify genes and chemicals that may have crucial functions in the retina.</dcterms:abstract>
+        <bib:pages>116</bib:pages>
+        <dc:date>2010-9-15</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945357/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 20843315
+PMCID: PMC2945357</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_84">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/84/Watanabe et al. - 2010 - In vivo imaging of zebrafish retinal cells using f.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945357/pdf/1471-2202-11-116.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_83">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2945357/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3319919/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1389-4501"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Meijer</foaf:surname>
+                        <foaf:givenname>Annemarie H</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Spaink</foaf:surname>
+                        <foaf:givenname>Herman P</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_87"/>
+        <link:link rdf:resource="#item_86"/>
+        <dc:title>Host-Pathogen Interactions Made Transparent with the Zebrafish Model</dc:title>
+        <dcterms:abstract>The zebrafish holds much promise as a high-throughput drug screening model for immune-related diseases, including inflammatory and infectious diseases and cancer. This is due to the excellent possibilities for in vivo imaging in combination with advanced tools for genomic and large scale mutant analysis. The context of the embryo’s developing immune system makes it possible to study the contribution of different immune cell types to disease progression. Furthermore, due to the temporal separation of innate immunity from adaptive responses, zebrafish embryos and larvae are particularly useful for dissecting the innate host factors involved in pathology. Recent studies have underscored the remarkable similarity of the zebrafish and human immune systems, which is important for biomedical applications. This review is focused on the use of zebrafish as a model for infectious diseases, with emphasis on bacterial pathogens. Following a brief overview of the zebrafish immune system and the tools and methods used to study host-pathogen interactions in zebrafish, we discuss the current knowledge on receptors and downstream signaling components that are involved in the zebrafish embryo’s innate immune response. We summarize recent insights gained from the use of bacterial infection models, particularly the Mycobacterium marinum model, that illustrate the potential of the zebrafish model for high-throughput antimicrobial drug screening.</dcterms:abstract>
+        <bib:pages>1000-1017</bib:pages>
+        <dc:date>2011-6</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3319919/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 21366518
+PMCID: PMC3319919</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1389-4501">
+        <dc:title>Current Drug Targets</dc:title>
+        <prism:volume>12</prism:volume>
+        <prism:number>7</prism:number>
+        <dcterms:alternative>Curr Drug Targets</dcterms:alternative>
+        <dc:identifier>DOI 10.2174/138945011795677809</dc:identifier>
+        <dc:identifier>ISSN 1389-4501</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_87">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/87/Meijer and Spaink - 2011 - Host-Pathogen Interactions Made Transparent with t.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3319919/pdf/CDT-12-1000.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_86">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3319919/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3590145/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>PLoS ONE</dc:title>
+                <prism:volume>8</prism:volume>
+                <prism:number>3</prism:number>
+                <dcterms:alternative>PLoS One</dcterms:alternative>
+                <dc:identifier>DOI 10.1371/journal.pone.0058311</dc:identifier>
+                <dc:identifier>ISSN 1932-6203</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stoll</foaf:surname>
+                        <foaf:givenname>Sandra J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bartsch</foaf:surname>
+                        <foaf:givenname>Susanne</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kroll</foaf:surname>
+                        <foaf:givenname>Jens</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_90"/>
+        <link:link rdf:resource="#item_89"/>
+        <dc:title>HOXC9 Regulates Formation of Parachordal Lymphangioplasts and the Thoracic Duct in Zebrafish via Stabilin 2</dc:title>
+        <dcterms:abstract>HOXC9 belongs to the family of homeobox transcription factors, which are regulators of body patterning and development. HOXC9 acts as a negative regulator on blood endothelial cells but its function on lymphatic vessel development has not been studied. The hyaluronan receptor homologs stabilin 1 and stabilin 2 are expressed in endothelial cells but their role in vascular development is poorly understood. This study was aimed at investigating the function of HOXC9, stabilin 2 and stabilin 1 in lymphatic vessel development in zebrafish and in endothelial cells. Morpholino-based expression silencing of HOXC9 repressed parachordal lymphangioblast assembly and thoracic duct formation in zebrafish. HOXC9 positively regulated stabilin 2 expression in zebrafish and in HUVECs and expression silencing of stabilin 2 phenocopied the HOXC9 morphant vascular phenotype. This effect could be compensated by HOXC9 mRNA injection in stabilin 2 morphant zebrafish embryos. Stabilin 1 also regulated parachordal lymphangioblast and thoracic duct formation in zebrafish but acts independently of HOXC9. On a cellular level stabilin 1 and stabilin 2 regulated endothelial cell migration and in-gel sprouting angiogenesis in endothelial cells. HOXC9 was identified as novel transcriptional regulator of parachordal lymphangioblast assembly and thoracic duct formation in zebrafish that acts via stabilin 2. Stabilin 1, which acts independently of HOXC9, has a similar function in zebrafish and both receptors control important cellular processes in endothelial cells.</dcterms:abstract>
+        <dc:date>2013-3-6</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3590145/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23484014
+PMCID: PMC3590145</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_90">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/90/Stoll et al. - 2013 - HOXC9 Regulates Formation of Parachordal Lymphangi.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3590145/pdf/PONE-D-12-32702.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_89">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3590145/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3750682/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1948-7193"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Neelkantan</foaf:surname>
+                        <foaf:givenname>Nikhil</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mikhaylova</foaf:surname>
+                        <foaf:givenname>Alina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stewart</foaf:surname>
+                        <foaf:givenname>Adam Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Arnold</foaf:surname>
+                        <foaf:givenname>Raymond</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gjeloshi</foaf:surname>
+                        <foaf:givenname>Visar</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kondaveeti</foaf:surname>
+                        <foaf:givenname>Divya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Poudel</foaf:surname>
+                        <foaf:givenname>Manoj
+K.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kalueff</foaf:surname>
+                        <foaf:givenname>Allan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_93"/>
+        <link:link rdf:resource="#item_92"/>
+        <dc:title>Perspectives on Zebrafish Models of Hallucinogenic Drugs and Related Psychotropic Compounds</dc:title>
+        <dcterms:abstract>, Among different classes of psychotropic
+drugs, hallucinogenic agents
+exert one of the most prominent effects on human and animal behaviors,
+markedly altering sensory, motor, affective, and cognitive responses.
+The growing clinical and preclinical interest in psychedelic, dissociative,
+and deliriant hallucinogens necessitates novel translational, sensitive,
+and high-throughput in vivo models and screens. Primate and rodent
+models have been traditionally used to study cellular mechanisms and
+neural circuits of hallucinogenic drugs’ action. The utility
+of zebrafish (Danio rerio) in neuroscience
+research is rapidly growing due to their high physiological and genetic
+homology to humans, ease of genetic manipulation, robust behaviors,
+and cost effectiveness. Possessing a fully characterized genome, both adult and larval zebrafish are currently
+widely used for in vivo screening of various psychotropic compounds,
+including hallucinogens and related drugs. Recognizing the growing
+importance of hallucinogens in biological psychiatry, here we discuss
+hallucinogenic-induced phenotypes in zebrafish and evaluate their
+potential as efficient preclinical models of drug-induced states in
+humans.</dcterms:abstract>
+        <bib:pages>1137-1150</bib:pages>
+        <dc:date>2013-07-24</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3750682/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23883191
+PMCID: PMC3750682</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1948-7193">
+        <dc:title>ACS Chemical Neuroscience</dc:title>
+        <prism:volume>4</prism:volume>
+        <prism:number>8</prism:number>
+        <dcterms:alternative>ACS Chem Neurosci</dcterms:alternative>
+        <dc:identifier>DOI 10.1021/cn400090q</dc:identifier>
+        <dc:identifier>ISSN 1948-7193</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_93">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/93/Neelkantan et al. - 2013 - Perspectives on Zebrafish Models of Hallucinogenic.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3750682/pdf/PONE-D-12-32702.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_92">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3750682/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3371262/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>Zebrafish</dc:title>
+                <prism:volume>9</prism:volume>
+                <prism:number>2</prism:number>
+                <dcterms:alternative>Zebrafish</dcterms:alternative>
+                <dc:identifier>DOI 10.1089/zeb.2012.0773</dc:identifier>
+                <dc:identifier>ISSN 1545-8547</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Henkel</foaf:surname>
+                        <foaf:givenname>Christiaan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dirks</foaf:surname>
+                        <foaf:givenname>Ron P.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Jansen</foaf:surname>
+                        <foaf:givenname>Hans J.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Forlenza</foaf:surname>
+                        <foaf:givenname>Maria</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wiegertjes</foaf:surname>
+                        <foaf:givenname>Geert F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Howe</foaf:surname>
+                        <foaf:givenname>Kerstin</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>van den Thillart</foaf:surname>
+                        <foaf:givenname>Guido E.E.J.M.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Spaink</foaf:surname>
+                        <foaf:givenname>Herman P.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_95"/>
+        <dc:title>Comparison of the Exomes of Common Carp (Cyprinus carpio) and Zebrafish (Danio rerio)</dc:title>
+        <dcterms:abstract>Research on common carp, Cyprinus carpio, is beneficial for zebrafish research because of resources available owing to its large body size, such as the availability of sufficient organ material for transcriptomics, proteomics, and metabolomics. Here we describe the shot gun sequencing of a clonal double-haploid common carp line. The assembly consists of 511891 scaffolds with an N50 of 17 kb, predicting a total genome size of 1.4–1.5 Gb. A detailed analysis of the ten largest scaffolds indicates that the carp genome has a considerably lower repeat coverage than zebrafish, whilst the average intron size is significantly smaller, making it comparable to the fugu genome. The quality of the scaffolding was confirmed by comparisons with RNA deep sequencing data sets and a manual analysis for synteny with the zebrafish, especially the Hox gene clusters. In the ten largest scaffolds analyzed, the synteny of genes is almost complete. Comparisons of predicted exons of common carp with those of the zebrafish revealed only few genes specific for either zebrafish or carp, most of these being of unknown function. This supports the hypothesis of an additional genome duplication event in the carp evolutionary history, which—due to a higher degree of compactness—did not result in a genome larger than that of zebrafish.</dcterms:abstract>
+        <bib:pages>59-67</bib:pages>
+        <dc:date>2012-6</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3371262/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 22715948
+PMCID: PMC3371262</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_95">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3371262/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2912770/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>PLoS ONE</dc:title>
+                <prism:volume>5</prism:volume>
+                <prism:number>7</prism:number>
+                <dcterms:alternative>PLoS One</dcterms:alternative>
+                <dc:identifier>DOI 10.1371/journal.pone.0011783</dc:identifier>
+                <dc:identifier>ISSN 1932-6203</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fett</foaf:surname>
+                        <foaf:givenname>Mareike E.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pilsl</foaf:surname>
+                        <foaf:givenname>Anna</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Paquet</foaf:surname>
+                        <foaf:givenname>Dominik</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>van Bebber</foaf:surname>
+                        <foaf:givenname>Frauke</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Haass</foaf:surname>
+                        <foaf:givenname>Christian</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tatzelt</foaf:surname>
+                        <foaf:givenname>Jorg</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Schmid</foaf:surname>
+                        <foaf:givenname>Bettina</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Winklhofer</foaf:surname>
+                        <foaf:givenname>Konstanze F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_99"/>
+        <link:link rdf:resource="#item_98"/>
+        <dc:title>Parkin Is Protective against Proteotoxic Stress in a Transgenic Zebrafish Model</dc:title>
+        <dcterms:abstract>Background
+Mutations in the gene encoding the E3 ubiquitin ligase parkin (PARK2) are responsible for the majority of autosomal recessive parkinsonism. Similarly to other knockout mouse models of PD-associated genes, parkin knockout mice do not show a substantial neuropathological or behavioral phenotype, while loss of parkin in Drosophila melanogaster leads to a severe phenotype, including reduced lifespan, apoptotic flight muscle degeneration and male sterility. In order to study the function of parkin in more detail and to address possible differences in its role in different species, we chose Danio rerio as a different vertebrate model system.
+
+Methodology/Principal Findings
+We first cloned zebrafish parkin to compare its biochemical and functional aspects with that of human parkin. By using an antisense knockdown strategy we generated a zebrafish model of parkin deficiency (knockdown efficiency between 50% and 60%) and found that the transient knockdown of parkin does not cause morphological or behavioral alterations. Specifically, we did not observe a loss of dopaminergic neurons in parkin-deficient zebrafish. In addition, we established transgenic zebrafish lines stably expressing parkin by using a Gal4/UAS-based bidirectional expression system. While parkin-deficient zebrafish are more vulnerable to proteotoxicity, increased parkin expression protected transgenic zebrafish from cell death induced by proteotoxic stress.
+
+Conclusions/Significance
+Similarly to human parkin, zebrafish parkin is a stress-responsive protein which protects cells from stress-induced cell death. Our transgenic zebrafish model is a novel tool to characterize the protective capacity of parkin in vivo.</dcterms:abstract>
+        <dc:date>2010-7-30</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2912770/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 20689587
+PMCID: PMC2912770</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_99">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/99/Fett et al. - 2010 - Parkin Is Protective against Proteotoxic Stress in.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2912770/pdf/10-PONE-RA-15843R2.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_98">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2912770/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2972245/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1472-6793"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Oka</foaf:surname>
+                        <foaf:givenname>Takehiko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Yuhei</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zang</foaf:surname>
+                        <foaf:givenname>Liqing</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hirano</foaf:surname>
+                        <foaf:givenname>Minoru</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shimada</foaf:surname>
+                        <foaf:givenname>Yasuhito</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wang</foaf:surname>
+                        <foaf:givenname>Zhipeng</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Umemoto</foaf:surname>
+                        <foaf:givenname>Noriko</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kuroyanagi</foaf:surname>
+                        <foaf:givenname>Junya</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nishimura</foaf:surname>
+                        <foaf:givenname>Norihiro</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tanaka</foaf:surname>
+                        <foaf:givenname>Toshio</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_102"/>
+        <link:link rdf:resource="#item_101"/>
+        <dc:title>Diet-induced obesity in zebrafish shares common pathophysiological pathways with mammalian obesity</dc:title>
+        <dcterms:abstract>Background
+Obesity is a multifactorial disorder influenced by genetic and environmental factors. Animal models of obesity are required to help us understand the signaling pathways underlying this condition. Zebrafish possess many structural and functional similarities with humans and have been used to model various human diseases, including a genetic model of obesity. The purpose of this study was to establish a zebrafish model of diet-induced obesity (DIO).
+
+Results
+Zebrafish were assigned into two dietary groups. One group of zebrafish was overfed with Artemia (60 mg dry weight/day/fish), a living prey consisting of a relatively high amount of fat. The other group of zebrafish was fed with Artemia sufficient to meet their energy requirements (5 mg dry weight/day/fish). Zebrafish were fed under these dietary protocols for 8 weeks. The zebrafish overfed with Artemia exhibited increased body mass index, which was calculated by dividing the body weight by the square of the body length, hypertriglyceridemia and hepatosteatosis, unlike the control zebrafish. Calorie restriction for 2 weeks was applied to zebrafish after the 8-week overfeeding period. The increased body weight and plasma triglyceride level were improved by calorie restriction. We also performed comparative transcriptome analysis of visceral adipose tissue from DIO zebrafish, DIO rats, DIO mice and obese humans. This analysis revealed that obese zebrafish and mammals share common pathophysiological pathways related to the coagulation cascade and lipid metabolism. Furthermore, several regulators were identified in zebrafish and mammals, including APOH, IL-6 and IL-1β in the coagulation cascade, and SREBF1, PPARα/γ, NR1H3 and LEP in lipid metabolism.
+
+Conclusion
+We established a zebrafish model of DIO that shared common pathophysiological pathways with mammalian obesity. The DIO zebrafish can be used to identify putative pharmacological targets and to test novel drugs for the treatment of human obesity.</dcterms:abstract>
+        <bib:pages>21</bib:pages>
+        <dc:date>2010-10-21</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2972245/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 20961460
+PMCID: PMC2972245</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1472-6793">
+        <dc:title>BMC Physiology</dc:title>
+        <prism:volume>10</prism:volume>
+        <dcterms:alternative>BMC Physiol</dcterms:alternative>
+        <dc:identifier>DOI 10.1186/1472-6793-10-21</dc:identifier>
+        <dc:identifier>ISSN 1472-6793</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_102">
+        <z:itemType>attachment</z:itemType>
+        <link:link rdf:resource="files/102/Oka et al. - 2010 - Diet-induced obesity in zebrafish shares common pa.pdf"/>
+        <dc:title>PubMed Central Full Text PDF</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2972245/pdf/1472-6793-10-21.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_101">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>PubMed Central Link</dc:title>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2972245/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>
