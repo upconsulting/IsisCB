@@ -1,5 +1,4 @@
 import django_filters
-import filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
 from django.db.models import Q
