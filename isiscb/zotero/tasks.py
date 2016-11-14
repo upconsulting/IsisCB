@@ -125,8 +125,9 @@ def ingest_citation(request, accession, draftcitation):
             date = draftcitation.publication_date.date()
 
     if date:
+        if type(date) in [unicode, str]:
+            date = iso8601.parse_date(date).date()
         citation.publication_date = date
-
         pubdatetype, _ = AttributeType.objects.get_or_create(
             name='PublicationDate',
             defaults={
@@ -145,6 +146,9 @@ def ingest_citation(request, accession, draftcitation):
             value=date,
             attribute=attribute,
         )
+
+
+
     elif draftcitation.publication_date:
         # If we cannot parse the publication date as an ISO8601 date, then we
         #  update the staff notes with the unparseable date so that it is not

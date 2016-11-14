@@ -343,6 +343,14 @@ class IngestManager(object):
         def _cast(datum):
             label, ident = datum
             authority, acrelation_type = IngestManager.check_for_authority_reference(label, ident)
+
+            # Usually we want to preserve the label as it appeared in the
+            #  original data. If explicit mappings are used, however, we want
+            #  to display the name of the matched authority rather than the
+            #  code in the data.
+            if label and authority and (label.startswith('=') or label.startswith('C')):
+                label = authority.name
+
             draft_authority = DraftAuthority.objects.create(
                 name=label,
                 type_controlled=authority_type,

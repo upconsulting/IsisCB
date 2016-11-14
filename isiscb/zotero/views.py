@@ -15,7 +15,6 @@ from zotero.models import *
 from zotero.filters import *
 from zotero.forms import *
 from zotero import tasks, parse, ingest
-from zotero import parser as zparser
 from zotero.suggest import suggest_citation, suggest_authority
 
 import tempfile

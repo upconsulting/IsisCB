@@ -215,8 +215,6 @@ class TestBookSeries(TestCase):
         DraftCCRelation.objects.all().delete()
 
 
-
-
 class TestBookReviews(TestCase):
     """
     Reviews are linked to book citations via the "reviewed author" field in
@@ -259,6 +257,7 @@ class TestBookReviews(TestCase):
         type_counts = Counter()
         for citation in citations:
             type_counts[citation.type_controlled] += 1
+            print citation.type_controlled
             if citation.type_controlled == Citation.REVIEW:
                 self.assertGreater(citation.relations_to.count(), 0)
                 relation = citation.relations_to.first()
@@ -313,6 +312,38 @@ class TestBookChapters(TestCase):
         self.assertEqual(type_counts[Citation.CHAPTER], 2)
         instance.refresh_from_db()
 
+    def test_process_bookchapters_resolve(self):
+        book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
+        papers = ZoteroIngest(book_data)
+        accession = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, accession).process()
+
+        accession.refresh_from_db()
+
+        # The ImportAccession should be fully resolved, so we need to create
+        #  corresponding Authority records ahead of time.
+        for draftauthority in accession.draftauthority_set.all():
+            authority = Authority.objects.create(
+                name = draftauthority.name,
+                type_controlled = draftauthority.type_controlled,
+            )
+            InstanceResolutionEvent.objects.create(
+                for_instance = draftauthority,
+                to_instance = authority,
+            )
+        accession.draftauthority_set.all().update(processed=True)
+
+        #  We need a user for the accession.
+        rf = RequestFactory()
+        request = rf.get('/hello/')
+        user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
+        request.user = user
+
+        prod_citations = ingest_accession(request, accession)
+        for citation in prod_citations:
+            self.assertGreater(citation.relations_from.count() + citation.relations_to.count(), 0)
+
+
     def test_process_bookchapters(self):
         test_book = Citation.objects.create(title='A Test Citation',
                                             type_controlled=Citation.BOOK)
@@ -346,16 +377,11 @@ class TestBookChapters(TestCase):
         self.assertEqual(type_counts[Citation.CHAPTER], 6)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute, User, Citation, ACRelation, CCRelation]:
+            model.objects.all().delete()
 
 
 class TestSubjects(TestCase):
@@ -438,7 +464,6 @@ class TestIngest(TestCase):
         self.publicationDateType, _ = AttributeType.objects.get_or_create(
             name='PublicationDate',
             value_content_type=isodate_type,
-            display_name='Publication date',
         )
 
         # The ImportAccession should be fully resolved, so we need to create
