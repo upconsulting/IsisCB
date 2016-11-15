@@ -239,6 +239,8 @@ class IngestManager(object):
         :prop:`.DraftCitation.language`\.
         """
         literal = IngestManager._get(entry, 'language')
+        if not literal:
+            return
         try:
             language = Language.objects.get(id=literal)
         except Language.DoesNotExist:
