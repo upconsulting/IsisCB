@@ -57,6 +57,27 @@
             </div>
         </div>
 
+        {{ form.redirect_to }}
+        {% for error in form.redirect_to.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+
+        <div class="form-group row">
+            <label class="col-sm-12">{{ form.redirect_to.label }}</label>
+            <div class="col-sm-11">
+            <input type="text"
+                class="form-control"
+                name="authority-search"
+                autocomplete="off"
+                id="authority-search" />
+                <ul class="list-group" id="results-container"></ul>
+              </div>
+              <div class="col-sm-1">
+            <span id="remove_redirect" class="glyphicon glyphicon-remove" style="color: red; padding-top: 7px; margin-left: -10px;"
+              ></span>
+            </div>
+        </div>
+
         {% for error in form.name.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
@@ -87,27 +108,6 @@
         <div class="form-group">
             <label>{{ form.classification_code.label }}</label>
             {{ form.classification_code|addcss:"form-control"}}
-        </div>
-
-        {{ form.redirect_to }}
-        {% for error in form.redirect_to.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-
-        <div class="form-group row">
-            <label class="col-sm-12">{{ form.redirect_to.label }}</label>
-            <div class="col-sm-11">
-            <input type="text"
-                class="form-control"
-                name="authority-search"
-                autocomplete="off"
-                id="authority-search" />
-                <ul class="list-group" id="results-container"></ul>
-              </div>
-              <div class="col-sm-1">
-            <span id="remove_redirect" class="glyphicon glyphicon-remove" style="color: red; padding-top: 7px; margin-left: -10px;"
-              ></span>
-            </div>
         </div>
 
         {% for error in form.record_status_explanation.errors %}
@@ -222,9 +222,10 @@ $(document).ready(function() {
     var lastSearch = $.now();
     var waiting = false;
 
-    var authority_name = "{% if instance.redirect_to %}{{ instance.redirect_to.name }}{% endif %}";
+    var authority_name = "{% if instance.redirect_to %}{{ instance.redirect_to.id}}: {{ instance.redirect_to.name }}{% endif %}";
     if (authority_name.length > 0) {
         $('#authority-search').val(authority_name);
+        $('#authority-search').attr('title', authority_name);
     }
     $('#authority-search').on('keyup', function(e) {
         if ($.now() - lastSearch < 500 || waiting) return;
@@ -247,10 +248,10 @@ $(document).ready(function() {
                     }
                     choice_elem += '">';
                     choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
+                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.id + ': ' + r.name + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                     choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.id + ': ' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
                     if (r.description != null) {
                         choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                     }
@@ -268,6 +269,7 @@ $(document).ready(function() {
                     var selected_name = selected.attr('data-name');
                     $('#results-container').empty();
                     $('#authority-search').val(selected_name);
+                    $('#authority-search').attr('title', selected_name);
                     $('#id_authority-redirect_to').val(selected_id);
                 });
             }
