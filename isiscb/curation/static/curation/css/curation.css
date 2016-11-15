@@ -11,6 +11,7 @@ a {
     cursor: pointer;
     color: #032544;
 }
+
 #citationView a, #authorityView a {
   cursor: pointer;
   color: #032544;
@@ -36,7 +37,7 @@ a {
 }
 
 label {
-  color: #3e3e3e;
+  color: #747880;
   font-weight: normal;
 }
 
