@@ -19,7 +19,7 @@
     <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
-            <strong id="author_editors">{{ authors_editors }}</strong>
+            <span id="author_editors">{{ authors_editors }}</span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
@@ -38,7 +38,7 @@
       <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
-            <strong id="publication_date">{{ pubdate }}</strong>
+            <span id="publication_date">{{ pubdate }}</span>
             {% else %}
             <em>Add publication date</em>
             {% endif %}
@@ -68,7 +68,7 @@
             onclick="toggleTab('ccrelations')">
             {% if books %}
             {% for book in books %}
-            <strong>{{ book|get_pub_title_and_year  }}</strong>
+            {{ book|get_pub_title_and_year  }}
             {% endfor %}
             {% else %}
             <em>Add Book</em>
@@ -241,6 +241,26 @@
 
 {{ form.physical_details }}
 {{ form.book_series }}
+<!--
+{% with instance|get_publisher as publisher %}
+<div class="form-group">
+    <label>Publisher</label>
+    <div>
+        {% if publisher %}
+        <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">
+            {{ publisher }}
+        </a>
+        {% else %}
+        <a class="text-warning"
+            href="{% url 'create_acrelation_for_citation' instance.id %}?type_controlled=PU">
+            <span class="gylphicon glyphicon-plus"></span> Add Publisher
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endwith %}
+-->
 
 {% with instance|get_doi as doi %}
 <div class="form-group">
@@ -248,7 +268,7 @@
         {% if doi %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('linkeddata')">
-            <strong>{{ doi }}</strong>
+            {{ doi }}
         </a>
         {% else %}
         <a class="text-warning input-sm"

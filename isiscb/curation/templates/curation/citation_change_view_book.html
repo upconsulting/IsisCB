@@ -20,7 +20,7 @@
         <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
             {% if authors_editors %}
-            <strong id="author_editors">{{ authors_editors }}</strong>
+            <span id="author_editors">{{ authors_editors }}</span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
@@ -38,7 +38,7 @@
         <a class="text-warning cursor-link"
             onclick="toggleTab('attributes')">
             {% if pubdate %}
-            <strong id="publication_date">{{ pubdate }}</strong>
+            <span id="publication_date">{{ pubdate }}</a>
             {% else %}
             <em>Add publication date</em>
             {% endif %}
@@ -115,7 +115,7 @@
         {% if publisher %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('acrelations')">
-            <strong id="publisher">{{ publisher.name }}</strong>
+            <span id="publisher">{{ publisher.name }}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"
@@ -133,7 +133,7 @@
         {% if isbn %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('linkeddata')">
-            <strong id="isbn">{{ isbn }}</strong>
+            <span id="isbn">{{ isbn }}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"
