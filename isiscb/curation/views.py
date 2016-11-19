@@ -419,6 +419,37 @@ def tracking_for_citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 @staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def tracking_for_authority(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+    })
+
+    template = loader.get_template('curation/authority_tracking_create.html')
+
+    if request.method == "POST":
+        form = AuthorityTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
+        if form.is_valid():
+            tracking = form.save(commit=False)
+            tracking.subject = authority
+            tracking.save()
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority_id,)) + '?tab=tracking')
+    else:
+        # just always shows tracking form if not post
+        form = AuthorityTrackingForm(prefix='tracking', initial={'subject': authority_id})
+
+
+    context.update({
+        'form': form,
+    })
+
+    return HttpResponse(template.render(context))
+
+@staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
