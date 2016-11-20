@@ -28,6 +28,34 @@ def create_perm_tuple(fieldname, id):
     return (fieldname, id)
 
 @register.filter
+def get_warnings_column_count_citation(instance):
+    nr_of_warnings = 0
+    if not instance.public:
+        nr_of_warnings += 1
+    if not are_related_objects_for_citation_public(instance):
+        nr_of_warnings += 1
+    if is_public_inconsistent(instance):
+        nr_of_warnings += 1
+    print nr_of_warnings
+    if nr_of_warnings == 0:
+        return 12
+    return 12/nr_of_warnings
+
+@register.filter
+def get_warnings_column_count_authority(instance):
+    nr_of_warnings = 0
+    if not instance.public:
+        nr_of_warnings += 1
+    if not are_related_objects_for_authority_public(instance):
+        nr_of_warnings += 1
+    if is_public_inconsistent(instance):
+        nr_of_warnings += 1
+    print nr_of_warnings
+    if nr_of_warnings == 0:
+        return 0
+    return 12/nr_of_warnings
+
+@register.filter
 def is_public_inconsistent(instance):
     if instance.public and instance.record_status_value != 'Active':
         return True
