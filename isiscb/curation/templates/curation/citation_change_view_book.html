@@ -78,7 +78,7 @@
 </div>
 
 {% if partdetails_form %}
-<div class="form-group">
+<div class="form-group" style="margin-bottom: 0px;">
   <div class="row">
         {% for error in partdetails_form.extent.errors %}
         <div class="col-sm-12 text-left">
@@ -110,8 +110,9 @@
 {% endif %}
 
 {% with instance|get_publisher as publisher %}
-<div class="form-group">
+<div class="form-group" style="margin-bottom: 0px;">
     <div>
+        <label class="control-label input-sm">Publisher:</label>
         {% if publisher %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('acrelations')">
