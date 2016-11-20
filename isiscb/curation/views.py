@@ -936,6 +936,10 @@ def citation(request, citation_id):
             if partdetails_form:
                 partdetails_form.save()
 
+            back_to_list = request.POST.get('back_to_list', False)
+            if back_to_list == "True":
+                return HttpResponseRedirect(reverse('citation_list') + "?page=" + str(page))
+
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
 
         context.update({
