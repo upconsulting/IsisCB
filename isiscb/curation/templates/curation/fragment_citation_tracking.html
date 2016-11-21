@@ -7,11 +7,25 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-{% if can_update %}
-<div class="text-right" style="margin-bottom: 20px;">
-<a href="{% url 'tracking-citation' instance.id %}" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span> Create Tracking Record</a>
-</div>
+<div class="text-right" style="margin-bottom: 10px;">
+{% if can_update and can_create_fully_entered %}
+  <a href="{% url 'tracking-citation' instance.id %}?type=FU" class="btn btn-default btn-sm">Fully Entered</a>
+{% else %}
+<a class="btn btn-default btn-sm" disabled="disabled">Fully Entered</a>
 {% endif %}
+
+{% if can_update and can_create_proofed %}
+<a href="{% url 'tracking-citation' instance.id %}?type=PD" class="btn btn-default btn-sm">Proofed</a>
+{% else %}
+<a class="btn btn-default btn-sm" disabled="disabled">Proofed</a>
+{% endif %}
+
+{% if can_update and can_create_authorize %}
+<a href="{% url 'tracking-citation' instance.id %}?type=AU" class="btn btn-default btn-sm">Authorized</a>
+{% else %}
+<a class="btn btn-default btn-sm" disabled="disabled">Authorized</a>
+{% endif %}
+</div>
 
 {% if can_view %}
 {% for tracking in tracking_entries %}
