@@ -34,7 +34,7 @@ $('body').ready(function() {
     <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
-                <th width="5%">
+                <th width="3%">
                     <input type="checkbox" name="select_all" id="select_all" />
                     <script>
                     $('#select_all').change(function(e) {
@@ -46,6 +46,7 @@ $('body').ready(function() {
                     });
                     </script>
                 </th>
+                <th width="5%">Status</th>
                 <th width="5%">ID</th>
                 <th width="5%">Type</th>
                 <th>Title  <span style="cursor: pointer;" id="sort_title"></span></th>
@@ -66,6 +67,9 @@ $('body').ready(function() {
             <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
                 <td>
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
+                </td>
+                <td>
+                  {% if object.record_status_value %}{{ object.record_status_value }}{% endif %}
                 </td>
                 <td>
                     <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>

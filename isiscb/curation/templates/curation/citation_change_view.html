@@ -12,27 +12,33 @@ var toggleTab = function(name) {
 }
 </script>
 
+{% with instance|get_warnings_column_count_citation as column_count %}
+
 {% if not instance.public %}
-<div class="alert alert-danger" role="alert">
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
 <i class="fa fa-eye-slash" aria-hidden="true"></i> This citation is not public. It cannot be found through the public site.
 </div>
 {% endif %}
 
 {% if not instance|are_related_objects_for_citation_public %}
-<div class="alert alert-info" role="alert">
+<div class="alert alert-info alert-small col-md-{{column_count}}" role="alert">
   <i class="fa fa-exclamation-circle" aria-hidden="true"></i> At least one record linked to this citation is not public.
 </div>
 {% endif %}
 
 {% if instance|is_public_inconsistent %}
-<div class="alert alert-warning" role="alert">
+<div class="alert alert-warning alert-small col-md-{{column_count}}" role="alert">
   <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
  There is a problem with this record. It has the status "Active" but it is not marked as public.
 </div>
 {% endif %}
 
+{% endwith %}
+
 <form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
+
+  <input type="hidden" id="input_back_to_list" name="back_to_list" value="False">
 
 {% include "curation/fragment_citation_header.html" %}
 
@@ -84,7 +90,7 @@ Back to List </a>
     </div>
     <div class="col-md-3">
         <div class="btn-group pull-right">
-            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a id="citation_cancel" class="btn btn-sm btn-default">Cancel</a>
             <a class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
@@ -289,6 +295,25 @@ var delete_language = function() {
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
+<div class="modal fade" id="data_changed_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i> Record has changed!</h4>
+      </div>
+      <div class="modal-body">
+        <p id="modal_text">This record has changed. Do you want to save the changes?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="data_changed_cancel" type="button" class="btn btn-default" data-dismiss="modal">No, just cancel.</button>
+        <button id="data_changed_save_confirmed" type="button" class="btn btn-primary">Yes, Save!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script>
 //# sourceURL=script.js
 var language_creation_container = $('#create-language-item');
@@ -371,8 +396,50 @@ var addLanguage = function() {
     });
 }
 
-$('.citation_submit').click(function() {
 
+
+$( document ).ready(function() {
+
+  $('.citation_submit').on( "click", function() {
+      if (checkRecord()) {
+          $('#citation_form').submit();
+      }
+  });
+
+  $('#data_changed_save_confirmed').on('click', function() {
+    $('#data_changed_modal').modal('hide');
+    $("#input_back_to_list").val("True");
+    if ( checkRecord() ) {
+        $('#citation_form').attr('href', '{% url 'curate_citation' instance.id %}');
+        $('#citation_form').submit();
+    }
+  });
+
+  $('#save_confirmed').on('click', function() {
+    $('#citation_form').submit();
+  });
+
+  $("#citation_form :input").change(function() {
+    $("#citation_form").data("changed",true);
+  });
+
+  /* if data in record has changed, show change confirm dialog */
+  $("#citation_cancel").on('click', function() {
+    if ($("#citation_form").data("changed")) {
+      $('#data_changed_modal').modal('show');
+    }
+    else {
+      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+    }
+  });
+
+  $("#data_changed_cancel").on('click', function() {
+    window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+  });
+
+});
+
+function checkRecord() {
   var citation_type = $('#citation_type').attr("data-type");
 
   var warnings = [];
@@ -477,15 +544,11 @@ $('.citation_submit').click(function() {
     $('#modal_text').html(start + list);
 
     $('#save_confirm_modal').modal('show');
-    return;
+    return false;
   }
 
-  $('#citation_form').submit();
-});
-
-$('#save_confirmed').click(function() {
-  $('#citation_form').submit();
-});
+  return true;
+}
 
 </script>
 

@@ -18,6 +18,7 @@ from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
 from isisdata.utils import strip_punctuation
+from curation.tracking import TrackingWorkflow
 from zotero.models import ImportAccession
 from curation.filters import *
 from curation.forms import *
@@ -25,6 +26,7 @@ from curation.contrib.views import check_rules
 
 import iso8601
 import rules
+import datetime
 from itertools import chain
 
 
@@ -398,18 +400,42 @@ def tracking_for_citation(request, citation_id):
         'instance': citation,
     })
 
-    template = loader.get_template('curation/citation_tracking_create.html')
+    trackType = request.GET.get('type', None)
+    workflow = TrackingWorkflow(citation)
+    if workflow.is_workflow_action_allowed(trackType):
+        tracking = Tracking()
+        tracking.type_controlled = trackType
+        tracking.modified_by = request.user
+        date = datetime.datetime.now()
+        tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
+        tracking.subject = citation
+        tracking.save()
+    return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
+
+
+@staff_member_required
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def tracking_for_authority(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+
+    context = RequestContext(request, {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+    })
+
+    template = loader.get_template('curation/authority_tracking_create.html')
 
     if request.method == "POST":
-        form = CitationTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
+        form = AuthorityTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
         if form.is_valid():
             tracking = form.save(commit=False)
-            tracking.subject = citation
+            tracking.subject = authority
             tracking.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
+            return HttpResponseRedirect(reverse('curate_authority', args=(authority_id,)) + '?tab=tracking')
     else:
         # just always shows tracking form if not post
-        form = CitationTrackingForm(prefix='tracking', initial={'subject': citation_id})
+        form = AuthorityTrackingForm(prefix='tracking', initial={'subject': authority_id})
 
 
     context.update({
@@ -880,10 +906,15 @@ def citation(request, citation_id):
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
         tracking_entries = Tracking.objects.filter(subject_instance_id=citation_id)
+
+        tracking_workflow = TrackingWorkflow(citation)
         context.update({
             'form': form,
             'instance': citation,
             'tracking_entries': tracking_entries,
+            'can_create_fully_entered': tracking_workflow.is_workflow_action_allowed(Tracking.FULLY_ENTERED),
+            'can_create_proofed': tracking_workflow.is_workflow_action_allowed(Tracking.PROOFED),
+            'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
@@ -904,6 +935,10 @@ def citation(request, citation_id):
             form.save()
             if partdetails_form:
                 partdetails_form.save()
+
+            back_to_list = request.POST.get('back_to_list', False)
+            if back_to_list == "True":
+                return HttpResponseRedirect(reverse('citation_list') + "?page=" + str(page))
 
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
 

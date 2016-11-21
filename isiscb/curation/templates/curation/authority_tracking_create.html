@@ -1,0 +1,68 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-md-5">
+      <div class="row">
+          <div class="col-md-12">
+            <div class="form-group form-inline">
+              <strong class="text-warning">New</strong> | <strong>Tracking record for {{ instance.id}}</strong>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    <div class="col-md-3">
+      <a href="{% url 'curate_authority' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+ Back to Authority</a>
+    </div>
+    <div class="col-md-4">
+        <div class="btn-group pull-right">
+            <a href="{% url 'curate_authority' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a id="saveTrackingBtn" href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
+        </div>
+    </div>
+  </div>
+
+<form id="trackingForm" class="form" action="{% url 'tracking-authority' instance.id %}" method="POST">
+    {% csrf_token %}
+
+    {% for error in form.tracking_info.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ form.tracking_info.label }}</label>
+        {{ form.tracking_info|addcss:"form-control" }}
+    </div>
+
+    {% for error in form.notes.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ form.notes.label }}</label>
+        {{ form.notes|addcss:"form-control" }}
+    </div>
+
+    {% for error in form.type_controlled.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ form.type_controlled.label }}</label>
+        {{ form.type_controlled|addcss:"form-control" }}
+    </div>
+
+</form>
+
+<script>
+//# sourceURL=save.js
+$(document).ready(function() {
+
+  $("#saveTrackingBtn").click(function() {
+    $("#trackingForm").submit();
+  });
+});
+</script>
+
+{% endblock %}
