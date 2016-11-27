@@ -241,26 +241,6 @@
 
 {{ form.physical_details }}
 {{ form.book_series }}
-<!--
-{% with instance|get_publisher as publisher %}
-<div class="form-group">
-    <label>Publisher</label>
-    <div>
-        {% if publisher %}
-        <a class="text-warning cursor-link"
-            onclick="toggleTab('acrelations')">
-            {{ publisher }}
-        </a>
-        {% else %}
-        <a class="text-warning"
-            href="{% url 'create_acrelation_for_citation' instance.id %}?type_controlled=PU">
-            <span class="gylphicon glyphicon-plus"></span> Add Publisher
-        </a>
-        {% endif %}
-    </div>
-</div>
-{% endwith %}
--->
 
 {% with instance|get_doi as doi %}
 <div class="form-group">

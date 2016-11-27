@@ -113,10 +113,10 @@
 <div class="form-group" style="margin-bottom: 0px;">
     <div>
         <label class="control-label input-sm">Publisher:</label>
-        {% if publisher %}
+        {% if publisher.authority %}
         <a class="text-warning cursor-link input-sm"
             onclick="toggleTab('acrelations')">
-            <span id="publisher">{{ publisher.name }}</span>
+            <span id="publisher">{% if publisher.name_for_display_in_citation %}{{ publisher.name_for_display_in_citation }} {% else %} {{ publisher.authority.name }}{% endif %}</span>
         </a>
         {% else %}
         <a class="text-warning input-sm"
