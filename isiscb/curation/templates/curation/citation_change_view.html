@@ -39,6 +39,7 @@ var toggleTab = function(name) {
     {% csrf_token %}
 
   <input type="hidden" id="input_back_to_list" name="back_to_list" value="False">
+  <input type="hidden" id="input_forward_type" name="forward_type" >
 
 {% include "curation/fragment_citation_header.html" %}
 
@@ -77,21 +78,21 @@ var toggleTab = function(name) {
 
     <div class="col-md-4 text-center">
       {% if previous %}
-      <a href="{% url 'curate_citation' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+      <a id="citation_previous"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
       {% endif %}
       &nbsp; &nbsp; &nbsp;
 
-      <a href="{% url 'citation_list' %}?page={{request_params.page}}"><i class="fa fa-reply" aria-hidden="true"></i>
+      <a id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>
 Back to List </a>
       &nbsp; &nbsp; &nbsp;
       {% if next %}
-      <a href="{% url 'curate_citation' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+      <a id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
       {% endif %}
     </div>
     <div class="col-md-3">
         <div class="btn-group pull-right">
-            <a id="citation_cancel" class="btn btn-sm btn-default">Cancel</a>
-            <a class="btn btn-sm btn-success citation_submit">Save</a>
+            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
     </div>
@@ -296,7 +297,7 @@ var delete_language = function() {
 </div><!-- /.modal -->
 
 
-<div class="modal fade" id="data_changed_modal" tabindex="-1" role="dialog">
+<div class="modal fade" id="data_changed_modal" tabindex="-1" role="dialog" data-forward-type="list">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -416,6 +417,8 @@ $( document ).ready(function() {
   });
 
   $('#save_confirmed').on('click', function() {
+    var forwardType = $('#data_changed_modal').attr('data-forward-type');
+    $('#input_forward_type').val(forwardType);
     $('#citation_form').submit();
   });
 
@@ -424,17 +427,53 @@ $( document ).ready(function() {
   });
 
   /* if data in record has changed, show change confirm dialog */
-  $("#citation_cancel").on('click', function() {
+  $("#citation_next").on('click', function(event) {
     if ($("#citation_form").data("changed")) {
+      $('#data_changed_modal').attr('data-forward-type', 'next');
       $('#data_changed_modal').modal('show');
     }
+    {% if next.id %}
     else {
+      window.location.href = '{% url 'curate_citation' next.id %}';
+    }
+    {% endif %}
+  });
+
+  $("#citation_previous").on('click', function(event) {
+    if ($("#citation_form").data("changed")) {
+      $('#data_changed_modal').attr('data-forward-type', 'previous');
+      $('#data_changed_modal').modal('show');
+    }
+    {% if previous.id %}
+    else {
+      window.location.href = '{% url 'curate_citation' previous.id %}';
+    }
+    {% endif %}
+  });
+
+  $('#citation_back_to_list').on('click', function(event) {
+    if ($("#citation_form").data("changed")) {
+      $('#data_changed_modal').attr('data-forward-type', 'list');
+      $('#data_changed_modal').modal('show');
+    } else {
       window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
     }
   });
 
   $("#data_changed_cancel").on('click', function() {
-    window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+    {% if next.id and previous.id %}
+    if ($('#data_changed_modal').attr('data-forward-type') == "next") {
+      window.location.href = '{% url 'curate_citation' next.id %}';
+    } else if ($('#data_changed_modal').attr('data-forward-type') == "previous") {
+      window.location.href = '{% url 'curate_citation' previous.id %}';
+    }
+    else {
+      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+    }
+    {% else %}
+      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+    {% endif %}
+
   });
 
 });
