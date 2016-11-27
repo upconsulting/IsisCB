@@ -936,9 +936,15 @@ def citation(request, citation_id):
             if partdetails_form:
                 partdetails_form.save()
 
-            back_to_list = request.POST.get('back_to_list', False)
-            if back_to_list == "True":
+            forward_type = request.POST.get('forward_type', None)
+            if forward_type == "list":
                 return HttpResponseRedirect(reverse('citation_list') + "?page=" + str(page))
+            elif forward_type == "next":
+                next = context.get('next', citation)
+                return HttpResponseRedirect(reverse('curate_citation', args=(next.id,)))
+            elif forward_type == "previous":
+                prev = context.get('previous', citation)
+                return HttpResponseRedirect(reverse('curate_citation', args=(prev.id,)))
 
             return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
 
