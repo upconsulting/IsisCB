@@ -3,6 +3,7 @@ import re
 import string
 import unidecode
 import unicodedata
+import regex
 
 
 def remove_control_characters(s):
@@ -10,18 +11,24 @@ def remove_control_characters(s):
     return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 
-def strip_punctuation(s):
-    """
-    Removes all punctuation characters from a string.
-    """
-    if not s:
-        return ''
-    if type(s) is str:    # Bytestring (default in Python 2.x).
-        return s.translate(string.maketrans("",""), string.punctuation.replace('-', ''))
-    else:                 # Unicode string (default in Python 3.x).
-        translate_table = dict((ord(char), u'') for char
-                                in u'!"#%\'()*+,./:;<=>?@[\]^_`{|}~')
-        return s.translate(translate_table)
+def strip_punctuation(text):
+    return regex.sub(ur"\p{P}+", u" ", text)
+
+# if isinstance(value, str) or isinstance(value, unicode):
+#     value = remove_punctuation(value)
+#
+# def strip_punctuation(s):
+#     """
+#     Removes all punctuation characters from a string.
+#     """
+#     if not s:
+#         return ''
+#     if type(s) is str:    # Bytestring (default in Python 2.x).
+#         return s.translate(string.maketrans("",""), string.punctuation.replace('-', ''))
+#     else:                 # Unicode string (default in Python 3.x).
+#         translate_table = dict((ord(char), u'') for char
+#                                 in u'!"#%\'()*+,./:;<=>?@[\]^_`{|}~')
+#         return s.translate(translate_table)
 
 
 def strip_tags(s):

@@ -20,7 +20,7 @@ DOCUMENT_TYPES = {
 # These fields can be mapped directly onto the DraftCitation model.
 CITATION_FIELDS = [
     'title', 'abstract', 'publication_date', 'type_controlled',
-    'type_controlled', 'volume', 'issue', 'extent'
+    'type_controlled', 'volume', 'issue', 'extent', 'extra'
 ]
 
 # These fields can be mapped directly onto the DraftAuthority model.
@@ -184,7 +184,10 @@ class IngestManager(object):
         -------
         list
         """
-        return [tuple(match.split(':')) for match in re.findall(ur'\{([^\{]+)\}', raw)]
+
+        extra = [tuple(match.split(':')) for match in re.findall(ur'\{([^\{]+)\}', raw)]
+        value = re.sub(ur'\{([^\{]+)\}', u'', raw)
+        return extra, value
 
     @staticmethod
     def _update_field(key, value):
@@ -223,6 +226,7 @@ class IngestManager(object):
 
         def _update(obj):
             for key, value in data:
+
                 handler = IngestManager.EXTRA_DATA_HANDLERS.get(key, None)
                 if handler:
                     obj = handler(key, value)(obj)
@@ -239,16 +243,16 @@ class IngestManager(object):
         :prop:`.DraftCitation.language`\.
         """
         literal = IngestManager._get(entry, 'language')
+
         if not literal:
             return
         try:
-            language = Language.objects.get(id=literal.lower())
+            language = Language.objects.get(id__iexact=literal)
         except Language.DoesNotExist:
             try:
-                language = Language.objects.get(name=literal.title())
+                language = Language.objects.get(name__iexact=literal)
             except Language.DoesNotExist:
                 return
-
         draft_citation.language = language
         draft_citation.save()
 
@@ -460,7 +464,7 @@ class IngestManager(object):
         def _cast(datum):
             draft_authority = DraftAuthority.objects.create(
                 name = datum,
-                type_controlled = Authority.PUBLISHER,
+                type_controlled = Authority.INSTITUTION,
                 part_of = draft_citation.part_of,
             )
             draft_acrelation = DraftACRelation.objects.create(
@@ -502,11 +506,14 @@ class IngestManager(object):
                 'type_controlled': authority_type,
                 'part_of': draft_citation.part_of
             })
-            draft_authority = DraftAuthority.objects.create(**instance_data)
 
             # Extra data about the authority instance may be included in the
             #  ``name`` field.
-            extra = IngestManager.find_extra_data(instance_data.get('name', ''))
+            extra, instance_data['name'] = IngestManager.find_extra_data(instance_data.get('name', ''))
+            _, instance_data['name_last'] = IngestManager.find_extra_data(instance_data.get('name_last', ''))
+
+            draft_authority = DraftAuthority.objects.create(**instance_data)
+
             if extra:
                 _apply = IngestManager.apply_extra_data(extra)
                 draft_authority = _apply(draft_authority)

@@ -1205,6 +1205,7 @@ def authorities(request):
 
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def authority(request, authority_id):
@@ -1239,7 +1240,7 @@ def authority(request, authority_id):
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
         tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
-
+        print authority.linkeddata_entries.all()
         context.update({
             'request_params': request_params,
             'form': form,
@@ -1289,6 +1290,7 @@ def quick_and_dirty_language_search(request):
 @staff_member_required
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
+    show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     tc = request.GET.get('type', None)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:
@@ -1300,9 +1302,14 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
 
-    query_parts = strip_punctuation(q).split()
+    if not show_inactive:   # Don't show inactive records.
+        queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
+        queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
+
+    query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
-        queryset = queryset.filter(name_for_sort__icontains=part)
+        queryset = queryset.filter(name__icontains=part)
+
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     results = []
     result_ids = []
@@ -1323,9 +1330,12 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
+            'related_citations': map(lambda s: s.title(), set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])),
+            'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curate_authority", args=(obj.id,)),
             'public': obj.public,
+            'type_controlled': obj.get_type_controlled_display(),
         })
     return JsonResponse({'results': results})
 

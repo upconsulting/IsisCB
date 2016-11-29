@@ -43,18 +43,29 @@ def suggest_citation_json(request, citation_id):
 @login_required
 @csrf_protect
 def suggest_authority_json(request, authority_id):
+    """
+    Provides Authority suggestion data in the authority resolution interface.
+    """
     draftAuthority = get_object_or_404(DraftAuthority, pk=authority_id)
     suggestions = []
+
     for suggestion in suggest_authority(draftAuthority):
         instance = Authority.objects.get(pk=suggestion['id'])
-        related_citations = instance.acrelation_set.values_list('citation__title', flat=True)[:10]
+
+        # Do not suggest inactive records.
+        if instance.record_status_value != CuratedMixin.ACTIVE:
+            continue
+
+        related_citations = map(lambda s: s.title(), set(instance.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10]))
         suggestion.update({
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': list(related_citations),
-            })
+            'related_citations': related_citations,
+        })
         suggestions.append(suggestion)
+
+        # Show a maximum of 30 suggestions. TODO: make this configurable.
         if len(suggestions) > 30:
             break
     return JsonResponse({'data': suggestions})
@@ -256,18 +267,25 @@ def create_authority_for_draft(request):
 
     authority = model_class.objects.create(**authority_data)
 
+    # We want generic relations to point to the Authority table rather than the
+    #  Person table.
+    generic_target = Authority.objects.get(pk=authority.id)
+
     resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
     draftauthority.processed = True
     draftauthority.save()
 
     for draftlinkeddata in draftauthority.linkeddata.all():
-        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
-        LinkedData.objects.create(
-            subject = authority,
+
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
+        l = LinkedData.objects.create(
+            subject = generic_target,
             universal_resource_name = draftlinkeddata.value,
             type_controlled = ldtype
         )
+
     draftauthority.linkeddata.all().update(processed=True)
+    print authority.id
 
     response_data = {
         'resolution': resolution.id,
@@ -394,3 +412,12 @@ def change_draftauthority(request, draftauthority_id):
     })
     template = loader.get_template('zotero/change_draftauthority.html')
     return HttpResponse(template.render(context))
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
+def remove_draftcitation(request):
+    draftcitation = get_object_or_404(DraftCitation,
+                                      pk=request.GET.get('citation'))
+    draftcitation.delete();
+    return JsonResponse({'data': 'ok'});

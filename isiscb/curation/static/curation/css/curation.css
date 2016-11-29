@@ -189,3 +189,28 @@ a:hover.list_entry_link .underlineWhenLinked {
 .input-shaded {
     background-color: #ccc;
 }
+
+
+.related-citations-tooltip {
+    background-color: white;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+.related-citations-tooltip .tooltip-inner {
+    background-color: white;
+    color: black;
+    text-align: left;
+    max-width: 300px;
+    width: 300px;
+}
+
+.related-citations-tooltip .tooltip-inner p {
+    width: 300px;
+}
+
+.related-citation {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 8pt;
+}

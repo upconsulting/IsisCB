@@ -41,6 +41,7 @@ FIELD_NAMES = dict([
     (PRISM.number, u'issue'),
     (DCTERMS.dateSubmitted, u'date_submitted'),
     (DC.identifier, u'linkeddata'),
+    (DC.description, u'extra'),
 
     (BIB.authors, u'authors'),
     (ZOTERO.seriesEditors, u'series_editors'),
@@ -348,6 +349,10 @@ class ZoteroIngest(object):
                 if p == RDF.type:
                     o = self._relabel_predicate(o)
                 parent_document.append(self.handle(p, o))
+            elif p == PRISM.volume:
+                self._set_value('volume', self._to_python(o))
+            elif p == PRISM.number:
+                self._set_value('issue', self._to_python(o))
         return predicate, dict(parent_document)
 
     def handle_subjects(self, predicate, node):
@@ -470,8 +475,8 @@ class ZoteroIngest(object):
 
                 data = {
                     u'name': ' '.join([forename, surname]).strip(),
-                    u'name_last': forename,
-                    u'name_first': surname,
+                    u'name_last': surname,
+                    u'name_first': forename,
                 }
                 if surname.startswith('http://'):
                     data.update({'uri': surname,})

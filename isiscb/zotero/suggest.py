@@ -1,11 +1,14 @@
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 
+
 from isisdata.models import *
 from zotero.models import *
 
 import difflib
 from collections import Counter, defaultdict
+
+import regex
 
 
 def argsort(seq):
@@ -125,15 +128,22 @@ def suggest_by_field(draftObject, field, targetModel, targetField, scramble=Fals
     hits = []
     value = getattr(draftObject, field)
 
-    q_objects = Q()
-    q_objects |= Q(**{'{0}__icontains'.format(targetField): value})
-    q_objects |= Q(**{'{0}__in'.format(targetField): value})
+
+    def remove_punctuation(text):
+        return regex.sub(ur"\p{P}+", "", text)
+
+    if isinstance(value, str) or isinstance(value, unicode):
+        value = remove_punctuation(value)
+
+    q = Q()
+    q |= Q(**{'{0}__icontains'.format(targetField): value})
+    q |= Q(**{'{0}__in'.format(targetField): value})
     if scramble:
         for v in value.split(' '):
             if len(v) > 2:
-                q_objects |= Q(**{'{0}__istartswith'.format(targetField): v})
+                q |= Q(**{'{0}__istartswith'.format(targetField): v})
 
-    inexact_match = targetModel.objects.filter(q_objects)
+    inexact_match = targetModel.objects.filter(q)
 
     for obj in inexact_match:
         targetValue = getattr(obj, targetField)

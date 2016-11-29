@@ -41,3 +41,4 @@ rdflib
 Markdown==2.6.6
 rules
 jsonpickle
+regex
