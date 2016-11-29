@@ -105,11 +105,11 @@ class DraftCitation(ImportedData):
     title = models.CharField(max_length=1000, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     abstract = models.TextField(null=True, blank=True)
+    extra = models.TextField(null=True, blank=True)
+    """ISISCB-788: "extra" data should be stored in a separate field."""
 
     source_data = models.TextField(null=True, blank=True)
-    """
-    Raw data from which this record was generated.
-    """
+    """Raw data from which this record was generated."""
 
     BOOK = 'BO'
     ARTICLE = 'AR'

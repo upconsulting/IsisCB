@@ -20,7 +20,7 @@ DOCUMENT_TYPES = {
 # These fields can be mapped directly onto the DraftCitation model.
 CITATION_FIELDS = [
     'title', 'abstract', 'publication_date', 'type_controlled',
-    'type_controlled', 'volume', 'issue', 'extent'
+    'type_controlled', 'volume', 'issue', 'extent', 'extra'
 ]
 
 # These fields can be mapped directly onto the DraftAuthority model.
@@ -243,16 +243,16 @@ class IngestManager(object):
         :prop:`.DraftCitation.language`\.
         """
         literal = IngestManager._get(entry, 'language')
+
         if not literal:
             return
         try:
-            language = Language.objects.get(id=literal.lower())
+            language = Language.objects.get(id__iexact=literal)
         except Language.DoesNotExist:
             try:
-                language = Language.objects.get(name=literal.title())
+                language = Language.objects.get(name__iexact=literal)
             except Language.DoesNotExist:
                 return
-
         draft_citation.language = language
         draft_citation.save()
 
