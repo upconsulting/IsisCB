@@ -1051,6 +1051,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     hierarchy.
     """))
 
+    # TODO: we need to remove this; it conflicts with CuratedMixin.
     ACTIVE = 'AC'
     DUPLICATE = 'DU'
     REDIRECT = 'RD'

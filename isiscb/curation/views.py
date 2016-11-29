@@ -1289,6 +1289,7 @@ def quick_and_dirty_language_search(request):
 @staff_member_required
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
+    show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     tc = request.GET.get('type', None)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:
@@ -1299,6 +1300,10 @@ def quick_and_dirty_authority_search(request):
     if tc:
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
+
+    if not show_inactive:   # Don't show inactive records.
+        queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
+        queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
 
     query_parts = strip_punctuation(q).split()
     for part in query_parts:
@@ -1323,9 +1328,12 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
+            'related_citations': list(obj.acrelation_set.values_list('citation__title', flat=True)[:10]),
+            'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curate_authority", args=(obj.id,)),
             'public': obj.public,
+            'type_controlled': obj.get_type_controlled_display(),
         })
     return JsonResponse({'results': results})
 

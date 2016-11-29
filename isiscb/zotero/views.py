@@ -43,18 +43,29 @@ def suggest_citation_json(request, citation_id):
 @login_required
 @csrf_protect
 def suggest_authority_json(request, authority_id):
+    """
+    Provides Authority suggestion data in the authority resolution interface.
+    """
     draftAuthority = get_object_or_404(DraftAuthority, pk=authority_id)
     suggestions = []
+
     for suggestion in suggest_authority(draftAuthority):
         instance = Authority.objects.get(pk=suggestion['id'])
+
+        # Do not suggest inactive records.
+        if instance.record_status_value != CuratedMixin.ACTIVE:
+            continue
+
         related_citations = instance.acrelation_set.values_list('citation__title', flat=True)[:10]
         suggestion.update({
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
             'related_citations': list(related_citations),
-            })
+        })
         suggestions.append(suggestion)
+
+        # Show a maximum of 30 suggestions. TODO: make this configurable.
         if len(suggestions) > 30:
             break
     return JsonResponse({'data': suggestions})

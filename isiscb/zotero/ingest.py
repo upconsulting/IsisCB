@@ -460,7 +460,7 @@ class IngestManager(object):
         def _cast(datum):
             draft_authority = DraftAuthority.objects.create(
                 name = datum,
-                type_controlled = Authority.PUBLISHER,
+                type_controlled = Authority.INSTITUTION,
                 part_of = draft_citation.part_of,
             )
             draft_acrelation = DraftACRelation.objects.create(

@@ -57,9 +57,9 @@ def get_warnings_column_count_authority(instance):
 
 @register.filter
 def is_public_inconsistent(instance):
-    if instance.public and instance.record_status_value != 'Active':
+    if instance.public and instance.record_status_value != CuratedMixin.ACTIVE:
         return True
-    if not instance.public and instance.record_status_value == 'Active':
+    if not instance.public and instance.record_status_value == CuratedMixin.ACTIVE:
         return True
     return False
 

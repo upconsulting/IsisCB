@@ -207,7 +207,6 @@ $('.draftauthority').click(function() {
             } else {
 
                 response.data.forEach(function(suggestion) {
-                    console.log(suggestion);
                     var suggestElem = `
                         <li class="list-group-item">
                             <div class="row">
@@ -292,7 +291,7 @@ $(document).ready(function() {
 
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
-        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?max=20&q=" + query;
+        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?show_inactive=false&max=20&q=" + query;
         if (filter_type != "") {
             search_endpoint += "&type=" + filter_type;
         }
@@ -304,19 +303,49 @@ $(document).ready(function() {
             success: function(result) {
                 waiting = false;
                 $('#results-container').empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation resolve-with-search" data-id="' + r.id + '" data-name="' + r.name + '" data-suggestion="' + r.id + '" data-authority="' + selected_authority + '" data-name="' + r.name + '"></a>';
-                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong><a href="/isis/authority/'+r.id+'/" target="_blank">' + r.name + '</a></strong> <span class="label label-default">' + r.datestring + '</span>';
-                    if (r.description != null) {
-                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                result.results.forEach(function(suggestion) {
+                    var description;
+                    if (suggestion.description != null) {
+                        description = ' | <span class="text-muted">' + suggestion.description + '</span>';
+                    } else {
+                        description = '';
                     }
-                    choice_elem += '</li>';
-
+                    var choice_elem = `
+                        <li class="list-group-item search-result">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <span class="button-group button-group-md">
+                                        <a class="glyphicon glyphicon-ok btn btn-md select-citation resolve-with-search"
+                                            data-id="` + suggestion.id + `"
+                                            data-name="` + suggestion.name + `"
+                                            data-suggestion="` + suggestion.id + `"
+                                            data-authority="` + selected_authority + `">
+                                        </a>
+                                    </span>
+                                </div>
+                                <div class="col-xs-10">
+                                    <div class="h5">
+                                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                                            class="search-authority-anchor"
+                                            target="_blank"
+                                            data-toggle="tooltip"
+                                            data-html="true"
+                                            data-placement="left"
+                                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
+                                    </div>
+                                    <span class="label label-danger"
+                                        style="margin-left: 5px;">
+                                        ` + suggestion.type_controlled + `
+                                    </span>
+                                </div>
+                            </div>
+                        </li>`;
+                        // <span class="label label-default">` + r.datestring + `</span>
+                        // ` + description + `
                     $('#results-container').append(choice_elem);
+                });
+                $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
+                    template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
                 });
 
                 $('.select-citation').click(function() {
@@ -497,9 +526,7 @@ var bindModal = function() {
 <style>
 .selected {
     background-color: orange;
-}
-
-.related-citations-tooltip {
+}.related-citations-tooltip {
     background-color: white;
     text-align: left;
     border: 1px solid #ccc;

@@ -84,9 +84,14 @@ class TestPublisher(TestCase):
 
         for citation in citations:
             type_counts = Counter()
+            auth_type_counts = Counter()
             for rel in citation.authority_relations.all():
                 type_counts[rel.type_controlled] += 1
+                auth_type_counts[rel.authority.type_controlled] += 1
             self.assertEqual(type_counts[DraftACRelation.PUBLISHER], 1)
+
+            # ISISCB-789: Target of Publisher relation should be Institution.
+            self.assertEqual(auth_type_counts[DraftAuthority.INSTITUTION], 1)
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -591,7 +596,7 @@ class TestIngest(TestCase):
             if model_fields[pfield] is models.IntegerField:
                 try:
                     draft_value = int(draft_value)
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
 
             prod_value = getattr(citation.part_details, pfield, None)
