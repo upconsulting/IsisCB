@@ -1306,9 +1306,10 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
         queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
 
-    query_parts = strip_punctuation(q).split()
+    query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
-        queryset = queryset.filter(name_for_sort__icontains=part)
+        queryset = queryset.filter(name__icontains=part)
+
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     results = []
     result_ids = []

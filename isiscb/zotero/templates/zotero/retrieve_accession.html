@@ -119,7 +119,7 @@
                 </ul>
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="suggest">
-                        <ul class="suggestion-results-list list-group">
+                        <ul class="suggestion-results-list list-group" style="max-height: 700px; overflow-y: scroll;">
                         </ul>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="search">
@@ -155,7 +155,7 @@
 
                             </div>
                         </div>
-                        <ul class="list-group" id="results-container"></ul>
+                        <ul class="list-group" id="results-container" style="max-height: 600px; overflow-y: scroll;"></ul>
                     </div>
 
 
@@ -271,6 +271,7 @@ $('.draftauthority').click(function() {
                                             class="suggested-authority-anchor"
                                             target="_blank"
                                             data-toggle="tooltip"
+                                            data-container="body"
                                             data-html="true"
                                             data-placement="left"
                                             data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
@@ -376,6 +377,7 @@ $(document).ready(function() {
                                             class="search-authority-anchor"
                                             target="_blank"
                                             data-toggle="tooltip"
+                                            data-container="body"
                                             data-html="true"
                                             data-placement="left"
                                             data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
