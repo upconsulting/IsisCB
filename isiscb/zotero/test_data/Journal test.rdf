@@ -14,7 +14,7 @@
             <rdf:Seq>
                 <rdf:li>
                     <foaf:Person>
-                        <foaf:surname>Bulstrode</foaf:surname>
+                        <foaf:surname>Bulstrode {viaf:1234567}</foaf:surname>
                         <foaf:givenname>Jenny</foaf:givenname>
                     </foaf:Person>
                 </rdf:li>
