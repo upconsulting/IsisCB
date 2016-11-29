@@ -1205,6 +1205,7 @@ def authorities(request):
 
     return HttpResponse(template.render(context))
 
+
 @staff_member_required
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def authority(request, authority_id):
@@ -1239,7 +1240,7 @@ def authority(request, authority_id):
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
         tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
-
+        print authority.linkeddata_entries.all()
         context.update({
             'request_params': request_params,
             'form': form,
