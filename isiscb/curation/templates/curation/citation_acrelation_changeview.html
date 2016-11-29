@@ -2,7 +2,33 @@
 {% load addcss %}
 {% load render_object %}
 
+
 {% block content %}
+<style>
+.related-citations-tooltip {
+    background-color: white;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+.related-citations-tooltip .tooltip-inner {
+    background-color: white;
+    color: black;
+    text-align: left;
+    max-width: 300px;
+    width: 300px;
+}
+
+.related-citations-tooltip .tooltip-inner p {
+    width: 300px;
+}
+
+.related-citation {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 8pt;
+}
+</style>
 
 {% if not form.instance.public %}
 <div class="alert alert-danger" role="alert">
@@ -208,6 +234,15 @@ $('#id_language').multiSelect()
 <script>
 //# sourceURL=save.js
 $(document).ready(function() {
+    var format_citations = function(related_citations) {
+        var _doc = '';
+        related_citations.forEach(function(rel_cit) {
+            _doc += "<div class='related-citation'>" + rel_cit + "</div>";
+        })
+        return _doc;
+    }
+
+
     var lastSearch = $.now();
     var waiting = false;
 
@@ -226,7 +261,7 @@ $(document).ready(function() {
         waiting = true;
 
         var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?q=" + query, {
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?show_inactive=false&q=" + query, {
             failure: function(result) {
                 waiting = false;
             },
@@ -234,26 +269,61 @@ $(document).ready(function() {
                 waiting = false;
 
                 $('#results-container').empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
-                    if (r.public != true) {
-                      choice_elem += ' record-notpublic';
-                    }
-                    choice_elem += '">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '" data-type="' +r.type +'" data-type-code="' + r.type_code + '" ></a>';
-                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                    if (r.description != null) {
-                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                    }
-                    if (r.public != true) {
-                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    }
-                    choice_elem += '</li>';
+                result.results.forEach(function(suggestion) {
+                    var choice_elem = `
+                        <li class="list-group-item search-result">
+                            <div class="row">
+                                <div class="col-xs-2">
+                                    <span class="button-group button-group-md">
+                                        <a class="glyphicon glyphicon-ok btn btn-md select-citation"
+                                            data-type="`+ suggestion.type +`"
+                                            data-type-code="` + suggestion.type_code + `"
+                                            data-id="` + suggestion.id + `"
+                                            data-name="` + suggestion.name + `"
+                                            data-suggestion="` + suggestion.id + `">
+                                        </a>
+                                    </span>
+                                </div>
+                                <div class="col-xs-10">
+                                    <div class="h5">
+                                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                                            class="search-authority-anchor"
+                                            target="_blank"
+                                            data-toggle="tooltip"
+                                            data-html="true"
+                                            data-placement="left"
+                                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
+                                    </div>
+                                    <span class="label label-danger"
+                                        style="margin-left: 5px;">
+                                        ` + suggestion.type_controlled + `
+                                    </span>
+                                </div>
+                            </div>
+                        </li>`;
+
+                    // var choice_elem = '<li class="list-group-item search-result';
+                    // if (r.public != true) {
+                    //   choice_elem += ' record-notpublic';
+                    // }
+                    // choice_elem += '">';
+                    // choice_elem += '<span class="button-group button-group-xs">';
+                    // choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '" data-type="' +r.type +'" data-type-code="' + r.type_code + '" ></a>';
+                    // choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                    // choice_elem += '</span>';
+                    // choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                    // if (r.description != null) {
+                    //     choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                    // }
+                    // if (r.public != true) {
+                    //   choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                    // }
+                    // choice_elem += '</li>';
 
                     $('#results-container').append(choice_elem);
+                });
+                $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
+                    template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
                 });
 
                 $('.select-citation').click(function() {
