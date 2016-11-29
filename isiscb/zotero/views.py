@@ -56,12 +56,12 @@ def suggest_authority_json(request, authority_id):
         if instance.record_status_value != CuratedMixin.ACTIVE:
             continue
 
-        related_citations = instance.acrelation_set.values_list('citation__title', flat=True)[:10]
+        related_citations = map(lambda s: s.title(), set(instance.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10]))
         suggestion.update({
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': list(related_citations),
+            'related_citations': related_citations,
         })
         suggestions.append(suggestion)
 
@@ -286,7 +286,7 @@ def create_authority_for_draft(request):
 
     draftauthority.linkeddata.all().update(processed=True)
     print authority.id
-    
+
     response_data = {
         'resolution': resolution.id,
         'authority': authority.id,
@@ -412,3 +412,12 @@ def change_draftauthority(request, draftauthority_id):
     })
     template = loader.get_template('zotero/change_draftauthority.html')
     return HttpResponse(template.render(context))
+
+
+@check_rules('has_zotero_access')
+@staff_member_required
+def remove_draftcitation(request):
+    draftcitation = get_object_or_404(DraftCitation,
+                                      pk=request.GET.get('citation'))
+    draftcitation.delete();
+    return JsonResponse({'data': 'ok'});

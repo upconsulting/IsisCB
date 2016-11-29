@@ -23,5 +23,7 @@ urlpatterns = [
     url(r'authority/skip/$', skip_authority_for_draft, name='skip_authority_for_draft'),
     url(r'authority/similar/$', similar_authorities, name='similar_authorities'),
 
+    url(r'citation/remove/$', remove_draftcitation, name='remove-draftcitation'),
+
 
 ]
