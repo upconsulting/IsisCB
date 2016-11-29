@@ -67,6 +67,38 @@ class TestPages(TestCase):
         DraftCCRelation.objects.all().delete()
 
 
+class TestVolumeAndIssue(TestCase):
+    """
+    ISISCB-779 Issue and Volume should be imported.
+    """
+
+    def test_volume_and_issue(self):
+        """
+        Each of the citations in this RDF document should have values for
+        volume and issue.
+        """
+        book_data = 'zotero/test_data/Journal test.rdf'
+        papers = ZoteroIngest(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+
+        for citation in citations:
+            self.assertTrue(citation.issue is not None)
+            self.assertTrue(citation.volume is not None)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+
+
 class TestPublisher(TestCase):
     """
     Information about publisher should be retained.
@@ -1123,9 +1155,9 @@ class TestExtraDataParsing(TestCase):
 
         raw = 'Some freeform text {key:value}'
         data = ingest.IngestManager.find_extra_data(raw)
-        self.assertIsInstance(data, list)
-        self.assertIn('key', dict(data))
-        self.assertEqual(dict(data).get('key'), 'value')
+        self.assertIsInstance(data, tuple)
+        self.assertIn('key', dict(data[0]))
+        self.assertEqual(dict(data[0]).get('key'), 'value')
 
     def test_apply_extra_data(self):
         """
@@ -1138,7 +1170,7 @@ class TestExtraDataParsing(TestCase):
             pass
 
         raw = 'Some freeform text {name:The Best Name}'
-        data = ingest.IngestManager.find_extra_data(raw)
+        data, value = ingest.IngestManager.find_extra_data(raw)
         func = ingest.IngestManager.apply_extra_data(data)
 
         obj = func(DummyObject())
@@ -1151,7 +1183,7 @@ class TestExtraDataParsing(TestCase):
         """
 
         raw = 'Some freeform text {viaf:76382712}'
-        data = ingest.IngestManager.find_extra_data(raw)
+        data, value = ingest.IngestManager.find_extra_data(raw)
         func = ingest.IngestManager.apply_extra_data(data)
 
         obj = DraftAuthority.objects.create(

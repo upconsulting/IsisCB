@@ -267,19 +267,26 @@ def create_authority_for_draft(request):
 
     authority = model_class.objects.create(**authority_data)
 
+    # We want generic relations to point to the Authority table rather than the
+    #  Person table.
+    generic_target = Authority.objects.get(pk=authority.id)
+
     resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
     draftauthority.processed = True
     draftauthority.save()
 
     for draftlinkeddata in draftauthority.linkeddata.all():
-        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name)
-        LinkedData.objects.create(
-            subject = authority,
+
+        ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
+        l = LinkedData.objects.create(
+            subject = generic_target,
             universal_resource_name = draftlinkeddata.value,
             type_controlled = ldtype
         )
-    draftauthority.linkeddata.all().update(processed=True)
 
+    draftauthority.linkeddata.all().update(processed=True)
+    print authority.id
+    raise
     response_data = {
         'resolution': resolution.id,
         'authority': authority.id,

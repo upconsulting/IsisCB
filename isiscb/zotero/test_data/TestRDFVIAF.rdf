@@ -1,0 +1,46 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3629777/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1545-8547"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kalueff {viaf:12345}</foaf:surname>
+                        <foaf:givenname>Allan V.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_44"/>
+        <dc:title>Towards a Comprehensive Catalog of Zebrafish Behavior 1.0 and Beyond</dc:title>
+        <dcterms:abstract>Zebrafish (Danio rerio) are rapidly gaining popularity in translational neuroscience and behavioral research. Physiological similarity to mammals, ease of genetic manipulations, sensitivity to pharmacological and genetic factors, robust behavior, low cost, and potential for high-throughput screening contribute to the growing utility of zebrafish models in this field. Understanding zebrafish behavioral phenotypes provides important insights into neural pathways, physiological biomarkers, and genetic underpinnings of normal and pathological brain function. Novel zebrafish paradigms continue to appear with an encouraging pace, thus necessitating a consistent terminology and improved understanding of the behavioral repertoire. What can zebrafish ‘do’, and how does their altered brain function translate into behavioral actions? To help address these questions, we have developed a detailed catalog of zebrafish behaviors (Zebrafish Behavior Catalog, ZBC) that covers both larval and adult models. Representing a beginning of creating a more comprehensive ethogram of zebrafish behavior, this effort will improve interpretation of published findings, foster cross-species behavioral modeling, and encourage new groups to apply zebrafish neurobehavioral paradigms in their research. In addition, this glossary creates a framework for developing a zebrafish neurobehavioral ontology, ultimately to become part of a unified animal neurobehavioral ontology, which collectively will contribute to better integration of biological data within and across species.</dcterms:abstract>
+        <bib:pages>70-86</bib:pages>
+        <dc:date>2013-3</dc:date>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3629777/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2014-10-30 18:04:59</dcterms:dateSubmitted>
+        <z:libraryCatalog>PubMed Central</z:libraryCatalog>
+        <dc:description>PMID: 23590400
+PMCID: PMC3629777</dc:description>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1545-8547">
+        <dc:title>Zebrafish</dc:title>
+        <prism:volume>10</prism:volume>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Zebrafish</dcterms:alternative>
+        <dc:identifier>DOI 10.1089/zeb.2012.0861</dc:identifier>
+        <dc:identifier>ISSN 1545-8547</dc:identifier>
+    </bib:Journal>
+</rdf:RDF>

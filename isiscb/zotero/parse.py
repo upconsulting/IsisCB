@@ -19,6 +19,7 @@ from rdflib.namespace import DC, FOAF, DCTERMS, split_uri
 BIB = Namespace('http://purl.org/net/biblio#')
 RSS = Namespace('http://purl.org/rss/1.0/modules/link/')
 ZOTERO = Namespace('http://www.zotero.org/namespaces/export#')
+PRISM = Namespace('http://prismstandard.org/namespaces/1.2/basic/')
 
 RESOURCE_CLASSES = [
     BIB.Illustration, BIB.Recording, BIB.Legislation, BIB.Document,
@@ -346,6 +347,10 @@ class ZoteroIngest(object):
                 if p == RDF.type:
                     o = self._relabel_predicate(o)
                 parent_document.append(self.handle(p, o))
+            elif p == PRISM.volume:
+                self._set_value('volume', self._to_python(o))
+            elif p == PRISM.number:
+                self._set_value('issue', self._to_python(o))
         return predicate, dict(parent_document)
 
     def handle_subjects(self, predicate, node):
@@ -468,8 +473,8 @@ class ZoteroIngest(object):
 
                 data = {
                     u'name': ' '.join([forename, surname]).strip(),
-                    u'name_last': forename,
-                    u'name_first': surname,
+                    u'name_last': surname,
+                    u'name_first': forename,
                 }
                 if surname.startswith('http://'):
                     data.update({'uri': surname,})

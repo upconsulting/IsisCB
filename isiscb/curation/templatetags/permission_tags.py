@@ -68,7 +68,7 @@ def are_related_objects_for_citation_public(citation):
     for acrel in citation.acrelations:
         if not acrel.public:
             return False
-        if not acrel.authority.public:
+        if not getattr(acrel.authority, 'public', None):
             return False
 
     for ccrel in citation.ccrelations:
