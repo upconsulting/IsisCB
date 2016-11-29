@@ -35,6 +35,43 @@ partdetails_fields = [
 ]
 
 
+
+def clearAll():
+    Citation.objects.all().delete()
+    Authority.objects.all().delete()
+    CCRelation.objects.all().delete()
+    ACRelation.objects.all().delete()
+    InstanceResolutionEvent.objects.all().delete()
+    ImportAccession.objects.all().delete()
+    DraftAuthority.objects.all().delete()
+    DraftCitation.objects.all().delete()
+    DraftACRelation.objects.all().delete()
+    DraftCCRelation.objects.all().delete()
+
+
+class TestExtra(TestCase):
+    """
+    The "extra" field in Zotero is represented using the DC.description
+    predicate.
+    """
+
+    def test_extra(self):
+        """
+
+        """
+        papers = ZoteroIngest('zotero/test_data/TestExtraField.rdf')
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+
+        for citation in citations:
+            self.assertTrue(citation.extra is not None)
+            self.assertEqual(citation.extra,
+                             "This is a test of the extra data field")
+
+    def tearDown(self):
+        clearAll()
+
+
 class TestPages(TestCase):
     """
     Sometimes we get unicode oddities in the page numbers.
@@ -55,16 +92,7 @@ class TestPages(TestCase):
             self.assertTrue(citation.page_end is not None)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
+        clearAll()
 
 
 class TestVolumeAndIssue(TestCase):
@@ -87,16 +115,7 @@ class TestVolumeAndIssue(TestCase):
             self.assertTrue(citation.volume is not None)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
+        clearAll()
 
 
 class TestPublisher(TestCase):
@@ -126,16 +145,7 @@ class TestPublisher(TestCase):
             self.assertEqual(auth_type_counts[DraftAuthority.INSTITUTION], 1)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
+        clearAll()
 
 
 class TestExtent(TestCase):
@@ -156,18 +166,7 @@ class TestExtent(TestCase):
             self.assertGreater(citation.extent, 0)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
-
-
+        clearAll()
 
 
 class TestBookSeries(TestCase):
@@ -240,16 +239,7 @@ class TestBookSeries(TestCase):
                 self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
 
     def tearDown(self):
-        Citation.objects.all().delete()
-        Authority.objects.all().delete()
-        CCRelation.objects.all().delete()
-        ACRelation.objects.all().delete()
-        InstanceResolutionEvent.objects.all().delete()
-        ImportAccession.objects.all().delete()
-        DraftAuthority.objects.all().delete()
-        DraftCitation.objects.all().delete()
-        DraftACRelation.objects.all().delete()
-        DraftCCRelation.objects.all().delete()
+        clearAll()
 
 
 class TestLanguageParsing(TestCase):
@@ -352,6 +342,7 @@ class TestBookReviews(TestCase):
                                       type_controlled=isbn_type,
                                       subject=test_book)
 
+
     def test_process_bookreviews(self):
 
         book_data = 'zotero/test_data/IsisReviewExamples.rdf'
@@ -373,7 +364,6 @@ class TestBookReviews(TestCase):
 
         self.assertEqual(type_counts[Citation.REVIEW], 8)
 
-
     def test_ingest_reviews(self):
         rf = RequestFactory()
         request = rf.get('/hello/')
@@ -392,35 +382,178 @@ class TestBookReviews(TestCase):
             #  when attempting to resolve dependencies.
             self.assertEqual(new_citation.relations_to.count(), 0)
 
-    def test_ingest_reviews_all(self):
-        """
-        If all authorities are resolved, all :class:`.DraftCCRelation` instances
-        should be accessioned to production.
-        """
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
+
+
+class TestBookChapters(TestCase):
+    """
+    Chapters are linked to book citations via the "Book title" field in Zotero.
+    This is represented as dc.isPartOf -> bib:Book.
+    """
+    def test_process_bookchapters2(self):
+        book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
+        papers = ZoteroIngest(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+        type_counts = Counter([c.type_controlled for c in citations])
+        self.assertEqual(type_counts[Citation.BOOK], 1)
+        self.assertEqual(type_counts[Citation.CHAPTER], 2)
+        instance.refresh_from_db()
+
+    def test_process_bookchapters_resolve(self):
+        book_data = "zotero/test_data/Chapter Test 8-9-16.rdf"
+        papers = ZoteroIngest(book_data)
+        accession = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, accession).process()
+
+        accession.refresh_from_db()
+
+        # The ImportAccession should be fully resolved, so we need to create
+        #  corresponding Authority records ahead of time.
+        for draftauthority in accession.draftauthority_set.all():
+            authority = Authority.objects.create(
+                name = draftauthority.name,
+                type_controlled = draftauthority.type_controlled,
+            )
+            InstanceResolutionEvent.objects.create(
+                for_instance = draftauthority,
+                to_instance = authority,
+            )
+        accession.draftauthority_set.all().update(processed=True)
+
+        #  We need a user for the accession.
         rf = RequestFactory()
         request = rf.get('/hello/')
         user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
         request.user = user
 
-        accession = ImportAccession.objects.create(name='TestAccession')
-        book_data = 'zotero/test_data/IsisReviewExamples.rdf'
-        data  = ingest.process(ZoteroIngest(book_data), accession)
-        for authority in accession.draftauthority_set.all():
-            authority.processed = True
-            authority.save()
+        prod_citations = ingest_accession(request, accession)
+        for citation in prod_citations:
+            self.assertGreater(citation.relations_from.count() + citation.relations_to.count(), 0)
 
-        N_ccrelations = CCRelation.objects.count()
-        ingest_accession(request, accession)
-        self.assertEqual(N_ccrelations + accession.draftccrelation_set.count(),
-                         CCRelation.objects.count())
 
-    def test_ingest_reviews_all2(self):
+    def test_process_bookchapters(self):
+        test_book = Citation.objects.create(title='A Test Citation',
+                                            type_controlled=Citation.BOOK)
+        isbn_type, _ = LinkedDataType.objects.get_or_create(name='ISBN')
+        LinkedData.objects.create(universal_resource_name='9783110225784',
+                                  type_controlled=isbn_type,
+                                  subject=test_book)
+
+
+        book_data = 'zotero/test_data/BookChapterExamples.rdf'
+        papers = ZoteroIngest(book_data)
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+
+        # There is one book in this dataset, and the chapters are chapter of
+        #  this book.
+        book = [c for c in citations if c.type_controlled == Citation.BOOK][0]
+
+        type_counts = Counter()
+        for citation in citations:
+            type_counts[citation.type_controlled] += 1
+            if citation.type_controlled == Citation.CHAPTER:
+                self.assertGreater(citation.relations_to.count(), 0)
+                relation = citation.relations_to.first()
+                self.assertEqual(relation.type_controlled,
+                                 CCRelation.INCLUDES_CHAPTER)
+
+
+        self.assertEqual(type_counts[Citation.BOOK], 2, "There are two unique"
+                         "ISBNs, thus two unique books.")
+        self.assertEqual(type_counts[Citation.CHAPTER], 6)
+
+    def tearDown(self):
+        for model in [DraftCitation, DraftAuthority, DraftACRelation,
+                      DraftCCRelation, ImportAccession, DraftCitationLinkedData,
+                      DraftAuthorityLinkedData, Authority, AttributeType,
+                      Attribute, User, Citation, ACRelation, CCRelation]:
+            model.objects.all().delete()
+
+
+class TestSubjects(TestCase):
+    def test_parse_subjects(self):
+        papers = ZoteroIngest('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
+        for paper in papers:
+            self.assertIn('subjects', paper)
+
+    def test_process_subjects(self):
+        Authority.objects.create(name='testauthority', classification_code='140-340')
+
+        papers = ZoteroIngest('zotero/test_data/Hist Europ Idea 2015 41 7.rdf')
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(papers, instance).process()
+        for citation in citations:
+            for acrelation in citation.authority_relations.filter(type_controlled=DraftACRelation.CATEGORY):
+                if acrelation.authority.name == 'testauthority':
+                    self.assertEqual(acrelation.authority.resolutions.count(), 1)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
+
+
+
+class TestSuggest(TestCase):
+    def test_suggest_citation_by_linkeddata(self):
         """
-        If all authorities are resolved, all :class:`.DraftCCRelation` instances
-        should be accessioned to production.
+        TODO: complete this.
         """
+        accession = ImportAccession(name='test')
+        accession.save()
+
+        instance = ImportAccession.objects.create(name='TestAccession')
+        citations = ingest.IngestManager(ZoteroIngest(datapath), instance).process()
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        Authority.objects.all().delete()
+        ACRelation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        ImportAccession.objects.all().delete()
+        DraftAuthority.objects.all().delete()
+        DraftCitation.objects.all().delete()
+        DraftACRelation.objects.all().delete()
+        DraftCCRelation.objects.all().delete()
+        User.objects.all().delete()
+
+
+class TestIngest(TestCase):
+    """
+    After all :class:`.DraftAuthority` instances have been resolved for a
+    :class:`.ImportAccession`\, the curator will elect to ingest all of the
+    records in that accession into the production database.
+    """
+
+    def setUp(self):
+        self.dataset = Dataset.objects.create(name='test dataset')
+        self.accession = ImportAccession.objects.create(name='test',
+                                                        ingest_to=self.dataset)
+        instance = ImportAccession.objects.create(name='TestAccession')
+
+        self.citations = ingest.IngestManager(ZoteroIngest(datapath), self.accession).process()
+
+        # We need a user for the accession.
         rf = RequestFactory()
-
         self.request = rf.get('/hello/')
         self.user = User.objects.create(username='bob', password='what', email='asdf@asdf.com')
         self.request.user = self.user
@@ -551,32 +684,32 @@ class TestAccessionProperties(TestCase):
         # draftcitation2 has no ACRelations, so should be ready from the start.
         self.assertEqual(len(accession.citations_ready), 1)
 
+        authority = Authority.objects.create(name='testtest', type_controlled=Authority.PERSON)
+        InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+        draftauthority.processed = True
+        draftauthority.save()
 
-        accession = ImportAccession.objects.create(name='TestAccession')
-        book_data = 'zotero/test_data/ahr 2015, vol. 120, no. 5.rdf'
-        data  = ingest.process(ZoteroIngest(book_data), accession)
-        for authority in accession.draftauthority_set.all():
-            authority.processed = True
-            authority.save()
+        # Now draftcitation is ready, since the target of its one ACRelation is
+        #  resolved.
+        self.assertEqual(len(accession.citations_ready), 2)
 
-        N_ccrelations = CCRelation.objects.count()
-        ingest_accession(request, accession)
-        self.assertEqual(N_ccrelations + accession.draftccrelation_set.count(),
-                         CCRelation.objects.count())
-
+        citations_before = Citation.objects.count()
+        ccrelations_before = CCRelation.objects.count()
+        ingest_accession(self.request, accession)
+        self.assertEqual(citations_before + 2, Citation.objects.count())
+        self.assertEqual(ccrelations_before + 1, CCRelation.objects.count())
 
     def tearDown(self):
         Citation.objects.all().delete()
         Authority.objects.all().delete()
-        ACRelation.objects.all().delete()
         CCRelation.objects.all().delete()
+        ACRelation.objects.all().delete()
+        InstanceResolutionEvent.objects.all().delete()
         ImportAccession.objects.all().delete()
         DraftAuthority.objects.all().delete()
         DraftCitation.objects.all().delete()
         DraftACRelation.objects.all().delete()
         DraftCCRelation.objects.all().delete()
-        User.objects.all().delete()
-
 
 
 class TestZoteroIngesterRDFOnlyReviews(TestCase):

@@ -41,6 +41,7 @@ FIELD_NAMES = dict([
     (PRISM.number, u'issue'),
     (DCTERMS.dateSubmitted, u'date_submitted'),
     (DC.identifier, u'linkeddata'),
+    (DC.description, u'extra'),
 
     (BIB.authors, u'authors'),
     (ZOTERO.seriesEditors, u'series_editors'),

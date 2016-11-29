@@ -10,3 +10,8 @@ register = template.Library()
 @register.filter(name='filter_unresolved')
 def filter_unresolved(queryset):
     return queryset.filter(processed=False)
+
+
+@register.filter(name='filter_unresolved_acrelation')
+def filter_unresolved_acrelation(queryset):
+    return queryset.filter(authority__processed=False)

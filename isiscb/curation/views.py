@@ -1306,9 +1306,10 @@ def quick_and_dirty_authority_search(request):
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
         queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
 
-    query_parts = strip_punctuation(q).split()
+    query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
-        queryset = queryset.filter(name_for_sort__icontains=part)
+        queryset = queryset.filter(name__icontains=part)
+
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     results = []
     result_ids = []
@@ -1329,7 +1330,7 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
-            'related_citations': list(obj.acrelation_set.values_list('citation__title', flat=True)[:10]),
+            'related_citations': map(lambda s: s.title(), set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])),
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curate_authority", args=(obj.id,)),
