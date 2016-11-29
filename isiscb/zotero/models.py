@@ -31,6 +31,19 @@ class ImportAccession(models.Model):
     processed = models.BooleanField(default=False)
 
     @property
+    def citations_ok(self):
+        ok = []
+        for draftcitation in self.draftcitation_set.all():
+            ready = True
+            for relation in draftcitation.authority_relations.all():
+                if not relation.authority.processed:
+                    ready = False
+                    break
+            if ready:
+                ok.append(draftcitation.id)
+        return self.draftcitation_set.filter(pk__in=ok)
+
+    @property
     def citations_ready(self):
         fields = ['authority_relations__authority__processed',
                   'authority_relations__authority__id']

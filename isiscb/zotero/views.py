@@ -320,6 +320,16 @@ def data_draftcitation(request, draftcitation_id):
             'Authority Records',
             [(_field_data(acrelation), _field_data(acrelation.authority))
              for acrelation in draftcitation.authority_relations.all()]
+        ),
+        (
+            'Citation Records (from)',
+            [(_field_data(ccrelation), _field_data(ccrelation.object))
+             for ccrelation in draftcitation.relations_from.all()]
+        ),
+        (
+            'Citation Records (to)',
+            [(_field_data(ccrelation), _field_data(ccrelation.subject))
+             for ccrelation in draftcitation.relations_to.all()]
         )
     ]
     context = RequestContext(request, {

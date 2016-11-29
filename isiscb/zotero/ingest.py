@@ -246,10 +246,10 @@ class IngestManager(object):
         if not literal:
             return
         try:
-            language = Language.objects.get(id=literal)
+            language = Language.objects.get(id=literal.lower())
         except Language.DoesNotExist:
             try:
-                language = Language.objects.get(name=literal)
+                language = Language.objects.get(name=literal.title())
             except Language.DoesNotExist:
                 return
 
@@ -593,9 +593,7 @@ class IngestManager(object):
                     'type_controlled': IngestManager._get_dtype(datum, Citation.BOOK)['type_controlled'],
                     'part_of': draft_citation.part_of
                 }, ldata, None, datum)
-                # draft_altcitation = DraftCitation.objects.create(
-                #
-                # )
+
                 IngestManager.generate_citation_linkeddata(datum, draft_altcitation)
 
         draft_ccrelation = DraftCCRelation.objects.create(
@@ -746,6 +744,7 @@ class IngestManager(object):
         acrelations += IngestManager.generate_publisher_acrelations(
             entry, draft_citation)
         IngestManager.generate_part_of_relations(entry, draft_citation)
+        IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation
 
     def process(self):

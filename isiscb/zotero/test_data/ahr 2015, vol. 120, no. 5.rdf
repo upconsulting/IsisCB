@@ -1,0 +1,867 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1888">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0002-8762,%201937-5239"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lipin</foaf:surname>
+                        <foaf:givenname>Lawrence M.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780674725096</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_98635"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1888</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1888-1889</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:18:54</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Catherine McNeur. Taming Manhattan: Environmental Battles in the Antebellum City.</dc:title>
+        <z:shortTitle>Catherine McNeur. Taming Manhattan</z:shortTitle>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0002-8762,%201937-5239">
+        <prism:volume>120</prism:volume>
+        <prism:number>5</prism:number>
+        <dc:title>The American Historical Review</dc:title>
+        <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+        <dcterms:alternative>The American Historical Review</dcterms:alternative>
+        <dc:identifier>DOI 10.1093/ahr/120.5.1888</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_98635">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1888.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:18:54</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1853">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1853</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ash</foaf:surname>
+                        <foaf:givenname>Mitchell G.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780271060705</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_97305"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1853</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1853-1854</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:16:47</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Liv Emma Thorsen, Karen A. Rader, and Adam Dodd, editors. Animals on Display: The Creaturely in Museums, Zoos, and Natural History.</dc:title>
+        <z:shortTitle>Liv Emma Thorsen, Karen A. Rader, and Adam Dodd, editors. Animals on Display</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_97305">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1853.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:16:47</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1873">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1873</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peckham</foaf:surname>
+                        <foaf:givenname>Robert</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780774824323</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_97578"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1873</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1873-1874</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:17:43</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Bridie Andrews. The Making of Modern Chinese Medicine, 1850–1960.</dc:title>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_97578">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1873.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:17:43</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1619">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1619</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zitser</foaf:surname>
+                        <foaf:givenname>Ernest A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Collis</foaf:surname>
+                        <foaf:givenname>Robert</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_97990"/>
+        <dc:subject>=340-111=</dc:subject>
+        <dc:subject>17th century [10]</dc:subject>
+        <dc:subject>18th century [12]</dc:subject>
+        <dc:subject>Astrology [4848]</dc:subject>
+        <dc:subject>Russia [5149]</dc:subject>
+        <dc:subject>Science and politics [1142]</dc:subject>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1619</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1619-1652</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:00:49</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dcterms:abstract>Robert Collis is an Honorary Research Fellow at the University of Sheffield (UK) and a Docent in Russian History at the University of Turku (Finland). He is the author of The Petrine Instauration: Religion, Esotericism and Science at the Court of Peter the Great, 1689–1725 (Brill, 2012) and co-editor of Freemasonry and Fraternalism in Eighteenth-Century Russia (Centre for Research into Freemasonry and Fraternalism, 2009). He has published numerous articles on Russian history in peer-reviewed journals and is also on the editorial boards of В ивлiо ѳика: E-Journal of Eighteenth-Century Russian Studies and the Journal for Research into Freemasonry and Fraternalism. He is currently researching the influence of various aspects of Western esotericism on the Russian elite in the long eighteenth century.</dcterms:abstract>
+        <dc:title>On the Cusp: Astrology, Politics, and Life-Writing in Early Imperial Russia</dc:title>
+        <z:shortTitle>On the Cusp</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_97990">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1619.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:00:49</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1922">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1922</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pratt</foaf:surname>
+                        <foaf:givenname>Joseph A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780700620043</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_98598"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1922</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1922-1923</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:20:35</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Bob Johnson. Carbon Nation: Fossil Fuels in the Making of American Culture.</dc:title>
+        <z:shortTitle>Bob Johnson. Carbon Nation</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_98598">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1922.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:20:35</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1972">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1972</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Brown</foaf:surname>
+                        <foaf:givenname>Michael</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9781322096988</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_97875"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1972</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1972-1973</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:22:41</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Erica Charters. Disease, War, and the Imperial State: The Welfare of the British Armed Forces during the Seven Years’ War.</dc:title>
+        <z:shortTitle>Erica Charters. Disease, War, and the Imperial State</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_97875">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1972.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:22:41</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1865">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1865</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Rothman</foaf:surname>
+                        <foaf:givenname>Sheila M.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9781421413020</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_98142"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1865</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1865-1866</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:17:18</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>George Weisz. Chronic Disease in the Twentieth Century: A History.</dc:title>
+        <z:shortTitle>George Weisz. Chronic Disease in the Twentieth Century</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_98142">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1865.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:17:18</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1920">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1920</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Umansky</foaf:surname>
+                        <foaf:givenname>Lauri</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9781421413655</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_98141"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1920</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1920-1921</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:20:19</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Keith Wailoo. Pain: A Political History.</dc:title>
+        <z:shortTitle>Keith Wailoo. Pain</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_98141">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1920.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:20:19</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1918">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1918</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hangen</foaf:surname>
+                        <foaf:givenname>Tona</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780814708323</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_96673"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1918</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1918-1919</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:20:07</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Lerone A. Martin. Preaching on Wax: The Phonograph and the Shaping of Modern African American Religion.</dc:title>
+        <z:shortTitle>Lerone A. Martin. Preaching on Wax</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_96673">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1918.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:20:07</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1921">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1921</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Logan</foaf:surname>
+                        <foaf:givenname>Michael F.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780691139067</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_97970"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1921</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1921-1922</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:20:27</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Andrew Needham. Power Lines: Phoenix and the Making of the Modern Southwest.</dc:title>
+        <z:shortTitle>Andrew Needham. Power Lines</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_97970">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1921.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:20:27</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/2003">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.2003</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hall</foaf:surname>
+                        <foaf:givenname>Gwendolyn Midlo</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780253352194</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_99456"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/2003</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>2003-2004</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:24:06</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Edda L. Fields-Black. Deep Roots: Rice Farmers in West Africa and the African Diaspora.</dc:title>
+        <z:shortTitle>Edda L. Fields-Black. Deep Roots</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_99456">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/2003.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:24:06</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1904">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1904</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Brattain</foaf:surname>
+                        <foaf:givenname>Michelle</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780231168748</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_99196"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1904</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1904-1905</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:19:29</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Michael Yudell. Race Unmasked: Biology and Race in the Twentieth Century.</dc:title>
+        <z:shortTitle>Michael Yudell. Race Unmasked</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_99196">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1904.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:19:29</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1995">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1995</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Miller</foaf:surname>
+                        <foaf:givenname>Alexey</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9781442648937</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_96282"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1995</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1995-1995</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:23:36</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Matthew D. Pauly. Breaking the Tongue: Language, Education, and Power in Soviet Ukraine, 1923–1934.</dc:title>
+        <z:shortTitle>Matthew D. Pauly. Breaking the Tongue</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_96282">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1995.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:23:36</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1874">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1874</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mizuno</foaf:surname>
+                        <foaf:givenname>Hiromi</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9781442644403</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_96609"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1874</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1874-1875</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:17:56</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Hoi-eun Kim. Doctors of Empire: Medical and Cultural Encounters between Imperial Germany and Meiji Japan.</dc:title>
+        <z:shortTitle>Hoi-eun Kim. Doctors of Empire</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_96609">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1874.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:17:56</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ahr.oxfordjournals.org/content/120/5/1923">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>120</prism:volume>
+                <prism:number>5</prism:number>
+                <dc:title>The American Historical Review</dc:title>
+                <dc:identifier>ISSN 0002-8762, 1937-5239</dc:identifier>
+                <dcterms:alternative>The American Historical Review</dcterms:alternative>
+                <dc:identifier>DOI 10.1093/ahr/120.5.1923</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Schwantes</foaf:surname>
+                        <foaf:givenname>Carlos A.</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <z:reviewedAuthors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                       <foaf:surname>9780674725645</foaf:surname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </z:reviewedAuthors>
+        <link:link rdf:resource="#item_96639"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1923</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>1923-1924</bib:pages>
+        <dc:date>12/01/2015</dc:date>
+        <dcterms:dateSubmitted>2016-06-26 18:20:50</dcterms:dateSubmitted>
+        <z:libraryCatalog>ahr.oxfordjournals.org</z:libraryCatalog>
+        <z:language>en</z:language>
+        <dc:title>Robert E. Gallamore and John R. Meyer. American Railroads: Decline and Renaissance in the Twentieth Century.</dc:title>
+        <z:shortTitle>Robert E. Gallamore and John R. Meyer. American Railroads</z:shortTitle>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_96639">
+        <z:itemType>attachment</z:itemType>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://ahr.oxfordjournals.org/content/120/5/1923.extract</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2016-06-26 18:20:50</dcterms:dateSubmitted>
+        <dc:title>Snapshot</dc:title>
+        <z:linkMode>3</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>

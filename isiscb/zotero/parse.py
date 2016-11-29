@@ -37,7 +37,8 @@ FIELD_NAMES = dict([
     (RDF.type, u'type_controlled'),
     (ZOTERO.itemType, u'type_controlled'),
     (ZOTERO.numPages, u'extent'),
-
+    (PRISM.volume, u'volume'),
+    (PRISM.number, u'issue'),
     (DCTERMS.dateSubmitted, u'date_submitted'),
     (DC.identifier, u'linkeddata'),
 
