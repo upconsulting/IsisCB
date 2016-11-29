@@ -63,6 +63,13 @@
                         {{ citation.abstract|truncatechars:200 }}
                     </p>
                     {% endif %}
+                    {% if citation.extra %}
+                    <p class="strong">Extra</p>
+                    <p>
+
+                        {{ citation.extra|truncatechars:200 }}
+                    </p>
+                    {% endif %}
                     </div>
                     {% if acrelations.count > 0 %}
                     <ul class="list-group">
