@@ -845,9 +845,9 @@ def citation(request, citation_id):
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    user_cache = caches['default']
-    page = user_cache.get('citation_page', 1)
-    get_request = user_cache.get('citation_filters', None)
+    user_session = request.session
+    page = user_session.get('citation_page', 1)
+    get_request = user_session.get('citation_filters', None)
     queryset = filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
@@ -856,9 +856,9 @@ def citation(request, citation_id):
     citations_page = paginator.page(page)
 
     # ok, let's start the whole pagination/next/previous dance :op
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params')
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
 
-    request_params = user_cache.get('citation_request_params', "")
+    request_params = user_session.get('citation_request_params', "")
     context.update({
         'request_params': request_params,
     })
@@ -916,13 +916,13 @@ def citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 
-def _build_next_and_prev(context, current_obj, objects_page, paginator, page, cache_prev_index_key, cache_page_key, cache_request_param_key):
+def _build_next_and_prev(context, current_obj, objects_page, paginator, page, cache_prev_index_key, cache_page_key, cache_request_param_key, session):
     if objects_page:
-        user_cache = caches['default']
-        request_params = user_cache.get(cache_request_param_key, {})
+        user_session = session
+        request_params = user_session.get(cache_request_param_key, {})
 
         result_list = list(objects_page.object_list)
-        prev_index = user_cache.get(cache_prev_index_key, None)
+        prev_index = user_session.get(cache_prev_index_key, None)
         index = None
         if current_obj in result_list:
             index = result_list.index(current_obj)
@@ -947,10 +947,10 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
                 index = _get_corrected_index(prev_index, index)
                 if index != None:
                     page = page+1
-                    user_cache.set(cache_page_key, page)
+                    user_session[cache_page_key] = page
                     request_params['page'] = page
 
-                    user_cache.set(cache_request_param_key, request_params)
+                    user_session[cache_request_param_key] = request_params
 
         # check if it's on previous page
         if index == None and page > 1:
@@ -960,17 +960,17 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
             if current_obj in result_list:
                 page = page-1
                 index = result_list.index(current_obj)
-                user_cache.set(cache_page_key, page)
+                user_session[cache_page_key] = page
 
                 # update back to list link
                 request_params['page'] = page
 
-                user_cache.set(cache_request_param_key, request_params)
+                user_session[cache_request_param_key] = request_params
 
         # let's get next and previous if we have an index
         if index != None:
             # store current index for duplication issue
-            user_cache.set(cache_prev_index_key, index)
+            user_session[cache_prev_index_key] = index
 
             next = result_list[index+1] if len(result_list) > index+1 else None
             # if next is not on this page, get the next one
@@ -1050,11 +1050,11 @@ def citations(request):
     additional_params_names = ["page", "zotero_accession"]
     all_params = {}
 
-    user_cache = caches['default']
+    user_session = request.session
     if request.method == 'POST':
         filter_params = QueryDict(request.POST.urlencode(), mutable=True)
     elif request.method == 'GET':
-        filter_params = user_cache.get('citation_filters', {})
+        filter_params = user_session.get('citation_filters', {})
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
         for key in additional_params_names:
@@ -1090,10 +1090,10 @@ def citations(request):
         if not currentPage:
             currentPage = 1
 
-        user_cache.set('citation_request_params', all_params)
-        user_cache.set('citation_filters', request_params)
-        user_cache.set('citation_page', int(currentPage))
-        user_cache.set('citation_prev_index', None)
+        user_session['citation_request_params'] = all_params
+        user_session['citation_filters'] = request_params
+        user_session['citation_page'] = int(currentPage)
+        user_session['citation_prev_index'] = None
 
     context.update({
         'objects': filtered_objects,
@@ -1145,12 +1145,12 @@ def authorities(request):
         'curation_subsection': 'authorities',
     })
 
-    user_cache = caches['default']
-    user_cache.set('authority_request_params', request.META['QUERY_STRING'])
-    user_cache.set('authority_get_request', request.GET)
+    user_session = request.session
+    user_session['authority_request_params'] = request.META['QUERY_STRING']
+    user_session['authority_get_request'] = request.GET
     currentPage = request.GET.get('page', 1)
-    user_cache.set('authority_page', int(currentPage))
-    user_cache.set('authority_prev_index', None)
+    user_session['authority_page'] = int(currentPage)
+    user_session['authority_prev_index'] = None
 
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
@@ -1178,9 +1178,9 @@ def authority(request, authority_id):
     person_form = None
     if request.method == 'GET':
 
-        user_cache = caches['default']
-        page = user_cache.get('authority_page', 1)
-        get_request = user_cache.get('authority_get_request', None)
+        user_session = request.session
+        page = user_session.get('authority_page', 1)
+        get_request = user_session.get('authority_get_request', None)
 
         queryset = filter_queryset(request.user, Authority.objects.all())
 
@@ -1189,8 +1189,8 @@ def authority(request, authority_id):
 
         authority_page = paginator.page(page)
 
-        _build_next_and_prev(context, authority, authority_page, paginator, page, 'authority_prev_index', 'authority_page', 'authority_request_params')
-        request_params = user_cache.get('authority_request_params', "")
+        _build_next_and_prev(context, authority, authority_page, paginator, page, 'authority_prev_index', 'authority_page', 'authority_request_params', user_session)
+        request_params = user_session.get('authority_request_params', "")
 
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
             person_form = PersonForm(request.user, authority_id, instance=authority.person)
