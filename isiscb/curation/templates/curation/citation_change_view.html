@@ -402,6 +402,7 @@ var addLanguage = function() {
 $( document ).ready(function() {
 
   $('.citation_submit').on( "click", function() {
+      $('#data_changed_modal').attr('data-forward-type', '');
       if (checkRecord()) {
           $('#citation_form').submit();
       }
