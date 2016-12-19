@@ -887,6 +887,7 @@ def citation(request, citation_id):
     request_params = user_session.get('citation_request_params', "")
     context.update({
         'request_params': request_params,
+        'total': filtered_objects.qs.count(),
     })
 
     if citation.type_controlled == Citation.BOOK:
@@ -965,12 +966,13 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
         result_list = list(objects_page.object_list)
         prev_index = user_session.get(cache_prev_index_key, None)
         index = None
+
         if current_obj in result_list:
             index = result_list.index(current_obj)
 
             # this is a fix for the duplicate results issue
             # is this more stable than having a running index for the record
-            # looked at? I don't know, but this work, so I say it's stable enough!
+            # looked at? I don't know, but this works, so I say it's stable enough!
             index = _get_corrected_index(prev_index, index)
 
         # if current citation is not on current page (page turns)
@@ -1037,6 +1039,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
             context.update({
                 'next': next,
                 'previous': previous,
+                'index': paginator.page(page).start_index() + index,
             })
 
 def _get_corrected_index(prev_index, index):
@@ -1186,18 +1189,49 @@ def authorities(request):
         'curation_subsection': 'authorities',
     })
 
+    additional_params_names = ["page"]
+    all_params = {}
+
     user_session = request.session
-    user_session['authority_request_params'] = request.META['QUERY_STRING']
-    user_session['authority_get_request'] = request.GET
+
+    if request.method == 'POST':
+        filter_params = QueryDict(request.POST.urlencode(), mutable=True)
+    elif request.method == 'GET':
+        filter_params = user_session.get('authority_filters', {})
+        if not 'o' in filter_params.keys():
+            filter_params['o'] = 'name_for_sort'
+        for key in additional_params_names:
+            all_params[key] = request.GET.get(key, '')
+    if 'o' not in filter_params:
+        filter_params['o'] = 'name_for_sort'
+
+    #user_session['authority_request_params'] = request.META['QUERY_STRING']
+    #user_session['authority_get_request'] = request.GET
     currentPage = request.GET.get('page', 1)
-    user_session['authority_page'] = int(currentPage)
-    user_session['authority_prev_index'] = None
+    #user_session['authority_page'] = int(currentPage)
+    #user_session['authority_prev_index'] = None
 
     template = loader.get_template('curation/authority_list_view.html')
     queryset = filter_queryset(request.user, Authority.objects.all())
-    filtered_objects = AuthorityFilter(request.GET, queryset=queryset)
-    filters_active = request.GET.get('filters', False)
+    filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
+
+    filters_active = filter_params
     filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+
+    if filtered_objects.form.is_valid():
+        request_params = filtered_objects.form.cleaned_data
+        for key in request_params:
+            all_params[key] = request_params[key]
+
+        currentPage = all_params.get('page', 1)
+        if not currentPage:
+            currentPage = 1
+
+        user_session['authority_request_params'] = all_params
+        user_session['authority_filters'] = request_params
+        user_session['authority_page'] = int(currentPage)
+        user_session['authority_prev_index'] = None
+
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active
@@ -1222,16 +1256,16 @@ def authority(request, authority_id):
 
         user_session = request.session
         page = user_session.get('authority_page', 1)
-        get_request = user_session.get('authority_get_request', None)
+        get_request = user_session.get('authority_filters', None)
 
         queryset = filter_queryset(request.user, Authority.objects.all())
-
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
         paginator = Paginator(filtered_objects.qs, 40)
-
         authority_page = paginator.page(page)
 
+        # ok, let's start the whole pagination/next/previous dance :op
         _build_next_and_prev(context, authority, authority_page, paginator, page, 'authority_prev_index', 'authority_page', 'authority_request_params', user_session)
+
         request_params = user_session.get('authority_request_params', "")
 
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
@@ -1240,13 +1274,14 @@ def authority(request, authority_id):
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
         tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
-        print authority.linkeddata_entries.all()
+
         context.update({
             'request_params': request_params,
             'form': form,
             'instance': authority,
             'person_form': person_form,
             'tracking_entries': tracking_entries,
+            'total': filtered_objects.qs.count(),
         })
 
 

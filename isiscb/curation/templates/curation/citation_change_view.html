@@ -89,11 +89,13 @@ Back to List </a>
       <a id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
       {% endif %}
     </div>
-    <div class="col-md-3">
-        <div class="btn-group pull-right">
+    <div class="col-md-3 text-right">
+        Record {{ index }} of {{ total }}
+        <div class="btn-group ">
             <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
+
         </div>
     </div>
 </div>
