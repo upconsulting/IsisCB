@@ -887,6 +887,7 @@ def citation(request, citation_id):
     request_params = user_session.get('citation_request_params', "")
     context.update({
         'request_params': request_params,
+        'total': filtered_objects.qs.count(),
     })
 
     if citation.type_controlled == Citation.BOOK:
@@ -970,7 +971,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
 
             # this is a fix for the duplicate results issue
             # is this more stable than having a running index for the record
-            # looked at? I don't know, but this work, so I say it's stable enough!
+            # looked at? I don't know, but this works, so I say it's stable enough!
             index = _get_corrected_index(prev_index, index)
 
         # if current citation is not on current page (page turns)
@@ -1037,6 +1038,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page, ca
             context.update({
                 'next': next,
                 'previous': previous,
+                'index': paginator.page(page).start_index() + index,
             })
 
 def _get_corrected_index(prev_index, index):
