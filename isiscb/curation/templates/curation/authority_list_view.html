@@ -47,7 +47,8 @@
 {% endblock %}
 
 {% block filter_form %}
-<form class="form clearfix">
+<form id="filter_form" class="form clearfix" action="{% url 'authority_list' %}" method="POST" >
+{% csrf_token %}
 
     <div class="row">
         <div class="col-sm-4">
@@ -152,12 +153,6 @@
             <div class="form-group clearable">
                 <label>{{ objects.form.o.label }}</label>
                 {{ objects.form.o|addcss:"form-control" }}
-            </div>
-
-
-            <div class="btn-group pull-right">
-                <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-                <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
             </div>
         </div>
     </div>

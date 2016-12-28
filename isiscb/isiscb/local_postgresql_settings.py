@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.humanize',    
+    'django.contrib.humanize',
     'social.apps.django_app.default',
     'rest_framework',
     'simple_history',
@@ -242,3 +242,5 @@ FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
 LICENSE = """This work is licensed under a Creative Commons
              Attribution-NonCommercial 4.0 International License."""
+
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
