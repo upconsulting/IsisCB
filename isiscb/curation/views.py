@@ -1333,24 +1333,29 @@ def quick_and_dirty_authority_search(request):
 
     queryset = Authority.objects.all()
     queryset_sw = Authority.objects.all()
+    queryset_exact = Authority.objects.all()
     if tc:
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
+        queryset_exact = queryset_exact.filter(type_controlled=tc.upper())
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
         queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
+        queryset_exact = queryset_exact.filter(record_status_value=CuratedMixin.ACTIVE)
 
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
         queryset = queryset.filter(name__icontains=part)
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
+    queryset_exact = queryset_exact.filter(name_for_sort=q)
     results = []
     result_ids = []
-    for i, obj in enumerate(chain(queryset_sw, queryset.order_by('name'))):
-        # for some reason some query results have duplicates
-        # and unique doesn't seem to really fix it, so this workaround
+    # first exact matches then starts with matches and last contains matches
+    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset.order_by('name'))):
+        # there are duplicates since everything that starts with a term
+        # also contains the term.
         if obj.id in result_ids:
             # make sure we still return 10 results although we're skipping one
             N += 1
