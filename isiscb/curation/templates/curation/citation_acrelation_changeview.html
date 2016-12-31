@@ -245,6 +245,7 @@ $(document).ready(function() {
 
     var lastSearch = $.now();
     var waiting = false;
+    var max_results = 10;
 
     var authority_name = "{% if acrelation %}{{ acrelation.authority.name|safe }}{% endif %}";
     var authority_search_input = $('#authority-search');
@@ -260,8 +261,8 @@ $(document).ready(function() {
         lastSearch = $.now();
         waiting = true;
 
-        var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?show_inactive=false&q=" + query, {
+        var query = authority_search_input.val();
+        $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + query, {
             failure: function(result) {
                 waiting = false;
             },
@@ -302,26 +303,20 @@ $(document).ready(function() {
                             </div>
                         </li>`;
 
-                    // var choice_elem = '<li class="list-group-item search-result';
-                    // if (r.public != true) {
-                    //   choice_elem += ' record-notpublic';
-                    // }
-                    // choice_elem += '">';
-                    // choice_elem += '<span class="button-group button-group-xs">';
-                    // choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.name + '" data-type="' +r.type +'" data-type-code="' + r.type_code + '" ></a>';
-                    // choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                    // choice_elem += '</span>';
-                    // choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                    // if (r.description != null) {
-                    //     choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                    // }
-                    // if (r.public != true) {
-                    //   choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    // }
-                    // choice_elem += '</li>';
-
                     $('#results-container').append(choice_elem);
                 });
+                if (result.results.length == max_results) {
+                  var load_more = `
+                    <li class="list-group-item search-result">
+                      <div class="text-right" id="load-more"><a>Load more...</a></div>
+                    </li>
+                  `;
+                  $('#results-container').append(load_more);
+                  $('#load-more').click(function() {
+                      max_results += 10;
+                      triggerSearch();
+                  });
+                }
                 $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
                     template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
                 });
@@ -351,7 +346,10 @@ $(document).ready(function() {
         authority_search_input.val(authority_name);
         authority_search_input.attr('disabled', true);
     }
-    authority_search_input.on('keyup', triggerSearch);
+    authority_search_input.on('keyup', function() {
+      max_results = 10;
+      triggerSearch();
+    });
     $('.enable-search-input').click(unlockSearchInput);
 
     $('.save-acrelation').click(function() {
