@@ -1334,26 +1334,33 @@ def quick_and_dirty_authority_search(request):
     queryset = Authority.objects.all()
     queryset_sw = Authority.objects.all()
     queryset_exact = Authority.objects.all()
+    queryset_with_numbers = Authority.objects.all()
     if tc:
         queryset = queryset.filter(type_controlled=tc.upper())
         queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
         queryset_exact = queryset_exact.filter(type_controlled=tc.upper())
+        queryset_with_numbers = queryset_with_numbers.filter(type_controlled=tc.upper())
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
         queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
         queryset_exact = queryset_exact.filter(record_status_value=CuratedMixin.ACTIVE)
+        queryset_with_numbers = queryset_with_numbers.filter(record_status_value=CuratedMixin.ACTIVE)
 
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
         queryset = queryset.filter(name__icontains=part)
+
+    query_parts_numbers = strip_punctuation(q).split()
+    for part in query_parts_numbers:
+        queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     queryset_exact = queryset_exact.filter(name_for_sort=q)
     results = []
     result_ids = []
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset.order_by('name'))):
+    for i, obj in enumerate(chain(queryset_exact, queryset_with_numbers.order_by('name'), queryset_sw, queryset.order_by('name'))):
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
@@ -1745,12 +1752,14 @@ def remove_rule(request, role_id, rule_id):
 @staff_member_required
 def quick_and_dirty_citation_search(request):
     q = request.GET.get('q', None)
+    N = int(request.GET.get('max', 20))
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
 
     queryset = Citation.objects.all()
     for part in q.split():
         queryset = queryset.filter(title_for_sort__icontains=part)
+    queryset = queryset.order_by('title_for_sort')
     results = [{
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
@@ -1761,7 +1770,7 @@ def quick_and_dirty_citation_search(request):
         'description': obj.description,
         'url': reverse("curate_citation", args=(obj.id,)),
         'public':obj.public,
-    } for obj in queryset[:20]]
+    } for obj in queryset[:N]]
     return JsonResponse({'results': results})
 
 
