@@ -71,7 +71,6 @@ def get_isbn(obj):
 
 @register.filter(name='get_doi')
 def get_doi(obj):
-    print obj.linkeddata_entries.all()
     return obj.linkeddata_entries.filter(type_controlled__name__icontains='doi').first()
 
 
