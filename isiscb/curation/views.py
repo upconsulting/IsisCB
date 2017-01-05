@@ -1752,12 +1752,14 @@ def remove_rule(request, role_id, rule_id):
 @staff_member_required
 def quick_and_dirty_citation_search(request):
     q = request.GET.get('q', None)
+    N = int(request.GET.get('max', 20))
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
 
     queryset = Citation.objects.all()
     for part in q.split():
         queryset = queryset.filter(title_for_sort__icontains=part)
+    queryset = queryset.order_by('title_for_sort')
     results = [{
         'id': obj.id,
         'type': obj.get_type_controlled_display(),
@@ -1768,7 +1770,7 @@ def quick_and_dirty_citation_search(request):
         'description': obj.description,
         'url': reverse("curate_citation", args=(obj.id,)),
         'public':obj.public,
-    } for obj in queryset[:20]]
+    } for obj in queryset[:N]]
     return JsonResponse({'results': results})
 
 

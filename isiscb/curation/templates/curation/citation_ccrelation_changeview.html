@@ -323,21 +323,21 @@ $(document).ready(function() {
 
     var lastSearch = $.now();
     var waiting = false;
+    var INITIAL_MAX_RESULT = 20;
+    var max_results = INITIAL_MAX_RESULT;
+    var search_input;
 
     /**
       * Performs a citation search based on the content of the search input.
       */
     var triggerSearch = function(e) {
         if ($.now() - lastSearch < 500 || waiting) return;
-        
-        var search_input = $(this);
-        var query = search_input.val();
-        console.log('query', query);
-        var results_container = $($(this).attr('results-target'));
-        console.log('results_container', results_container);
-        var id_result_container = $($(this).attr('selected-result-target'));
 
-        $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
+        var query = search_input.val();
+        var results_container = $(search_input.attr('results-target'));
+        var id_result_container = $(search_input.attr('selected-result-target'));
+
+        $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
             failure: function(result) {
                 waiting = false;
             },
@@ -366,6 +366,18 @@ $(document).ready(function() {
 
                     results_container.append(choice_elem);
                 });
+                if (result.results.length == max_results) {
+                  var load_more = `
+                    <li class="list-group-item search-result">
+                      <div class="text-right" id="load-more"><a>Load more...</a></div>
+                    </li>
+                  `;
+                  results_container.append(load_more);
+                  $('#load-more').click(function() {
+                      max_results += 10;
+                      triggerSearch();
+                  });
+                }
 
                 $('.select-citation').click(function() {
                     var selected = $(this);
@@ -462,7 +474,11 @@ $(document).ready(function() {
     });
 
     $('#swap-subject-object').click(swapSubjectObject);
-    $('.citation-search').on('keyup', triggerSearch);
+    $('.citation-search').on('keyup', function() {
+      max_results = INITIAL_MAX_RESULT;
+      search_input = $(this);
+      triggerSearch();
+    });
     $('.enable-search-input').click(unlockSearchInput);
 });
 </script>
