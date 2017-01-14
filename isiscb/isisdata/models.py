@@ -683,7 +683,7 @@ class Citation(ReferencedEntity, CuratedMixin):
                              " title, this should be added as something like"
                              " '[Review of Title (Year) by Author]'.")
 
-    title_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+    title_for_sort = models.CharField(max_length=2000, blank=True, null=True, db_index=True)
 
     additional_titles = models.TextField(blank=True, null=True,
                                          help_text="Additional titles (not"
