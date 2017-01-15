@@ -1757,20 +1757,44 @@ def quick_and_dirty_citation_search(request):
         return JsonResponse({'results': []})
 
     queryset = Citation.objects.all()
+    queryset_exact = Citation.objects.all()
+    queryset_sw = Citation.objects.all()
+
+    queryset_exact = queryset_exact.filter(title_for_sort=q)
+    queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)
+
     for part in q.split():
         queryset = queryset.filter(title_for_sort__icontains=part)
+
     queryset = queryset.order_by('title_for_sort')
-    results = [{
-        'id': obj.id,
-        'type': obj.get_type_controlled_display(),
-        'type_id':obj.type_controlled,
-        'title': _get_citation_title(obj),
-        'authors': _get_authors_editors(obj),
-        'datestring': _get_datestring_for_citation(obj),
-        'description': obj.description,
-        'url': reverse("curate_citation", args=(obj.id,)),
-        'public':obj.public,
-    } for obj in queryset[:N]]
+    queryset_exact = queryset_exact.order_by('title_for_sort')
+    queryset_sw = queryset_sw.order_by('title_for_sort')
+
+    result_ids = []
+    results = []
+    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset)):
+        # there are duplicates since everything that starts with a term
+        # also contains the term.
+        if obj.id in result_ids:
+            # make sure we still return 10 results although we're skipping one
+            N += 1
+            continue
+        if i == N:
+            break
+
+        result_ids.append(obj.id)
+        results.append({
+            'id': obj.id,
+            'type': obj.get_type_controlled_display(),
+            'type_id':obj.type_controlled,
+            'title': _get_citation_title(obj),
+            'authors': _get_authors_editors(obj),
+            'datestring': _get_datestring_for_citation(obj),
+            'description': obj.description,
+            'url': reverse("curate_citation", args=(obj.id,)),
+            'public':obj.public,
+        })
+
     return JsonResponse({'results': results})
 
 

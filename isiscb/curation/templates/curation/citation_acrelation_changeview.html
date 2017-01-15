@@ -243,8 +243,6 @@ $(document).ready(function() {
     }
 
 
-    var lastSearch = $.now();
-    var waiting = false;
     var max_results = 10;
 
     var authority_name = "{% if acrelation %}{{ acrelation.authority.name|safe }}{% endif %}";
@@ -256,90 +254,93 @@ $(document).ready(function() {
         search_input.trigger('keyup');
     }
 
+    var searchTimer = 0;
     var triggerSearch = function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
-        lastSearch = $.now();
-        waiting = true;
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
 
         var query = authority_search_input.val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + query, {
-            failure: function(result) {
-                waiting = false;
-            },
-            success: function(result) {
-                waiting = false;
+        searchTimer = setTimeout(function() {
+          $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + query, {
+              failure: function(result) {
+                  waiting = false;
+              },
+              success: function(result) {
+                  waiting = false;
 
-                $('#results-container').empty();
-                result.results.forEach(function(suggestion) {
-                    var choice_elem = `
-                        <li class="list-group-item search-result">
-                            <div class="row">
-                                <div class="col-xs-2">
-                                    <span class="button-group button-group-md">
-                                        <a class="glyphicon glyphicon-ok btn btn-md select-citation"
-                                            data-type="`+ suggestion.type +`"
-                                            data-type-code="` + suggestion.type_code + `"
-                                            data-id="` + suggestion.id + `"
-                                            data-name="` + suggestion.name + `"
-                                            data-suggestion="` + suggestion.id + `">
-                                        </a>
-                                    </span>
-                                </div>
-                                <div class="col-xs-10">
-                                    <div class="h5">
-                                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
-                                            class="search-authority-anchor"
-                                            target="_blank"
-                                            data-toggle="tooltip"
-                                            data-html="true"
-                                            data-placement="left"
-                                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
-                                    </div>
-                                    <span class="label label-danger"
-                                        style="margin-left: 5px;">
-                                        ` + suggestion.type_controlled + `
-                                    </span>
-                                </div>
-                            </div>
-                        </li>`;
+                  $('#results-container').empty();
+                  result.results.forEach(function(suggestion) {
+                      var choice_elem = `
+                          <li class="list-group-item search-result">
+                              <div class="row">
+                                  <div class="col-xs-2">
+                                      <span class="button-group button-group-md">
+                                          <a class="glyphicon glyphicon-ok btn btn-md select-citation"
+                                              data-type="`+ suggestion.type +`"
+                                              data-type-code="` + suggestion.type_code + `"
+                                              data-id="` + suggestion.id + `"
+                                              data-name="` + suggestion.name + `"
+                                              data-suggestion="` + suggestion.id + `">
+                                          </a>
+                                      </span>
+                                  </div>
+                                  <div class="col-xs-10">
+                                      <div class="h5">
+                                          <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                                              class="search-authority-anchor"
+                                              target="_blank"
+                                              data-toggle="tooltip"
+                                              data-html="true"
+                                              data-placement="left"
+                                              data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
+                                      </div>
+                                      <span class="label label-danger"
+                                          style="margin-left: 5px;">
+                                          ` + suggestion.type_controlled + `
+                                      </span>
+                                  </div>
+                              </div>
+                          </li>`;
 
-                    $('#results-container').append(choice_elem);
-                });
-                if (result.results.length == max_results) {
-                  var load_more = `
-                    <li class="list-group-item search-result">
-                      <div class="text-right" id="load-more"><a>Load more...</a></div>
-                    </li>
-                  `;
-                  $('#results-container').append(load_more);
-                  $('#load-more').click(function() {
-                      max_results += 10;
-                      triggerSearch();
+                      $('#results-container').append(choice_elem);
                   });
-                }
-                $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
-                    template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-                });
+                  if (result.results.length == max_results) {
+                    var load_more = `
+                      <li class="list-group-item search-result">
+                        <div class="text-right" id="load-more"><a>Load more...</a></div>
+                      </li>
+                    `;
+                    $('#results-container').append(load_more);
+                    $('#load-more').click(function() {
+                        max_results += 10;
+                        triggerSearch();
+                    });
+                  }
+                  $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
+                      template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+                  });
 
-                $('.select-citation').click(function() {
-                    var selected = $(this);
-                    var selected_id = selected.attr('data-id');
-                    var selected_name = selected.attr('data-name');
-                    var selected_type = selected.attr('data-type');
-                    var selected_type_code = selected.attr('data-type-code');
+                  $('.select-citation').click(function() {
+                      var selected = $(this);
+                      var selected_id = selected.attr('data-id');
+                      var selected_name = selected.attr('data-name');
+                      var selected_type = selected.attr('data-type');
+                      var selected_type_code = selected.attr('data-type-code');
 
-                    $('#results-container').empty();
-                    authority_search_input.val(selected_name);
-                    $('#id_acrelation-name_for_display_in_citation').val(selected_name);
-                    $('#id_acrelation-authority').val(selected_id);
-                    $('#authority_type_full').text(selected_type);
-                    $('#authority_type_full').attr('data-type-code', selected_type_code);
-                    $('#authority_name').text(selected_name);
+                      $('#results-container').empty();
+                      authority_search_input.val(selected_name);
+                      $('#id_acrelation-name_for_display_in_citation').val(selected_name);
+                      $('#id_acrelation-authority').val(selected_id);
+                      $('#authority_type_full').text(selected_type);
+                      $('#authority_type_full').attr('data-type-code', selected_type_code);
+                      $('#authority_name').text(selected_name);
 
-                    authority_search_input.attr('disabled', true);
-                });
-            }
-        });
+                      authority_search_input.attr('disabled', true);
+                  });
+              }
+          });
+        }, 500);
     }
 
     if (authority_name.length > 0) {
