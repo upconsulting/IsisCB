@@ -1360,7 +1360,7 @@ def quick_and_dirty_authority_search(request):
     results = []
     result_ids = []
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(queryset_exact, queryset_with_numbers.order_by('name'), queryset_sw, queryset.order_by('name'))):
+    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset_with_numbers.order_by('name'), queryset.order_by('name'))):
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
