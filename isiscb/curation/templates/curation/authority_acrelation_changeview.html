@@ -202,8 +202,8 @@ $('#id_language').multiSelect()
 <script>
 //# sourceURL=script.js
 $(document).ready(function() {
-    var lastSearch = $.now();
-    var waiting = false;
+    var INITIAL_MAX_RESULT = 20;
+    var max_results = INITIAL_MAX_RESULT;
 
     var citation_name = "{% if acrelation %}{{ acrelation.citation|get_citation_title|safe }}{% endif %}";
     var citation_id = "{% if acrelation %}{{ acrelation.citation.id }}{% endif %}";
@@ -216,75 +216,93 @@ $(document).ready(function() {
         search_input.trigger('keyup');
     }
 
+    var searchTimer = 0;
     var triggerSearch = function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
-        lastSearch = $.now();
-        waiting = true;
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
 
-        var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_citation_search" %}?q=" + query, {
-            failure: function(result) {
-                waiting = false;
-            },
-            success: function(result) {
-                waiting = false;
-                var results_container = $('#results-container');
-                results_container.empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
-                    if (r.public != true) {
-                      choice_elem += ' record-notpublic';
-                    }
-                    choice_elem += '">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type +'" data-type-code="' + r.type_code + '"></a>';
-                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                    if (r.description != null) {
-                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                    }
-                    if (r.public != true) {
-                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    }
-                    choice_elem += '</li>';
+        searchTimer = setTimeout(function() {
+          var query = citation_search_input.val();
+          $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
+              failure: function(result) {
+                  // do nothing
+              },
+              success: function(result) {
+                  var results_container = $('#results-container');
+                  results_container.empty();
+                  result.results.forEach(function(r) {
+                      var choice_elem = '<li class="list-group-item search-result';
+                      if (r.public != true) {
+                        choice_elem += ' record-notpublic';
+                      }
+                      choice_elem += '">';
+                      choice_elem += '<span class="button-group button-group-xs">';
+                      choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type +'" data-type-code="' + r.type_code + '"></a>';
+                      choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                      choice_elem += '</span>';
+                      choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                      if (r.description != null) {
+                          choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                      }
+                      if (r.public != true) {
+                        choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                      }
+                      choice_elem += '</li>';
 
-                    results_container.append(choice_elem);
+                      results_container.append(choice_elem);
 
-                });
+                  });
 
-                $('.select-citation').click(function() {
-                    var selected = $(this);
-                    var selected_id = selected.attr('data-id');
-                    var selected_name = selected.attr('data-name');
-                    var selected_authors = selected.attr('data-authors');
-                    var selected_type = selected.attr('data-type');
-                    var selected_type_code = selected.attr('data-type-code');
-                    var link = "{% url 'citation_list' %}" + selected_id;
+                  if (result.results.length == max_results) {
+                    var load_more = `
+                      <li class="list-group-item search-result">
+                        <div class="text-right" id="load-more"><a>Load more...</a></div>
+                      </li>
+                    `;
+                    results_container.append(load_more);
+                    $('#load-more').click(function() {
+                        max_results += 10;
+                        triggerSearch();
+                    });
+                  }
 
-                    $('#results-container').empty();
-                    citation_search_input.val(selected_name);
-                    $('#id_acrelation-citation').val(selected_id);
-                    citation_search_input.attr('disabled', true);
+                  $('.select-citation').click(function() {
+                      var selected = $(this);
+                      var selected_id = selected.attr('data-id');
+                      var selected_name = selected.attr('data-name');
+                      var selected_authors = selected.attr('data-authors');
+                      var selected_type = selected.attr('data-type');
+                      var selected_type_code = selected.attr('data-type-code');
+                      var link = "{% url 'citation_list' %}" + selected_id;
 
-                    var parentCont = $("#citation_info");
+                      $('#results-container').empty();
+                      citation_search_input.val(selected_name);
+                      $('#id_acrelation-citation').val(selected_id);
+                      citation_search_input.attr('disabled', true);
 
-                    parentCont.find(".show_id").html(selected_id);
-                    parentCont.find(".show_title").html(selected_name);
-                    parentCont.find(".show_authors").html(selected_authors);
-                    parentCont.find(".show_type_controlled").html(selected_type);
-                    parentCont.find(".show_type_controlled").attr("data-code-type", selected_type_code);
-                    parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
-                });
-            }
-        });
+                      var parentCont = $("#citation_info");
+
+                      parentCont.find(".show_id").html(selected_id);
+                      parentCont.find(".show_title").html(selected_name);
+                      parentCont.find(".show_authors").html(selected_authors);
+                      parentCont.find(".show_type_controlled").html(selected_type);
+                      parentCont.find(".show_type_controlled").attr("data-code-type", selected_type_code);
+                      parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
+                  });
+              }
+          });
+        }, 500);
     }
 
     if (citation_id.length > 0) {
         citation_search_input.val(citation_name);
         citation_search_input.attr('disabled', true);
     }
-    citation_search_input.on('keyup', triggerSearch);
+    citation_search_input.on('keyup', function() {
+        max_results = INITIAL_MAX_RESULT;
+        triggerSearch();
+    });
     $('.enable-search-input').click(unlockSearchInput);
 
     $('.save-acrelation').click(function() {

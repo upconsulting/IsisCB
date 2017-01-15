@@ -321,8 +321,6 @@ $(document).ready(function() {
         search_input.trigger('keyup');
     }
 
-    var lastSearch = $.now();
-    var waiting = false;
     var INITIAL_MAX_RESULT = 20;
     var max_results = INITIAL_MAX_RESULT;
     var search_input;
@@ -330,86 +328,87 @@ $(document).ready(function() {
     /**
       * Performs a citation search based on the content of the search input.
       */
+    var searchTimer = 0;
     var triggerSearch = function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
 
         var query = search_input.val();
         var results_container = $(search_input.attr('results-target'));
         var id_result_container = $(search_input.attr('selected-result-target'));
 
-        $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
-            failure: function(result) {
-                waiting = false;
-            },
-            success: function(result) {
-                waiting = false;
+        searchTimer = setTimeout(function() {
+          $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
+              failure: function(result) {
+                  // do nothing
+              },
+              success: function(result) {
+                  results_container.empty();
+                  result.results.forEach(function(r) {
+                      var choice_elem = '<li class="list-group-item search-result';
+                      if (r.public != true) {
+                        choice_elem += ' record-notpublic';
+                      }
+                      choice_elem += '">';
+                      choice_elem += '<span class="button-group button-group-xs">';
+                      choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '" data-type_id="' + r.type_id + '"></a>';
+                      choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
+                      choice_elem += '</span>';
+                      choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                      if (r.description != null) {
+                          choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
+                      }
+                      if (r.public != true) {
+                        choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+                      }
+                      choice_elem += '</li>';
 
-                results_container.empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
-                    if (r.public != true) {
-                      choice_elem += ' record-notpublic';
-                    }
-                    choice_elem += '">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '" data-type_id="' + r.type_id + '"></a>';
-                    choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                    if (r.description != null) {
-                        choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                    }
-                    if (r.public != true) {
-                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    }
-                    choice_elem += '</li>';
-
-                    results_container.append(choice_elem);
-                });
-                if (result.results.length == max_results) {
-                  var load_more = `
-                    <li class="list-group-item search-result">
-                      <div class="text-right" id="load-more"><a>Load more...</a></div>
-                    </li>
-                  `;
-                  results_container.append(load_more);
-                  $('#load-more').click(function() {
-                      max_results += 10;
-                      triggerSearch();
+                      results_container.append(choice_elem);
                   });
-                }
+                  if (result.results.length == max_results) {
+                    var load_more = `
+                      <li class="list-group-item search-result">
+                        <div class="text-right" id="load-more"><a>Load more...</a></div>
+                      </li>
+                    `;
+                    results_container.append(load_more);
+                    $('#load-more').click(function() {
+                        max_results += 10;
+                        triggerSearch();
+                    });
+                  }
 
-                $('.select-citation').click(function() {
-                    var selected = $(this);
-                    var selected_id = selected.attr('data-id');
-                    var selected_name = selected.attr('data-name');
-                    var selected_authors = selected.attr('data-authors');
-                    var selected_type = selected.attr('data-type');
-                    var selected_type_id = selected.attr('data-type_id');
-                    var link = "{% url 'citation_list' %}" + selected_id;
+                  $('.select-citation').click(function() {
+                      var selected = $(this);
+                      var selected_id = selected.attr('data-id');
+                      var selected_name = selected.attr('data-name');
+                      var selected_authors = selected.attr('data-authors');
+                      var selected_type = selected.attr('data-type');
+                      var selected_type_id = selected.attr('data-type_id');
+                      var link = "{% url 'citation_list' %}" + selected_id;
 
-                    results_container.empty();
-                    search_input.val(selected_name);
-                    search_input.attr('disabled', true);
-                    id_result_container.val(selected_id);
+                      results_container.empty();
+                      search_input.val(selected_name);
+                      search_input.attr('disabled', true);
+                      id_result_container.val(selected_id);
 
-                    var parentCont = $("#subject_info");
-                    // this is butt-ugly, but so what, too tired to do something better
-                    if (search_input.attr("id") == "citation-search-object") {
-                      parentCont = $("#object_info");
-                    }
+                      var parentCont = $("#subject_info");
+                      // this is butt-ugly, but so what, too tired to do something better
+                      if (search_input.attr("id") == "citation-search-object") {
+                        parentCont = $("#object_info");
+                      }
 
-                    parentCont.find(".show_id").html(selected_id);
-                    parentCont.find(".show_title").html(selected_name);
-                    parentCont.find(".show_authors").html(selected_authors);
-                    parentCont.find(".show_type_controlled").html(selected_type);
-                    parentCont.find(".show_type_controlled").attr("data-type_id", selected_type_id);
-                    parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
-
-
-                });
-            }
-        });
+                      parentCont.find(".show_id").html(selected_id);
+                      parentCont.find(".show_title").html(selected_name);
+                      parentCont.find(".show_authors").html(selected_authors);
+                      parentCont.find(".show_type_controlled").html(selected_type);
+                      parentCont.find(".show_type_controlled").attr("data-type_id", selected_type_id);
+                      parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
+                  });
+              }
+          });
+        }, 500);
     }
 
     $('#ccrelation_form').on('keyup keypress', function(e) {
