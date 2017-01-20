@@ -54,8 +54,7 @@ def _get_authors_editors(citation):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in citation.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
-
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def dashboard(request):
     """
     """
@@ -65,8 +64,7 @@ def dashboard(request):
     })
     return HttpResponse(template.render(context))
 
-
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def datasets(request):
     """
     """
@@ -77,7 +75,7 @@ def datasets(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 #@check_rules('can_create_record')
 def create_citation(request):
 
@@ -121,7 +119,7 @@ def create_citation(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 #@check_rules('can_create_record')
 def create_authority(request):
     context = RequestContext(request, {
@@ -161,7 +159,7 @@ def create_authority(request):
 
 
 # TODO this method needs to be logged down!
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_create_acrelation(request):
     if request.method == 'POST':
         authority_id = request.POST.get('authority_id')
@@ -198,7 +196,7 @@ def quick_create_acrelation(request):
         return JsonResponse(response_data)
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -237,7 +235,7 @@ def create_ccrelation_for_citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -268,7 +266,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def create_acrelation_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -302,7 +300,7 @@ def create_acrelation_for_authority(request, authority_id):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def acrelation_for_authority(request, authority_id, acrelation_id):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -330,7 +328,7 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -362,7 +360,7 @@ def create_acrelation_for_citation(request, citation_id):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -389,7 +387,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     template = loader.get_template('curation/citation_acrelation_changeview.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def tracking_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -413,7 +411,7 @@ def tracking_for_citation(request, citation_id):
     return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def tracking_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -444,7 +442,7 @@ def tracking_for_authority(request, authority_id):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -463,7 +461,7 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
     template = loader.get_template('curation/citation_attribute_delete.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -484,7 +482,7 @@ def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=N
     template = loader.get_template('curation/citation_linkeddata_delete.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -505,7 +503,7 @@ def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format
     template = loader.get_template('curation/authority_linkeddata_delete.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_language_for_citation(request, citation_id):
     # TODO: format?
@@ -519,7 +517,7 @@ def delete_language_for_citation(request, citation_id):
     return JsonResponse({'result': True})
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def add_language_for_citation(request, citation_id):
     # TODO: format?
@@ -540,7 +538,7 @@ def add_language_for_citation(request, citation_id):
     return JsonResponse(result)
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -560,7 +558,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -580,7 +578,7 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_acrelation_for_authority(request, authority_id, acrelation_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -600,7 +598,7 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_attribute_for_authority(request, authority_id, attribute_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
@@ -619,7 +617,7 @@ def delete_attribute_for_authority(request, authority_id, attribute_id, format=N
     template = loader.get_template('curation/authority_attribute_delete.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
@@ -673,7 +671,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
     })
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
 
@@ -717,7 +715,7 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
     })
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def attribute_for_citation(request, citation_id, attribute_id=None):
 
@@ -789,7 +787,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def attribute_for_authority(request, authority_id, attribute_id=None):
 
@@ -861,7 +859,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id):
     context = RequestContext(request, {
@@ -1089,7 +1087,7 @@ class QueryDictWrapper(object):
         self.extra[key] = value
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def citations(request):
     additional_params_names = ["page", "zotero_accession"]
     all_params = {}
@@ -1182,7 +1180,7 @@ def filter_queryset(user, queryset):
 
     return queryset
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def authorities(request):
     context = RequestContext(request, {
         'curation_section': 'datasets',
@@ -1240,7 +1238,7 @@ def authorities(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def authority(request, authority_id):
     context = RequestContext(request, {
@@ -1308,7 +1306,7 @@ def authority(request, authority_id):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_language_search(request):
     q = request.GET.get('q', None)
     if not q or len(q) < 3:
@@ -1322,7 +1320,7 @@ def quick_and_dirty_language_search(request):
     return JsonResponse({'results': results})
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
@@ -1387,11 +1385,11 @@ def quick_and_dirty_authority_search(request):
     return JsonResponse({'results': results})
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def dataset(request, dataset_id=None):
     return HttpResponse('')
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_collections(request):
     q = request.GET.get('query', None)
     queryset = CitationCollection.objects.filter(name__icontains=q)
@@ -1403,7 +1401,7 @@ def search_collections(request):
 
 from django.utils import formats
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_zotero_accessions(request):
     q = request.GET.get('query', None)
     queryset = ImportAccession.objects.filter(name__icontains=q)
@@ -1414,7 +1412,7 @@ def search_zotero_accessions(request):
     } for accession in queryset[:20]]
     return JsonResponse(results, safe=False)
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_datasets(request):
     q = request.GET.get('query', None)
     queryset = Dataset.objects.filter(name__icontains=q)
@@ -1424,7 +1422,7 @@ def search_datasets(request):
     } for ds in queryset[:20]]
     return JsonResponse(results, safe=False)
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def users(request, user_id=None):
     context = RequestContext(request, {
@@ -1437,7 +1435,7 @@ def users(request, user_id=None):
     })
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def user(request, user_id):
     selected_user = get_object_or_404(User, pk=user_id)
@@ -1450,7 +1448,7 @@ def user(request, user_id):
     template = loader.get_template('curation/user.html')
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_role(request, user_id=None):
     context = RequestContext(request, {
@@ -1480,7 +1478,7 @@ def add_role(request, user_id=None):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def remove_role(request, user_id, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1491,7 +1489,7 @@ def remove_role(request, user_id, role_id):
 
     return redirect('user', user_id=user.pk)
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def delete_role(request, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1506,7 +1504,7 @@ def delete_role(request, role_id):
 
     return redirect('roles')
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def role(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1519,7 +1517,7 @@ def role(request, role_id, user_id=None):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def roles(request):
     roles = IsisCBRole.objects.all()
@@ -1532,7 +1530,7 @@ def roles(request):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_dataset_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1572,7 +1570,7 @@ def add_dataset_rule(request, role_id, user_id=None):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_crud_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1613,7 +1611,7 @@ def add_crud_rule(request, role_id, user_id=None):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATION):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1665,7 +1663,7 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_user_module_rule(request, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1706,7 +1704,7 @@ def add_user_module_rule(request, role_id):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_role_to_user(request, user_edit_id, user_id=None):
     user = get_object_or_404(User, pk=user_edit_id)
@@ -1737,7 +1735,7 @@ def add_role_to_user(request, user_edit_id, user_id=None):
 
     return HttpResponse(template.render(context))
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def remove_rule(request, role_id, rule_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
@@ -1749,7 +1747,7 @@ def remove_rule(request, role_id, rule_id):
     return redirect('role', role_id=role.pk)
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_citation_search(request):
     q = request.GET.get('q', None)
     N = int(request.GET.get('max', 20))
@@ -1798,7 +1796,7 @@ def quick_and_dirty_citation_search(request):
     return JsonResponse({'results': results})
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def change_is_staff(request, user_id):
 
@@ -1853,14 +1851,14 @@ def add_zotero_rule(request, role_id):
     return redirect('role', role_id=role.pk)
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_select_citation(request):
     template = loader.get_template('curation/bulk_select_citation.html')
     context = RequestContext(request, {})
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_action(request):
     """
     User has selected some number of records.
@@ -1891,7 +1889,7 @@ def bulk_action(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def create_citation_collection(request):
     template = loader.get_template('curation/citation_collection_create.html')
     context = RequestContext(request, {})
@@ -1920,7 +1918,7 @@ def create_citation_collection(request):
     return HttpResponse(template.render(context))
 
 
-@staff_member_required
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def add_citation_collection(request):
     template = loader.get_template('curation/citation_collection_add.html')
     context = RequestContext(request, {})
