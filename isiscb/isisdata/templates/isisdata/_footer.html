@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <p class="text-muted pull-right">
         <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a>
-        {% if user.is_staff %}<a href="{% url 'curation:index' %}">Curation Interface</a>{% endif %}
+        {% if user.is_staff or user.is_superuser %}<a href="{% url 'curation:index' %}">Curation Interface</a>{% endif %}
         <a href="{% url 'rest_root' %}">REST API</a>
     </p>
 </div>

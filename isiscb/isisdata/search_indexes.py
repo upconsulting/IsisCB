@@ -14,7 +14,6 @@ from itertools import groupby
 import time
 from collections import defaultdict
 
-
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
     title = indexes.CharField(null=True, indexed=False, stored=True)
@@ -179,7 +178,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
         # We need to able to __getitem__, below.
         data = [row for row in data]
-        print data
         self.prepared_data = {
             ID: identifier,
             DJANGO_CT: 'isisdata.citation',
@@ -413,7 +411,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return remove_control_characters(data['description'])
 
     def prepare_public(self, data):
-        return remove_control_characters(data['public'])
+        return data['public']
 
     def prepare_type(self, data):
         """
