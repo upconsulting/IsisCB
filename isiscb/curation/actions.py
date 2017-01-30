@@ -29,8 +29,12 @@ class SetRecordStatus(BaseAction):
     }
 
     def apply(self, queryset, value):
-        queryset.update(record_status_value=value)
-        queryset.update(public=(value=='Active'))
+        # we need to call the save method rather than a queryset update
+        # otherwise post hooks are not being called since the update
+        # is executed directly on the database
+        for record in queryset.all():
+            record.record_status_value=value
+            record.save()
 
 
 class SetRecordStatusExplanation(BaseAction):
@@ -44,7 +48,12 @@ class SetRecordStatusExplanation(BaseAction):
     }
 
     def apply(self, queryset, value):
-        queryset.update(record_status_explanation=value)
+        # we need to call the save method rather than a queryset update
+        # otherwise post hooks are not being called since the update
+        # is executed directly on the database
+        for record in queryset.all():
+            record.record_status_explanation=value
+            record.save()
 
 
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation]
