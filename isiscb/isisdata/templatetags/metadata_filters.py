@@ -106,6 +106,13 @@ def get_coins_from_result(result):
     TODO: support additional COinS metadata types (beyond article and book).
     """
 
+    # If the search index is out of sync with the database, this function may
+    #  be called with a result does that exist. Unless we die quietly here we
+    #  risk bringing down the whole template rendering process in the search
+    #  result view.
+    if result is None:
+        return u''
+
     kv_pairs = OrderedDict()
     kv_pairs['ctx_ver'] = 'Z39.88-2004'
     kv_pairs['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:book'
