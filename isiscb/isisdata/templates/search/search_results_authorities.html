@@ -27,13 +27,14 @@
     <p>
           <span class="glyphicon glyphicon-bookmark"></span>
           [{{ result.authority_type }}]
-          <a href="{% url 'authority' result.id|get_pk %}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
+          {% url 'authority' result.id|get_pk as authority_url %}
+          <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
           {% with result.dates as dates %}
           {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
           {% endwith %}
           ({{ result.object | get_nr_of_citations }})
 
-          <span class="visible-print-inline">({% url 'authority' result.id|get_pk %})</span>
+          <span class="visible-print-inline">({{ authority_url }})</span>
 
     </p>
     {% endif %}

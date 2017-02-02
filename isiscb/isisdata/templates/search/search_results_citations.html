@@ -47,7 +47,9 @@
             {% if result.publication_date.0 %}
               ({{ result.publication_date.0 }})
             {% endif %}
-            <a href="{% url 'citation' result.id|get_pk %}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
+            {% url 'citation' result.id|get_pk as citation_url %}
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
+
             <!-- book title and page numbers -->
             {% if result.book_title %}
               In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
@@ -55,7 +57,7 @@
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
 
-            <span class="visible-print-inline">({% url 'citation' result.id|get_pk %})</span>
+            <span class="visible-print-inline">({{ citation_url }})</span>
 
             <!-- Zotero -->
             <span style="display:none;">
@@ -65,7 +67,8 @@
 
             <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print">
                 <script>
-                $.ajax("{% url 'linkresolver' citation_id=result.id|get_pk %}",
+                {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
+                $.ajax("{{ ajax_linkresolve_url }}",
                     {
                         success: function(result) {
 
