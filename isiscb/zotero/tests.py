@@ -890,7 +890,8 @@ class TestImportMethods(TestCase):
         data = {
             u'part_of': [{
                 u'linkeddata': [(u'ISBN', u'9781874267621')],
-                u'title': u'Thinking Through the Environment: Green Approaches to Global History',
+                u'title': u"Thinking Through the Environment: Green"
+                          u" Approaches to Global History",
                 u'type_controlled': u'Book'
             }],
         }
@@ -898,7 +899,8 @@ class TestImportMethods(TestCase):
         result = manager.generate_book_chapter_relations(data, draftcitation)
 
         alt_draftcitation = DraftCitation.objects.create(**{
-            'title': u'Thinking Through the Environment: Green Approaches to Global History',
+            'title': u"Thinking Through the Environment: Green"
+                     u" Approaches to Global History",
             'type_controlled': DraftCitation.BOOK,
             'part_of': accession,
         })

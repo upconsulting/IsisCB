@@ -719,18 +719,14 @@ function sticky_relocate() {
         // $('.action-body').css('max-height', 300);
         $('#sticky').removeClass('fixed-bottom');
         $('#sticky').removeClass('col-xs-12');
-        console.log(window_top);
-        console.log(div_top);
+
         if (window_top > div_top) {
-            console.log('window_top > div_top');
             $('#sticky').addClass('fixed');
 
             // Setting position: fixed removes the element from the
             //  flow, so this applies the appropriate left-offset.
             $('#sticky').addClass('col-sm-offset-6');
         } else {
-            console.log('window_top <= div_top');
-
             // The user hasn't scrolled below the navbar, so we keep
             //  the action panel in the grid.
             $('#sticky').removeClass('fixed');

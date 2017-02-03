@@ -532,7 +532,7 @@ class IngestManager(object):
         identifier = datum.get('name', '').strip()
         ldata = datum.get('linkeddata', None)
         if not identifier and ldata:
-                identifier = ldata[0][1]
+            identifier = ldata[0][1]
         if not identifier:
             return None, None
 
@@ -608,12 +608,12 @@ class IngestManager(object):
         """
         Generate :class:`.DraftCCRelation` instances specifically for book chapters.
 
-        If a containing book is found, then ``draft_citation`` will be re-typed as a
-        Chapter.
+        If a containing book is found, then ``draft_citation`` will be re-typed
+        as a Chapter.
 
-        Attempts to match reviewed works against (1) citations in this ingest batch,
-        (2) citations with matching IDs, and (3) citations with matching linked
-        data.
+        Attempts to match reviewed works against (1) citations in this ingest
+        batch, (2) citations with matching IDs, and (3) citations with matching
+        linked data.
         """
         _is_a_book = lambda datum: IngestManager._get_dtype(datum)['type_controlled'] == DraftCitation.BOOK
         data = [datum for datum in entry.get('part_of', []) if _is_a_book(datum)]
@@ -633,9 +633,9 @@ class IngestManager(object):
         If reviews are found, then ``draft_citation`` will be re-typed as a
         Review.
 
-        Attempts to match reviewed works against (1) citations in this ingest batch,
-        (2) citations with matching IDs, and (3) citations with matching linked
-        data.
+        Attempts to match reviewed works against (1) citations in this ingest
+        batch, (2) citations with matching IDs, and (3) citations with matching
+        linked data.
         """
         data = entry.get('reviewed_works', [])
         if data:    # This is a Review, regardless of what Zotero might way.
