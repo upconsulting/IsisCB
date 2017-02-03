@@ -53,6 +53,7 @@ $('body').ready(function() {
                 <th>Author/Editor(s)</th>
                 <th width="8%">Published <span style="cursor: pointer;" id="sort_published"></span></th>
                 <th width="15%">Periodical</th>
+                <th width="5%">Pages</th>
                 <th width="12%">Modified</th>
                 <th width="12%">Created</th>
             </tr>
@@ -103,6 +104,9 @@ $('body').ready(function() {
                     <a href="{% url "curate_citation" object.id %}?tab=acrelations">
                         {{ object|get_citation_periodical }}
                     </a>
+                </td>
+                <td>
+                    {{ object|get_page_numbers }}
                 </td>
                 <td>
                     {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
