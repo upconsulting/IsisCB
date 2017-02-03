@@ -1094,7 +1094,9 @@ def citations(request):
 
     user_session = request.session
     if request.method == 'POST':
-        filter_params = QueryDict(request.POST.urlencode(), mutable=True)
+        print request.POST
+        filter_params = QueryDict(request.POST.urlencode().encode('utf-8'),
+                                  mutable=True)
     elif request.method == 'GET':
         filter_params = user_session.get('citation_filters', {})
         if not 'o' in filter_params.keys():
@@ -1180,6 +1182,7 @@ def filter_queryset(user, queryset):
 
     return queryset
 
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def authorities(request):
     context = RequestContext(request, {
@@ -1193,7 +1196,8 @@ def authorities(request):
     user_session = request.session
 
     if request.method == 'POST':
-        filter_params = QueryDict(request.POST.urlencode(), mutable=True)
+        filter_params = QueryDict(request.POST.urlencode().encode('utf-8'),
+                                  mutable=True)
     elif request.method == 'GET':
         filter_params = user_session.get('authority_filters', {})
         if not 'o' in filter_params.keys():
