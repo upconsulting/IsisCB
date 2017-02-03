@@ -1094,7 +1094,6 @@ def citations(request):
 
     user_session = request.session
     if request.method == 'POST':
-        print request.POST
         filter_params = QueryDict(request.POST.urlencode().encode('utf-8'),
                                   mutable=True)
     elif request.method == 'GET':

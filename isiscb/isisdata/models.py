@@ -683,7 +683,9 @@ class Citation(ReferencedEntity, CuratedMixin):
                              " title, this should be added as something like"
                              " '[Review of Title (Year) by Author]'.")
 
-    title_for_sort = models.CharField(max_length=2000, blank=True, null=True, db_index=True)
+    title_for_sort = models.CharField(max_length=2000, blank=True, null=True,
+                                      db_index=True)
+    """ASCII-normalized title."""
 
     additional_titles = models.TextField(blank=True, null=True,
                                          help_text="Additional titles (not"
@@ -943,6 +945,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     """))
 
     name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+    """ASCII-normalized name."""
 
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
