@@ -140,6 +140,12 @@ def get_citation_periodical(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
         if relation.type_controlled in [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]])
 
+@register.filter(name='get_page_numbers')
+def get_page_numbers(obj):
+    if not obj.part_details:
+        return ''
+
+    return ' - '.join([str(p) for p in [getattr(obj.part_details, 'page_begin', None), getattr(obj.part_details, 'page_end', None)] if p])
 
 @register.filter
 def get_school(obj):
