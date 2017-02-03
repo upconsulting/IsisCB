@@ -695,7 +695,19 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     def save(self, *args, **kwargs):
-        self.title_for_sort = normalize(unidecode.unidecode(self.title))
+        def get_title(obj):
+            if obj.title:
+                return obj.title
+            else:
+                title_parts = []
+                for relation in get_related(obj):
+                    if relation.type_controlled =='RO' and relation.object and relation.object.title:
+                        title_parts.append(relation.object.title)
+                    if relation.type_controlled == 'RB' and relation.subject and relation.subject.title:
+                        title_parts.append(relation.subject.title)
+                return u' '.join(title_parts)
+
+        self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         super(Citation, self).save(*args, **kwargs)
 
     @property
@@ -928,6 +940,8 @@ class Citation(ReferencedEntity, CuratedMixin):
         The absolute URL of a Citation is the citation detail view.
         """
         return core_reverse("citation", args=(self.id,))
+
+
 
 
 
