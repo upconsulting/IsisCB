@@ -14,10 +14,6 @@ from django.views.generic.edit import FormView
 from django.template import RequestContext, loader
 from django.utils.translation import get_language
 
-import uuid
-import base64, zlib
-import locale
-
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
 
@@ -31,11 +27,11 @@ import rest_framework_filters as filters
 from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 
 from urllib import quote, urlopen
-import codecs
+import codecs, datetime, uuid, base64, zlib, locale
+
 from collections import defaultdict
 from helpers.mods_xml import initial_response, generate_mods_xml
 from helpers.linked_data import generate_authority_rdf, generate_citation_rdf
-import datetime
 from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
@@ -43,6 +39,8 @@ from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
+
+from unidecode import unidecode
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -1156,7 +1154,7 @@ def search_history(request):
 
 class IsisSearchView(FacetedSearchView):
     """
-    Provides the search view at /isis/
+    Provides the search view at /isis/.
     """
 
     results_per_page = 20
@@ -1189,8 +1187,15 @@ class IsisSearchView(FacetedSearchView):
 
         # These are used to generate a SearchQuery instance.
         parameters = self.request.GET.get('q', None)
+
+        # The search query should be ASCII-normalized.
+        # TODO: this could be tightened up.
         if parameters:
-            parameters = parameters.encode('ascii', 'ignore')
+            parameters = unidecode(parameters)
+        q = form.cleaned_data.get('q')
+        if q:
+            form.cleaned_data['q'] = unidecode(q)
+
         search_models = self.request.GET.get('models', None)
         selected_facets = self.request.GET.get('selected_facets', None)
         excluded_facets = self.request.GET.get('excluded_facets', None)

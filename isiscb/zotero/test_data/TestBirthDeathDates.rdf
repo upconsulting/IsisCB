@@ -1,0 +1,25 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <bib:Thesis rdf:about="#item_9878">
+        <z:itemType>thesis</z:itemType>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Damerow</foaf:surname>
+                        <foaf:givenname>Julia</foaf:givenname>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:date>2014</dc:date>
+        <dc:subject>Kant, Immanuel (1724-1804) [10085]</dc:subject>
+        <dc:description>This is a test of the extra data field</dc:description>
+        <z:libraryCatalog>data.isiscb.org</z:libraryCatalog>
+        <dc:title>A Quadruple-Based Text Analysis System for History and Philosophy of Science</dc:title>
+    </bib:Thesis>
+</rdf:RDF>
