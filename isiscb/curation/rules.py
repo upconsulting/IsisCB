@@ -21,9 +21,14 @@ def is_accessible_by_dataset(user, object):
         rules = role.dataset_rules
         if rules:
             has_dataset_rules = True
-        for rule in rules:
-            if Dataset.objects.get(pk = rule.dataset) == Dataset.objects.get(pk = object.belongs_to.pk):
+
+            dataset_ids = [rule.dataset for rule in rules]
+            if ('' in dataset_ids) or (None in dataset_ids) and not object.belongs_to:
                 return True
+
+            if object.belongs_to and object.belongs_to.pk in dataset_ids:
+                return True
+
     # if there are no dataset rules on any role then the user
     # has access to all records
     if not has_dataset_rules:
@@ -78,7 +83,8 @@ def is_field_action_allowed(user, object, action, object_type):
         datasets = [rule.dataset for rule in role.dataset_rules]
 
         # if there is a dataset rule for the given dataset
-        if has_ds_rule and str(access_obj.belongs_to.pk) in datasets:
+        ds_of_object = str(access_obj.belongs_to.pk) if access_obj.belongs_to else ''
+        if has_ds_rule and ds_of_object in datasets:
             for rule in role.field_rules:
                 # if there is a rule restricting access return False
                 # dataset rules are applied before everything
@@ -167,10 +173,10 @@ def is_action_allowed(user, object, action):
         # if there is a dataset rule, and the object belongs to this dataset
         # we need to apply dataset rule actions
         datasets = [rule.dataset for rule in role.dataset_rules]
-
         # if this role applies, check allowed actions
         # dataset roles are applied over everthing else
-        if has_ds_rule and str(object.belongs_to.pk) in datasets:
+        ds_of_object = str(object.belongs_to.pk) if object.belongs_to else ''
+        if has_ds_rule and ds_of_object in datasets:
             for rule in rules:
                 if rule.crud_action == action:
                     return True

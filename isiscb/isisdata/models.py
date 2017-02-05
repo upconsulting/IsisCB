@@ -683,7 +683,9 @@ class Citation(ReferencedEntity, CuratedMixin):
                              " title, this should be added as something like"
                              " '[Review of Title (Year) by Author]'.")
 
-    title_for_sort = models.CharField(max_length=2000, blank=True, null=True, db_index=True)
+    title_for_sort = models.CharField(max_length=2000, blank=True, null=True,
+                                      db_index=True)
+    """ASCII-normalized title."""
 
     additional_titles = models.TextField(blank=True, null=True,
                                          help_text="Additional titles (not"
@@ -693,7 +695,19 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     def save(self, *args, **kwargs):
-        self.title_for_sort = normalize(unidecode.unidecode(self.title))
+        def get_title(obj):
+            if obj.title:
+                return obj.title
+            else:
+                title_parts = []
+                for relation in get_related(obj):
+                    if relation.type_controlled =='RO' and relation.object and relation.object.title:
+                        title_parts.append(relation.object.title)
+                    if relation.type_controlled == 'RB' and relation.subject and relation.subject.title:
+                        title_parts.append(relation.subject.title)
+                return u' '.join(title_parts)
+
+        self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         super(Citation, self).save(*args, **kwargs)
 
     @property
@@ -929,6 +943,8 @@ class Citation(ReferencedEntity, CuratedMixin):
 
 
 
+
+
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
 
@@ -943,6 +959,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     """))
 
     name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+    """ASCII-normalized name."""
 
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
@@ -1042,14 +1059,14 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification terms. Primarily of historical interest only. Used primarily
     for Codes for the classificationTerms. however, can be used for other
     kinds of terms as appropriate.
-    """))
+    """), db_index=True)
 
     classification_hierarchy = models.CharField(max_length=255, blank=True,
                                                 null=True,
                                                 help_text=help_text("""
     Used for Classification Terms to describe where they fall in the
     hierarchy.
-    """))
+    """), db_index=True)
 
     # TODO: we need to remove this; it conflicts with CuratedMixin.
     ACTIVE = 'AC'
@@ -1994,7 +2011,7 @@ class DatasetRule(AccessRule):
     """
     This rules limits the records a user has access to to a specific dataset.
     """
-    dataset = models.CharField(max_length=255, null=False, blank=False)
+    dataset = models.CharField(max_length=255, null=True, blank=True, default=None)
 
 
 class UserModuleRule(AccessRule):

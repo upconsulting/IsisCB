@@ -169,7 +169,7 @@ Back to List </a>
                             {{ form.record_history|addcss:"form-control" }}
                         </div>
 
-                        {% for error in form.dataset.errors %}
+                        {% for error in form.belongs_to.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">

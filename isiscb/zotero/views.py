@@ -56,12 +56,26 @@ def suggest_authority_json(request, authority_id):
         if instance.record_status_value != CuratedMixin.ACTIVE:
             continue
 
-        related_citations = map(lambda s: s.title(), set(instance.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10]))
+        _type_map = dict(Citation.TYPE_CHOICES)
+        def _format_citation(o):
+            _title, _title_for_sort, _type_controlled = o
+            if _type_controlled == Citation.REVIEW:
+                _s = u'Rev. of %s' % _title_for_sort.title()
+            else:
+                _s = _title.title()
+            return _s + u' (%s)' % _type_map.get(_type_controlled)
+
+        related_citations = set(instance.acrelation_set.values_list(
+            'citation__title',
+            'citation__title_for_sort',
+            'citation__type_controlled'
+        )[:10])
+
         suggestion.update({
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': related_citations,
+            'related_citations': map(_format_citation, related_citations),
         })
         suggestions.append(suggestion)
 

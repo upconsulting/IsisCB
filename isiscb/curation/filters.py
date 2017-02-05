@@ -7,8 +7,8 @@ from django import forms
 from isisdata.models import *
 from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
-import six
-import iso8601
+import six, iso8601
+from unidecode import unidecode
 
 from django_filters import filters
 
@@ -148,10 +148,11 @@ class CitationFilter(django_filters.FilterSet):
         return queryset
 
     def filter_title(self, queryset, value):
+        value = unidecode(value)
         if not value:
             return queryset
         for part in value.split():
-            queryset = queryset.filter(title__icontains=part)
+            queryset = queryset.filter(title_for_sort__icontains=part)
         return queryset
 
     def filter_abstract(self, queryset, value):
@@ -228,6 +229,10 @@ class AuthorityFilter(django_filters.FilterSet):
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
+    datasets = Dataset.objects.all()
+    dataset_list = [(ds.pk, ds.name) for ds in datasets ]
+    belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+
     class Meta:
         model = Authority
         fields = [
@@ -244,10 +249,11 @@ class AuthorityFilter(django_filters.FilterSet):
 
 
     def filter_name(self, queryset, value):
+        value = unidecode(value)
         if not value:
             return queryset
         for part in value.split():
-            queryset = queryset.filter(name__icontains=part)
+            queryset = queryset.filter(name_for_sort__icontains=part)
 
         return queryset
 

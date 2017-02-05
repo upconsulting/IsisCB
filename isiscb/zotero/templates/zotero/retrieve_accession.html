@@ -40,7 +40,7 @@
 
 <div class="container-fluid" id="main-container">
     <div class="row">
-        <div class="col-xs-6">
+        <div class="col-xs-6" id="left-panel-column">
             {% for citation in accession.draftcitation_set.all %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
@@ -119,7 +119,9 @@
                 </ul>
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="suggest">
-                        <ul class="suggestion-results-list list-group" style="max-height: 700px; overflow-y: scroll;">
+                        <ul class="suggestion-results-list list-group"
+                            id="suggestion-results-list"
+                            style="max-height: 500px; overflow-y: scroll;">
                         </ul>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="search">
@@ -219,7 +221,7 @@ $('.draftauthority').click(function() {
 
     var elem = $(this);
     // elem.scrollTop();
-    $('body').scrollTop(elem.offset().top - 70);
+    $('body').scrollTop(elem.offset().top - 250);
     $('.selected').removeClass('selected');
 
     elem.parent().addClass('selected');
@@ -683,15 +685,23 @@ var bindModal = function() {
     </div>
 </div>
 
+
 <script>
 // If the window scrolls below the top of the main content, the right-
 //  hand column should scroll with it.
 function sticky_relocate() {
+
     var window_top = $(window).scrollTop(),
         window_width = $(window).width(),
         window_height = $(window).height(),
         div_top = $('#main-container').offset().top;
 
+    // If the list of unresolved authority records (left) is shorter than the
+    //  viewport, fixing and unfixing the right-hand panel during scrolling
+    //  will result in a "bounce" behavior. There's no reason to fix the right
+    //  panel in this case anyway, because all of the unresolved authority
+    //  records are visible without scrolling down.
+    if (window.innerHeight > $('#left-panel-column').height()) return;
 
     // If the window is narrow, the action panel is overlayed on the
     //  text at the bottom of the window.
@@ -712,6 +722,7 @@ function sticky_relocate() {
 
         if (window_top > div_top) {
             $('#sticky').addClass('fixed');
+
             // Setting position: fixed removes the element from the
             //  flow, so this applies the appropriate left-offset.
             $('#sticky').addClass('col-sm-offset-6');
@@ -720,6 +731,7 @@ function sticky_relocate() {
             //  the action panel in the grid.
             $('#sticky').removeClass('fixed');
             $('#sticky').removeClass('col-sm-offset-6');
+
         }
     }
 }

@@ -29,7 +29,6 @@ RESOURCE_CLASSES = [
 ]
 
 
-
 FIELD_NAMES = dict([
     (DC.title, u'title'),
     (DCTERMS.abstract, u'abstract'),
