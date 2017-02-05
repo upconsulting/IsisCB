@@ -228,6 +228,10 @@ class AuthorityFilter(django_filters.FilterSet):
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
+    datasets = Dataset.objects.all()
+    dataset_list = [(ds.pk, ds.name) for ds in datasets ]
+    belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+
     class Meta:
         model = Authority
         fields = [

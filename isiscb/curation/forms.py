@@ -329,6 +329,7 @@ class AuthorityForm(forms.ModelForm):
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
     redirect_to = forms.CharField(widget=forms.HiddenInput(), required = False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
 
     class Meta:
         model = Authority
@@ -336,10 +337,11 @@ class AuthorityForm(forms.ModelForm):
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
-            'administrator_notes', 'record_history',
+            'administrator_notes', 'record_history', 'belongs_to'
         ]
 
         labels = {
+            'belongs_to': 'Dataset',
             'administrator_notes': 'Staff notes',
         }
 
@@ -483,17 +485,24 @@ class RoleForm(forms.ModelForm):
 
 
 class DatasetRuleForm(forms.ModelForm):
-    dataset = forms.ChoiceField(required=True)
+    dataset = forms.ChoiceField(required=False)
 
     def __init__(self, *args, **kwargs):
         super(DatasetRuleForm, self).__init__( *args, **kwargs)
 
         dataset_values = Dataset.objects.all()
         choices = set()
+        choices.add((None, "No Dataset"))
         for ds in dataset_values:
             choices.add((ds.pk, ds.name))
         self.fields['dataset'].choices = choices
 
+    def clean_field(self):
+        data = self.cleaned_data['dataset']
+        if data == '':
+            data = None
+
+        return data
 
     class Meta:
         model = DatasetRule
