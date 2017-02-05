@@ -26,7 +26,7 @@ def help_text(s):
 class ImportAccession(models.Model):
     imported_on = models.DateTimeField(auto_now_add=True)
     imported_by = models.ForeignKey(User, blank=True, null=True)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, db_index=True)
     ingest_to = models.ForeignKey(Dataset, null=True)
     processed = models.BooleanField(default=False)
 
