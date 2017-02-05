@@ -1151,7 +1151,9 @@ def filter_queryset(user, queryset):
     roles = IsisCBRole.objects.filter(users__pk=user.pk)
 
     datasets = []
+    include_no_dataset = False
     excluded_datasets = []
+    exclude_no_datasets = False
     can_view_all = False
 
     if user.is_superuser:
@@ -1161,13 +1163,16 @@ def filter_queryset(user, queryset):
             # if there are dataset limitations in role
             if role.dataset_rules:
                 crud_actions = [rule.crud_action for rule in role.crud_rules]
-                datasets_in_role = [rule.dataset for rule in role.dataset_rules]
+                datasets_in_role = [rule.dataset for rule in role.dataset_rules if rule.dataset]
+                no_dataset_in_role = [None for rule in role.dataset_rules if not rule.dataset ]
                 # if the crud rules allow viewing records in datasets add them to included datasets
                 if CRUDRule.VIEW in crud_actions:
                     datasets += datasets_in_role
+                    include_no_dataset = True if no_dataset_in_role else False
                 # otherwise exclude datasets
                 else:
                     excluded_datasets += datasets_in_role
+                    exclude_no_datasets = True if no_dataset_in_role else False
             # if there are no dataset limitations
             else:
                 crud_actions = [rule.crud_action for rule in role.crud_rules]
@@ -1175,9 +1180,16 @@ def filter_queryset(user, queryset):
                     can_view_all = True
 
     if excluded_datasets:
-        queryset = queryset.exclude(belongs_to__in=excluded_datasets)
+        query = Q(belongs_to__in=excluded_datasets)
+        if exclude_no_datasets:
+            query = query | Q(belongs_to__isnull=True)
+        queryset = queryset.exclude(query)
+
     if not can_view_all:
-        queryset = queryset.filter(belongs_to__in=datasets)
+        query = Q(belongs_to__in=datasets)
+        if include_no_dataset:
+            query = query | Q(belongs_to__isnull=True)
+        queryset = queryset.filter(query)
 
     return queryset
 

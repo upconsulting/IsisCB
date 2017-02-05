@@ -1059,14 +1059,14 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification terms. Primarily of historical interest only. Used primarily
     for Codes for the classificationTerms. however, can be used for other
     kinds of terms as appropriate.
-    """))
+    """), db_index=True)
 
     classification_hierarchy = models.CharField(max_length=255, blank=True,
                                                 null=True,
                                                 help_text=help_text("""
     Used for Classification Terms to describe where they fall in the
     hierarchy.
-    """))
+    """), db_index=True)
 
     # TODO: we need to remove this; it conflicts with CuratedMixin.
     ACTIVE = 'AC'
@@ -2011,7 +2011,7 @@ class DatasetRule(AccessRule):
     """
     This rules limits the records a user has access to to a specific dataset.
     """
-    dataset = models.CharField(max_length=255, null=False, blank=False)
+    dataset = models.CharField(max_length=255, null=True, blank=True, default=None)
 
 
 class UserModuleRule(AccessRule):

@@ -154,8 +154,9 @@
 
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
-                {% if person_form %}
+
                 <div class="col-sm-6">
+                    {% if person_form %}
                     <div class="h4">Person Details</div>
                     {% for field in person_form %}
                     {% for error in field.errors %}
@@ -166,8 +167,18 @@
                         {{ field|addcss:"form-control" }}
                     </div>
                     {% endfor %}
+                    {% endif %}
                 </div>
-                {% endif %}
+
+                <div class="col-sm-6">
+                  {% for error in form.belongs_to.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ form.belongs_to.label }}</label>
+                      {{ form.belongs_to|addcss:"form-control" }}
+                  </div>
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">
                 {% include "curation/fragment_authority_attributes.html" %}
