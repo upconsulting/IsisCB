@@ -165,12 +165,6 @@ def are_related_objects_for_authority_public(authority):
     if ACRelation.objects.filter(authority__pk=authority.pk).filter(citation__public=False):
         return False
 
-    for acrel in authority.acrelations:
-        if not acrel.public:
-            return False
-        if not acrel.citation.public:
-            return False
-
     for aarel in authority.aarelations:
         if not aarel.public:
             return False
