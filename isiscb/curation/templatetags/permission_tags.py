@@ -160,6 +160,11 @@ def are_linked_journals_public(citation_id, authorities):
 
 @register.filter
 def are_related_objects_for_authority_public(authority):
+    if ACRelation.objects.filter(authority__pk=authority.pk).filter(public=False):
+        return False
+    if ACRelation.objects.filter(authority__pk=authority.pk).filter(citation__public=False):
+        return False
+
     for acrel in authority.acrelations:
         if not acrel.public:
             return False
