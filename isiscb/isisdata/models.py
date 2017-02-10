@@ -1343,8 +1343,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                 self.type_broad_controlled = self.PUBLICATION_HOST
 
         # Trigger indexing of Authority and Citation instances.
-        self.authority.save()
-        self.citation.save()
+        if self.authority:
+            self.authority.save()
+        if self.citation:
+            self.citation.save()
         super(ACRelation, self).save(*args, **kwargs)
 
 
@@ -1503,8 +1505,10 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     def save(self, *args, **kwargs):
         super(CCRelation, self).save(*args, **kwargs)
         # Trigger indexing of Authority and Citation instances.
-        self.subject.save()
-        self.object.save()
+        if self.subject:
+            self.subject.save()
+        if self.object:
+            self.object.save()
 
 
 class LinkedDataType(models.Model):
