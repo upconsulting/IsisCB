@@ -190,6 +190,7 @@ def retrieve_accession(request, accession_id):
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'accession': accession,
+        'draftcitations': accession.draftcitation_set.filter(processed=False)
     })
     return HttpResponse(template.render(context))
 
