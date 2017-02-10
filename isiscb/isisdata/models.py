@@ -698,7 +698,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         def get_related(obj):
             query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
             return CCRelation.objects.filter(query)
-            
+
         def get_title(obj):
             if obj.title:
                 return obj.title
@@ -966,7 +966,6 @@ class Authority(ReferencedEntity, CuratedMixin):
     """ASCII-normalized name."""
 
     def save(self, *args, **kwargs):
-        print 'jup'
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
         super(Authority, self).save(*args, **kwargs)
 
@@ -1500,6 +1499,12 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     def __unicode__(self):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
+
+    def save(self, *args, **kwargs):
+        super(CCRelation, self).save(*args, **kwargs)
+        # Trigger indexing of Authority and Citation instances.
+        self.subject.save()
+        self.object.save()
 
 
 class LinkedDataType(models.Model):
