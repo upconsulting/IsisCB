@@ -41,7 +41,7 @@
 <div class="container-fluid" id="main-container">
     <div class="row">
         <div class="col-xs-6" id="left-panel-column">
-            {% for citation in accession.draftcitation_set.all %}
+            {% for citation in draftcitations %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
                     <div class="panel-body">
