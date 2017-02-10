@@ -962,6 +962,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     """ASCII-normalized name."""
 
     def save(self, *args, **kwargs):
+        print 'jup'
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
         super(Authority, self).save(*args, **kwargs)
 
@@ -1337,6 +1338,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                 self.type_broad_controlled = self.INSTITUTIONAL_HOST
             elif self.type_controlled in self.PUBLICATION_HOST_TYPES:
                 self.type_broad_controlled = self.PUBLICATION_HOST
+
+        # Trigger indexing of Authority and Citation instances.
+        self.authority.save()
+        self.citation.save()
         super(ACRelation, self).save(*args, **kwargs)
 
 
