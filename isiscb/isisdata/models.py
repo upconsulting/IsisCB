@@ -695,6 +695,10 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     def save(self, *args, **kwargs):
+        def get_related(obj):
+            query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
+            return CCRelation.objects.filter(query)
+            
         def get_title(obj):
             if obj.title:
                 return obj.title
