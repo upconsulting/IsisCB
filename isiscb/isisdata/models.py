@@ -933,7 +933,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         query = Q(citation_id=self.id)
         return ACRelation.objects.filter(query)
 
-
     @property
     def get_all_contributors(self):
         query = Q(citation_id=self.id) & Q(type_broad_controlled__in=['PR'], data_display_order__lt=30)
@@ -944,9 +943,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         The absolute URL of a Citation is the citation detail view.
         """
         return core_reverse("citation", args=(self.id,))
-
-
-
 
 
 class Authority(ReferencedEntity, CuratedMixin):
