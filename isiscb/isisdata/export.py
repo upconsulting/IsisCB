@@ -7,6 +7,7 @@ since these jobs will be performed asynchronously.
 """
 
 from isisdata.models import *
+from django.utils.text import slugify
 
 
 def generate_csv(stream, queryset, columns):
@@ -50,6 +51,7 @@ class Column(object):
         self.label = label
         self.call = fnx
         self.model = model
+        self.slug = slugify(label)
 
     def __call__(self, obj):
         if self.model is not None:
@@ -110,3 +112,11 @@ object_id = Column(u'Record ID', lambda obj: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
 citation_author = Column(u'Author', _citation_author, Citation)
 citation_editor = Column(u'Editor', _citation_editor, Citation)
+
+
+CITATION_COLUMNS = [
+    object_id,
+    citation_title,
+    citation_author,
+    citation_editor
+]

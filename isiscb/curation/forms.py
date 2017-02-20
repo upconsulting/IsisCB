@@ -4,6 +4,7 @@ from django import forms
 from django.http import QueryDict
 
 from isisdata.models import *
+from isisdata import export    # This never gets old...
 from curation import actions
 
 import rules
@@ -673,4 +674,11 @@ class CitationCollectionForm(forms.ModelForm):
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
+
+
+class ExportCitationsForm(forms.Form):
+    tag = forms.CharField(help_text='This tag will be added to the export filename')
+    export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())

@@ -1995,3 +1995,57 @@ def add_citation_collection(request):
         })
 
     return HttpResponse(template.render(context))
+
+
+# TODO: refactor around asynchronous tasks.
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_citations_status(request):
+    template = loader.get_template('curation/citations_export_status.html')
+    context = RequestContext(request, {})
+    target = request.GET.get('target')
+    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    context.update({'download_target': download_target})
+    return HttpResponse(template.render(context))
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_citations(request):
+    # TODO: move some of this stuff out to the export module.
+    from django.utils.text import slugify
+    from isisdata import export
+    import smart_open
+    from datetime import datetime
+    template = loader.get_template('curation/citations_export.html')
+    context = RequestContext(request, {})
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('citation_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset(request)
+    if request.GET.get('confirmed', False):
+        form = ExportCitationsForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            tag = slugify(form.cleaned_data.get('tag', 'export'))
+            fields = form.cleaned_data.get('fields')
+            columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
+            _datestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            _out_name = '%s--%s.csv' % (_datestamp, tag)
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY, settings.AWS_EXPORT_BUCKET_NAME, _out_name)
+
+            # This will block! TODO: farm out to celery.
+            with smart_open.smart_open(s3_path, 'wb') as f:
+                export.generate_csv(f, queryset, columns)
+
+            from django.utils.http import urlencode
+            return HttpResponseRedirect(reverse('export-citations-status') + '?' + urlencode({'target': _out_name}))
+    else:
+        form = ExportCitationsForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+    })
+
+    return HttpResponse(template.render(context))
