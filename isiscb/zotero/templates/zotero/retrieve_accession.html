@@ -485,7 +485,9 @@ var confirmCreateModal = function() {
     triggerCreateAuthority(draftauthority_id, function(created_authority_id) {
         console.log('create a new authority:: done');
         getSimilarAuthorities(draftauthority_id, function(count, ids) {
-            console.log('create a new authority:: apply to ' + ids.length + ' other DraftAuthority records');
+
+            console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
+
             ids.forEach(function(di) {
                 triggerResolveAuthority(di, created_authority_id);
             });

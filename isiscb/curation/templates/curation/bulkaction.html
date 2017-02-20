@@ -17,6 +17,8 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
 
+    {{ form.filter_params }}
+
     <div class="row">
         <div class="col-xs-6">
             {% with form.action as field %}
@@ -29,14 +31,7 @@
             </div>
             {% endwith %}
 
-            {% with form.queryset as field %}
-            {% for error in field.errors %}
-            <div class="alert alert-danger">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group">
-                {{ field|addcss:"form-control"}}
-            </div>
-            {% endwith %}
+
             <p class="text-muted">Hold the <kbd class="kbd">shift</kbd> key to select multiple actions.</p>
         </div>
 
