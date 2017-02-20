@@ -43,3 +43,4 @@ rules
 jsonpickle
 regex
 smart-open==1.4.0
+unicodecsv==0.14.1
