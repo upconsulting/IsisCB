@@ -10,7 +10,21 @@ from isisdata.models import *
 
 
 def generate_csv(stream, queryset, columns):
-    import csv
+    """
+    Write data from a queryset as CSV to a file/stream.
+
+    Parameters
+    ----------
+    stream : object
+        A file pointer, or anything that provides a ``write()`` method.
+    queryset : iterable
+        Each object yielded will be passed to the column handlers in
+        ``columns``.
+    columns : list
+        Should be a list of :class:`.Column` instances.
+    """
+
+    import unicodecsv as csv
     writer = csv.writer(stream)
     writer.writerow(map(lambda c: c.label, columns))
     for obj in queryset:
