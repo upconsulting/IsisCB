@@ -156,3 +156,7 @@ def get_school(obj):
 @register.filter(name='get_date_attributes')
 def get_date_attributes(obj):
     return SafeText(', '.join(['<span class="label label-success">%s</span> %s' % (attribute.type_controlled.name, attribute.value.display) for attribute in obj.attributes.all()]))
+
+@register.filter
+def is_ccrelation_other_public(instance_id, ccrelation):
+    return (instance_id == ccrelation.subject.id and not ccrelation.object.public) or (instance_id == ccrelation.object.id and not ccrelation.subject.public)
