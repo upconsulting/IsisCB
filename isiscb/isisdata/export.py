@@ -18,6 +18,19 @@ def generate_csv(stream, queryset, columns):
 
 
 class Column(object):
+    """
+    Convenience wrapper for functions that generate column data.
+
+    Parameters
+    ----------
+    label : str
+        Label used as the column header in the output document.
+    fnx : callable
+        Should take a single object (e.g. a model instance), and return unicode.
+    model : class
+        Optional. If provided, an AssertionError will be raised if the column
+        is passed an object that is not an instance of ``model``.
+    """
     def __init__(self, label, fnx, model=None):
         assert hasattr(fnx, '__call__')
         self.label = label
@@ -65,7 +78,6 @@ def _citation_author(obj):
                                    .order_by('data_display_order')\
                                    .values_list('name_for_display_in_citation',
                                                 'authority__name')
-    print names
     return u'; '.join(map(lambda o: o[0] if o[0] else o[1], names))
 
 

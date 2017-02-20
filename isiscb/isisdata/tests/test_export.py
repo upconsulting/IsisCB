@@ -3,6 +3,31 @@ from isisdata import export    # Ha!
 from isisdata.models import *
 
 
+class TestExportCSV(unittest.TestCase):
+    def test_output(self):
+        for i in xrange(5):
+            Citation.objects.create(title='Citation %i' % i, type_controlled=Citation.ARTICLE)
+        columns = [export.object_id, export.citation_title]
+
+        class FakeFile(object):
+            def __init__(self):
+                self.data = []
+
+            def write(self, data):
+                self.data.append(data)
+
+        f = FakeFile()
+        qs = Citation.objects.all()
+        export.generate_csv(f, qs, columns)
+        self.assertEqual(len(f.data), qs.count() + 1,
+                         "Should generate one line per object, plus a header.")
+
+        def tearDown(self):
+            Citation.objects.all().delete()
+            Authority.objects.all().delete()
+            ACRelation.objects.all().delete()
+
+
 class TestColumn(unittest.TestCase):
     """
     :class:`.export.Column` should provide a uniform interface for data-prep
