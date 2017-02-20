@@ -24,10 +24,9 @@ from curation.filters import *
 from curation.forms import *
 from curation.contrib.views import check_rules
 
-import iso8601
-import rules
-import datetime
+import iso8601, rules, datetime
 from itertools import chain
+from unidecode import unidecode
 
 
 def _get_datestring_for_authority(authority):
@@ -1324,7 +1323,7 @@ def authority(request, authority_id):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_language_search(request):
     q = request.GET.get('q', None)
-    if not q or len(q) < 3:
+    if not q or len(q) < 3:    # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
     queryset = Language.objects.filter(name__istartswith=q)
     results = [{
@@ -1341,7 +1340,7 @@ def quick_and_dirty_authority_search(request):
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     tc = request.GET.get('type', None)
     N = int(request.GET.get('max', 10))
-    if not q or len(q) < 3:
+    if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
     queryset = Authority.objects.all()
@@ -1362,7 +1361,7 @@ def quick_and_dirty_authority_search(request):
 
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
-        queryset = queryset.filter(name__icontains=part)
+        queryset = queryset.filter(Q(name__icontains=part) | Q(name_for_sort__icontains=unidecode(part)))
 
     query_parts_numbers = strip_punctuation(q).split()
     for part in query_parts_numbers:

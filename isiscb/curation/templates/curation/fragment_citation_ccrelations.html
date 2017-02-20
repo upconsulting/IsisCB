@@ -10,15 +10,12 @@
 <ul class="list-group">
 {% if can_view %}
 {% for ccrelation in instance.relations_from.all %}
-
-    <li class="list-group-item ccrelation clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
+    <li class="list-group-item ccrelation clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if instance.id|is_ccrelation_other_public:ccrelation %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">
         {% endif %}
-
         <span class="col-sm-11">
-
           {% if instance.id == ccrelation.subject.id %}
           <span class="text">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
           {% else %}
@@ -34,7 +31,7 @@
           the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text">{{ ccrelation.object|get_citation_title|safe }} ({{ ccrelation.object|get_citation_pubdate }})</span>, <span class="text text-muted">{{ ccrelation.object|get_authors_editors }}</span>.
           {% endif %}
 
-          {% if not ccrelation.object.public %}
+          {% if instance.id|is_ccrelation_other_public:ccrelation %}
           <i class="fa fa-eye-slash" title="The linked record is not public."></i>
           {% endif %}
 
@@ -62,7 +59,7 @@
 {% endfor %}
 {% for ccrelation in instance.relations_to.all %}
 
-    <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if not ccrelation.object.public %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
+    <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if instance.id|is_ccrelation_other_public:ccrelation %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
       <div class="row">
         {% if can_update %}
         <a href="{% url "ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">
@@ -88,7 +85,7 @@
           the <span class="label label-success">{{ ccrelation.object.get_type_controlled_display }}</span> <span class="text ">{{ ccrelation.object|get_citation_title|safe }}</span>.
           {% endif %}
 
-          {% if not ccrelation.object.public %}
+          {% if instance.id|is_ccrelation_other_public:ccrelation %}
           <i class="fa fa-eye-slash" title="The linked record is not public."></i>
           {% endif %}
 

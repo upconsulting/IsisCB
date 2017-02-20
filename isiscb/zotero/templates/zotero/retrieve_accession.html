@@ -41,7 +41,7 @@
 <div class="container-fluid" id="main-container">
     <div class="row">
         <div class="col-xs-6" id="left-panel-column">
-            {% for citation in accession.draftcitation_set.all %}
+            {% for citation in draftcitations %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
                     <div class="panel-body">
@@ -205,6 +205,8 @@ var opts = {
 , position: 'relative' // Element positioning
 }
 
+var max_results = 20;
+
 var selected_authority, selected_authority_name;
 
 var format_citations = function(related_citations) {
@@ -240,20 +242,21 @@ $('.draftauthority').click(function() {
     $('#authority-search-filter-type').val(selected_authority_type);
 
 
-    $.ajax('/zotero/suggest/authority/' + draftauthority_id + '/', {
+    $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + selected_authority_name, {
         beforeSend: function(response) {
             elem.find('.suggestion-status').spin(opts);
         },
         success: function(response) {
+            console.log(response);
             $('#matching').css('visibility', 'visible');
 
             var target = $('.suggestion-results-list');
             target.empty();
-            if (response.data.length == 0) {
+            if (response.results.length == 0) {
                 target.append('<div class="alert alert-warning">No matches found</div>');
             } else {
 
-                response.data.forEach(function(suggestion) {
+                response.results.forEach(function(suggestion) {
                     var suggestElem = `
                         <li class="list-group-item">
                             <div class="row">
@@ -298,15 +301,6 @@ $('.draftauthority').click(function() {
 
                                     <div class="suggestion-reasons">
                     `;
-                    suggestion.reasons.forEach(function(reason) {
-                        suggestElem += ' <span class="text text-muted" style="font-size: 8pt;">' + reason[0] + '|' + reason[1] + '</span> ';
-                    });
-                    suggestElem += `
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    `;
 
                     target.append(suggestElem);
                 });
@@ -341,7 +335,7 @@ $(document).ready(function() {
 
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
-        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?show_inactive=false&max=20&q=" + query;
+        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?show_inactive=false&max=" + String(max_results) + "&q=" + query;
         if (filter_type != "") {
             search_endpoint += "&type=" + filter_type;
         }
