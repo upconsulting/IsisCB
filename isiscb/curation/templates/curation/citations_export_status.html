@@ -1,0 +1,11 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load addcss %}
+
+{% block content %}
+<div class="h2">Export citations</div>
+
+<p class="text-warning">
+    Your export is complete; you can download it from <a href="{{ download_target }}" target="_blank">{{ download_target }}</a>.
+</p>
+{% endblock %}

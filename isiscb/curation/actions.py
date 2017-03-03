@@ -4,6 +4,9 @@ from django import forms
 
 from isisdata.models import *
 
+# TODO: refactor these actions to use bulk apply methods and then explicitly
+#  trigger search indexing (or whatever other post-save actions are needed).
+
 
 class BaseAction(object):
     def __init__(self):
@@ -32,7 +35,9 @@ class SetRecordStatus(BaseAction):
         # we need to call the save method rather than a queryset update
         # otherwise post hooks are not being called since the update
         # is executed directly on the database
-        for record in queryset.all():
+        print queryset, value
+        for record in queryset:
+            print record
             record.record_status_value=value
             record.save()
 
@@ -51,7 +56,7 @@ class SetRecordStatusExplanation(BaseAction):
         # we need to call the save method rather than a queryset update
         # otherwise post hooks are not being called since the update
         # is executed directly on the database
-        for record in queryset.all():
+        for record in queryset:
             record.record_status_explanation=value
             record.save()
 

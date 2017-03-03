@@ -1,8 +1,10 @@
 from __future__ import absolute_import
 
 from django import forms
+from django.http import QueryDict
 
 from isisdata.models import *
+from isisdata import export    # This never gets old...
 from curation import actions
 
 import rules
@@ -618,12 +620,21 @@ class AttributeForm(forms.ModelForm):
 
 
 class BulkActionForm(forms.Form):
-    def apply(self):
+    def apply(self, queryset, user=None):
         selected_actions = self.cleaned_data.get('action')
-        queryset = self.cleaned_data.get('queryset')
+
+        # filter_params_raw = self.cleaned_data.get('filter_params')
+        # filter_params = QueryDict(filter_params_raw)
+        # if filter_params:
+        #     _qs = Citation.objects.all()
+        #     if user is not None:
+        #         _qs = filter_queryset(user, _qs)
+        #     queryset = CitationFilter(filter_params, queryset=_qs)
+        print selected_actions, queryset
         for action_name in selected_actions:
             action_value = self.cleaned_data.get(action_name)
-            action = getattr(actions, action_name)()
+            # Load and instantiate the corresponding action class.
+            action = getattr(actions, action_name)()    # Object is callable.
             action.apply(queryset, action_value)
 
 
@@ -647,21 +658,27 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
         form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
 
     form_class_attrs['action'] = forms.MultipleChoiceField(choices=action_choices)
-    form_class_attrs['queryset'] = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
-                                                                  widget=forms.widgets.MultipleHiddenInput())
+    form_class_attrs['filters'] = forms.CharField(widget=forms.widgets.HiddenInput())
     return type(form)('BulkChangeForm', (form,), form_class_attrs)
 
 
 class CitationCollectionForm(forms.ModelForm):
-    citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
-                                               widget=forms.widgets.MultipleHiddenInput(),
-                                               required=False)
-
+    # citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
+    #                                            widget=forms.widgets.MultipleHiddenInput(),
+    #                                            required=False)
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
     class Meta:
         model = CitationCollection
-        exclude = ('created', 'createdBy')
+        exclude = ('created', 'createdBy', 'citations')
 
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
-    citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(), widget=forms.widgets.MultipleHiddenInput())
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
+
+
+class ExportCitationsForm(forms.Form):
+    tag = forms.CharField(help_text='This tag will be added to the export filename')
+    export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())

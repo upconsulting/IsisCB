@@ -190,6 +190,7 @@ def linkeddata_for_display(ldinstance):
         return value
     return URN_PATTERNS[ldinstance.type_controlled.name].format(value)
 
+
 @register.filter
 def get_doc_type_display(abbrev):
     for type in Citation.TYPE_CHOICES:
@@ -197,6 +198,7 @@ def get_doc_type_display(abbrev):
             return type[1]
 
     return abbrev
+
 
 @register.filter
 def get_authority_type_display(abbrev):
@@ -206,12 +208,14 @@ def get_authority_type_display(abbrev):
 
     return abbrev
 
+
 @register.filter
 def set_sort_order(link, sort_str):
     [key, sort_order] = sort_str.split(":")
     if not (key + "=") in link:
         return link + "&" + key + "=" + sort_order
     return re.sub(r"&" + key + "=[a-z_]+&?", "&" + key + "=" + sort_order + "&", link)
+
 
 @register.filter
 def set_sort_direction(link, sort_str):
@@ -220,6 +224,7 @@ def set_sort_direction(link, sort_str):
         return link + "&" + key + "=" + sort_dir
     return re.sub(r"&"+ key +"=[a-z_]+&?", "&" + key + "=" + sort_dir + "&", link)
 
+
 @register.filter
 def set_page(link, sort_str):
     [key, page_number] = sort_str.split(":")
@@ -227,12 +232,14 @@ def set_page(link, sort_str):
         return link + "&" + key + "=" + str(page_number)
     return re.sub(r"&" + key + "=[0-9]+&?", "&" + key + "=" + str(page_number) + "&", link)
 
+
 @register.filter
 def set_index_model(link, model_str):
     [key, model] = model_str.split(':')
     if not (key + "=") in link:
         return link + "&" + key + "=" + model
     return re.sub(r"&" + key + "=isisdata\.[a-z]+&?", "&" + key + "=" + model + "&", link)
+
 
 @register.filter
 def get_current_sort_order_citation(sort_field):
