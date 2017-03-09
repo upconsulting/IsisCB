@@ -20,7 +20,7 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = eval(os.environ.get('DEBUG', 'False'))
 
@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'openurl',
     'curation',
     'rules',
+    'django_celery_results',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -264,3 +265,10 @@ AUTHENTICATION_BACKENDS = (
 )
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+
+CELERY_RESULT_BACKEND = 'django-cache'#'django-cache'
+CELERY_REDIS_HOST = 'redis://'
+CELERY_BROKER_URL = 'redis://'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_IMPORTS = ('curation.tasks',)

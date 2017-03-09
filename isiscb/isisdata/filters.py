@@ -31,6 +31,7 @@ filters.LOOKUP_TYPES = [
 class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilter):
     pass
 
+
 def filter_in_collections(queryset, value):
     if not value:
         return queryset

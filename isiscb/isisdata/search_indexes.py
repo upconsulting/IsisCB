@@ -14,6 +14,7 @@ from itertools import groupby
 import time
 from collections import defaultdict
 
+
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
     title = indexes.CharField(null=True, indexed=False, stored=True)
