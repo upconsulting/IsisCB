@@ -128,7 +128,8 @@ def _subjects(obj):
          & (Q(authority__type_controlled__in=_authority_types) \
             | Q(type_controlled=ACRelation.SUBJECT))
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(list(qs.values_list('authority__name', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None,
+                             list(qs.values_list('authority__name', flat=True))))
 
 
 def _category_numbers(obj):
@@ -138,11 +139,11 @@ def _category_numbers(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(list(qs.values_list('authority__classification_code', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('authority__classification_code', flat=True))))
 
 
 def _language(obj):
-    return u'//'.join(list(obj.language.all().values_list('name', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
 
 
 def _place_publisher(obj):
@@ -203,7 +204,7 @@ def _pages(obj):
 def _tracking(obj, type_controlled):
     qs = obj.tracking_entries.filter(type_controlled=type_controlled)
     if qs.count() > 0:
-        return u'//'.join(list(qs.values_list('tracking_info', flat=True)))
+        return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('tracking_info', flat=True))))
     return u""
 
 
@@ -218,7 +219,7 @@ def _link_to_record(obj):
          & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
                                   CCRelation.INCLUDES_CHAPTER])
     ids += list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
-    return u"//".join(ids)
+    return u"//".join(filter(lambda o: o is not None, ids))
 
 
 def _journal_link(obj):
@@ -229,7 +230,7 @@ def _journal_link(obj):
         return u""
     _first = qs.first()
     if _first.authority:
-        return _first.authority.id
+        return _first.authority.name
     return u""
 
 
