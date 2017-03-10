@@ -236,7 +236,7 @@ $('.draftauthority').click(function() {
     $('#authority-search').trigger('keyup');
     $('#matching').css('visibility', 'visible');
 
-    // $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + selected_authority_name, {
+    // $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + selected_authority_name, {
     //     beforeSend: function(response) {
     //         elem.find('.suggestion-status').spin(opts);
     //     },
@@ -329,7 +329,7 @@ $(document).ready(function() {
 
         var query = $(this).val();
         var filter_type = $('#authority-search-filter-type').val();
-        var search_endpoint = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&max=" + String(max_results) + "&q=" + query;
+        var search_endpoint = "{% url "quick_and_dirty_authority_search" %}?show_inactive=false&max=" + String(max_results) + "&q=" + query;
         if (filter_type != "") {
             search_endpoint += "&type=" + filter_type;
         }

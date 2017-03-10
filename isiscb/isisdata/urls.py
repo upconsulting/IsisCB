@@ -3,7 +3,7 @@ from django.views.decorators.cache import cache_page
 from haystack.forms import FacetedSearchForm
 from haystack.views import FacetedSearchView
 from haystack.query import SearchQuerySet
-
+from django.conf.urls import patterns
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
 

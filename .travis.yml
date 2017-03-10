@@ -3,6 +3,8 @@ python:
 - '2.7'
 services:
 - postgresql
+cache:
+- pip
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.test_settings
@@ -12,10 +14,6 @@ env:
     - SOCIAL_AUTH_TWITTER_SECRET=''
 before_script:
 - psql -c 'create database isiscb;' -U postgres
-before_install:
-- pip install -U pip
-- pip install -U six
-- pip install -U setuptools==33.1.1
 script:
 - pip install nose
 - cd isiscb

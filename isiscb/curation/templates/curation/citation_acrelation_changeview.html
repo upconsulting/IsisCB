@@ -65,12 +65,12 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Citation</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <a href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
             <a href="#"
                 class="btn btn-danger btn-sm delete-acrelation"
@@ -146,7 +146,7 @@
             <div class="col-sm-6">
 
               <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
-                <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
               </strong>
 
               <p>
@@ -163,12 +163,12 @@
               </p>
               <hr>
               <div class="text-right">
-                <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+                <a href="{% url 'create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
               </div>
               <div class="form-horizontal">
                 <div id="authority_info">
                   <strong>Authority record: </strong><strong class="text-warning">{% if form.instance.authority %}{{ form.instance.authority.id }}{% endif %}</strong> &nbsp;&nbsp;
-                    <a id="authority_link" href="{% if form.instance.authority %}{% url 'curation:curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+                    <a id="authority_link" href="{% if form.instance.authority %}{% url 'curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
 
 
 
@@ -262,7 +262,7 @@ $(document).ready(function() {
 
         var query = authority_search_input.val();
         searchTimer = setTimeout(function() {
-          $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + query, {
+          $.ajax("{% url "quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + query, {
               failure: function(result) {
                   waiting = false;
               },
@@ -439,7 +439,7 @@ var delete_acrelation = function() {
     $('#delete-acrelation-modal').modal('hide');
     var acrelation_id = $('#acrelation-id-container').val();
     if (acrelation_id) {
-        window.location.replace("{% url "curation:delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true");
+        window.location.replace("{% url "delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true");
     }
 }
 </script>

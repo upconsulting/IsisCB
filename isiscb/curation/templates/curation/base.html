@@ -46,8 +46,6 @@
             }
         });
         </script>
-        {% block extrahead %}
-        {% endblock %}
     </head>
     <body>
       <nav class="navbar navbar-default navbar-fixed-top">
@@ -59,17 +57,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url "curation:dashboard" %}">IsisCB Curation</a>
+          <a class="navbar-brand" href="{% url "dashboard" %}">IsisCB Curation</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav navbar-right">
-              <li{% if curation_section == "dashboard" %} class="active"{% endif %}><a href="{% url "curation:dashboard" %}">Dashboard</a></li>
-              {% if view_user_module %}<li{% if curation_section == "users" %} class="active"{% endif %}><a href="{% url "curation:user_list" %}">Users</a></li>{% endif %}
+              <li{% if curation_section == "dashboard" %} class="active"{% endif %}><a href="{% url "dashboard" %}">Dashboard</a></li>
+              {% if view_user_module %}<li{% if curation_section == "users" %} class="active"{% endif %}><a href="{% url "user_list" %}">Users</a></li>{% endif %}
               <li{% if curation_section == "datasets" %} class="active"{% endif %}>
-                <a href="{% url "curation:datasets" %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Datasets <span class="caret"></span></a>
+                <a href="{% url "datasets" %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Datasets <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "curation:citation_list" %}?filters=true">Citations</a></li>
-                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "curation:authority_list" %}?filters=true">Authorities</a></li>
+                    <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "citation_list" %}?filters=true">Citations</a></li>
+                    <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "authority_list" %}?filters=true">Authorities</a></li>
                 </ul>
               </li>
 

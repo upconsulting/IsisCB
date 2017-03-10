@@ -6,7 +6,7 @@
 {% block content %}
 
 
-<form class="form" action="{% url 'curation:create_authority' %}" method="POST">
+<form class="form" action="{% url 'create_authority' %}" method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_create_authority_header.html" %}

@@ -7,14 +7,14 @@
     <div class="panel-body text-success text-center">
         Successfully ingested {{ ingested|length }} of {{ draftcitations.count }} citations{% if accession.ingest_to %} into dataset
         &nbsp;
-        <a href="{% url "curation:citation_list" %}?zotero_accession={{accession.id}}&belongs_to={{ accession.ingest_to.id }}"
+        <a href="{% url "citation_list" %}?zotero_accession={{accession.id}}&belongs_to={{ accession.ingest_to.id }}"
             class="text-warning">
             {{ accession.ingest_to.name }}
         </a>{% endif %}.
     </div>
 
     <div class="panel-body text-center">
-        <form method="POST" action="{% url "curation:citation_list" %}">
+        <form method="POST" action="{% url "citation_list" %}">
             {% csrf_token %}
             <input type="hidden" name="zotero_accession" value="{{ accession.id }}" />
 

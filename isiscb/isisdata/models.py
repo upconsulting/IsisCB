@@ -10,7 +10,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
-import jsonpickle
 
 
 from markupfield.fields import MarkupField
@@ -1763,8 +1762,8 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES)
 
-    subject_content_type = models.ForeignKey(ContentType, db_index=True)
-    subject_instance_id = models.CharField(max_length=200, db_index=True)
+    subject_content_type = models.ForeignKey(ContentType)
+    subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
 
@@ -2049,7 +2048,6 @@ class ZoteroRule(AccessRule):
     """
     # so far no properties
 
-
 class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -2057,32 +2055,3 @@ class Dataset(CuratedMixin):
 
     def __unicode__(self):
         return u'{0}'.format(self.name)
-
-
-class AsyncTask(models.Model):
-    """
-    Represents an user-initiated asynchronous job, such as a bulk update.
-    """
-
-    async_uuid = models.CharField(max_length=255, blank=True, null=True)
-
-    max_value = models.FloatField(default=0.0)
-    current_value = models.FloatField(default=0.0)
-    state = models.CharField(max_length=10, blank=True, null=True)
-
-    _value = models.TextField()
-    """Use jsonpickle to serialize/deserialize return values."""
-
-    def _get_value(self):
-        return jsonpickle.decode(self._value)
-
-    def _set_value(self, value):
-        self._value = jsonpickle.encode(value)
-
-    value = property(_get_value, _set_value)
-
-    @property
-    def progress(self):
-        if self.max_value and self.max_value > 0:
-            return 100.*self.current_value/self.max_value
-        return 0.

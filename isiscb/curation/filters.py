@@ -31,7 +31,6 @@ filters.LOOKUP_TYPES = [
 class ChoiceMethodFilter(django_filters.MethodFilter, django_filters.ChoiceFilter):
     pass
 
-
 def filter_in_collections(queryset, value):
     if not value:
         return queryset
@@ -107,50 +106,38 @@ class CitationFilter(django_filters.FilterSet):
             'author_or_editor', 'periodical', 'record_status',
             'belongs_to', 'zotero_accession', 'in_collections',
         ]
-        # order_by = [
-        #     ('publication_date', 'Publication date (ascending)'),
-        #     ('-publication_date', 'Publication date (descending)'),
-        #     ('title_for_sort', 'Title (ascending)'),
-        #     ('-title_for_sort', 'Title (descending)')
-        # ]
-    o = filters.OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('publication_date', 'publication_date'),
-            ('title', 'title_for_sort'),
-        ),
+        order_by = [
+            ('publication_date', 'Publication date (ascending)'),
+            ('-publication_date', 'Publication date (descending)'),
+            ('title_for_sort', 'Title (ascending)'),
+            ('-title_for_sort', 'Title (descending)')
+        ]
 
-        # labels do not need to retain order
-        field_labels={
-            'publication_date': 'Publication date',
-            'title': 'Title'
-        }
-    )
 
-    # def get_ordering_field(self):
-    #     if self._meta.order_by:
-    #         if isinstance(self._meta.order_by, (list, tuple)):
-    #             if isinstance(self._meta.order_by[0], (list, tuple)):
-    #                 # e.g. (('field', 'Display name'), ...)
-    #                 choices = [(f[0], f[1]) for f in self._meta.order_by]
-    #             else:
-    #                 choices = []
-    #                 for f in self._meta.order_by:
-    #                     if f[0] == '-':
-    #                         label = _('%s (descending)' % capfirst(f[1:]))
-    #                     else:
-    #                         label = capfirst(f)
-    #                     choices.append((f, label))
-    #         else:
-    #             # add asc and desc field names
-    #             # use the filter's label if provided
-    #             choices = []
-    #             for f, fltr in self.filters.items():
-    #                 choices.extend([
-    #                     (f, fltr.label or capfirst(f)),
-    #                     ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
-    #                 ])
-    #         return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
+    def get_ordering_field(self):
+        if self._meta.order_by:
+            if isinstance(self._meta.order_by, (list, tuple)):
+                if isinstance(self._meta.order_by[0], (list, tuple)):
+                    # e.g. (('field', 'Display name'), ...)
+                    choices = [(f[0], f[1]) for f in self._meta.order_by]
+                else:
+                    choices = []
+                    for f in self._meta.order_by:
+                        if f[0] == '-':
+                            label = _('%s (descending)' % capfirst(f[1:]))
+                        else:
+                            label = capfirst(f)
+                        choices.append((f, label))
+            else:
+                # add asc and desc field names
+                # use the filter's label if provided
+                choices = []
+                for f, fltr in self.filters.items():
+                    choices.extend([
+                        (f, fltr.label or capfirst(f)),
+                        ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
+                    ])
+            return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
 
     def filter_id(self, queryset, value):
         if not value:
@@ -254,23 +241,12 @@ class AuthorityFilter(django_filters.FilterSet):
             'classification_hierarchy', 'zotero_accession',
             'belongs_to']
 
-        # order_by = [
-        #     ('', 'None'),
-        #     ('name_for_sort', 'Name (ascending)'),
-        #     ('-name_for_sort', 'Name (descending)')
-        # ]
+        order_by = [
+            ('', 'None'),
+            ('name_for_sort', 'Name (ascending)'),
+            ('-name_for_sort', 'Name (descending)')
+        ]
 
-    o = filters.OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('name', 'name_for_sort'),
-        ),
-
-        # labels do not need to retain order
-        field_labels={
-            'name': 'Name'
-        }
-    )
 
     def filter_name(self, queryset, value):
         value = unidecode(value)

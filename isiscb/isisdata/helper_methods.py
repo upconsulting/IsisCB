@@ -1,10 +1,7 @@
-# TODO: this should be combined with isisdata.utils.
-
 import string
 import unidecode
 import re
 import bleach
-
 
 def strip_punctuation(s):
     """

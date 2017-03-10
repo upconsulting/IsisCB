@@ -6,7 +6,7 @@
 
 
 {% block object_list %}
-<a class="btn btn-primary btn-sm" href="{% url 'curation:create_authority' %}">Create new authority record</a>
+<a class="btn btn-primary btn-sm" href="{% url 'create_authority' %}">Create new authority record</a>
 
 <table class="table table-responsive table-hover table-curation">
     <thead>
@@ -21,7 +21,7 @@
         {% for object in filter_list %}
         <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
             <td>
-                <a href="{% url "curation:curate_authority" object.id %}">{{ object.id }}</a>
+                <a href="{% url "curate_authority" object.id %}">{{ object.id }}</a>
                 {% if not object.public %}
                 <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                 {% endif %}
@@ -47,7 +47,7 @@
 {% endblock %}
 
 {% block filter_form %}
-<form id="filter_form" class="form clearfix" action="{% url 'curation:authority_list' %}" method="POST" >
+<form id="filter_form" class="form clearfix" action="{% url 'authority_list' %}" method="POST" >
 {% csrf_token %}
 
     <div class="row">
