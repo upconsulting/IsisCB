@@ -31,12 +31,12 @@
             </div>
           </div>
         <div class="col-md-3">
-          <a href="{% url 'curation:curate_authority' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+          <a href="{% url 'curate_authority' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Authority</a>
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_authority' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+                <a href="{% url 'curate_authority' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
                 <a href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
                 <a href="#"
                   class="btn btn-danger btn-sm delete-acrelation"
@@ -108,13 +108,13 @@
             <div class="col-sm-6">
 
               <div class="text-right">
-                <a href="{% url 'curation:create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
+                <a href="{% url 'create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
               </div>
 
               <div id="citation_info_container">
                 <div id="citation_info">
                   <strong>Citation record: </strong><strong class="text-warning"><span class="show_id">{{ form.instance.citation.id }}</span> &nbsp;&nbsp;
-                    <a class="link_to_citation" {% if form.instance.citation %}href="{% url 'curation:curate_citation' form.instance.citation.id %}"{% endif %}><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    <a class="link_to_citation" {% if form.instance.citation %}href="{% url 'curate_citation' form.instance.citation.id %}"{% endif %}><i class="fa fa-external-link" aria-hidden="true"></i></a>
                   </strong>
 
                   <p>
@@ -160,7 +160,7 @@
 
                 <div id="authority_info">
                   <strong>Authority record: </strong><strong class="text-warning">{{ instance.id }}</strong> &nbsp;&nbsp;
-                    <a href="{% url 'curation:curate_authority' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+                    <a href="{% url 'curate_authority' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
 
                 <p>
                   <span id="authority_type_full" {% if form.instance.authority %}data-code-type="{{ form.instance.authority.type_controlled }}"{% endif %} class="text-success">{{ instance.get_type_controlled_display }}</span>
@@ -224,7 +224,7 @@ $(document).ready(function() {
 
         searchTimer = setTimeout(function() {
           var query = citation_search_input.val();
-          $.ajax("{% url "curation:quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
+          $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
               failure: function(result) {
                   // do nothing
               },
@@ -274,7 +274,7 @@ $(document).ready(function() {
                       var selected_authors = selected.attr('data-authors');
                       var selected_type = selected.attr('data-type');
                       var selected_type_code = selected.attr('data-type-code');
-                      var link = "{% url 'curation:citation_list' %}" + selected_id;
+                      var link = "{% url 'citation_list' %}" + selected_id;
 
                       $('#results-container').empty();
                       citation_search_input.val(selected_name);

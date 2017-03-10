@@ -49,7 +49,7 @@
           <div class="row">
 
           {% if can_update %}
-          <a href="{% url "curation:update_acrelation_for_authority" instance.id acrelation.id %}" class="list_entry_link">
+          <a href="{% url "update_acrelation_for_authority" instance.id acrelation.id %}" class="list_entry_link">
           {% endif %}
           <span class="col-sm-11">
             <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
@@ -88,7 +88,7 @@
 
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "curation:create_acrelation_for_authority" instance.id %}">
+    <a class="list-group-item text-muted" href="{% url "create_acrelation_for_authority" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
 {% endif %}
@@ -122,7 +122,7 @@ var delete_acrelation = function() {
     $('#delete-acrelation-modal').modal('hide');
     var acrelation_id = $('#acrelation-id-container').val();
     if (acrelation_id) {
-        $.ajax("{% url "curation:create_acrelation_for_authority" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+        $.ajax("{% url "create_acrelation_for_authority" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#acrelation-' + acrelation_id).remove();
             },

@@ -13,7 +13,7 @@
     <li class="list-group-item linkeddata" id="linkeddata-{{ linkeddata.id }}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url 'curation:update_linkeddata_for_citation' instance.pk linkeddata.pk %}" class="list_entry_link">
+        <a href="{% url 'update_linkeddata_for_citation' instance.pk linkeddata.pk %}" class="list_entry_link">
         {% endif %}
 
         <span class="col-sm-11">
@@ -49,7 +49,7 @@
     </li>
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item linkeddata text-muted" href="{% url 'curation:create_linkeddata_for_citation' instance.id %}">
+    <a class="list-group-item linkeddata text-muted" href="{% url 'create_linkeddata_for_citation' instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new Linked Data entry
     </a>
 {% endif %}
@@ -83,7 +83,7 @@ var delete_linkeddata = function() {
     $('#delete-linkeddata-modal').modal('hide');
     var linkeddata_id = $('#linkeddata-id-container').val();
     if (linkeddata_id) {
-        $.ajax("{% url "curation:curate_citation" instance.id %}linkeddata/" + linkeddata_id + '/delete.json?confirm=true', {
+        $.ajax("{% url "curate_citation" instance.id %}linkeddata/" + linkeddata_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#linkeddata-' + linkeddata_id).remove();
             }

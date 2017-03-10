@@ -52,7 +52,7 @@
             <td class="text-center">{% if object.resolved %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
             <td class="text-center">{% if object.processed %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
             <td>
-                <form method="POST" action="{% url "curation:citation_list" %}">
+                <form method="POST" action="{% url "citation_list" %}">
                 <div class="btn-group btn-group-xs">
                     <a href="{% url "retrieve_accession" object.id %}"
                         class="btn btn-xs btn-primary">Resolve</a>

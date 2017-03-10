@@ -276,7 +276,7 @@
         </a>
         {% else %}
         <a class="text-warning input-sm"
-            href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?type_controlled=DOI">
+            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=DOI">
             <span class="gylphicon glyphicon-plus"></span> Add DOI
         </a>
         {% endif %}

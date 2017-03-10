@@ -2,7 +2,6 @@ from isisdata.models import *
 
 import collections
 
-
 class TrackingWorkflow(object):
     """
     This class represents the tracking workflow a record goes through.

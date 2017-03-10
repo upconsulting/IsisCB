@@ -14,21 +14,13 @@
 
     {% for field in form %}
 
-
     {% for error in field.errors %}
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
-        {% if field.label != 'Filters' %}
         <label>{{ field.label }}</label>
-        <span class="pull-right">{{ field.help_text }}</span>
-        {% endif %}
         {{ field|addcss:"form-control" }}
     </div>
-    <p class="text-muted text">
-
-    </p>
-
     {% endfor %}
     <div class="text-center">
         <input type="submit" class="btn btn-success" value="Create" />
