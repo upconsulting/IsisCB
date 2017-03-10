@@ -65,7 +65,6 @@ pycurl==7.43.0
 pydot==1.0.2
 pygraphviz==1.3rc2
 PyJWT==1.4.2
-pyodbc==3.0.10
 pyparsing==1.5.7
 python-dateutil==1.5
 python-openid==2.2.5
