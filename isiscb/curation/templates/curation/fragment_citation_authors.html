@@ -17,7 +17,7 @@
 
           <div class="row">
             {% if can_update %}
-            <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+            <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
             {% endif %}
             <span class="col-sm-11">
 
@@ -95,7 +95,7 @@ var createNewauthor = function() {
 
     $('#create-author-input').on('keyup', function(e) {
         var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?type=PE&q=" + query, {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=PE&q=" + query, {
             success: function(result) {
                 var results_container = $('#create-author-results-container');
                 results_container.empty();
@@ -140,14 +140,14 @@ var createNewauthor = function() {
                         'type_broad_controlled': 'PR',    // Personal Responsibility
                     };
 
-                    $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
+                    $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
                         var new_elem = '<li class="list-group-item clearfix" id="author-' + new_id + '">';
                         var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
-                        new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
                         new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-author" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem += '</span>';
@@ -197,7 +197,7 @@ var delete_author = function() {
     $('#delete-author-modal').modal('hide');
     var acrelation_id = $('#author-id-container').val();
     if (acrelation_id) {
-        $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+        $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#author-' + acrelation_id).remove();
                 $('#acrelation-' + acrelation_id).remove();

@@ -70,7 +70,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div class="alert alert-warning headerbox" role="alert">{{ authority.get_type_controlled_display }}
         <span class="btn-grp pull-right">
-            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curate_authority" authority.id %}"></a>{% endif %}
+            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}"></a>{% endif %}
             <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
 

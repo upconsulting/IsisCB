@@ -12,7 +12,7 @@ var toggleTab = function(name) {
 }
 </script>
 
-<form class="form" action="{% url 'create_citation' %}" method="POST">
+<form class="form" action="{% url 'curation:create_citation' %}" method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_create_citation_header.html" %}

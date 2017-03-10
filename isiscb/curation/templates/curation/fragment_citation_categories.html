@@ -14,7 +14,7 @@
     <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+        <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
         {% endif %}
         <span class="col-sm-10">
           {{ acrelation.authority.name }}
@@ -81,7 +81,7 @@ function triggerSearchCategories() {
 
   var query = $('#create-category-input').val();
   searchTimerCategories = setTimeout(function() {
-    $.ajax("{% url "quick_and_dirty_authority_search" %}?type=CT&max=" + max_results_categories + "&q=" + query, {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=CT&max=" + max_results_categories + "&q=" + query, {
         success: function(result) {
             var results_container = $('#create-category-results-container');
             results_container.empty();
@@ -138,14 +138,14 @@ function triggerSearchCategories() {
                     'type_broad_controlled': 'CT',    // classification term.
                 };
 
-                $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
+                $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
                     var new_id = result.acrelation.id;
                     var new_elem = '<li class="list-group-item clearfix" id="category-' + new_id + '">';
                     var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
                     new_elem_acr += '<span class="label label-primary">category</span> <span class="label label-success">Provides category Content About</span> ';
 
-                    new_elem += '<a href="{% url "create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
-                    new_elem_acr += '<a href="{% url "create_acrelation_for_citation" instance.id %}"' + new_id +  '" >';
+                    new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
+                    new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}"' + new_id +  '" >';
 
                     new_elem += '<div class="row">';
                     new_elem_acr += '<div class="row">';
@@ -233,7 +233,7 @@ var delete_category = function() {
     $('#delete-category-modal').modal('hide');
     var acrelation_id = $('#category-id-container').val();
     if (acrelation_id) {
-        $.ajax("{% url "create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+        $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#category-' + acrelation_id).remove();
                 $('#acrelation-' + acrelation_id).remove();

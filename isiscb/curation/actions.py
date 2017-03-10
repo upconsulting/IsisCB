@@ -1,8 +1,14 @@
+"""
+Asynchronous functions for bulk changes to the database.
+"""
+
 from __future__ import absolute_import
+from curation.tasks import update_instance
 
 from django import forms
 
 from isisdata.models import *
+import isisdata.tasks as dtasks
 
 # TODO: refactor these actions to use bulk apply methods and then explicitly
 #  trigger search indexing (or whatever other post-save actions are needed).
@@ -31,15 +37,23 @@ class SetRecordStatus(BaseAction):
         'widget': forms.widgets.Select(attrs={'class': 'action-value'}),
     }
 
-    def apply(self, queryset, value):
-        # we need to call the save method rather than a queryset update
-        # otherwise post hooks are not being called since the update
-        # is executed directly on the database
-        print queryset, value
-        for record in queryset:
-            print record
-            record.record_status_value=value
-            record.save()
+    def apply(self, user, filter_params_raw, value):
+        # We need this to exist first so that we can keep it up to date as the
+        #  group of tasks is executed.
+
+        task = AsyncTask.objects.create()
+        result = dtasks.bulk_update_citations.delay(user.id,
+                                                    filter_params_raw,
+                                                    'record_status_value',
+                                                    value, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('record_status_value', value)
+        task.save()
+        return task.id
+
 
 
 class SetRecordStatusExplanation(BaseAction):
@@ -52,13 +66,19 @@ class SetRecordStatusExplanation(BaseAction):
         'widget': forms.widgets.TextInput(attrs={'class': 'action-value'}),
     }
 
-    def apply(self, queryset, value):
-        # we need to call the save method rather than a queryset update
-        # otherwise post hooks are not being called since the update
-        # is executed directly on the database
-        for record in queryset:
-            record.record_status_explanation=value
-            record.save()
+    def apply(self, user, filter_params_raw, value):
+        task = AsyncTask.objects.create()
+        result = dtasks.bulk_update_citations.delay(user.id,
+                                                    filter_params_raw,
+                                                    'record_status_explanation',
+                                                    value, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('record_status_explanation', value)
+        task.save()
+        return task.id
 
 
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation]

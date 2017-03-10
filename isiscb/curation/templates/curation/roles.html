@@ -22,7 +22,7 @@
 
 <div class="row" style="margin-top: 35px;">
   <div class="col-md-12 text-right">
-    <a class="btn btn-primary btn-sm" href="{% url "create_role" %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create new role</a>
+    <a class="btn btn-primary btn-sm" href="{% url "curation:create_role" %}"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create new role</a>
   </div>
 </div>
 
@@ -38,12 +38,12 @@
 <tbody>
 {% for role in roles %}
   <tr>
-    <td><a href="{% url 'role' role.pk %}">{{ role.name }}</a></td>
+    <td><a href="{% url 'curation:role' role.pk %}">{{ role.name }}</a></td>
     <td>{{ role.description }}</td>
-    <td>{% for user in role.users.all %}<a href="{% url 'user' user.pk %}">{{ user.username }}</a>, {% endfor %}</td>
+    <td>{% for user in role.users.all %}<a href="{% url 'curation:user' user.pk %}">{{ user.username }}</a>, {% endfor %}</td>
     <td>
       {% if update_module %}
-      <form action="{% url 'delete_role' role.pk %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Delete Role" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Delete Role</small></button></form>
+      <form action="{% url 'curation:delete_role' role.pk %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Delete Role" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Delete Role</small></button></form>
       {% endif %}
     </td>
   </tr>
