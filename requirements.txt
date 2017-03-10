@@ -62,8 +62,6 @@ pefile
 Pillow==2.9.0
 psycopg2==2.6.1
 pycurl==7.43.0
-pydot==1.0.2
-pygraphviz==1.3rc2
 PyJWT==1.4.2
 pyparsing==1.5.7
 python-dateutil==1.5
