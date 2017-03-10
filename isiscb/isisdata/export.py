@@ -149,7 +149,12 @@ def _place_publisher(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().authority.name
+    if qs.count() == 0:
+        return u''
+    _first_publisher = qs.first()
+    if _first_publisher.authority:
+        return _first_publisher.authority.name
+    return u''
 
 
 def _series(obj):
@@ -159,7 +164,12 @@ def _series(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.BOOK_SERIES)
     qs = obj.acrelation_set.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().authority.name
+    if qs.count() == 0:
+        return u''
+    _first_series = qs.first()
+    if _first_series.authority:
+        return _first_series.authority.name
+    return u''
 
 
 def _isbn(obj):
@@ -169,7 +179,9 @@ def _isbn(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__name__iexact='isbn')
     qs = obj.linkeddata_entries.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().universal_resource_name
+    if qs.count() == 0:
+        return u''
+    return qs.first().universal_resource_name
 
 
 def _pages(obj):
@@ -213,7 +225,12 @@ def _journal_link(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PERIODICAL)
     qs = obj.acrelation_set.filter(_q)
-    return u"" if qs.count() == 0 else qs.first().authority.id
+    if qs.count() == 0:
+        return u""
+    _first = qs.first()
+    if _first.authority:
+        return _first.authority.id
+    return u""
 
 
 def _journal_volume(obj):
