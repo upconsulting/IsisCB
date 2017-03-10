@@ -57,9 +57,16 @@ class Column(object):
         self.slug = slugify(label)
 
     def __call__(self, obj):
-        if self.model is not None:
-            assert isinstance(obj, self.model)
-        return self.call(obj)
+        try:
+            if self.model is not None:
+                assert isinstance(obj, self.model)
+            return self.call(obj)
+        except AssertionError as E:
+            raise E
+        except Exception as E:
+            print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
+            print E
+            return u""
 
 
 def _citation_title(obj):
@@ -123,7 +130,8 @@ def _subjects(obj):
          & (Q(authority__type_controlled__in=_authority_types) \
             | Q(type_controlled=ACRelation.SUBJECT))
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(list(qs.values_list('authority__name', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None,
+                             list(qs.values_list('authority__name', flat=True))))
 
 
 def _category_numbers(obj):
@@ -133,18 +141,23 @@ def _category_numbers(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(list(qs.values_list('authority__classification_code', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('authority__classification_code', flat=True))))
 
 
 def _language(obj):
-    return u'//'.join(list(obj.language.all().values_list('name', flat=True)))
+    return u'//'.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
 
 
 def _place_publisher(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().authority.name
+    if qs.count() == 0:
+        return u''
+    _first_publisher = qs.first()
+    if _first_publisher.authority:
+        return _first_publisher.authority.name
+    return u''
 
 
 def _series(obj):
@@ -154,7 +167,12 @@ def _series(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.BOOK_SERIES)
     qs = obj.acrelation_set.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().authority.name
+    if qs.count() == 0:
+        return u''
+    _first_series = qs.first()
+    if _first_series.authority:
+        return _first_series.authority.name
+    return u''
 
 
 def _isbn(obj):
@@ -164,7 +182,9 @@ def _isbn(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__name__iexact='isbn')
     qs = obj.linkeddata_entries.filter(_q)
-    return u'' if qs.count() == 0 else qs.first().universal_resource_name
+    if qs.count() == 0:
+        return u''
+    return qs.first().universal_resource_name
 
 
 def _pages(obj):
@@ -186,7 +206,7 @@ def _pages(obj):
 def _tracking(obj, type_controlled):
     qs = obj.tracking_entries.filter(type_controlled=type_controlled)
     if qs.count() > 0:
-        return u'//'.join(list(qs.values_list('tracking_info', flat=True)))
+        return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('tracking_info', flat=True))))
     return u""
 
 
@@ -201,14 +221,19 @@ def _link_to_record(obj):
          & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
                                   CCRelation.INCLUDES_CHAPTER])
     ids += list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
-    return u"//".join(ids)
+    return u"//".join(filter(lambda o: o is not None, ids))
 
 
 def _journal_link(obj):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PERIODICAL)
     qs = obj.acrelation_set.filter(_q)
-    return u"" if qs.count() == 0 else qs.first().authority.id
+    if qs.count() == 0:
+        return u""
+    _first = qs.first()
+    if _first.authority:
+        return _first.authority.name
+    return u""
 
 
 def _journal_volume(obj):
