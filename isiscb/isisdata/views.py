@@ -531,11 +531,6 @@ def index(request, obj_id=None):
 
     return redirect('citation', citation_id = obj_id)
 
-    #context = RequestContext(request, {
-    #    'test': False,
-    #})
-    #return render(request, template, context)
-
 
 def api_redirect(request, base_view=None, obj_id=None):
     """

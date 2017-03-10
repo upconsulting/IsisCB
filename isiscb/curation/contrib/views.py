@@ -4,12 +4,10 @@ from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured, FieldError
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils import six
 from django.utils.decorators import available_attrs
 from django.utils.encoding import force_text
-from django.template import loader, RequestContext
-from django.http import HttpResponse
 
 
 import rules
@@ -59,7 +57,7 @@ def check_rules(perm, fn=None, login_url=None, raise_exception=False, redirect_f
 
             if not rules.test_rule(perm, request.user, obj):
                 template = 'curation/access_denied.html'
-                return HttpResponse(template.render(RequestContext(request, {})))
+                return render(request, template, {})
 
             else:
                 # User has all required permissions -- allow the view to execute
