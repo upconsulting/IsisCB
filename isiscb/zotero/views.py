@@ -4,7 +4,6 @@ from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpRespon
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
-from django.template import RequestContext, loader
 from django.core.urlresolvers import reverse
 
 from isisdata.models import *
@@ -128,13 +127,13 @@ def accessions(request):
     queryset = ImportAccession.objects.all().order_by('-imported_on')
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'objects': filtered_objects,
-    })
-    template = loader.get_template('zotero/accessions.html')
-    return HttpResponse(template.render(context))
+    }
+    template = 'zotero/accessions.html'
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
@@ -143,12 +142,12 @@ def create_accession(request):
     """
     Curators should be able to upload Zotero RDF.
     """
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
-    })
+    }
 
-    template = loader.get_template('zotero/create_accession.html')
+    template = 'zotero/create_accession.html'
 
     if request.method == 'GET':
         try:
@@ -173,7 +172,7 @@ def create_accession(request):
             return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
@@ -184,15 +183,15 @@ def retrieve_accession(request, accession_id):
     Zotero ingest.
     """
 
-    template = loader.get_template('zotero/retrieve_accession.html')
+    template = 'zotero/retrieve_accession.html'
     accession = get_object_or_404(ImportAccession, pk=accession_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'accession': accession,
         'draftcitations': accession.draftcitation_set.filter(processed=False)
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
@@ -312,22 +311,22 @@ def create_authority_for_draft(request):
 @check_rules('has_zotero_access')
 @staff_member_required
 def data_importaccession(request, accession_id):
-    template = loader.get_template('zotero/raw_data_list.html')
+    template = 'zotero/raw_data_list.html'
     accession = get_object_or_404(ImportAccession, pk=accession_id)
     queryset = accession.draftcitation_set.all().order_by('title')
 
 
-    context = RequestContext(request, {
+    context = {
         'accession': accession,
         'draftcitations':  queryset,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
 @staff_member_required
 def data_draftcitation(request, draftcitation_id):
-    template = loader.get_template('zotero/raw_data.html')
+    template = 'zotero/raw_data.html'
     draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
     data = _field_data(draftcitation)
     related_data = [
@@ -347,20 +346,20 @@ def data_draftcitation(request, draftcitation_id):
              for ccrelation in draftcitation.relations_to.all()]
         )
     ]
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'instance': draftcitation,
         'data': data,
         'related_data': related_data,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
 @staff_member_required
 def data_draftauthority(request, draftauthority_id):
-    template = loader.get_template('zotero/raw_data.html')
+    template = 'zotero/raw_data.html'
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     data = _field_data(draftauthority)
     related_data = [
@@ -370,14 +369,14 @@ def data_draftauthority(request, draftauthority_id):
              for acrelation in draftauthority.citation_relations.all()]
         )
     ]
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'instance': draftauthority,
         'data': data,
         'related_data': related_data,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
@@ -386,23 +385,23 @@ def ingest_accession(request, accession_id):
     accession = get_object_or_404(ImportAccession, pk=accession_id)
     queryset = accession.draftcitation_set.all().order_by('title')
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'accession': accession,
         'draftcitations': queryset,
-    })
+    }
 
     confirmed = request.GET.get('confirmed', False)
     if confirmed:
         ingested = tasks.ingest_accession(request, accession)
         context.update({'ingested': ingested})
-        template = loader.get_template('zotero/ingest_accession_success.html')
+        template = 'zotero/ingest_accession_success.html'
     else:
-        template = loader.get_template('zotero/ingest_accession_prompt.html')
+        template = 'zotero/ingest_accession_prompt.html'
 
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')
@@ -420,13 +419,13 @@ def change_draftauthority(request, draftauthority_id):
     elif request.method == 'GET':
         form = DraftAuthorityForm(instance=authority)
 
-    context = RequestContext(request, {
+    context = {
         'form': form,
         'authority': authority,
         'next': request.GET.get('next', None)
-    })
-    template = loader.get_template('zotero/change_draftauthority.html')
-    return HttpResponse(template.render(context))
+    }
+    template = 'zotero/change_draftauthority.html'
+    return render(request, template, context)
 
 
 @check_rules('has_zotero_access')

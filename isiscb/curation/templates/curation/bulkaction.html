@@ -11,7 +11,7 @@
     and then click "apply".
 </p>
 
-<form class="form" action="{% url "citation-bulk-action" %}?confirmed=true" method="POST">
+<form class="form" action="{% url "curation:citation-bulk-action" %}?confirmed=true" method="POST">
     {% csrf_token %}
     {% for error in form.non_field_errors %}
     <div class="alert alert-danger">{{ error }}</div>

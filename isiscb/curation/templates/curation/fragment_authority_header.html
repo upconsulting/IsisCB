@@ -17,16 +17,16 @@
 
 <div class="col-md-4 text-center">
   {% if previous %}
-  <a href="{% url 'curate_authority' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+  <a href="{% url 'curation:curate_authority' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
   {% endif %}
   &nbsp; &nbsp; &nbsp;
-  <a href="{% url 'authority_list' %}?page={{request_params.page}}"><i class="fa fa-reply" aria-hidden="true"></i>
+  <a href="{% url 'curation:authority_list' %}?page={{request_params.page}}"><i class="fa fa-reply" aria-hidden="true"></i>
 
     Back to List
   </a>
   &nbsp; &nbsp; &nbsp;
   {% if next %}
-  <a href="{% url 'curate_authority' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+  <a href="{% url 'curation:curate_authority' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
   {% endif %}
 </div>
 
