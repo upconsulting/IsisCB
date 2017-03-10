@@ -20,7 +20,7 @@
 
 <div>
     {% if selected_user.is_superuser %}
-    <form action="{% url 'change_is_superuser' selected_user.pk %}" method="POST">
+    <form action="{% url 'curation:change_is_superuser' selected_user.pk %}" method="POST">
       {% csrf_token %}
       <span class="label label-danger">Administrator</span> This user is an <strong>administrator</strong> and can do anything in the system.
       <br>
@@ -31,7 +31,7 @@
     </form>
     {% endif %}
     {% if not selected_user.is_superuser %}
-    <form action="{% url 'change_is_superuser' selected_user.pk %}" method="POST">
+    <form action="{% url 'curation:change_is_superuser' selected_user.pk %}" method="POST">
       {% csrf_token %}
       <span class="label label-default">Administrator</span> This user <strong>is not</strong> an administrator.
       <br>
@@ -42,7 +42,7 @@
     </form>
     {% endif %}
     {% if selected_user.is_staff %}
-    <form action="{% url 'change_is_staff' selected_user.pk %}" method="POST">
+    <form action="{% url 'curation:change_is_staff' selected_user.pk %}" method="POST">
       {% csrf_token %}
       <span class="label label-warning">Curation Access</span> This user <strong>can access</strong> the curation interface.
       <br>
@@ -54,7 +54,7 @@
     {% endif %}
     {% if not selected_user.is_staff %}
     <p>
-      <form action="{% url 'change_is_staff' selected_user.pk %}" method="POST" class="form-inline">
+      <form action="{% url 'curation:change_is_staff' selected_user.pk %}" method="POST" class="form-inline">
         {% csrf_token %}
         <span class="label label-default">Curation Access</span> This user <strong>cannot access</strong> the curation interface.
         <br>
@@ -69,7 +69,7 @@
 
 {% if update_module %}
 <div class="pull-right">
-<a href="{% url 'add_role_to_user' selected_user.pk %}?from_user=True" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
+<a href="{% url 'curation:add_role_to_user' selected_user.pk %}?from_user=True" class="btn btn-primary btn-sm"><i class="fa fa-plus-circle" aria-hidden="true"></i> Role</a>
 </div>
 {% endif %}
 
@@ -84,10 +84,10 @@
 <tbody>
     {% for role in selected_user.pk|roles %}
     <tr>
-      <td><a href="{% url 'role' role.pk %}">{{ role.name }}</a></td>
+      <td><a href="{% url 'curation:role' role.pk %}">{{ role.name }}</a></td>
       <td>
         {% if update_module %}
-        <form action="{% url 'remove_role' selected_user.pk role.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Role" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Role</small></button></form>
+        <form action="{% url 'curation:remove_role' selected_user.pk role.id %}" method="POST" style="margin: 0px;"> {% csrf_token %}<button style="padding: 0px;" title="Remove Role" type="submit" class="btn btn-link"><small><i class="fa fa-trash-o" aria-hidden="true"></i> Remove Role</small></button></form>
         {% endif %}
       </td>
     </tr>

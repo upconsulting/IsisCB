@@ -66,7 +66,7 @@
             </div>
         </form>
         {% else %}
-        <p><a href="{% url 'django.contrib.auth.views.login' %}?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
+        <p><a href="{% url 'login' %}?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
         {% endif %}
     </div>
 </div>

@@ -41,7 +41,7 @@ var createNewauthor = function() {
 
     $('#create-author-input').on('keyup', function(e) {
         var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_authority_search" %}?type=PE&q=" + query, {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=PE&q=" + query, {
             success: function(result) {
                 var results_container = $('#create-author-results-container');
                 results_container.empty();

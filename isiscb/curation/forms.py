@@ -620,22 +620,15 @@ class AttributeForm(forms.ModelForm):
 
 
 class BulkActionForm(forms.Form):
-    def apply(self, queryset, user=None):
+    def apply(self, user, filter_params_raw):
         selected_actions = self.cleaned_data.get('action')
-
-        # filter_params_raw = self.cleaned_data.get('filter_params')
-        # filter_params = QueryDict(filter_params_raw)
-        # if filter_params:
-        #     _qs = Citation.objects.all()
-        #     if user is not None:
-        #         _qs = filter_queryset(user, _qs)
-        #     queryset = CitationFilter(filter_params, queryset=_qs)
-        print selected_actions, queryset
+        tasks = []
         for action_name in selected_actions:
             action_value = self.cleaned_data.get(action_name)
             # Load and instantiate the corresponding action class.
             action = getattr(actions, action_name)()    # Object is callable.
-            action.apply(queryset, action_value)
+            tasks.append(action.apply(user, filter_params_raw, action_value))
+        return tasks
 
 
 # Emulates django's modelform_factory
@@ -678,7 +671,10 @@ class SelectCitationCollectionForm(forms.Form):
 
 
 class ExportCitationsForm(forms.Form):
-    tag = forms.CharField(help_text='This tag will be added to the export filename')
+    export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
+    # compress_output = forms.BooleanField(required=False, initial=True,
+    #                                      help_text="If selected, the output"
+    #                                      " will be gzipped.")

@@ -70,7 +70,7 @@ var createNewSubject = function() {
                         'type_broad_controlled': 'SC',    // subject content.
                     };
 
-                    $.post("{% url "quick_create_acrelation"  %}", payload, function(result) {
+                    $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
                         var new_id = result.acrelation.id;
                         var new_elem = '<li class="list-group-item acrelation clearfix" id="subject-' + new_id + '">';
                         var new_elem_acr = '<li class="list-group-item acrelation clearfix" id="acrelation-' + new_id + '">';
