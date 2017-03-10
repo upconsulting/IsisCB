@@ -11,7 +11,6 @@ from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
-from django.template import RequestContext, loader
 from django.utils.translation import get_language
 
 from haystack.generic_views import FacetedSearchView
@@ -143,6 +142,7 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
 
     def create(self, *args, **kwargs):
         """
@@ -171,6 +171,7 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 class LinkedDataTypeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LinkedDataType
+        fields = '__all__'
 
 
 class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
@@ -329,6 +330,7 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
 class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = PartDetails
+        fields = '__all__'
 
 
 class AuthorityFilterSet(filters.FilterSet):
@@ -511,19 +513,15 @@ def api_root(request, format=None):
     })
 
 def index(request):
-    template = loader.get_template('isisdata/index.html')
-    context = RequestContext(request, {
+    context = {
         'test': False,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/index.html', context)
+
 
 def index(request, obj_id=None):
-    template = loader.get_template('isisdata/index.html')
     if (obj_id == None):
-        context = RequestContext(request, {
-
-        })
-        return HttpResponse(template.render(context))
+        return render(request, 'isisdata/index.html', {})
     try:
         object = Authority.objects.get(id=obj_id)
     except Authority.DoesNotExist:
@@ -536,7 +534,7 @@ def index(request, obj_id=None):
     #context = RequestContext(request, {
     #    'test': False,
     #})
-    #return HttpResponse(template.render(context))
+    #return render(request, template, context)
 
 
 def api_redirect(request, base_view=None, obj_id=None):
@@ -555,29 +553,20 @@ def help(request):
     """
     View for help page
     """
-    template = loader.get_template('isisdata/help.html')
 
-    context = RequestContext(request, {
-        'active': 'help',
-    })
-    return HttpResponse(template.render(context))
+    return render(request, 'isisdata/help.html', context={'active': 'help'})
 
 def about(request):
     """
     View for about page
     """
-    template = loader.get_template('isisdata/about.html')
+    return render(request, 'isisdata/about.html', context={'active': 'about'})
 
-    context = RequestContext(request, {
-        'active': 'about',
-    })
-    return HttpResponse(template.render(context))
 
 def statistics(request):
     """
     View for statistics page
     """
-    template = loader.get_template('isisdata/statistics.html')
 
     # set timeout (in sec) to one day
     cache_timeout = 86400
@@ -634,7 +623,7 @@ def statistics(request):
     crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
     publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
 
-    context = RequestContext(request, {
+    context = {
         'active': 'about',
         'citations_count': citations_count,
         'authority_count': authority_count,
@@ -662,8 +651,8 @@ def statistics(request):
         'events_count': events_count,
         'crossreferences_count': crossreferences_count,
         'publishers_count': publishers_count,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/statistics.html', context=context)
 
 def _get_count_citation_type(cache_name, citation_type, cache_timeout):
     cache = caches['default']
@@ -723,8 +712,6 @@ def authority(request, authority_id):
 
     if not authority.public:
         return HttpResponseForbidden()
-
-    template = loader.get_template('isisdata/authority.html')
 
     show_nr = 3
     acrelation_qs = ACRelation.objects.filter(public=True)
@@ -875,7 +862,7 @@ def authority(request, authority_id):
         search_count = None
 
 
-    context = RequestContext(request, {
+    context = {
         'authority_id': authority_id,
         'authority': authority,
         'related_citations_author': related_citations_author,
@@ -917,15 +904,14 @@ def authority(request, authority_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/authority.html', context)
 
 
 def citation(request, citation_id):
     """
     View for individual citation record.
     """
-    template = loader.get_template('isisdata/citation.html')
     citation = get_object_or_404(Citation, pk=citation_id)
 
     if not citation.public:
@@ -1042,7 +1028,7 @@ def citation(request, citation_id):
 
     #last_query = request.session.get('last_query', None)
 
-    context = RequestContext(request, {
+    context = {
         'citation_id': citation_id,
         'citation': citation,
         'authors': authors,
@@ -1073,8 +1059,8 @@ def citation(request, citation_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/citation.html', context)
 
 
 @login_required
@@ -1098,8 +1084,6 @@ def search_saved(request):
         instance.saved = False
         instance.save()
 
-
-    template = loader.get_template('isisdata/search_saved.html')
     searchqueries = request.user.searches.filter(saved=True).order_by('-created_on')
 
     paginator = Paginator(searchqueries, 10)
@@ -1114,11 +1098,10 @@ def search_saved(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         searchqueries = paginator.page(paginator.num_pages)
 
-    context = RequestContext(request, {
+    context = {
         'searchqueries': searchqueries,
-    })
-    return HttpResponse(template.render(context))
-
+    }
+    return render(request, 'isisdata/search_saved.html', context)
 
 
 @login_required
@@ -1131,7 +1114,6 @@ def search_history(request):
     if not type(request.user._wrapped) is User:
         return HttpResponseRedirect(reverse('login'))
 
-    template = loader.get_template('isisdata/search_history.html')
     searchqueries = request.user.searches.order_by('-created_on')
 
     paginator = Paginator(searchqueries, 10)
@@ -1146,10 +1128,10 @@ def search_history(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         searchqueries = paginator.page(paginator.num_pages)
 
-    context = RequestContext(request, {
+    context = {
         'searchqueries': searchqueries,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/search_history.html', context)
 
 
 class IsisSearchView(FacetedSearchView):
@@ -1483,20 +1465,19 @@ def unapi_server_root(request):
     return HttpResponse('')
 
 
+
 def home(request):
     """
     The landing view, at /.
     """
 
-    template = loader.get_template('isisdata/home.html')
-
-    context = RequestContext(request, {
+    context = {
         'active': 'home',
         'comments_citation': Comment.objects.filter(subject_content_type__model='citation').order_by('-modified_on')[:10],
         'comments_authority': Comment.objects.filter(subject_content_type__model='authority').order_by('-modified_on')[:10]
-    })
+    }
+    return render(request, 'isisdata/home.html', context=context)
 
-    return HttpResponse(template.render(context))
 
 def rdf_authority_view(request, authority_id):
     """
@@ -1509,6 +1490,7 @@ def rdf_authority_view(request, authority_id):
 
     return HttpResponse('')
 
+
 def rdf_citation_view(request, citation_id):
     """
     Get RDF for authorities
@@ -1520,18 +1502,18 @@ def rdf_citation_view(request, citation_id):
 
     return HttpResponse('')
 
+
 def api_documentation(request):
     """
     Information page about the REST API.
     """
 
-    template = loader.get_template('isisdata/api.html')
     rest_endpoint = request.build_absolute_uri(reverse('rest_root'))
-    context = RequestContext(request, {
+    context = {
         'active': 'about',
         'rest_endpoint': rest_endpoint,
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, 'isisdata/api.html', context)
 
 
 def build_openurl(endpoint, citation):
@@ -1619,7 +1601,7 @@ def user_profile(request, username):
             form_error = True
 
     comments = Comment.objects.filter(created_by=user).order_by('-created_on')
-    context = RequestContext(request, {
+    context = {
         'active': '',
         'username': user.username,
         'full_name': '%s %s' % (user.first_name, user.last_name),
@@ -1627,13 +1609,13 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
-    })
+    }
 
     # User has elected to edit their own profile.
     if edit and user.id == request.user.id:
         # This template has an almost identical layout to userprofile.html,
         #  except that display fields are replaced with input fields.
-        template = loader.get_template('isisdata/userprofile_edit.html')
+        template = 'isisdata/userprofile_edit.html'
         form = UserProfileForm(initial={
             'first_name': user.first_name,
             'last_name': user.last_name,
@@ -1647,7 +1629,7 @@ def user_profile(request, username):
         context.update({'form': form})
     elif form_error:
         context.update({'form': form})
-        template = loader.get_template('isisdata/userprofile_edit.html')
+        template = 'isisdata/userprofile_edit.html'
     else:
-        template = loader.get_template('isisdata/userprofile.html')
-    return HttpResponse(template.render(context))
+        template = 'isisdata/userprofile.html'
+    return render(request, template, context)

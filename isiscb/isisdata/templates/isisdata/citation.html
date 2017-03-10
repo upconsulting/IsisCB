@@ -79,7 +79,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div class="alert alert-info headerbox" role="alert">{{ citation.get_type_controlled_display }}
         <span class="btn-grp pull-right">
-            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
+            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
             <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
     </div>

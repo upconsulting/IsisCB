@@ -146,7 +146,7 @@ It seems like you've granted update, create, or delete access to records but no 
     <td>{{ user.username }}</td>
     <td>
       {% for role in user.pk|roles %}
-        <a href="{% url 'role' role.pk %}">{{ role.name }}</a>,
+        <a href="{% url 'curation:role' role.pk %}">{{ role.name }}</a>,
       {% endfor %}
     </td>
   </tr>

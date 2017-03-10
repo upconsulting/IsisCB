@@ -54,10 +54,11 @@ def check_rules(perm, fn=None, login_url=None, raise_exception=False, redirect_f
                 obj = fn
 
             # Get the user
+            print request, request.user
             user = request.user
 
             if not rules.test_rule(perm, request.user, obj):
-                template = loader.get_template('curation/access_denied.html')
+                template = 'curation/access_denied.html'
                 return HttpResponse(template.render(RequestContext(request, {})))
 
             else:

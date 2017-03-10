@@ -196,11 +196,11 @@ def _link_to_record(obj):
         return u""
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEW_OF])
-    ids = list(obj.ccrelation_set.filter(_q).values_list('object__id', flat=True))
+    ids = list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
                                   CCRelation.INCLUDES_CHAPTER])
-    ids += list(obj.ccrelation_set.filter(_q).values_list('object__id', flat=True))
+    ids += list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
     return u"//".join(ids)
 
 

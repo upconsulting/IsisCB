@@ -3,7 +3,7 @@ from celery import shared_task
 
 from django.http import QueryDict
 
-from curation.filters import CitationFilter
+from isisdata.filters import CitationFilter
 from isisdata.operations import filter_queryset
 from isisdata import export    # Oh man, so good.
 from isisdata.models import *
