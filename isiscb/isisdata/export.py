@@ -57,9 +57,14 @@ class Column(object):
         self.slug = slugify(label)
 
     def __call__(self, obj):
-        if self.model is not None:
-            assert isinstance(obj, self.model)
-        return self.call(obj)
+        try:
+            if self.model is not None:
+                assert isinstance(obj, self.model)
+            return self.call(obj)
+        except Exception as E:
+            print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
+            print E
+            return u""
 
 
 def _citation_title(obj):
