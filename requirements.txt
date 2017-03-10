@@ -61,7 +61,6 @@ pbr==1.10.0
 pefile
 Pillow==2.9.0
 psycopg2==2.6.1
-pycurl==7.43.0
 PyJWT==1.4.2
 pyparsing==1.5.7
 python-dateutil==1.5
