@@ -63,6 +63,7 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 
 @shared_task
 def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
+    print 'export to csv:: %s' % str(task_id)
     columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
     queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
     if task_id:
@@ -84,8 +85,10 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
                 writer.writerow(map(lambda c: c(obj), columns))
         task.state = 'SUCCESS'
         task.save()
+        print 'success:: %s' % str(task_id)
     except Exception as E:
         print 'export_to_csv failed for %s' % filter_params_raw,
         print E
+        task.value = str(E)
         task.state = 'FAILURE'
         task.save()

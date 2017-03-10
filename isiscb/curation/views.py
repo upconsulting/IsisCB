@@ -2006,7 +2006,6 @@ def export_citations(request):
         return HttpResponseRedirect(reverse('curation:citation_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
-    print filter_params_raw
 
     if request.GET.get('confirmed', False):
         # The user has selected the desired configuration settings.
@@ -2026,7 +2025,6 @@ def export_citations(request):
                                             settings.AWS_SECRET_ACCESS_KEY,
                                             settings.AWS_EXPORT_BUCKET_NAME,
                                             _out_name)
-            print s3_path
             # if _compress:
             #     s3_path += '.gz'
 
