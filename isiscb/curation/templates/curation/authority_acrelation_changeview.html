@@ -389,7 +389,7 @@ var delete_acrelation = function() {
     $('#delete-acrelation-modal').modal('hide');
     var acrelation_id = $('#acrelation-id-container').val();
     if (acrelation_id) {
-        window.location.replace("{% url "delete_acrelation_for_authority" instance.id acrelation.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_acrelation_for_authority" instance.id acrelation.id %}?confirm=true");
     }
 }
 </script>

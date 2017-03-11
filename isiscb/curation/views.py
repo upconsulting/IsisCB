@@ -359,7 +359,7 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
@@ -387,7 +387,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
@@ -586,7 +586,7 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
     template = 'curation/citation_acrelation_delete.html'
     return render(request, template, context)
 
