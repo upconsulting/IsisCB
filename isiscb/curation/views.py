@@ -117,7 +117,7 @@ def create_citation(request):
 
             if partdetails_form:
                 partdetails_form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
         else:
             context.update({
                 'form' : form,
