@@ -499,7 +499,7 @@ var delete_ccrelation = function() {
     $('#delete-ccrelation-modal').modal('hide');
     var ccrelation_id = $('#ccrelation-id-container').val();
     if (ccrelation_id) {
-        window.location.replace("{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_ccrelation_for_citation" instance.id ccrelation.id %}?confirm=true");
     }
 }
 </script>

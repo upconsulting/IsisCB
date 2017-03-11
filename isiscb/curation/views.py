@@ -234,7 +234,7 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
 
     context.update({
         'form': form,
@@ -265,7 +265,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
 
     context.update({
         'form': form,
@@ -417,7 +417,7 @@ def tracking_for_citation(request, citation_id):
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
         tracking.subject = citation
         tracking.save()
-    return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
+    return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking')
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -467,7 +467,7 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
         attribute.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
     template = 'curation/citation_attribute_delete.html'
     return render(request, template, context)
 
@@ -489,7 +489,7 @@ def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=N
 
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
     template = 'curation/citation_linkeddata_delete.html'
     return render(request, template, context)
 
@@ -566,7 +566,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
         ccrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
     template = 'curation/citation_ccrelation_delete.html'
     return render(request, template, context)
 
@@ -674,7 +674,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
         else:
             pass
     else:
@@ -791,7 +791,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
         else:
             pass
 
@@ -958,12 +958,12 @@ def citation(request, citation_id):
                 return HttpResponseRedirect(reverse('curation:citation_list') + "?page=" + str(page))
             elif forward_type == "next":
                 next = context.get('next', citation)
-                return HttpResponseRedirect(reverse('curate_citation', args=(next.id,)))
+                return HttpResponseRedirect(reverse('curation:curate_citation', args=(next.id,)))
             elif forward_type == "previous":
                 prev = context.get('previous', citation)
-                return HttpResponseRedirect(reverse('curate_citation', args=(prev.id,)))
+                return HttpResponseRedirect(reverse('curation:curate_citation', args=(prev.id,)))
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
 
         context.update({
             'form': form,
