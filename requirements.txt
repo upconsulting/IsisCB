@@ -23,7 +23,8 @@ django-celery-results==1.0.1
 django-cors-headers==1.1.0
 django-crispy-forms==1.5.2
 django-extensions==1.5.5
-django-filter==0.15.3
+#django-filter==0.15.3
+-e git://github.com/jdamerow/django-filter.git@f53358a81776e0100f92a58501bc70e2354a030a#egg=django-filter-develop
 django-filters==0.2.1
 django-guardian==1.4.4
 django-haystack==2.6.0
