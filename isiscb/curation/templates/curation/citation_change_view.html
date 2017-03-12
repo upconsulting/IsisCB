@@ -20,6 +20,18 @@ var toggleTab = function(name) {
 </div>
 {% endif %}
 
+{% if instance|does_chapter_miss_book %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This chapter is not linked to a book.
+</div>
+{% endif %}
+
+{% if instance|reviewed_book_missing %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This review is not linked to a book.
+</div>
+{% endif %}
+
 {% if not instance|are_related_objects_for_citation_public %}
 <div class="alert alert-info alert-small col-md-{{column_count}}" role="alert">
   <i class="fa fa-exclamation-circle" aria-hidden="true"></i> At least one record linked to this citation is not public.
