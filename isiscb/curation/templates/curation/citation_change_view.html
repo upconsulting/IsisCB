@@ -20,6 +20,24 @@ var toggleTab = function(name) {
 </div>
 {% endif %}
 
+{% if instance|does_chapter_miss_book %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a book.
+</div>
+{% endif %}
+
+{% if instance|reviewed_book_missing %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a book.
+</div>
+{% endif %}
+
+{% if instance|is_periodical_missing %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a periodical.
+</div>
+{% endif %}
+
 {% if not instance|are_related_objects_for_citation_public %}
 <div class="alert alert-info alert-small col-md-{{column_count}}" role="alert">
   <i class="fa fa-exclamation-circle" aria-hidden="true"></i> At least one record linked to this citation is not public.
@@ -533,11 +551,12 @@ function checkRecord() {
 
   if (citation_type == "RE" || citation_type == "ES") {
     var citationsBox = $("#ccrelations");
+
     //TODO: this is really ugly and nees a better solution!
     var bookLinks = citationsBox.find("span.label:contains('Book')");
 
     if (bookLinks.length < 1) {
-      warnings.push("You did not add a CCRelation to a book.");
+      warnings.push("You did not add a link to a book.");
     }
   }
 
