@@ -36,14 +36,12 @@ def get_warnings_column_count_citation(instance):
         nr_of_warnings += 1
     if is_public_inconsistent(instance):
         nr_of_warnings += 1
-    if instance.type_controlled == Citation.CHAPTER:
-        includes_chapter = instance.ccrelations.filter(type_controlled=CCRelation.INCLUDES_CHAPTER)
-        if not includes_chapter:
-            nr_of_warnings += 1
-    if instance.type_controlled == Citation.REVIEW:
-        reviews = instance.ccrelations.filter(type_controlled__in=[CCRelation.REVIEWED_BY, CCRelation.REVIEW_OF])
-        if not reviews:
-            nr_of_warnings += 1
+    if does_chapter_miss_book(instance):
+        nr_of_warnings += 1
+    if reviewed_book_missing(instance):
+        nr_of_warnings += 1
+    if is_periodical_missing(instance):
+        nr_of_warnings += 1
 
     if nr_of_warnings == 0:
         return 12
@@ -64,6 +62,14 @@ def reviewed_book_missing(instance):
         if not reviews:
             return True;
     return False;
+
+@register.filter
+def is_periodical_missing(instance):
+    if instance.type_controlled in [Citation.REVIEW, Citation.ARTICLE]:
+        has_periodical = instance.acrelations.filter(type_controlled=ACRelation.PERIODICAL)
+        if not has_periodical:
+            return True
+    return False
 
 @register.filter
 def get_warnings_column_count_authority(instance):
