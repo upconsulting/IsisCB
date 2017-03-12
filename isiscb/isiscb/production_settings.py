@@ -20,7 +20,7 @@ sys.path.append('..')
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = eval(os.environ.get('DEBUG', 'False'))
 
@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'openurl',
     'curation',
     'rules',
+    'django_celery_results',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -77,10 +78,13 @@ MIDDLEWARE_CLASSES = (
 
 
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'social.apps.django_app.context_processors.backends',
-    'social.apps.django_app.context_processors.login_redirect',
-)
+# TEMPLATE_CONTEXT_PROCESSORS = (
+#     'social.apps.django_app.context_processors.backends',
+#     'social.apps.django_app.context_processors.login_redirect',
+#     'isisdata.context_processors.user',
+#     'isisdata.context_processors.social',
+#     'isisdata.context_processors.google',
+# )
 
 
 ROOT_URLCONF = 'isiscb.urls'
@@ -93,14 +97,14 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                "django.core.context_processors.i18n",
-                "django.core.context_processors.media",
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
-                 'django.template.context_processors.tz'
+                 'django.template.context_processors.tz',
+                 'isisdata.context_processors.user',
             ],
         },
     },
@@ -264,3 +268,31 @@ AUTHENTICATION_BACKENDS = (
 )
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+
+CELERY_RESULT_BACKEND = 'django-cache'#'django-cache'
+
+# If you want to use Redis for Celery message passing, uncomment these options
+#  and comment out the SQS options, below.
+# CELERY_REDIS_HOST = 'redis://'
+# CELERY_BROKER_URL = 'redis://'
+
+# The following configuration options are used for Amazon SQS message passing.
+CELERY_TASK_TRACK_STARTED = True
+CELERY_IMPORTS = ('curation.tasks',)
+
+CELERY_BROKER_TRANSPORT = 'sqs'
+SQS_REGION = os.environ.get('SQS_REGION', 'sqs.us-west-2')
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'region': SQS_REGION,
+}
+CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
+CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
+CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'isiscb-staging-messages')
+CELERY_QUEUES = {
+    CELERY_DEFAULT_QUEUE: {
+        'exchange': CELERY_DEFAULT_QUEUE,
+        'binding_key': CELERY_DEFAULT_QUEUE,
+    }
+}
+LOGIN_REDIRECT_URL = '/'

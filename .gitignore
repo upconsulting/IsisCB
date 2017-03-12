@@ -67,3 +67,5 @@ isiscb/isisdata/fixtures/*
 #.elasticbeanstalk/*
 #!.elasticbeanstalk/*.cfg.yml
 #!.elasticbeanstalk/*.global.yml
+
+src

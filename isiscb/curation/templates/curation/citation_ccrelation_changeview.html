@@ -37,12 +37,12 @@
             </div>
           </div>
         <div class="col-md-3">
-          <a href="{% url 'curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+          <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Citation</a>
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+                <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
                 <a href="#" class="btn btn-sm btn-success save-ccrelation" >Save</a>
                 {% if ccrelation.id %}
                 <a href="#"
@@ -97,7 +97,7 @@
             <div class="col-sm-6">
 
               <div class="text-right">
-                <a href="{% url 'create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
+                <a href="{% url 'curation:create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
               </div>
 
                 {% for error in form.subject.errors %}
@@ -113,7 +113,7 @@
                     <strong>Citation record: </strong>
                     {% if form.instance.subject %}
                     <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                      <a class="link_to_citation" href="{% url 'curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                      <a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
                     </strong>
 
                     <p>
@@ -177,7 +177,7 @@
                 <strong>Citation record: </strong>
 
                 <strong class="text-warning"><span class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
-                  {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
+                  {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
                   {% if not form.instance.object %}
                     <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
                   {% endif %}
@@ -339,7 +339,7 @@ $(document).ready(function() {
         var id_result_container = $(search_input.attr('selected-result-target'));
 
         searchTimer = setTimeout(function() {
-          $.ajax("{% url "quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
+          $.ajax("{% url "curation:quick_and_dirty_citation_search" %}?max=" + max_results + "&q=" + query, {
               failure: function(result) {
                   // do nothing
               },
@@ -386,7 +386,7 @@ $(document).ready(function() {
                       var selected_authors = selected.attr('data-authors');
                       var selected_type = selected.attr('data-type');
                       var selected_type_id = selected.attr('data-type_id');
-                      var link = "{% url 'citation_list' %}" + selected_id;
+                      var link = "{% url 'curation:citation_list' %}" + selected_id;
 
                       results_container.empty();
                       search_input.val(selected_name);
@@ -499,7 +499,7 @@ var delete_ccrelation = function() {
     $('#delete-ccrelation-modal').modal('hide');
     var ccrelation_id = $('#ccrelation-id-container').val();
     if (ccrelation_id) {
-        window.location.replace("{% url "delete_ccrelation_for_citation" instance.id ccrelation.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_ccrelation_for_citation" instance.id ccrelation.id %}?confirm=true");
     }
 }
 </script>

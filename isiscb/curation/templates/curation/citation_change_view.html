@@ -20,6 +20,24 @@ var toggleTab = function(name) {
 </div>
 {% endif %}
 
+{% if instance|does_chapter_miss_book %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a book.
+</div>
+{% endif %}
+
+{% if instance|reviewed_book_missing %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a book.
+</div>
+{% endif %}
+
+{% if instance|is_periodical_missing %}
+<div class="alert alert-danger alert-small col-md-{{column_count}}" role="alert">
+<i class="fa fa-exclamation-circle" aria-hidden="true"></i> This {{instance.get_type_controlled_display}} is not linked to a periodical.
+</div>
+{% endif %}
+
 {% if not instance|are_related_objects_for_citation_public %}
 <div class="alert alert-info alert-small col-md-{{column_count}}" role="alert">
   <i class="fa fa-exclamation-circle" aria-hidden="true"></i> At least one record linked to this citation is not public.
@@ -92,7 +110,7 @@ Back to List </a>
     <div class="col-md-3 text-right">
         Record {{ index }} of {{ total }}
         <div class="btn-group ">
-            <a href="{% url 'curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
             <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
 
@@ -246,7 +264,7 @@ var delete_language = function() {
     $('#delete-language-modal').modal('hide');
     var language_id = $('#language-id-container').val();
     if (language_id) {
-        $.ajax("{% url "delete_language_for_citation" instance.id %}?language=" + language_id, {
+        $.ajax("{% url "curation:delete_language_for_citation" instance.id %}?language=" + language_id, {
             'success': function(r) {
                 $('#language-' + language_id).remove();
             },
@@ -336,7 +354,7 @@ var addLanguage = function() {
         if ($.now() - lastSearch < 500 || waiting) return;
 
         var query = $(this).val();
-        $.ajax("{% url "quick_and_dirty_language_search" %}?q=" + query, {
+        $.ajax("{% url "curation:quick_and_dirty_language_search" %}?q=" + query, {
             failure: function(result) {
                 waiting = false;
             },
@@ -376,7 +394,7 @@ var addLanguage = function() {
                         'language': selected_id
                     };
 
-                    $.post("{% url "add_language_for_citation" instance.id %}", payload, function(result) {
+                    $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
                         var new_id = result.language.id;
                         var new_elem = '<li class="list-group-item clearfix" id="language-' + new_id + '">';
                         new_elem += result.language.name;
@@ -414,7 +432,7 @@ $( document ).ready(function() {
     $('#data_changed_modal').modal('hide');
     $("#input_back_to_list").val("True");
     if ( checkRecord() ) {
-        $('#citation_form').attr('href', '{% url 'curate_citation' instance.id %}');
+        $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}');
         $('#citation_form').submit();
     }
   });
@@ -437,7 +455,7 @@ $( document ).ready(function() {
     }
     {% if next.id %}
     else {
-      window.location.href = '{% url 'curate_citation' next.id %}';
+      window.location.href = '{% url 'curation:curate_citation' next.id %}';
     }
     {% endif %}
   });
@@ -449,7 +467,7 @@ $( document ).ready(function() {
     }
     {% if previous.id %}
     else {
-      window.location.href = '{% url 'curate_citation' previous.id %}';
+      window.location.href = '{% url 'curation:curate_citation' previous.id %}';
     }
     {% endif %}
   });
@@ -459,22 +477,22 @@ $( document ).ready(function() {
       $('#data_changed_modal').attr('data-forward-type', 'list');
       $('#data_changed_modal').modal('show');
     } else {
-      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
     }
   });
 
   $("#data_changed_cancel").on('click', function() {
     {% if next.id and previous.id %}
     if ($('#data_changed_modal').attr('data-forward-type') == "next") {
-      window.location.href = '{% url 'curate_citation' next.id %}';
+      window.location.href = '{% url 'curation:curate_citation' next.id %}';
     } else if ($('#data_changed_modal').attr('data-forward-type') == "previous") {
-      window.location.href = '{% url 'curate_citation' previous.id %}';
+      window.location.href = '{% url 'curation:curate_citation' previous.id %}';
     }
     else {
-      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
     }
     {% else %}
-      window.location.href = '{% url 'citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
     {% endif %}
 
   });
@@ -533,11 +551,12 @@ function checkRecord() {
 
   if (citation_type == "RE" || citation_type == "ES") {
     var citationsBox = $("#ccrelations");
+
     //TODO: this is really ugly and nees a better solution!
     var bookLinks = citationsBox.find("span.label:contains('Book')");
 
     if (bookLinks.length < 1) {
-      warnings.push("You did not add a CCRelation to a book.");
+      warnings.push("You did not add a link to a book.");
     }
   }
 

@@ -15,7 +15,7 @@
 
       <div class="row">
         {% if can_update %}
-        <a href="{% url "update_attribute_for_authority" instance.id attribute.id%}" class="list_entry_link">
+        <a href="{% url "curation:update_attribute_for_authority" instance.id attribute.id%}" class="list_entry_link">
         {% endif %}
         <span class="col-sm-11">
 
@@ -47,7 +47,7 @@
 {% endfor %}
 
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "create_attribute_for_authority" instance.id %}">
+    <a class="list-group-item text-muted" href="{% url "curation:create_attribute_for_authority" instance.id %}">
         <span class="glyphicon glyphicon-plus"></span> Create new attribute
     </a>
 {% endif %}
@@ -82,7 +82,7 @@ var delete_attribute = function() {
     $('#delete-attribute-modal').modal('hide');
     var attribute_id = $('#attribute-id-container').val();
     if (attribute_id) {
-        $.ajax("{% url "create_attribute_for_authority" instance.id %}" + attribute_id + '/delete.json?confirm=true', {
+        $.ajax("{% url "curation:create_attribute_for_authority" instance.id %}" + attribute_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#attribute-' + attribute_id).remove();
             },

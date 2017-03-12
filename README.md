@@ -9,4 +9,11 @@ information, see ``LICENSE.md`` in this repository.
 
 ## Deployment
 
-Updated deployment documentation coming soon!
+IsisCB Explore can be run as a WSGI application, e.g. using Gunicorn behind
+NginX, or in Apache using mod_wsgi.
+
+The main application should be run from ``isiscb.wsgi``.
+
+Worker processes should be run from ``isiscb.celery``.
+
+The following variables must be set in your environment:

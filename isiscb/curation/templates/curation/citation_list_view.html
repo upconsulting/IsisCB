@@ -10,26 +10,26 @@
 $('body').ready(function() {
     var form = $('#bulk-form');
     $('#collection-create').click(function() {
-        form.attr('action', '{% url "create-citation-collection" %}');
+        form.attr('action', '{% url "curation:create-citation-collection" %}');
         form.submit();
     });
     $('#collection-add').click(function() {
-        form.attr('action', '{% url "add-citation-collection" %}');
+        form.attr('action', '{% url "curation:add-citation-collection" %}');
         form.submit();
     });
     $('#export').click(function() {
-        form.attr('action', '{% url "export-citations" %}');
+        form.attr('action', '{% url "curation:export-citations" %}');
         form.submit();
     });
 });
 </script>
 
-<form action="{% url "citation-bulk-action" %}" method="POST" id="bulk-form">
+<form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form">
     {% csrf_token %}
     &nbsp;&nbsp;
-    <a class="btn btn-primary btn-xs" href="{% url 'create_citation' %}">Create new citation record</a>
+    <a class="btn btn-primary btn-xs" href="{% url 'curation:create_citation' %}">Create new citation record</a>
     <input class="btn btn-success btn-xs" type="submit" value="Bulk change" />
-    <a class="btn btn-primary btn-xs" href="{% url 'citation-bulk-select' %}">Bulk select</a>
+    <a class="btn btn-primary btn-xs" href="{% url 'curation:citation-bulk-select' %}">Bulk select</a>
     <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
     <a class="btn btn-primary btn-xs" href="#" id="collection-add">Add to existing collection</a>
     <a class="btn btn-primary btn-xs" href="#" id="export">Bulk Export</a>
@@ -78,7 +78,7 @@ $('body').ready(function() {
                   {% if object.record_status_value %}{{ object.record_status_value }}{% endif %}
                 </td>
                 <td>
-                    <a href="{% url "curate_citation" object.id %}">{{ object.id }}</a>
+                    <a href="{% url "curation:curate_citation" object.id %}">{{ object.id }}</a>
                     {% if not object.public %}
                     <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                     {% endif %}
@@ -96,17 +96,17 @@ $('body').ready(function() {
                 <td>{{ object.get_type_controlled_display }}</td>
                 <td>{{ object|get_citation_title|safe }}</td>
                 <td>
-                    <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                    <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
                         {{ acrelations|get_authors_editors_preloaded }}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url "curate_citation" object.id %}?tab=attributes">
+                    <a href="{% url "curation:curate_citation" object.id %}?tab=attributes">
                         {{ object|get_citation_pubdate_fast }}
                     </a>
                 </td>
                 <td>
-                    <a href="{% url "curate_citation" object.id %}?tab=acrelations">
+                    <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
                         {{ object|get_citation_periodical }}
                     </a>
                 </td>
@@ -175,7 +175,7 @@ $('body').ready(function() {
 {% endblock %}
 
 {% block filter_form %}
-<form id="filter_form" action="{% url 'citation_list' %}" class="form-horizontal clearfix" method="POST" style="margin-bottom: 0px; margin-top: 10px;">
+<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="POST" style="margin-bottom: 0px; margin-top: 10px;">
   {% csrf_token %}
     <div>
         <div class="col-sm-4">
@@ -302,7 +302,16 @@ $('body').ready(function() {
         </div>
 
         <div class="col-sm-4">
-          {{ objects.form.o }}
+            {% for error in objects.form.o.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-sm clearable">
+                <label class="col-md-2 control-label">{{ objects.form.o.label }}</label>
+                <div class="col-sm-10">
+                  {{ objects.form.o|addcss:"form-control" }}
+                </div>
+            </div>
+          
 
           {% for error in objects.form.abstract.errors %}
           <div class="alert alert-warning">{{ error }}</div>
@@ -354,7 +363,7 @@ $(document).ready(function() {
 
     /* in collection javascript */
     $('#in_collections_input').bootcomplete({
-        url:'{% url 'search-collections' %}',
+        url:'{% url 'curation:search-collections' %}',
         minLength: 3,
         idFieldName: 'in_collections'
     });
@@ -367,7 +376,7 @@ $(document).ready(function() {
 
     /* zotero accession javascript */
     $('#zotero_accession_input').bootcomplete({
-        url:'{% url 'search-zotero-accessions' %}',
+        url:'{% url 'curation:search-zotero-accessions' %}',
         minLength: 3,
         idFieldName: 'zotero_accession'
     });
@@ -387,7 +396,7 @@ $(document).ready(function() {
 
     /* 'belongs to' javascript */
     $('#belongs_to_input').bootcomplete({
-        url:'{% url 'search-datasets' %}',
+        url:'{% url 'curation:search-datasets' %}',
         minLength: 3,
         idFieldName: 'belongs_to'
     });

@@ -50,7 +50,7 @@ INSTALLED_APPS = (
     # 'haystack',
     # 'captcha',
     # "elasticstack",     # TODO: Do we need this?
-    # 'oauth2_provider',
+    'oauth2_provider',
     # 'corsheaders',
     'zotero',
     'openurl',

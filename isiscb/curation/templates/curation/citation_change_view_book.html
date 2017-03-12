@@ -120,7 +120,7 @@
         </a>
         {% else %}
         <a class="text-warning input-sm"
-            href="{% url 'create_acrelation_for_citation' instance.id %}?type_controlled=PU">
+            href="{% url 'curation:create_acrelation_for_citation' instance.id %}?type_controlled=PU">
             <span class="gylphicon glyphicon-plus"></span> Add Publisher
         </a>
         {% endif %}
@@ -138,7 +138,7 @@
         </a>
         {% else %}
         <a class="text-warning input-sm"
-            href="{% url 'create_linkeddata_for_citation' instance.id %}?type_controlled=ISBN">
+            href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?type_controlled=ISBN">
             <span class="gylphicon glyphicon-plus"></span> Add ISBN
         </a>
         {% endif %}

@@ -1,16 +1,18 @@
 from __future__ import absolute_import
 
-from django.template import RequestContext, loader
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.core.urlresolvers import reverse
 from django.core.cache import caches
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
+from django.utils import formats
+from django.utils.http import urlencode
+from django.utils.text import slugify
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
@@ -18,11 +20,18 @@ from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
 from isisdata.utils import strip_punctuation
+from isisdata import operations
+from isisdata.filters import *
+from isisdata import tasks as data_tasks
+
+
 from curation.tracking import TrackingWorkflow
 from zotero.models import ImportAccession
-from curation.filters import *
+
 from curation.forms import *
+
 from curation.contrib.views import check_rules
+from curation import tasks as curation_tasks
 
 import iso8601, rules, datetime
 from itertools import chain
@@ -57,33 +66,33 @@ def _get_authors_editors(citation):
 def dashboard(request):
     """
     """
-    template = loader.get_template('curation/dashboard.html')
-    context = RequestContext(request, {
+    template = 'curation/dashboard.html'
+    context = {}
+    return render(request, template, context)
 
-    })
-    return HttpResponse(template.render(context))
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def datasets(request):
     """
     """
-    template = loader.get_template('curation/dashboard.html')
-    context = RequestContext(request, {
+    template = 'curation/dashboard.html'
+    context = {
         'curation_section':'datasets',
-    })
-    return HttpResponse(template.render(context))
+    }
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 #@check_rules('can_create_record')
 def create_citation(request):
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
-    })
+    }
 
-    template = loader.get_template('curation/citation_create_view.html')
+    template = 'curation/citation_create_view.html'
 
     if request.method == 'GET':
         form = CitationForm(user=request.user)
@@ -108,25 +117,25 @@ def create_citation(request):
 
             if partdetails_form:
                 partdetails_form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
         else:
             context.update({
                 'form' : form,
                 'partdetails_form': partdetails_form,
             })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 #@check_rules('can_create_record')
 def create_authority(request):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
-    })
+    }
 
-    template = loader.get_template('curation/authority_create_view.html')
+    template = 'curation/authority_create_view.html'
     person_form = None
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
@@ -149,12 +158,12 @@ def create_authority(request):
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
             authority = form.save()
 
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)))
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
         else:
             context.update({
                 'form' : form,
             })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 # TODO this method needs to be logged down!
@@ -200,11 +209,11 @@ def quick_create_acrelation(request):
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
-    })
+    }
     if request.method == 'GET':
         ccrelation = CCRelation()
         initial={}
@@ -225,13 +234,13 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/citation_ccrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/citation_ccrelation_changeview.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -240,12 +249,12 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = None if not ccrelation_id else get_object_or_404(CCRelation, pk=ccrelation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'ccrelation': ccrelation,
-    })
+    }
     if request.method == 'GET':
         if ccrelation:
             form = CCRelationForm(instance=ccrelation, prefix='ccrelation')
@@ -256,13 +265,13 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/citation_ccrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/citation_ccrelation_changeview.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -270,12 +279,12 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
 def create_acrelation_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
 
-    })
+    }
     if request.method == 'GET':
         initial = {
             'authority': authority.id,
@@ -290,13 +299,13 @@ def create_acrelation_for_authority(request, authority_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/authority_acrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/authority_acrelation_changeview.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -305,12 +314,12 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'acrelation': acrelation,
-    })
+    }
     if request.method == 'GET':
         form = ACRelationForm(instance=acrelation, prefix='acrelation')
 
@@ -318,13 +327,13 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/authority_acrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/authority_acrelation_changeview.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -332,11 +341,11 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
-    })
+    }
     if request.method == 'GET':
         initial = {
             'citation': citation.id,
@@ -350,13 +359,13 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/citation_acrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/citation_acrelation_changeview.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -365,12 +374,12 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = None if not acrelation_id else get_object_or_404(ACRelation, pk=acrelation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'acrelation': acrelation,
-    })
+    }
     if request.method == 'GET':
         form = ACRelationForm(instance=acrelation, prefix='acrelation')
 
@@ -378,24 +387,25 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
 
     context.update({
         'form': form,
     })
-    template = loader.get_template('curation/citation_acrelation_changeview.html')
-    return HttpResponse(template.render(context))
+    template = 'curation/citation_acrelation_changeview.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def tracking_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
-    })
+    }
 
     trackType = request.GET.get('type', None)
     workflow = TrackingWorkflow(citation)
@@ -407,7 +417,7 @@ def tracking_for_citation(request, citation_id):
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
         tracking.subject = citation
         tracking.save()
-    return HttpResponseRedirect(reverse('curate_citation', args=(citation_id,)) + '?tab=tracking')
+    return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking')
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -415,13 +425,13 @@ def tracking_for_citation(request, citation_id):
 def tracking_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
-    })
+    }
 
-    template = loader.get_template('curation/authority_tracking_create.html')
+    template = 'curation/authority_tracking_create.html'
 
     if request.method == "POST":
         form = AuthorityTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
@@ -429,7 +439,7 @@ def tracking_for_authority(request, authority_id):
             tracking = form.save(commit=False)
             tracking.subject = authority
             tracking.save()
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority_id,)) + '?tab=tracking')
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority_id,)) + '?tab=tracking')
     else:
         # just always shows tracking form if not post
         form = AuthorityTrackingForm(prefix='tracking', initial={'subject': authority_id})
@@ -439,68 +449,72 @@ def tracking_for_authority(request, authority_id):
         'form': form,
     })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'attribute': attribute,
-    })
+    }
     if request.GET.get('confirm', False):
         attribute.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
-    template = loader.get_template('curation/citation_attribute_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
+    template = 'curation/citation_attribute_delete.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'linkeddata': linkeddata,
-    })
+    }
 
     if request.GET.get('confirm', False):
         linkeddata.delete()
 
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
-    template = loader.get_template('curation/citation_linkeddata_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+    template = 'curation/citation_linkeddata_delete.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'linkeddata': linkeddata,
-    })
+    }
 
     if request.GET.get('confirm', False):
         linkeddata.delete()
 
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=linkeddata')
-    template = loader.get_template('curation/authority_linkeddata_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+    template = 'curation/authority_linkeddata_delete.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -542,19 +556,19 @@ def add_language_for_citation(request, citation_id):
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'ccrelation': ccrelation,
-    })
+    }
     if request.GET.get('confirm', False):
         ccrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=ccrelations')
-    template = loader.get_template('curation/citation_ccrelation_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+    template = 'curation/citation_ccrelation_delete.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -562,19 +576,19 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
 def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'acrelation': acrelation,
-    })
+    }
     if request.GET.get('confirm', False):
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=acrelations')
-    template = loader.get_template('curation/citation_acrelation_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
+    template = 'curation/citation_acrelation_delete.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -582,19 +596,19 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
 def delete_acrelation_for_authority(request, authority_id, acrelation_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'acrelation': acrelation,
-    })
+    }
     if request.GET.get('confirm', False):
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=acrelations')
-    template = loader.get_template('curation/authority_acrelation_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
+    template = 'curation/authority_acrelation_delete.html'
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -602,37 +616,38 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
 def delete_attribute_for_authority(request, authority_id, attribute_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'attribute': attribute,
-    })
+    }
     if request.GET.get('confirm', False):
         attribute.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
-    template = loader.get_template('curation/authority_attribute_delete.html')
-    return HttpResponse(template.render(context))
+        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes')
+    template = 'curation/authority_attribute_delete.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
-    template = loader.get_template('curation/citation_linkeddata_changeview.html')
+    template = 'curation/citation_linkeddata_changeview.html'
     citation = get_object_or_404(Citation, pk=citation_id)
     linkeddata = None
 
     if linkeddata_id:
         linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'linkeddata': linkeddata,
-    })
+    }
 
     if request.method == 'GET':
         if linkeddata:
@@ -659,34 +674,35 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
         else:
             pass
     else:
-        redirect('curate_citation', citation_id)
+        redirect('curation:curate_citation', citation_id)
 
     context.update({
         'linkeddata_form': linkeddata_form,
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
 
-    template = loader.get_template('curation/authority_linkeddata_changeview.html')
+    template = 'curation/authority_linkeddata_changeview.html'
     authority = get_object_or_404(Authority, pk=authority_id)
     linkeddata = None
 
     if linkeddata_id:
         linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': authority,
         'linkeddata': linkeddata,
-    })
+    }
 
     if request.method == 'GET':
         if linkeddata:
@@ -703,22 +719,23 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
             linkeddata_form.instance.subject = authority
             linkeddata_form.save()
 
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata')
         else:
             pass
     else:
-        redirect('curate_authority', authority_id)
+        redirect('curation:curate_authority', authority_id)
 
     context.update({
         'linkeddata_form': linkeddata_form,
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def attribute_for_citation(request, citation_id, attribute_id=None):
 
-    template = loader.get_template('curation/citation_attribute_changeview.html')
+    template = 'curation/citation_attribute_changeview.html'
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute, value, value_form, value_form_class = None, None, None, None
 
@@ -737,13 +754,13 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value = attribute.value.get_child_class()
             value_form_class = value_forms[attribute.type_controlled.id]
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'attribute': attribute,
         'value': value,
-    })
+    }
 
     if request.method == 'GET':
         if attribute:
@@ -774,7 +791,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)) + '?tab=attributes')
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
         else:
             pass
 
@@ -783,14 +800,14 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         'value_form': value_form,
         'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def attribute_for_authority(request, authority_id, attribute_id=None):
 
-    template = loader.get_template('curation/authority_attribute_changeview.html')
+    template = 'curation/authority_attribute_changeview.html'
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute, value, value_form, value_form_class = None, None, None, None
 
@@ -809,13 +826,13 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             value = attribute.value.get_child_class()
             value_form_class = value_forms[attribute.type_controlled.id]
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'attribute': attribute,
         'value': value,
-    })
+    }
 
     if request.method == 'GET':
         if attribute:
@@ -846,7 +863,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            return HttpResponseRedirect(reverse('curate_authority', args=(authority.id,)) + '?tab=attributes')
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes')
         else:
             pass
 
@@ -855,23 +872,25 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
         'value_form': value_form,
         'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
-    })
+    }
 
     citation = get_object_or_404(Citation, pk=citation_id)
 
     user_session = request.session
     page = user_session.get('citation_page', 1)
     get_request = user_session.get('citation_filters', None)
-    queryset = filter_queryset(request.user, Citation.objects.all())
+    if 'o' in get_request and isinstance(get_request['o'], list):
+        get_request['o'] = get_request['o'][0]
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
     paginator = Paginator(filtered_objects.qs, 40)
@@ -888,17 +907,17 @@ def citation(request, citation_id):
     })
 
     if citation.type_controlled == Citation.BOOK:
-        template = loader.get_template('curation/citation_change_view_book.html')
+        template = 'curation/citation_change_view_book.html'
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
-        template = loader.get_template('curation/citation_change_view_review.html')
+        template = 'curation/citation_change_view_review.html'
     elif citation.type_controlled == Citation.CHAPTER:
-        template = loader.get_template('curation/citation_change_view_chapter.html')
+        template = 'curation/citation_change_view_chapter.html'
     elif citation.type_controlled == Citation.ARTICLE:
-        template = loader.get_template('curation/citation_change_view_article.html')
+        template = 'curation/citation_change_view_article.html'
     elif citation.type_controlled == Citation.THESIS:
-        template = loader.get_template('curation/citation_change_view_thesis.html')
+        template = 'curation/citation_change_view_thesis.html'
     else:
-        template = loader.get_template('curation/citation_change_view.html')
+        template = 'curation/citation_change_view.html'
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
@@ -936,15 +955,15 @@ def citation(request, citation_id):
 
             forward_type = request.POST.get('forward_type', None)
             if forward_type == "list":
-                return HttpResponseRedirect(reverse('citation_list') + "?page=" + str(page))
+                return HttpResponseRedirect(reverse('curation:citation_list') + "?page=" + str(page))
             elif forward_type == "next":
                 next = context.get('next', citation)
-                return HttpResponseRedirect(reverse('curate_citation', args=(next.id,)))
+                return HttpResponseRedirect(reverse('curation:curate_citation', args=(next.id,)))
             elif forward_type == "previous":
                 prev = context.get('previous', citation)
-                return HttpResponseRedirect(reverse('curate_citation', args=(prev.id,)))
+                return HttpResponseRedirect(reverse('curation:curate_citation', args=(prev.id,)))
 
-            return HttpResponseRedirect(reverse('curate_citation', args=(citation.id,)))
+            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
 
         context.update({
             'form': form,
@@ -952,10 +971,13 @@ def citation(request, citation_id):
             'partdetails_form': partdetails_form,
         })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
-def _build_next_and_prev(context, current_obj, objects_page, paginator, page, cache_prev_index_key, cache_page_key, cache_request_param_key, session):
+# TODO: needs documentation.
+def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
+                         cache_prev_index_key, cache_page_key,
+                         cache_request_param_key, session):
     if objects_page:
         user_session = session
         request_params = user_session.get(cache_request_param_key, {})
@@ -1054,36 +1076,7 @@ def _get_corrected_index(prev_index, index):
     return index
 
 
-class QueryDictWrapper(object):
-    def __init__(self, querydict, extra={}):
-        self.extra = {}
-        self.extra.update(extra)
-        self.qd = querydict
-
-    def __getitem__(self, key):
-        if key in self.qd:
-            return self.qd.get(key)
-        return self.extra.get(key)
-
-    def iteritems(self):
-        from itertools import chain
-        return chain(self.qd.iteritems(), self.extra.iteritems())
-
-    def get(self, key, default=None):
-        value = self.__getitem__(key)
-        if not value:
-            return default
-        return value
-
-    def getlist(self, key):
-        if key in self.qd:
-            return self.qd.getlist(key)
-        return [self.extra.get[key]]
-
-    def __setitem__(self, key, value):
-        if key in qd:
-            self.qd[key] = value    # this will throw an exception
-        self.extra[key] = value
+# Deleted class QueryDictWraper; we're not using it. -E
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1098,6 +1091,9 @@ def citations(request):
                                   mutable=True)
     elif request.method == 'GET':
         filter_params = user_session.get('citation_filters', {})
+        if 'o' in filter_params and isinstance(filter_params['o'], list):
+            filter_params['o'] = filter_params['o'][0]
+
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
         for key in additional_params_names:
@@ -1122,15 +1118,15 @@ def citations(request):
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'filter_params': encoded_params,
-    })
+    }
 
-    template = loader.get_template('curation/citation_list_view.html')
+    template = 'curation/citation_list_view.html'
 
-    queryset = filter_queryset(request.user, Citation.objects.all())
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(filter_params, queryset=queryset)
 
@@ -1157,62 +1153,15 @@ def citations(request):
         'result_count': filtered_objects.count()
     })
 
-    return HttpResponse(template.render(context))
-
-
-def filter_queryset(user, queryset):
-    roles = IsisCBRole.objects.filter(users__pk=user.pk)
-
-    datasets = []
-    include_no_dataset = False
-    excluded_datasets = []
-    exclude_no_datasets = False
-    can_view_all = False
-
-    if user.is_superuser:
-        can_view_all = True
-    else:
-        for role in roles:
-            # if there are dataset limitations in role
-            if role.dataset_rules:
-                crud_actions = [rule.crud_action for rule in role.crud_rules]
-                datasets_in_role = [rule.dataset for rule in role.dataset_rules if rule.dataset]
-                no_dataset_in_role = [None for rule in role.dataset_rules if not rule.dataset ]
-                # if the crud rules allow viewing records in datasets add them to included datasets
-                if CRUDRule.VIEW in crud_actions:
-                    datasets += datasets_in_role
-                    include_no_dataset = True if no_dataset_in_role else False
-                # otherwise exclude datasets
-                else:
-                    excluded_datasets += datasets_in_role
-                    exclude_no_datasets = True if no_dataset_in_role else False
-            # if there are no dataset limitations
-            else:
-                crud_actions = [rule.crud_action for rule in role.crud_rules]
-                if CRUDRule.VIEW in crud_actions:
-                    can_view_all = True
-
-    if excluded_datasets:
-        query = Q(belongs_to__in=excluded_datasets)
-        if exclude_no_datasets:
-            query = query | Q(belongs_to__isnull=True)
-        queryset = queryset.exclude(query)
-
-    if not can_view_all:
-        query = Q(belongs_to__in=datasets)
-        if include_no_dataset:
-            query = query | Q(belongs_to__isnull=True)
-        queryset = queryset.filter(query)
-
-    return queryset
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def authorities(request):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
-    })
+    }
 
     additional_params_names = ["page"]
     all_params = {}
@@ -1237,8 +1186,8 @@ def authorities(request):
     #user_session['authority_page'] = int(currentPage)
     #user_session['authority_prev_index'] = None
 
-    template = loader.get_template('curation/authority_list_view.html')
-    queryset = filter_queryset(request.user, Authority.objects.all())
+    template = 'curation/authority_list_view.html'
+    queryset = operations.filter_queryset(request.user, Authority.objects.all())
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
 
     filters_active = filter_params
@@ -1263,20 +1212,20 @@ def authorities(request):
         'filters_active': filters_active
     })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def authority(request, authority_id):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
-    })
+    }
 
     context.update({'tab': request.GET.get('tab', None)})
     authority = get_object_or_404(Authority, pk=authority_id)
-    template = loader.get_template('curation/authority_change_view.html')
+    template = 'curation/authority_change_view.html'
     person_form = None
     if request.method == 'GET':
 
@@ -1284,13 +1233,19 @@ def authority(request, authority_id):
         page = user_session.get('authority_page', 1)
         get_request = user_session.get('authority_filters', None)
 
-        queryset = filter_queryset(request.user, Authority.objects.all())
+        # Something odd going on with the sorting field (``o``).
+        if 'o' in get_request and isinstance(get_request['o'], list):
+            get_request['o'] = get_request['o'][0]
+
+        queryset = operations.filter_queryset(request.user, Authority.objects.all())
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
         paginator = Paginator(filtered_objects.qs, 40)
         authority_page = paginator.page(page)
 
         # ok, let's start the whole pagination/next/previous dance :op
-        _build_next_and_prev(context, authority, authority_page, paginator, page, 'authority_prev_index', 'authority_page', 'authority_request_params', user_session)
+        _build_next_and_prev(context, authority, authority_page, paginator,
+                             page, 'authority_prev_index', 'authority_page',
+                             'authority_request_params', user_session)
 
         request_params = user_session.get('authority_request_params', "")
 
@@ -1322,7 +1277,7 @@ def authority(request, authority_id):
 
             form.save()
 
-            return HttpResponseRedirect(reverse('curate_authority', args=[authority.id,]))
+            return HttpResponseRedirect(reverse('curation:curate_authority', args=[authority.id,]))
 
         context.update({
             'form': form,
@@ -1331,7 +1286,7 @@ def authority(request, authority_id):
             # 'partdetails_form': partdetails_form,
         })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1406,7 +1361,7 @@ def quick_and_dirty_authority_search(request):
             'related_citations': map(lambda s: s.title(), set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])),
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
-            'url': reverse("curate_authority", args=(obj.id,)),
+            'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
             'type_controlled': obj.get_type_controlled_display(),
         })
@@ -1416,6 +1371,7 @@ def quick_and_dirty_authority_search(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def dataset(request, dataset_id=None):
     return HttpResponse('')
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_collections(request):
@@ -1427,7 +1383,6 @@ def search_collections(request):
     } for col in queryset[:20]]
     return JsonResponse(results, safe=False)
 
-from django.utils import formats
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_zotero_accessions(request):
@@ -1440,6 +1395,7 @@ def search_zotero_accessions(request):
     } for accession in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_datasets(request):
     q = request.GET.get('query', None)
@@ -1450,18 +1406,20 @@ def search_datasets(request):
     } for ds in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def users(request, user_id=None):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
-    })
-    template = loader.get_template('curation/users.html')
+    }
+    template = 'curation/users.html'
     users =  User.objects.all()
     context.update({
         'objects': users,
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
@@ -1469,22 +1427,23 @@ def user(request, user_id):
     selected_user = get_object_or_404(User, pk=user_id)
 
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'selected_user': selected_user,
-    })
-    template = loader.get_template('curation/user.html')
-    return HttpResponse(template.render(context))
+    }
+    template = 'curation/user.html'
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_role(request, user_id=None):
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_role.html')
+        template = 'curation/add_role.html'
         form = RoleForm()
         context.update({
             'form': form,
@@ -1495,16 +1454,17 @@ def add_role(request, user_id=None):
         if form.is_valid():
             role = form.save()
 
-            return redirect('roles')
+            return redirect('curation:roles')
         else:
-            template = loader.get_template('curation/add_role.html')
+            template = 'curation/add_role.html'
             context.update({
                 'form': form,
             })
     else:
-        return redirect('roles')
+        return redirect('curation:roles')
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
@@ -1515,7 +1475,8 @@ def remove_role(request, user_id, role_id):
     if request.method == 'POST':
         role.users.remove(user)
 
-    return redirect('user', user_id=user.pk)
+    return redirect('curation:user', user_id=user.pk)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
@@ -1530,48 +1491,51 @@ def delete_role(request, role_id):
         else:
             role.delete()
 
-    return redirect('roles')
+    return redirect('curation:roles')
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def role(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    template = loader.get_template('curation/role.html')
-    context = RequestContext(request, {
+    template = 'curation/role.html'
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def roles(request):
     roles = IsisCBRole.objects.all()
 
-    template = loader.get_template('curation/roles.html')
-    context = RequestContext(request, {
+    template = 'curation/roles.html'
+    context = {
         'curation_section': 'users',
         'roles': roles,
-    })
+    }
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_dataset_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_rule.html')
+        template = 'curation/add_rule.html'
         form = DatasetRuleForm(initial = { 'role': role })
-        header_template = loader.get_template('curation/rule_dataset_header.html').render(context)
+        header_template = 'curation/rule_dataset_header.html'.render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -1584,33 +1548,34 @@ def add_dataset_rule(request, role_id, user_id=None):
             rule.role = role
             rule.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('curation:role', role_id=role.pk)
         else:
-            template = loader.get_template('curation/add_rule.html')
-            header_template = loader.get_template('curation/rule_dataset_header.html').render(context)
+            template = 'curation/add_rule.html'
+            header_template = 'curation/rule_dataset_header.html'.render(context)
 
             context.update({
                 'form': form,
                 'header': header_template,
             })
 
-        return redirect('role', role_id=role.pk)
+        return redirect('curation:role', role_id=role.pk)
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_crud_rule(request, role_id, user_id=None):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_rule.html')
-        header_template = loader.get_template('curation/rule_crud_header.html').render(context)
+        template = 'curation/add_rule.html'
+        header_template = 'curation/rule_crud_header.html'.render(context)
 
         form = CRUDRuleForm(initial = { 'role': role })
         context.update({
@@ -1625,32 +1590,33 @@ def add_crud_rule(request, role_id, user_id=None):
             rule.role = role
             rule.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('curation:role', role_id=role.pk)
         else:
-            template = loader.get_template('curation/add_rule.html')
-            header_template = loader.get_template('curation/rule_crud_header.html').render(context)
+            template = 'curation/add_rule.html'
+            header_template = 'curation/rule_crud_header.html'.render(context)
 
             context.update({
                 'form': form,
                 'header_template': header_template,
             })
 
-        return redirect('role', role_id=role.pk)
+        return redirect('curation:role', role_id=role.pk)
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATION):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_rule.html')
+        template = 'curation/add_rule.html'
         if object_type == AccessRule.CITATION:
             form = FieldRuleCitationForm(initial = { 'role': role, 'object_type': object_type})
             header_template = 'curation/rule_field_citation_header.html'
@@ -1677,9 +1643,9 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
             rule.role = role
             rule.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('curation:role', role_id=role.pk)
         else:
-            template = loader.get_template('curation/add_rule.html')
+            template = 'curation/add_rule.html'
             header_template = loader.get_template(header_template).render(context)
 
             context.update({
@@ -1687,25 +1653,26 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
                 'header': header_template,
             })
 
-        return redirect('role', role_id=role.pk)
+        return redirect('curation:role', role_id=role.pk)
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_user_module_rule(request, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_rule.html')
+        template = 'curation/add_rule.html'
         form = UserModuleRuleForm()
 
-        header_template = loader.get_template('curation/rule_user_module_header.html').render(context)
+        header_template = 'curation/rule_user_module_header.html'.render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -1718,31 +1685,32 @@ def add_user_module_rule(request, role_id):
             rule.role = role
             rule.save()
 
-            return redirect('role', role_id=role.pk)
+            return redirect('curation:role', role_id=role.pk)
         else:
-            template = loader.get_template('curation/add_rule.html')
-            header_template = loader.get_template('curation/rule_user_module_header.html').render(context)
+            template = 'curation/add_rule.html'
+            header_template = 'curation/rule_user_module_header.html'.render(context)
 
             context.update({
                 'form': form,
                 'header_template': header_template,
             })
 
-        return redirect('role', role_id=role.pk)
+        return redirect('curation:role', role_id=role.pk)
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_role_to_user(request, user_edit_id, user_id=None):
     user = get_object_or_404(User, pk=user_edit_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
-    })
+    }
 
     if request.method == 'GET':
-        template = loader.get_template('curation/add_role_to_user.html')
+        template = 'curation/add_role_to_user.html'
         form = AddRoleForm(initial = { 'users': user })
         context.update({
             'form': form,
@@ -1757,11 +1725,12 @@ def add_role_to_user(request, user_edit_id, user_id=None):
             role.save()
 
             if request.GET.get('from_user', False):
-                return redirect('user', user.pk)
+                return redirect('curation:user', user.pk)
 
-            return redirect('user_list')
+            return redirect('curation:user_list')
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
@@ -1772,7 +1741,7 @@ def remove_rule(request, role_id, rule_id):
     if request.method == 'POST':
         rule.delete()
 
-    return redirect('role', role_id=role.pk)
+    return redirect('curation:role', role_id=role.pk)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1817,7 +1786,7 @@ def quick_and_dirty_citation_search(request):
             'authors': _get_authors_editors(obj),
             'datestring': _get_datestring_for_citation(obj),
             'description': obj.description,
-            'url': reverse("curate_citation", args=(obj.id,)),
+            'url': reverse("curation:curate_citation", args=(obj.id,)),
             'public':obj.public,
         })
 
@@ -1838,7 +1807,8 @@ def change_is_staff(request, user_id):
             user.is_staff = False
         user.save()
 
-    return redirect('user', user_id=user_id)
+    return redirect('curation:user', user_id=user_id)
+
 
 @check_rules('is_user_superuser')
 def change_is_superuser(request, user_id):
@@ -1861,17 +1831,17 @@ def change_is_superuser(request, user_id):
                 message = "This is the only admin user in the system. There have to be at least two adminstrators to remove administrator permissions from a user. "
                 messages.add_message(request, messages.ERROR, message)
 
-    return redirect('user', user_id=user_id)
+    return redirect('curation:user', user_id=user_id)
 
 
 @check_rules('can_update_user_module')
 def add_zotero_rule(request, role_id):
     role = get_object_or_404(IsisCBRole, pk=role_id)
 
-    context = RequestContext(request, {
+    context = {
         'curation_section': 'users',
         'role': role,
-    })
+    }
 
     if request.method == 'POST':
         rule = ZoteroRule.objects.create(role_id=role_id)
@@ -1881,15 +1851,14 @@ def add_zotero_rule(request, role_id):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_select_citation(request):
-    template = loader.get_template('curation/bulk_select_citation.html')
-    context = RequestContext(request, {})
-    return HttpResponse(template.render(context))
+    template = 'curation/bulk_select_citation.html'
+    context = {}
+    return render(request, template, context)
 
 
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
-    if request.method != 'POST':
-        return HttpResponseRedirect(reverse('citation_list'))
+
 
     filter_params_raw = request.POST.get('filters')
     filter_params = QueryDict(filter_params_raw, mutable=True)
@@ -1898,7 +1867,7 @@ def _get_filtered_queryset(request):
         filter_params['id'] = ','.join(pks)
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
-    _qs = filter_queryset(request.user, Citation.objects.all())
+    _qs = operations.filter_queryset(request.user, Citation.objects.all())
     queryset = CitationFilter(filter_params, queryset=_qs)
     return queryset, filter_params_raw
 
@@ -1912,22 +1881,25 @@ def bulk_action(request):
     Selection can be explicit via a list of pks in the ``queryset`` form field,
     or implicit via the ``filters`` from the list view.
     """
-    template = loader.get_template('curation/bulkaction.html')
+    template = 'curation/bulkaction.html'
     form_class = bulk_action_form_factory()
-    context = RequestContext(request, {})
+    context = {}
+
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:citation_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
 
     context.update({'queryset': queryset, 'filters': filter_params_raw})
-
 
     if request.GET.get('confirmed', False):
         # Perform the selected action.
         form = form_class(request.POST)
         form.fields['filters'].initial = filter_params_raw
         if form.is_valid():
-            form.apply(queryset.qs, request.user)
-            return HttpResponseRedirect(reverse('citation_list'))
+            tasks = form.apply(request.user, filter_params_raw)
+            # task_id = form.apply(queryset.qs, request.user)[0]
+            return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
     else:
         # Prompt to select an action that will be applied to those records.
         form = form_class()
@@ -1937,13 +1909,13 @@ def bulk_action(request):
     context.update({
         'form': form,
     })
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def create_citation_collection(request):
-    template = loader.get_template('curation/citation_collection_create.html')
-    context = RequestContext(request, {})
+    template = 'curation/citation_collection_create.html'
+    context = {}
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
         if request.GET.get('confirmed', False):
@@ -1956,7 +1928,7 @@ def create_citation_collection(request):
                 instance.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('citation_list') + '?in_collections=%i' % instance.id)
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
         else:
             form = CitationCollectionForm()
             form.fields['filters'].initial = filter_params_raw
@@ -1966,13 +1938,13 @@ def create_citation_collection(request):
             'queryset': queryset,
         })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def add_citation_collection(request):
-    template = loader.get_template('curation/citation_collection_add.html')
-    context = RequestContext(request, {})
+    template = 'curation/citation_collection_add.html'
+    context = {}
 
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
@@ -1984,7 +1956,7 @@ def add_citation_collection(request):
                 collection.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('citation_list') + '?in_collections=%i' % collection.id)
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
         else:
             form = SelectCitationCollectionForm()
             form.fields['filters'].initial = filter_params_raw
@@ -1994,52 +1966,88 @@ def add_citation_collection(request):
             'queryset': queryset,
         })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_action_status(request):
+    template = 'curation/citations_bulk_status.html'
+    context = {}
+    task_ids = request.GET.getlist('task')
+    tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
+
+
+    context.update({'tasks': tasks})
+    return render(request, template, context)
 
 
 # TODO: refactor around asynchronous tasks.
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def export_citations_status(request):
-    template = loader.get_template('curation/citations_export_status.html')
-    context = RequestContext(request, {})
-    target = request.GET.get('target')
+    template = 'curation/citations_export_status.html'
+    context = {}
+    # target = request.GET.get('target')
+    task_id = request.GET.get('task_id')
+    task = AsyncTask.objects.get(pk=task_id)
+    target = task.value
+
     download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
-    context.update({'download_target': download_target})
-    return HttpResponse(template.render(context))
+    context.update({'download_target': download_target, 'task': task})
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def export_citations(request):
     # TODO: move some of this stuff out to the export module.
-    from django.utils.text import slugify
-    from isisdata import export
-    import smart_open
-    from datetime import datetime
-    template = loader.get_template('curation/citations_export.html')
-    context = RequestContext(request, {})
+
+    template = 'curation/citations_export.html'
+    context = {}
     if request.method != 'POST':
-        return HttpResponseRedirect(reverse('citation_list'))
+        return HttpResponseRedirect(reverse('curation:citation_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
+
     if request.GET.get('confirmed', False):
+        # The user has selected the desired configuration settings.
         form = ExportCitationsForm(request.POST)
         form.fields['filters'].initial = filter_params_raw
 
         if form.is_valid():
-            tag = slugify(form.cleaned_data.get('tag', 'export'))
+            # Start the export process.
+            tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
-            columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
-            _datestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # TODO: generalize this, so that we are not tied directly to S3.
+            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY, settings.AWS_EXPORT_BUCKET_NAME, _out_name)
+            # _compress = form.cleaned_data.get('compress_output', False)
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                                            settings.AWS_SECRET_ACCESS_KEY,
+                                            settings.AWS_EXPORT_BUCKET_NAME,
+                                            _out_name)
+            # if _compress:
+            #     s3_path += '.gz'
 
-            # This will block! TODO: farm out to celery.
-            with smart_open.smart_open(s3_path, 'wb') as f:
-                export.generate_csv(f, queryset, columns)
+            # We create the AsyncTask object first, so that we can keep it
+            #  updated while the task is running.
+            task = AsyncTask.objects.create()
+            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id)
 
-            from django.utils.http import urlencode
-            return HttpResponseRedirect(reverse('export-citations-status') + '?' + urlencode({'target': _out_name}))
-    else:
+            # We can use the AsyncResult's UUID to access this task later, e.g.
+            #  to check the return value or task state.
+            task.async_uuid = result.id
+            task.value = _out_name
+            task.save()
+
+            # Send the user to a status view, which will show the export
+            #  progress and a link to the finished export.
+            target = reverse('curation:export-citations-status') \
+                     + '?' + urlencode({'task_id': task.id})
+            return HttpResponseRedirect(target)
+        print form.errors
+    else:       # Display the export configuration form.
         form = ExportCitationsForm()
         form.fields['filters'].initial = filter_params_raw
 
@@ -2048,4 +2056,4 @@ def export_citations(request):
         'queryset': queryset,
     })
 
-    return HttpResponse(template.render(context))
+    return render(request, template, context)
