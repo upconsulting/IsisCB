@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 from django.utils import formats
 from django.utils.http import urlencode
 from django.utils.text import slugify
+from django.template.loader import get_template
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
@@ -1535,7 +1536,7 @@ def add_dataset_rule(request, role_id, user_id=None):
     if request.method == 'GET':
         template = 'curation/add_rule.html'
         form = DatasetRuleForm(initial = { 'role': role })
-        header_template = 'curation/rule_dataset_header.html'.render(context)
+        header_template = get_template('curation/rule_dataset_header.html').render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -1551,7 +1552,7 @@ def add_dataset_rule(request, role_id, user_id=None):
             return redirect('curation:role', role_id=role.pk)
         else:
             template = 'curation/add_rule.html'
-            header_template = 'curation/rule_dataset_header.html'.render(context)
+            header_template = get_template('curation/rule_dataset_header.html').render(context)
 
             context.update({
                 'form': form,
@@ -1575,7 +1576,7 @@ def add_crud_rule(request, role_id, user_id=None):
 
     if request.method == 'GET':
         template = 'curation/add_rule.html'
-        header_template = 'curation/rule_crud_header.html'.render(context)
+        header_template = get_template('curation/rule_crud_header.html').render(context)
 
         form = CRUDRuleForm(initial = { 'role': role })
         context.update({
@@ -1593,7 +1594,7 @@ def add_crud_rule(request, role_id, user_id=None):
             return redirect('curation:role', role_id=role.pk)
         else:
             template = 'curation/add_rule.html'
-            header_template = 'curation/rule_crud_header.html'.render(context)
+            header_template = get_template('curation/rule_crud_header.html').render(context)
 
             context.update({
                 'form': form,
@@ -1624,7 +1625,7 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
             form = FieldRuleAuthorityForm(initial = { 'role': role, 'object_type': object_type})
             header_template = 'curation/rule_field_authority_header.html'
 
-        header_template = loader.get_template(header_template).render(context)
+        header_template = get_template(header_template).render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -1646,7 +1647,7 @@ def add_field_rule(request, role_id, user_id=None, object_type=AccessRule.CITATI
             return redirect('curation:role', role_id=role.pk)
         else:
             template = 'curation/add_rule.html'
-            header_template = loader.get_template(header_template).render(context)
+            header_template = get_template(header_template).render(context)
 
             context.update({
                 'form': form,
@@ -1672,7 +1673,7 @@ def add_user_module_rule(request, role_id):
         template = 'curation/add_rule.html'
         form = UserModuleRuleForm()
 
-        header_template = 'curation/rule_user_module_header.html'.render(context)
+        header_template = get_template('curation/rule_user_module_header.html').render(context)
         context.update({
             'form': form,
             'header': header_template
@@ -1688,7 +1689,7 @@ def add_user_module_rule(request, role_id):
             return redirect('curation:role', role_id=role.pk)
         else:
             template = 'curation/add_rule.html'
-            header_template = 'curation/rule_user_module_header.html'.render(context)
+            header_template = get_template('curation/rule_user_module_header.html').render(context)
 
             context.update({
                 'form': form,
@@ -1846,7 +1847,7 @@ def add_zotero_rule(request, role_id):
     if request.method == 'POST':
         rule = ZoteroRule.objects.create(role_id=role_id)
 
-    return redirect('role', role_id=role.pk)
+    return redirect('curation:role', role_id=role.pk)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
