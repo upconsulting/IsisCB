@@ -79,7 +79,7 @@
 
 
 {% block filter_form %}
-<form class="form clearfix">
+<form id="filter_form" class="form clearfix">
 
     <div class="row">
         <div class="col-sm-4">
@@ -131,21 +131,9 @@
                 <label>{{ objects.form.ingest_to.label }}</label>
                 {{ objects.form.ingest_to|addcss:"form-control" }}
             </div>
-
-            <div class="btn-group pull-right">
-                <input class="btn btn-primary" type="submit" value="Apply Filters"></input>
-                <button class="btn btn-warning" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-            </div>
         </div>
     </div>
 
 </form>
-<script>
-$(document).ready(function() {
-    $('#clear-filters').on('click', function() {
-        $('.form-group.clearable input').val('');
-        $('.form-group.clearable select').val('');
-    });
-});
-</script>
+
 {% endblock %}
