@@ -1076,6 +1076,21 @@ def _get_corrected_index(prev_index, index):
             return None
     return index
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def subjects_and_categories(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+    }
+
+
+    template = 'curation/citation_subjects_categories.html'
+
+    return render(request, template, context)
 
 # Deleted class QueryDictWraper; we're not using it. -E
 

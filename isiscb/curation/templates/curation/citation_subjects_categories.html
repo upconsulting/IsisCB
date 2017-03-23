@@ -1,0 +1,47 @@
+{% extends "curation/base.html" %}
+
+{% load render_object %}
+
+{% block content %}
+
+<div id="subjectsCategoriesView" class="row">
+  <div class="col-md-6">
+      <div class="col-md-12">
+        <p>
+        <strong id="citation_type" data-type="{{instance.type_controlled}}">
+  {{ instance.get_type_controlled_display }}</strong>:
+        {{ instance.id }}, {{ instance|get_citation_pubdate }} [{{ instance.record_status_value }}]
+        </p>
+      </div>
+
+
+      <div class="col-md-12">
+        {% for acrelation in instance.acrelation_set.all %}
+            {% if acrelation.type_broad_controlled == 'PR' %}
+            <label class="label label-success">{{ acrelation.get_type_controlled_display }}</label>
+            {{ acrelation.authority.name }}
+            {% if acrelation.name_for_display_in_citation %}
+            <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+            {% endif %}
+            {% if not acrelation.authority.public %}
+            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+            {% endif %}
+            {% if not acrelation.public %}
+            <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+            {% endif %}
+            {% endif %}
+         {% endfor %}
+       </div>
+
+       <div class="col-md-12">
+         <i>{{ instance.title }}</i>
+       </div>
+
+       <div class="col-md-12">
+         {{ instance.abstract }}
+       </div>
+
+     </div>
+</div>
+
+{% endblock %}
