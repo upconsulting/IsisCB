@@ -1082,7 +1082,7 @@ def _get_corrected_index(prev_index, index):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def citations(request):
-    additional_params_names = ["page", "zotero_accession"]
+    additional_params_names = ["page", "zotero_accession", "in_collections"]
     all_params = {}
 
     user_session = request.session
@@ -1097,8 +1097,14 @@ def citations(request):
 
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
+
         for key in additional_params_names:
             all_params[key] = request.GET.get(key, '')
+
+        # Let the GET parameter override the cached POST parameter, in case the
+        #  curator is originating in the collections view.
+        if "in_collections" in all_params:
+            filter_params["in_collections"] = all_params["in_collections"]
     if 'o' not in filter_params:
         filter_params['o'] = 'title_for_sort'
     # if 'zotero_accession' in request.GET:
@@ -1977,7 +1983,6 @@ def bulk_action_status(request):
     task_ids = request.GET.getlist('task')
     tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
 
-
     context.update({'tasks': tasks})
     return render(request, template, context)
 
@@ -2058,3 +2063,17 @@ def export_citations(request):
     })
 
     return render(request, template, context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def collections(request):
+    """
+    List :class:`.Collection` instances.
+    """
+    collections = CitationCollection.objects.all()
+
+    filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
+    context = {
+        'objects': filtered_objects,
+    }
+    return render(request, 'curation/collection_list.html', context)
