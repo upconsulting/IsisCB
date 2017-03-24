@@ -193,18 +193,23 @@ def _isbn(obj, extra):
 
 
 def _pages(obj, extra):
-    if obj.type_controlled != Citation.CHAPTER:
-        return u""
     if not getattr(obj, 'part_details', None):
         return u""
     page_start_string = obj.part_details.page_begin
     page_end_string = obj.part_details.page_end
+    if obj.type_controlled == Citation.CHAPTER:
+        if page_start_string and page_end_string:
+            pre = u"pp."
+        else:
+            pre = u"p."
+    else:
+        pre = u""
     if page_start_string and page_end_string:
-        return u"pp. " + unicode(page_start_string) + "-" + unicode(page_end_string)
+        return pre + unicode(page_start_string) + "-" + unicode(page_end_string)
     if page_start_string:
-        return u"p. " + unicode(page_start_string)
+        return pre + unicode(page_start_string)
     if page_end_string:
-        return u"p. " + unicode(page_end_string)
+        return pre + unicode(page_end_string)
     return ""
 
 
