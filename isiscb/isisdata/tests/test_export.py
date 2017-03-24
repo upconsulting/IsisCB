@@ -39,9 +39,9 @@ class TestColumn(unittest.TestCase):
         Calling a :class:`.Column` should result in a call to the underlying
         function.
         """
-        test_fnx = mock.Mock(side_effect=lambda o: o)
+        test_fnx = mock.Mock(side_effect=lambda o, e: o)
         test_column = export.Column('Test', test_fnx)
-        self.assertEqual('foo', test_column('foo'))
+        self.assertEqual('foo', test_column('foo', []))
         self.assertEqual(test_fnx.call_count, 1)
 
     def test_column_enforces_input_expectation(self):
@@ -51,10 +51,10 @@ class TestColumn(unittest.TestCase):
         column is called.
         """
 
-        test_fnx = mock.Mock(side_effect=lambda o: o + 1)
+        test_fnx = mock.Mock(side_effect=lambda o, e: o + 1)
         test_column = export.Column('Test', test_fnx, int)
         with self.assertRaises(AssertionError):
-            test_column('Definitely not an int')
+            test_column('Definitely not an int', [])
         self.assertEqual(test_fnx.call_count, 0,
                          "The underlying function should not be called if the"
                          " input expectation is not met.")
@@ -71,7 +71,7 @@ class TestCitationAuthorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         author = Authority.objects.create(name='Author', type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, authority=author, type_controlled=ACRelation.AUTHOR)
-        self.assertEqual(author.name, export.citation_author(citation))
+        self.assertEqual(author.name, export.citation_author(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
         """
@@ -82,7 +82,7 @@ class TestCitationAuthorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         author = Authority.objects.create(name='Author', type_controlled=Authority.PERSON)
         relation = ACRelation.objects.create(citation=citation, authority=author, type_controlled=ACRelation.AUTHOR, name_for_display_in_citation='Some other name')
-        self.assertEqual(relation.name_for_display_in_citation, export.citation_author(citation))
+        self.assertEqual(relation.name_for_display_in_citation, export.citation_author(citation, []))
 
     def test_citation_has_multiple_authors(self):
         """
@@ -94,7 +94,7 @@ class TestCitationAuthorColumn(unittest.TestCase):
         author_two = Authority.objects.create(name='AuthorTwo', type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, authority=author_one, type_controlled=ACRelation.AUTHOR, data_display_order=1)
         ACRelation.objects.create(citation=citation, authority=author_two, type_controlled=ACRelation.AUTHOR, data_display_order=2)
-        self.assertEqual(u'%s; %s' % (author_one.name, author_two.name), export.citation_author(citation))
+        self.assertEqual(u'%s; %s' % (author_one.name, author_two.name), export.citation_author(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -113,7 +113,7 @@ class TestCitationEditorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         editor = Authority.objects.create(name='Editor', type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, authority=editor, type_controlled=ACRelation.EDITOR)
-        self.assertEqual(editor.name, export.citation_editor(citation))
+        self.assertEqual(editor.name, export.citation_editor(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
         """
@@ -124,7 +124,7 @@ class TestCitationEditorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         editor = Authority.objects.create(name='Editor', type_controlled=Authority.PERSON)
         relation = ACRelation.objects.create(citation=citation, authority=editor, type_controlled=ACRelation.EDITOR, name_for_display_in_citation='Some other name')
-        self.assertEqual(relation.name_for_display_in_citation, export.citation_editor(citation))
+        self.assertEqual(relation.name_for_display_in_citation, export.citation_editor(citation, []))
 
     def test_citation_has_multiple_authors(self):
         """
@@ -136,7 +136,7 @@ class TestCitationEditorColumn(unittest.TestCase):
         editor_two = Authority.objects.create(name='EditorTwo', type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, authority=editor_one, type_controlled=ACRelation.EDITOR, data_display_order=1)
         ACRelation.objects.create(citation=citation, authority=editor_two, type_controlled=ACRelation.EDITOR, data_display_order=2)
-        self.assertEqual(u'%s; %s' % (editor_one.name, editor_two.name), export.citation_editor(citation))
+        self.assertEqual(u'%s; %s' % (editor_one.name, editor_two.name), export.citation_editor(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -156,7 +156,7 @@ class TestCitationTitleColumn(unittest.TestCase):
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
 
-        self.assertEqual(citation.title, export.citation_title(citation))
+        self.assertEqual(citation.title, export.citation_title(citation, []))
 
     def test_citation_is_review(self):
         """
@@ -168,7 +168,7 @@ class TestCitationTitleColumn(unittest.TestCase):
                                        type_controlled=Citation.BOOK)
         CCRelation.objects.create(subject=book, object=citation,
                                   type_controlled=CCRelation.REVIEWED_BY)
-        self.assertEqual('Review of "Book"', export.citation_title(citation))
+        self.assertEqual('Review of "Book"', export.citation_title(citation, []))
 
     def test_citation_is_review_alt(self):
         """
@@ -180,7 +180,7 @@ class TestCitationTitleColumn(unittest.TestCase):
                                        type_controlled=Citation.BOOK)
         CCRelation.objects.create(subject=citation, object=book,
                                   type_controlled=CCRelation.REVIEW_OF)
-        self.assertEqual('Review of "Book"', export.citation_title(citation))
+        self.assertEqual('Review of "Book"', export.citation_title(citation, []))
 
     def test_citation_is_review_missing_book(self):
         """
@@ -190,12 +190,55 @@ class TestCitationTitleColumn(unittest.TestCase):
         citation = Citation.objects.create(type_controlled=Citation.REVIEW)
 
         self.assertEqual(u"Review of unknown publication",
-                         export.citation_title(citation))
+                         export.citation_title(citation, []))
 
 
     def tearDown(self):
         Citation.objects.all().delete()
         CCRelation.objects.all().delete()
+
+
+class TestExtraRecordsAreAddedToTheExport(unittest.TestCase):
+    """
+    There are cases in which a column needs to add a related record to the
+    export set.
+    """
+    def test_link_to_record_adds_extra_records(self):
+        citation = Citation.objects.create(type_controlled=Citation.REVIEW)
+        book = Citation.objects.create(title='Book',
+                                       type_controlled=Citation.BOOK)
+        CCRelation.objects.create(subject=citation, object=book,
+                                  type_controlled=CCRelation.REVIEW_OF)
+        extra = []
+        export.link_to_record(citation, extra)
+        self.assertEqual(len(extra), 1)
+        self.assertEqual(extra[0].id, book.id)
+
+    def test_link_to_record_results_in_extra_rows(self):
+        citation = Citation.objects.create(type_controlled=Citation.REVIEW)
+        book = Citation.objects.create(title='Book',
+                                       type_controlled=Citation.BOOK)
+        CCRelation.objects.create(subject=citation, object=book,
+                                  type_controlled=CCRelation.REVIEW_OF)
+        class FakeFile(object):
+            def __init__(self):
+                self.data = []
+
+            def write(self, data):
+                self.data.append(data)
+
+        f = FakeFile()
+        qs = Citation.objects.filter(pk=citation.id)
+        export.generate_csv(f, qs, [export.object_id, export.link_to_record])
+        self.assertEqual(len(f.data), 3)    # Including the header.
+        self.assertTrue(book.id in zip(*[r.split(',') for r in f.data])[0][1:],
+                        "Linked book record should be included in the output.")
+
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        CCRelation.objects.all().delete()
+
 
 
 if __name__ == '__main__':
