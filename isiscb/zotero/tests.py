@@ -1302,3 +1302,35 @@ class BookSeriesShouldBeSkippedAutomatically(TestCase):
         for authority, relation in result:
             if relation.type_controlled == ACRelation.BOOK_SERIES:
                 self.assertTrue(authority.processed)
+
+
+class ThesisACRelationsAreABitDifferent(TestCase):
+    """
+    From ISISCB-928:
+
+    > During Zotero ingest of theses / dissertations, please make the following
+    > two changes:
+    > 1) all names marked as contributors should be designated as advisors in
+    > the ACR link.
+    > 2) all university data should be marked as school not publisher (as it is
+    > currently)
+    """
+
+    def test_universities_should_be_schools_not_publishers(self):
+
+        papers = ZoteroIngest('zotero/test_data/thesis.rdf')
+        instance = ImportAccession.objects.create(name='TestAccession')
+
+        # There is only one citation in this accession.
+        citation = ingest.IngestManager(papers, instance).process()[0]
+        school_relation = citation.authority_relations.filter(authority__name='Arizona State University').first()
+        self.assertEqual(school_relation.type_controlled, DraftACRelation.SCHOOL)
+
+    def test_contributors_should_be_advisors(self):
+        papers = ZoteroIngest('zotero/test_data/thesis.rdf')
+        instance = ImportAccession.objects.create(name='TestAccession')
+
+        # There is only one citation in this accession.
+        citation = ingest.IngestManager(papers, instance).process()[0]
+        advisor_relation = citation.authority_relations.filter(authority__name='Laubichler, Manfred D.').first()
+        self.assertEqual(advisor_relation.type_controlled, DraftACRelation.ADVISOR)
