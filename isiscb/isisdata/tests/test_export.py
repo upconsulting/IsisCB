@@ -198,6 +198,22 @@ class TestCitationTitleColumn(unittest.TestCase):
         CCRelation.objects.all().delete()
 
 
+class TestPageNumbersAreForEveryone(unittest.TestCase):
+    def test_pages(self):
+        for ctype, _ in Citation.TYPE_CHOICES:
+            citation = Citation.objects.create(type_controlled=ctype)
+            citation.part_details = PartDetails.objects.create(page_begin=15, page_end=17)
+            citation.save()
+            if ctype == Citation.CHAPTER:
+                self.assertTrue(export.pages(citation, []).startswith('pp.'))
+            else:
+                self.assertEqual(export.pages(citation, []), "15-17")
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        CCRelation.objects.all().delete()
+
+
 class TestExtraRecordsAreAddedToTheExport(unittest.TestCase):
     """
     There are cases in which a column needs to add a related record to the
