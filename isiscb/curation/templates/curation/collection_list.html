@@ -1,0 +1,84 @@
+{% extends "curation/list_view.html" %}
+{% load addcss %}
+{% load pagination_tags %}
+{% load render_object %}
+{% load permission_tags %}
+
+
+{% block object_list %}
+
+
+<div class="h3">Citation Collections</div>
+<form action="" method="GET" id="">
+    <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
+
+    <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Created By</th>
+                <th>Created On</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in filter_list %}
+
+            <tr class="">
+                <td>
+                    <a href="{% url "curation:citation_list" %}?in_collections={{object.id}}">{{ object.name }}</a>
+                </td>
+                <td>
+                    {{ object.createdBy }}
+                </td>
+                <td>
+                    {{ object.created }}
+                </td>
+                <td>
+                    {{ object.citations.count }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        </thead>
+
+    </table>
+</form>
+
+{% endblock %}
+
+{% block filter_form %}
+<form id="filter_form" action="" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
+  {% csrf_token %}
+    <!-- <div class="row"> -->
+        <div class="col-sm-6">
+            {% with objects.form.name as field %}
+            {% for error in field.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-sm clearable">
+                <label class="control-label">{{ field.label }}</label>
+                <div class="">
+                  {{ field|addcss:"form-control" }}
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+        <div class="col-sm-6">
+            {% with objects.form.createdBy as field %}
+            {% for error in field.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-sm clearable">
+                <label class="control-label">{{ field.label }}</label>
+                <div class="">
+                  {{ field|addcss:"form-control" }}
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+
+    <!-- </div> -->
+</form>
+{% endblock %}

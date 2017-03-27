@@ -291,6 +291,9 @@ class ZoteroIngest(object):
         return predicate, tuple(value.split('-'))
 
     def handle_publisher(self, predicate, node):
+        """
+        Publisher is usually a BNode.
+        """
         for s, p, o in self.graph.triples((node, None, None)):
             if p == FOAF.name:
                 return predicate, o.toPython()

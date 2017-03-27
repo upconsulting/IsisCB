@@ -33,7 +33,6 @@ GENERIC_ACRELATIONS = [
     ('authors', Authority.PERSON, ACRelation.AUTHOR),
     ('editors', Authority.PERSON, ACRelation.EDITOR),
     ('series_editors', Authority.PERSON, ACRelation.EDITOR),
-    ('contributors', Authority.PERSON, ACRelation.CONTRIBUTOR),
     ('translators', Authority.PERSON, ACRelation.TRANSLATOR),
 ]
 
@@ -459,8 +458,42 @@ class IngestManager(object):
         return map(_cast, list(set(entry.get('subjects', []))))
 
     @staticmethod
+    def generate_contributor_acrelations(entry, draft_citation):
+        # ('contributors', Authority.PERSON, ACRelation.CONTRIBUTOR),
+        if draft_citation.type_controlled == DraftCitation.THESIS:
+            _acr_type = ACRelation.ADVISOR
+        else:
+            _acr_type = ACRelation.CONTRIBUTOR
+
+        def _cast(datum):
+            extra, datum['name'] = IngestManager.find_extra_data(datum.get('name', ''))
+            _, datum['name_last'] = IngestManager.find_extra_data(datum.get('name_last', ''))
+
+            draft_authority = DraftAuthority.objects.create(
+                name = datum.get('name'),
+                type_controlled = Authority.PERSON,
+                part_of = draft_citation.part_of,
+            )
+            if extra:
+                draft_authority = IngestManager.apply_extra_data(extra)(draft_authority)
+
+            draft_acrelation = DraftACRelation.objects.create(
+                type_controlled = _acr_type,
+                citation = draft_citation,
+                authority = draft_authority,
+                part_of = draft_citation.part_of,
+            )
+            return draft_authority, draft_acrelation
+        return map(_cast, entry.get('contributors', []))
+
+    @staticmethod
     def generate_publisher_acrelations(entry, draft_citation):
         # ('publisher', Authority.PUBLISHER, ACRelation.PUBLISHER)
+        if draft_citation.type_controlled == DraftCitation.THESIS:
+            _acr_type = ACRelation.SCHOOL
+        else:
+            _acr_type = ACRelation.PUBLISHER
+
         def _cast(datum):
             draft_authority = DraftAuthority.objects.create(
                 name = datum,
@@ -468,7 +501,7 @@ class IngestManager(object):
                 part_of = draft_citation.part_of,
             )
             draft_acrelation = DraftACRelation.objects.create(
-                type_controlled = ACRelation.PUBLISHER,
+                type_controlled = _acr_type,
                 citation = draft_citation,
                 authority = draft_authority,
                 part_of = draft_citation.part_of,
@@ -739,10 +772,9 @@ class IngestManager(object):
         for field, authority_type, acrelation_type in GENERIC_ACRELATIONS:
             if draft_citation.type_controlled == DraftCitation.BOOK and field == 'part_of':
                 continue
-            acrelations += IngestManager.generate_generic_acrelations(
-                entry, field, draft_citation, authority_type, acrelation_type)
-        acrelations += IngestManager.generate_publisher_acrelations(
-            entry, draft_citation)
+            acrelations += IngestManager.generate_generic_acrelations(entry, field, draft_citation, authority_type, acrelation_type)
+        acrelations += IngestManager.generate_publisher_acrelations(entry, draft_citation)
+        acrelations += IngestManager.generate_contributor_acrelations(entry, draft_citation)
         IngestManager.generate_part_of_relations(entry, draft_citation)
         IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation

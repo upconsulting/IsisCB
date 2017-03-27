@@ -292,3 +292,12 @@ class AuthorityFilter(django_filters.FilterSet):
         if len(authority_ids) == 1 and authority_ids[0] is None:
             return queryset.none()
         return queryset.filter(pk__in=authority_ids)
+
+
+
+class CitationCollectionFilter(django_filters.FilterSet):
+
+
+    class Meta:
+        model = CitationCollection
+        fields = ('name', 'createdBy', )
