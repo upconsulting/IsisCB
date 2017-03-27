@@ -9,7 +9,7 @@ from zotero.models import ImportAccession
 from isisdata.helper_methods import strip_punctuation
 import six, iso8601
 from unidecode import unidecode
-
+from curation.tracking import TrackingWorkflow
 from django_filters import filters
 
 
@@ -63,6 +63,9 @@ class CitationFilter(django_filters.FilterSet):
     in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
+
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Tracking.TYPE_CHOICES), method='filter_tracking_state')
+
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
@@ -106,6 +109,7 @@ class CitationFilter(django_filters.FilterSet):
             'publication_date_from', 'publication_date_to',
             'author_or_editor', 'periodical', 'record_status',
             'belongs_to', 'zotero_accession', 'in_collections',
+            'tracking_state'
         ]
         # order_by = [
         #     ('publication_date', 'Publication date (ascending)'),
@@ -226,6 +230,20 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
                                acrelation__type_controlled=ACRelation.SUBJECT)
+
+    def filter_tracking_state(self, queryset, field, value):
+        if not value:
+            return queryset
+
+
+        q = Q(tracking_records__type_controlled=value)
+
+        next_state = TrackingWorkflow.stages.get(value)
+        # if next_state:
+        #     q &= ~Q(tracking_records__type_controlled=next_state)
+        return queryset.filter(q)
+
+
 
 
 class AuthorityFilter(django_filters.FilterSet):

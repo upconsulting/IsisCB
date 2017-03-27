@@ -81,4 +81,9 @@ class SetRecordStatusExplanation(BaseAction):
         return task.id
 
 
+class SetTrackingStatus(BaseAction):
+    model = Citation
+    label = u'Set record tracking status'
+
+
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation]

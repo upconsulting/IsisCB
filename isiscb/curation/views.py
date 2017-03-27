@@ -416,7 +416,7 @@ def tracking_for_citation(request, citation_id):
         tracking.modified_by = request.user
         date = datetime.datetime.now()
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
-        tracking.subject = citation
+        tracking.citation = citation
         tracking.save()
     return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking')
 
@@ -435,10 +435,10 @@ def tracking_for_authority(request, authority_id):
     template = 'curation/authority_tracking_create.html'
 
     if request.method == "POST":
-        form = AuthorityTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
+        form = AuthorityTrackingForm(request.POST, instance=AuthorityTracking(), prefix='tracking')
         if form.is_valid():
             tracking = form.save(commit=False)
-            tracking.subject = authority
+            tracking.authority = authority
             tracking.save()
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority_id,)) + '?tab=tracking')
     else:
@@ -923,7 +923,7 @@ def citation(request, citation_id):
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
-        tracking_entries = Tracking.objects.filter(subject_instance_id=citation_id)
+        tracking_entries = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
 
         tracking_workflow = TrackingWorkflow(citation)
         context.update({
@@ -1255,7 +1255,7 @@ def authority(request, authority_id):
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
-        tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
+        tracking_entries = authority.tracking_records.all() #Tracking.objects.filter(subject_instance_id=authority_id)
 
         context.update({
             'request_params': request_params,

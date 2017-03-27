@@ -1732,6 +1732,42 @@ class LinkedData(ReferencedEntity, CuratedMixin):
         return u'{0}: {1}'.format(*values)
 
 
+class AuthorityTracking(ReferencedEntity, CuratedMixin):
+    """
+    An audit entry for tracking the status of records in the curatorial process.
+
+    This is a higher-level concept than the History audit log, which records
+    only changes to entries.
+    """
+    ID_PREFIX = 'TRA'
+
+    history = HistoricalRecords()
+
+    tracking_info = models.CharField(max_length=255, blank=True)
+
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TYPE_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES, db_index=True)
+
+    authority = models.ForeignKey(Authority, related_name='tracking_records', null=True, blank=True)
+
+    notes = models.TextField(blank=True)
+
+
 class Tracking(ReferencedEntity, CuratedMixin):
     """
     An audit entry for tracking the status of records in the curatorial process.
@@ -1761,12 +1797,9 @@ class Tracking(ReferencedEntity, CuratedMixin):
     )
 
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
-                                       choices=TYPE_CHOICES)
+                                       choices=TYPE_CHOICES, db_index=True)
 
-    subject_content_type = models.ForeignKey(ContentType, db_index=True)
-    subject_instance_id = models.CharField(max_length=200, db_index=True)
-    subject = GenericForeignKey('subject_content_type',
-                                'subject_instance_id')
+    citation = models.ForeignKey(Citation, related_name='tracking_records', null=True, blank=True)
 
     notes = models.TextField(blank=True)
 

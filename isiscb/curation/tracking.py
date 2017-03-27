@@ -3,6 +3,8 @@ from isisdata.models import *
 import collections
 
 
+# TODO: we may need to create a separate workflow for AuthorityTracking records
+#  at some point.
 class TrackingWorkflow(object):
     """
     This class represents the tracking workflow a record goes through.
@@ -18,7 +20,7 @@ class TrackingWorkflow(object):
     def __init__(self, instance):
         self.tracked_object = instance
 
-        self.entries = [x.type_controlled for x in instance.tracking_entries.all()]
+        self.entries = [x.type_controlled for x in instance.tracking_records.all()]
 
         if not self.entries:
             self.next_stage = self.stages[None]

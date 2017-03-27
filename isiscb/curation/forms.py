@@ -389,6 +389,7 @@ class AuthorityForm(forms.ModelForm):
 
         return exclude
 
+
 class CitationTrackingForm(forms.ModelForm):
 
     HSTM_UPLOAD = 'HS'
@@ -415,6 +416,7 @@ class CitationTrackingForm(forms.ModelForm):
             'tracking_info', 'notes', 'type_controlled'
         ]
 
+
 class AuthorityTrackingForm(forms.ModelForm):
 
     HSTM_UPLOAD = 'HS'
@@ -436,10 +438,11 @@ class AuthorityTrackingForm(forms.ModelForm):
                                        choices=TYPE_CHOICES)
 
     class Meta:
-        model = Tracking
+        model = AuthorityTracking
         fields = [
             'tracking_info', 'notes', 'type_controlled'
         ]
+
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
