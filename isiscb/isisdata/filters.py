@@ -70,7 +70,7 @@ class CitationFilter(django_filters.FilterSet):
     subject = django_filters.CharFilter(method='filter_subject')
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
-    in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
+    in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
 
