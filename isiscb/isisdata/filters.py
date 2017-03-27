@@ -46,18 +46,28 @@ class CitationFilter(django_filters.FilterSet):
     strict = STRICTNESS.RETURN_NO_RESULTS
     # strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
-    id = django_filters.MethodFilter(name='id', lookup_type='exact')
-    title = django_filters.MethodFilter(name='title', lookup_type='icontains')
+    # id = django_filters.MethodFilter(name='id', lookup_type='exact')
+    id = django_filters.CharFilter(method='filter_id')
+    # title = django_filters.MethodFilter(name='title', lookup_type='icontains')
+    title = django_filters.CharFilter(method='filter_title')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
-    publication_date_from = django_filters.MethodFilter()
-    publication_date_to = django_filters.MethodFilter()
-    abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
-    description = django_filters.MethodFilter(name='description', lookup_type='icontains')
+    # publication_date_from = django_filters.MethodFilter()
+    publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
+    # publication_date_to = django_filters.MethodFilter()
+    publication_date_to = django_filters.CharFilter(method='filter_publication_date_to')
+    # abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
+    abstract = django_filters.CharFilter(method='filter_abstract')
+    # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
+    description = django_filters.CharFilter(method='filter_description')
 
-    author_or_editor = django_filters.MethodFilter()
-    periodical = django_filters.MethodFilter()
-    publisher = django_filters.MethodFilter()
-    subject = django_filters.MethodFilter()
+    # author_or_editor = django_filters.MethodFilter()
+    author_or_editor = django_filters.CharFilter(method='filter_author_or_editor')
+    # periodical = django_filters.MethodFilter()
+    periodical = django_filters.CharFilter(method='filter_periodical')
+    # publisher = django_filters.MethodFilter()
+    publisher = django_filters.CharFilter(method='filter_publisher')
+    # subject = django_filters.MethodFilter()
+    subject = django_filters.CharFilter(method='filter_subject')
 
     record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(widget=forms.HiddenInput(), action=filter_in_collections)
@@ -250,13 +260,15 @@ class AuthorityFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(name='id', lookup_type='exact')
-    name = django_filters.MethodFilter()
+    # name = django_filters.MethodFilter()
+    name = django_filters.CharFilter(method='filter_name')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
     description = django_filters.CharFilter(name='description', lookup_type='icontains')
     classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
-    linked_data = django_filters.MethodFilter()
+    # linked_data = django_filters.MethodFilter()
+    linked_data = django_filters.CharFilter(method='filter_linked_data')
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
