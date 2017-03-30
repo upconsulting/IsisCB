@@ -259,11 +259,11 @@ class CitationFilter(django_filters.FilterSet):
 class AuthorityFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
-    id = django_filters.CharFilter(name='id', lookup_type='exact')
+    id = django_filters.CharFilter(name='id', lookup_expr='exact')
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
-    description = django_filters.CharFilter(name='description', lookup_type='icontains')
+    description = django_filters.CharFilter(name='description', lookup_expr='icontains')
     classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
