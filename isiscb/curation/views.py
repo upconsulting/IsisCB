@@ -1252,7 +1252,10 @@ def authority(request, authority_id):
 
         # Something odd going on with the sorting field (``o``).
         if 'o' in get_request and isinstance(get_request['o'], list):
-            get_request['o'] = get_request['o'][0]
+            if len(get_request['o']) > 0:
+                get_request['o'] = get_request['o'][0]
+            else:
+                get_request['o'] = "name_for_sort"
 
 
         queryset = operations.filter_queryset(request.user, Authority.objects.all())
