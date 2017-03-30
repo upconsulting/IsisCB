@@ -1221,7 +1221,6 @@ def authorities(request):
         user_session['authority_page'] = int(currentPage)
         user_session['authority_prev_index'] = None
 
-    print filtered_objects.form.is_valid()
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active
