@@ -166,7 +166,7 @@ class CitationFilter(django_filters.FilterSet):
     #                 ])
     #         return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
 
-    def filter_id(self, queryset, value):
+    def filter_id(self, queryset, name, value):
         if not value:
             return queryset
 
@@ -174,7 +174,7 @@ class CitationFilter(django_filters.FilterSet):
         queryset = queryset.filter(pk__in=ids)
         return queryset
 
-    def filter_title(self, queryset, value):
+    def filter_title(self, queryset, name, value):
         value = unidecode(value)
         if not value:
             return queryset
@@ -182,35 +182,35 @@ class CitationFilter(django_filters.FilterSet):
             queryset = queryset.filter(title_for_sort__icontains=part)
         return queryset
 
-    def filter_abstract(self, queryset, value):
+    def filter_abstract(self, queryset, name, value):
         if not value:
             return queryset
         for part in value.split():
             queryset = queryset.filter(abstract__icontains=part)
         return queryset
 
-    def filter_description(self, queryset, value):
+    def filter_description(self, queryset, name, value):
         if not value:
             return queryset
         for part in value.split():
             queryset = queryset.filter(description__icontains=part)
         return queryset
 
-    def filter_publication_date_from(self, queryset, value):
+    def filter_publication_date_from(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
             return queryset
         return queryset.filter(publication_date__gte=date)
 
-    def filter_publication_date_to(self, queryset, value):
+    def filter_publication_date_to(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
             return queryset
         return queryset.filter(publication_date__lte=date)
 
-    def filter_author_or_editor(self, queryset, value):
+    def filter_author_or_editor(self, queryset, name, value):
         if not value:
             return queryset
         for part in value.split():
@@ -221,7 +221,7 @@ class CitationFilter(django_filters.FilterSet):
                                     ACRelation.EDITOR])
         return queryset
 
-    def filter_periodical(self, queryset, value):
+    def filter_periodical(self, queryset, name, value):
         if not value:
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
@@ -229,13 +229,13 @@ class CitationFilter(django_filters.FilterSet):
                                     ACRelation.PERIODICAL,
                                     ACRelation.BOOK_SERIES])
 
-    def filter_publisher(self, queryset, value):
+    def filter_publisher(self, queryset, name, value):
         if not value:
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
                                acrelation__type_controlled=ACRelation.PUBLISHER)
 
-    def filter_subject(self, queryset, value):
+    def filter_subject(self, queryset, name, value):
         if not value:
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
@@ -302,7 +302,7 @@ class AuthorityFilter(django_filters.FilterSet):
         }
     )
 
-    def filter_name(self, queryset, value):
+    def filter_name(self, queryset, name, value):
         value = unidecode(value)
         if not value:
             return queryset
@@ -311,7 +311,7 @@ class AuthorityFilter(django_filters.FilterSet):
 
         return queryset
 
-    def filter_linked_data(self, queryset, value):
+    def filter_linked_data(self, queryset, name, value):
         if not value:
             return queryset
         authority_ids = LinkedData.objects\
