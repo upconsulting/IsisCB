@@ -1186,6 +1186,13 @@ def authorities(request):
             all_params[key] = request.GET.get(key, '')
     if 'o' not in filter_params:
         filter_params['o'] = 'name_for_sort'
+    elif isinstance(filter_params['o'], list):
+        if len(filter_params['o']) > 0:
+            filter_params['o'] = filter_params['o'][0]
+        else:
+            filter_params['o'] = 'name_for_sort'
+
+
 
     #user_session['authority_request_params'] = request.META['QUERY_STRING']
     #user_session['authority_get_request'] = request.GET
@@ -1214,6 +1221,7 @@ def authorities(request):
         user_session['authority_page'] = int(currentPage)
         user_session['authority_prev_index'] = None
 
+    print filtered_objects.form.is_valid()
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active
@@ -1243,6 +1251,7 @@ def authority(request, authority_id):
         # Something odd going on with the sorting field (``o``).
         if 'o' in get_request and isinstance(get_request['o'], list):
             get_request['o'] = get_request['o'][0]
+
 
         queryset = operations.filter_queryset(request.user, Authority.objects.all())
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
