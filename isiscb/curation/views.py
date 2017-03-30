@@ -889,7 +889,7 @@ def citation(request, citation_id):
     user_session = request.session
     page = user_session.get('citation_page', 1)
     get_request = user_session.get('citation_filters', None)
-    if get_request and 'o' in get_request and isinstance(get_request['o'], list)):
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
         if len(get_request['o']) > 0:
             get_request['o'] = get_request['o'][0]
         else:
