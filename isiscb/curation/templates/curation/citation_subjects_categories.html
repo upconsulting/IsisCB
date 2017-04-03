@@ -33,12 +33,32 @@
          {% endfor %}
        </div>
 
-       <div class="col-md-12">
+       <div class="col-md-12"  style="margin-top: 10px;">
          <i>{{ instance.title }}</i>
        </div>
 
-       <div class="col-md-12">
-         {{ instance.abstract }}
+       <div class="col-md-12" style="margin-top: 10px;">
+            <textarea readonly class="form-control">
+           {{ instance.abstract }}
+           </textarea>
+       </div>
+
+       <div class="col-md-12" style="margin-top: 10px;">
+         <h5>Categories</h5>
+         <ul class="list-group">
+           {% for acrel in instance|get_categories %}
+              <li class="list-group-item">{{ acrel.authority.name }}</li>
+           {% endfor %}
+         </ul>
+       </div>
+
+       <div class="col-md-12" style="margin-top: 10px;">
+         <h5>Subjects</h5>
+         <ul class="list-group">
+           {% for acrel in instance|get_subjects %}
+              <li class="list-group-item">{{ acrel.authority.name }}</li>
+           {% endfor %}
+         </ul>
        </div>
 
      </div>
