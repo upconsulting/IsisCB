@@ -133,7 +133,8 @@ def _subjects(obj, extra):
     ]
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(authority__type_controlled__in=_authority_types) \
-            | Q(type_controlled=ACRelation.SUBJECT))
+            | Q(type_controlled=ACRelation.SUBJECT)) \
+         & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
     return u'//'.join(filter(lambda o: o is not None,
                              list(qs.values_list('authority__name', flat=True))))
@@ -174,6 +175,18 @@ def _place_publisher(obj, extra):
     _first_publisher = qs.first()
     if _first_publisher.authority:
         return _first_publisher.authority.name
+    return u''
+
+
+def _school(obj, extra):
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=ACRelation.SCHOOL)
+    qs = obj.acrelation_set.filter(_q)
+    if qs.count() == 0:
+        return u''
+    _first_school = qs.first()
+    if _first_school.authority:
+        return _first_school.authority.name
     return u''
 
 
@@ -317,6 +330,7 @@ journal_link = Column(u"Journal Link", _journal_link)
 journal_volume = Column(u"Journal Volume", _journal_volume)
 journal_issue = Column(u"Journal Issue", _journal_issue)
 advisor = Column("Advisor", _advisor)
+school = Column(u"School", _school)
 
 
 CITATION_COLUMNS = [
@@ -347,5 +361,6 @@ CITATION_COLUMNS = [
     journal_link,
     journal_volume,
     journal_issue,
-    advisor
+    advisor,
+    school,
 ]
