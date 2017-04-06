@@ -1969,6 +1969,9 @@ class IsisCBRole(models.Model):
     def zotero_rules(self):
         return ZoteroRule.objects.filter(role=self.pk)
 
+    def __unicode__(self):
+        return self.name
+
 
 class AccessRule(models.Model):
     """
