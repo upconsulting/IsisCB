@@ -284,6 +284,32 @@ class TestCitationSubjectColumn(unittest.TestCase):
 
         self.assertEqual(subject.name, export.school(citation, []))
 
+    def tearDown(self):
+        Citation.objects.all().delete()
+        ACRelation.objects.all().delete()
+
+
+class TestCitationAdvisorColumn(unittest.TestCase):
+    """
+    The :func:`.export.advisor` column retrieves advisors.
+    """
+    def test_citation_has_subject(self):
+        """
+        """
+        citation = Citation.objects.create(title='The title',
+                                           type_controlled=Citation.THESIS)
+        subject = Authority.objects.create(name='Test Authority',
+                                           type_controlled=Authority.PERSON)
+        ACRelation.objects.create(citation=citation, authority=subject,
+                                  type_controlled=ACRelation.ADVISOR)
+
+        self.assertEqual(subject.name, export.advisor(citation, []))
+
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        ACRelation.objects.all().delete()
+
 
 if __name__ == '__main__':
     unittest.main()

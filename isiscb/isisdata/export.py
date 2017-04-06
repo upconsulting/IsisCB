@@ -140,6 +140,18 @@ def _subjects(obj, extra):
                              list(qs.values_list('authority__name', flat=True))))
 
 
+def _advisor(obj, extra):
+    """
+    ISISCB-936: "Adviser for thesis needs to be exported as a separate field".
+    """
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & (Q(type_controlled=ACRelation.ADVISOR))
+    qs = obj.acrelation_set.filter(_q)
+    return u'//'.join(filter(lambda o: o is not None,
+                             list(qs.values_list('authority__name', flat=True))))
+
+
+
 def _category_numbers(obj, extra):
     """
     "Classification code" for the linked Classification Term
@@ -317,7 +329,9 @@ link_to_record = Column(u"Link to Record", _link_to_record)
 journal_link = Column(u"Journal Link", _journal_link)
 journal_volume = Column(u"Journal Volume", _journal_volume)
 journal_issue = Column(u"Journal Issue", _journal_issue)
+advisor = Column("Advisor", _advisor)
 school = Column(u"School", _school)
+
 
 CITATION_COLUMNS = [
     object_id,
@@ -347,5 +361,6 @@ CITATION_COLUMNS = [
     journal_link,
     journal_volume,
     journal_issue,
+    advisor,
     school,
 ]
