@@ -28,9 +28,20 @@ filters.LOOKUP_TYPES = [
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
-    imported_by = django_filters.ModelChoiceFilter(name='imported_by', queryset=User.objects.annotate(num_accessions=Count('importaccession')).filter(num_accessions__gt=0))
+    imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False))
 
     class Meta:
         model = ImportAccession
         fields = ['id', 'name', 'processed', 'imported_on',
                   'imported_by', 'ingest_to']
+        o = django_filters.filters.OrderingFilter(
+            # tuple-mapping retains order
+            fields=(
+                ('imported_on', 'imported_on'),
+            ),
+
+            # labels do not need to retain order
+            field_labels={
+                'imported_on': 'Date imported',
+            }
+        )
