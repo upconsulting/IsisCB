@@ -24,12 +24,30 @@ filters.LOOKUP_TYPES = [
     ('not_contains', 'Does not contain'),
 ]
 
+from django.core.exceptions import ValidationError
+# import iso8601
+
 
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
     name = django_filters.CharFilter(lookup_expr='istartswith')
+    imported_on = django_filters.CharFilter(method='filter_imported_on')
     imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False))
+    #
+    def filter_imported_on(self, queryset, name, value):
+
+        # # try:
+        # date = iso8601.parse_date(value).date
+        # # except:
+        #     # raise ValidationError("That doesn't look like a real date")
+        try:
+            queryset = queryset.filter(imported_on__date=value)
+        except Exception as E:
+            return queryset
+
+        return queryset
+
 
     class Meta:
         model = ImportAccession
