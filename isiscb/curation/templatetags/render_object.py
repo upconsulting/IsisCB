@@ -7,7 +7,10 @@ from isisdata.models import *
 register = template.Library()
 
 
-PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
+try:
+    PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
+except AttributeType.DoesNotExist:
+    PUBLICATION_DATE = -1
 
 
 @register.filter(name='render_object')

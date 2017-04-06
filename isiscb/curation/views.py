@@ -889,8 +889,11 @@ def citation(request, citation_id):
     user_session = request.session
     page = user_session.get('citation_page', 1)
     get_request = user_session.get('citation_filters', None)
-    if 'o' in get_request and isinstance(get_request['o'], list):
-        get_request['o'] = get_request['o'][0]
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
+        if len(get_request['o']) > 0:
+            get_request['o'] = get_request['o'][0]
+        else:
+            get_request['o'] = "publication_date"
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
@@ -1157,7 +1160,7 @@ def citations(request):
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
-        'result_count': filtered_objects.count()
+        'result_count': filtered_objects.qs.count()
     })
 
     return render(request, template, context)
@@ -1186,6 +1189,13 @@ def authorities(request):
             all_params[key] = request.GET.get(key, '')
     if 'o' not in filter_params:
         filter_params['o'] = 'name_for_sort'
+    elif isinstance(filter_params['o'], list):
+        if len(filter_params['o']) > 0:
+            filter_params['o'] = filter_params['o'][0]
+        else:
+            filter_params['o'] = 'name_for_sort'
+
+
 
     #user_session['authority_request_params'] = request.META['QUERY_STRING']
     #user_session['authority_get_request'] = request.GET
@@ -1242,7 +1252,11 @@ def authority(request, authority_id):
 
         # Something odd going on with the sorting field (``o``).
         if 'o' in get_request and isinstance(get_request['o'], list):
-            get_request['o'] = get_request['o'][0]
+            if len(get_request['o']) > 0:
+                get_request['o'] = get_request['o'][0]
+            else:
+                get_request['o'] = "name_for_sort"
+
 
         queryset = operations.filter_queryset(request.user, Authority.objects.all())
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
