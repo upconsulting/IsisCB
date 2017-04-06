@@ -28,6 +28,7 @@ filters.LOOKUP_TYPES = [
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
+    name = django_filters.CharFilter(lookup_expr='istartswith')
     imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False))
 
     class Meta:
