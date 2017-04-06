@@ -1431,13 +1431,16 @@ def search_datasets(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def users(request, user_id=None):
+    from curation.filters import UserFilter
     context = {
         'curation_section': 'users',
     }
     template = 'curation/users.html'
     users =  User.objects.all()
+    filterset = UserFilter(request.GET, queryset=users)
     context.update({
-        'objects': users,
+        'objects': filterset.qs,
+        'filterset': filterset,
     })
     return render(request, template, context)
 
