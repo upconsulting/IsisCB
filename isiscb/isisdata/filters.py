@@ -255,6 +255,11 @@ class CitationFilter(django_filters.FilterSet):
         #     q &= ~Q(tracking_records__type_controlled=next_state)
         return queryset.filter(q)
 
+    def filter_in_collections(self, queryset, field, value):
+        if not value:
+            return queryset
+        return queryset.filter(in_collections=value)
+
 
 
 
