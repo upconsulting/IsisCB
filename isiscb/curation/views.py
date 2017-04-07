@@ -1096,7 +1096,10 @@ def citations(request):
     elif request.method == 'GET':
         filter_params = user_session.get('citation_filters', {})
         if 'o' in filter_params and isinstance(filter_params['o'], list):
-            filter_params['o'] = filter_params['o'][0]
+            if len(filter_params['o']) > 0:
+                filter_params['o'] = filter_params['o'][0]
+            else:
+                filter_params['o'] = "publication_date"
 
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
