@@ -1952,6 +1952,8 @@ def create_citation_collection(request):
                 instance = form.save(commit=False)
                 instance.createdBy = request.user
                 instance.save()
+                if isinstance(queryset, CitationFilter):
+                    queryset = queryset.qs
                 instance.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
@@ -1980,6 +1982,8 @@ def add_citation_collection(request):
             form.fields['filters'].initial = filter_params_raw
             if form.is_valid():
                 collection = form.cleaned_data['collection']
+                if isinstance(queryset, CitationFilter):
+                    queryset = queryset.qs
                 collection.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
