@@ -31,8 +31,13 @@ def generate_csv(stream, queryset, columns):
     import unicodecsv as csv
     writer = csv.writer(stream)
     writer.writerow(map(lambda c: c.label, columns))
+    extra = []
     for obj in queryset:
-        writer.writerow(map(lambda c: c(obj), columns))
+        writer.writerow(map(lambda c: c(obj, extra), columns))
+    print extra
+    for obj in extra:
+        print obj
+        writer.writerow(map(lambda c: c(obj, []), columns))
 
 
 class Column(object):
@@ -56,12 +61,12 @@ class Column(object):
         self.model = model
         self.slug = slugify(label)
 
-    def __call__(self, obj):
+    def __call__(self, obj, extra):
         try:
             if self.model is not None:
                 assert isinstance(obj, self.model)
-            return self.call(obj)
-        except AssertionError as E:
+            return self.call(obj, extra)
+        except AssertionError as E:    # Let this percolate through.
             raise E
         except Exception as E:
             print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
@@ -69,7 +74,7 @@ class Column(object):
             return u""
 
 
-def _citation_title(obj):
+def _citation_title(obj, extra):
     """
     Get the production title for a citation.
     """
@@ -96,7 +101,7 @@ def _citation_title(obj):
     return u'Review of "%s"' % book.title
 
 
-def _citation_author(obj):
+def _citation_author(obj, extra):
     """
     Get the names of all authors on a citation.
     """
@@ -107,7 +112,7 @@ def _citation_author(obj):
     return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
 
 
-def _citation_editor(obj):
+def _citation_editor(obj, extra):
     """
     Get the names of all editors on a citation.
     """
@@ -118,7 +123,7 @@ def _citation_editor(obj):
     return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
 
 
-def _subjects(obj):
+def _subjects(obj, extra):
     """
     related authorites that are one of the following: subject, time, place,
     institution. Seperated by  double slashes //
@@ -128,13 +133,26 @@ def _subjects(obj):
     ]
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(authority__type_controlled__in=_authority_types) \
-            | Q(type_controlled=ACRelation.SUBJECT))
+            | Q(type_controlled=ACRelation.SUBJECT)) \
+         & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
     return u'//'.join(filter(lambda o: o is not None,
                              list(qs.values_list('authority__name', flat=True))))
 
 
-def _category_numbers(obj):
+def _advisor(obj, extra):
+    """
+    ISISCB-936: "Adviser for thesis needs to be exported as a separate field".
+    """
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & (Q(type_controlled=ACRelation.ADVISOR))
+    qs = obj.acrelation_set.filter(_q)
+    return u'//'.join(filter(lambda o: o is not None,
+                             list(qs.values_list('authority__name', flat=True))))
+
+
+
+def _category_numbers(obj, extra):
     """
     "Classification code" for the linked Classification Term
     """
@@ -144,11 +162,11 @@ def _category_numbers(obj):
     return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('authority__classification_code', flat=True))))
 
 
-def _language(obj):
+def _language(obj, extra):
     return u'//'.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
 
 
-def _place_publisher(obj):
+def _place_publisher(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
@@ -160,7 +178,19 @@ def _place_publisher(obj):
     return u''
 
 
-def _series(obj):
+def _school(obj, extra):
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=ACRelation.SCHOOL)
+    qs = obj.acrelation_set.filter(_q)
+    if qs.count() == 0:
+        return u''
+    _first_school = qs.first()
+    if _first_school.authority:
+        return _first_school.authority.name
+    return u''
+
+
+def _series(obj, extra):
     """
     Book Series
     """
@@ -175,7 +205,7 @@ def _series(obj):
     return u''
 
 
-def _isbn(obj):
+def _isbn(obj, extra):
     """
     Get ISBN from LinkedData.
     """
@@ -187,19 +217,24 @@ def _isbn(obj):
     return qs.first().universal_resource_name
 
 
-def _pages(obj):
-    if obj.type_controlled != Citation.CHAPTER:
-        return u""
+def _pages(obj, extra):
     if not getattr(obj, 'part_details', None):
         return u""
     page_start_string = obj.part_details.page_begin
     page_end_string = obj.part_details.page_end
+    if obj.type_controlled == Citation.CHAPTER:
+        if page_start_string and page_end_string:
+            pre = u"pp."
+        else:
+            pre = u"p."
+    else:
+        pre = u""
     if page_start_string and page_end_string:
-        return u"pp. " + unicode(page_start_string) + "-" + unicode(page_end_string)
+        return pre + unicode(page_start_string) + "-" + unicode(page_end_string)
     if page_start_string:
-        return u"p. " + unicode(page_start_string)
+        return pre + unicode(page_start_string)
     if page_end_string:
-        return u"p. " + unicode(page_end_string)
+        return pre + unicode(page_end_string)
     return ""
 
 
@@ -210,21 +245,25 @@ def _tracking(obj, type_controlled):
     return u""
 
 
-def _link_to_record(obj):
+def _link_to_record(obj, extra):
     _ltypes = [Citation.CHAPTER, Citation.REVIEW, Citation.ESSAY_REVIEW]
     if obj.type_controlled not in _ltypes:
         return u""
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEW_OF])
-    ids = list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
+    qs = obj.ccrelations.filter(_q)
+    extra += map(lambda o: o.object, qs)
+    ids = list(qs.values_list('object__id', flat=True))
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
                                   CCRelation.INCLUDES_CHAPTER])
-    ids += list(obj.ccrelations.filter(_q).values_list('object__id', flat=True))
+    qs = obj.ccrelations.filter(_q)
+    extra += map(lambda o: o.subject, qs)
+    ids += list(qs.values_list('subject__id', flat=True))
     return u"//".join(filter(lambda o: o is not None, ids))
 
 
-def _journal_link(obj):
+def _journal_link(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PERIODICAL)
     qs = obj.acrelation_set.filter(_q)
@@ -236,7 +275,7 @@ def _journal_link(obj):
     return u""
 
 
-def _journal_volume(obj):
+def _journal_volume(obj, extra):
     if not hasattr(obj, 'part_details') or obj.part_details is None:
         return u""
     if obj.part_details.volume and len(obj.part_details.volume) > 0:
@@ -244,7 +283,7 @@ def _journal_volume(obj):
     return obj.part_details.volume_free_text
 
 
-def _journal_issue(obj):
+def _journal_issue(obj, extra):
     if not hasattr(obj, 'part_details') or obj.part_details is None:
         return u""
 
@@ -256,40 +295,42 @@ def _journal_issue(obj):
     return obj.part_details.issue_free_text
 
 
-object_id = Column(u'Record ID', lambda obj: obj.id)
+object_id = Column(u'Record ID', lambda obj, extra: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
 citation_author = Column(u'Author', _citation_author, Citation)
-record_type = Column('Record Type', lambda obj: obj.get_type_controlled_display())
+record_type = Column('Record Type', lambda obj, extra: obj.get_type_controlled_display())
 citation_editor = Column(u'Editor', _citation_editor, Citation)
 year_of_publication = Column(u'Year of publication',
-                             lambda obj: obj.publication_date.year)
-edition_details = Column(u'Edition Details', lambda obj: obj.edition_details)
-description = Column(u'Description', lambda obj: obj.description)
+                             lambda obj, extra: obj.publication_date.year)
+edition_details = Column(u'Edition Details', lambda obj, extra: obj.edition_details)
+description = Column(u'Description', lambda obj, extra: obj.description)
 subjects = Column(u'Subjects', _subjects)
 category_numbers = Column(u'CategoryNumbers', _category_numbers)
 language = Column(u'Language', _language)
 place_publisher = Column(u'Place Publisher', _place_publisher)
-physical_details = Column(u'Physical Details', lambda obj: obj.physical_details)
+physical_details = Column(u'Physical Details', lambda obj, extra: obj.physical_details)
 series = Column(u'Series', _series)
 isbn = Column(u'ISBN', _isbn)
 pages = Column('Pages', _pages)
 record_action = Column(u'Record Action',
-                       lambda obj: obj.get_record_action_display())
+                       lambda obj, extra: obj.get_record_action_display())
 record_nature = Column(u'Record Nature',
-                       lambda obj: obj.get_record_status_value_display())
+                       lambda obj, extra: obj.get_record_status_value_display())
 fully_entered = Column(u"FullyEntered",
-                       lambda obj: _tracking(obj, Tracking.FULLY_ENTERED))
-proofed = Column(u"Proofed", lambda obj: _tracking(obj, Tracking.PROOFED))
+                       lambda obj, extra: _tracking(obj, Tracking.FULLY_ENTERED))
+proofed = Column(u"Proofed", lambda obj, extra: _tracking(obj, Tracking.PROOFED))
 spw_checked = Column(u"SPW checked",
-                     lambda obj: _tracking(obj, Tracking.AUTHORIZED))
+                     lambda obj, extra: _tracking(obj, Tracking.AUTHORIZED))
 published_print = Column(u"Published Print",
-                         lambda obj: _tracking(obj, Tracking.PRINTED))
+                         lambda obj, extra: _tracking(obj, Tracking.PRINTED))
 published_rlg = Column(u"Published RLG",
-                       lambda obj: _tracking(obj, Tracking.HSTM_UPLOAD))
+                       lambda obj, extra: _tracking(obj, Tracking.HSTM_UPLOAD))
 link_to_record = Column(u"Link to Record", _link_to_record)
 journal_link = Column(u"Journal Link", _journal_link)
 journal_volume = Column(u"Journal Volume", _journal_volume)
 journal_issue = Column(u"Journal Issue", _journal_issue)
+advisor = Column("Advisor", _advisor)
+school = Column(u"School", _school)
 
 
 CITATION_COLUMNS = [
@@ -320,4 +361,6 @@ CITATION_COLUMNS = [
     journal_link,
     journal_volume,
     journal_issue,
+    advisor,
+    school,
 ]

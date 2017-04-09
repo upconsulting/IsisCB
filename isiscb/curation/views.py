@@ -889,8 +889,11 @@ def citation(request, citation_id):
     user_session = request.session
     page = user_session.get('citation_page', 1)
     get_request = user_session.get('citation_filters', None)
-    if 'o' in get_request and isinstance(get_request['o'], list):
-        get_request['o'] = get_request['o'][0]
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
+        if len(get_request['o']) > 0:
+            get_request['o'] = get_request['o'][0]
+        else:
+            get_request['o'] = "publication_date"
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
     filtered_objects = CitationFilter(get_request, queryset=queryset)
@@ -1097,7 +1100,7 @@ def subjects_and_categories(request, citation_id):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def citations(request):
-    additional_params_names = ["page", "zotero_accession"]
+    additional_params_names = ["page", "zotero_accession", "in_collections"]
     all_params = {}
 
     user_session = request.session
@@ -1112,8 +1115,14 @@ def citations(request):
 
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
+
         for key in additional_params_names:
             all_params[key] = request.GET.get(key, '')
+
+        # Let the GET parameter override the cached POST parameter, in case the
+        #  curator is originating in the collections view.
+        if "in_collections" in all_params:
+            filter_params["in_collections"] = all_params["in_collections"]
     if 'o' not in filter_params:
         filter_params['o'] = 'title_for_sort'
     # if 'zotero_accession' in request.GET:
@@ -1166,7 +1175,7 @@ def citations(request):
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
-        'result_count': filtered_objects.count()
+        'result_count': filtered_objects.qs.count()
     })
 
     return render(request, template, context)
@@ -1195,6 +1204,13 @@ def authorities(request):
             all_params[key] = request.GET.get(key, '')
     if 'o' not in filter_params:
         filter_params['o'] = 'name_for_sort'
+    elif isinstance(filter_params['o'], list):
+        if len(filter_params['o']) > 0:
+            filter_params['o'] = filter_params['o'][0]
+        else:
+            filter_params['o'] = 'name_for_sort'
+
+
 
     #user_session['authority_request_params'] = request.META['QUERY_STRING']
     #user_session['authority_get_request'] = request.GET
@@ -1251,7 +1267,11 @@ def authority(request, authority_id):
 
         # Something odd going on with the sorting field (``o``).
         if 'o' in get_request and isinstance(get_request['o'], list):
-            get_request['o'] = get_request['o'][0]
+            if len(get_request['o']) > 0:
+                get_request['o'] = get_request['o'][0]
+            else:
+                get_request['o'] = "name_for_sort"
+
 
         queryset = operations.filter_queryset(request.user, Authority.objects.all())
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
@@ -1426,13 +1446,16 @@ def search_datasets(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
 def users(request, user_id=None):
+    from curation.filters import UserFilter
     context = {
         'curation_section': 'users',
     }
     template = 'curation/users.html'
     users =  User.objects.all()
+    filterset = UserFilter(request.GET, queryset=users)
     context.update({
-        'objects': users,
+        'objects': filterset.qs,
+        'filterset': filterset,
     })
     return render(request, template, context)
 
@@ -1992,7 +2015,6 @@ def bulk_action_status(request):
     task_ids = request.GET.getlist('task')
     tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
 
-
     context.update({'tasks': tasks})
     return render(request, template, context)
 
@@ -2073,3 +2095,17 @@ def export_citations(request):
     })
 
     return render(request, template, context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def collections(request):
+    """
+    List :class:`.Collection` instances.
+    """
+    collections = CitationCollection.objects.all()
+
+    filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
+    context = {
+        'objects': filtered_objects,
+    }
+    return render(request, 'curation/collection_list.html', context)

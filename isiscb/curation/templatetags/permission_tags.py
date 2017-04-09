@@ -3,13 +3,16 @@ from isisdata.models import *
 
 register = template.Library()
 
+
 @register.filter
 def roles(userid):
     return IsisCBRole.objects.filter(users__pk=userid)
 
+
 @register.filter
 def print_roles(roles):
     return ", ".join(map((lambda role: role.name), roles))
+
 
 @register.filter
 def needs_view_rule(crud_rules):
@@ -23,9 +26,11 @@ def needs_view_rule(crud_rules):
 
     return False
 
+
 @register.filter
 def create_perm_tuple(fieldname, id):
     return (fieldname, id)
+
 
 @register.filter
 def get_warnings_column_count_citation(instance):
@@ -47,6 +52,7 @@ def get_warnings_column_count_citation(instance):
         return 12
     return 12/nr_of_warnings
 
+
 @register.filter
 def does_chapter_miss_book(instance):
     if instance.type_controlled == Citation.CHAPTER:
@@ -54,6 +60,7 @@ def does_chapter_miss_book(instance):
         if not includes_chapter:
             return True;
     return False;
+
 
 @register.filter
 def reviewed_book_missing(instance):
@@ -63,6 +70,7 @@ def reviewed_book_missing(instance):
             return True;
     return False;
 
+
 @register.filter
 def is_periodical_missing(instance):
     if instance.type_controlled in [Citation.REVIEW, Citation.ARTICLE]:
@@ -70,6 +78,7 @@ def is_periodical_missing(instance):
         if not has_periodical:
             return True
     return False
+
 
 @register.filter
 def get_warnings_column_count_authority(instance):
@@ -85,6 +94,7 @@ def get_warnings_column_count_authority(instance):
         return 0
     return 12/nr_of_warnings
 
+
 @register.filter
 def is_public_inconsistent(instance):
     if instance.public and instance.record_status_value != CuratedMixin.ACTIVE:
@@ -92,6 +102,7 @@ def is_public_inconsistent(instance):
     if not instance.public and instance.record_status_value == CuratedMixin.ACTIVE:
         return True
     return False
+
 
 @register.filter
 def are_related_objects_for_citation_public(citation):
@@ -110,8 +121,8 @@ def are_related_objects_for_citation_public(citation):
     for attr in citation.attributes.all():
         if not attr.public:
             return False
-
     return True
+    
 
 @register.filter
 def get_authorities(acrelations):
@@ -119,6 +130,7 @@ def get_authorities(acrelations):
     for acrel in acrelations:
         authorities.append(acrel.authority)
     return authorities
+
 
 @register.filter
 def get_citations(citation, ccrelations):
@@ -130,6 +142,7 @@ def get_citations(citation, ccrelations):
             citations.append(ccrel.subject)
     return citations
 
+
 @register.filter
 def are_related_authorities_public(acrelations, authorities):
     for acrel in acrelations:
@@ -139,6 +152,7 @@ def are_related_authorities_public(acrelations, authorities):
         if not authority.public:
             return False
     return True
+
 
 @register.filter
 def are_related_citations_public(ccrelations, citations):
@@ -150,12 +164,14 @@ def are_related_citations_public(ccrelations, citations):
             return False
     return True
 
+
 @register.filter
 def are_attributes_public(attributes):
     for attr in attributes:
         if not attr.public:
             return False
     return True
+
 
 @register.filter
 def are_linked_books_public(citation_id, citations):
@@ -170,8 +186,8 @@ def are_linked_books_public(citation_id, citations):
             for ccrel in ccrels:
                 if not ccrel.public:
                     return False
-
     return True
+
 
 @register.filter
 def are_linked_journals_public(citation_id, authorities):
@@ -185,8 +201,8 @@ def are_linked_journals_public(citation_id, authorities):
             for acrel in acrels:
                 if not acrel.public:
                     return False
-
     return True
+
 
 @register.filter
 def are_related_objects_for_authority_public(authority):
@@ -206,6 +222,7 @@ def are_related_objects_for_authority_public(authority):
             return False
 
     return True
+
 
 @register.filter
 def get_dataset_name(ds_id):

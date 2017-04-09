@@ -24,13 +24,43 @@ filters.LOOKUP_TYPES = [
     ('not_contains', 'Does not contain'),
 ]
 
+from django.core.exceptions import ValidationError
+# import iso8601
+
 
 class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
-    imported_by = django_filters.ModelChoiceFilter(name='imported_by', queryset=User.objects.annotate(num_accessions=Count('importaccession')).filter(num_accessions__gt=0))
+    name = django_filters.CharFilter(lookup_expr='istartswith')
+    imported_on = django_filters.CharFilter(method='filter_imported_on')
+    imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False))
+    #
+    def filter_imported_on(self, queryset, name, value):
+
+        # # try:
+        # date = iso8601.parse_date(value).date
+        # # except:
+        #     # raise ValidationError("That doesn't look like a real date")
+        try:
+            queryset = queryset.filter(imported_on__date=value)
+        except Exception as E:
+            return queryset
+
+        return queryset
+
 
     class Meta:
         model = ImportAccession
         fields = ['id', 'name', 'processed', 'imported_on',
                   'imported_by', 'ingest_to']
+        o = django_filters.filters.OrderingFilter(
+            # tuple-mapping retains order
+            fields=(
+                ('imported_on', 'imported_on'),
+            ),
+
+            # labels do not need to retain order
+            field_labels={
+                'imported_on': 'Date imported',
+            }
+        )

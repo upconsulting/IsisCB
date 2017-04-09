@@ -30,9 +30,14 @@ $('body').ready(function() {
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_citation' %}">Create new citation record</a>
     <input class="btn btn-success btn-xs" type="submit" value="Bulk change" />
     <a class="btn btn-primary btn-xs" href="{% url 'curation:citation-bulk-select' %}">Bulk select</a>
-    <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
-    <a class="btn btn-primary btn-xs" href="#" id="collection-add">Add to existing collection</a>
+
     <a class="btn btn-primary btn-xs" href="#" id="export">Bulk Export</a>
+    <span class="btn-group">
+        <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
+        <a class="btn btn-warning btn-xs" href="#" id="collection-add">Add to existing collection</a>
+        <a class="btn btn-success btn-xs" href="{% url "curation:collections" %}" id="collections">List collections</a>
+    </span>
+
     <input type="hidden" value="{{ filter_params }}" name="filters" />
     <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
 
@@ -239,7 +244,7 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.periodical.label }}</label>
+                <label class="col-md-2 control-label">Periodical</label>
                 <div class="col-sm-10">
                   {{ objects.form.periodical|addcss:"form-control" }}
                 </div>
@@ -311,7 +316,7 @@ $('body').ready(function() {
                   {{ objects.form.o|addcss:"form-control" }}
                 </div>
             </div>
-          
+
 
           {% for error in objects.form.abstract.errors %}
           <div class="alert alert-warning">{{ error }}</div>
@@ -338,7 +343,7 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.subject.label }}</label>
+                <label class="col-md-2 control-label">Subject</label>
                 <div class="col-sm-10">
                   {{ objects.form.subject|addcss:"form-control" }}
                 </div>
@@ -348,7 +353,7 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm  clearable">
-                <label class="col-md-2 control-label">{{ objects.form.publisher.label }}</label>
+                <label class="col-md-2 control-label">Publisher</label>
                 <div class="col-sm-10">
                   {{ objects.form.publisher|addcss:"form-control" }}
                 </div>

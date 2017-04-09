@@ -21,7 +21,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-import rest_framework_filters as filters
+# import rest_framework_filters as filters
 
 from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 
@@ -333,11 +333,11 @@ class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class AuthorityFilterSet(filters.FilterSet):
-    name = filters.AllLookupsFilter(name='name')
-    class Meta:
-        model = Authority
-        fields = ['name', 'type_controlled']
+# class AuthorityFilterSet(filters.FilterSet):
+#     name = filters.AllLookupsFilter(name='name')
+#     class Meta:
+#         model = Authority
+#         fields = ['name', 'type_controlled']
 
 
 class AuthorityViewSet(mixins.ListModelMixin,
@@ -345,8 +345,8 @@ class AuthorityViewSet(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
-    filter_class = AuthorityFilterSet
-    filter_fields = ('name', )
+    # filter_class = AuthorityFilterSet
+    # filter_fields = ('name', )
 
 
 class UserViewSet(mixins.ListModelMixin,
