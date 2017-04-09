@@ -1,8 +1,15 @@
 {% extends "curation/base.html" %}
 
 {% load render_object %}
+{% load rules %}
+{% load permission_tags %}
 
 {% block content %}
+
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
 <div id="subjectsCategoriesView" class="row">
   <div class="col-md-6">
@@ -47,7 +54,16 @@
          <h5>Categories</h5>
          <ul class="list-group">
            {% for acrel in instance|get_categories %}
-              <li class="list-group-item">{{ acrel.authority.name }}</li>
+              <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+              {% if can_update %}
+              <span class="button-group button-group-xs">
+                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                      acrelation-id="{{ acrel.id }}"
+                      data-acrelation-type="category"
+                      acrelation-title="{{ acrel.authority.name }}"></a>
+              </span>
+              {% endif %}
+              </li>
            {% endfor %}
          </ul>
        </div>
@@ -56,12 +72,79 @@
          <h5>Subjects</h5>
          <ul class="list-group">
            {% for acrel in instance|get_subjects %}
-              <li class="list-group-item">{{ acrel.authority.name }}</li>
+              <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+                {% if can_update %}
+                <span class="button-group button-group-xs">
+                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                        acrelation-id="{{ acrel.id }}"
+                        data-acrelation-type="subject"
+                        acrelation-title="{{ acrel.authority.name }}"></a>
+                </span>
+                {% endif %}
+              </li>
            {% endfor %}
          </ul>
        </div>
 
      </div>
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="delete-category-modal" tabindex="-1" role="dialog" aria-labelledby="delete-category-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-category-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to remove a category relation with <span class="text-warning" id="delete-category-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority record itself, only the association between that record and this citation.
+                </p>
+                <input type="hidden" id="category-id-container" />
+                <input type="hidden" id="entry-type-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_category();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endwith %}
+<script>
+//@ sourceURL=delete.js
+$(document).ready(function() {
+  $('.delete-category').click(function() {
+      var elem = $(this);
+      var acrelation_id = elem.attr('acrelation-id');
+      var acrelation_title = elem.attr('acrelation-title');
+      var acrelation_type = elem.attr('data-acrelation-type')
+      $('#category-id-container').val(acrelation_id);
+      $('#delete-category-target-name').html(acrelation_title);
+      $('#entry-type-container').val(acrelation_type);
+      $('#delete-category-modal').modal('show');
+  });
+});
+
+var delete_category = function() {
+    $('#delete-category-modal').modal('hide');
+    var acrelation_id = $('#category-id-container').val();
+    var acrelation_type = $('#entry-type-container').val();
+    if (acrelation_id) {
+        $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+            'success': function(r) {
+                $('#' + acrelation_type + '-entry-' + acrelation_id).remove();
+            },
+        });
+    }
+}
+
+</script>
+
 
 {% endblock %}
