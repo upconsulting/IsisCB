@@ -15,12 +15,10 @@
   <div class="col-md-6">
       <div class="col-md-12">
         <p>
-        <strong id="citation_type" data-type="{{instance.type_controlled}}">
-  {{ instance.get_type_controlled_display }}</strong>:
+        <strong id="citation_type" data-type="{{instance.type_controlled}}">{{ instance.get_type_controlled_display }}</strong>:
         {{ instance.id }}, {{ instance|get_citation_pubdate }} [{{ instance.record_status_value }}]
         </p>
       </div>
-
 
       <div class="col-md-12">
         {% for acrelation in instance.acrelation_set.all %}
@@ -85,8 +83,33 @@
            {% endfor %}
          </ul>
        </div>
+  </div>
+  <div class="col-md-6">
+    <ul class="nav nav-tabs" role="tablist">
+      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
+      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
+    </ul>
 
-     </div>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="addSubjects">
+        <p>
+          <div class="input-group">
+            <input type="text" id="subjectSearchQuery" class="form-control input-sm" placeholder="Search for subject...">
+            <span class="input-group-btn">
+              <button class="btn btn-default" id="searchSubjectsBtn" style="padding: 7px;" type="button"><i class="fa fa-search" aria-hidden="true"></i></button>
+            </span>
+          </div>
+        </p>
+
+        <ul class="list-group" id="subjectSearchResultsContainer">
+
+        </ul>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="addCategories">
+        add categories
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -117,6 +140,11 @@
 
 {% endwith %}
 <script>
+$('#subjectsTab a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+
 //@ sourceURL=delete.js
 $(document).ready(function() {
   $('.delete-category').click(function() {
@@ -143,6 +171,29 @@ var delete_category = function() {
         });
     }
 }
+
+$(document).ready(function() {
+  $('#searchSubjectsBtn').click(function() {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?q=" + $('#subjectSearchQuery').val(), {
+        success: function(result) {
+          var resultsContainer = $('#subjectSearchResultsContainer');
+          resultsContainer.empty();
+          result.results.forEach(function(r) {
+            var newLi = $("<li></li>");
+            newLi.addClass("list-group-item");
+            newLi.attr('data-acrelation-id', r.name);
+            newLi.html(r.name + '<span class="label label-primary pull-right">' + r.type + '</span>');
+            resultsContainer.append(newLi);
+
+            var addBtn = $('<a href="#"><i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i></a>');
+            newLi.prepend(addBtn);
+
+
+          });
+        }
+      });
+  });
+});
 
 </script>
 
