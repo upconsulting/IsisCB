@@ -1353,10 +1353,12 @@ def quick_and_dirty_authority_search(request):
     queryset_exact = Authority.objects.all()
     queryset_with_numbers = Authority.objects.all()
     if tc:
-        queryset = queryset.filter(type_controlled=tc.upper())
-        queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
-        queryset_exact = queryset_exact.filter(type_controlled=tc.upper())
-        queryset_with_numbers = queryset_with_numbers.filter(type_controlled=tc.upper())
+        type_array = tc.split(",")
+        map(lambda t: t.upper(), type_array)
+        queryset = queryset.filter(type_controlled__in=type_array)
+        queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
+        queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
+        queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
