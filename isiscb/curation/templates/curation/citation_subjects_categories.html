@@ -1,0 +1,395 @@
+{% extends "curation/base.html" %}
+
+{% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+
+{% block content %}
+
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+<div id="subjectsCategoriesView" class="row">
+  <div class="col-md-6">
+      <div class="col-md-12">
+        <p>
+          <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+     Back to Citation</a>
+        </p>
+        <p>
+        <strong id="citation_type" data-type="{{instance.type_controlled}}">{{ instance.get_type_controlled_display }}</strong>:
+        {{ instance.id }}, {{ instance|get_citation_pubdate }} [{{ instance.record_status_value }}]
+        </p>
+      </div>
+
+      <div class="col-md-12">
+        {% for acrelation in instance.acrelation_set.all %}
+            {% if acrelation.type_broad_controlled == 'PR' %}
+            <label class="label label-success">{{ acrelation.get_type_controlled_display }}</label>
+            {{ acrelation.authority.name }}
+            {% if acrelation.name_for_display_in_citation %}
+            <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+            {% endif %}
+            {% if not acrelation.authority.public %}
+            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+            {% endif %}
+            {% if not acrelation.public %}
+            <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
+            {% endif %}
+            {% endif %}
+         {% endfor %}
+       </div>
+
+       <div class="col-md-12"  style="margin-top: 10px;">
+         <i>{{ instance.title }}</i>
+       </div>
+
+       <div class="col-md-12" style="margin-top: 10px;">
+            <textarea readonly class="form-control">
+           {{ instance.abstract }}
+           </textarea>
+       </div>
+
+       <div class="col-md-12" style="margin-top: 10px;">
+         <h5>Categories</h5>
+         <ul class="list-group">
+           {% for acrel in instance|get_categories %}
+              <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+              {% if can_update %}
+              <span class="button-group button-group-xs">
+                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                      acrelation-id="{{ acrel.id }}"
+                      data-acrelation-type="category"
+                      acrelation-title="{{ acrel.authority.name }}"></a>
+              </span>
+              {% endif %}
+              </li>
+           {% endfor %}
+         </ul>
+       </div>
+
+       <div class="col-md-12" style="margin-top: 10px;">
+         <h5>Subjects</h5>
+         <ul id="subject-list-group" class="list-group">
+           {% for acrel in instance|get_subjects %}
+              <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+                {% if can_update %}
+                <span class="button-group button-group-xs">
+                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                        acrelation-id="{{ acrel.id }}"
+                        data-acrelation-type="subject"
+                        acrelation-title="{{ acrel.authority.name }}"></a>
+                </span>
+                {% endif %}
+              </li>
+           {% endfor %}
+         </ul>
+       </div>
+  </div>
+  <div class="col-md-6">
+    <ul class="nav nav-tabs" role="tablist">
+      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
+      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="addSubjects">
+        <p>
+          <div class="input-group">
+            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject...">
+
+            <span class="input-group-btn">
+              <span class="button-checkbox">
+                <button type="button" class="btn" data-color="primary">C</button>
+                <input id="filterConcepts" type="checkbox" class="hidden" />
+              </span>
+              <span class="button-checkbox">
+                <button type="button" class="btn" data-color="primary">P</button>
+                <input id="filterPersons" type="checkbox" class="hidden" />
+              </span>
+              <span class="button-checkbox">
+                <button type="button" class="btn" data-color="primary">I</button>
+                <input id="filterInstitutions" type="checkbox" class="hidden" />
+              </span>
+              <span class="button-checkbox">
+                <button type="button" class="btn" data-color="primary">G</button>
+                <input id="filterGeoTerms" type="checkbox" class="hidden" />
+              </span>
+              <span class="button-checkbox">
+                <button type="button" class="btn" data-color="primary">T</button>
+                <input id="filterTimePeriods" type="checkbox" class="hidden" />
+              </span>
+              <span >
+                <button id="filterAll" type="button" class="btn btn-default" >All</button>
+              </span>
+            </span>
+          </div>
+        </p>
+
+        <ul class="list-group" id="subjectSearchResultsContainer">
+
+        </ul>
+      </div>
+      <div role="tabpanel" class="tab-pane" id="addCategories">
+        add categories
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="delete-category-modal" tabindex="-1" role="dialog" aria-labelledby="delete-category-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-category-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to remove a category relation with <span class="text-warning" id="delete-category-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related authority record itself, only the association between that record and this citation.
+                </p>
+                <input type="hidden" id="category-id-container" />
+                <input type="hidden" id="entry-type-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_category();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$('#subjectsTab a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+})
+
+//@ sourceURL=delete.js
+$(document).ready(function() {
+  $('.delete-category').click(function() {
+      var elem = $(this);
+      var acrelation_id = elem.attr('acrelation-id');
+      var acrelation_title = elem.attr('acrelation-title');
+      var acrelation_type = elem.attr('data-acrelation-type')
+      $('#category-id-container').val(acrelation_id);
+      $('#delete-category-target-name').html(acrelation_title);
+      $('#entry-type-container').val(acrelation_type);
+      $('#delete-category-modal').modal('show');
+  });
+});
+
+var delete_category = function() {
+    $('#delete-category-modal').modal('hide');
+    var acrelation_id = $('#category-id-container').val();
+    var acrelation_type = $('#entry-type-container').val();
+    if (acrelation_id) {
+        $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+            'success': function(r) {
+                $('#' + acrelation_type + '-entry-' + acrelation_id).remove();
+            },
+        });
+    }
+}
+
+var INITIAL_MAX_RESULTS = 10;
+var max_results = INITIAL_MAX_RESULTS;
+var types = [];
+
+var searchTimerSubjects = 0;
+function triggerSearchSubjects(e) {
+  if (searchTimerSubjects) {
+      clearTimeout(searchTimerSubjects);
+  }
+
+  var query = $('#subjectSearchQuery').val();
+  searchTimerSubjects = setTimeout(function() {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
+        success: function(result) {
+          var resultsContainer = $('#subjectSearchResultsContainer');
+          resultsContainer.empty();
+          result.results.forEach(function(r) {
+            var newLi = $("<li></li>");
+            newLi.addClass("list-group-item");
+            newLi.attr('data-acrelation-id', r.name);
+            newLi.html(r.name + '<span class="label label-primary pull-right">' + r.type + '</span>');
+            resultsContainer.append(newLi);
+
+            var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
+            addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+            addBtn.click(addConcept);
+            newLi.prepend(addBtn);
+          });
+
+          if (result.results.length == 0) {
+            var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+            resultsContainer.append(msg);
+          }
+
+          if (result.results.length == max_results) {
+            var load_more = `
+              <li class="list-group-item search-result">
+                <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+              </li>
+            `;
+            resultsContainer.append(load_more);
+            $('#load-more-subjects').click(function() {
+                max_results += 10;
+                triggerSearchSubjects();
+            });
+          }
+        }
+      });
+  }, 500);
+}
+
+// checkbox settings
+var settings = {
+    on: {
+        icon: 'glyphicon glyphicon-check'
+    },
+    off: {
+        icon: 'glyphicon glyphicon-unchecked'
+    }
+};
+
+$(document).ready(function() {
+  $('#subjectSearchQuery').on('keyup', function() {
+    max_results = INITIAL_MAX_RESULTS;
+    triggerSearchSubjects();
+  });
+
+  // add checkbox search handlers
+  $("#filterConcepts").change(function() {
+    filterType("CO", $("#filterConcepts"));
+  });
+  $("#filterPersons").change(function() {
+    filterType("PE", $("#filterPersons"));
+  });
+  $("#filterInstitutions").change(function() {
+    filterType("IN", $("#filterInstitutions"));
+  });
+  $("#filterGeoTerms").change(function() {
+    filterType("GE", $("#filterGeoTerms"));
+  });
+  $("#filterTimePeriods").change(function() {
+    filterType("TI", $("#filterTimePeriods"));
+  });
+  $("#filterAll").click(function() {
+    $('.button-checkbox').each(function () {
+      var checkbox = $(this).find('input:checkbox');
+      checkbox.attr('checked', false);
+      updateDisplay(checkbox);
+    });
+    types = []
+    triggerSearchSubjects();
+  });
+
+  // checkbox styling
+  $('.button-checkbox').each(function () {
+          // Settings
+          var $widget = $(this),
+              $button = $widget.find('button'),
+              $checkbox = $widget.find('input:checkbox'),
+              color = $button.data('color')
+
+
+          // Event Handlers
+          $button.on('click', function () {
+              $checkbox.prop('checked', !$checkbox.is(':checked'));
+              $checkbox.triggerHandler('change');
+              updateDisplay($checkbox);
+          });
+          $checkbox.on('change', function () {
+              updateDisplay($checkbox);
+          });
+
+          // Initialization
+          function init() {
+
+              updateDisplay($checkbox);
+
+              // Inject the icon if applicable
+              if ($button.find('.state-icon').length == 0) {
+                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i> ');
+              }
+          }
+          init();
+      });
+});
+
+// checkbox update display
+function updateDisplay($checkbox) {
+    var isChecked = $checkbox.is(':checked');
+    var $button = $checkbox.siblings('button')
+    var color = $button.data('color');
+
+    // Set the button's state
+    $button.data('state', (isChecked) ? "on" : "off");
+
+    // Set the button's icon
+    $button.find('.state-icon')
+        .removeClass()
+        .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+    // Update the button's color
+    if (isChecked) {
+        $button
+            .removeClass('btn-default')
+            .addClass('btn-' + color + ' active');
+    }
+    else {
+        $button
+            .removeClass('btn-' + color + ' active')
+            .addClass('btn-default');
+    }
+}
+
+function filterType(type, element) {
+  if (element.is(':checked')) {
+    types.push(type);
+  } else {
+    var typeIndex = types.indexOf(type);
+    if (typeIndex > -1) {
+      types.splice(typeIndex, 1);
+    }
+  }
+  triggerSearchSubjects();
+}
+
+function addConcept(event) {
+  var link = event.target.closest('a');
+  var acRelId = $(link).data('id');
+
+  var payload = {
+      'citation_id': "{{ instance.id }}",
+      'authority_id': acRelId,
+      'type_controlled': 'SU',    // subject.
+      'type_broad_controlled': 'SC',    // subject content.
+  };
+
+  $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
+    var ul = $('#subject-list-group');
+    var newId = result.acrelation.id;
+
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item">' + result.acrelation.authority.name + '</li>');
+    ul.append(li);
+    {% if can_update %}
+    var span = $('<span class="button-group button-group-xs"></span>');
+    li.append(span);
+
+    var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
+    span.append(a);
+    {% endif %}
+  });
+}
+</script>
+
+{% endwith %}
+{% endblock %}

@@ -1079,6 +1079,21 @@ def _get_corrected_index(prev_index, index):
             return None
     return index
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def subjects_and_categories(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'instance': citation,
+    }
+
+
+    template = 'curation/citation_subjects_categories.html'
+
+    return render(request, template, context)
 
 # Deleted class QueryDictWraper; we're not using it. -E
 
@@ -1338,10 +1353,12 @@ def quick_and_dirty_authority_search(request):
     queryset_exact = Authority.objects.all()
     queryset_with_numbers = Authority.objects.all()
     if tc:
-        queryset = queryset.filter(type_controlled=tc.upper())
-        queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
-        queryset_exact = queryset_exact.filter(type_controlled=tc.upper())
-        queryset_with_numbers = queryset_with_numbers.filter(type_controlled=tc.upper())
+        type_array = tc.split(",")
+        map(lambda t: t.upper(), type_array)
+        queryset = queryset.filter(type_controlled__in=type_array)
+        queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
+        queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
+        queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
