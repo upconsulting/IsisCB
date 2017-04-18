@@ -1902,7 +1902,7 @@ def bulk_select_citation(request):
 
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
-
+    print 'got pks', pks
 
     filter_params_raw = request.POST.get('filters')
     filter_params = QueryDict(filter_params_raw, mutable=True)
@@ -1914,7 +1914,6 @@ def _get_filtered_queryset(request):
     _qs = operations.filter_queryset(request.user, Citation.objects.all())
     queryset = CitationFilter(filter_params, queryset=_qs)
     return queryset, filter_params_raw
-
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1962,6 +1961,8 @@ def create_citation_collection(request):
     context = {}
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = CitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
@@ -1969,8 +1970,8 @@ def create_citation_collection(request):
                 instance = form.save(commit=False)
                 instance.createdBy = request.user
                 instance.save()
-                if isinstance(queryset, CitationFilter):
-                    queryset = queryset.qs
+
+
                 instance.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
@@ -1994,13 +1995,13 @@ def add_citation_collection(request):
 
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = SelectCitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
             if form.is_valid():
                 collection = form.cleaned_data['collection']
-                if isinstance(queryset, CitationFilter):
-                    queryset = queryset.qs
                 collection.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
@@ -2111,6 +2112,7 @@ def collections(request):
     """
     List :class:`.Collection` instances.
     """
+    from curation.filters import CitationCollectionFilter
     collections = CitationCollection.objects.all()
 
     filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)

@@ -1,6 +1,6 @@
 import django_filters
 from django.contrib.auth.models import User
-from isisdata.models import IsisCBRole
+from isisdata.models import IsisCBRole, CitationCollection
 
 
 class UserFilter(django_filters.FilterSet):
@@ -25,3 +25,11 @@ class UserFilter(django_filters.FilterSet):
             'username': 'Username',
         }
     )
+
+
+class CitationCollectionFilter(django_filters.FilterSet):
+    createdBy = django_filters.ModelChoiceFilter(queryset=User.objects.filter(citation_collections__id__isnull=False).distinct('id'))
+
+    class Meta:
+        model = CitationCollection
+        fields = ('name', 'createdBy')
