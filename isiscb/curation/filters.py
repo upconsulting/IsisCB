@@ -25,3 +25,9 @@ class UserFilter(django_filters.FilterSet):
             'username': 'Username',
         }
     )
+
+
+class CitationCollectionFilter(django_filters.FilterSet):
+    class Meta:
+        model = CitationCollection
+        fields = ('name',)

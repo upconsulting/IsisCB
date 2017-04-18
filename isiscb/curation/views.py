@@ -1964,7 +1964,7 @@ def create_citation_collection(request):
                 instance = form.save(commit=False)
                 instance.createdBy = request.user
                 instance.save()
-                instance.citations.add(*queryset)
+                instance.citations.add(*queryset.qs)
 
                 # TODO: add filter paramter to select collection.
                 return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
@@ -2102,6 +2102,7 @@ def collections(request):
     """
     List :class:`.Collection` instances.
     """
+    from curation.filters import CitationCollectionFilter
     collections = CitationCollection.objects.all()
 
     filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
