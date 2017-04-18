@@ -182,7 +182,6 @@ class DraftAuthority(ImportedData):
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
     CROSSREFERENCE = 'CR'
-    PUBLISHER = 'PU'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -194,7 +193,6 @@ class DraftAuthority(ImportedData):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
         (CROSSREFERENCE, 'Cross-reference'),
-        (PUBLISHER, 'Publisher'),
     )
     name = models.CharField(max_length=1000)
     name_last = models.CharField(max_length=255, null=True, blank=True)
