@@ -1992,7 +1992,7 @@ def add_citation_collection(request):
             form.fields['filters'].initial = filter_params_raw
             if form.is_valid():
                 collection = form.cleaned_data['collection']
-                collection.citations.add(*queryset)
+                collection.citations.add(*queryset.qs)
 
                 # TODO: add filter paramter to select collection.
                 return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
