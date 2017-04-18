@@ -1897,7 +1897,7 @@ def bulk_select_citation(request):
 
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
-
+    print 'got pks', pks
 
     filter_params_raw = request.POST.get('filters')
     filter_params = QueryDict(filter_params_raw, mutable=True)
@@ -1909,7 +1909,6 @@ def _get_filtered_queryset(request):
     _qs = operations.filter_queryset(request.user, Citation.objects.all())
     queryset = CitationFilter(filter_params, queryset=_qs)
     return queryset, filter_params_raw
-
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
