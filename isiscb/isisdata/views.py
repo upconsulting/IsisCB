@@ -1535,8 +1535,8 @@ def get_linkresolver_url_by_ip(request, citation):
 
     if resolver:
         url = build_openurl(resolver.find(worldcat_tag + 'baseURL').text.strip(), citation)
-        linkIcon = resolver.find(worldcat_tag + 'linkIcon').text.strip()
-        linkText = resolver.find(worldcat_tag + 'linkText').text.strip()
+        linkIcon = getattr(resolver.find(worldcat_tag + 'linkIcon'), 'text', '').strip()
+        linkText = getattr(resolver.find(worldcat_tag + 'linkText'), 'text', '').strip()
         return {
             'url': url,
             'icon': linkIcon,
