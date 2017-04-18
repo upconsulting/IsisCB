@@ -1,6 +1,6 @@
 import django_filters
 from django.contrib.auth.models import User
-from isisdata.models import IsisCBRole
+from isisdata.models import IsisCBRole, CitationCollection
 
 
 class UserFilter(django_filters.FilterSet):
