@@ -28,6 +28,8 @@ class UserFilter(django_filters.FilterSet):
 
 
 class CitationCollectionFilter(django_filters.FilterSet):
+    createdBy = django_filters.ModelChoiceFilter(queryset=User.objects.filter(citation_collections__id__isnull=False).distinct('id'))
+
     class Meta:
         model = CitationCollection
-        fields = ('name',)
+        fields = ('name', 'createdBy')
