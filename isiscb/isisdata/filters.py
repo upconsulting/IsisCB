@@ -32,14 +32,7 @@ filters.LOOKUP_TYPES = [
 #     pass
 
 
-def filter_in_collections(queryset, value):
-    if not value:
-        return queryset
-    q = Q()
-    for collection in value:
-        q |= Q(in_collections=collection)
 
-    return queryset.filter(q)
 
 
 class CitationFilter(django_filters.FilterSet):
@@ -255,7 +248,14 @@ class CitationFilter(django_filters.FilterSet):
         #     q &= ~Q(tracking_records__type_controlled=next_state)
         return queryset.filter(q)
 
+    def filter_in_collections(self, queryset, field, value):
+        if not value:
+            return queryset
+        q = Q()
+        for collection in value:
+            q |= Q(in_collections=collection)
 
+        return queryset.filter(q)
 
 
 class AuthorityFilter(django_filters.FilterSet):
