@@ -902,7 +902,9 @@ def citation(request, citation_id):
     citations_page = paginator.page(page)
 
     # ok, let's start the whole pagination/next/previous dance :op
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+    _build_next_and_prev(context, citation, citations_page, paginator, page,
+                         'citation_prev_index', 'citation_page',
+                         'citation_request_params', user_session)
 
     request_params = user_session.get('citation_request_params', "")
     context.update({
@@ -910,6 +912,7 @@ def citation(request, citation_id):
         'total': filtered_objects.qs.count(),
     })
 
+    # We use a different template for each citation type.
     if citation.type_controlled == Citation.BOOK:
         template = 'curation/citation_change_view_book.html'
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
@@ -922,6 +925,7 @@ def citation(request, citation_id):
         template = 'curation/citation_change_view_thesis.html'
     else:
         template = 'curation/citation_change_view.html'
+
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
@@ -937,14 +941,20 @@ def citation(request, citation_id):
             'can_create_proofed': tracking_workflow.is_workflow_action_allowed(Tracking.PROOFED),
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
+
+        # Most (but not all) citation types should have a PartDetails entry.
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK,
+                                        Citation.REVIEW, Citation.CHAPTER,
+                                        Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()
                 citation.part_details = part_details
                 citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details, prefix='partdetails')
+            partdetails_form = PartDetailsForm(request.user, citation_id,
+                                               instance=part_details,
+                                               prefix='partdetails')
             context.update({
                 'partdetails_form': partdetails_form,
             })
@@ -1065,6 +1075,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
                 'index': paginator.page(page).start_index() + index,
             })
 
+
 def _get_corrected_index(prev_index, index):
     # this is a fix for the duplicate results issue
     # is this more stable than having a running index for the record
@@ -1078,6 +1089,7 @@ def _get_corrected_index(prev_index, index):
           (index != 0 and index != 39 and index != prev_index + 1 and index != prev_index -1)):
             return None
     return index
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
