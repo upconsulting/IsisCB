@@ -1356,18 +1356,25 @@ def quick_and_dirty_language_search(request):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
+    # Ordering: First, sort by closeness of match as follows: exact match; whole word
+    # match; partial word match from beginning of word. Second, sort by number of
+    # linked items. * * Names without double-hyphens go first * If there are names
+    # with double-hyphens and the next character is numeric, sort in descending
+    # numerical order * If there are names with double-hyphens and the next character
+    # is alpha, sort in ascending alphabetical order
+
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     classification_system = request.GET.getlist('classification_system')#SPWC&classification_system=SPWT&
-    tc = request.GET.get('type', None)
+    type_controlled = request.GET.get('type', None)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
-    queryset = Authority.objects.all()
-    queryset_sw = Authority.objects.all()
-    queryset_exact = Authority.objects.all()
-    queryset_with_numbers = Authority.objects.all()
+    queryset = Authority.objects.all()          # Partial matches, in chunks; no punctuation or numbers.
+    queryset_sw = Authority.objects.all()       # Starts with...
+    queryset_exact = Authority.objects.all()    # Exact match.
+    queryset_with_numbers = Authority.objects.all()    # partial matches, in chunks; with punctuation and numbers.
 
     if classification_system:
         queryset = queryset.filter(classification_system__in=classification_system)
@@ -1375,9 +1382,8 @@ def quick_and_dirty_authority_search(request):
         queryset_exact = queryset_exact.filter(classification_system__in=classification_system)
         queryset_with_numbers = queryset_with_numbers.filter(classification_system__in=classification_system)
 
-    if tc:
-        type_array = tc.split(",")
-        map(lambda t: t.upper(), type_array)
+    if type_controlled:
+        type_array = map(lambda t: t.upper(), type_controlled.split(","))
         queryset = queryset.filter(type_controlled__in=type_array)
         queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
         queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
@@ -1398,11 +1404,60 @@ def quick_and_dirty_authority_search(request):
         queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
-    queryset_exact = queryset_exact.filter(name_for_sort=q)
+    queryset_exact = queryset_exact.filter(Q(name_for_sort=q) | Q(name=q))
     results = []
     result_ids = []
+
+    def _is_int(val):
+        try:
+            int(val)
+            return True
+        except:
+            return False
+
+    def custom_cmp(a, b):
+        if '--' in a.name and '--' in b.name:
+            a_remainder = a.name.split('--')[1].strip()
+            b_remainder = b.name.split('--')[1].strip()
+
+            # If there are names with double-hyphens and the next character is
+            #  numeric, sort in descending numerical order
+            if _is_int(a_remainder[0]) and _is_int(b_remainder[0]):
+                _v = int(b_remainder[0]) - int(a_remainder[0])
+                if _v == 0:
+                    if _is_int(a_remainder[0:2]) and _is_int(b_remainder[0:2]):
+                        return int(b_remainder[0:2]) - int(a_remainder[0:2])
+                    elif _is_int(a_remainder[0:2]):
+                        return -1
+                    elif _is_int(b_remainder[0:2]):
+                        return 1
+                    else:
+                        return 0
+                else:
+                    return _v
+            elif _is_int(a_remainder[0]):
+                return 1
+            elif _is_int(b_remainder[0]):
+                return -1
+            else:
+                # If there are names with double-hyphens and the next
+                #  character is alpha, sort in ascending alphabetical
+                #  order.
+                return cmp(a_remainder, b_remainder)
+
+        # Names without double-hyphens go first.
+        elif '--' in a.name:
+            return 1
+        elif '--' in b.name:
+            return -1
+        else:
+            return a.acrelation_set.count() - b.acrelation_set.count()
+
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset_with_numbers.order_by('name'), queryset.order_by('name'))):
+    for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
+                                  sorted(queryset_sw, cmp=custom_cmp),
+                                  sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+                                  sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
