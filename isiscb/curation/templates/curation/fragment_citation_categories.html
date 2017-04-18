@@ -6,6 +6,14 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
+{% if can_update %}
+<p class="pull-right">
+<a href="{% url 'curation:subjects_and_categories' instance.id %}" class="btn btn-primary btn-sm">Categories/Subjects</a>
+</p>
+{% endif %}
+
+<div class="clearfix"></div>
+
 <label>Categories</label>
 <ul class="list-group" id="category-list-group">
 {% if can_view %}

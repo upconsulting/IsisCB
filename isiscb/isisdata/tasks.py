@@ -77,12 +77,18 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
     try:    # Report all exceptions as a task failure.
         with smart_open.smart_open(path, 'wb') as f:
             writer = csv.writer(f)
+
             writer.writerow(map(lambda c: c.label, columns))
+            extra = []
             for i, obj in enumerate(queryset):
                 if task and (i % _inc == 0 or i == (task.max_value - 1)):
                     task.current_value = i
                     task.save()
-                writer.writerow(map(lambda c: c(obj), columns))
+                writer.writerow(map(lambda c: c(obj, extra), columns))
+
+            for obj in extra:
+                writer.writerow(map(lambda c: c(obj, []), columns))
+
         task.state = 'SUCCESS'
         task.save()
         print 'success:: %s' % str(task_id)

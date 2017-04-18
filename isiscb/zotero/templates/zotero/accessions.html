@@ -2,7 +2,6 @@
 {% load pagination_tags %}
 {% load addcss %}
 
-
 {% block object_list %}
 <style>
 .glyphicon-ok {
@@ -114,6 +113,16 @@
             <div class="form-group clearable">
                 <label>{{ objects.form.imported_on.label }}</label>
                 {{ objects.form.imported_on|addcss:"form-control" }}
+                <script>
+                  $( function() {
+                    $( "#id_imported_on" ).datepicker({
+                      dateFormat: "yy-mm-dd"
+                    });
+                    // $( "#format" ).on( "change", function() {
+                    //   $( "#datepicker" ).datepicker( "option", "dateFormat", $( this ).val() );
+                    // });
+                  } );
+                  </script>
             </div>
         </div>
         <div class="col-sm-4">

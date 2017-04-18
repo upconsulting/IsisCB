@@ -7,7 +7,10 @@ from isisdata.models import *
 register = template.Library()
 
 
-PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
+try:
+    PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
+except AttributeType.DoesNotExist:
+    PUBLICATION_DATE = -1
 
 
 @register.filter(name='render_object')
@@ -160,3 +163,12 @@ def get_date_attributes(obj):
 @register.filter
 def is_ccrelation_other_public(instance_id, ccrelation):
     return (instance_id == ccrelation.subject.id and not ccrelation.object.public) or (instance_id == ccrelation.object.id and not ccrelation.subject.public)
+
+
+@register.filter
+def get_categories(obj):
+    return ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id=obj.id)
+
+@register.filter
+def get_subjects(obj):
+    return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=obj.id)

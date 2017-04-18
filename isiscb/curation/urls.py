@@ -46,8 +46,9 @@ urlpatterns = [
 
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),
 
+    url(r'^(?i)citation/collection$', views.collections, name='collections'),
     url(r'^(?i)citation/collection/search$', views.search_collections, name='search-collections'),
-    url(r'^(?i)citation/collection$', views.create_citation_collection, name='create-citation-collection'),
+    url(r'^(?i)citation/collection/create$', views.create_citation_collection, name='create-citation-collection'),
     url(r'^(?i)citation/collection/add$', views.add_citation_collection, name='add-citation-collection'),
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),
     url(r'^(?i)citation/bulk/status$', views.bulk_action_status, name='citation-bulk-action-status'),
@@ -90,6 +91,8 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_citation, name='delete_linkeddata_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/$', views.linkeddata_for_citation, name='create_linkeddata_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/$', views.linkeddata_for_citation, name='update_linkeddata_for_citation'),
+
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/subjects/$', views.subjects_and_categories, name='subjects_and_categories'),
 
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete/$', views.delete_linkeddata_for_authority, name='delete_linkeddata_for_authority'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_authority, name='delete_linkeddata_for_authority_format'),
