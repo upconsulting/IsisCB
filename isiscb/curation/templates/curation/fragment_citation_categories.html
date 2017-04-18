@@ -89,7 +89,7 @@ function triggerSearchCategories() {
 
   var query = $('#create-category-input').val();
   searchTimerCategories = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&type=CT&max=" + max_results_categories + "&q=" + query, {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&classification_system=SPWC&classification_system=SPWT&type=CT&max=" + max_results_categories + "&q=" + query, {
         success: function(result) {
             var results_container = $('#create-category-results-container');
             results_container.empty();

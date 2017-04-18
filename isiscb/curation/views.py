@@ -1358,6 +1358,7 @@ def quick_and_dirty_language_search(request):
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
+    classification_system = request.GET.getlist('classification_system')#SPWC&classification_system=SPWT&
     tc = request.GET.get('type', None)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
@@ -1367,6 +1368,13 @@ def quick_and_dirty_authority_search(request):
     queryset_sw = Authority.objects.all()
     queryset_exact = Authority.objects.all()
     queryset_with_numbers = Authority.objects.all()
+
+    if classification_system:
+        queryset = queryset.filter(classification_system__in=classification_system)
+        queryset_sw = queryset_sw.filter(classification_system__in=classification_system)
+        queryset_exact = queryset_exact.filter(classification_system__in=classification_system)
+        queryset_with_numbers = queryset_with_numbers.filter(classification_system__in=classification_system)
+
     if tc:
         type_array = tc.split(",")
         map(lambda t: t.upper(), type_array)

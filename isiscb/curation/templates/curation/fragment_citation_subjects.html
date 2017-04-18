@@ -81,7 +81,7 @@ function triggerSearchSubjects(e) {
 
     var query = $('#create-subject-input').val();
     searchTimerSubjects = setTimeout(function() {
-      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&max=" + max_results + "&q=" + query, {
+      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&classification_system=SPWC&classification_system=SPWT&max=" + max_results + "&q=" + query, {
           success: function(result) {
               var results_container = $('#create-subject-results-container');
               results_container.empty();
