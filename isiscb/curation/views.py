@@ -1111,7 +1111,10 @@ def citations(request):
     elif request.method == 'GET':
         filter_params = user_session.get('citation_filters', {})
         if 'o' in filter_params and isinstance(filter_params['o'], list):
-            filter_params['o'] = filter_params['o'][0]
+            if len(filter_params['o']) > 0:
+                filter_params['o'] = filter_params['o'][0]
+            else:
+                filter_params['o'] = "publication_date"
 
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'publication_date'
@@ -1353,10 +1356,12 @@ def quick_and_dirty_authority_search(request):
     queryset_exact = Authority.objects.all()
     queryset_with_numbers = Authority.objects.all()
     if tc:
-        queryset = queryset.filter(type_controlled=tc.upper())
-        queryset_sw = queryset_sw.filter(type_controlled=tc.upper())
-        queryset_exact = queryset_exact.filter(type_controlled=tc.upper())
-        queryset_with_numbers = queryset_with_numbers.filter(type_controlled=tc.upper())
+        type_array = tc.split(",")
+        map(lambda t: t.upper(), type_array)
+        queryset = queryset.filter(type_controlled__in=type_array)
+        queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
+        queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
+        queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
@@ -1956,6 +1961,8 @@ def create_citation_collection(request):
     context = {}
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = CitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
@@ -1963,7 +1970,9 @@ def create_citation_collection(request):
                 instance = form.save(commit=False)
                 instance.createdBy = request.user
                 instance.save()
-                instance.citations.add(*queryset.qs)
+
+
+                instance.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
                 return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
@@ -1986,12 +1995,14 @@ def add_citation_collection(request):
 
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = SelectCitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
             if form.is_valid():
                 collection = form.cleaned_data['collection']
-                collection.citations.add(*queryset.qs)
+                collection.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
                 return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)

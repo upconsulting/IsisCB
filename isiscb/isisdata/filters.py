@@ -255,6 +255,7 @@ class CitationFilter(django_filters.FilterSet):
         for collection in value:
             q |= Q(in_collections=collection)
 
+
         return queryset.filter(q)
 
 
