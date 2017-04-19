@@ -97,7 +97,6 @@ class TestHandler(object):
             self.testcase.assertNotEqual(data['record_history'], '')
             self.testcase.assertTrue(data['public'])
             self.testcase.assertEqual(data['record_status_value'], CuratedMixin.ACTIVE)
-            self.testcase.assertEqual(data['type_controlled'], Authority.PUBLISHER)
         elif data['id'] == 'CBA000167056':
             self.testcase.assertEqual(data['type_controlled'], Authority.PERSON)
         elif data['id'] == 'CBA000166688':
@@ -180,7 +179,6 @@ class TestLoadFileMakerDatabase(unittest.TestCase):
         self.assertNotEqual(authority.record_history, '')
         self.assertTrue(authority.public)
         self.assertEqual(authority.record_status_value, CuratedMixin.ACTIVE)
-        self.assertEqual(authority.type_controlled, Authority.PUBLISHER)
 
     def test_parse_attribute(self):
         # Try to trip things up by creating back AttributeTypes ahead of time.
