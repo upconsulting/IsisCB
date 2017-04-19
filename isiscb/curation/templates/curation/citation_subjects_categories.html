@@ -3,9 +3,22 @@
 {% load render_object %}
 {% load rules %}
 {% load permission_tags %}
+{% load search_filters %}
 
 {% block content %}
 
+<style>
+#subject-list-group > li, #category-list-group > li {
+  padding: 5px 15px;
+}
+
+#abstract_panel div.panel-heading {
+  padding: 1px 15px;
+}
+#abstract_panel div.panel-body {
+  padding: 5px;
+}
+</style>
 
 {% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
@@ -47,16 +60,29 @@
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
-            <textarea readonly class="form-control">
-           {{ instance.abstract }}
-           </textarea>
+         <div class="panel-group" id="abstract_panel" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <i class="fa fa-caret-up" aria-hidden="true"></i>
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                {{ instance.abstract }}
+              </div>
+            </div>
+          </div>
+        </div>
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
          <h5>Categories</h5>
-         <ul class="list-group">
+         <ul id="category-list-group" class="list-group">
            {% for acrel in instance|get_categories %}
-              <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+              <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }} ({{ acrel.authority|get_nr_of_citations }})
               {% if can_update %}
               <span class="button-group button-group-xs">
                   <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -74,7 +100,7 @@
          <h5>Subjects</h5>
          <ul id="subject-list-group" class="list-group">
            {% for acrel in instance|get_subjects %}
-              <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
+              <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }} ({{ acrel.authority|get_nr_of_citations }})
                 {% if can_update %}
                 <span class="button-group button-group-xs">
                     <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -173,17 +199,19 @@ $('#subjectsTab a').click(function (e) {
 
 //@ sourceURL=delete.js
 $(document).ready(function() {
-  $('.delete-category').click(function() {
-      var elem = $(this);
-      var acrelation_id = elem.attr('acrelation-id');
-      var acrelation_title = elem.attr('acrelation-title');
-      var acrelation_type = elem.attr('data-acrelation-type')
-      $('#category-id-container').val(acrelation_id);
-      $('#delete-category-target-name').html(acrelation_title);
-      $('#entry-type-container').val(acrelation_type);
-      $('#delete-category-modal').modal('show');
-  });
+  $('.delete-category').click(delete_handler);
 });
+
+var delete_handler = function() {
+    var elem = $(this);
+    var acrelation_id = elem.attr('acrelation-id');
+    var acrelation_title = elem.attr('acrelation-title');
+    var acrelation_type = elem.attr('data-acrelation-type')
+    $('#category-id-container').val(acrelation_id);
+    $('#delete-category-target-name').html(acrelation_title);
+    $('#entry-type-container').val(acrelation_type);
+    $('#delete-category-modal').modal('show');
+}
 
 var delete_category = function() {
     $('#delete-category-modal').modal('hide');
@@ -386,6 +414,7 @@ function addConcept(event) {
 
     var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
     span.append(a);
+    a.click(delete_handler);
     {% endif %}
   });
 }
