@@ -1090,7 +1090,29 @@ def subjects_and_categories(request, citation_id):
         'instance': citation,
     }
 
+    user_session = request.session
+    page = user_session.get('citation_page', 1)
+    get_request = user_session.get('citation_filters', None)
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
+        if len(get_request['o']) > 0:
+            get_request['o'] = get_request['o'][0]
+        else:
+            get_request['o'] = "publication_date"
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
+    filtered_objects = CitationFilter(get_request, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, 40)
+
+    citations_page = paginator.page(page)
+
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+
+    request_params = user_session.get('citation_request_params', "")
+    context.update({
+        'request_params': request_params,
+        'total': filtered_objects.qs.count(),
+    })
+    
     template = 'curation/citation_subjects_categories.html'
 
     return render(request, template, context)
