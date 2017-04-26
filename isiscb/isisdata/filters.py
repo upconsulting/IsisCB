@@ -240,10 +240,9 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-
         q = Q(tracking_records__type_controlled=value)
-
-        next_state = TrackingWorkflow.stages.get(value)
+        # https://code.djangoproject.com/ticket/14645
+        # next_state = TrackingWorkflow.stages.get(value)
         # if next_state:
         #     q &= ~Q(tracking_records__type_controlled=next_state)
         return queryset.filter(q)
@@ -279,13 +278,15 @@ class AuthorityFilter(django_filters.FilterSet):
     dataset_list = [(ds.pk, ds.name) for ds in datasets ]
     belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
 
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(AuthorityTracking.TYPE_CHOICES), method='filter_tracking_state')
+
     class Meta:
         model = Authority
         fields = [
             'id', 'name', 'type_controlled', 'description',
             'classification_system', 'classification_code',
             'classification_hierarchy', 'zotero_accession',
-            'belongs_to']
+            'belongs_to', 'tracking_state']
 
         # order_by = [
         #     ('', 'None'),
@@ -304,6 +305,18 @@ class AuthorityFilter(django_filters.FilterSet):
             'name': 'Name'
         }
     )
+
+    def filter_tracking_state(self, queryset, field, value):
+        if not value:
+            return queryset
+
+        q = Q(tracking_records__type_controlled=value)
+        queryset = queryset.filter(q)
+        # https://code.djangoproject.com/ticket/14645
+        # next_state = TrackingWorkflow.stages.get(value)
+        # if next_state:
+        #     queryset = queryset.filter(~Q(tracking_records__type_controlled=next_state))
+        return queryset
 
     def filter_name(self, queryset, name, value):
         value = unidecode(value)

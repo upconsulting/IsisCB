@@ -1761,7 +1761,8 @@ class AuthorityTracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
-    authority = models.ForeignKey(Authority, related_name='tracking_records', null=True, blank=True)
+    authority = models.ForeignKey(Authority, related_name='tracking_records',
+                                  null=True, blank=True)
 
     notes = models.TextField(blank=True)
 
@@ -1797,7 +1798,8 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
-    citation = models.ForeignKey(Citation, related_name='tracking_records', null=True, blank=True)
+    citation = models.ForeignKey(Citation, related_name='tracking_records',
+                                 null=True, blank=True)
 
     notes = models.TextField(blank=True)
 

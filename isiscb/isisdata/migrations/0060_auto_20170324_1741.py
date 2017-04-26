@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
+from django.db.models import F
 import sys
 
 def set_citation(apps, schema_editor):
@@ -12,13 +13,14 @@ def set_citation(apps, schema_editor):
     ContentType = apps.get_model("contenttypes", "ContentType")
     citation_type = ContentType.objects.get_by_natural_key("isisdata", "citation")
     authority_type = ContentType.objects.get_by_natural_key("isisdata", "authority")
+    Tracking.objects.filter(subject_content_type=citation_type).update(citation_id=F('subject_instance_id'))
+    # for tracking in Tracking.objects.filter(subject_content_type=citation_type):
+    #     print '\rcitation tracking', tracking.id,
+    #     sys.stdout.flush()
+    #     tracking.citation_id = tracking.subject_instance_id
+    #     tracking.save()
 
-    for tracking in Tracking.objects.filter(subject_content_type=citation_type):
-        print '\rcitation tracking', tracking.id,
-        sys.stdout.flush()
-        tracking.citation_id = tracking.subject_instance_id
-        tracking.save()
-
+    authority_tracking = []
     for tracking in Tracking.objects.filter(subject_content_type=authority_type):
         print '\rauthority tracking', tracking.id,
         sys.stdout.flush()
@@ -27,7 +29,7 @@ def set_citation(apps, schema_editor):
             if AuthorityTracking.objects.filter(id=pk).count() == 0:
                 break
 
-        a_tracking = AuthorityTracking.objects.create(
+        authority_tracking.append(AuthorityTracking(
             id=pk,
             administrator_notes = tracking.administrator_notes,
             record_history = tracking.record_history,
@@ -40,16 +42,18 @@ def set_citation(apps, schema_editor):
             type_controlled = tracking.type_controlled,
             notes = tracking.notes,
             authority_id  = tracking.subject_instance_id,
-        )
-        tracking.delete()
+        ))
+    AuthorityTracking.objects.bulk_create(authority_tracking)
+    Tracking.objects.filter(subject_content_type=authority_type).delete()
 
 
 def clear_citation(apps, schema_editor):
-    Tracking = apps.get_model("isisdata", "Tracking")
-    Tracking.objects.all().update(citation_id=None)
-
-    AuthorityTracking = apps.get_model("isisdata", "AuthorityTracking")
-    Tracking.objects.all().update(authority_id=None)
+    pass
+    # Tracking = apps.get_model("isisdata", "Tracking")
+    # Tracking.objects.all().update(citation_id=None)
+    #
+    # AuthorityTracking = apps.get_model("isisdata", "AuthorityTracking")
+    # Tracking.objects.all().update(authority_id=None)
 
 
 class Migration(migrations.Migration):
