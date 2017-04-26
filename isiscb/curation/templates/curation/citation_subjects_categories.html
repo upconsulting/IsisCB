@@ -3,21 +3,56 @@
 {% load render_object %}
 {% load rules %}
 {% load permission_tags %}
+{% load search_filters %}
 
 {% block content %}
 
+<style>
+#subject-list-group > li, #category-list-group > li {
+  padding: 5px 15px;
+}
+
+#abstract_panel div.panel-heading {
+  padding: 1px 15px;
+}
+#abstract_panel div.panel-body {
+  padding: 5px;
+}
+</style>
 
 {% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
 <div id="subjectsCategoriesView" class="row">
+  <div class="col-md-12">
+    <div class="col-md-2">
+      <p>
+        <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+   Back to Citation</a>
+      </p>
+    </div>
+    <div class="col-md-8">
+      <div class="text-center">
+        {% if previous %}
+        <a href="{% url 'curation:subjects_and_categories' previous.id %}" id="citation_previous"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+        {% endif %}
+        &nbsp; &nbsp; &nbsp;
+
+        <a href="{% url 'curation:citation_list' %}?page={{request_params.page}}" id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>
+  Back to List </a>
+        &nbsp; &nbsp; &nbsp;
+        {% if next %}
+        <a href="{% url 'curation:subjects_and_categories' next.id %}" id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-2">
+      Record {{ index }} of {{ total }}
+    </div>
+  </div>
   <div class="col-md-6">
       <div class="col-md-12">
-        <p>
-          <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
-     Back to Citation</a>
-        </p>
         <p>
         <strong id="citation_type" data-type="{{instance.type_controlled}}">{{ instance.get_type_controlled_display }}</strong>:
         {{ instance.id }}, {{ instance|get_citation_pubdate }} [{{ instance.record_status_value }}]
@@ -47,14 +82,27 @@
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
-            <textarea readonly class="form-control">
-           {{ instance.abstract }}
-           </textarea>
+         <div class="panel-group" id="abstract_panel" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <i class="fa fa-caret-up" aria-hidden="true"></i>
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                {{ instance.abstract }}
+              </div>
+            </div>
+          </div>
+        </div>
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
-         <h5>Categories</h5>
-         <ul class="list-group">
+         <h5><b>Categories</b></h5>
+         <ul id="category-list-group" class="list-group">
            {% for acrel in instance|get_categories %}
               <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
               {% if can_update %}
@@ -71,7 +119,7 @@
        </div>
 
        <div class="col-md-12" style="margin-top: 10px;">
-         <h5>Subjects</h5>
+         <h5><b>Subjects</b></h5>
          <ul id="subject-list-group" class="list-group">
            {% for acrel in instance|get_subjects %}
               <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
@@ -131,6 +179,10 @@
         <ul class="list-group" id="subjectSearchResultsContainer">
 
         </ul>
+
+        <div class="text-right">
+          <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+        </div>
       </div>
       <div role="tabpanel" class="tab-pane" id="addCategories">
         add categories
@@ -173,17 +225,19 @@ $('#subjectsTab a').click(function (e) {
 
 //@ sourceURL=delete.js
 $(document).ready(function() {
-  $('.delete-category').click(function() {
-      var elem = $(this);
-      var acrelation_id = elem.attr('acrelation-id');
-      var acrelation_title = elem.attr('acrelation-title');
-      var acrelation_type = elem.attr('data-acrelation-type')
-      $('#category-id-container').val(acrelation_id);
-      $('#delete-category-target-name').html(acrelation_title);
-      $('#entry-type-container').val(acrelation_type);
-      $('#delete-category-modal').modal('show');
-  });
+  $('.delete-category').click(delete_handler);
 });
+
+var delete_handler = function() {
+    var elem = $(this);
+    var acrelation_id = elem.attr('acrelation-id');
+    var acrelation_title = elem.attr('acrelation-title');
+    var acrelation_type = elem.attr('data-acrelation-type')
+    $('#category-id-container').val(acrelation_id);
+    $('#delete-category-target-name').html(acrelation_title);
+    $('#entry-type-container').val(acrelation_type);
+    $('#delete-category-modal').modal('show');
+}
 
 var delete_category = function() {
     $('#delete-category-modal').modal('hide');
@@ -210,7 +264,7 @@ function triggerSearchSubjects(e) {
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
@@ -218,7 +272,7 @@ function triggerSearchSubjects(e) {
             var newLi = $("<li></li>");
             newLi.addClass("list-group-item");
             newLi.attr('data-acrelation-id', r.name);
-            newLi.html(r.name + '<span class="label label-primary pull-right">' + r.type + '</span>');
+            newLi.html(r.name + ' (' + r.citation_count + ') <span class="label label-primary pull-right">' + r.type + '</span>');
             resultsContainer.append(newLi);
 
             var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
@@ -386,6 +440,7 @@ function addConcept(event) {
 
     var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
     span.append(a);
+    a.click(delete_handler);
     {% endif %}
   });
 }

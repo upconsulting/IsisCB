@@ -57,7 +57,8 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.id.label }}</label>
-                {{ objects.form.id|addcss:"form-control" }}
+                {{ objects.form.id|addcss:"form-control input-sm" }}
+
             </div>
 
             {% for error in objects.form.type_controlled.errors %}
@@ -65,7 +66,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.type_controlled.label }}</label>
-                {{ objects.form.type_controlled|addcss:"form-control" }}
+                {{ objects.form.type_controlled|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.classification_system.errors %}
@@ -73,7 +74,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.classification_system.label }}</label>
-                {{ objects.form.classification_system|addcss:"form-control" }}
+                {{ objects.form.classification_system|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.zotero_accession.errors %}
@@ -81,7 +82,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>Zotero Acc.</label>
-                {{ objects.form.zotero_accession|addcss:"form-control" }}
+                {{ objects.form.zotero_accession|addcss:"form-control input-sm" }}
             </div>
 
 
@@ -92,7 +93,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.name.label }}</label>
-                {{ objects.form.name|addcss:"form-control" }}
+                {{ objects.form.name|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.classification_code.errors %}
@@ -100,7 +101,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.classification_code.label }}</label>
-                {{ objects.form.classification_code|addcss:"form-control" }}
+                {{ objects.form.classification_code|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.linked_data.errors %}
@@ -108,7 +109,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>Linked Data</label>
-                {{ objects.form.linked_data|addcss:"form-control" }}
+                {{ objects.form.linked_data|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.belongs_to.errors %}
@@ -116,7 +117,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.belongs_to.label }}</label>
-                {{ objects.form.belongs_to|addcss:"form-control" }}
+                {{ objects.form.belongs_to|addcss:"form-control input-sm" }}
             </div>
 
 
@@ -128,7 +129,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.description.label }}</label>
-                {{ objects.form.description|addcss:"form-control" }}
+                {{ objects.form.description|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.classification_hierarchy.errors %}
@@ -136,7 +137,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.classification_hierarchy.label }}</label>
-                {{ objects.form.classification_hierarchy|addcss:"form-control" }}
+                {{ objects.form.classification_hierarchy|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.record_status_value.errors %}
@@ -144,7 +145,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.record_status_value.label }}</label>
-                {{ objects.form.record_status_value|addcss:"form-control" }}
+                {{ objects.form.record_status_value|addcss:"form-control input-sm" }}
             </div>
 
             {% for error in objects.form.o.errors %}
@@ -152,7 +153,7 @@
             {% endfor %}
             <div class="form-group clearable">
                 <label>{{ objects.form.o.label }}</label>
-                {{ objects.form.o|addcss:"form-control" }}
+                {{ objects.form.o|addcss:"form-control input-sm" }}
             </div>
         </div>
     </div>

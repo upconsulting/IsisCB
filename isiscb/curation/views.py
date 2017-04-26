@@ -885,32 +885,8 @@ def citation(request, citation_id):
     }
 
     citation = get_object_or_404(Citation, pk=citation_id)
+    _build_result_set_links(request, context, citation)
 
-    user_session = request.session
-    page = user_session.get('citation_page', 1)
-    get_request = user_session.get('citation_filters', None)
-    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
-        if len(get_request['o']) > 0:
-            get_request['o'] = get_request['o'][0]
-        else:
-            get_request['o'] = "publication_date"
-    queryset = operations.filter_queryset(request.user, Citation.objects.all())
-
-    filtered_objects = CitationFilter(get_request, queryset=queryset)
-    paginator = Paginator(filtered_objects.qs, 40)
-
-    citations_page = paginator.page(page)
-
-    # ok, let's start the whole pagination/next/previous dance :op
-    _build_next_and_prev(context, citation, citations_page, paginator, page,
-                         'citation_prev_index', 'citation_page',
-                         'citation_request_params', user_session)
-
-    request_params = user_session.get('citation_request_params', "")
-    context.update({
-        'request_params': request_params,
-        'total': filtered_objects.qs.count(),
-    })
 
     # We use a different template for each citation type.
     if citation.type_controlled == Citation.BOOK:
@@ -1091,6 +1067,41 @@ def _get_corrected_index(prev_index, index):
     return index
 
 
+def _build_result_set_links(request, context, citation):
+    """
+    This function build all the info that the previous/next/back to list links from  a given
+    request object, context object for the page, and the citation that should be displayed.
+    After calling this method, the context object will have five additional properties:
+    * next: the next citation in the result set
+    * previous: the previous citation in the result set
+    * index: the current position in the result set
+    * request_params: request parameters that went into the function call
+    * total: the total number of found citations
+    """
+    user_session = request.session
+    page = user_session.get('citation_page', 1)
+    get_request = user_session.get('citation_filters', None)
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
+        if len(get_request['o']) > 0:
+            get_request['o'] = get_request['o'][0]
+        else:
+            get_request['o'] = "publication_date"
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
+
+    filtered_objects = CitationFilter(get_request, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, 40)
+
+    citations_page = paginator.page(page)
+
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+
+    request_params = user_session.get('citation_request_params', "")
+    context.update({
+        'request_params': request_params,
+        'total': filtered_objects.qs.count(),
+    })
+
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def subjects_and_categories(request, citation_id):
@@ -1102,6 +1113,7 @@ def subjects_and_categories(request, citation_id):
         'instance': citation,
     }
 
+    _build_result_set_links(request, context, citation)
 
     template = 'curation/citation_subjects_categories.html'
 
@@ -1353,7 +1365,6 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
-
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     # Ordering: First, sort by closeness of match as follows: exact match; whole word
@@ -1365,11 +1376,14 @@ def quick_and_dirty_authority_search(request):
 
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
-    classification_system = request.GET.getlist('classification_system')#SPWC&classification_system=SPWT&
-    type_controlled = request.GET.get('type', None)
+    tc = request.GET.get('type', None)
+    exclude = request.GET.get('exclude', None)
+    classification_system = request.GET.get('system', None)
+    system_blank = request.GET.get('system_blank', True)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
+
 
     queryset = Authority.objects.all()          # Partial matches, in chunks; no punctuation or numbers.
     queryset_sw = Authority.objects.all()       # Starts with...
@@ -1384,10 +1398,30 @@ def quick_and_dirty_authority_search(request):
 
     if type_controlled:
         type_array = map(lambda t: t.upper(), type_controlled.split(","))
+
         queryset = queryset.filter(type_controlled__in=type_array)
         queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
         queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
         queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
+
+    if exclude: # exclude certain types
+        exclude_array = exclude.split(",")
+        map(lambda t: t.upper(), exclude_array)
+        queryset = queryset.exclude(type_controlled__in=exclude_array)
+        queryset_sw = queryset_sw.exclude(type_controlled__in=exclude_array)
+        queryset_exact = queryset_exact.exclude(type_controlled__in=exclude_array)
+        queryset_with_numbers = queryset_with_numbers.exclude(type_controlled__in=exclude_array)
+
+    if classification_system: # filter by classification system
+        system_array = classification_system.split(",")
+        map(lambda t: t.upper(), system_array)
+        query = Q(classification_system__in=system_array)
+        if system_blank:
+            query = query | Q(classification_system__isnull=True)
+        queryset = queryset.filter(query)
+        queryset_sw = queryset_sw.filter(query)
+        queryset_exact = queryset_exact.filter(query)
+        queryset_with_numbers = queryset_with_numbers.filter(query)
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
@@ -1479,7 +1513,7 @@ def quick_and_dirty_authority_search(request):
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
-            'type_controlled': obj.get_type_controlled_display(),
+            'type_controlled': obj.get_type_controlled_display()
         })
     return JsonResponse({'results': results})
 
