@@ -32,17 +32,21 @@ class ImportAccesionFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
     name = django_filters.CharFilter(lookup_expr='istartswith')
-    imported_on = django_filters.CharFilter(method='filter_imported_on')
-    imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False))
+    imported_on_or_after = django_filters.CharFilter(method='filter_imported_on_or_after')
+    imported_on_or_before = django_filters.CharFilter(method='filter_imported_on_or_before')
+    imported_by = django_filters.ModelChoiceFilter(queryset=User.objects.filter(importaccession__id__isnull=False).distinct('id'))
     #
-    def filter_imported_on(self, queryset, name, value):
-
-        # # try:
-        # date = iso8601.parse_date(value).date
-        # # except:
-        #     # raise ValidationError("That doesn't look like a real date")
+    def filter_imported_on_or_after(self, queryset, name, value):
         try:
-            queryset = queryset.filter(imported_on__date=value)
+            queryset = queryset.filter(imported_on__date__gte=value)
+        except Exception as E:
+            return queryset
+
+        return queryset
+
+    def filter_imported_on_or_before(self, queryset, name, value):
+        try:
+            queryset = queryset.filter(imported_on__date__lte=value)
         except Exception as E:
             return queryset
 
@@ -51,8 +55,9 @@ class ImportAccesionFilter(django_filters.FilterSet):
 
     class Meta:
         model = ImportAccession
-        fields = ['id', 'name', 'processed', 'imported_on',
-                  'imported_by', 'ingest_to']
+        fields = ['id', 'name', 'processed', 'imported_on_or_before',
+                  'imported_on_or_after', 'imported_by', 'ingest_to']
+
         o = django_filters.filters.OrderingFilter(
             # tuple-mapping retains order
             fields=(

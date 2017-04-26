@@ -107,20 +107,31 @@
                 {{ objects.form.processed|addcss:"form-control" }}
             </div>
 
-            {% for error in objects.form.imported_on.errors %}
+            {% for error in objects.form.imported_on_or_after.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group clearable">
-                <label>{{ objects.form.imported_on.label }}</label>
-                {{ objects.form.imported_on|addcss:"form-control" }}
+                <label>Imported on or after</label>
+                {{ objects.form.imported_on_or_after|addcss:"form-control" }}
                 <script>
                   $( function() {
-                    $( "#id_imported_on" ).datepicker({
+                    $( "#id_imported_on_or_after" ).datepicker({
                       dateFormat: "yy-mm-dd"
                     });
-                    // $( "#format" ).on( "change", function() {
-                    //   $( "#datepicker" ).datepicker( "option", "dateFormat", $( this ).val() );
-                    // });
+                  } );
+                  </script>
+            </div>
+            {% for error in objects.form.imported_on_or_before.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label>Imported on or before</label>
+                {{ objects.form.imported_on_or_before|addcss:"form-control" }}
+                <script>
+                  $( function() {
+                    $( "#id_imported_on_or_before" ).datepicker({
+                      dateFormat: "yy-mm-dd"
+                    });
                   } );
                   </script>
             </div>

@@ -885,31 +885,10 @@ def citation(request, citation_id):
     }
 
     citation = get_object_or_404(Citation, pk=citation_id)
+    _build_result_set_links(request, context, citation)
 
-    user_session = request.session
-    page = user_session.get('citation_page', 1)
-    get_request = user_session.get('citation_filters', None)
-    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
-        if len(get_request['o']) > 0:
-            get_request['o'] = get_request['o'][0]
-        else:
-            get_request['o'] = "publication_date"
-    queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
-    filtered_objects = CitationFilter(get_request, queryset=queryset)
-    paginator = Paginator(filtered_objects.qs, 40)
-
-    citations_page = paginator.page(page)
-
-    # ok, let's start the whole pagination/next/previous dance :op
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
-
-    request_params = user_session.get('citation_request_params', "")
-    context.update({
-        'request_params': request_params,
-        'total': filtered_objects.qs.count(),
-    })
-
+    # We use a different template for each citation type.
     if citation.type_controlled == Citation.BOOK:
         template = 'curation/citation_change_view_book.html'
     elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
@@ -922,6 +901,7 @@ def citation(request, citation_id):
         template = 'curation/citation_change_view_thesis.html'
     else:
         template = 'curation/citation_change_view.html'
+
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
@@ -937,14 +917,20 @@ def citation(request, citation_id):
             'can_create_proofed': tracking_workflow.is_workflow_action_allowed(Tracking.PROOFED),
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS, Citation.ESSAY_REVIEW]:
+
+        # Most (but not all) citation types should have a PartDetails entry.
+        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK,
+                                        Citation.REVIEW, Citation.CHAPTER,
+                                        Citation.THESIS, Citation.ESSAY_REVIEW]:
             part_details = getattr(citation, 'part_details', None)
             if not part_details:
                 part_details = PartDetails.objects.create()
                 citation.part_details = part_details
                 citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id, instance=part_details, prefix='partdetails')
+            partdetails_form = PartDetailsForm(request.user, citation_id,
+                                               instance=part_details,
+                                               prefix='partdetails')
             context.update({
                 'partdetails_form': partdetails_form,
             })
@@ -1065,6 +1051,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
                 'index': paginator.page(page).start_index() + index,
             })
 
+
 def _get_corrected_index(prev_index, index):
     # this is a fix for the duplicate results issue
     # is this more stable than having a running index for the record
@@ -1079,6 +1066,42 @@ def _get_corrected_index(prev_index, index):
             return None
     return index
 
+
+def _build_result_set_links(request, context, citation):
+    """
+    This function build all the info that the previous/next/back to list links from  a given
+    request object, context object for the page, and the citation that should be displayed.
+    After calling this method, the context object will have five additional properties:
+    * next: the next citation in the result set
+    * previous: the previous citation in the result set
+    * index: the current position in the result set
+    * request_params: request parameters that went into the function call
+    * total: the total number of found citations
+    """
+    user_session = request.session
+    page = user_session.get('citation_page', 1)
+    get_request = user_session.get('citation_filters', None)
+    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
+        if len(get_request['o']) > 0:
+            get_request['o'] = get_request['o'][0]
+        else:
+            get_request['o'] = "publication_date"
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
+
+    filtered_objects = CitationFilter(get_request, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, 40)
+
+    citations_page = paginator.page(page)
+
+    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+
+    request_params = user_session.get('citation_request_params', "")
+    context.update({
+        'request_params': request_params,
+        'total': filtered_objects.qs.count(),
+    })
+
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def subjects_and_categories(request, citation_id):
@@ -1090,6 +1113,7 @@ def subjects_and_categories(request, citation_id):
         'instance': citation,
     }
 
+    _build_result_set_links(request, context, citation)
 
     template = 'curation/citation_subjects_categories.html'
 
@@ -1344,30 +1368,66 @@ def quick_and_dirty_language_search(request):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
+    # Ordering: First, sort by closeness of match as follows: exact match; whole word
+    # match; partial word match from beginning of word. Second, sort by number of
+    # linked items. * * Names without double-hyphens go first * If there are names
+    # with double-hyphens and the next character is numeric, sort in descending
+    # numerical order * If there are names with double-hyphens and the next character
+    # is alpha, sort in ascending alphabetical order
+
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
-    tc = request.GET.get('type', None)
+
+    # In some cases, the curator wants to limit to active only for certain
+    #  authority types.
+    limit_active_types = request.GET.get('active_types', None)
+    type_controlled = request.GET.get('type', None)
+    exclude = request.GET.get('exclude', None)
+
+    # In some cases, the curator wants to apply the system parameter only to
+    #  specific authority types.
+    limit_clasification_types = request.GET.get('system_types', None)
+    classification_system = request.GET.get('system', None)
+
+    system_blank = request.GET.get('system_blank', True)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
-    queryset = Authority.objects.all()
-    queryset_sw = Authority.objects.all()
-    queryset_exact = Authority.objects.all()
-    queryset_with_numbers = Authority.objects.all()
-    if tc:
-        type_array = tc.split(",")
-        map(lambda t: t.upper(), type_array)
-        queryset = queryset.filter(type_controlled__in=type_array)
-        queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
-        queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
-        queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
+    query = Q()
+    if type_controlled:
+        type_array = map(lambda t: t.upper(), type_controlled.split(","))
+        query &= Q(type_controlled__in=type_array)
+
+    if limit_active_types:
+        type_array = map(lambda t: t.upper(), limit_active_types.split(","))
+        query &= ~(Q(type_controlled__in=type_array) & Q(record_status_value=CuratedMixin.INACTIVE))
+
+    if exclude:     # exclude certain types
+        exclude_array = map(lambda t: t.upper(), exclude.split(","))
+        query &= ~Q(type_controlled__in=exclude_array)
+
+    if classification_system:   # filter by classification system
+        system_array = map(lambda t: t.upper(), classification_system.split(","))
+        if limit_clasification_types:
+            type_array = map(lambda t: t.upper(), limit_clasification_types.split(","))
+            q_part = Q(type_controlled__in=type_array) & ~Q(classification_system__in=system_array)
+            if system_blank:
+                q_part &= ~Q(classification_system__isnull=True)
+            query &= ~q_part
+        else:
+            q_part = Q(classification_system__in=system_array)
+            if system_blank:
+                q_part = q_part | Q(classification_system__isnull=True)
+            query &= q_part
 
     if not show_inactive:   # Don't show inactive records.
-        queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_exact = queryset_exact.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_with_numbers = queryset_with_numbers.filter(record_status_value=CuratedMixin.ACTIVE)
+        query &= Q(record_status_value=CuratedMixin.ACTIVE)
+
+    queryset = Authority.objects.filter(query)
+    queryset_sw = Authority.objects.filter(query)       # Starts with...
+    queryset_exact = Authority.objects.filter(query)    # Exact match.
+    queryset_with_numbers = Authority.objects.filter(query)    # partial matches, in chunks; with punctuation and numbers.
 
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
@@ -1378,11 +1438,61 @@ def quick_and_dirty_authority_search(request):
         queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
-    queryset_exact = queryset_exact.filter(name_for_sort=q)
+    queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     results = []
     result_ids = []
+
+    def _is_int(val):
+        try:
+            int(val)
+            return True
+        except:
+            return False
+
+    def custom_cmp(a, b):
+        if '--' in a.name and '--' in b.name:
+            a_remainder = a.name.split('--')[1].strip()
+            b_remainder = b.name.split('--')[1].strip()
+
+            # If there are names with double-hyphens and the next character is
+            #  numeric, sort in descending numerical order
+            if _is_int(a_remainder[0]) and _is_int(b_remainder[0]):
+                _v = int(b_remainder[0]) - int(a_remainder[0])
+                if _v == 0:
+                    if _is_int(a_remainder[0:2]) and _is_int(b_remainder[0:2]):
+                        return int(b_remainder[0:2]) - int(a_remainder[0:2])
+                    elif _is_int(a_remainder[0:2]):
+                        return -1
+                    elif _is_int(b_remainder[0:2]):
+                        return 1
+                    else:
+                        return 0
+                else:
+                    return _v
+            # Numeric fragments should go first (e.g. 21st century).
+            elif _is_int(a_remainder[0]):
+                return -1
+            elif _is_int(b_remainder[0]):
+                return 1
+            else:
+                # If there are names with double-hyphens and the next
+                #  character is alpha, sort in ascending alphabetical
+                #  order.
+                return cmp(a_remainder, b_remainder)
+
+        # Names without double-hyphens go first.
+        elif '--' in a.name:
+            return 1
+        elif '--' in b.name:
+            return -1
+        else:
+            return a.acrelation_set.count() - b.acrelation_set.count()
+
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset_with_numbers.order_by('name'), queryset.order_by('name'))):
+    for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
+                                  sorted(queryset_sw, cmp=custom_cmp),
+                                  sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+                                  sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
@@ -1404,7 +1514,7 @@ def quick_and_dirty_authority_search(request):
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
-            'type_controlled': obj.get_type_controlled_display(),
+            'type_controlled': obj.get_type_controlled_display()
         })
     return JsonResponse({'results': results})
 
@@ -1903,7 +2013,6 @@ def bulk_select_citation(request):
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
 
-
     filter_params_raw = request.POST.get('filters')
     filter_params = QueryDict(filter_params_raw, mutable=True)
     pks = request.POST.getlist('queryset')
@@ -1914,7 +2023,6 @@ def _get_filtered_queryset(request):
     _qs = operations.filter_queryset(request.user, Citation.objects.all())
     queryset = CitationFilter(filter_params, queryset=_qs)
     return queryset, filter_params_raw
-
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1962,6 +2070,8 @@ def create_citation_collection(request):
     context = {}
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = CitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
@@ -1969,8 +2079,8 @@ def create_citation_collection(request):
                 instance = form.save(commit=False)
                 instance.createdBy = request.user
                 instance.save()
-                if isinstance(queryset, CitationFilter):
-                    queryset = queryset.qs
+
+
                 instance.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
@@ -1994,13 +2104,13 @@ def add_citation_collection(request):
 
     if request.method == 'POST':
         queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
         if request.GET.get('confirmed', False):
             form = SelectCitationCollectionForm(request.POST)
             form.fields['filters'].initial = filter_params_raw
             if form.is_valid():
                 collection = form.cleaned_data['collection']
-                if isinstance(queryset, CitationFilter):
-                    queryset = queryset.qs
                 collection.citations.add(*queryset)
 
                 # TODO: add filter paramter to select collection.
@@ -2093,7 +2203,7 @@ def export_citations(request):
             target = reverse('curation:export-citations-status') \
                      + '?' + urlencode({'task_id': task.id})
             return HttpResponseRedirect(target)
-        print form.errors
+
     else:       # Display the export configuration form.
         form = ExportCitationsForm()
         form.fields['filters'].initial = filter_params_raw
@@ -2111,6 +2221,7 @@ def collections(request):
     """
     List :class:`.Collection` instances.
     """
+    from curation.filters import CitationCollectionFilter
     collections = CitationCollection.objects.all()
 
     filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)

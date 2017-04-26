@@ -299,7 +299,6 @@ def create_authority_for_draft(request):
         )
 
     draftauthority.linkeddata.all().update(processed=True)
-    print authority.id
 
     response_data = {
         'resolution': resolution.id,

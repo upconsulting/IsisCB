@@ -1001,7 +1001,6 @@ class Authority(ReferencedEntity, CuratedMixin):
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
     CROSSREFERENCE = 'CR'
-    PUBLISHER = 'PU'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -1013,7 +1012,6 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
         (CROSSREFERENCE, 'Cross-reference'),
-        (PUBLISHER, 'Publisher'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
