@@ -6,6 +6,7 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
+
 <label>Subjects</label>
 <ul class="list-group" id="subject-list-group">
 {% if can_view %}
@@ -81,7 +82,7 @@ function triggerSearchSubjects(e) {
 
     var query = $('#create-subject-input').val();
     searchTimerSubjects = setTimeout(function() {
-      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + max_results + "&q=" + query, {
+      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=true&active_types=CO&type=PE,IN,GE,TI,CR&system_types=CO&system=SPWT&max=" + max_results + "&q=" + query, {
           success: function(result) {
               var results_container = $('#create-subject-results-container');
               results_container.empty();
@@ -96,8 +97,8 @@ function triggerSearchSubjects(e) {
                   choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                   choice_elem += '</span>';
                   choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
-                  if (r.datestring != null) {
-                      choice_elem += '(' + r.datestring + ')';
+                  if (r.citation_count != null) {
+                      choice_elem += ' (' + r.citation_count + ')';
                   }
                   if (r.description != null) {
                       choice_elem += ' | <span class="text-muted">' + r.description + '</span>';

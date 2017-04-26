@@ -214,3 +214,9 @@ a:hover.list_entry_link .underlineWhenLinked {
     margin-bottom: 6px;
     font-size: 8pt;
 }
+
+
+.list-group-item.search-result {
+    font-size: 0.9em;
+    padding: 5px;
+}
