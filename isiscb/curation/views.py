@@ -1469,10 +1469,11 @@ def quick_and_dirty_authority_search(request):
                         return 0
                 else:
                     return _v
+            # Numeric fragments should go first (e.g. 21st century).
             elif _is_int(a_remainder[0]):
-                return 1
-            elif _is_int(b_remainder[0]):
                 return -1
+            elif _is_int(b_remainder[0]):
+                return 1
             else:
                 # If there are names with double-hyphens and the next
                 #  character is alpha, sort in ascending alphabetical
@@ -2202,7 +2203,7 @@ def export_citations(request):
             target = reverse('curation:export-citations-status') \
                      + '?' + urlencode({'task_id': task.id})
             return HttpResponseRedirect(target)
-        
+
     else:       # Display the export configuration form.
         form = ExportCitationsForm()
         form.fields['filters'].initial = filter_params_raw
