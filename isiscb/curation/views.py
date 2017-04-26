@@ -1354,12 +1354,14 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
-
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
     tc = request.GET.get('type', None)
+    exclude = request.GET.get('exclude', None)
+    classification_system = request.GET.get('system', None)
+    system_blank = request.GET.get('system_blank', True)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
@@ -1368,13 +1370,32 @@ def quick_and_dirty_authority_search(request):
     queryset_sw = Authority.objects.all()
     queryset_exact = Authority.objects.all()
     queryset_with_numbers = Authority.objects.all()
-    if tc:
+    if tc: # include certain types
         type_array = tc.split(",")
         map(lambda t: t.upper(), type_array)
         queryset = queryset.filter(type_controlled__in=type_array)
         queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
         queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
         queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
+
+    if exclude: # exclude certain types
+        exclude_array = exclude.split(",")
+        map(lambda t: t.upper(), exclude_array)
+        queryset = queryset.exclude(type_controlled__in=exclude_array)
+        queryset_sw = queryset_sw.exclude(type_controlled__in=exclude_array)
+        queryset_exact = queryset_exact.exclude(type_controlled__in=exclude_array)
+        queryset_with_numbers = queryset_with_numbers.exclude(type_controlled__in=exclude_array)
+
+    if classification_system: # filter by classification system
+        system_array = classification_system.split(",")
+        map(lambda t: t.upper(), system_array)
+        query = Q(classification_system__in=system_array)
+        if system_blank:
+            query = query | Q(classification_system__isnull=True)
+        queryset = queryset.filter(query)
+        queryset_sw = queryset_sw.filter(query)
+        queryset_exact = queryset_exact.filter(query)
+        queryset_with_numbers = queryset_with_numbers.filter(query)
 
     if not show_inactive:   # Don't show inactive records.
         queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
@@ -1417,7 +1438,7 @@ def quick_and_dirty_authority_search(request):
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
-            'type_controlled': obj.get_type_controlled_display(),
+            'type_controlled': obj.get_type_controlled_display()
         })
     return JsonResponse({'results': results})
 
