@@ -1365,6 +1365,7 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     # Ordering: First, sort by closeness of match as follows: exact match; whole word
@@ -1376,58 +1377,57 @@ def quick_and_dirty_authority_search(request):
 
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
-    tc = request.GET.get('type', None)
+
+    # In some cases, the curator wants to limit to active only for certain
+    #  authority types.
+    limit_active_types = request.GET.get('active_types', None)
+    type_controlled = request.GET.get('type', None)
     exclude = request.GET.get('exclude', None)
+
+    # In some cases, the curator wants to apply the system parameter only to
+    #  specific authority types.
+    limit_clasification_types = request.GET.get('system_types', None)
     classification_system = request.GET.get('system', None)
+
     system_blank = request.GET.get('system_blank', True)
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
-
-    queryset = Authority.objects.all()          # Partial matches, in chunks; no punctuation or numbers.
-    queryset_sw = Authority.objects.all()       # Starts with...
-    queryset_exact = Authority.objects.all()    # Exact match.
-    queryset_with_numbers = Authority.objects.all()    # partial matches, in chunks; with punctuation and numbers.
-
-    if classification_system:
-        queryset = queryset.filter(classification_system__in=classification_system)
-        queryset_sw = queryset_sw.filter(classification_system__in=classification_system)
-        queryset_exact = queryset_exact.filter(classification_system__in=classification_system)
-        queryset_with_numbers = queryset_with_numbers.filter(classification_system__in=classification_system)
-
+    query = Q()
     if type_controlled:
         type_array = map(lambda t: t.upper(), type_controlled.split(","))
+        query &= Q(type_controlled__in=type_array)
 
-        queryset = queryset.filter(type_controlled__in=type_array)
-        queryset_sw = queryset_sw.filter(type_controlled__in=type_array)
-        queryset_exact = queryset_exact.filter(type_controlled__in=type_array)
-        queryset_with_numbers = queryset_with_numbers.filter(type_controlled__in=type_array)
+    if limit_active_types:
+        type_array = map(lambda t: t.upper(), limit_active_types.split(","))
+        query &= ~(Q(type_controlled__in=type_array) & Q(record_status_value=CuratedMixin.INACTIVE))
 
-    if exclude: # exclude certain types
-        exclude_array = exclude.split(",")
-        map(lambda t: t.upper(), exclude_array)
-        queryset = queryset.exclude(type_controlled__in=exclude_array)
-        queryset_sw = queryset_sw.exclude(type_controlled__in=exclude_array)
-        queryset_exact = queryset_exact.exclude(type_controlled__in=exclude_array)
-        queryset_with_numbers = queryset_with_numbers.exclude(type_controlled__in=exclude_array)
+    if exclude:     # exclude certain types
+        exclude_array = map(lambda t: t.upper(), exclude.split(","))
+        query &= ~Q(type_controlled__in=exclude_array)
 
-    if classification_system: # filter by classification system
-        system_array = classification_system.split(",")
-        map(lambda t: t.upper(), system_array)
-        query = Q(classification_system__in=system_array)
-        if system_blank:
-            query = query | Q(classification_system__isnull=True)
-        queryset = queryset.filter(query)
-        queryset_sw = queryset_sw.filter(query)
-        queryset_exact = queryset_exact.filter(query)
-        queryset_with_numbers = queryset_with_numbers.filter(query)
+    if classification_system:   # filter by classification system
+        system_array = map(lambda t: t.upper(), classification_system.split(","))
+        if limit_clasification_types:
+            type_array = map(lambda t: t.upper(), limit_clasification_types.split(","))
+            q_part = Q(type_controlled__in=type_array) & ~Q(classification_system__in=system_array)
+            if system_blank:
+                q_part &= ~Q(classification_system__isnull=True)
+            query &= ~q_part
+        else:
+            q_part = Q(classification_system__in=system_array)
+            if system_blank:
+                q_part = q_part | Q(classification_system__isnull=True)
+            query &= q_part
 
     if not show_inactive:   # Don't show inactive records.
-        queryset = queryset.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_sw = queryset_sw.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_exact = queryset_exact.filter(record_status_value=CuratedMixin.ACTIVE)
-        queryset_with_numbers = queryset_with_numbers.filter(record_status_value=CuratedMixin.ACTIVE)
+        query &= Q(record_status_value=CuratedMixin.ACTIVE)
+
+    queryset = Authority.objects.filter(query)
+    queryset_sw = Authority.objects.filter(query)       # Starts with...
+    queryset_exact = Authority.objects.filter(query)    # Exact match.
+    queryset_with_numbers = Authority.objects.filter(query)    # partial matches, in chunks; with punctuation and numbers.
 
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
@@ -1438,7 +1438,7 @@ def quick_and_dirty_authority_search(request):
         queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
-    queryset_exact = queryset_exact.filter(Q(name_for_sort=q) | Q(name=q))
+    queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     results = []
     result_ids = []
 
@@ -2011,7 +2011,6 @@ def bulk_select_citation(request):
 
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
-    print 'got pks', pks
 
     filter_params_raw = request.POST.get('filters')
     filter_params = QueryDict(filter_params_raw, mutable=True)
@@ -2203,7 +2202,7 @@ def export_citations(request):
             target = reverse('curation:export-citations-status') \
                      + '?' + urlencode({'task_id': task.id})
             return HttpResponseRedirect(target)
-        print form.errors
+        
     else:       # Display the export configuration form.
         form = ExportCitationsForm()
         form.fields['filters'].initial = filter_params_raw

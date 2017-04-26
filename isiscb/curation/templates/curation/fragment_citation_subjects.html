@@ -6,6 +6,11 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
+<style>
+.acrelation.search-result {
+    font-size: 9pt;
+}
+</style>
 <label>Subjects</label>
 <ul class="list-group" id="subject-list-group">
 {% if can_view %}
@@ -81,7 +86,7 @@ function triggerSearchSubjects(e) {
 
     var query = $('#create-subject-input').val();
     searchTimerSubjects = setTimeout(function() {
-      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&classification_system=SPWC&classification_system=SPWT&max=" + max_results + "&q=" + query, {
+      $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=true&active_types=CO&type=PE,IN,GE,TI,CR&system_types=CO&system=SPWT&max=" + max_results + "&q=" + query, {
           success: function(result) {
               var results_container = $('#create-subject-results-container');
               results_container.empty();
