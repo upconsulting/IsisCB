@@ -11,6 +11,11 @@ var toggleTab = function(name) {
     $('.nav-tabs a[href="#' + name + '"]').tab('show')
 }
 </script>
+<style>
+.acrelation.search-result {
+    font-size: 9pt;
+}
+</style>
 
 {% with instance|get_warnings_column_count_citation as column_count %}
 
@@ -151,7 +156,6 @@ Back to List </a>
                 <div class="row">
                     <div class="col-sm-6">
                         {% include "curation/fragment_citation_categories.html" %}
-                        {% include "curation/fragment_citation_subjects.html" %}
                     </div>
                     <div class="col-sm-6">
 

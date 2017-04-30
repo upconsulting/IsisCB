@@ -89,7 +89,7 @@ function triggerSearchCategories() {
 
   var query = $('#create-category-input').val();
   searchTimerCategories = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?type=CT&max=" + max_results_categories + "&q=" + query, {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&system=SPWC&type=CT&max=" + max_results_categories + "&q=" + query, {
         success: function(result) {
             var results_container = $('#create-category-results-container');
             results_container.empty();
@@ -104,8 +104,8 @@ function triggerSearchCategories() {
                 choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                 choice_elem += '</span>';
                 choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.name + '</strong>';
-                if (r.datestring != null) {
-                    choice_elem += '(' + r.datestring + ')';
+                if (r.citation_count != null) {
+                    choice_elem += ' (' + r.citation_count + ')';
                 }
                 if (r.description != null) {
                     choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
