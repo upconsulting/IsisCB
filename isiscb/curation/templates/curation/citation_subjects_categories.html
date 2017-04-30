@@ -137,6 +137,7 @@
        </div>
   </div>
   <div class="col-md-6">
+    {% if can_update %}
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
       <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
@@ -184,10 +185,14 @@
           <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
         </div>
       </div>
+
+      <!-- Category tab -->
       <div role="tabpanel" class="tab-pane" id="addCategories">
-        add categories
+        {% include "curation/fragment_categories_page_categories.html" %}
+
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 
