@@ -130,7 +130,7 @@ var delete_linkeddata = function() {
     $('#delete-linkeddata-modal').modal('hide');
     var linkeddata_id = $('#linkeddata-id-container').val();
     if (linkeddata_id) {
-        window.location.replace("{% url "delete_linkeddata_for_authority" instance.id linkeddata.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_linkeddata_for_authority" instance.id linkeddata.id %}?confirm=true");
     }
 }
 </script>
