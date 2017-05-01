@@ -10,17 +10,17 @@ def set_citation_tracking_state(apps, schema_editor):
     Tracking = apps.get_model("isisdata", "Tracking")
     Citation = apps.get_model("isisdata", "Citation")
 
-    while Citation.objects.filter(tracking_state__isnull=True).exists():
-        with transaction.atomic():
-            for citation in Citation.objects.filter(tracking_state__isnull=True)[:1000]:
-                tracking_types = list(citation.tracking_records.all().values_list('type_controlled', flat=True))
-                for stage in stages[::-1]:
-                    if stage in tracking_types:
-                        citation.tracking_state = stage
-                        citation.save()
-                        break
-                citation.tracking_state = Citation.NONE
-                citation.save()
+    # while Citation.objects.filter(tracking_state__isnull=True).exists():
+    #     with transaction.atomic():
+    #         for citation in Citation.objects.filter(tracking_state__isnull=True)[:1000]:
+    #             tracking_types = list(citation.tracking_records.all().values_list('type_controlled', flat=True))
+    #             for stage in stages[::-1]:
+    #                 if stage in tracking_types:
+    #                     citation.tracking_state = stage
+    #                     citation.save()
+    #                     break
+    #             citation.tracking_state = Citation.NONE
+    #             citation.save()
 
 
 def set_authority_tracking_state(apps, schema_editor):
@@ -29,17 +29,17 @@ def set_authority_tracking_state(apps, schema_editor):
     Authority = apps.get_model("isisdata", "Authority")
     ContentType = apps.get_model("contenttypes", "ContentType")
 
-    while Authority.objects.filter(tracking_state__isnull=True).exists():
-        with transaction.atomic():
-            for authority in Authority.objects.filter(tracking_state__isnull=True)[:1000]:
-                tracking_types = list(authority.tracking_records.all().values_list('type_controlled', flat=True))
-                for stage in stages[::-1]:
-                    if stage in tracking_types:
-                        authority.tracking_state = stage
-                        authority.save()
-                        break
-                authority.tracking_state = Authority.NONE
-                authority.save()
+    # while Authority.objects.filter(tracking_state__isnull=True).exists():
+    #     with transaction.atomic():
+    #         for authority in Authority.objects.filter(tracking_state__isnull=True)[:1000]:
+    #             tracking_types = list(authority.tracking_records.all().values_list('type_controlled', flat=True))
+    #             for stage in stages[::-1]:
+    #                 if stage in tracking_types:
+    #                     authority.tracking_state = stage
+    #                     authority.save()
+    #                     break
+    #             authority.tracking_state = Authority.NONE
+    #             authority.save()
 
 
 def clear_citation_tracking_state(apps, schema_editor):
