@@ -6,6 +6,7 @@ from django.db import migrations
 from django.db.models import F
 import sys
 
+
 def set_citation(apps, schema_editor):
     from random import randint
     Tracking = apps.get_model("isisdata", "Tracking")
