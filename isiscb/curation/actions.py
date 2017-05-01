@@ -106,14 +106,14 @@ class SetTrackingStatus(BaseAction):
 
     def apply(self, user, filter_params_raw, value, info='', notes=''):
         task = AsyncTask.objects.create()
-        result = bulk_change_tracking_state(user.id, filter_params_raw, value, info, notes, task.id)
+        result = bulk_change_tracking_state.delay(user.id, filter_params_raw, value, info, notes, task.id)
 
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
-        # task.async_uuid = result.id
-        # task.value = ('record_status_explanation', value)
-        # task.save()
-        # return task.id
+        task.async_uuid = result.id
+        task.value = ('record_status_explanation', value)
+        task.save()
+        return task.id
 
 
 
