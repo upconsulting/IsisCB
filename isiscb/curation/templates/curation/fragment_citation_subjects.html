@@ -50,12 +50,6 @@
     {% endif %}
 {% endfor %}
 
-{% if can_update %}
-<li class="list-group-item" id="create-subject-item" style="display: none;"></li>
-<a style="cursor: pointer;" class="list-group-item acrelation text-muted" onclick="createNewSubject();">
-    <span class="glyphicon glyphicon-plus"></span> Add a subject
-</a>
-{% endif %}
 {% endif %}
 {% if not can_view %}
 <li class="list-group-item">
