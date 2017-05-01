@@ -3,13 +3,12 @@
 from __future__ import unicode_literals
 
 from django.db import migrations
-from collections import OrderedDict
-# import sys
 
 stages = ['BD', 'FU', 'PD', 'AU', 'HS', 'PT']
 
 
 def set_citation_tracking_state(apps, schema_editor):
+    from collections import OrderedDict
     Tracking = apps.get_model("isisdata", "Tracking")
     Citation = apps.get_model("isisdata", "Citation")
 
@@ -21,13 +20,12 @@ def set_citation_tracking_state(apps, schema_editor):
         for stage in stages[::-1]:
             if stage in tracking_types:
                 citation.tracking_state = stage
-                # print stage,
                 citation.save()
                 break
-        # sys.stdout.flush()
 
 
 def set_authority_tracking_state(apps, schema_editor):
+    from collections import OrderedDict
     AuthorityTracking = apps.get_model("isisdata", "AuthorityTracking")
     Authority = apps.get_model("isisdata", "Authority")
     ContentType = apps.get_model("contenttypes", "ContentType")
