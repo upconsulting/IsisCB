@@ -97,6 +97,12 @@ def get_warnings_column_count_authority(instance):
 
 @register.filter
 def is_public_inconsistent(instance):
+    if isinstance(instance, dict):
+        if instance['public'] and instance['record_status_value'] != CuratedMixin.ACTIVE:
+            return True
+        if not instance['public'] and instance['record_status_value'] == CuratedMixin.ACTIVE:
+            return True
+        return False
     if instance.public and instance.record_status_value != CuratedMixin.ACTIVE:
         return True
     if not instance.public and instance.record_status_value == CuratedMixin.ACTIVE:
@@ -122,7 +128,7 @@ def are_related_objects_for_citation_public(citation):
         if not attr.public:
             return False
     return True
-    
+
 
 @register.filter
 def get_authorities(acrelations):
@@ -145,24 +151,12 @@ def get_citations(citation, ccrelations):
 
 @register.filter
 def are_related_authorities_public(acrelations, authorities):
-    for acrel in acrelations:
-        if not acrel.public:
-            return False
-    for authority in authorities:
-        if not authority.public:
-            return False
-    return True
+    return acrelations.filter(public=False).count() == 0 and authorities.filter(public=False).count() == 0
 
 
 @register.filter
 def are_related_citations_public(ccrelations, citations):
-    for ccrel in ccrelations:
-        if not ccrel.public:
-            return False
-    for citation in citations:
-        if not citation.public:
-            return False
-    return True
+    return ccrelations.filter(public=False).count() == 0 and citations.filter(public=False).count() == 0
 
 
 @register.filter
