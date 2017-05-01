@@ -2042,12 +2042,14 @@ class IsisCBRole(models.Model):
 class AccessRule(models.Model):
     """
     Parent class for all rules
+
+    TODO: can we make this abstract? :-(
     """
 
     name = models.CharField(max_length=255, blank=True, null=True)
 
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
-                                    help_text=help_text("""The role a rules belongs to."""))
+                             help_text=help_text("""The role a rules belongs to."""))
 
     CITATION = 'citation'
     AUTHORITY = 'authority'

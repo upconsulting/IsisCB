@@ -52,7 +52,6 @@ def check_rules(perm, fn=None, login_url=None, raise_exception=False, redirect_f
                 obj = fn
 
             # Get the user
-            print request, request.user
             user = request.user
 
             if not rules.test_rule(perm, request.user, obj):
