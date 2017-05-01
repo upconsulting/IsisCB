@@ -1806,7 +1806,7 @@ class Tracking(ReferencedEntity, CuratedMixin):
         (AUTHORIZED, 'Authorized'),
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
-        (BULK_DATA, 'Bulk Data Update')
+        (BULK_DATA, 'Bulk Data Update'),
         (NONE, 'None'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
