@@ -46,7 +46,7 @@
                 {% endfor %}
                 <div class="form-group">
                     <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control"}}
+                    {{ form.type_controlled|addcss:"form-control input-sm"}}
                 </div>
             </div>
 
@@ -56,7 +56,7 @@
                 {% endfor %}
                 <div class="form-group">
                     <label>{{ form.record_status_value.label }}</label>
-                    {{ form.record_status_value|addcss:"form-control"}}
+                    {{ form.record_status_value|addcss:"form-control input-sm"}}
                 </div>
             </div>
         </div>
@@ -66,19 +66,22 @@
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
 
-        <div class="form-group row">
-            <label class="col-sm-12">{{ form.redirect_to.label }}</label>
-            <div class="col-sm-11">
-            <input type="text"
-                class="form-control"
-                name="authority-search"
-                autocomplete="off"
-                id="authority-search" />
-                <ul class="list-group" id="results-container"></ul>
-              </div>
-              <div class="col-sm-1">
-            <span id="remove_redirect" class="glyphicon glyphicon-remove" style="color: red; padding-top: 7px; margin-left: -10px;"
-              ></span>
+        <div class="form-group">
+            <label>{{ form.redirect_to.label }}</label>
+
+            <div class="input-group">
+                <input type="text"
+                    class="form-control input-sm"
+                    name="authority-search"
+                    autocomplete="off"
+                    id="authority-search" />
+                    <ul class="list-group" id="results-container"></ul>
+                <span class="input-group-btn">
+                    <span class="btn" id="remove_redirect">
+                        <span class="glyphicon glyphicon-remove"
+                            style="color: red;"></span>
+                    </span>
+                </span>
             </div>
         </div>
 
@@ -87,7 +90,7 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.name.label }}</label>
-            {{ form.name|addcss:"form-control"}}
+            {{ form.name|addcss:"form-control input-sm"}}
         </div>
 
         {% for error in form.description.errors %}
@@ -95,7 +98,7 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.description.label }}</label>
-            {{ form.description|addcss:"form-control"}}
+            {{ form.description|addcss:"form-control input-sm"}}
         </div>
 
         {% for error in form.classification_system.errors %}
@@ -103,7 +106,7 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.classification_system.label }}</label>
-            {{ form.classification_system|addcss:"form-control"}}
+            {{ form.classification_system|addcss:"form-control input-sm"}}
         </div>
 
         {% for error in form.classification_code.errors %}
@@ -111,7 +114,7 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.classification_code.label }}</label>
-            {{ form.classification_code|addcss:"form-control"}}
+            {{ form.classification_code|addcss:"form-control input-sm"}}
         </div>
 
         {% for error in form.record_status_explanation.errors %}
@@ -119,7 +122,7 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.record_status_explanation.label }}</label>
-            {{ form.record_status_explanation|addcss:"form-control"}}
+            {{ form.record_status_explanation|addcss:"form-control input-sm"}}
         </div>
 
         {% for error in form.record_history.errors %}
@@ -127,11 +130,11 @@
         {% endfor %}
         <div class="form-group">
             <label>{{ form.record_history.label }}</label>
-            {{ form.record_history|addcss:"form-control"}}
+            {{ form.record_history|addcss:"form-control input-sm"}}
         </div>
     </div>
     <div class="col-sm-8">
-        <ul class="nav nav-tabs nav-justified" role="tablist">
+        <ul class="nav nav-tabs nav-justified curation-tabs" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
                 <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
             </li>
@@ -164,7 +167,7 @@
                     {% endfor %}
                     <div class="form-group">
                         <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control" }}
+                        {{ field|addcss:"form-control input-sm" }}
                     </div>
                     {% endfor %}
                     {% endif %}
@@ -176,7 +179,7 @@
                   {% endfor %}
                   <div class="form-group">
                       <label>{{ form.belongs_to.label }}</label>
-                      {{ form.belongs_to|addcss:"form-control" }}
+                      {{ form.belongs_to|addcss:"form-control input-sm" }}
                   </div>
                 </div>
             </div>
