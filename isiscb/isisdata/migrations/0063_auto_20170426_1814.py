@@ -19,6 +19,8 @@ def set_citation_tracking_state(apps, schema_editor):
                         citation.tracking_state = stage
                         citation.save()
                         break
+                citation.tracking_state = Citation.NONE
+                citation.save()
 
 
 def set_authority_tracking_state(apps, schema_editor):
@@ -36,6 +38,8 @@ def set_authority_tracking_state(apps, schema_editor):
                         authority.tracking_state = stage
                         authority.save()
                         break
+                authority.tracking_state = Authority.NONE
+                authority.save()
 
 
 def clear_citation_tracking_state(apps, schema_editor):
@@ -48,7 +52,7 @@ def clear_authority_tracking_state(apps, schema_editor):
 
 class Migration(migrations.Migration):
     atomic = False
-    
+
     dependencies = [
         ('isisdata', '0062_auto_20170426_1813'),
     ]

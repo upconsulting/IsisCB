@@ -9,8 +9,10 @@ class TrackingWorkflow(object):
 
     transitions = (
         (None, Tracking.BULK_DATA),
+        (Tracking.NONE, Tracking.BULK_DATA),
         (Tracking.BULK_DATA, Tracking.FULLY_ENTERED),
         (None, Tracking.FULLY_ENTERED),
+        (Tracking.NONE, Tracking.FULLY_ENTERED),
         (Tracking.FULLY_ENTERED, Tracking.PROOFED),
         (Tracking.PROOFED, Tracking.AUTHORIZED),
         (Tracking.AUTHORIZED, Tracking.HSTM_UPLOAD),

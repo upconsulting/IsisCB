@@ -798,13 +798,15 @@ class Citation(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
+    NONE = 'NO'
     TRACKING_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),
         (AUTHORIZED, 'Authorized'),
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
-        (BULK_DATA, 'Bulk Data Update')
+        (BULK_DATA, 'Bulk Data Update'),
+        (NONE, 'None')
     )
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
                                       choices=TRACKING_CHOICES)
@@ -1038,13 +1040,15 @@ class Authority(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
+    NONE = 'No'
     TRACKING_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),
         (AUTHORIZED, 'Authorized'),
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
-        (BULK_DATA, 'Bulk Data Update')
+        (BULK_DATA, 'Bulk Data Update'),
+        (NONE, 'No')
     )
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
                                       choices=TRACKING_CHOICES)
@@ -1756,13 +1760,15 @@ class AuthorityTracking(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
+    NONE = 'NO'
     TYPE_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),
         (AUTHORIZED, 'Authorized'),
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
-        (BULK_DATA, 'Bulk Data Update')
+        (BULK_DATA, 'Bulk Data Update'),
+        (NONE, 'None')
     )
 
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
@@ -1793,6 +1799,7 @@ class Tracking(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
+    NONE = 'NO'
     TYPE_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),
@@ -1800,6 +1807,7 @@ class Tracking(ReferencedEntity, CuratedMixin):
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
         (BULK_DATA, 'Bulk Data Update')
+        (NONE, 'None'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
