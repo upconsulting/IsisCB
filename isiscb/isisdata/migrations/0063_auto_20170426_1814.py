@@ -8,7 +8,6 @@ stages = ['BD', 'FU', 'PD', 'AU', 'HS', 'PT']
 
 
 def set_citation_tracking_state(apps, schema_editor):
-    from collections import OrderedDict
     Tracking = apps.get_model("isisdata", "Tracking")
     Citation = apps.get_model("isisdata", "Citation")
 
@@ -22,7 +21,6 @@ def set_citation_tracking_state(apps, schema_editor):
 
 
 def set_authority_tracking_state(apps, schema_editor):
-    from collections import OrderedDict
     AuthorityTracking = apps.get_model("isisdata", "AuthorityTracking")
     Authority = apps.get_model("isisdata", "Authority")
     ContentType = apps.get_model("contenttypes", "ContentType")
