@@ -305,7 +305,8 @@ class LinkedDataForm(forms.ModelForm):
         model = LinkedData
         fields = [
             'universal_resource_name', 'resource_name', 'url',
-            'type_controlled', 'record_status_value', 'record_status_explanation', 'administrator_notes'
+            'type_controlled', 'record_status_value',
+            'record_status_explanation', 'administrator_notes'
         ]
 
     def __init__(self, *args, **kwargs):

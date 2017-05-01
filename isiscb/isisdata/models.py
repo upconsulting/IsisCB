@@ -1492,7 +1492,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                          related_query_name='cc_relations',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
-    
+
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
     Position at which the citation should be displayed in the citation detail
     view. Whole numbers or decimals can be used.
@@ -1698,23 +1698,20 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     description = models.TextField(blank=True)
 
     universal_resource_name = models.CharField(max_length=255,
-                                               help_text=help_text("""
-    The value of the identifier (the actual DOI link or the value of the ISBN,
-    etc). Will be a URN, URI, URL, or other unique identifier for a work, used
-    as needed to provide information about how to find the digital object on the
-    web or to identify the physical object uniquely.
-    """))
+                                               help_text="The value of the"
+    " identifier (the actual DOI link or the value of the ISBN, etc). Will be a"
+    " URN, URI, URL, or other unique identifier for a work, used as needed to"
+    " provide information about how to find the digital object on the web or"
+    " to identify the physical object uniquely.")
 
     resource_name = models.CharField(max_length=255, blank=True, null=True,
-                                     help_text=help_text("""
-    Name of the resource that the URN links to."""))
+                                     help_text="Title of the resource that the"
+                                               " URN links to.")
 
     url = models.CharField(max_length=255, blank=True, null=True,
-                           help_text=help_text(
-    """
-    If the resource has a DOI, use the DOI instead and do not include URL. Do
-    include the http:// prefix. If used must also provide URLDateAccessed.
-    """))
+                           help_text="If the URN is not an URL, you may"
+                                     " optionally provide one here, for display"
+                                     " purposes.")
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
@@ -1724,11 +1721,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
                                 'subject_instance_id')
 
     type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
-                                        help_text=help_text("""
-    The "type" field determines what kinds of values are acceptable for this
-    linked data entry.
-    """))
-
+                                        help_text="This field is used to"
+    " determine what values are acceptable for the URN field, and to choose"
+    " the correct display modality in the public-facing site and metadata")
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
