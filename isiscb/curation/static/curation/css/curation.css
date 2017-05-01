@@ -220,3 +220,11 @@ a:hover.list_entry_link .underlineWhenLinked {
     font-size: 0.9em;
     padding: 5px;
 }
+
+label {
+    font-size: 9pt;
+}
+
+.curation-tabs {
+    font-size: 9pt;
+}

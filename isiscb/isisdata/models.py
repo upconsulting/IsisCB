@@ -784,7 +784,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         (WEBSITE, 'Website'),
         (APPLICATION, 'Application'),
     )
-
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',
                                        choices=TYPE_CHOICES,
@@ -792,6 +791,24 @@ class Citation(ReferencedEntity, CuratedMixin):
     This list can be extended to the resource types specified by Doublin Core
     Recource Types http://dublincore.org/documents/resource-typelist/
     """))
+
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TRACKING_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=TRACKING_CHOICES)
+    """The current state of the record."""
 
     abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.
@@ -888,12 +905,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         related_query_name='citations',
         content_type_field='subject_content_type',
         object_id_field="subject_instance_id")
-
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='citations',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
 
     resolutions = GenericRelation('zotero.InstanceResolutionEvent',
                                   related_query_name='citation_resolutions',
@@ -1021,6 +1032,23 @@ class Authority(ReferencedEntity, CuratedMixin):
     controlled type vocabulary.
     """))
 
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TRACKING_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=TRACKING_CHOICES)
+    """The current state of the record."""
 
     SPWT = 'SPWT'
     SPWC = 'SPWC'
@@ -1097,11 +1125,8 @@ class Authority(ReferencedEntity, CuratedMixin):
         related_query_name='authorities',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='authorities',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
+
+
 
     @property
     def linkeddata_public(self):
@@ -1305,12 +1330,6 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
 
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='ac_relations',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
-
     resolutions = GenericRelation('zotero.InstanceResolutionEvent',
                                   related_query_name='acrelation_resolutions',
                                   content_type_field='to_model',
@@ -1402,10 +1421,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
                                          related_query_name='aa_relations',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='aa_relations',
-                                       content_type_field='subject_content_type',
-                                       object_id_field='subject_instance_id')
+
 
     def _render_type_controlled(self):
         try:
@@ -1476,10 +1492,6 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                          related_query_name='cc_relations',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='cc_relations',
-                                       content_type_field='subject_content_type',
-                                       object_id_field='subject_instance_id')
 
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
     Position at which the citation should be displayed in the citation detail
@@ -1686,23 +1698,20 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     description = models.TextField(blank=True)
 
     universal_resource_name = models.CharField(max_length=255,
-                                               help_text=help_text("""
-    The value of the identifier (the actual DOI link or the value of the ISBN,
-    etc). Will be a URN, URI, URL, or other unique identifier for a work, used
-    as needed to provide information about how to find the digital object on the
-    web or to identify the physical object uniquely.
-    """))
+                                               help_text="The value of the"
+    " identifier (the actual DOI link or the value of the ISBN, etc). Will be a"
+    " URN, URI, URL, or other unique identifier for a work, used as needed to"
+    " provide information about how to find the digital object on the web or"
+    " to identify the physical object uniquely.")
 
     resource_name = models.CharField(max_length=255, blank=True, null=True,
-                                     help_text=help_text("""
-    Name of the resource that the URN links to."""))
+                                     help_text="Title of the resource that the"
+                                               " URN links to.")
 
     url = models.CharField(max_length=255, blank=True, null=True,
-                           help_text=help_text(
-    """
-    If the resource has a DOI, use the DOI instead and do not include URL. Do
-    include the http:// prefix. If used must also provide URLDateAccessed.
-    """))
+                           help_text="If the URN is not an URL, you may"
+                                     " optionally provide one here, for display"
+                                     " purposes.")
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
@@ -1712,11 +1721,9 @@ class LinkedData(ReferencedEntity, CuratedMixin):
                                 'subject_instance_id')
 
     type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
-                                        help_text=help_text("""
-    The "type" field determines what kinds of values are acceptable for this
-    linked data entry.
-    """))
-
+                                        help_text="This field is used to"
+    " determine what values are acceptable for the URN field, and to choose"
+    " the correct display modality in the public-facing site and metadata")
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
@@ -1728,6 +1735,43 @@ class LinkedData(ReferencedEntity, CuratedMixin):
         values = (self.type_controlled,
                   self.universal_resource_name)
         return u'{0}: {1}'.format(*values)
+
+
+class AuthorityTracking(ReferencedEntity, CuratedMixin):
+    """
+    An audit entry for tracking the status of records in the curatorial process.
+
+    This is a higher-level concept than the History audit log, which records
+    only changes to entries.
+    """
+    ID_PREFIX = 'TRA'
+
+    history = HistoricalRecords()
+
+    tracking_info = models.CharField(max_length=255, blank=True)
+
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TYPE_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+
+    type_controlled = models.CharField(max_length=2, null=True, blank=True,
+                                       choices=TYPE_CHOICES, db_index=True)
+
+    authority = models.ForeignKey(Authority, related_name='tracking_records',
+                                  null=True, blank=True)
+
+    notes = models.TextField(blank=True)
 
 
 class Tracking(ReferencedEntity, CuratedMixin):
@@ -1757,14 +1801,11 @@ class Tracking(ReferencedEntity, CuratedMixin):
         (FULLY_ENTERED, 'Fully Entered'),
         (BULK_DATA, 'Bulk Data Update')
     )
-
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
-                                       choices=TYPE_CHOICES)
+                                       choices=TYPE_CHOICES, db_index=True)
 
-    subject_content_type = models.ForeignKey(ContentType, db_index=True)
-    subject_instance_id = models.CharField(max_length=200, db_index=True)
-    subject = GenericForeignKey('subject_content_type',
-                                'subject_instance_id')
+    citation = models.ForeignKey(Citation, related_name='tracking_records',
+                                 null=True, blank=True)
 
     notes = models.TextField(blank=True)
 
@@ -1974,11 +2015,14 @@ class IsisCBRole(models.Model):
 class AccessRule(models.Model):
     """
     Parent class for all rules
+
+    TODO: can we make this abstract? :-(
     """
+
     name = models.CharField(max_length=255, blank=True, null=True)
 
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
-                                    help_text=help_text("""The role a rules belongs to."""))
+                             help_text=help_text("""The role a rules belongs to."""))
 
     CITATION = 'citation'
     AUTHORITY = 'authority'
@@ -2005,7 +2049,7 @@ class CRUDRule(AccessRule):
         (DELETE, 'Delete'),
     )
     crud_action = models.CharField(max_length=255, null=False, blank=False,
-                                       choices=CRUD_CHOICES)
+                                   choices=CRUD_CHOICES)
 
 
 class FieldRule(AccessRule):

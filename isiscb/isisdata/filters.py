@@ -67,14 +67,18 @@ class CitationFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Tracking.TYPE_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
 
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
 
-    def __init__(self, *args, **kwargs):
-        super(CitationFilter, self).__init__(*args, **kwargs)
+    def __init__(self, params, **kwargs):
+
+        if params.get('in_collections', False) and params.get('collection_only', False):
+             params = QueryDict({'in_collections': params.getlist('in_collections')})
+
+        super(CitationFilter, self).__init__(params, **kwargs)
 
         in_coll = self.data.get('in_collections', None)
         if in_coll:
@@ -85,8 +89,12 @@ class CitationFilter(django_filters.FilterSet):
             except CitationCollection.DoesNotExist:
                 self.collection_name = "Collection could not be found."
 
-        zotero_acc = self.data.get('zotero_accession', None)
+            if self.data.get('collection_only', False):
+                print '!!!'
+                self.data = {'in_collections': in_coll}
+            return
 
+        zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
                 accession = ImportAccession.objects.get(pk=zotero_acc)
@@ -125,7 +133,8 @@ class CitationFilter(django_filters.FilterSet):
         fields=(
             ('publication_date', 'publication_date'),
             ('title', 'title_for_sort'),
-            ('part_details__page_begin', 'start_page')
+            ('part_details__page_begin', 'start_page'),
+            ('modified_on', 'modified')
         ),
 
         # labels do not need to retain order
@@ -133,6 +142,7 @@ class CitationFilter(django_filters.FilterSet):
             'publication_date': 'Publication date',
             'title': 'Title',
             'start_page': 'Start page',
+            'modified': 'Last modified'
         }
     )
 
@@ -240,23 +250,16 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-
-        q = Q(tracking_records__type_controlled=value)
-
-        next_state = TrackingWorkflow.stages.get(value)
-        # if next_state:
-        #     q &= ~Q(tracking_records__type_controlled=next_state)
-        return queryset.filter(q)
+        return queryset.filter(tracking_state=value)
 
     def filter_in_collections(self, queryset, field, value):
         if not value:
             return queryset
         q = Q()
-        for collection in value:
-            q |= Q(in_collections=collection)
+        print value, type(value)
 
 
-        return queryset.filter(q)
+        return queryset.filter(Q(in_collections=value))
 
 
 class AuthorityFilter(django_filters.FilterSet):
@@ -279,13 +282,15 @@ class AuthorityFilter(django_filters.FilterSet):
     dataset_list = [(ds.pk, ds.name) for ds in datasets ]
     belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
 
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
+
     class Meta:
         model = Authority
         fields = [
             'id', 'name', 'type_controlled', 'description',
             'classification_system', 'classification_code',
             'classification_hierarchy', 'zotero_accession',
-            'belongs_to']
+            'belongs_to', 'tracking_state']
 
         # order_by = [
         #     ('', 'None'),
@@ -304,6 +309,12 @@ class AuthorityFilter(django_filters.FilterSet):
             'name': 'Name'
         }
     )
+
+    def filter_tracking_state(self, queryset, field, value):
+        if not value:
+            return queryset
+
+        return queryset.filter(tracking_state=value)
 
     def filter_name(self, queryset, name, value):
         value = unidecode(value)

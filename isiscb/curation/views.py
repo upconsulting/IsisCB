@@ -34,7 +34,7 @@ from curation.forms import *
 from curation.contrib.views import check_rules
 from curation import tasks as curation_tasks
 
-import iso8601, rules, datetime
+import iso8601, rules, datetime, hashlib
 from itertools import chain
 from unidecode import unidecode
 
@@ -416,8 +416,10 @@ def tracking_for_citation(request, citation_id):
         tracking.modified_by = request.user
         date = datetime.datetime.now()
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
-        tracking.subject = citation
+        tracking.citation = citation
         tracking.save()
+        citation.tracking_state = trackType
+        citation.save()
     return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking')
 
 
@@ -435,11 +437,13 @@ def tracking_for_authority(request, authority_id):
     template = 'curation/authority_tracking_create.html'
 
     if request.method == "POST":
-        form = AuthorityTrackingForm(request.POST, instance=Tracking(), prefix='tracking')
+        form = AuthorityTrackingForm(request.POST, instance=AuthorityTracking(), prefix='tracking')
         if form.is_valid():
             tracking = form.save(commit=False)
-            tracking.subject = authority
+            tracking.authority = authority
             tracking.save()
+            authority.tracking_state = tracking.type_controlled
+            authority.save()
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority_id,)) + '?tab=tracking')
     else:
         # just always shows tracking form if not post
@@ -906,7 +910,7 @@ def citation(request, citation_id):
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
-        tracking_entries = Tracking.objects.filter(subject_instance_id=citation_id)
+        tracking_entries = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
 
         tracking_workflow = TrackingWorkflow(citation)
         context.update({
@@ -1122,41 +1126,50 @@ def subjects_and_categories(request, citation_id):
 # Deleted class QueryDictWraper; we're not using it. -E
 
 
+def _citations_get_filter_params(request):
+    """
+    Build ``filter_params`` for GET request in citation list view.
+    """
+    all_params = {}
+    additional_params_names = ["page", "zotero_accession", "in_collections",
+                               'collection_only']
+    user_session = request.session
+
+
+    raw_params = request.GET.urlencode().encode('utf-8')
+    filter_params = QueryDict(raw_params, mutable=True)
+
+    if 'o' in filter_params and isinstance(filter_params['o'], list):
+        if len(filter_params['o']) > 0:
+            filter_params['o'] = filter_params['o'][0]
+        else:
+            filter_params['o'] = "publication_date"
+
+    if not 'o' in filter_params.keys():
+        filter_params['o'] = 'publication_date'
+
+    for key in additional_params_names:
+        all_params[key] = request.GET.get(key, '')
+
+    # Let the GET parameter override the cached POST parameter, in case the
+    #  curator is originating in the collections view.
+    if "in_collections" in all_params:
+        filter_params["in_collections"] = all_params["in_collections"]
+    return filter_params, all_params
+
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def citations(request):
-    additional_params_names = ["page", "zotero_accession", "in_collections"]
-    all_params = {}
+    template = 'curation/citation_list_view.html'
 
     user_session = request.session
-    if request.method == 'POST':
-        # We need to be able to amend the filter parameters.
-        filter_params = QueryDict(request.POST.urlencode().encode('utf-8'),
-                                  mutable=True)
-    elif request.method == 'GET':
-        filter_params = user_session.get('citation_filters', {})
-        if 'o' in filter_params and isinstance(filter_params['o'], list):
-            if len(filter_params['o']) > 0:
-                filter_params['o'] = filter_params['o'][0]
-            else:
-                filter_params['o'] = "publication_date"
+    # We need to be able to amend the filter parameters, so we create a new
+    #  mutable QueryDict from the POST payload.
+    filter_params, all_params = _citations_get_filter_params(request)
 
-        if not 'o' in filter_params.keys():
-            filter_params['o'] = 'publication_date'
-
-        for key in additional_params_names:
-            all_params[key] = request.GET.get(key, '')
-
-        # Let the GET parameter override the cached POST parameter, in case the
-        #  curator is originating in the collections view.
-        if "in_collections" in all_params:
-            filter_params["in_collections"] = all_params["in_collections"]
-    if 'o' not in filter_params:
+    # Default sort order. TODO: move this to the CitationFilterSet itself.
+    if 'o' not in filter_params or not filter_params['o']:
         filter_params['o'] = 'title_for_sort'
-    # if 'zotero_accession' in request.GET:
-    #     filter_params['zotero_accession'] = request.GET.get('zotero_accession')
-    #ids = None
-    #if request.method == 'POST':
-    #    ids = [i.strip() for i in request.POST.get('ids').split(',')]
 
     # We use the filter parameters in this form to specify the queryset for
     #  bulk actions.
@@ -1164,9 +1177,7 @@ def citations(request):
         encoded_params = filter_params.urlencode().encode('utf-8')
     else:
         _params = QueryDict(mutable=True)
-        for k, v in filter_params.iteritems():
-            if v is None:
-                continue
+        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
@@ -1176,19 +1187,15 @@ def citations(request):
         'filter_params': encoded_params,
     }
 
-    template = 'curation/citation_list_view.html'
-
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
+    fields = ('record_status_value', 'id', 'type_controlled', 'public', 'publication_date')
+    filtered_objects = CitationFilter(filter_params, queryset=queryset.select_related('part_details'))
 
-    filtered_objects = CitationFilter(filter_params, queryset=queryset)
-
-    filters_active = filter_params
-    filters_active = len([v for k, v in filter_params.iteritems() if v and k != 'page']) > 0
+    # filters_active = len(filter(lambda (k, v): v and k != 'page', filter_params.items())) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
-        for key in request_params:
-            all_params[key] = request_params[key]
+        all_params.update(request_params)
 
         currentPage = all_params.get('page', 1)
         if not currentPage:
@@ -1201,7 +1208,7 @@ def citations(request):
 
     context.update({
         'objects': filtered_objects,
-        'filters_active': filters_active,
+        # 'filters_active': filters_active,
         'result_count': filtered_objects.qs.count()
     })
 
@@ -1220,15 +1227,14 @@ def authorities(request):
 
     user_session = request.session
 
-    if request.method == 'POST':
-        filter_params = QueryDict(request.POST.urlencode().encode('utf-8'),
-                                  mutable=True)
-    elif request.method == 'GET':
-        filter_params = user_session.get('authority_filters', {})
-        if not 'o' in filter_params.keys():
-            filter_params['o'] = 'name_for_sort'
-        for key in additional_params_names:
-            all_params[key] = request.GET.get(key, '')
+    raw_params = request.GET.urlencode().encode('utf-8')
+    filter_params = QueryDict(raw_params, mutable=True)
+
+    if not 'o' in filter_params.keys():
+        filter_params['o'] = 'name_for_sort'
+    for key in additional_params_names:
+        all_params[key] = request.GET.get(key, '')
+
     if 'o' not in filter_params:
         filter_params['o'] = 'name_for_sort'
     elif isinstance(filter_params['o'], list):
@@ -1236,8 +1242,6 @@ def authorities(request):
             filter_params['o'] = filter_params['o'][0]
         else:
             filter_params['o'] = 'name_for_sort'
-
-
 
     #user_session['authority_request_params'] = request.META['QUERY_STRING']
     #user_session['authority_get_request'] = request.GET
@@ -1270,7 +1274,6 @@ def authorities(request):
         'objects': filtered_objects,
         'filters_active': filters_active
     })
-
     return render(request, template, context)
 
 
@@ -1299,7 +1302,6 @@ def authority(request, authority_id):
             else:
                 get_request['o'] = "name_for_sort"
 
-
         queryset = operations.filter_queryset(request.user, Authority.objects.all())
         filtered_objects = AuthorityFilter(get_request, queryset=queryset)
         paginator = Paginator(filtered_objects.qs, 40)
@@ -1317,7 +1319,7 @@ def authority(request, authority_id):
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
-        tracking_entries = Tracking.objects.filter(subject_instance_id=authority_id)
+        tracking_entries = authority.tracking_records.all() #Tracking.objects.filter(subject_instance_id=authority_id)
 
         context.update({
             'request_params': request_params,
@@ -2042,7 +2044,7 @@ def bulk_action(request):
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
 
-    context.update({'queryset': queryset, 'filters': filter_params_raw})
+    context.update({'queryset': queryset.qs, 'filters': filter_params_raw})
 
     if request.GET.get('confirmed', False):
         # Perform the selected action.
@@ -2064,67 +2066,7 @@ def bulk_action(request):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def create_citation_collection(request):
-    template = 'curation/citation_collection_create.html'
-    context = {}
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request)
-        if isinstance(queryset, CitationFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = CitationCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.createdBy = request.user
-                instance.save()
 
-
-                instance.citations.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
-        else:
-            form = CitationCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def add_citation_collection(request):
-    template = 'curation/citation_collection_add.html'
-    context = {}
-
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request)
-        if isinstance(queryset, CitationFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = SelectCitationCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                collection = form.cleaned_data['collection']
-                collection.citations.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
-        else:
-            form = SelectCitationCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -2163,6 +2105,8 @@ def export_citations(request):
         return HttpResponseRedirect(reverse('curation:citation_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
+    if isinstance(queryset, CitationFilter):
+        queryset = queryset.qs
 
     if request.GET.get('confirmed', False):
         # The user has selected the desired configuration settings.
@@ -2229,3 +2173,64 @@ def collections(request):
         'objects': filtered_objects,
     }
     return render(request, 'curation/collection_list.html', context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def create_citation_collection(request):
+    template = 'curation/citation_collection_create.html'
+    context = {}
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = CitationCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.citations.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = CitationCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def add_citation_collection(request):
+    template = 'curation/citation_collection_add.html'
+    context = {}
+
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = SelectCitationCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                collection = form.cleaned_data['collection']
+                collection.citations.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectCitationCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)

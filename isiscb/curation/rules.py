@@ -5,47 +5,45 @@ from isisdata.models import *
 
 from rules import predicate
 
+
+
 @predicate
-def is_accessible_by_dataset(user, object):
+def is_accessible_by_dataset(user, obj):
     """
-    Checks if the user has a role that has a dataset rule that allows
-    the user to see the current object.
+    Checks if the user has a role that has a dataset rule that applies to
+    ``obj``.
     """
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
 
-    roles = IsisCBRole.objects.filter(users__pk=user.pk)
-    has_dataset_rules = False
-    for role in roles:
-        rules = role.dataset_rules
-        if rules:
-            has_dataset_rules = True
+    roles = user.isiscbrole_set.all()
+    dataset = getattr(obj, 'belongs_to', None)
+    if dataset:
+        roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
+    else:
+        roles = roles.filter((Q(accessrule__datasetrule__dataset__isnull=True)\
+                              | Q(accessrule__datasetrule__dataset=''))\
+                             & Q(accessrule__datasetrule__isnull=False))
+    return roles.count() > 0
 
-            dataset_ids = [rule.dataset for rule in rules]
-            if ('' in dataset_ids) or (None in dataset_ids) and not object.belongs_to:
-                return True
-
-            if object.belongs_to and object.belongs_to.pk in dataset_ids:
-                return True
-
-    # if there are no dataset rules on any role then the user
-    # has access to all records
-    if not has_dataset_rules:
-        return True
-    return False
 
 @predicate
 def can_view_citation_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_VIEW, AccessRule.CITATION)
 
+
+
 @predicate
 def can_update_citation_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_UPDATE, AccessRule.CITATION)
 
+
+
 @predicate
 def can_view_authority_field(user, object):
     return is_field_action_allowed(user, object, FieldRule.CANNOT_VIEW, AccessRule.AUTHORITY)
+
 
 @predicate
 def can_update_authority_field(user, object):
@@ -96,94 +94,97 @@ def is_field_action_allowed(user, object, action, object_type):
     # if there are no field rules defined that disallow acces, grant access
     return is_allowed
 
+
 @predicate
 def can_view_record(user, object):
     return is_action_allowed(user, object, CRUDRule.VIEW)
+
 
 @predicate
 def can_view_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.VIEW)
 
+
 @predicate
 def can_view_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.VIEW)
 
+
 @predicate
 def can_edit_record(user, object):
     return is_action_allowed(user, object, CRUDRule.UPDATE)
+
 
 @predicate
 def can_edit_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.UPDATE)
 
+
 @predicate
 def can_edit_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.UPDATE)
 
+
 @predicate
 def can_create_record(user, object):
     return is_action_allowed(user, object, CRUDRule.CREATE)
+
 
 @predicate
 def can_create_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.CREATE)
 
+
 @predicate
 def can_create_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.CREATE)
 
+
 @predicate
 def can_delete_record(user, object):
     return is_action_allowed(user, object, CRUDRule.DELETE)
+
 
 @predicate
 def can_delete_citation_record_using_id(user, object):
     access_obj = Citation.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.DELETE)
 
+
 @predicate
 def can_delete_authority_record_using_id(user, object):
     access_obj = Authority.objects.get(pk=object[1])
     return is_action_allowed(user, access_obj, CRUDRule.DELETE)
 
-def is_action_allowed(user, object, action):
+
+def is_action_allowed(user, obj, action):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
 
-    roles = IsisCBRole.objects.filter(users__pk=user.pk)
-    is_allowed = False
-    for role in roles:
-        rules = role.crud_rules
+    roles = user.isiscbrole_set.all()
+    dataset = getattr(obj, 'belongs_to', None)
 
-        # let's see if this rule has a limited record set
-        has_ds_rule = has_dataset_rule(role)
+    if dataset:
+        relevant_roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
+    else:
+        relevant_roles = roles.filter(
+            (Q(accessrule__datasetrule__dataset__isnull=True)
+             | Q(accessrule__datasetrule__dataset=''))
+            & Q(accessrule__datasetrule__isnull=False)
+        )
 
-        # if there is no limited record set, just look at the actions
-        if not has_ds_rule:
-            for rule in rules:
-                if rule.crud_action == action:
-                    is_allowed = True
-        # if there is a dataset rule, and the object belongs to this dataset
-        # we need to apply dataset rule actions
-        datasets = [rule.dataset for rule in role.dataset_rules]
-        # if this role applies, check allowed actions
-        # dataset roles are applied over everthing else
-        ds_of_object = str(object.belongs_to.pk) if object.belongs_to else ''
-        if has_ds_rule and ds_of_object in datasets:
-            for rule in rules:
-                if rule.crud_action == action:
-                    return True
-            # if there is no rule to give access
-            return False
+    grant_roles = roles.filter(pk__in=relevant_roles.values_list('id', flat=True))
+    if grant_roles.count() > 0:
+        return grant_roles.filter(accessrule__crudrule__crud_action=action).count() > 0
+    return False
 
-    return is_allowed
 
 def has_dataset_rule(role):
     has_ds_rule = False
@@ -191,13 +192,16 @@ def has_dataset_rule(role):
         has_ds_rule = True
     return has_ds_rule
 
+
 @predicate
 def can_view_user_module(user):
     return is_user_module_action_allowed(user, UserModuleRule.VIEW)
 
+
 @predicate
 def can_update_user_module(user):
     return is_user_module_action_allowed(user, UserModuleRule.UPDATE)
+
 
 def is_user_module_action_allowed(user, action):
     # if user is superuser they can always do everything
@@ -212,13 +216,16 @@ def is_user_module_action_allowed(user, action):
                 return True
     return False
 
+
 @predicate
 def is_user_staff(user, object):
     return user.is_staff
 
+
 @predicate
 def is_user_superuser(user, object):
     return user.is_superuser
+
 
 @predicate
 def has_zotero_access(user):

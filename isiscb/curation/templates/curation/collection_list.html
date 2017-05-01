@@ -26,7 +26,7 @@
 
             <tr class="">
                 <td>
-                    <a href="{% url "curation:citation_list" %}?in_collections={{object.id}}">{{ object.name }}</a>
+                    <a href="{% url "curation:citation_list" %}?in_collections={{object.id}}&collection_only=true">{{ object.name }}</a>
                 </td>
                 <td>
                     {{ object.createdBy }}

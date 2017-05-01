@@ -295,6 +295,12 @@ def _journal_issue(obj, extra):
     return obj.part_details.issue_free_text
 
 
+def _includes_series_article(obj, extra):
+    qs = obj.relations_from.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
+    extra += map(lambda o: o.object, qs)
+    return u"//".join(filter(lambda o: o is not None, qs.values_list('object_id', flat=True)))
+
+
 object_id = Column(u'Record ID', lambda obj, extra: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
 citation_author = Column(u'Author', _citation_author, Citation)
@@ -331,6 +337,8 @@ journal_volume = Column(u"Journal Volume", _journal_volume)
 journal_issue = Column(u"Journal Issue", _journal_issue)
 advisor = Column("Advisor", _advisor)
 school = Column(u"School", _school)
+include_series_article = Column(u"Includes Series Article",
+                                _includes_series_article)
 
 
 CITATION_COLUMNS = [
@@ -363,4 +371,5 @@ CITATION_COLUMNS = [
     journal_issue,
     advisor,
     school,
+    include_series_article
 ]

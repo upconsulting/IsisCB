@@ -1,31 +1,30 @@
 from isisdata.models import *
 
-import collections
-
 
 class TrackingWorkflow(object):
     """
     This class represents the tracking workflow a record goes through.
     """
 
-    stages = collections.OrderedDict()
-    stages[None] = Tracking.FULLY_ENTERED
-    stages[Tracking.FULLY_ENTERED] = Tracking.PROOFED
-    stages[Tracking.PROOFED] = Tracking.AUTHORIZED
 
-    next_stage = None
+    transitions = (
+        (None, Tracking.BULK_DATA),
+        (Tracking.BULK_DATA, Tracking.FULLY_ENTERED),
+        (None, Tracking.FULLY_ENTERED),
+        (Tracking.FULLY_ENTERED, Tracking.PROOFED),
+        (Tracking.PROOFED, Tracking.AUTHORIZED),
+        (Tracking.AUTHORIZED, Tracking.HSTM_UPLOAD),
+        (Tracking.AUTHORIZED, Tracking.PRINTED),
+    )
 
     def __init__(self, instance):
         self.tracked_object = instance
+        self.entries = [x.type_controlled for x in instance.tracking_records.all()]
+        self.instance = instance
 
-        self.entries = [x.type_controlled for x in instance.tracking_entries.all()]
-
-        if not self.entries:
-            self.next_stage = self.stages[None]
-
-        for key, value in self.stages.items():
-            if key in self.entries:
-                self.next_stage = value
+    @classmethod
+    def allowed(cls, action):
+        return zip(*filter(lambda (start, end): end == action, cls.transitions))[0]
 
     def is_workflow_action_allowed(self, action):
-        return action == self.next_stage and action not in self.entries
+        return self.instance.tracking_state in TrackingWorkflow.allowed(action) and action not in self.entries

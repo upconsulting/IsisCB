@@ -305,7 +305,8 @@ class LinkedDataForm(forms.ModelForm):
         model = LinkedData
         fields = [
             'universal_resource_name', 'resource_name', 'url',
-            'type_controlled', 'record_status_value', 'record_status_explanation', 'administrator_notes'
+            'type_controlled', 'record_status_value',
+            'record_status_explanation', 'administrator_notes'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -389,6 +390,7 @@ class AuthorityForm(forms.ModelForm):
 
         return exclude
 
+
 class CitationTrackingForm(forms.ModelForm):
 
     HSTM_UPLOAD = 'HS'
@@ -415,6 +417,7 @@ class CitationTrackingForm(forms.ModelForm):
             'tracking_info', 'notes', 'type_controlled'
         ]
 
+
 class AuthorityTrackingForm(forms.ModelForm):
 
     HSTM_UPLOAD = 'HS'
@@ -436,10 +439,11 @@ class AuthorityTrackingForm(forms.ModelForm):
                                        choices=TYPE_CHOICES)
 
     class Meta:
-        model = Tracking
+        model = AuthorityTracking
         fields = [
             'tracking_info', 'notes', 'type_controlled'
         ]
+
 
 class PersonForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -625,9 +629,13 @@ class BulkActionForm(forms.Form):
         tasks = []
         for action_name in selected_actions:
             action_value = self.cleaned_data.get(action_name)
+            extra_data = {
+                k.split('__')[1]: v for k, v in self.cleaned_data.iteritems()
+                if k.startswith(action_name) and not k == action_name
+            }
             # Load and instantiate the corresponding action class.
             action = getattr(actions, action_name)()    # Object is callable.
-            tasks.append(action.apply(user, filter_params_raw, action_value))
+            tasks.append(action.apply(user, filter_params_raw, action_value, **extra_data))
         return tasks
 
 
@@ -649,6 +657,9 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
         action = action_class()
         action_choices.append((action_class.__name__, action.label))
         form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
+        extras = action.get_extra_fields()
+        if extras:
+            form_class_attrs.update({'%s__%s' % (action_class.__name__, name): field for name, field in extras})
 
     form_class_attrs['action'] = forms.MultipleChoiceField(choices=action_choices)
     form_class_attrs['filters'] = forms.CharField(widget=forms.widgets.HiddenInput())

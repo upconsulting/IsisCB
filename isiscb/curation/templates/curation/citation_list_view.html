@@ -64,6 +64,7 @@ $('body').ready(function() {
                 <th width="8%">Published <span style="cursor: pointer;" id="sort_published"></span></th>
                 <th width="15%">Periodical</th>
                 <th width="5%">Pages</th>
+                <th width="5%">Tracking</th>
                 <th width="12%">Modified</th>
                 <th width="12%">Created</th>
             </tr>
@@ -94,7 +95,7 @@ $('body').ready(function() {
                     {% if object|is_public_inconsistent %}
                     <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
                     {% endif %}
-                    {% if object.record_status_value == 'Redirect' %}
+                    {% if object.record_status_value == object.REDIRECT %}
                     <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
                     {% endif %}
                 </td>
@@ -107,7 +108,7 @@ $('body').ready(function() {
                 </td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?tab=attributes">
-                        {{ object|get_citation_pubdate_fast }}
+                        {{ object.publication_date.year }}
                     </a>
                 </td>
                 <td>
@@ -117,6 +118,9 @@ $('body').ready(function() {
                 </td>
                 <td>
                     {{ object|get_page_numbers }}
+                </td>
+                <td>
+                    {{ object.get_tracking_state_display }}
                 </td>
                 <td>
                     {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
@@ -180,16 +184,15 @@ $('body').ready(function() {
 {% endblock %}
 
 {% block filter_form %}
-<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="POST" style="margin-bottom: 0px; margin-top: 10px;">
-  {% csrf_token %}
+<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
         <div class="col-sm-4">
             {% for error in objects.form.id.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.id.label }}</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">{{ objects.form.id.label }}</label>
+                <div class="col-lg-10">
                   {{ objects.form.id|addcss:"form-control" }}
                 </div>
             </div>
@@ -198,8 +201,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.title.label }}</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">{{ objects.form.title.label }}</label>
+                <div class="col-lg-10">
                   {{ objects.form.title|addcss:"form-control" }}
                 </div>
             </div>
@@ -209,43 +212,47 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">Author/Ed.</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">Author/Ed.</label>
+                <div class="col-lg-10">
                   {{ objects.form.author_or_editor|addcss:"form-control" }}
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-xs-8">
-                    {% for error in objects.form.publication_date_from.errors %}
-                    <div class="alert alert-warning">{{ error }}</div>
-                    {% endfor %}
-                    <div class="form-group form-group-sm clearable">
-                        <label class="col-md-6 control-label">Pub. date from</label>
-                        <div class="col-sm-6">
-                          {{ objects.form.publication_date_from|addcss:"form-control" }}
-                        </div>
-                    </div>
+            {% for error in objects.form.publication_date_from.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-sm clearable">
+                <label class="col-lg-2 control-label">Published</label>
+                <div class="col-lg-5">
+                  {{ objects.form.publication_date_from|addcss:"form-control;From" }}
                 </div>
-                <div class="col-xs-4">
+                <div class="col-lg-5">
+                  {{ objects.form.publication_date_to|addcss:"form-control;To" }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+
+                </div>
+                <!-- <div class="col-xs-6">
                     {% for error in objects.form.publication_date_to.errors %}
                     <div class="alert alert-warning">{{ error }}</div>
                     {% endfor %}
                     <div class="form-group form-group-sm clearable">
-                        <label class="col-md-3 control-label">to</label>
-                        <div class="col-sm-9">
-                          {{ objects.form.publication_date_to|addcss:"form-control" }}
+                        <label class="col-lg-3 control-label">to</label>
+                        <div class="col-lg-9">
+
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             {% for error in objects.form.periodical.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">Periodical</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">Periodical</label>
+                <div class="col-lg-10">
                   {{ objects.form.periodical|addcss:"form-control" }}
                 </div>
             </div>
@@ -255,8 +262,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-3 control-label">Rec. Type</label>
-              <div class="col-sm-9">
+              <label class="col-lg-3 control-label">Rec. Type</label>
+              <div class="col-lg-9">
                 {{ objects.form.type_controlled|addcss:"form-control" }}
               </div>
           </div>
@@ -265,8 +272,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-3 control-label">Rec. Status</label>
-              <div class="col-sm-9">
+              <label class="col-lg-3 control-label">Rec. Status</label>
+              <div class="col-lg-9">
                 {{ objects.form.record_status|addcss:"form-control" }}
               </div>
           </div>
@@ -275,8 +282,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-3 control-label">Zotero Acc.</label>
-              <div class="col-sm-9">
+              <label class="col-lg-3 control-label">Zotero Acc.</label>
+              <div class="col-lg-9">
                 {{ objects.form.zotero_accession|addcss:"form-control" }}
                 <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
               </div>
@@ -286,8 +293,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-3 control-label">Database</label>
-              <div class="col-sm-9">
+              <label class="col-lg-3 control-label">Database</label>
+              <div class="col-lg-9">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
                 <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
@@ -297,8 +304,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-3 control-label">Collection</label>
-              <div class="col-sm-9">
+              <label class="col-lg-3 control-label">Collection</label>
+              <div class="col-lg-9">
                 {{ objects.form.in_collections}}
                 <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
               </div>
@@ -311,8 +318,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.o.label }}</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">{{ objects.form.o.label }}</label>
+                <div class="col-lg-10">
                   {{ objects.form.o|addcss:"form-control" }}
                 </div>
             </div>
@@ -322,8 +329,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-sm clearable">
-              <label class="col-md-2 control-label">{{ objects.form.abstract.label }}</label>
-              <div class="col-sm-10">
+              <label class="col-lg-2 control-label">{{ objects.form.abstract.label }}</label>
+              <div class="col-lg-10">
                 {{ objects.form.abstract|addcss:"form-control" }}
               </div>
           </div>
@@ -333,8 +340,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">{{ objects.form.description.label }}</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">{{ objects.form.description.label }}</label>
+                <div class="col-lg-10">
                   {{ objects.form.description|addcss:"form-control" }}
                 </div>
             </div>
@@ -343,8 +350,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm clearable">
-                <label class="col-md-2 control-label">Subject</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">Subject</label>
+                <div class="col-lg-10">
                   {{ objects.form.subject|addcss:"form-control" }}
                 </div>
             </div>
@@ -353,9 +360,19 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-sm  clearable">
-                <label class="col-md-2 control-label">Publisher</label>
-                <div class="col-sm-10">
+                <label class="col-lg-2 control-label">Publisher</label>
+                <div class="col-lg-10">
                   {{ objects.form.publisher|addcss:"form-control" }}
+                </div>
+            </div>
+
+            {% for error in objects.form.tracking_state.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-sm  clearable">
+                <label class="col-lg-2 control-label">Tracking</label>
+                <div class="col-lg-10">
+                  {{ objects.form.tracking_state|addcss:"form-control" }}
                 </div>
             </div>
         </div>
