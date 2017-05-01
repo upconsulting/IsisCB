@@ -12,20 +12,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='historicaltracking',
-            name='subject_content_type',
-        ),
-        migrations.RemoveField(
-            model_name='historicaltracking',
-            name='subject_instance_id',
-        ),
-        migrations.RemoveField(
-            model_name='tracking',
-            name='subject_content_type',
-        ),
-        migrations.RemoveField(
-            model_name='tracking',
-            name='subject_instance_id',
-        ),
+        # migrations.RemoveField(
+        #     model_name='historicaltracking',
+        #     name='subject_content_type',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='historicaltracking',
+        #     name='subject_instance_id',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='tracking',
+        #     name='subject_content_type',
+        # ),
+        # migrations.RemoveField(
+        #     model_name='tracking',
+        #     name='subject_instance_id',
+        # ),
     ]
