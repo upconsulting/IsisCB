@@ -311,5 +311,32 @@ class TestCitationAdvisorColumn(unittest.TestCase):
         ACRelation.objects.all().delete()
 
 
+class TestIncludesSeriesArticleColumn(unittest.TestCase):
+    """
+    The :func:`.export.advisor` column retrieves advisors.
+    """
+    def test_citation_has_subject(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        citation = Citation.objects.create(title='The title',
+                                           type_controlled=Citation.ARTICLE)
+
+        CCRelation.objects.create(subject=book, object=citation,
+                                  type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
+
+        extras = []
+        value = export.include_series_article(book, extras)
+        self.assertEqual(value, citation.id)
+        self.assertEqual(len(extras), 1)
+        self.assertEqual(extras[0].id, citation.id)
+
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        CCRelation.objects.all().delete()
+
+
 if __name__ == '__main__':
     unittest.main()
