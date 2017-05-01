@@ -14,13 +14,17 @@ def set_citation_tracking_state(apps, schema_editor):
         with transaction.atomic():
             for citation in Citation.objects.filter(tracking_state__isnull=True)[:1000]:
                 tracking_types = list(citation.tracking_records.all().values_list('type_controlled', flat=True))
+                found = False
                 for stage in stages[::-1]:
                     if stage in tracking_types:
                         citation.tracking_state = stage
                         citation.save()
+                        found = True
                         break
-                citation.tracking_state = Citation.NONE
-                citation.save()
+
+                if not found:
+                    authority.tracking_state = 'NO'
+                    authority.save()
 
 
 def set_authority_tracking_state(apps, schema_editor):
@@ -33,13 +37,16 @@ def set_authority_tracking_state(apps, schema_editor):
         with transaction.atomic():
             for authority in Authority.objects.filter(tracking_state__isnull=True)[:1000]:
                 tracking_types = list(authority.tracking_records.all().values_list('type_controlled', flat=True))
+                found = False
                 for stage in stages[::-1]:
                     if stage in tracking_types:
                         authority.tracking_state = stage
                         authority.save()
+                        found = True
                         break
-                authority.tracking_state = Authority.NONE
-                authority.save()
+                if not found:
+                    authority.tracking_state = 'NO'
+                    authority.save()
 
 
 def clear_citation_tracking_state(apps, schema_editor):
