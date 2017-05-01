@@ -12,10 +12,7 @@ def set_citation_tracking_state(apps, schema_editor):
     Tracking = apps.get_model("isisdata", "Tracking")
     Citation = apps.get_model("isisdata", "Citation")
 
-
-    N = Citation.objects.all().count()
-    for i, citation in enumerate(Citation.objects.all()):
-        # print '\r', 100*float(i)/N, '%',
+    for citation in Citation.objects.all():
         tracking_types = list(citation.tracking_records.all().values_list('type_controlled', flat=True))
         for stage in stages[::-1]:
             if stage in tracking_types:
@@ -31,15 +28,13 @@ def set_authority_tracking_state(apps, schema_editor):
     ContentType = apps.get_model("contenttypes", "ContentType")
 
     N = Authority.objects.all().count()
-    for i, authority in enumerate(Authority.objects.all()):
-        # print '\r', 100*float(i)/N, '%',
+    for authority in Authority.objects.all():
         tracking_types = list(authority.tracking_records.all().values_list('type_controlled', flat=True))
         for stage in stages[::-1]:
             if stage in tracking_types:
                 authority.tracking_state = stage
                 authority.save()
                 break
-        # sys.stdout.flush()
 
 
 def clear_citation_tracking_state(apps, schema_editor):
