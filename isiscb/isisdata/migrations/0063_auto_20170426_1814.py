@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from collections import OrderedDict
-import sys
+# import sys
 
 stages = ['BD', 'FU', 'PD', 'AU', 'HS', 'PT']
 
@@ -24,7 +24,7 @@ def set_citation_tracking_state(apps, schema_editor):
                 # print stage,
                 citation.save()
                 break
-        sys.stdout.flush()
+        # sys.stdout.flush()
 
 
 def set_authority_tracking_state(apps, schema_editor):
@@ -41,7 +41,7 @@ def set_authority_tracking_state(apps, schema_editor):
                 authority.tracking_state = stage
                 authority.save()
                 break
-        sys.stdout.flush()
+        # sys.stdout.flush()
 
 
 def clear_citation_tracking_state(apps, schema_editor):
