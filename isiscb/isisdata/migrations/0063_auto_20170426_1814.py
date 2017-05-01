@@ -16,12 +16,12 @@ def set_citation_tracking_state(apps, schema_editor):
 
     N = Citation.objects.all().count()
     for i, citation in enumerate(Citation.objects.all()):
-        print '\r', 100*float(i)/N, '%',
+        # print '\r', 100*float(i)/N, '%',
         tracking_types = list(citation.tracking_records.all().values_list('type_controlled', flat=True))
         for stage in stages[::-1]:
             if stage in tracking_types:
                 citation.tracking_state = stage
-                print stage,
+                # print stage,
                 citation.save()
                 break
         sys.stdout.flush()
@@ -34,7 +34,7 @@ def set_authority_tracking_state(apps, schema_editor):
 
     N = Authority.objects.all().count()
     for i, authority in enumerate(Authority.objects.all()):
-        print '\r', 100*float(i)/N, '%',
+        # print '\r', 100*float(i)/N, '%',
         tracking_types = list(authority.tracking_records.all().values_list('type_controlled', flat=True))
         for stage in stages[::-1]:
             if stage in tracking_types:
