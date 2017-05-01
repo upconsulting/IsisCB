@@ -205,19 +205,19 @@ AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 AWS_S3_SECURE_URLS = True
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
-STATICFILES_DIRS = ['isisdata/static']
+STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
 # STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+# STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
-# STATIC_URL ='/static/'
+# STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
+STATIC_URL ='/static/'
 
 MEDIA_URL = '/media/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 AWS_EXPORT_BUCKET_NAME = os.environ.get('AWS_EXPORT_BUCKET_NAME')
 

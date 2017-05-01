@@ -67,7 +67,7 @@ class CitationFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Tracking.TYPE_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
 
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
@@ -240,12 +240,7 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-        q = Q(tracking_records__type_controlled=value)
-        # https://code.djangoproject.com/ticket/14645
-        # next_state = TrackingWorkflow.stages.get(value)
-        # if next_state:
-        #     q &= ~Q(tracking_records__type_controlled=next_state)
-        return queryset.filter(q)
+        return queryset.filter(tracking_state=value)
 
     def filter_in_collections(self, queryset, field, value):
         if not value:
@@ -278,7 +273,7 @@ class AuthorityFilter(django_filters.FilterSet):
     dataset_list = [(ds.pk, ds.name) for ds in datasets ]
     belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(AuthorityTracking.TYPE_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
     class Meta:
         model = Authority
@@ -310,13 +305,7 @@ class AuthorityFilter(django_filters.FilterSet):
         if not value:
             return queryset
 
-        q = Q(tracking_records__type_controlled=value)
-        queryset = queryset.filter(q)
-        # https://code.djangoproject.com/ticket/14645
-        # next_state = TrackingWorkflow.stages.get(value)
-        # if next_state:
-        #     queryset = queryset.filter(~Q(tracking_records__type_controlled=next_state))
-        return queryset
+        return queryset.filter(tracking_state=value)
 
     def filter_name(self, queryset, name, value):
         value = unidecode(value)

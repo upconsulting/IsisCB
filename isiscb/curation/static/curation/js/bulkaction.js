@@ -11,12 +11,16 @@ $('select#id_action').change(function(e) {
     // If the action widget is a multiselect, there may be several selected
     //  actions.
     var selected = $('select#id_action').val();
-    selected.forEach(function(field_name) {    // Display the selected inputs.
+    var show = function(field_name) {    // Display the selected inputs.
         $('#container_' + field_name).css('display', 'block');
+        $('[id^=container_' + field_name + ']').css('display', 'block');
         $('#confirm-action-list').append('<li class="list-group-item">' + field_name + ': <span class="text-warning" id="confirm-action-value-' + field_name + '"></span>');
         var field = $('#id_' + field_name);
         $('#confirm-action-value-' + field_name).append(field.val());
-    });
+    }
+    selected.forEach(show);
+
+    $("[id^=jander]")
 
     // Update the confirm modal with action values.
     $('.action-value').change(function(e) {

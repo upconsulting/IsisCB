@@ -784,7 +784,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         (WEBSITE, 'Website'),
         (APPLICATION, 'Application'),
     )
-
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',
                                        choices=TYPE_CHOICES,
@@ -792,6 +791,24 @@ class Citation(ReferencedEntity, CuratedMixin):
     This list can be extended to the resource types specified by Doublin Core
     Recource Types http://dublincore.org/documents/resource-typelist/
     """))
+
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TRACKING_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=TRACKING_CHOICES)
+    """The current state of the record."""
 
     abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.
@@ -1021,6 +1038,23 @@ class Authority(ReferencedEntity, CuratedMixin):
     controlled type vocabulary.
     """))
 
+    HSTM_UPLOAD = 'HS'
+    PRINTED = 'PT'
+    AUTHORIZED = 'AU'
+    PROOFED = 'PD'
+    FULLY_ENTERED = 'FU'
+    BULK_DATA = 'BD'
+    TRACKING_CHOICES = (
+        (HSTM_UPLOAD, 'HSTM Upload'),
+        (PRINTED, 'Printed'),
+        (AUTHORIZED, 'Authorized'),
+        (PROOFED, 'Proofed'),
+        (FULLY_ENTERED, 'Fully Entered'),
+        (BULK_DATA, 'Bulk Data Update')
+    )
+    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=TRACKING_CHOICES)
+    """The current state of the record."""
 
     SPWT = 'SPWT'
     SPWC = 'SPWC'
@@ -1794,7 +1828,6 @@ class Tracking(ReferencedEntity, CuratedMixin):
         (FULLY_ENTERED, 'Fully Entered'),
         (BULK_DATA, 'Bulk Data Update')
     )
-
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
@@ -2010,6 +2043,7 @@ class AccessRule(models.Model):
     """
     Parent class for all rules
     """
+
     name = models.CharField(max_length=255, blank=True, null=True)
 
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
@@ -2040,7 +2074,7 @@ class CRUDRule(AccessRule):
         (DELETE, 'Delete'),
     )
     crud_action = models.CharField(max_length=255, null=False, blank=False,
-                                       choices=CRUD_CHOICES)
+                                   choices=CRUD_CHOICES)
 
 
 class FieldRule(AccessRule):

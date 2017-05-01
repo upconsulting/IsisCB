@@ -14,11 +14,6 @@ def set_citation(apps, schema_editor):
     citation_type = ContentType.objects.get_by_natural_key("isisdata", "citation")
     authority_type = ContentType.objects.get_by_natural_key("isisdata", "authority")
     Tracking.objects.filter(subject_content_type=citation_type).update(citation_id=F('subject_instance_id'))
-    # for tracking in Tracking.objects.filter(subject_content_type=citation_type):
-    #     print '\rcitation tracking', tracking.id,
-    #     sys.stdout.flush()
-    #     tracking.citation_id = tracking.subject_instance_id
-    #     tracking.save()
 
     authority_tracking = []
     for tracking in Tracking.objects.filter(subject_content_type=authority_type):
