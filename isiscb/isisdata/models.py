@@ -906,12 +906,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         content_type_field='subject_content_type',
         object_id_field="subject_instance_id")
 
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='citations',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
-
     resolutions = GenericRelation('zotero.InstanceResolutionEvent',
                                   related_query_name='citation_resolutions',
                                   content_type_field='to_model',
@@ -1131,11 +1125,8 @@ class Authority(ReferencedEntity, CuratedMixin):
         related_query_name='authorities',
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='authorities',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
+
+
 
     @property
     def linkeddata_public(self):
@@ -1339,12 +1330,6 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         content_type_field='subject_content_type',
         object_id_field='subject_instance_id')
 
-    tracking_entries = GenericRelation(
-        'Tracking',
-        related_query_name='ac_relations',
-        content_type_field='subject_content_type',
-        object_id_field='subject_instance_id')
-
     resolutions = GenericRelation('zotero.InstanceResolutionEvent',
                                   related_query_name='acrelation_resolutions',
                                   content_type_field='to_model',
@@ -1436,10 +1421,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
                                          related_query_name='aa_relations',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='aa_relations',
-                                       content_type_field='subject_content_type',
-                                       object_id_field='subject_instance_id')
+
 
     def _render_type_controlled(self):
         try:
@@ -1510,11 +1492,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
                                          related_query_name='cc_relations',
                                          content_type_field='subject_content_type',
                                          object_id_field='subject_instance_id')
-    tracking_entries = GenericRelation('Tracking',
-                                       related_query_name='cc_relations',
-                                       content_type_field='subject_content_type',
-                                       object_id_field='subject_instance_id')
-
+    
     data_display_order = models.FloatField(default=1.0, help_text=help_text("""
     Position at which the citation should be displayed in the citation detail
     view. Whole numbers or decimals can be used.

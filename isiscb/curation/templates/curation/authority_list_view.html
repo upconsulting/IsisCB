@@ -14,6 +14,7 @@
             <th>ID</th>
             <th>Type</th>
             <th>Name</th>
+            <th>Tracking</th>
 
         </tr>
     </thead>
@@ -31,12 +32,13 @@
                 {% if object|is_public_inconsistent %}
                 <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
                 {% endif %}
-                {% if object.record_status_value == 'Redirect' %}
+                {% if object.record_status_value == object.REDIRECT %}
                 <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
                 {% endif %}
             </td>
             <td>{{ object.get_type_controlled_display }}</td>
             <td>{{ object.name }}</td>
+            <td>{{ object.get_tracking_state_display }}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -125,7 +125,8 @@ class CitationFilter(django_filters.FilterSet):
         fields=(
             ('publication_date', 'publication_date'),
             ('title', 'title_for_sort'),
-            ('part_details__page_begin', 'start_page')
+            ('part_details__page_begin', 'start_page'),
+            ('modified_on', 'modified')
         ),
 
         # labels do not need to retain order
@@ -133,6 +134,7 @@ class CitationFilter(django_filters.FilterSet):
             'publication_date': 'Publication date',
             'title': 'Title',
             'start_page': 'Start page',
+            'modified': 'Last modified'
         }
     )
 

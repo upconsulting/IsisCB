@@ -1188,7 +1188,8 @@ def citations(request):
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
-    filtered_objects = CitationFilter(filter_params, queryset=queryset)
+    fields = ('record_status_value', 'id', 'type_controlled', 'public', 'publication_date')
+    filtered_objects = CitationFilter(filter_params, queryset=queryset.select_related('part_details'))
 
     # filters_active = len(filter(lambda (k, v): v and k != 'page', filter_params.items())) > 0
 
@@ -1210,7 +1211,7 @@ def citations(request):
         # 'filters_active': filters_active,
         'result_count': filtered_objects.qs.count()
     })
-
+    print 'start render'
     return render(request, template, context)
 
 
@@ -2048,7 +2049,7 @@ def bulk_action(request):
 
     queryset, filter_params_raw = _get_filtered_queryset(request)
 
-    context.update({'queryset': queryset, 'filters': filter_params_raw})
+    context.update({'queryset': queryset.qs, 'filters': filter_params_raw})
 
     if request.GET.get('confirmed', False):
         # Perform the selected action.

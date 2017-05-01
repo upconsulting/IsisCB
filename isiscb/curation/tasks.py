@@ -88,20 +88,25 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
     import math
 
     queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+
     # We should have already filtered out ineligible citations, but just in
     #  case....
-    queryset = queryset.filter(tracking_state__in=TrackingWorkflow.allowed(target_state))
+    allowed_prior = TrackingWorkflow.allowed(target_state)
 
-    _tracking_gen = lambda ident: Tracking(citation_id=ident,
-                                           tracking_info=info,
-                                           notes=notes,
-                                           modified_by_id=user_id)
+    queryset = queryset.filter(tracking_state__in=allowed_prior)
 
+    idents = list(queryset.values_list('id', flat=True))
     try:
         queryset.update(tracking_state=target_state)
-        Tracking.objects.bulk_create(map(_tracking_gen, queryset.values_list('id', flat=True)))
+        for ident in idents:
+            Tracking.objects.create(citation_id=ident,
+                                    type_controlled=target_state,
+                                    tracking_info=info,
+                                    notes=notes,
+                                    modified_by_id=user_id)
+
         if task_id:
-            task = Task.objects.get(pk=task_id)
+            task = AsyncTask.objects.get(pk=task_id)
             task.state = 'SUCCESS'
             task.save()
             print 'success:: %s' % str(task_id)
@@ -109,7 +114,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
         print 'bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state),
         print E
         if task_id:
-            task = Task.objects.get(pk=task_id)
+            task = AsyncTask.objects.get(pk=task_id)
             task.value = str(E)
             task.state = 'FAILURE'
             task.save()
