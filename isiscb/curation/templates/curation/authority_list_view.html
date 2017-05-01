@@ -54,9 +54,7 @@
     font-size: 0.8em;
 }
 </style>
-<form id="filter_form" class="form clearfix" action="{% url 'curation:authority_list' %}" method="POST" >
-{% csrf_token %}
-
+<form id="filter_form" class="form clearfix" action="{% url 'curation:authority_list' %}" method="GET" >
     <div class="row">
         <div class="col-sm-4">
             {% for error in objects.form.id.errors %}

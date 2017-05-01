@@ -73,8 +73,12 @@ class CitationFilter(django_filters.FilterSet):
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
 
-    def __init__(self, *args, **kwargs):
-        super(CitationFilter, self).__init__(*args, **kwargs)
+    def __init__(self, params, **kwargs):
+
+        if params.get('in_collections', False) and params.get('collection_only', False):
+             params = QueryDict({'in_collections': params.getlist('in_collections')})
+
+        super(CitationFilter, self).__init__(params, **kwargs)
 
         in_coll = self.data.get('in_collections', None)
         if in_coll:
@@ -85,8 +89,12 @@ class CitationFilter(django_filters.FilterSet):
             except CitationCollection.DoesNotExist:
                 self.collection_name = "Collection could not be found."
 
-        zotero_acc = self.data.get('zotero_accession', None)
+            if self.data.get('collection_only', False):
+                print '!!!'
+                self.data = {'in_collections': in_coll}
+            return
 
+        zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
             try:
                 accession = ImportAccession.objects.get(pk=zotero_acc)
@@ -248,11 +256,10 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
         q = Q()
-        for collection in value:
-            q |= Q(in_collections=collection)
+        print value, type(value)
 
 
-        return queryset.filter(q)
+        return queryset.filter(Q(in_collections=value))
 
 
 class AuthorityFilter(django_filters.FilterSet):

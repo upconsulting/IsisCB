@@ -154,7 +154,7 @@ def get_citation_periodical(obj):
     rtypes = [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
     atype_display = dict(Authority.TYPE_CHOICES)
     relations = obj.acrelations.filter(type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', ''), atype_display[obj['authority__type_controlled']]), relations))
+    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', ''), atype_display.get(obj['authority__type_controlled'], 'none')), relations))
 
 
 @register.filter(name='get_page_numbers')

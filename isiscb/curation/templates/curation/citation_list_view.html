@@ -184,8 +184,7 @@ $('body').ready(function() {
 {% endblock %}
 
 {% block filter_form %}
-<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="POST" style="margin-bottom: 0px; margin-top: 10px;">
-  {% csrf_token %}
+<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
         <div class="col-sm-4">
             {% for error in objects.form.id.errors %}
