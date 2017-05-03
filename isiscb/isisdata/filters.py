@@ -76,8 +76,10 @@ class CitationFilter(django_filters.FilterSet):
 
     def __init__(self, params, **kwargs):
 
-        if params.get('in_collections', False) and params.get('collection_only', False):
-             params = QueryDict({'in_collections': params.getlist('in_collections')})
+        if 'in_collections' in params and params.get('collection_only', False):
+            in_coll = params.get('in_collections')
+            params = QueryDict('', mutable=True)
+            params['in_collections'] = in_coll
 
         super(CitationFilter, self).__init__(params, **kwargs)
 
@@ -91,7 +93,6 @@ class CitationFilter(django_filters.FilterSet):
                 self.collection_name = "Collection could not be found."
 
             if self.data.get('collection_only', False):
-                print '!!!'
                 self.data = {'in_collections': in_coll}
             return
 
