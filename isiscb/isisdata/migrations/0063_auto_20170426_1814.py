@@ -23,8 +23,8 @@ def set_citation_tracking_state(apps, schema_editor):
                         break
 
                 if not found:
-                    authority.tracking_state = 'NO'
-                    authority.save()
+                    citation.tracking_state = 'NO'
+                    citation.save()
 
 
 def set_authority_tracking_state(apps, schema_editor):
