@@ -2036,15 +2036,18 @@ def bulk_action(request):
     or implicit via the ``filters`` from the list view.
     """
     template = 'curation/bulkaction.html'
-    form_class = bulk_action_form_factory()
-    context = {}
+    queryset, filter_params_raw = _get_filtered_queryset(request)
+    if isinstance(queryset, CitationFilter):
+        queryset = queryset.qs
+    form_class = bulk_action_form_factory(queryset=queryset)
+    context = {
+        'extra_data': '\n'.join(form_class.extra_data.values())
+    }
 
     if request.method != 'POST':
         return HttpResponseRedirect(reverse('curation:citation_list'))
 
-    queryset, filter_params_raw = _get_filtered_queryset(request)
-
-    context.update({'queryset': queryset.qs, 'filters': filter_params_raw})
+    context.update({'queryset': queryset, 'filters': filter_params_raw})
 
     if request.GET.get('confirmed', False):
         # Perform the selected action.
@@ -2058,6 +2061,7 @@ def bulk_action(request):
         # Prompt to select an action that will be applied to those records.
         form = form_class()
         form.fields['filters'].initial = filter_params_raw
+
 
         # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
     context.update({

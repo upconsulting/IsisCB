@@ -9,7 +9,7 @@ from django import forms
 
 from isisdata.models import *
 import isisdata.tasks as dtasks
-
+import json
 # TODO: refactor these actions to use bulk apply methods and then explicitly
 #  trigger search indexing (or whatever other post-save actions are needed).
 
@@ -88,6 +88,21 @@ class SetRecordStatusExplanation(BaseAction):
         return task.id
 
 
+def get_tracking_transition_counts(qs):
+    states = zip(*qs.model.TRACKING_CHOICES)[0]
+    return dict(zip(states, map(lambda state: qs.filter(tracking_state=state).count(), states)))
+
+
+def get_allowable_transition_states():
+    from curation.tracking import TrackingWorkflow
+    return dict([(target, source) for source, target in TrackingWorkflow.transitions])
+
+
+def get_transition_labels():
+    from curation.tracking import TrackingWorkflow
+    return dict(Tracking.TYPE_CHOICES)
+
+
 class SetTrackingStatus(BaseAction):
     model = Citation
     label = u'Set record tracking status'
@@ -99,10 +114,24 @@ class SetTrackingStatus(BaseAction):
         'widget': forms.widgets.Select(attrs={'class': 'action-value'}),
     }
 
+    extra_js = 'curation/js/bulktracking.js'
+
     extra_fields = (
         ('info', forms.CharField, {'label': 'Tracking Info', 'widget': forms.widgets.TextInput(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus'})}),
         ('notes', forms.CharField, {'label': 'Tracking Notes', 'widget': forms.widgets.Textarea(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus'})}),
     )
+
+    @staticmethod
+    def get_extra_data(queryset=None, **kwargs):
+        transition_counts = json.dumps(get_tracking_transition_counts(queryset))
+        allowable_states = json.dumps(get_allowable_transition_states())
+        transition_labels = json.dumps(get_transition_labels())
+        return """
+        var settrackingstatus_data = {
+            transition_counts: %s,
+            allowable_states: %s,
+            transition_labels: %s
+        }""" % (transition_counts, allowable_states, transition_labels)
 
     def apply(self, user, filter_params_raw, value, info='', notes=''):
         task = AsyncTask.objects.create()

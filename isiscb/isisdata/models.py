@@ -797,7 +797,6 @@ class Citation(ReferencedEntity, CuratedMixin):
     AUTHORIZED = 'AU'
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
-    BULK_DATA = 'BD'
     NONE = 'NO'
     TRACKING_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
@@ -805,7 +804,6 @@ class Citation(ReferencedEntity, CuratedMixin):
         (AUTHORIZED, 'Authorized'),
         (PROOFED, 'Proofed'),
         (FULLY_ENTERED, 'Fully Entered'),
-        (BULK_DATA, 'Bulk Data Update'),
         (NONE, 'None')
     )
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
