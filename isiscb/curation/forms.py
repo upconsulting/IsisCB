@@ -645,15 +645,22 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
 
     # For the Media inner class.
     media_attrs = {'js': ('curation/js/bulkaction.js', )}
+    queryset = kwargs.pop('queryset', None)
 
     parent = (object,)
     if hasattr(form, 'Meta'):
         parent = (form.Meta, object)
     Meta = type(str('Meta'), parent, attrs)
-    Media = type(str('Media'), (object,), media_attrs)
-    form_class_attrs = {'Meta': Meta, 'Media': Media}
+
+    form_class_attrs = {'Meta': Meta}
     action_choices = []
+    extra_data = {}
     for action_class in actions.AVAILABLE_ACTIONS:
+        if hasattr(action_class, 'extra_js'):
+            media_attrs['js'] = tuple(list(media_attrs['js']) + [action_class.extra_js])
+
+        if hasattr(action_class, 'get_extra_data'):
+            extra_data[action_class.__name__] = action_class.get_extra_data(queryset=queryset)
         action = action_class()
         action_choices.append((action_class.__name__, action.label))
         form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
@@ -661,15 +668,14 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
         if extras:
             form_class_attrs.update({'%s__%s' % (action_class.__name__, name): field for name, field in extras})
 
+    form_class_attrs['Media'] = type(str('Media'), (object,), media_attrs)
+    form_class_attrs['extra_data'] = extra_data
     form_class_attrs['action'] = forms.MultipleChoiceField(choices=action_choices)
     form_class_attrs['filters'] = forms.CharField(widget=forms.widgets.HiddenInput())
     return type(form)('BulkChangeForm', (form,), form_class_attrs)
 
 
 class CitationCollectionForm(forms.ModelForm):
-    # citations = forms.ModelMultipleChoiceField(queryset=Citation.objects.all(),
-    #                                            widget=forms.widgets.MultipleHiddenInput(),
-    #                                            required=False)
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     class Meta:
         model = CitationCollection

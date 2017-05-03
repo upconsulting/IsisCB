@@ -81,6 +81,36 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
 
 
 @shared_task
+def bulk_prepend_record_history(user_id, filter_params_raw, prepend_value, task_id=None):
+    from django.db.models import CharField, Value as V
+    from django.db.models.functions import Concat
+    from isisdata.models import AsyncTask
+    import math, datetime
+
+    user = User.objects.get(pk=user_id)
+    now = datetime.datetime.now().strftime('%Y-%m-%d at %I:%M%p')
+    prepend_value = 'On %s, %s wrote: %s\n\n' % (now, user.username, prepend_value)
+
+    queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+    queryset.update(record_history=Concat(V(prepend_value), 'record_history'))
+
+    try:
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+            task.state = 'SUCCESS'
+            task.save()
+            print 'success:: %s' % str(task_id)
+    except Exception as E:
+        print 'bulk_prepend_record_history failed for %s:: %s' % (filter_params_raw, prepend_value),
+        print E
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+            task.value = str(E)
+            task.state = 'FAILURE'
+            task.save()
+
+
+@shared_task
 def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
                                notes, task_id=None):
     from curation.tracking import TrackingWorkflow

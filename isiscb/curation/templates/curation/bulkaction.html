@@ -2,7 +2,14 @@
 {% load staticfiles %}
 {% load addcss %}
 
+{% block extrahead %}
+<script>
+{{ extra_data|safe }}
+</script>
+{% endblock %}
+
 {% block content %}
+
 <div class="h2">Bulk edit</div>
 
 <p class="text-warning">
@@ -45,7 +52,7 @@
                     {% endfor %}
                     <div class="form-group">
                         <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control action-value"}}
+                        {{ field|addcss:"action-value"}}
                     </div>
                 </div>
                 {% endif %}
@@ -68,12 +75,12 @@
                 </div>
             <div class="modal-body">
                 <p>You are about to apply the following actions to {{queryset.count}} citations:</p>
-                <ul class="list-group" id="confirm-action-list">
-                </ul>
+                <ul class="list-group" id="confirm-action-list"></ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <input type="submit" value="Apply" class="btn btn-success" />
+                Are you sure that you wish to proceed?
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Take me back</button>
+                <input type="submit" value="Yes" class="btn btn-success" />
             </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
