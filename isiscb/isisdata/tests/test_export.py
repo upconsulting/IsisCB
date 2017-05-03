@@ -313,7 +313,7 @@ class TestCitationAdvisorColumn(unittest.TestCase):
 
 class TestIncludesSeriesArticleColumn(unittest.TestCase):
     """
-    The :func:`.export.advisor` column retrieves advisors.
+    The INCLUDES_SERIES_ARTICLE relation actually represents its inverse.
     """
     def test_citation_has_subject(self):
         """
@@ -327,10 +327,10 @@ class TestIncludesSeriesArticleColumn(unittest.TestCase):
                                   type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
 
         extras = []
-        value = export.include_series_article(book, extras)
-        self.assertEqual(value, citation.id)
+        value = export.include_series_article(citation, extras)
+        self.assertEqual(value, book.id)
         self.assertEqual(len(extras), 1)
-        self.assertEqual(extras[0].id, citation.id)
+        self.assertEqual(extras[0].id, book.id)
 
 
     def tearDown(self):
@@ -340,17 +340,7 @@ class TestIncludesSeriesArticleColumn(unittest.TestCase):
 
 class TestTrackingColumn(unittest.TestCase):
     """
-    The :func:`.export.advisor` column retrieves advisors.
-
-    fully_entered = Column(u"FullyEntered",
-                           lambda obj, extra: _tracking(obj, Tracking.FULLY_ENTERED))
-    proofed = Column(u"Proofed", lambda obj, extra: _tracking(obj, Tracking.PROOFED))
-    spw_checked = Column(u"SPW checked",
-                         lambda obj, extra: _tracking(obj, Tracking.AUTHORIZED))
-    published_print = Column(u"Published Print",
-                             lambda obj, extra: _tracking(obj, Tracking.PRINTED))
-    published_rlg = Column(u"Published RLG",
-                           lambda obj, extra: _tracking(obj, Tracking.HSTM_UPLOAD))
+    Tests export columns based on :class:`.Tracing` records.
     """
     def test_fully_entered(self):
         """
