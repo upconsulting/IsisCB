@@ -910,13 +910,13 @@ def citation(request, citation_id):
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
         form = CitationForm(user=request.user, instance=citation)
-        tracking_entries = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
+        tracking_records = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
 
         tracking_workflow = TrackingWorkflow(citation)
         context.update({
             'form': form,
             'instance': citation,
-            'tracking_entries': tracking_entries,
+            'tracking_records': tracking_records,
             'can_create_fully_entered': tracking_workflow.is_workflow_action_allowed(Tracking.FULLY_ENTERED),
             'can_create_proofed': tracking_workflow.is_workflow_action_allowed(Tracking.PROOFED),
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
@@ -1319,14 +1319,14 @@ def authority(request, authority_id):
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
-        tracking_entries = authority.tracking_records.all() #Tracking.objects.filter(subject_instance_id=authority_id)
+        tracking_records = authority.tracking_records.all() #Tracking.objects.filter(subject_instance_id=authority_id)
 
         context.update({
             'request_params': request_params,
             'form': form,
             'instance': authority,
             'person_form': person_form,
-            'tracking_entries': tracking_entries,
+            'tracking_records': tracking_records,
             'total': filtered_objects.qs.count(),
         })
 

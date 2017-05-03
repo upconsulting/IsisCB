@@ -3,7 +3,7 @@
 {% load rules %}
 {% load permission_tags %}
 
-{% with 'tracking_entries'|create_perm_tuple:instance.id as permTuple %}
+{% with 'tracking_records'|create_perm_tuple:instance.id as permTuple %}
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
@@ -28,7 +28,7 @@
 </div>
 
 {% if can_view %}
-{% for tracking in tracking_entries %}
+{% for tracking in tracking_records %}
 
 <div class="panel panel-default">
   <div class="panel-heading">
