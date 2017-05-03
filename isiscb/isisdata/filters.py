@@ -84,9 +84,7 @@ class CitationFilter(django_filters.FilterSet):
         super(CitationFilter, self).__init__(params, **kwargs)
 
         in_coll = self.data.get('in_collections', None)
-        print self.data
         if in_coll:
-            print '!!'
             try:
                 collection = CitationCollection.objects.get(pk=in_coll)
                 if collection:
