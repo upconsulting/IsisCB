@@ -1293,7 +1293,7 @@ def authority(request, authority_id):
 
         user_session = request.session
         page = user_session.get('authority_page', 1)
-        get_request = user_session.get('authority_filters', None)
+        get_request = user_session.get('authority_filters', {})
 
         # Something odd going on with the sorting field (``o``).
         if 'o' in get_request and isinstance(get_request['o'], list):
