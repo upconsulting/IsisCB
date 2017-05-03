@@ -34,9 +34,8 @@ def generate_csv(stream, queryset, columns):
     extra = []
     for obj in queryset:
         writer.writerow(map(lambda c: c(obj, extra), columns))
-    print extra
+
     for obj in extra:
-        print obj
         writer.writerow(map(lambda c: c(obj, []), columns))
 
 
@@ -239,7 +238,7 @@ def _pages(obj, extra):
 
 
 def _tracking(obj, type_controlled):
-    qs = obj.tracking_entries.filter(type_controlled=type_controlled)
+    qs = obj.tracking_records.filter(type_controlled=type_controlled)
     if qs.count() > 0:
         return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('tracking_info', flat=True))))
     return u""
@@ -296,9 +295,9 @@ def _journal_issue(obj, extra):
 
 
 def _includes_series_article(obj, extra):
-    qs = obj.relations_from.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
-    extra += map(lambda o: o.object, qs)
-    return u"//".join(filter(lambda o: o is not None, qs.values_list('object_id', flat=True)))
+    qs = obj.relations_to.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
+    extra += map(lambda o: o.subject, qs)
+    return u"//".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
 
 
 object_id = Column(u'Record ID', lambda obj, extra: obj.id)
