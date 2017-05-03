@@ -34,9 +34,8 @@ def generate_csv(stream, queryset, columns):
     extra = []
     for obj in queryset:
         writer.writerow(map(lambda c: c(obj, extra), columns))
-    print extra
+
     for obj in extra:
-        print obj
         writer.writerow(map(lambda c: c(obj, []), columns))
 
 
@@ -239,7 +238,7 @@ def _pages(obj, extra):
 
 
 def _tracking(obj, type_controlled):
-    qs = obj.tracking_entries.filter(type_controlled=type_controlled)
+    qs = obj.tracking_records.filter(type_controlled=type_controlled)
     if qs.count() > 0:
         return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('tracking_info', flat=True))))
     return u""

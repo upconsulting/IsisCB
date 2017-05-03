@@ -338,5 +338,89 @@ class TestIncludesSeriesArticleColumn(unittest.TestCase):
         CCRelation.objects.all().delete()
 
 
+class TestTrackingColumn(unittest.TestCase):
+    """
+    The :func:`.export.advisor` column retrieves advisors.
+
+    fully_entered = Column(u"FullyEntered",
+                           lambda obj, extra: _tracking(obj, Tracking.FULLY_ENTERED))
+    proofed = Column(u"Proofed", lambda obj, extra: _tracking(obj, Tracking.PROOFED))
+    spw_checked = Column(u"SPW checked",
+                         lambda obj, extra: _tracking(obj, Tracking.AUTHORIZED))
+    published_print = Column(u"Published Print",
+                             lambda obj, extra: _tracking(obj, Tracking.PRINTED))
+    published_rlg = Column(u"Published RLG",
+                           lambda obj, extra: _tracking(obj, Tracking.HSTM_UPLOAD))
+    """
+    def test_fully_entered(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        test_value = 'test'
+        Tracking.objects.create(citation=book,
+                                type_controlled=Tracking.FULLY_ENTERED,
+                                tracking_info=test_value)
+
+
+
+        value = export.fully_entered(book, [])
+        self.assertEqual(value, test_value)
+
+    def test_proofed(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        test_value = 'test'
+        Tracking.objects.create(citation=book,
+                                type_controlled=Tracking.PROOFED,
+                                tracking_info=test_value)
+
+    def test_spw_checked(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        test_value = 'test'
+        Tracking.objects.create(citation=book,
+                                type_controlled=Tracking.AUTHORIZED,
+                                tracking_info=test_value)
+
+        value = export.spw_checked(book, [])
+        self.assertEqual(value, test_value)
+
+    def test_published_print(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        test_value = 'test'
+        Tracking.objects.create(citation=book,
+                                type_controlled=Tracking.PRINTED,
+                                tracking_info=test_value)
+
+        value = export.published_print(book, [])
+        self.assertEqual(value, test_value)
+
+    def test_published_rlg(self):
+        """
+        """
+        book = Citation.objects.create(title='The book title',
+                                       type_controlled=Citation.BOOK)
+        test_value = 'test'
+        Tracking.objects.create(citation=book,
+                                type_controlled=Tracking.HSTM_UPLOAD,
+                                tracking_info=test_value)
+
+        value = export.published_rlg(book, [])
+        self.assertEqual(value, test_value)
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        CCRelation.objects.all().delete()
+        Tracking.objects.all().delete()
+
+
 if __name__ == '__main__':
     unittest.main()
