@@ -167,7 +167,7 @@ def get_page_numbers(obj):
 @register.filter
 def get_school(obj):
     return ', '.join(['%s (%s)' % (getattr(relation.authority, 'name', ''), relation.get_type_controlled_display()) for relation in obj.acrelations
-        if relation.type_controlled in [ACRelation.SCHOOL]])
+        if relation.authority is not None and relation.type_controlled in [ACRelation.SCHOOL]])
 
 
 @register.filter(name='get_date_attributes')
@@ -176,7 +176,7 @@ def get_date_attributes(obj):
 
 @register.filter
 def is_ccrelation_other_public(instance_id, ccrelation):
-    return (instance_id == ccrelation.subject.id and not ccrelation.object.public) or (instance_id == ccrelation.object.id and not ccrelation.subject.public)
+    return (ccrelation.subject is not None and ccrelation.object is not None) and (instance_id == ccrelation.subject.id and not ccrelation.object.public) or (instance_id == ccrelation.object.id and not ccrelation.subject.public)
 
 
 @register.filter

@@ -11,6 +11,7 @@ import six, iso8601
 from unidecode import unidecode
 from curation.tracking import TrackingWorkflow
 from django_filters import filters
+from django.http import QueryDict
 
 
 filters.LOOKUP_TYPES = [
