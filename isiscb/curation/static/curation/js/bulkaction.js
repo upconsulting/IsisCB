@@ -33,10 +33,12 @@ $('select#id_action').change(function(e) {
     //  actions.
     var selected = $('select#id_action').val();
     var show = function(field_name) {    // Display the selected inputs.
-
         $('#container_' + field_name).css('display', 'block');
         $('[id^=container_' + field_name + ']').css('display', 'block');
         var field = $('#id_' + field_name);
+        $('[id^=container_' + field_name + '] .action-value').addClass('form-control');
+
+        field.addClass('form-control');
 
         var elem = '<li class="list-group-item">' + field_name + ': <span class="text-warning" id="confirm-action-value-' + field_name + '"></span><div id="confirm-extra-'+ field_name+'" class="field-extra"></li>';
         $('#confirm-action-list').append(elem);

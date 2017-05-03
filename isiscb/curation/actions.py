@@ -3,7 +3,7 @@ Asynchronous functions for bulk changes to the database.
 """
 
 from __future__ import absolute_import
-from curation.tasks import update_instance, bulk_change_tracking_state
+from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history
 
 from django import forms
 
@@ -31,6 +31,30 @@ class BaseAction(object):
         if hasattr(self, 'extra_fields'):
             return [(name, field(**kwargs)) for name, field, kwargs in self.extra_fields]
         return []
+
+
+class PrependToRecordHistory(BaseAction):
+    model = Citation
+    label = u'Update record history'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Prepend to record history',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+        result = bulk_prepend_record_history.delay(user.id, filter_params_raw,
+                                                   value, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('record_status_explanation', value)
+        task.save()
+        return task.id
+
 
 
 class SetRecordStatus(BaseAction):
@@ -117,8 +141,8 @@ class SetTrackingStatus(BaseAction):
     extra_js = 'curation/js/bulktracking.js'
 
     extra_fields = (
-        ('info', forms.CharField, {'label': 'Tracking Info', 'widget': forms.widgets.TextInput(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus'})}),
-        ('notes', forms.CharField, {'label': 'Tracking Notes', 'widget': forms.widgets.Textarea(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus'})}),
+        ('info', forms.CharField, {'label': 'Tracking Info', 'required': False, 'widget': forms.widgets.TextInput(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus', 'required': False})}),
+        ('notes', forms.CharField, {'label': 'Tracking Notes', 'required': False,  'widget': forms.widgets.Textarea(attrs={'class': 'form-control', 'part_of': 'SetTrackingStatus', 'required': False})}),
     )
 
     @staticmethod
@@ -146,4 +170,4 @@ class SetTrackingStatus(BaseAction):
 
 
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus]
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory]
