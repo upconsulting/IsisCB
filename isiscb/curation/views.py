@@ -1135,7 +1135,7 @@ def _citations_get_filter_params(request):
                                'collection_only']
     user_session = request.session
 
-    if len(request.GET.keys()) == 0:
+    if len(request.GET.keys()) <= 1:
         filter_params = user_session.get('citation_filter_params', None)
         all_params = user_session.get('citation_request_params', None)
         if filter_params is not None and all_params is not None:
