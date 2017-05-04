@@ -1206,11 +1206,11 @@ def citations(request):
         if not currentPage:
             currentPage = 1
 
-    user_session['citation_filter_params'] = filter_params
-    user_session['citation_request_params'] = all_params
-    user_session['citation_filters'] = request_params
-    user_session['citation_page'] = int(currentPage)
-    user_session['citation_prev_index'] = None
+        user_session['citation_filter_params'] = filter_params
+        user_session['citation_request_params'] = all_params
+        user_session['citation_filters'] = request_params
+        user_session['citation_page'] = int(currentPage)
+        user_session['citation_prev_index'] = None
 
     context.update({
         'objects': filtered_objects,
