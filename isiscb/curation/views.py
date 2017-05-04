@@ -1139,10 +1139,15 @@ def _citations_get_filter_params(request):
         filter_params = user_session.get('citation_filter_params', None)
         all_params = user_session.get('citation_request_params', None)
         if filter_params is not None and all_params is not None:
+            # page needs to be updated otherwise it keeps old page count
+            if request.GET.get('page'):
+                all_params['page'] = request.GET.get('page')
             return filter_params, all_params
 
     raw_params = request.GET.urlencode().encode('utf-8')
     filter_params = QueryDict(raw_params, mutable=True)
+    if not all_params:
+        all_params = {}
 
     if 'o' in filter_params and isinstance(filter_params['o'], list):
         if len(filter_params['o']) > 0:
