@@ -88,6 +88,6 @@ urlpatterns = [
 
     url(r'^curation/', include('curation.urls')),
     # Social authentication views.
-    url('', include('social.apps.django_app.urls', namespace='social')),
+    url('', include('social_django.urls', namespace='social')),
 
 ]

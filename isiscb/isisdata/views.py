@@ -1465,7 +1465,7 @@ def home(request):
     """
     The landing view, at /.
     """
-
+    print request.user
     context = {
         'active': 'home',
         'comments_citation': Comment.objects.filter(subject_content_type__model='citation').order_by('-modified_on')[:10],
