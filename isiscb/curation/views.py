@@ -1126,7 +1126,7 @@ def subjects_and_categories(request, citation_id):
 # Deleted class QueryDictWraper; we're not using it. -E
 
 
-def _citations_get_filter_params(request, force_cache=False):
+def _citations_get_filter_params(request):
     """
     Build ``filter_params`` for GET request in citation list view.
     """
@@ -1135,7 +1135,7 @@ def _citations_get_filter_params(request, force_cache=False):
                                'collection_only']
     user_session = request.session
 
-    if len(request.GET.keys()) <= 1 or force_cache:
+    if len(request.GET.keys()) <= 1:
         filter_params = user_session.get('citation_filter_params', None)
         all_params = user_session.get('citation_request_params', None)
         if filter_params is not None and all_params is not None:
