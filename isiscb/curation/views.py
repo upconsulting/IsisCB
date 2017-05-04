@@ -1135,6 +1135,11 @@ def _citations_get_filter_params(request):
                                'collection_only']
     user_session = request.session
 
+    if len(request.GET.keys()) == 0:
+        filter_params = user_session.get('citation_filter_params', None)
+        all_params = user_session.get('citation_request_params', None)
+        if filter_params is not None and all_params is not None:
+            return filter_params, all_params
 
     raw_params = request.GET.urlencode().encode('utf-8')
     filter_params = QueryDict(raw_params, mutable=True)
@@ -1201,6 +1206,7 @@ def citations(request):
         if not currentPage:
             currentPage = 1
 
+        user_session['citation_filter_params'] = filter_params
         user_session['citation_request_params'] = all_params
         user_session['citation_filters'] = request_params
         user_session['citation_page'] = int(currentPage)
