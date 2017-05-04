@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 from django.utils import formats
 from django.utils.http import urlencode
 from django.utils.text import slugify
+from django.utils.html import escape
 from django.template.loader import get_template
 
 from rules.contrib.views import permission_required, objectgetter
@@ -1139,10 +1140,15 @@ def _citations_get_filter_params(request):
         filter_params = user_session.get('citation_filter_params', None)
         all_params = user_session.get('citation_request_params', None)
         if filter_params is not None and all_params is not None:
+            # page needs to be updated otherwise it keeps old page count
+            if request.GET.get('page'):
+                all_params['page'] = request.GET.get('page')
             return filter_params, all_params
 
     raw_params = request.GET.urlencode().encode('utf-8')
     filter_params = QueryDict(raw_params, mutable=True)
+    if not all_params:
+        all_params = {}
 
     if 'o' in filter_params and isinstance(filter_params['o'], list):
         if len(filter_params['o']) > 0:
@@ -1228,10 +1234,10 @@ def authorities(request):
         'curation_subsection': 'authorities',
     }
 
+    user_session = request.session
+
     additional_params_names = ["page"]
     all_params = {}
-
-    user_session = request.session
 
     raw_params = request.GET.urlencode().encode('utf-8')
     filter_params = QueryDict(raw_params, mutable=True)
@@ -1282,7 +1288,6 @@ def authorities(request):
     })
     return render(request, template, context)
 
-
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def authority(request, authority_id):
@@ -1327,8 +1332,17 @@ def authority(request, authority_id):
 
         tracking_records = authority.tracking_records.all() #Tracking.objects.filter(subject_instance_id=authority_id)
 
+        # if zotero_accession is None, we need to remove it or the filters give us trouble
+        if not get_request.get('zotero_accession', ''):
+            get_request['zotero_accession'] = ''
+
+        # to avoid scripting attacks let's escape the parameters
+        safe_get_request = {}
+        for key, value in get_request.items():
+            safe_get_request[escape(key)] = escape(value)
         context.update({
             'request_params': request_params,
+            'filters': safe_get_request,
             'form': form,
             'instance': authority,
             'person_form': person_form,
