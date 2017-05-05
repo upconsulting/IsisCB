@@ -2044,10 +2044,19 @@ def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
     if pks:
         filter_params['id'] = ','.join(pks)
+
+        # The ``collection_only`` parameter is used in the list view to indicate
+        #  that cached parameters should be ignored. That way, when the user
+        #  selects a collection in the collection list view they first see all
+        #  of the records in that collection. But if specific record IDs are
+        #  provided in the POST request, we want to preserve that selection
+        #  in the filter; so we remove ``collection_only``.
+        filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
     _qs = operations.filter_queryset(request.user, Citation.objects.all())
     queryset = CitationFilter(filter_params, queryset=_qs)
+
     return queryset, filter_params_raw
 
 
