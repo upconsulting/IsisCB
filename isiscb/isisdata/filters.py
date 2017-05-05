@@ -257,8 +257,6 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
         q = Q()
-        print value, type(value)
-
 
         return queryset.filter(Q(in_collections=value))
 
