@@ -75,7 +75,6 @@ class CitationFilter(django_filters.FilterSet):
     # order = ChoiceMethodFilter(name='order', choices=order_by)
 
     def __init__(self, params, **kwargs):
-
         if 'in_collections' in params and params.get('collection_only', False):
             in_coll = params.get('in_collections')
             params = QueryDict('', mutable=True)
@@ -258,8 +257,6 @@ class CitationFilter(django_filters.FilterSet):
         if not value:
             return queryset
         q = Q()
-        print value, type(value)
-
 
         return queryset.filter(Q(in_collections=value))
 
