@@ -994,6 +994,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
         if index == None and paginator.num_pages > page:
             objects_page = paginator.page(page+1)
             result_list = list(objects_page.object_list)
+
             # update current page number
             if current_obj in result_list:
                 index = result_list.index(current_obj)
@@ -1013,6 +1014,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
         if index == None and page > 1:
             objects_page = paginator.page(page-1)
             result_list = list(objects_page.object_list)
+
             # update current page number
             if current_obj in result_list:
                 page = page-1
@@ -1093,7 +1095,8 @@ def _build_result_set_links(request, context, citation):
             get_request['o'] = "publication_date"
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
 
-    filtered_objects = CitationFilter(get_request, queryset=queryset)
+    # unless we use the same queryset with select_related order of records will be different
+    filtered_objects = CitationFilter(get_request, queryset=queryset.select_related('part_details'))
     paginator = Paginator(filtered_objects.qs, 40)
 
     citations_page = paginator.page(page)
@@ -1286,6 +1289,7 @@ def authorities(request):
         'objects': filtered_objects,
         'filters_active': filters_active
     })
+
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
