@@ -85,9 +85,10 @@
             {% for error in objects.form.zotero_accession.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group clearable">
+            <div class="form-group form-group-sm clearable">
                 <label class="control-label">Zotero Acc.</label>
-                {{ objects.form.zotero_accession|addcss:"form-control input-sm" }}
+                {{ objects.form.zotero_accession|addcss:"form-control" }}
+                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
             </div>
 
             {% for error in objects.form.tracking_state.errors %}
@@ -178,6 +179,26 @@ $(document).ready(function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
     });
+
+    /* zotero accession javascript */
+    $('#zotero_accession_input').bootcomplete({
+        url:'{% url 'curation:search-zotero-accessions' %}',
+        minLength: 3,
+        idFieldName: 'zotero_accession'
+    });
+
+    $('#zotero_accession_input').on('input', function() {
+        if ($('#zotero_accession_input').val() == '') {
+          $('#id_zotero_accession').val('');
+        }
+    });
+
+    var date = "{{ objects.zotero_accession_date|date:"c" }}";
+    var append = "";
+    if (date != null && date != "") {
+      append = " (" + new Date().toLocaleString() + ")";
+    }
+    $('#zotero_accession_input').val("{{objects.zotero_accession_name}}" + append);
 });
 </script>
 {% endblock %}
