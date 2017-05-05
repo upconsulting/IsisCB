@@ -283,6 +283,7 @@ class AuthorityFilter(django_filters.FilterSet):
     datasets = Dataset.objects.all()
     dataset_list = [(ds.pk, ds.name) for ds in datasets ]
     belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
@@ -311,6 +312,21 @@ class AuthorityFilter(django_filters.FilterSet):
             'name': 'Name'
         }
     )
+
+    def __init__(self, params, **kwargs):
+
+        super(AuthorityFilter, self).__init__(params, **kwargs)
+
+        zotero_acc = self.data.get('zotero_accession', None)
+        if zotero_acc:
+            try:
+                accession = ImportAccession.objects.get(pk=zotero_acc)
+                if accession:
+                    self.zotero_accession_name = accession.name
+                    self.zotero_accession_date = accession.imported_on
+            except ImportAccession.DoesNotExist:
+                self.zotero_accession_name = "Zotero accession could not be found."
+
 
     def filter_tracking_state(self, queryset, field, value):
         if not value:
