@@ -2051,7 +2051,8 @@ def _get_filtered_queryset(request):
         #  of the records in that collection. But if specific record IDs are
         #  provided in the POST request, we want to preserve that selection
         #  in the filter; so we remove ``collection_only``.
-        filter_params.pop('collection_only')
+        if 'collection_only' in filter_params:
+            filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
     _qs = operations.filter_queryset(request.user, Citation.objects.all())
