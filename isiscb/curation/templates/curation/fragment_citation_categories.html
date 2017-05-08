@@ -8,7 +8,7 @@
 
 {% if can_update %}
 <p class="pull-right">
-<a href="{% url 'curation:subjects_and_categories' instance.id %}" class="btn btn-primary btn-sm">Categories/Subjects</a>
+<a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-primary btn-sm">Categories/Subjects</a>
 </p>
 {% endif %}
 
@@ -22,7 +22,7 @@
     <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="category-{{ acrelation.id }}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+        <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
         {% endif %}
         <span class="col-sm-10">
           {{ acrelation.authority.name }}
@@ -152,8 +152,8 @@ function triggerSearchCategories() {
                     var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
                     new_elem_acr += '<span class="label label-primary">category</span> <span class="label label-success">Provides category Content About</span> ';
 
-                    new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
-                    new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}"' + new_id +  '" >';
+                    new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '?search={{ search_key }}&current={{ current_index }}" >';
+                    new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}"' + new_id +  '?search={{ search_key }}&current={{ current_index }}" >';
 
                     new_elem += '<div class="row">';
                     new_elem_acr += '<div class="row">';

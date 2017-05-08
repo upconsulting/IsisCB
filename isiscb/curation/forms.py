@@ -610,8 +610,8 @@ class AttributeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
-        if self.instance.id:
-            self.fields['type_controlled'].widget.attrs['disabled'] = True
+        # if self.instance.id:
+        #     self.fields['type_controlled'].widget.attrs['disabled'] = True
 
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:

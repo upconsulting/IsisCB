@@ -9,19 +9,19 @@
 
 <div class="text-right" style="margin-bottom: 10px;">
 {% if can_update and can_create_fully_entered %}
-  <a href="{% url 'curation:tracking-citation' instance.id %}?type=FU" class="btn btn-default btn-sm">Fully Entered</a>
+  <a href="{% url 'curation:tracking-citation' instance.id %}?type=FU&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Fully Entered</a>
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Fully Entered</a>
 {% endif %}
 
 {% if can_update and can_create_proofed %}
-<a href="{% url 'curation:tracking-citation' instance.id %}?type=PD" class="btn btn-default btn-sm">Proofed</a>
+<a href="{% url 'curation:tracking-citation' instance.id %}?type=PD&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Proofed</a>
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Proofed</a>
 {% endif %}
 
 {% if can_update and can_create_authorize %}
-<a href="{% url 'curation:tracking-citation' instance.id %}?type=AU" class="btn btn-default btn-sm">Authorized</a>
+<a href="{% url 'curation:tracking-citation' instance.id %}?type=AU&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Authorized</a>
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Authorized</a>
 {% endif %}
