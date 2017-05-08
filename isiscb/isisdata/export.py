@@ -33,10 +33,12 @@ def generate_csv(stream, queryset, columns):
     writer.writerow(map(lambda c: c.label, columns))
     extra = []
     for obj in queryset:
-        writer.writerow(map(lambda c: c(obj, extra), columns))
+        if obj is not None:
+            writer.writerow(map(lambda c: c(obj, extra), columns))
 
     for obj in extra:
-        writer.writerow(map(lambda c: c(obj, []), columns))
+        if obj is not None:
+            writer.writerow(map(lambda c: c(obj, []), columns))
 
 
 class Column(object):
