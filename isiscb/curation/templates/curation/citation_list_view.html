@@ -28,15 +28,27 @@ $('body').ready(function() {
     {% csrf_token %}
     &nbsp;&nbsp;
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_citation' %}">Create new citation record</a>
+
     <input class="btn btn-success btn-xs" type="submit" value="Bulk change" />
     <a class="btn btn-primary btn-xs" href="{% url 'curation:citation-bulk-select' %}">Bulk select</a>
 
-    <a class="btn btn-primary btn-xs" href="#" id="export">Bulk Export</a>
-    <span class="btn-group">
-        <a class="btn btn-primary btn-xs" href="#" id="collection-create">Create new collection</a>
-        <a class="btn btn-warning btn-xs" href="#" id="collection-add">Add to existing collection</a>
-        <a class="btn btn-success btn-xs" href="{% url "curation:collections" %}" id="collections">List collections</a>
+    <a class="btn btn-primary btn-xs" href="#" id="export">
+        <span class="glyphicon glyphicon-cloud-download"></span>
+        Export
+    </a>
+    <span class="dropdown">
+        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-folder-open"></span>
+            Collections
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="" href="#" id="collection-create"><span class="glyphicon glyphicon-certificate"></span> Create new collection</a></li>
+            <li><a class="" href="#" id="collection-add"><span class="glyphicon glyphicon-plus"></span> Add to existing collection</a></li>
+            <li><a class="" href="{% url "curation:collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>
+        </ul>
     </span>
+
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
     <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
@@ -84,12 +96,12 @@ $('body').ready(function() {
                   {% if object.record_status_value %}{{ object.record_status_value }}{% endif %}
                 </td>
                 <td>
-                    <a href="{% url "curation:curate_citation" object.id %}">{{ object.id }}</a>
+                    <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
                     {% if not object.public %}
                     <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                     {% endif %}
 
-                    {% if not acrelations|are_related_authorities_public:authorities or not ccrelations|are_related_citations_public:related_citations or not attributes|are_attributes_public %}
+                    {% if not object.id|are_related_authorities_public or not object.id|are_related_citations_public or not object.id|are_attributes_public %}
                     <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
                     {% endif %}
                     {% if object|is_public_inconsistent %}
@@ -99,11 +111,11 @@ $('body').ready(function() {
                     <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
                     {% endif %}
                 </td>
-                <td>{{ object.get_type_controlled_display }}</td>
-                <td>{{ object|get_citation_title|safe }}</td>
+                <td>{{ object.type_controlled|get_type_controlled_display }}</td>
+                <td>{{ object.title_for_display|safe }}</td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
-                        {{ acrelations|get_authors_editors_preloaded }}
+                        {{ object.id|get_authors_editors_preloaded }}
                     </a>
                 </td>
                 <td>
@@ -113,20 +125,20 @@ $('body').ready(function() {
                 </td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
-                        {{ object|get_citation_periodical }}
+                        {{ object.id|get_citation_periodical }}
                     </a>
                 </td>
                 <td>
                     {{ object|get_page_numbers }}
                 </td>
                 <td>
-                    {{ object.get_tracking_state_display }}
+                    {{ object.tracking_state|get_tracking_state_display }}
                 </td>
                 <td>
                     {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
                 </td>
                 <td>
-                    {% if object.created_on %}{{ object.created_on }}{% else %}{{ object.created_on_fm }}{% endif %}
+                    {% if object.created_native %}{{ object.created_native }}{% endif %}
                 </td>
             </tr>
             {% endwith %}

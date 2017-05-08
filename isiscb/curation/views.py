@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
+from django.core.paginator import EmptyPage
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -35,9 +36,12 @@ from curation.forms import *
 from curation.contrib.views import check_rules
 from curation import tasks as curation_tasks
 
-import iso8601, rules, datetime, hashlib
+import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
+
+
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 
 def _get_datestring_for_authority(authority):
@@ -880,6 +884,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     })
     return render(request, template, context)
 
+import datetime
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -888,10 +893,10 @@ def citation(request, citation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
     }
+    start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
-    _build_result_set_links(request, context, citation)
-
+    _build_result_set_links(request, context)
 
     # We use a different template for each citation type.
     if citation.type_controlled == Citation.BOOK:
@@ -948,17 +953,27 @@ def citation(request, citation_id):
             if partdetails_form:
                 partdetails_form.save()
 
+            search = request.POST.get('search')
+            current_index = request.POST.get('current')
+
             forward_type = request.POST.get('forward_type', None)
             if forward_type == "list":
-                return HttpResponseRedirect(reverse('curation:citation_list') + "?page=" + str(page))
-            elif forward_type == "next":
-                next = context.get('next', citation)
-                return HttpResponseRedirect(reverse('curation:curate_citation', args=(next.id,)))
+                return HttpResponseRedirect(reverse('curation:citation_list') + "?search=%s&page=%s" % (search, str(page)))
+            if forward_type == "next":
+                target_object = context.get('next', citation)
+                target_index = context.get('next_index', current_index)
             elif forward_type == "previous":
-                prev = context.get('previous', citation)
-                return HttpResponseRedirect(reverse('curation:curate_citation', args=(prev.id,)))
+                target_object = context.get('previous', citation)
+                target_index = context.get('previous_index', current_index)
+            else:
+                target_object = citation.id
+                target_index = current_index
 
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
+            target = reverse('curation:curate_citation', args=(target_object,))
+            if search and target_index:
+                target += '?search=%s&current=%s' % (search, target_index)
+            return HttpResponseRedirect(target)
+            # return HttpResponseRedirect()
 
         context.update({
             'form': form,
@@ -973,31 +988,65 @@ def citation(request, citation_id):
 def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
                          cache_prev_index_key, cache_page_key,
                          cache_request_param_key, session):
-    if objects_page:
-        user_session = session
+    user_session = session
+    start = datetime.datetime.now()
+    current_page_contents = user_session.get('citation_page_contents', [])
+    if current_page_contents:
+        page_number = user_session[cache_page_key]
+
+        idx = current_page_contents.index(current_obj.id)
+        if idx > 0:
+            previous_obj = current_page_contents[idx - 1]
+        elif page_number > 0:
+            previous_obj = user_session.get('citation_page_contents_previous')
+        else:
+            previous_obj = None
+
+        if idx < PAGE_SIZE - 1:
+            next_obj = current_page_contents[idx + 1]
+        else:
+            next_obj = user_session.get('citation_page_contents_next')
+
+        print previous_obj, next_obj
+        # next_objif idx < 39 else None
+
+        context.update({
+            'next': next_obj,
+            'previous': previous_obj,
+            'index': (page_number - 1) * PAGE_SIZE + idx + 1
+        })
+        return
+
+    # Evaluating the truthiness of a Page object is apparently super
+    #  non-performant.
+    if objects_page is not None:
+
         request_params = user_session.get(cache_request_param_key, {})
 
-        result_list = list(objects_page.object_list)
+        result_list = list(objects_page.object_list.values_list('id'))
         prev_index = user_session.get(cache_prev_index_key, None)
         index = None
+        print '...991', datetime.datetime.now() - start
 
-        if current_obj in result_list:
-            index = result_list.index(current_obj)
+        if current_obj.id in result_list:
+            index = result_list.index(current_obj.id)
 
             # this is a fix for the duplicate results issue
             # is this more stable than having a running index for the record
             # looked at? I don't know, but this works, so I say it's stable enough!
+            print '...999', datetime.datetime.now() - start
             index = _get_corrected_index(prev_index, index)
-
         # if current citation is not on current page (page turns)
         # check if it's on next page
+        print '...1003', datetime.datetime.now() - start
         if index == None and paginator.num_pages > page:
+            print '...1005', datetime.datetime.now() - start
             objects_page = paginator.page(page+1)
             result_list = list(objects_page.object_list)
 
             # update current page number
-            if current_obj in result_list:
-                index = result_list.index(current_obj)
+            if current_obj.id in result_list:
+                index = result_list.index(current_obj.id)
 
                 # this is a fix for the duplicate results issue
                 # is this more stable than having a running index for the record
@@ -1057,6 +1106,7 @@ def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
                 'previous': previous,
                 'index': paginator.page(page).start_index() + index,
             })
+    print '...', datetime.datetime.now() - start
 
 
 def _get_corrected_index(prev_index, index):
@@ -1074,7 +1124,7 @@ def _get_corrected_index(prev_index, index):
     return index
 
 
-def _build_result_set_links(request, context, citation):
+def _build_result_set_links(request, context, model=Citation):
     """
     This function build all the info that the previous/next/back to list links from  a given
     request object, context object for the page, and the citation that should be displayed.
@@ -1085,28 +1135,76 @@ def _build_result_set_links(request, context, citation):
     * request_params: request parameters that went into the function call
     * total: the total number of found citations
     """
+    start = datetime.datetime.now()
+
     user_session = request.session
-    page = user_session.get('citation_page', 1)
-    get_request = user_session.get('citation_filters', None)
-    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
-        if len(get_request['o']) > 0:
-            get_request['o'] = get_request['o'][0]
-        else:
-            get_request['o'] = "publication_date"
-    queryset = operations.filter_queryset(request.user, Citation.objects.all())
+    model_key = model.__name__.lower()
 
-    # unless we use the same queryset with select_related order of records will be different
-    filtered_objects = CitationFilter(get_request, queryset=queryset.select_related('part_details'))
-    paginator = Paginator(filtered_objects.qs, 40)
+    print request.POST
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+    search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
+    search_count = user_session.get('%s_%s_search_count' % (search_key, model_key))
 
-    citations_page = paginator.page(page)
+    # If there is no search, or we arrive at a record without a position in
+    #  the search results, there is nothing to do.
+    if not search_key or not current_index or not search_params:
+        return
 
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+    current_index = int(current_index)
+    page_number = int(math.floor(current_index / PAGE_SIZE)) + 1
+    relative_index = current_index % PAGE_SIZE
 
-    request_params = user_session.get('citation_request_params', "")
+    # The "current run" is the series of record IDs on the current page.
+    # The "prior" and "antecedent" are the IDs of the last record on the
+    # previous page and the first record on the next page, respectively.
+    current_run = user_session.get('%s_%s_page_%i' % (str(search_key), model_key, page_number))
+    prior = user_session.get('%s_%s_current_prior_%i' % (str(search_key), model_key, page_number))
+    antecedent = user_session.get('%s_%s_current_antecedent_%i' % (str(search_key), model_key, page_number))
+
+    if current_run is None:
+        queryset = operations.filter_queryset(request.user, model.objects.all())
+        filter_class = eval('%sFilter' % model.__name__.title())
+        filtered_objects = filter_class(params, queryset=queryset.select_related('part_details'))
+        paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+        page = paginator.page(page_number)
+
+        current_run = [o.id for o in page]
+        prior_page = paginator.page(page_number - 1) if page_number > 1 else []
+        antecedent_page = paginator.page(page_number + 1)
+        try:
+            prior = prior_page[0].id
+        except IndexError:
+            prior = None
+        try:
+            antecedent = antecedent_page[-1].id
+        except IndexError:
+            antecedent = None
+
+        user_session['%s_%s_page_%i' % (str(search_key), model_key, page_number)] = current_run
+        user_session['%s_%s_current_prior_%i' % (str(search_key), model_key, page_number)] = prior
+        user_session['%s_%s_current_antecedent_%i' % (str(search_key), model_key, page_number)] = antecedent
+
+    if current_index == 0:
+        prev_id = None
+        prev_index = None
+    else:
+        prev_index = current_index - 1
+        prev_id = current_run[relative_index - 1] if relative_index > 0 else prior
+    next_id = current_run[relative_index + 1] if relative_index < PAGE_SIZE - 1 else antecedent
+    next_index = current_index + 1 if next_id is not None else None
+
     context.update({
-        'request_params': request_params,
-        'total': filtered_objects.qs.count(),
+        'next': next_id,
+        'next_index': next_index,
+        'previous': prev_id,
+        'previous_index': prev_index,
+        'total': search_count,
+        'current_index': current_index,
+        'index': current_index + 1,
+        'search_key': search_key,
+        'current_page': page_number,
+        'current_offset': (page_number - 1) * PAGE_SIZE
     })
 
 
@@ -1127,40 +1225,99 @@ def subjects_and_categories(request, citation_id):
 
     return render(request, template, context)
 
-# Deleted class QueryDictWraper; we're not using it. -E
 
 
-def _citations_get_filter_params(request):
+def _authorities_get_filter_params(request):
     """
-    Build ``filter_params`` for GET request in citation list view.
+    Build ``filter_params`` for GET request in authority list view.
     """
+
+    search_key = request.GET.get('search')
+
+    additional_params_names = ["page"]
     all_params = {}
-    additional_params_names = ["page", "zotero_accession", "in_collections",
-                               'collection_only']
+
     user_session = request.session
+    filter_params = None
+    if search_key:
+        filter_params = user_session.get('%s_authority_search_params' % search_key)
+        all_params = {k: v for k, v in filter_params.iteritems()}
 
     if len(request.GET.keys()) <= 1:
-        filter_params = user_session.get('citation_filter_params', None)
-        all_params = user_session.get('citation_request_params', None)
+        if filter_params is None:
+            filter_params = user_session.get('authority_filter_params', None)
+            all_params = user_session.get('authority_request_params', None)
         if filter_params is not None and all_params is not None:
             # page needs to be updated otherwise it keeps old page count
             if request.GET.get('page'):
                 all_params['page'] = request.GET.get('page')
             return filter_params, all_params
 
-    raw_params = request.GET.urlencode().encode('utf-8')
-    filter_params = QueryDict(raw_params, mutable=True)
+    if filter_params is None:
+        raw_params = request.GET.urlencode().encode('utf-8')
+        filter_params = QueryDict(raw_params, mutable=True)
+
     if not all_params:
         all_params = {}
 
-    if 'o' in filter_params and isinstance(filter_params['o'], list):
-        if len(filter_params['o']) > 0:
-            filter_params['o'] = filter_params['o'][0]
-        else:
-            filter_params['o'] = "publication_date"
+    if search_key is None:
+        if not 'o' in filter_params.keys():
+            filter_params['o'] = 'name_for_sort'
+        for key in additional_params_names:
+            all_params[key] = request.GET.get(key, '')
 
-    if not 'o' in filter_params.keys():
-        filter_params['o'] = 'publication_date'
+        if 'o' not in filter_params:
+            filter_params['o'] = 'name_for_sort'
+        elif isinstance(filter_params['o'], list):
+            if len(filter_params['o']) > 0:
+                filter_params['o'] = filter_params['o'][0]
+            else:
+                filter_params['o'] = 'name_for_sort'
+
+    for key in additional_params_names:
+        all_params[key] = request.GET.get(key, '')
+    return filter_params, all_params
+
+
+def _citations_get_filter_params(request):
+    """
+    Build ``filter_params`` for GET request in citation list view.
+    """
+
+    search_key = request.GET.get('search')
+
+    all_params = {}
+    additional_params_names = ["page", "zotero_accession", "in_collections",
+                               'collection_only']
+    user_session = request.session
+    filter_params = None
+    if search_key:
+        filter_params = user_session.get('%s_citation_search_params' % search_key)
+        all_params = {k: v for k, v in filter_params.iteritems()}
+
+    if len(request.GET.keys()) <= 1:
+        if filter_params is None:
+            filter_params = user_session.get('citation_filter_params', None)
+            all_params = user_session.get('citation_request_params', None)
+        if filter_params is not None and all_params is not None:
+            # page needs to be updated otherwise it keeps old page count
+            if request.GET.get('page'):
+                all_params['page'] = request.GET.get('page')
+            return filter_params, all_params
+
+    if filter_params is None:
+        raw_params = request.GET.urlencode().encode('utf-8')
+        filter_params = QueryDict(raw_params, mutable=True)
+
+    if not all_params:
+        all_params = {}
+
+    if search_key is None:
+         if 'o' in filter_params and isinstance(filter_params['o'], list):
+             if len(filter_params['o']) > 0:
+                 filter_params['o'] = filter_params['o'][0]
+             else:
+                 filter_params['o'] = "publication_date"
 
     for key in additional_params_names:
         all_params[key] = request.GET.get(key, '')
@@ -1179,11 +1336,11 @@ def citations(request):
     user_session = request.session
     # We need to be able to amend the filter parameters, so we create a new
     #  mutable QueryDict from the POST payload.
+    #  - ``filter_params`` are the parameters that will be passed to the
+    #     CitationFilter.
+    #  - ``all_params`` includes the parameters in ``filter_params`` plus any
+    #     additional parameters not used by the CitationFilter (e.g. page).
     filter_params, all_params = _citations_get_filter_params(request)
-
-    # Default sort order. TODO: move this to the CitationFilterSet itself.
-    if 'o' not in filter_params or not filter_params['o']:
-        filter_params['o'] = 'title_for_sort'
 
     # We use the filter parameters in this form to specify the queryset for
     #  bulk actions.
@@ -1195,38 +1352,61 @@ def citations(request):
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'filter_params': encoded_params,
+        'search_key': search_key
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
-    fields = ('record_status_value', 'id', 'type_controlled', 'public', 'publication_date')
-    filtered_objects = CitationFilter(filter_params, queryset=queryset.select_related('part_details'))
 
-    # filters_active = len(filter(lambda (k, v): v and k != 'page', filter_params.items())) > 0
+    fields = ('record_status_value', 'id', 'type_controlled', 'public',
+              'tracking_state', 'modified_on', 'created_native',
+              'publication_date', 'title_for_display', 'part_details_id',
+              'part_details__page_begin', 'part_details__page_end',)
+    qs = queryset.select_related('part_details').values(*fields)
+    filtered_objects = CitationFilter(filter_params, queryset=qs)
+
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    currentPage = all_params.get('page', 1)
+    if not currentPage:
+        currentPage = 1
+    currentPage = int(currentPage)
+    page = paginator.page(currentPage)
+    paginated_objects = list(page)
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
         all_params.update(request_params)
 
-        currentPage = all_params.get('page', 1)
-        if not currentPage:
-            currentPage = 1
-
         user_session['citation_filter_params'] = filter_params
         user_session['citation_request_params'] = all_params
-        user_session['citation_filters'] = request_params
         user_session['citation_page'] = int(currentPage)
-        user_session['citation_prev_index'] = None
+
+    result_count = filtered_objects.qs.count()
+    user_session['%s_citation_search_params' % str(search_key)] = filter_params
+    user_session['%s_citation_search_count' % str(search_key)] = result_count
+    user_session['%s_citation_page_%i' % (str(search_key), currentPage)] = [o['id'] for o in paginated_objects]
+    user_session['%s_citation_current_prior_%i' % (str(search_key), currentPage)] = paginator.page(currentPage - 1)[-1]['id'] if currentPage > 1 else None
+    try:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = paginator.page(currentPage + 1)[0]['id']
+    except EmptyPage:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = None
 
     context.update({
         'objects': filtered_objects,
         # 'filters_active': filters_active,
-        'result_count': filtered_objects.qs.count()
+        'result_count': result_count,
+        'filter_list': paginated_objects,
+        'current_page': currentPage,
+        'current_offset': (currentPage - 1) * PAGE_SIZE
     })
-
     return render(request, template, context)
 
 
@@ -1239,58 +1419,68 @@ def authorities(request):
 
     user_session = request.session
 
-    additional_params_names = ["page"]
-    all_params = {}
+    filter_params, all_params = _authorities_get_filter_params(request)
 
-    raw_params = request.GET.urlencode().encode('utf-8')
-    filter_params = QueryDict(raw_params, mutable=True)
+    if isinstance(filter_params, QueryDict):
+        encoded_params = filter_params.urlencode().encode('utf-8')
+    else:
+        _params = QueryDict(mutable=True)
+        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+            _params[k] = v
+        encoded_params = _params.urlencode().encode('utf-8')
 
-    if not 'o' in filter_params.keys():
-        filter_params['o'] = 'name_for_sort'
-    for key in additional_params_names:
-        all_params[key] = request.GET.get(key, '')
-
-    if 'o' not in filter_params:
-        filter_params['o'] = 'name_for_sort'
-    elif isinstance(filter_params['o'], list):
-        if len(filter_params['o']) > 0:
-            filter_params['o'] = filter_params['o'][0]
-        else:
-            filter_params['o'] = 'name_for_sort'
-
-    #user_session['authority_request_params'] = request.META['QUERY_STRING']
-    #user_session['authority_get_request'] = request.GET
-    currentPage = request.GET.get('page', 1)
-    #user_session['authority_page'] = int(currentPage)
-    #user_session['authority_prev_index'] = None
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
 
     template = 'curation/authority_list_view.html'
-    queryset = operations.filter_queryset(request.user, Authority.objects.all())
+    fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
+              'tracking_state')
+    queryset = operations.filter_queryset(request.user,
+                                          Authority.objects.values(*fields))
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
 
-    filters_active = filter_params
-    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    currentPage = all_params.get('page', 1)
+    if not currentPage:
+        currentPage = 1
+    currentPage = int(currentPage)
+    page = paginator.page(currentPage)
+    paginated_objects = list(page)
+
+    filters_active = filter_params or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
         for key in request_params:
             all_params[key] = request_params[key]
 
-        currentPage = all_params.get('page', 1)
-        if not currentPage:
-            currentPage = 1
-
         user_session['authority_request_params'] = all_params
         user_session['authority_filters'] = request_params
         user_session['authority_page'] = int(currentPage)
         user_session['authority_prev_index'] = None
 
+    result_count = filtered_objects.qs.count()
+    user_session['%s_authority_search_params' % str(search_key)] = filter_params
+    user_session['%s_authority_search_count' % str(search_key)] = result_count
+    user_session['%s_authority_page_%i' % (str(search_key), currentPage)] = [o['id'] for o in paginated_objects]
+    user_session['%s_authority_current_prior_%i' % (str(search_key), currentPage)] = paginator.page(currentPage - 1)[-1]['id'] if currentPage > 1 else None
+    try:
+        user_session['%s_authority_current_antecedent_%i' % (str(search_key), currentPage)] = paginator.page(currentPage + 1)[0]['id']
+    except EmptyPage:
+        user_session['%s_authority_current_antecedent_%i' % (str(search_key), currentPage)] = None
+
     context.update({
         'objects': filtered_objects,
-        'filters_active': filters_active
+        'filters_active': filters_active,
+        'filter_params': encoded_params,
+        'search_key': search_key,
+        'current_page': currentPage,
+        'current_offset': (currentPage - 1) * PAGE_SIZE
     })
-
     return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
@@ -1303,6 +1493,7 @@ def authority(request, authority_id):
     context.update({'tab': request.GET.get('tab', None)})
     authority = get_object_or_404(Authority, pk=authority_id)
     template = 'curation/authority_change_view.html'
+
     person_form = None
     if request.method == 'GET':
 
@@ -1316,16 +1507,6 @@ def authority(request, authority_id):
                 get_request['o'] = get_request['o'][0]
             else:
                 get_request['o'] = "name_for_sort"
-
-        queryset = operations.filter_queryset(request.user, Authority.objects.all())
-        filtered_objects = AuthorityFilter(get_request, queryset=queryset)
-        paginator = Paginator(filtered_objects.qs, 40)
-        authority_page = paginator.page(page)
-
-        # ok, let's start the whole pagination/next/previous dance :op
-        _build_next_and_prev(context, authority, authority_page, paginator,
-                             page, 'authority_prev_index', 'authority_page',
-                             'authority_request_params', user_session)
 
         request_params = user_session.get('authority_request_params', "")
 
@@ -1351,9 +1532,8 @@ def authority(request, authority_id):
             'instance': authority,
             'person_form': person_form,
             'tracking_records': tracking_records,
-            'total': filtered_objects.qs.count(),
+            # 'total': filtered_objects.qs.count(),
         })
-
 
     elif request.method == 'POST':
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
@@ -1366,7 +1546,13 @@ def authority(request, authority_id):
 
             form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=[authority.id,]))
+            target = reverse('curation:curate_authority', args=[authority.id,])
+            search = request.POST.get('search')
+            current = request.POST.get('current')
+            print search, current
+            if search and current:
+                target += '?search=%s&current=%s' % (search, current)
+            return HttpResponseRedirect(target)
 
         context.update({
             'form': form,
@@ -1374,7 +1560,7 @@ def authority(request, authority_id):
             'instance': authority,
             # 'partdetails_form': partdetails_form,
         })
-
+    _build_result_set_links(request, context, model=Authority)
     return render(request, template, context)
 
 

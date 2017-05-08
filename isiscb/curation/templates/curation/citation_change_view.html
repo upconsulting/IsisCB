@@ -61,6 +61,9 @@ var toggleTab = function(name) {
 <form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
 
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
+
   <input type="hidden" id="input_back_to_list" name="back_to_list" value="False">
   <input type="hidden" id="input_forward_type" name="forward_type" >
 
@@ -113,9 +116,9 @@ Back to List </a>
       {% endif %}
     </div>
     <div class="col-md-3 text-right">
-        Record {{ index }} of {{ total }}
+        {% if index %}Record {{ index }} of {{ total }}{% endif %}
         <div class="btn-group ">
-            <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
             <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
 
@@ -437,7 +440,7 @@ $( document ).ready(function() {
     $('#data_changed_modal').modal('hide');
     $("#input_back_to_list").val("True");
     if ( checkRecord() ) {
-        $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}');
+        $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
         $('#citation_form').submit();
     }
   });
@@ -458,9 +461,9 @@ $( document ).ready(function() {
       $('#data_changed_modal').attr('data-forward-type', 'next');
       $('#data_changed_modal').modal('show');
     }
-    {% if next.id %}
+    {% if next %}
     else {
-      window.location.href = '{% url 'curation:curate_citation' next.id %}';
+      window.location.href = '{% url 'curation:curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
     }
     {% endif %}
   });
@@ -470,9 +473,9 @@ $( document ).ready(function() {
       $('#data_changed_modal').attr('data-forward-type', 'previous');
       $('#data_changed_modal').modal('show');
     }
-    {% if previous.id %}
+    {% if previous %}
     else {
-      window.location.href = '{% url 'curation:curate_citation' previous.id %}';
+      window.location.href = '{% url 'curation:curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
     }
     {% endif %}
   });
@@ -482,22 +485,22 @@ $( document ).ready(function() {
       $('#data_changed_modal').attr('data-forward-type', 'list');
       $('#data_changed_modal').modal('show');
     } else {
-      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page }}';
     }
   });
 
   $("#data_changed_cancel").on('click', function() {
-    {% if next.id and previous.id %}
+    {% if next and previous %}
     if ($('#data_changed_modal').attr('data-forward-type') == "next") {
-      window.location.href = '{% url 'curation:curate_citation' next.id %}';
+      window.location.href = '{% url 'curation:curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
     } else if ($('#data_changed_modal').attr('data-forward-type') == "previous") {
-      window.location.href = '{% url 'curation:curate_citation' previous.id %}';
+      window.location.href = '{% url 'curation:curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
     }
     else {
-      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page }}';
     }
     {% else %}
-      window.location.href = '{% url 'curation:citation_list' %}?page={{request_params.page}}';
+      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page}}';
     {% endif %}
 
   });
