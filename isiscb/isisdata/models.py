@@ -720,21 +720,21 @@ class Citation(ReferencedEntity, CuratedMixin):
         def get_display_title(obj):
             if not obj:
                 return u'No linked citation'
-            title = obj.title
-            if not title:
-                relation = obj.ccrelations.select_related('subject', 'object')\
-                    .filter(type_controlled__in=['RO', 'RB'])\
-                    .values('subject_id', 'subject__title', 'object__title')
-                if relation.count() > 0:
-                    relation = relation.first()
+            if obj.title:
+                return obj.title
+            relation = obj.ccrelations.select_related('subject', 'object')\
+                .filter(type_controlled__in=['RO', 'RB'])\
+                .values('subject_id', 'subject__title', 'object__title')
+            if relation.count() > 0:
+                relation = relation.first()
+            else:
+                relation = None
+            if relation:
+                if relation['subject__title'] or relation['object__title']:
+                    return u'Review: %s' % relation['subject__title'] if relation['subject_id'] != obj.id else relation['object__title']
                 else:
-                    relation = None
-                if relation:
-                    if relation['subject__title'] or relation['object__title']:
-                        return u'Review: %s' % relation['subject__title'] if relation['subject_id'] != obj.id else relation['object__title']
-                    else:
-                        return u'(no title)'
-                return u'Untitled review'
+                    return u'(no title)'
+            return u'Untitled review'
 
         if self.created_native is None:
             try:
