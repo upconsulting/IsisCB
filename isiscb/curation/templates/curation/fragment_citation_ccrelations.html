@@ -13,7 +13,7 @@
     <li class="list-group-item ccrelation clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if instance.id|is_ccrelation_other_public:ccrelation %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "curation:ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">
+        <a href="{% url "curation:ccrelation_for_citation" instance.id ccrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
         {% endif %}
         <span class="col-sm-11">
           {% if instance.id == ccrelation.subject.id %}
@@ -62,7 +62,7 @@
     <li class="list-group-item clearfix {% if not ccrelation.public %}notpublic{% endif %} {% if instance.id|is_ccrelation_other_public:ccrelation %}record-notpublic{% endif %}" id="ccrelation-{{ccrelation.id}}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "curation:ccrelation_for_citation" instance.id ccrelation.id %}" class="list_entry_link">
+        <a href="{% url "curation:ccrelation_for_citation" instance.id ccrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
         {% endif %}
 
         <span class="col-sm-11">
@@ -114,7 +114,7 @@
 {% endif %}
 
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "curation:create_ccrelation_for_citation" instance.id %}">
+    <a class="list-group-item text-muted" href="{% url "curation:create_ccrelation_for_citation" instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
 {% endif %}

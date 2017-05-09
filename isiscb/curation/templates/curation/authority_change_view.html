@@ -33,6 +33,9 @@
 <form class="form" action="." method="POST">
     {% csrf_token %}
 
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
+
 {% include "curation/fragment_authority_header.html" %}
 
 

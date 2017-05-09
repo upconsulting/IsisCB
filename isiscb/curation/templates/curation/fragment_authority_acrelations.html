@@ -49,7 +49,7 @@
           <div class="row">
 
           {% if can_update %}
-          <a href="{% url "curation:update_acrelation_for_authority" instance.id acrelation.id %}" class="list_entry_link">
+          <a href="{% url "curation:update_acrelation_for_authority" instance.id acrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
           {% endif %}
           <span class="col-sm-11">
             <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
@@ -88,7 +88,7 @@
 
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "curation:create_acrelation_for_authority" instance.id %}">
+    <a class="list-group-item text-muted" href="{% url "curation:create_acrelation_for_authority" instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
     </a>
 {% endif %}

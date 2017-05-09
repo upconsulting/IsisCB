@@ -6,6 +6,8 @@
 
 <form class="form" action="." method="POST">
     {% csrf_token %}
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
 
     <div class="row" style="margin-bottom: 20px;">
         <div class="col-md-5">
@@ -31,12 +33,12 @@
             </div>
           </div>
         <div class="col-md-3">
-          <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+          <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Citation</a>
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
                 <input type="submit" value="Save" class="btn btn-sm btn-success" />
                 <a href="#"
                   class="btn btn-danger btn-sm delete-linkeddata"
@@ -52,7 +54,7 @@
 
     <div class="container-fluid form-horizontal">
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 {% for error in linkeddata_form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
@@ -60,16 +62,42 @@
                     <label class="col-md-4">{{ linkeddata_form.type_controlled.label }}</label>
                     <div class="col-md-8">
                       {{ linkeddata_form.type_controlled|addcss:"form-control" }}
+                      <p class="text-muted text-small">{{ linkeddata_form.type_controlled.help_text }}</p>
                     </div>
+
                 </div>
+
 
                 {% for error in linkeddata_form.universal_resource_name.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.universal_resource_name.label }}</label>
+                    <label class="col-md-4">URN</label>
                     <div class="col-md-8">
                       {{ linkeddata_form.universal_resource_name|addcss:"form-control" }}
+                      <p class="text-muted text-small">{{ linkeddata_form.universal_resource_name.help_text }}</p>
+                    </div>
+                </div>
+
+                {% for error in linkeddata_form.resource_name.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-4">{{ linkeddata_form.resource_name.label }}</label>
+                    <div class="col-md-8">
+                      {{ linkeddata_form.resource_name|addcss:"form-control" }}
+                      <p class="text-muted text-small">{{ linkeddata_form.resource_name.help_text }}</p>
+                    </div>
+                </div>
+
+                {% for error in linkeddata_form.url.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-4">URL</label>
+                    <div class="col-md-8">
+                      {{ linkeddata_form.url|addcss:"form-control" }}
+                      <p class="text-muted text-small">{{ linkeddata_form.url.help_text }}</p>
                     </div>
                 </div>
 
@@ -77,51 +105,19 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-12">{{ linkeddata_form.administrator_notes.label }}</label>
-                    <div class="col-md-12">
+                    <label class="col-md-4">{{ linkeddata_form.administrator_notes.label }}</label>
+                    <div class="col-md-8">
                       {{ linkeddata_form.administrator_notes|addcss:"form-control" }}
+                      <p class="text-muted text-small">{{ linkeddata_form.administrator_notes.help_text }}</p>
                     </div>
                 </div>
 
             </div>
 
-            <div class="col-sm-6">
-              {% for error in linkeddata_form.resource_name.errors %}
-              <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-3">{{ linkeddata_form.resource_name.label }}</label>
-                  <div class="col-md-9">
-                    {{ linkeddata_form.resource_name|addcss:"form-control" }}
-                  </div>
-              </div>
 
-              {% for error in linkeddata_form.url.errors %}
-              <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-3">{{ linkeddata_form.url.label }}</label>
-                  <div class="col-md-9">
-                    {{ linkeddata_form.url|addcss:"form-control" }}
-                  </div>
-              </div>
-
-            </div>
 
         </div>
-        <div class="clearfix">
-            <div class="button-group pull-right">
-                <input type="submit" value="Save" class="btn btn-success" />
-                {% if linkeddata %}
-                <a href="#"
-                    class="btn btn-danger delete-linkeddata"
-                    linkeddata-id="{{ linkeddata.id }}"
-                    linkeddata-title="{{ linkeddata }}">
-                    Delete
-                </a>
-                {% endif %}
-            </div>
-        </div>
+
     </div>
 
 </form>
@@ -145,7 +141,7 @@ var delete_linkeddata = function() {
     $('#delete-linkeddata-modal').modal('hide');
     var linkeddata_id = $('#linkeddata-id-container').val();
     if (linkeddata_id) {
-        window.location.replace("{% url "curation:delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
     }
 }
 </script>

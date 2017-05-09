@@ -20,7 +20,7 @@
 
     <div class="clearfix">
         <div class="button-group pull-right">
-            <a href="{% url "curation:delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true" class="btn btn-danger">Delete</a>
+            <a href="{% url "curation:delete_linkeddata_for_citation" instance.id linkeddata.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}" class="btn btn-danger">Delete</a>
         </div>
     </div>
 </div>

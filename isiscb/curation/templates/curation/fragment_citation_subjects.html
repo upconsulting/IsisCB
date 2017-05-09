@@ -15,7 +15,7 @@
     <li class="list-group-item acrelation clearfix {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.authority.public %}record-notpublic{% endif %}" id="subject-{{ acrelation.id }}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+        <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
         {% endif %}
 
         <span class="col-sm-10">
@@ -139,8 +139,8 @@ function triggerSearchSubjects(e) {
                       var new_elem = '<li class="list-group-item clearfix" id="subject-' + new_id + '">';
                       var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
 
-                      new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
-                      new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '" >';
+                      new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '?search={{ search_key }}&current={{ current_index }}" >';
+                      new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id +  '?search={{ search_key }}&current={{ current_index }}" >';
 
                       new_elem += '<div class="row">';
                       new_elem_acr += '<div class="row">';

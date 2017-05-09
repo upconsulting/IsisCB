@@ -98,13 +98,11 @@ def get_authors_advisors(obj):
 
 
 @register.filter(name='get_authors_editors_preloaded')
-def get_authors_editors_preloaded(acrelations):
+def get_authors_editors_preloaded(citation_id):
     rtypes = [ACRelation.AUTHOR, ACRelation.EDITOR]
-    qs = acrelations.filter(type_controlled__in=rtypes).values('authority__name', 'type_controlled')
+    qs = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'type_controlled')
     rtype_display = dict(ACRelation.TYPE_CHOICES)
     return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', 'missing') or 'missing', rtype_display[obj['type_controlled']]), qs))
-    # return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in acrelations
-    #             if relation.type_controlled in ])
 
 
 @register.filter(name='get_citation_pubdate')
@@ -150,19 +148,18 @@ def get_pub_title_and_year(citation):
 
 
 @register.filter(name='get_citation_periodical')
-def get_citation_periodical(obj):
+def get_citation_periodical(citation_id):
     rtypes = [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
     atype_display = dict(Authority.TYPE_CHOICES)
-    relations = obj.acrelations.filter(type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
+    relations = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
     return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', ''), atype_display.get(obj['authority__type_controlled'], 'none')), relations))
 
 
 @register.filter(name='get_page_numbers')
 def get_page_numbers(obj):
-    if not obj.part_details:
-        return ''
-
-    return ' - '.join([str(p) for p in [getattr(obj.part_details, 'page_begin', None), getattr(obj.part_details, 'page_end', None)] if p])
+    if 'part_details_id' not in obj:
+        return u''
+    return ' - '.join([str(p) for p in [obj.get('part_details__page_begin'), obj.get('part_details__page_end')] if p])
 
 @register.filter
 def get_school(obj):
@@ -174,15 +171,43 @@ def get_school(obj):
 def get_date_attributes(obj):
     return SafeText(', '.join(['<span class="label label-success">%s</span> %s' % (attribute.type_controlled.name, attribute.value.display) for attribute in obj.attributes.all()]))
 
+
 @register.filter
 def is_ccrelation_other_public(instance_id, ccrelation):
-    return (ccrelation.subject is not None and ccrelation.object is not None) and (instance_id == ccrelation.subject.id and not ccrelation.object.public) or (instance_id == ccrelation.object.id and not ccrelation.subject.public)
+    return (ccrelation.subject is not None and ccrelation.object is not None) and (instance_id == ccrelation.subject.id and not getattr(ccrelation.object, 'public', False)) or (instance_id == ccrelation.object.id and not getattr(ccrelation.subject, 'public', False))
 
 
 @register.filter
 def get_categories(obj):
     return ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id=obj.id)
 
+
 @register.filter
 def get_subjects(obj):
     return ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=obj.id)
+
+
+TRACKING_STATES = dict(Citation.TRACKING_CHOICES)
+CITATION_TYPES = dict(Citation.TYPE_CHOICES)
+AUTHORITY_TRACKING_STATES = dict(Authority.TRACKING_CHOICES)
+AUTHORITY_TYPES = dict(Authority.TYPE_CHOICES)
+
+
+@register.filter
+def get_tracking_state_display(state):
+    return TRACKING_STATES.get(state)
+
+
+@register.filter
+def get_authority_tracking_state_display(state):
+    return AUTHORITY_TRACKING_STATES.get(state)
+
+
+@register.filter
+def get_type_controlled_display(type_controlled):
+    return CITATION_TYPES.get(type_controlled)
+
+
+@register.filter
+def get_authority_type_controlled_display(type_controlled):
+    return AUTHORITY_TYPES.get(type_controlled)

@@ -150,21 +150,20 @@ def get_citations(citation, ccrelations):
 
 
 @register.filter
-def are_related_authorities_public(acrelations, authorities):
-    return acrelations.filter(public=False).count() == 0 and authorities.filter(public=False).count() == 0
+def are_related_authorities_public(citation_id):   # acrelations, authorities
+    return ACRelation.objects.filter(citation_id=citation_id).filter(Q(public=False) | Q(authority__public=False)).count() == 0
 
 
 @register.filter
-def are_related_citations_public(ccrelations, citations):
-    return ccrelations.filter(public=False).count() == 0 and citations.filter(public=False).count() == 0
+def are_related_citations_public(citation_id):      #ccrelations, citations):
+    return CCRelation.objects.filter(Q(subject_id=citation_id)).filter(Q(public=False) | Q(object__public=False)).count() == 0\
+            and CCRelation.objects.filter(Q(object_id=citation_id)).filter(Q(public=False) | Q(subject__public=False)).count() == 0
 
 
 @register.filter
 def are_attributes_public(attributes):
-    for attr in attributes:
-        if not attr.public:
-            return False
-    return True
+    citation_type = ContentType.objects.get_for_model(Citation)
+    return Attribute.objects.filter(Q(source_instance_id=citation_id) & Q(source_content_type=citation_type) & Q(public=False)).count() == 0
 
 
 @register.filter
