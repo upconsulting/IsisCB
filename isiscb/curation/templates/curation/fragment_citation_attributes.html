@@ -13,7 +13,7 @@
     <li class="list-group-item attribute {% if not attribute.public %}notpublic{% endif %}" id="attribute-{{ attribute.id }}">
       <div class="row">
         {% if can_update %}
-        <a href="{% url "curation:update_attribute_for_citation" instance.id attribute.id%}" class="list_entry_link">
+        <a href="{% url "curation:update_attribute_for_citation" instance.id attribute.id%}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
         {% endif %}
         <span class="col-sm-11">
 
@@ -44,7 +44,7 @@
     </li>
 {% endfor %}
 {% if can_update %}
-    <a class="list-group-item text-muted" href="{% url "curation:create_attribute_for_citation" instance.id %}">
+    <a class="list-group-item text-muted" href="{% url "curation:create_attribute_for_citation" instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="glyphicon glyphicon-plus"></span> Create new attribute
     </a>
 {% endif %}

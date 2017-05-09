@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
+from django.core.paginator import EmptyPage
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -35,9 +36,12 @@ from curation.forms import *
 from curation.contrib.views import check_rules
 from curation import tasks as curation_tasks
 
-import iso8601, rules, datetime, hashlib
+import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
+
+
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 
 def _get_datestring_for_authority(authority):
@@ -210,11 +214,15 @@ def quick_create_acrelation(request):
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.method == 'GET':
         ccrelation = CCRelation()
@@ -236,7 +244,10 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -250,12 +261,16 @@ def create_ccrelation_for_citation(request, citation_id):
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = None if not ccrelation_id else get_object_or_404(CCRelation, pk=ccrelation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'ccrelation': ccrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.method == 'GET':
         if ccrelation:
@@ -267,7 +282,10 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -280,11 +298,15 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def create_acrelation_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
+        'search_key': search_key,
+        'current_index': current_index
 
     }
     if request.method == 'GET':
@@ -301,7 +323,11 @@ def create_acrelation_for_authority(request, authority_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
+
+            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -316,11 +342,16 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
 
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'acrelation': acrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.method == 'GET':
         form = ACRelationForm(instance=acrelation, prefix='acrelation')
@@ -329,7 +360,10 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
+            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -343,10 +377,15 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.method == 'GET':
         initial = {
@@ -361,7 +400,10 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -376,11 +418,16 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = None if not acrelation_id else get_object_or_404(ACRelation, pk=acrelation_id)
 
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'acrelation': acrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.method == 'GET':
         form = ACRelationForm(instance=acrelation, prefix='acrelation')
@@ -389,7 +436,10 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
 
     context.update({
         'form': form,
@@ -403,10 +453,15 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
 def tracking_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     trackType = request.GET.get('type', None)
@@ -421,18 +476,24 @@ def tracking_for_citation(request, citation_id):
         tracking.save()
         citation.tracking_state = trackType
         citation.save()
-    return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking')
+    target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking'
+    if search_key and current_index:
+        target += '&search=%s&current=%s' % (search_key, current_index)
+    return HttpResponseRedirect(target)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def tracking_for_authority(request, authority_id):
     authority = get_object_or_404(Authority, pk=authority_id)
-
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     template = 'curation/authority_tracking_create.html'
@@ -445,11 +506,13 @@ def tracking_for_authority(request, authority_id):
             tracking.save()
             authority.tracking_state = tracking.type_controlled
             authority.save()
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority_id,)) + '?tab=tracking')
+            target = reverse('curation:curate_authority', args=(authority_id,)) + '?tab=tracking'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
     else:
         # just always shows tracking form if not post
         form = AuthorityTrackingForm(prefix='tracking', initial={'subject': authority_id})
-
 
     context.update({
         'form': form,
@@ -463,17 +526,24 @@ def tracking_for_authority(request, authority_id):
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'attribute': attribute,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.GET.get('confirm', False):
         attribute.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/citation_attribute_delete.html'
     return render(request, template, context)
 
@@ -483,11 +553,15 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
 def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'linkeddata': linkeddata,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     if request.GET.get('confirm', False):
@@ -495,7 +569,11 @@ def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=N
 
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/citation_linkeddata_delete.html'
     return render(request, template, context)
 
@@ -505,11 +583,15 @@ def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=N
 def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'linkeddata': linkeddata,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     if request.GET.get('confirm', False):
@@ -517,7 +599,11 @@ def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format
 
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+
+        target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/authority_linkeddata_delete.html'
     return render(request, template, context)
 
@@ -562,17 +648,26 @@ def add_language_for_citation(request, citation_id):
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'ccrelation': ccrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.GET.get('confirm', False):
         ccrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations')
+
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/citation_ccrelation_delete.html'
     return render(request, template, context)
 
@@ -582,17 +677,26 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
 def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'acrelation': acrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.GET.get('confirm', False):
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations')
+
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/citation_acrelation_delete.html'
     return render(request, template, context)
 
@@ -602,17 +706,26 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
 def delete_acrelation_for_authority(request, authority_id, acrelation_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'acrelation': acrelation,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.GET.get('confirm', False):
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations')
+
+        target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/authority_acrelation_delete.html'
     return render(request, template, context)
 
@@ -622,17 +735,25 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
 def delete_attribute_for_authority(request, authority_id, attribute_id, format=None):
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
         'attribute': attribute,
+        'search_key': search_key,
+        'current_index': current_index
     }
     if request.GET.get('confirm', False):
         attribute.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-        return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes')
+
+        target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
     template = 'curation/authority_attribute_delete.html'
     return render(request, template, context)
 
@@ -643,16 +764,22 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
     template = 'curation/citation_linkeddata_changeview.html'
     citation = get_object_or_404(Citation, pk=citation_id)
+
     linkeddata = None
 
     if linkeddata_id:
         linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'instance': citation,
         'linkeddata': linkeddata,
+        'search_key': search_key,
+        'current_index': current_index,
     }
 
     if request.method == 'GET':
@@ -680,7 +807,10 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
         else:
             pass
     else:
@@ -698,6 +828,8 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
 
     template = 'curation/authority_linkeddata_changeview.html'
     authority = get_object_or_404(Authority, pk=authority_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
     linkeddata = None
 
     if linkeddata_id:
@@ -708,6 +840,8 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
         'curation_subsection': 'citations',
         'instance': authority,
         'linkeddata': linkeddata,
+        'search_key': search_key,
+        'current_index': current_index,
     }
 
     if request.method == 'GET':
@@ -725,7 +859,10 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
             linkeddata_form.instance.subject = authority
             linkeddata_form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata')
+            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
         else:
             pass
     else:
@@ -744,6 +881,8 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
     template = 'curation/citation_attribute_changeview.html'
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute, value, value_form, value_form_class = None, None, None, None
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     value_forms = {}
     for at in AttributeType.objects.all():
@@ -766,6 +905,8 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         'instance': citation,
         'attribute': attribute,
         'value': value,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     if request.method == 'GET':
@@ -776,7 +917,6 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         else:
             attribute_form = AttributeForm(prefix='attribute')
 
-
     elif request.method == 'POST':
         if attribute:    # Update.
             attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
@@ -786,7 +926,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         else:    # Create.
             attribute_form = AttributeForm(request.POST, prefix='attribute')
             selected_type_controlled = request.POST.get('attribute-type_controlled', None)
-            if selected_type_controlled:
+            if selected_type_controlled is not None:
                 value_form_class = value_forms[int(selected_type_controlled)]
                 value_form = value_form_class(request.POST, prefix='value')
 
@@ -797,7 +937,10 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes')
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
         else:
             pass
 
@@ -816,6 +959,8 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     template = 'curation/authority_attribute_changeview.html'
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute, value, value_form, value_form_class = None, None, None, None
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
 
     value_forms = {}
     for at in AttributeType.objects.all():
@@ -838,6 +983,8 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
         'instance': authority,
         'attribute': attribute,
         'value': value,
+        'search_key': search_key,
+        'current_index': current_index
     }
 
     if request.method == 'GET':
@@ -869,7 +1016,10 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes')
+            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=attributes'
+            if search_key and current_index:
+                target += '&search=%s&current=%s' % (search_key, current_index)
+            return HttpResponseRedirect(target)
         else:
             pass
 
@@ -880,6 +1030,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     })
     return render(request, template, context)
 
+import datetime
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -888,10 +1039,10 @@ def citation(request, citation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
     }
+    start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
-    _build_result_set_links(request, context, citation)
-
+    _build_result_set_links(request, context)
 
     # We use a different template for each citation type.
     if citation.type_controlled == Citation.BOOK:
@@ -948,17 +1099,27 @@ def citation(request, citation_id):
             if partdetails_form:
                 partdetails_form.save()
 
+            search = request.POST.get('search')
+            current_index = request.POST.get('current')
+
             forward_type = request.POST.get('forward_type', None)
             if forward_type == "list":
-                return HttpResponseRedirect(reverse('curation:citation_list') + "?page=" + str(page))
-            elif forward_type == "next":
-                next = context.get('next', citation)
-                return HttpResponseRedirect(reverse('curation:curate_citation', args=(next.id,)))
+                return HttpResponseRedirect(reverse('curation:citation_list') + "?search=%s&page=%s" % (search, str(page)))
+            if forward_type == "next":
+                target_object = context.get('next', citation)
+                target_index = context.get('next_index', current_index)
             elif forward_type == "previous":
-                prev = context.get('previous', citation)
-                return HttpResponseRedirect(reverse('curation:curate_citation', args=(prev.id,)))
+                target_object = context.get('previous', citation)
+                target_index = context.get('previous_index', current_index)
+            else:
+                target_object = citation.id
+                target_index = current_index
 
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
+            target = reverse('curation:curate_citation', args=(target_object,))
+            if search and target_index:
+                target += '?search=%s&current=%s' % (search, target_index)
+            return HttpResponseRedirect(target)
+            # return HttpResponseRedirect()
 
         context.update({
             'form': form,
@@ -969,112 +1130,8 @@ def citation(request, citation_id):
     return render(request, template, context)
 
 
-# TODO: needs documentation.
-def _build_next_and_prev(context, current_obj, objects_page, paginator, page,
-                         cache_prev_index_key, cache_page_key,
-                         cache_request_param_key, session):
-    if objects_page:
-        user_session = session
-        request_params = user_session.get(cache_request_param_key, {})
-
-        result_list = list(objects_page.object_list)
-        prev_index = user_session.get(cache_prev_index_key, None)
-        index = None
-
-        if current_obj in result_list:
-            index = result_list.index(current_obj)
-
-            # this is a fix for the duplicate results issue
-            # is this more stable than having a running index for the record
-            # looked at? I don't know, but this works, so I say it's stable enough!
-            index = _get_corrected_index(prev_index, index)
-
-        # if current citation is not on current page (page turns)
-        # check if it's on next page
-        if index == None and paginator.num_pages > page:
-            objects_page = paginator.page(page+1)
-            result_list = list(objects_page.object_list)
-
-            # update current page number
-            if current_obj in result_list:
-                index = result_list.index(current_obj)
-
-                # this is a fix for the duplicate results issue
-                # is this more stable than having a running index for the record
-                # looked at? I don't know, but this work, so I say it's stable enough!
-                index = _get_corrected_index(prev_index, index)
-                if index != None:
-                    page = page+1
-                    user_session[cache_page_key] = page
-                    request_params['page'] = page
-
-                    user_session[cache_request_param_key] = request_params
-
-        # check if it's on previous page
-        if index == None and page > 1:
-            objects_page = paginator.page(page-1)
-            result_list = list(objects_page.object_list)
-
-            # update current page number
-            if current_obj in result_list:
-                page = page-1
-                index = result_list.index(current_obj)
-                user_session[cache_page_key] = page
-
-                # update back to list link
-                request_params['page'] = page
-
-                user_session[cache_request_param_key] = request_params
-
-        # let's get next and previous if we have an index
-        if index != None:
-            # store current index for duplication issue
-            user_session[cache_prev_index_key] = index
-
-            next = result_list[index+1] if len(result_list) > index+1 else None
-            # if next is not on this page, get the next one
-            if not next:
-                # if there are more pages
-                # take the first element from the next page
-                if paginator.num_pages > page:
-                    objects_page = paginator.page(page+1)
-                    next_page = list(objects_page.object_list)
-                    if len(next_page) > 0:
-                        next = next_page[0]
-
-            previous = result_list[index-1] if index > 0 else None
-            # if previous is on previous page
-            if not previous:
-                # if we're not on the first page
-                if page > 1:
-                    objects_page = paginator.page(page-1)
-                    prev_page = list(objects_page.object_list)
-                    if len(prev_page) > 0:
-                        previous = prev_page[len(prev_page)-1]
-
-            context.update({
-                'next': next,
-                'previous': previous,
-                'index': paginator.page(page).start_index() + index,
-            })
-
-
-def _get_corrected_index(prev_index, index):
-    # this is a fix for the duplicate results issue
-    # is this more stable than having a running index for the record
-    # looked at? I don't know, but this work, so I say it's stable enough!
-    if prev_index == index:
-        return index
-
-    if prev_index != None:
-        if ((index == 0 and prev_index != 1 and prev_index != 39) or
-          (index == 39 and  prev_index != 0 and prev_index != 38) or
-          (index != 0 and index != 39 and index != prev_index + 1 and index != prev_index -1)):
-            return None
-    return index
-
-
-def _build_result_set_links(request, context, citation):
+# TODO: needs updated doc
+def _build_result_set_links(request, context, model=Citation):
     """
     This function build all the info that the previous/next/back to list links from  a given
     request object, context object for the page, and the citation that should be displayed.
@@ -1085,28 +1142,86 @@ def _build_result_set_links(request, context, citation):
     * request_params: request parameters that went into the function call
     * total: the total number of found citations
     """
+    start = datetime.datetime.now()
+
     user_session = request.session
-    page = user_session.get('citation_page', 1)
-    get_request = user_session.get('citation_filters', None)
-    if get_request and 'o' in get_request and isinstance(get_request['o'], list):
-        if len(get_request['o']) > 0:
-            get_request['o'] = get_request['o'][0]
+    model_key = model.__name__.lower()
+
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+    search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
+    search_count = user_session.get('%s_%s_search_count' % (search_key, model_key))
+
+    # If there is no search, or we arrive at a record without a position in
+    #  the search results, there is nothing to do.
+    if not search_key or not current_index or not search_params:
+        return
+
+    current_index = int(current_index)
+    page_number = int(math.floor(current_index / PAGE_SIZE)) + 1
+    relative_index = current_index % PAGE_SIZE
+
+    # The "current run" is the series of record IDs on the current page.
+    # The "prior" and "antecedent" are the IDs of the last record on the
+    # previous page and the first record on the next page, respectively.
+    current_run = user_session.get('%s_%s_page_%i' % (str(search_key), model_key, page_number))
+    prior = user_session.get('%s_%s_current_prior_%i' % (str(search_key), model_key, page_number))
+    antecedent = user_session.get('%s_%s_current_antecedent_%i' % (str(search_key), model_key, page_number))
+
+    if current_run is None:
+        queryset = operations.filter_queryset(request.user, model.objects.all())
+        filter_class = eval('%sFilter' % model.__name__.title())
+        if model == Citation:
+            filtered_objects = filter_class(search_params, queryset=queryset.select_related('part_details'))
         else:
-            get_request['o'] = "publication_date"
-    queryset = operations.filter_queryset(request.user, Citation.objects.all())
+            filtered_objects = filter_class(search_params, queryset=queryset)
+        paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+        page = paginator.page(page_number)
 
-    # unless we use the same queryset with select_related order of records will be different
-    filtered_objects = CitationFilter(get_request, queryset=queryset.select_related('part_details'))
-    paginator = Paginator(filtered_objects.qs, 40)
+        current_run = [o.id for o in page]
+        prior_page = paginator.page(page_number - 1) if page_number > 1 else []
+        antecedent_page = paginator.page(page_number + 1) if paginator.page(page_number).has_next() else []
 
-    citations_page = paginator.page(page)
+        try:
+            prior = prior_page[0].id
+        except IndexError:
+            prior = None
+        try:
+            antecedent = antecedent_page[-1].id
+        except IndexError:
+            antecedent = None
 
-    _build_next_and_prev(context, citation, citations_page, paginator, page, 'citation_prev_index', 'citation_page', 'citation_request_params', user_session)
+        user_session['%s_%s_page_%i' % (str(search_key), model_key, page_number)] = current_run
+        user_session['%s_%s_current_prior_%i' % (str(search_key), model_key, page_number)] = prior
+        user_session['%s_%s_current_antecedent_%i' % (str(search_key), model_key, page_number)] = antecedent
 
-    request_params = user_session.get('citation_request_params', "")
+    if current_index == 0:
+        prev_id = None
+        prev_index = None
+    else:
+        prev_index = current_index - 1
+        prev_id = current_run[relative_index - 1] if relative_index > 0 else prior
+
+    try:
+        next_id = current_run[relative_index + 1]
+    except IndexError:
+        next_id = antecedent
+
+    # if there is a following record, set next index
+    next_index = current_index + 1 if next_id else None
+
+
     context.update({
-        'request_params': request_params,
-        'total': filtered_objects.qs.count(),
+        'next': next_id,
+        'next_index': next_index,
+        'previous': prev_id,
+        'previous_index': prev_index,
+        'total': search_count,
+        'current_index': current_index,
+        'index': current_index + 1,
+        'search_key': search_key,
+        'current_page': page_number,
+        'current_offset': (page_number - 1) * PAGE_SIZE
     })
 
 
@@ -1121,46 +1236,105 @@ def subjects_and_categories(request, citation_id):
         'instance': citation,
     }
 
-    _build_result_set_links(request, context, citation)
+    _build_result_set_links(request, context, Citation)
 
     template = 'curation/citation_subjects_categories.html'
 
     return render(request, template, context)
 
-# Deleted class QueryDictWraper; we're not using it. -E
 
 
-def _citations_get_filter_params(request):
+def _authorities_get_filter_params(request):
     """
-    Build ``filter_params`` for GET request in citation list view.
+    Build ``filter_params`` for GET request in authority list view.
     """
+
+    search_key = request.GET.get('search')
+
+    additional_params_names = ["page"]
     all_params = {}
-    additional_params_names = ["page", "zotero_accession", "in_collections",
-                               'collection_only']
+
     user_session = request.session
+    filter_params = None
+    if search_key:
+        filter_params = user_session.get('%s_authority_search_params' % search_key)
+        all_params = {k: v for k, v in filter_params.iteritems()}
 
     if len(request.GET.keys()) <= 1:
-        filter_params = user_session.get('citation_filter_params', None)
-        all_params = user_session.get('citation_request_params', None)
+        if filter_params is None:
+            filter_params = user_session.get('authority_filter_params', None)
+            all_params = user_session.get('authority_request_params', None)
         if filter_params is not None and all_params is not None:
             # page needs to be updated otherwise it keeps old page count
             if request.GET.get('page'):
                 all_params['page'] = request.GET.get('page')
             return filter_params, all_params
 
-    raw_params = request.GET.urlencode().encode('utf-8')
-    filter_params = QueryDict(raw_params, mutable=True)
+    if filter_params is None:
+        raw_params = request.GET.urlencode().encode('utf-8')
+        filter_params = QueryDict(raw_params, mutable=True)
+
     if not all_params:
         all_params = {}
 
-    if 'o' in filter_params and isinstance(filter_params['o'], list):
-        if len(filter_params['o']) > 0:
-            filter_params['o'] = filter_params['o'][0]
-        else:
-            filter_params['o'] = "publication_date"
+    if search_key is None:
+        if not 'o' in filter_params.keys():
+            filter_params['o'] = 'name_for_sort'
+        for key in additional_params_names:
+            all_params[key] = request.GET.get(key, '')
 
-    if not 'o' in filter_params.keys():
-        filter_params['o'] = 'publication_date'
+        if 'o' not in filter_params:
+            filter_params['o'] = 'name_for_sort'
+        elif isinstance(filter_params['o'], list):
+            if len(filter_params['o']) > 0:
+                filter_params['o'] = filter_params['o'][0]
+            else:
+                filter_params['o'] = 'name_for_sort'
+
+    for key in additional_params_names:
+        all_params[key] = request.GET.get(key, '')
+    return filter_params, all_params
+
+
+def _citations_get_filter_params(request):
+    """
+    Build ``filter_params`` for GET request in citation list view.
+    """
+
+    search_key = request.GET.get('search')
+
+    all_params = {}
+    additional_params_names = ["page", "zotero_accession", "in_collections",
+                               'collection_only']
+    user_session = request.session
+    filter_params = None
+    if search_key:
+        filter_params = user_session.get('%s_citation_search_params' % search_key)
+        all_params = {k: v for k, v in filter_params.iteritems()}
+
+    if len(request.GET.keys()) <= 1:
+        if filter_params is None:
+            filter_params = user_session.get('citation_filter_params', None)
+            all_params = user_session.get('citation_request_params', None)
+        if filter_params is not None and all_params is not None:
+            # page needs to be updated otherwise it keeps old page count
+            if request.GET.get('page'):
+                all_params['page'] = request.GET.get('page')
+            return filter_params, all_params
+
+    if filter_params is None:
+        raw_params = request.GET.urlencode().encode('utf-8')
+        filter_params = QueryDict(raw_params, mutable=True)
+
+    if not all_params:
+        all_params = {}
+
+    if search_key is None:
+         if 'o' in filter_params and isinstance(filter_params['o'], list):
+             if len(filter_params['o']) > 0:
+                 filter_params['o'] = filter_params['o'][0]
+             else:
+                 filter_params['o'] = "publication_date"
 
     for key in additional_params_names:
         all_params[key] = request.GET.get(key, '')
@@ -1179,11 +1353,11 @@ def citations(request):
     user_session = request.session
     # We need to be able to amend the filter parameters, so we create a new
     #  mutable QueryDict from the POST payload.
+    #  - ``filter_params`` are the parameters that will be passed to the
+    #     CitationFilter.
+    #  - ``all_params`` includes the parameters in ``filter_params`` plus any
+    #     additional parameters not used by the CitationFilter (e.g. page).
     filter_params, all_params = _citations_get_filter_params(request)
-
-    # Default sort order. TODO: move this to the CitationFilterSet itself.
-    if 'o' not in filter_params or not filter_params['o']:
-        filter_params['o'] = 'title_for_sort'
 
     # We use the filter parameters in this form to specify the queryset for
     #  bulk actions.
@@ -1195,38 +1369,61 @@ def citations(request):
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'filter_params': encoded_params,
+        'search_key': search_key
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
-    fields = ('record_status_value', 'id', 'type_controlled', 'public', 'publication_date')
-    filtered_objects = CitationFilter(filter_params, queryset=queryset.select_related('part_details'))
 
-    # filters_active = len(filter(lambda (k, v): v and k != 'page', filter_params.items())) > 0
+    fields = ('record_status_value', 'id', 'type_controlled', 'public',
+              'tracking_state', 'modified_on', 'created_native',
+              'publication_date', 'title_for_display', 'part_details_id',
+              'part_details__page_begin', 'part_details__page_end',)
+    qs = queryset.select_related('part_details').values(*fields)
+    filtered_objects = CitationFilter(filter_params, queryset=qs)
+
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    currentPage = all_params.get('page', 1)
+    if not currentPage:
+        currentPage = 1
+    currentPage = int(currentPage)
+    page = paginator.page(currentPage)
+    paginated_objects = list(page)
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
         all_params.update(request_params)
 
-        currentPage = all_params.get('page', 1)
-        if not currentPage:
-            currentPage = 1
-
         user_session['citation_filter_params'] = filter_params
         user_session['citation_request_params'] = all_params
-        user_session['citation_filters'] = request_params
         user_session['citation_page'] = int(currentPage)
-        user_session['citation_prev_index'] = None
+
+    result_count = filtered_objects.qs.count()
+    user_session['%s_citation_search_params' % str(search_key)] = filter_params
+    user_session['%s_citation_search_count' % str(search_key)] = result_count
+    user_session['%s_citation_page_%i' % (str(search_key), currentPage)] = [o['id'] for o in paginated_objects]
+    user_session['%s_citation_current_prior_%i' % (str(search_key), currentPage)] = paginator.page(currentPage - 1)[-1]['id'] if currentPage > 1 else None
+    try:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = paginator.page(currentPage + 1)[0]['id']
+    except EmptyPage:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = None
 
     context.update({
         'objects': filtered_objects,
         # 'filters_active': filters_active,
-        'result_count': filtered_objects.qs.count()
+        'result_count': result_count,
+        'filter_list': paginated_objects,
+        'current_page': currentPage,
+        'current_offset': (currentPage - 1) * PAGE_SIZE
     })
-
     return render(request, template, context)
 
 
@@ -1239,58 +1436,68 @@ def authorities(request):
 
     user_session = request.session
 
-    additional_params_names = ["page"]
-    all_params = {}
+    filter_params, all_params = _authorities_get_filter_params(request)
 
-    raw_params = request.GET.urlencode().encode('utf-8')
-    filter_params = QueryDict(raw_params, mutable=True)
+    if isinstance(filter_params, QueryDict):
+        encoded_params = filter_params.urlencode().encode('utf-8')
+    else:
+        _params = QueryDict(mutable=True)
+        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+            _params[k] = v
+        encoded_params = _params.urlencode().encode('utf-8')
 
-    if not 'o' in filter_params.keys():
-        filter_params['o'] = 'name_for_sort'
-    for key in additional_params_names:
-        all_params[key] = request.GET.get(key, '')
-
-    if 'o' not in filter_params:
-        filter_params['o'] = 'name_for_sort'
-    elif isinstance(filter_params['o'], list):
-        if len(filter_params['o']) > 0:
-            filter_params['o'] = filter_params['o'][0]
-        else:
-            filter_params['o'] = 'name_for_sort'
-
-    #user_session['authority_request_params'] = request.META['QUERY_STRING']
-    #user_session['authority_get_request'] = request.GET
-    currentPage = request.GET.get('page', 1)
-    #user_session['authority_page'] = int(currentPage)
-    #user_session['authority_prev_index'] = None
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
 
     template = 'curation/authority_list_view.html'
-    queryset = operations.filter_queryset(request.user, Authority.objects.all())
+    fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
+              'tracking_state')
+    queryset = operations.filter_queryset(request.user,
+                                          Authority.objects.values(*fields))
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
 
-    filters_active = filter_params
-    filters_active = filters_active or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    currentPage = all_params.get('page', 1)
+    if not currentPage:
+        currentPage = 1
+    currentPage = int(currentPage)
+    page = paginator.page(currentPage)
+    paginated_objects = list(page)
+
+    filters_active = filter_params or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
         for key in request_params:
             all_params[key] = request_params[key]
 
-        currentPage = all_params.get('page', 1)
-        if not currentPage:
-            currentPage = 1
-
         user_session['authority_request_params'] = all_params
         user_session['authority_filters'] = request_params
         user_session['authority_page'] = int(currentPage)
         user_session['authority_prev_index'] = None
 
+    result_count = filtered_objects.qs.count()
+    user_session['%s_authority_search_params' % str(search_key)] = filter_params
+    user_session['%s_authority_search_count' % str(search_key)] = result_count
+    user_session['%s_authority_page_%i' % (str(search_key), currentPage)] = [o['id'] for o in paginated_objects]
+    user_session['%s_authority_current_prior_%i' % (str(search_key), currentPage)] = paginator.page(currentPage - 1)[-1]['id'] if currentPage > 1 else None
+    try:
+        user_session['%s_authority_current_antecedent_%i' % (str(search_key), currentPage)] = paginator.page(currentPage + 1)[0]['id']
+    except EmptyPage:
+        user_session['%s_authority_current_antecedent_%i' % (str(search_key), currentPage)] = None
+
     context.update({
         'objects': filtered_objects,
-        'filters_active': filters_active
+        'filters_active': filters_active,
+        'filter_params': encoded_params,
+        'search_key': search_key,
+        'current_page': currentPage,
+        'current_offset': (currentPage - 1) * PAGE_SIZE
     })
-
     return render(request, template, context)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
@@ -1303,6 +1510,7 @@ def authority(request, authority_id):
     context.update({'tab': request.GET.get('tab', None)})
     authority = get_object_or_404(Authority, pk=authority_id)
     template = 'curation/authority_change_view.html'
+
     person_form = None
     if request.method == 'GET':
 
@@ -1316,16 +1524,6 @@ def authority(request, authority_id):
                 get_request['o'] = get_request['o'][0]
             else:
                 get_request['o'] = "name_for_sort"
-
-        queryset = operations.filter_queryset(request.user, Authority.objects.all())
-        filtered_objects = AuthorityFilter(get_request, queryset=queryset)
-        paginator = Paginator(filtered_objects.qs, 40)
-        authority_page = paginator.page(page)
-
-        # ok, let's start the whole pagination/next/previous dance :op
-        _build_next_and_prev(context, authority, authority_page, paginator,
-                             page, 'authority_prev_index', 'authority_page',
-                             'authority_request_params', user_session)
 
         request_params = user_session.get('authority_request_params', "")
 
@@ -1351,9 +1549,8 @@ def authority(request, authority_id):
             'instance': authority,
             'person_form': person_form,
             'tracking_records': tracking_records,
-            'total': filtered_objects.qs.count(),
+            # 'total': filtered_objects.qs.count(),
         })
-
 
     elif request.method == 'POST':
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
@@ -1366,7 +1563,13 @@ def authority(request, authority_id):
 
             form.save()
 
-            return HttpResponseRedirect(reverse('curation:curate_authority', args=[authority.id,]))
+            target = reverse('curation:curate_authority', args=[authority.id,])
+            search = request.POST.get('search')
+            current = request.POST.get('current')
+            print search, current
+            if search and current:
+                target += '?search=%s&current=%s' % (search, current)
+            return HttpResponseRedirect(target)
 
         context.update({
             'form': form,
@@ -1374,7 +1577,7 @@ def authority(request, authority_id):
             'instance': authority,
             # 'partdetails_form': partdetails_form,
         })
-
+    _build_result_set_links(request, context, model=Authority)
     return render(request, template, context)
 
 

@@ -40,6 +40,8 @@
 
 <form id="acrelation_form" class="form" action="." method="POST">
     {% csrf_token %}
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
 
 <div class="row" style="margin-bottom: 20px;">
     <div class="col-md-5">
@@ -65,12 +67,12 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Citation</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
             <a href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
             <a href="#"
                 class="btn btn-danger btn-sm delete-acrelation"
@@ -146,7 +148,7 @@
             <div class="col-sm-6">
 
               <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
-                <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
               </strong>
 
               <p>
@@ -163,7 +165,7 @@
               </p>
               <hr>
               <div class="text-right">
-                <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+                <a href="{% url 'curation:create_authority' %}?search={{ search_key }}&current={{ current_index }}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
               </div>
               <div class="form-horizontal">
                 <div id="authority_info">
@@ -439,7 +441,7 @@ var delete_acrelation = function() {
     $('#delete-acrelation-modal').modal('hide');
     var acrelation_id = $('#acrelation-id-container').val();
     if (acrelation_id) {
-        window.location.replace("{% url "curation:delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
     }
 }
 </script>

@@ -22,7 +22,7 @@
         {% for object in filter_list %}
         <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
             <td>
-                <a href="{% url "curation:curate_authority" object.id %}">{{ object.id }}</a>
+                <a href="{% url "curation:curate_authority" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
                 {% if not object.public %}
                 <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
                 {% endif %}
@@ -36,9 +36,9 @@
                 <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
                 {% endif %}
             </td>
-            <td>{{ object.get_type_controlled_display }}</td>
-            <td>{{ object.name }}</td>
-            <td>{{ object.get_tracking_state_display }}</td>
+            <td>{{ object.type_controlled|get_authority_type_controlled_display }}</td>
+            <td>{{ object.name|safe }}</td>
+            <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
         </tr>
         {% endfor %}
     </tbody>

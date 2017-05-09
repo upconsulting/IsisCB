@@ -15,18 +15,18 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Citation</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
             <a id="saveTrackingBtn" href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
         </div>
     </div>
   </div>
 
-<form id="trackingForm" class="form" action="{% url 'tracking-citation' instance.id %}" method="POST">
+<form id="trackingForm" class="form" action="{% url 'tracking-citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" method="POST">
     {% csrf_token %}
 
     {% for error in form.tracking_info.errors %}

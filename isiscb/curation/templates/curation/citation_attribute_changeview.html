@@ -6,6 +6,8 @@
 
 <form class="form" action="." method="POST">
     {% csrf_token %}
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
 
     <div class="row" style="margin-bottom: 20px;">
         <div class="col-md-5">
@@ -31,12 +33,12 @@
             </div>
           </div>
         <div class="col-md-3">
-          <a href="{% url 'curation:curate_citation' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+          <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Citation</a>
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_citation' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
                 <input type="submit" value="Save" class="btn btn-sm btn-success" />
                 <a href="#"
                   class="btn btn-danger btn-sm delete-attribute"
@@ -128,11 +130,9 @@ $('#id_language').multiSelect()
 
 $('#id_attribute-type_controlled').change(function() {
     var value = $(this).val();
-    console.log(value);
     var container = $('#value_form_container');
     container.empty();
     var form = $('#form_for_' + value).clone();
-    console.log(form);
     container.append(form);
 });
 </script>
@@ -156,7 +156,7 @@ var delete_attribute = function() {
     $('#delete-attribute-modal').modal('hide');
     var attribute_id = $('#attribute-id-container').val();
     if (attribute_id) {
-        window.location.replace("{% url "curation:delete_attribute_for_citation" instance.id attribute.id %}?confirm=true");
+        window.location.replace("{% url "curation:delete_attribute_for_citation" instance.id attribute.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
     }
 }
 </script>

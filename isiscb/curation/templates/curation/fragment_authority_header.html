@@ -17,16 +17,16 @@
 
 <div class="col-md-4 text-center">
   {% if previous %}
-  <a href="{% url 'curation:curate_authority' previous.id %}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
+  <a href="{% url 'curation:curate_authority' previous %}?search={{ search_key }}&current={{ previous_index }}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
   {% endif %}
   &nbsp; &nbsp; &nbsp;
-  <a href="{% url 'curation:authority_list' %}?page={{ request_params.page }}&{% for key,value in filters.items %}{{ key }}={{ value }}&{% endfor %}"><i class="fa fa-reply" aria-hidden="true"></i>
+  <a href="{% url 'curation:authority_list' %}?search={{ search_key }}&page={{ current_page }}"><i class="fa fa-reply" aria-hidden="true"></i>
 
     Back to List
   </a>
   &nbsp; &nbsp; &nbsp;
   {% if next %}
-  <a href="{% url 'curation:curate_authority' next.id %}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
+  <a href="{% url 'curation:curate_authority' next %}?search={{ search_key }}&current={{ next_index }}">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
   {% endif %}
 </div>
 

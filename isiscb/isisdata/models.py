@@ -608,6 +608,7 @@ class CuratedMixin(models.Model):
         self.modified_on = value
 
 
+
 class ReferencedEntity(models.Model):
     """
     Provides a custom ID field and an URI field, and associated methods.
@@ -688,12 +689,16 @@ class Citation(ReferencedEntity, CuratedMixin):
                                       db_index=True)
     """ASCII-normalized title."""
 
+    title_for_display = models.CharField(max_length=2000, blank=True, null=True)
+
     additional_titles = models.TextField(blank=True, null=True,
                                          help_text="Additional titles (not"
                                          " delimited, free text).")
     book_series = models.CharField(max_length=255, blank=True, null=True,
                                    help_text="Used for books, and potentially"
                                    " other works in a series.")
+
+    created_native = models.DateTimeField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         def get_related(obj):
@@ -712,7 +717,33 @@ class Citation(ReferencedEntity, CuratedMixin):
                         title_parts.append(relation.subject.title)
                 return u' '.join(title_parts)
 
+        def get_display_title(obj):
+            if not obj:
+                return u'No linked citation'
+            title = obj.title
+            if not title:
+                relation = obj.ccrelations.select_related('subject', 'object')\
+                    .filter(type_controlled__in=['RO', 'RB'])\
+                    .values('subject_id', 'subject__title', 'object__title')
+                if relation.count() > 0:
+                    relation = relation.first()
+                else:
+                    relation = None
+                if relation:
+                    if relation['subject__title'] or relation['object__title']:
+                        return u'Review: %s' % relation['subject__title'] if relation['subject_id'] != obj.id else relation['object__title']
+                    else:
+                        return u'(no title)'
+                return u'Untitled review'
+
+        if self.created_native is None:
+            try:
+                self.created_native = self.created_on
+            except HistoricalCitation.DoesNotExist:
+                self.created_native = self.created_on_fm
+
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
+        self.title_for_display = get_display_title(self)
         super(Citation, self).save(*args, **kwargs)
 
     @property

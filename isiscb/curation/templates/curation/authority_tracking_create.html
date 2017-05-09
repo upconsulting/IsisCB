@@ -15,12 +15,12 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curation:curate_authority' instance.id %}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Authority</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curation:curate_authority' instance.id %}" class="btn btn-sm btn-default">Cancel</a>
+            <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
             <a id="saveTrackingBtn" href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
         </div>
     </div>
@@ -28,6 +28,9 @@
 
 <form id="trackingForm" class="form" action="{% url 'curation:tracking-authority' instance.id %}" method="POST">
     {% csrf_token %}
+
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
 
     {% for error in form.tracking_info.errors %}
     <div class="alert alert-danger">{{ error }}</div>

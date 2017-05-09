@@ -17,7 +17,7 @@
 
           <div class="row">
             {% if can_update %}
-            <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}" class="list_entry_link">
+            <a href="{% url "curation:update_acrelation_for_citation" instance.id acrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
             {% endif %}
             <span class="col-sm-11">
 
@@ -146,10 +146,10 @@ var createNewauthor = function() {
                         var new_elem_acr = '<li class="list-group-item clearfix" id="acrelation-' + new_id + '">';
                         new_elem += '<span class="button-group button-group-xs pull-right">';
                         new_elem_acr += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
-                        new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
-                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-author" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
-                        new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '?search={{ search_key }}&current={{ current_index }}" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem_acr += '<a href="{% url "curation:create_acrelation_for_citation" instance.id %}' + new_id + '?search={{ search_key }}&current={{ current_index }}" class="btn btn-xs glyphicon glyphicon-pencil"></a>';
+                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-author" type="button" acrelation-id="' + new_id + '?search={{ search_key }}&current={{ current_index }}" acrelation-title="' + result.acrelation.authority.name + '"></a>'
+                        new_elem_acr += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-acrelation" type="button" acrelation-id="' + new_id + '?search={{ search_key }}&current={{ current_index }}" acrelation-title="' + result.acrelation.authority.name + '"></a>'
                         new_elem += '</span>';
                         new_elem_acr += '</span>';
                         new_elem_acr += '<span class="label label-primary">author</span> <span class="label label-success">Provides author Content About</span> ';
