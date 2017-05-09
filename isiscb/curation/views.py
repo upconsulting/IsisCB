@@ -1130,6 +1130,7 @@ def citation(request, citation_id):
     return render(request, template, context)
 
 
+# TODO: needs updated doc
 def _build_result_set_links(request, context, model=Citation):
     """
     This function build all the info that the previous/next/back to list links from  a given
@@ -1146,7 +1147,6 @@ def _build_result_set_links(request, context, model=Citation):
     user_session = request.session
     model_key = model.__name__.lower()
 
-    print request.POST
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
     search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
@@ -1171,13 +1171,17 @@ def _build_result_set_links(request, context, model=Citation):
     if current_run is None:
         queryset = operations.filter_queryset(request.user, model.objects.all())
         filter_class = eval('%sFilter' % model.__name__.title())
-        filtered_objects = filter_class(params, queryset=queryset.select_related('part_details'))
+        if model == Citation:
+            filtered_objects = filter_class(search_params, queryset=queryset.select_related('part_details'))
+        else:
+            filtered_objects = filter_class(search_params, queryset=queryset)
         paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
         page = paginator.page(page_number)
 
         current_run = [o.id for o in page]
         prior_page = paginator.page(page_number - 1) if page_number > 1 else []
-        antecedent_page = paginator.page(page_number + 1)
+        antecedent_page = paginator.page(page_number + 1) if paginator.page(page_number).has_next() else []
+
         try:
             prior = prior_page[0].id
         except IndexError:
@@ -1197,8 +1201,15 @@ def _build_result_set_links(request, context, model=Citation):
     else:
         prev_index = current_index - 1
         prev_id = current_run[relative_index - 1] if relative_index > 0 else prior
-    next_id = current_run[relative_index + 1] if relative_index < PAGE_SIZE - 1 else antecedent
-    next_index = current_index + 1 if next_id is not None else None
+
+    try:
+        next_id = current_run[relative_index + 1]
+    except IndexError:
+        next_id = antecedent
+
+    # if there is a following record, set next index
+    next_index = current_index + 1 if next_id else None
+
 
     context.update({
         'next': next_id,
