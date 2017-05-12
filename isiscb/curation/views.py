@@ -1312,7 +1312,8 @@ def _citations_get_filter_params(request):
         filter_params = user_session.get('%s_citation_search_params' % search_key)
         all_params = {k: v for k, v in filter_params.iteritems()}
 
-    if len(request.GET.keys()) <= 1:
+    # if we don't have any filters set yet, or there is just one parameter 'page'
+    if len(request.GET.keys()) == 0 or (len(request.GET.keys()) == 1 and request.GET.get('page', None)):
         if filter_params is None:
             filter_params = user_session.get('citation_filter_params', None)
             all_params = user_session.get('citation_request_params', None)
@@ -1718,10 +1719,14 @@ def quick_and_dirty_authority_search(request):
             return a.acrelation_set.count() - b.acrelation_set.count()
 
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
-                                  sorted(queryset_sw, cmp=custom_cmp),
-                                  sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
-                                  sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
+    #for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
+    #                              sorted(queryset_sw, cmp=custom_cmp),
+    #                              sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+    #                              sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
+    for i, obj in enumerate(chain(queryset_exact.order_by('name'),
+                                  queryset_sw.order_by('name'),
+                                  queryset_with_numbers.order_by('name'), #.order_by('name'),
+                                  queryset.order_by('name'))):    # .order_by('name')
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
