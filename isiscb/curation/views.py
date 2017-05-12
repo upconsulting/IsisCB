@@ -1719,10 +1719,14 @@ def quick_and_dirty_authority_search(request):
             return a.acrelation_set.count() - b.acrelation_set.count()
 
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
-                                  sorted(queryset_sw, cmp=custom_cmp),
-                                  sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
-                                  sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
+    #for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
+    #                              sorted(queryset_sw, cmp=custom_cmp),
+    #                              sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+    #                              sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
+    for i, obj in enumerate(chain(queryset_exact.order_by('name'),
+                                  queryset_sw.order_by('name'),
+                                  queryset_with_numbers.order_by('name'), #.order_by('name'),
+                                  queryset.order_by('name'))):    # .order_by('name')
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
