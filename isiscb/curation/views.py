@@ -1312,7 +1312,8 @@ def _citations_get_filter_params(request):
         filter_params = user_session.get('%s_citation_search_params' % search_key)
         all_params = {k: v for k, v in filter_params.iteritems()}
 
-    if len(request.GET.keys()) <= 1:
+    # if we don't have any filters set yet, or there is just one parameter 'page'
+    if len(request.GET.keys()) == 0 or (len(request.GET.keys()) == 1 and request.GET.get('page', None)):
         if filter_params is None:
             filter_params = user_session.get('citation_filter_params', None)
             all_params = user_session.get('citation_request_params', None)
