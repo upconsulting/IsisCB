@@ -1699,6 +1699,8 @@ def quick_and_dirty_authority_search(request):
 
     queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
     queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    # we don't need to duplicate results we've already captured with other queries
+    queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     results = []
     result_ids = []
 
@@ -1751,7 +1753,7 @@ def quick_and_dirty_authority_search(request):
     if use_custom_cmp:
         chained = chain(sorted(queryset_exact, cmp=custom_cmp),
                         sorted(queryset_sw, cmp=custom_cmp),
-                        sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+                        sorted(queryset_with_numbers, cmp=custom_cmp), 
                         sorted(queryset, cmp=custom_cmp))
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
