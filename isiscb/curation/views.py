@@ -16,6 +16,7 @@ from django.utils.http import urlencode
 from django.utils.text import slugify
 from django.utils.html import escape
 from django.template.loader import get_template
+from django.db.models import Count
 
 from rules.contrib.views import permission_required, objectgetter
 from .rules import is_accessible_by_dataset
@@ -1595,15 +1596,42 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
-
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
-    # Ordering: First, sort by closeness of match as follows: exact match; whole word
-    # match; partial word match from beginning of word. Second, sort by number of
-    # linked items. * * Names without double-hyphens go first * If there are names
-    # with double-hyphens and the next character is numeric, sort in descending
-    # numerical order * If there are names with double-hyphens and the next character
-    # is alpha, sort in ascending alphabetical order
+    """
+    This method searches authorities. It accepts the following paramters:
+    * show_inactive: show only active and inactive records; if set to 'false' only
+      active records are shown; default is 'true'
+    * active_types: for some authority types show only active records; accepts
+      comma-separated list of authority types
+    * type: limit the search to certain authority types; accepts
+      comma-separated list of authority types
+    * exclude: exclude certain authority types
+    * system: limits results to specified classification systems (comma-separated list)
+      system_types: if set, inverses filter for 'system' (excludes records within specified
+      classification systems)
+    * system_blank: allows classification system to be not set (default is 'true')
+    * max: maximal number of results (default is 10)
+    * use_custom_cmp: if set to true, uses a custom compare function for ordering results;
+      default is 'false'.
+      Custom ordering works as follows:
+        * First, sort by closeness of match as follows:
+            * exact match;
+            * whole word match;
+            * partial word match from beginning of word.
+        * Second, sort by number of linked items.
+            * Names without double-hyphens go first
+            * If there are names with double-hyphens and the next character is numeric,
+              sort in descending numerical order
+            * If there are names with double-hyphens and the next character is alpha,
+              sort in ascending alphabetical order
+      default sorting is as follows:
+      * exact matches
+      * matches that start with the search phrase
+      * matches that contain all parts of the search phrase
+      * everything else
+      each of these result sets is sorted by the number of linked citations
+    """
 
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
@@ -1619,10 +1647,12 @@ def quick_and_dirty_authority_search(request):
     limit_clasification_types = request.GET.get('system_types', None)
     classification_system = request.GET.get('system', None)
 
-    system_blank = request.GET.get('system_blank', True)
+    system_blank = request.GET.get('system_blank', 'true') == 'true'
     N = int(request.GET.get('max', 10))
     if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
+
+    use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'
 
     query = Q()
     if type_controlled:
@@ -1718,15 +1748,19 @@ def quick_and_dirty_authority_search(request):
         else:
             return a.acrelation_set.count() - b.acrelation_set.count()
 
+    if use_custom_cmp:
+        chained = chain(sorted(queryset_exact, cmp=custom_cmp),
+                        sorted(queryset_sw, cmp=custom_cmp),
+                        sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
+                        sorted(queryset, cmp=custom_cmp))
+    else:
+        chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
+                        queryset_sw.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
+                        queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
+                        queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'))
+
     # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chain(sorted(queryset_exact, cmp=custom_cmp),
-                                  sorted(queryset_sw, cmp=custom_cmp),
-                                  sorted(queryset_with_numbers, cmp=custom_cmp), #.order_by('name'),
-                                  sorted(queryset, cmp=custom_cmp))):    # .order_by('name')
-    #for i, obj in enumerate(chain(queryset_exact.order_by('name'),
-    #                              queryset_sw.order_by('name'),
-    #                              queryset_with_numbers.order_by('name'), #.order_by('name'),
-    #                              queryset.order_by('name'))):    # .order_by('name')
+    for i, obj in enumerate(chained):    # .order_by('name')
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
