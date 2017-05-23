@@ -269,7 +269,7 @@ function triggerSearchSubjects(e) {
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
