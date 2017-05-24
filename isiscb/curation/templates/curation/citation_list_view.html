@@ -113,7 +113,7 @@ $('body').ready(function() {
                 <td>{{ object.type_controlled|get_type_controlled_display }}</td>
                 <td>{{ object.title_for_display|safe }}</td>
                 <td>
-                    <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
+                    <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}&tab=acrelations">
                         {{ object.id|get_authors_editors_preloaded }}
                     </a>
                 </td>
