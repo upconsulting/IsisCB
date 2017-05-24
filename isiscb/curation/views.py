@@ -1302,7 +1302,13 @@ def _citations_get_filter_params(request):
     Build ``filter_params`` for GET request in citation list view.
     """
 
-    search_key = request.GET.get('search')
+
+    if request.method == 'POST':
+        post_or_get = request.POST
+    else:
+        post_or_get = request.GET
+
+    search_key = post_or_get.get('search')
 
     all_params = {}
     additional_params_names = ["page", "zotero_accession", "in_collections",
@@ -1314,18 +1320,18 @@ def _citations_get_filter_params(request):
         all_params = {k: v for k, v in filter_params.iteritems()}
 
     # if we don't have any filters set yet, or there is just one parameter 'page'
-    if len(request.GET.keys()) == 0 or (len(request.GET.keys()) == 1 and request.GET.get('page', None)):
+    if len(post_or_get.keys()) == 0 or (len(post_or_get.keys()) == 1 and post_or_get.get('page', None)):
         if filter_params is None:
             filter_params = user_session.get('citation_filter_params', None)
             all_params = user_session.get('citation_request_params', None)
         if filter_params is not None and all_params is not None:
             # page needs to be updated otherwise it keeps old page count
-            if request.GET.get('page'):
-                all_params['page'] = request.GET.get('page')
+            if post_or_get.get('page'):
+                all_params['page'] = post_or_get.get('page')
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = request.GET.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode().encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
@@ -1339,7 +1345,7 @@ def _citations_get_filter_params(request):
                  filter_params['o'] = "publication_date"
 
     for key in additional_params_names:
-        all_params[key] = request.GET.get(key, '')
+        all_params[key] = post_or_get.get(key, '')
 
     # Let the GET parameter override the cached POST parameter, in case the
     #  curator is originating in the collections view.
@@ -1753,7 +1759,7 @@ def quick_and_dirty_authority_search(request):
     if use_custom_cmp:
         chained = chain(sorted(queryset_exact, cmp=custom_cmp),
                         sorted(queryset_sw, cmp=custom_cmp),
-                        sorted(queryset_with_numbers, cmp=custom_cmp), 
+                        sorted(queryset_with_numbers, cmp=custom_cmp),
                         sorted(queryset, cmp=custom_cmp))
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
