@@ -27,6 +27,7 @@ def set_citation_display_title(apps, schema_editor):
                 else:
                     return u'(no title)'
             return u'Untitled review'
+        return title
             
     Citation.objects.filter(title__isnull=False).update(title_for_display=F('title'))
     while Citation.objects.filter(title_for_display__isnull=True).exists():
