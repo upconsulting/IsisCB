@@ -244,3 +244,6 @@ LICENSE = """This work is licensed under a Creative Commons
              Attribution-NonCommercial 4.0 International License."""
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+CELERY_REDIS_HOST = 'redis://'
+CELERY_BROKER_URL = 'redis://'
