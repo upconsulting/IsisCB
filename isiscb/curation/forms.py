@@ -631,7 +631,7 @@ class BulkActionForm(forms.Form):
             action_value = self.cleaned_data.get(action_name)
             extra_data = {
                 k.split('__')[1]: v for k, v in self.cleaned_data.iteritems()
-                if k.startswith(action_name) and not k == action_name
+                if k.startswith(action_name) and not k == action_name and '__' in k
             }
             # Load and instantiate the corresponding action class.
             action = getattr(actions, action_name)()    # Object is callable.
