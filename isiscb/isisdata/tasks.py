@@ -84,7 +84,8 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
                 if task and (i % _inc == 0 or i == (task.max_value - 1)):
                     task.current_value = i
                     task.save()
-                writer.writerow(map(lambda c: c(obj, extra), columns))
+                if obj:
+                    writer.writerow(map(lambda c: c(obj, extra), columns))
 
             for obj in extra:
                 writer.writerow(map(lambda c: c(obj, []), columns))
