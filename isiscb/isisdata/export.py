@@ -238,6 +238,10 @@ def _pages(obj, extra):
         return pre + unicode(page_end_string)
     return ""
 
+def _pages_free_text(obj, extra):
+    if not getattr(obj, 'part_details', None):
+        return u""
+    return obj.part_details.pages_free_text
 
 def _tracking(obj, type_controlled):
     qs = obj.tracking_records.filter(type_controlled=type_controlled)
@@ -319,6 +323,7 @@ physical_details = Column(u'Physical Details', lambda obj, extra: obj.physical_d
 series = Column(u'Series', _series)
 isbn = Column(u'ISBN', _isbn)
 pages = Column('Pages', _pages)
+pages_free_text = Column('Pages Free Text', _pages_free_text)
 record_action = Column(u'Record Action',
                        lambda obj, extra: obj.get_record_action_display())
 record_nature = Column(u'Record Nature',
@@ -359,6 +364,7 @@ CITATION_COLUMNS = [
     series,
     isbn,
     pages,
+    pages_free_text,
     record_action,
     record_nature,
     fully_entered,

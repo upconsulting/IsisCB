@@ -88,7 +88,8 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
                     writer.writerow(map(lambda c: c(obj, extra), columns))
 
             for obj in extra:
-                writer.writerow(map(lambda c: c(obj, []), columns))
+                if obj:
+                    writer.writerow(map(lambda c: c(obj, []), columns))
 
         task.state = 'SUCCESS'
         task.save()
