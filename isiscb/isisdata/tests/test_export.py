@@ -213,6 +213,17 @@ class TestPageNumbersAreForEveryone(unittest.TestCase):
         Citation.objects.all().delete()
         CCRelation.objects.all().delete()
 
+class TestPagesFreeTextAreExported(unittest.TestCase):
+    def test_pages(self):
+        for ctype, _ in Citation.TYPE_CHOICES:
+            citation = Citation.objects.create(type_controlled=ctype)
+            citation.part_details = PartDetails.objects.create(page_begin=15, pages_free_text='pages 15-17')
+            citation.save()
+            self.assertEqual(export.pages(citation, []), "pages 15-17")
+
+    def tearDown(self):
+        Citation.objects.all().delete()
+        CCRelation.objects.all().delete()
 
 class TestExtraRecordsAreAddedToTheExport(unittest.TestCase):
     """
