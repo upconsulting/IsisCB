@@ -219,7 +219,7 @@ class TestPagesFreeTextAreExported(unittest.TestCase):
             citation = Citation.objects.create(type_controlled=ctype)
             citation.part_details = PartDetails.objects.create(page_begin=15, pages_free_text='pages 15-17')
             citation.save()
-            self.assertEqual(export.pages(citation, []), "pages 15-17")
+            self.assertEqual(export.pages_free_text(citation, []), "pages 15-17")
 
     def tearDown(self):
         Citation.objects.all().delete()
