@@ -1639,8 +1639,6 @@ def quick_and_dirty_authority_search(request):
       each of these result sets is sorted by the number of linked citations
     """
 
-    MAX_QUERYSET_LENGTH = 80
-
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
 
@@ -1709,8 +1707,6 @@ def quick_and_dirty_authority_search(request):
     queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     # we don't need to duplicate results we've already captured with other queries
     queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
-    results = []
-    result_ids = []
 
     def _is_int(val):
         try:
@@ -1766,20 +1762,14 @@ def quick_and_dirty_authority_search(request):
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
                         queryset_sw.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
-                        queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')[:MAX_QUERYSET_LENGTH],
-                        queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')[:MAX_QUERYSET_LENGTH])
+                        #queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
+                        #queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')
+                        )
 
-    # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chained):    # .order_by('name')
-        # there are duplicates since everything that starts with a term
-        # also contains the term.
-        if obj.id in result_ids:
-            # make sure we still return 10 results although we're skipping one
-            N += 1
-            continue
-        if i == N:
-            break
+    results = []
+    result_ids = []
 
+    def add_result(i, obj):
         result_ids.append(obj.id)
         results.append({
             'id': obj.id,
@@ -1794,6 +1784,46 @@ def quick_and_dirty_authority_search(request):
             'public': obj.public,
             'type_controlled': obj.get_type_controlled_display()
         })
+
+    # first exact matches then starts with matches and last contains matches
+    for i, obj in enumerate(chained):    # .order_by('name')
+        # there are duplicates since everything that starts with a term
+        # also contains the term.
+        if obj.id in result_ids:
+            # make sure we still return 10 results although we're skipping one
+            N += 1
+            continue
+        if i == N:
+            break
+
+        add_result(i, obj)
+
+    if len(results) < N:
+        for i, obj in enumerate(queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')):    # .order_by('name')
+            # there are duplicates since everything that starts with a term
+            # also contains the term.
+            if obj.id in result_ids:
+                # make sure we still return 10 results although we're skipping one
+                N += 1
+                continue
+            if i == N:
+                break
+
+            add_result(i, obj)
+
+    if len(results) < N:
+        for i, obj in enumerate(queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')):    # .order_by('name')
+            # there are duplicates since everything that starts with a term
+            # also contains the term.
+            if obj.id in result_ids:
+                # make sure we still return 10 results although we're skipping one
+                N += 1
+                continue
+            if i == N:
+                break
+
+            add_result(i, obj)
+
     return JsonResponse({'results': results})
 
 
