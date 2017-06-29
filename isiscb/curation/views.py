@@ -1695,18 +1695,25 @@ def quick_and_dirty_authority_search(request):
     queryset_exact = Authority.objects.filter(query)    # Exact match.
     queryset_with_numbers = Authority.objects.filter(query)    # partial matches, in chunks; with punctuation and numbers.
 
+    # letting the database transform queryies using UPPER prohibits using the index, which is slooowwwww
     query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
-        queryset = queryset.filter(Q(name__icontains=part) | Q(name_for_sort__icontains=unidecode(part)))
+        #queryset = queryset.filter(Q(name__icontains=part) | Q(name_for_sort__icontains=unidecode(part)))
+        queryset = queryset.filter(Q(name_for_sort__contains=unidecode(part.lower())))
 
     query_parts_numbers = strip_punctuation(q).split()
     for part in query_parts_numbers:
-        queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
+        #queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
+        queryset_with_numbers = queryset_with_numbers.filter(name_for_sort__contains=part.lower())
 
-    queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
-    queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    #queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    queryset_sw = queryset_sw.filter(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
+    #queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    queryset_exact = queryset_exact.filter(Q(name_for_sort__exact=q.lower()))
+
     # we don't need to duplicate results we've already captured with other queries
-    queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    #queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
+    queryset = queryset.exclude(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
 
     def _is_int(val):
         try:
@@ -1762,14 +1769,23 @@ def quick_and_dirty_authority_search(request):
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
                         queryset_sw.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
-                        #queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
-                        #queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')
-                        )
+                        queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
+                        queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'))
 
     results = []
     result_ids = []
 
-    def add_result(i, obj):
+    # first exact matches then starts with matches and last contains matches
+    for i, obj in enumerate(chained):    # .order_by('name')
+        # there are duplicates since everything that starts with a term
+        # also contains the term.
+        if obj.id in result_ids:
+            # make sure we still return 10 results although we're skipping one
+            N += 1
+            continue
+        if i == N:
+            break
+
         result_ids.append(obj.id)
         results.append({
             'id': obj.id,
@@ -1784,45 +1800,6 @@ def quick_and_dirty_authority_search(request):
             'public': obj.public,
             'type_controlled': obj.get_type_controlled_display()
         })
-
-    # first exact matches then starts with matches and last contains matches
-    for i, obj in enumerate(chained):    # .order_by('name')
-        # there are duplicates since everything that starts with a term
-        # also contains the term.
-        if obj.id in result_ids:
-            # make sure we still return 10 results although we're skipping one
-            N += 1
-            continue
-        if i == N:
-            break
-
-        add_result(i, obj)
-
-    if len(results) < N:
-        for i, obj in enumerate(queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')):    # .order_by('name')
-            # there are duplicates since everything that starts with a term
-            # also contains the term.
-            if obj.id in result_ids:
-                # make sure we still return 10 results although we're skipping one
-                N += 1
-                continue
-            if i == N:
-                break
-
-            add_result(i, obj)
-
-    if len(results) < N:
-        for i, obj in enumerate(queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')):    # .order_by('name')
-            # there are duplicates since everything that starts with a term
-            # also contains the term.
-            if obj.id in result_ids:
-                # make sure we still return 10 results although we're skipping one
-                N += 1
-                continue
-            if i == N:
-                break
-
-            add_result(i, obj)
 
     return JsonResponse({'results': results})
 

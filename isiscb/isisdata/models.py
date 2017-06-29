@@ -997,11 +997,11 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     history = HistoricalRecords()
 
-    name = models.CharField(max_length=1000, help_text=help_text("""
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
     Name, title, or other main term for the authority as will be displayed.
     """))
 
-    name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
+    name_for_sort = models.CharField(max_length=2000,  db_index=True, blank=True, null=True)
     """ASCII-normalized name."""
 
     def save(self, *args, **kwargs):
