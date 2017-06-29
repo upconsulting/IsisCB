@@ -1639,6 +1639,8 @@ def quick_and_dirty_authority_search(request):
       each of these result sets is sorted by the number of linked citations
     """
 
+    MAX_QUERYSET_LENGTH = 80
+
     q = request.GET.get('q', None)
     show_inactive = request.GET.get('show_inactive', 'true') == 'true'
 
@@ -1703,7 +1705,7 @@ def quick_and_dirty_authority_search(request):
     for part in query_parts_numbers:
         queryset_with_numbers = queryset_with_numbers.filter(name__icontains=part)
 
-    queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q)
+    queryset_sw = queryset_sw.filter(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     # we don't need to duplicate results we've already captured with other queries
     queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
@@ -1764,8 +1766,8 @@ def quick_and_dirty_authority_search(request):
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
                         queryset_sw.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
-                        queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
-                        queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'))
+                        queryset_with_numbers.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')[:MAX_QUERYSET_LENGTH],
+                        queryset.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count')[:MAX_QUERYSET_LENGTH])
 
     # first exact matches then starts with matches and last contains matches
     for i, obj in enumerate(chained):    # .order_by('name')
