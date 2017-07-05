@@ -51,7 +51,9 @@
       Record {{ index }} of {{ total }}
     </div>
   </div>
-  <div class="col-md-6">
+
+  <!-- BEGIN title/abstract column -->
+  <div class="col-md-4">
       <div class="col-md-12">
         <p>
         <strong id="citation_type" data-type="{{instance.type_controlled}}">{{ instance.get_type_controlled_display }}</strong>:
@@ -99,44 +101,51 @@
           </div>
         </div>
        </div>
-
-       <div class="col-md-12" style="margin-top: 10px;">
-         <h5><b>Categories</b></h5>
-         <ul id="category-list-group" class="list-group">
-           {% for acrel in instance|get_categories %}
-              <li id="category-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
-              {% if can_update %}
-              <span class="button-group button-group-xs">
-                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
-                      acrelation-id="{{ acrel.id }}"
-                      data-acrelation-type="category"
-                      acrelation-title="{{ acrel.authority.name }}"></a>
-              </span>
-              {% endif %}
-              </li>
-           {% endfor %}
-         </ul>
-       </div>
-
-       <div class="col-md-12" style="margin-top: 10px;">
-         <h5><b>Subjects</b></h5>
-         <ul id="subject-list-group" class="list-group">
-           {% for acrel in instance|get_subjects %}
-              <li id="subject-entry-{{ acrel.id }}" class="list-group-item">{{ acrel.authority.name }}
-                {% if can_update %}
-                <span class="button-group button-group-xs">
-                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
-                        acrelation-id="{{ acrel.id }}"
-                        data-acrelation-type="subject"
-                        acrelation-title="{{ acrel.authority.name }}"></a>
-                </span>
-                {% endif %}
-              </li>
-           {% endfor %}
-         </ul>
-       </div>
   </div>
-  <div class="col-md-6">
+  <!-- END title/abstract column -->
+
+  <!-- BEGIN category/subject column -->
+  <div class="col-md-4">
+    <div class="col-md-12" style="margin-top: 10px;">
+      <h5><b>Categories</b></h5>
+      <ul id="category-list-group" class="list-group">
+        {% for acrel in instance|get_categories %}
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           {% if can_update %}
+           <span class="button-group button-group-xs">
+               <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                   acrelation-id="{{ acrel.id }}"
+                   data-acrelation-type="category"
+                   acrelation-title="{{ acrel.authority.name }}"></a>
+           </span>
+           {% endif %}
+           </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="col-md-12" style="margin-top: 10px;">
+      <h5><b>Subjects</b></h5>
+      <ul id="subject-list-group" class="list-group">
+        {% for acrel in instance|get_subjects %}
+           <li id="subject-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+             {% if can_update %}
+             <span class="button-group button-group-xs">
+                 <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                     acrelation-id="{{ acrel.id }}"
+                     data-acrelation-type="subject"
+                     acrelation-title="{{ acrel.authority.name }}"></a>
+             </span>
+             {% endif %}
+           </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <!-- END category/subject column -->
+
+  <!-- BEGIN add subject/category column -->
+  <div class="col-md-4">
     {% if can_update %}
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
@@ -194,6 +203,8 @@
     </div>
     {% endif %}
   </div>
+  <!-- END add subject/category column -->
+
 </div>
 
 <!-- Modal -->
@@ -436,8 +447,9 @@ function addConcept(event) {
   $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
     var ul = $('#subject-list-group');
     var newId = result.acrelation.id;
+    var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
 
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item">' + result.acrelation.authority.name + '</li>');
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
     ul.append(li);
     {% if can_update %}
     var span = $('<span class="button-group button-group-xs"></span>');

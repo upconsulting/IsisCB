@@ -13,6 +13,20 @@ import bleach
 
 register = template.Library()
 
+@register.filter
+def get_label_string(record):
+    if type(record) == Citation:
+        kwargs = {
+            'authors': ", ".join([bleach_safe(contributor_as_string(x)) for x in get_authors(record)]),
+            'title': bleach_safe(get_title(record)),
+            'year': bleach_safe(get_pub_year(record)),
+            }
+        return u"{authors} <em>{title}</em> ({year})".format(**kwargs)
+
+    if type(record) == Authority:
+        return record.name
+
+    return "None"
 
 @register.filter(name='get_pk')
 def get_pk(value):

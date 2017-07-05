@@ -13,6 +13,8 @@ from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpRespon
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
 
+from itertools import chain
+
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet
 
@@ -1465,11 +1467,17 @@ def home(request):
     """
     The landing view, at /.
     """
-    print request.user
+    recent_citations = Citation.history.filter(public=True).filter(history_type="+").order_by('-history_date')[:10]
+    recent_authorities = Authority.history.filter(public=True).filter(history_type="+").order_by('-history_date')[:10]
+
+    recent_records =[]
+    for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True)[:10]:
+        recent_records.append(Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id))
+
     context = {
         'active': 'home',
-        'comments_citation': Comment.objects.filter(subject_content_type__model='citation').order_by('-modified_on')[:10],
-        'comments_authority': Comment.objects.filter(subject_content_type__model='authority').order_by('-modified_on')[:10]
+        'records_recent': recent_records,
+        'comments_recent': Comment.objects.order_by('-modified_on')[:10],
     }
     return render(request, 'isisdata/home.html', context=context)
 

@@ -57,22 +57,18 @@
     <!-- citation comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments on Citation Records</div>
+            <div class="panel-heading">Recently added records</div>
             <ul class="list-group">
-            {% for comment in comments_citation %}
+            {% for record in records_recent %}
             <li class="list-group-item">
                 <div>
-                    <strong><a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a></strong>
+                    <span class="label label-info">{{record|to_class_name}}</span> <strong><a href="">{{ record.created_by.username }}</a></strong>
                 </div>
                 <div>
-                     <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
-                 </div>
-                 <div>
-                     {{ comment.linkified|safe }}
+                     <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ record.created_on|date:"c" }}').toLocaleString());</script></span>
                  </div>
                 <div>
-                    <a href="/isis/{{comment.subject.id}}" class="text-warning" style="font-size: 9pt;">{{ comment.subject }}</a>
-
+                    <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
                 </div>
 
             </li>
@@ -84,11 +80,13 @@
     <!-- authority comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments on Authority Records</div>
-            {% for comment in comments_authority %}
+            <div class="panel-heading">Recent Comments</div>
+            {% for comment in comments_recent %}
             <li class="list-group-item">
                 <div>
-                    <strong><a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a></strong>
+                    <strong>
+                      <span class="label label-warning">{{ comment.subject_content_type.model|capfirst }}</span> <a href="{% url 'user_profile' comment.created_by.username %}">{{ comment.created_by.username }}</a>
+                    </strong>
                 </div>
                 <div>
                      <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
@@ -97,7 +95,7 @@
                      {{ comment.linkified|safe }}
                  </div>
                 <div>
-                    <a href="/isis/{{comment.subject.id}}" class="text-warning" style="font-size: 9pt;">{{ comment.subject }}</a>
+                    <a href="{% url 'index' comment.subject.id %}" class="text-warning" style="font-size: 9pt;">{{ comment.subject }}</a>
                 </div>
             </li>
             {% endfor %}

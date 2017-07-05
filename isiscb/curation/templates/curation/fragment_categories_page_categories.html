@@ -28,8 +28,9 @@ function addCategory(event) {
   $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
     var ul = $('#category-list-group');
     var newId = result.acrelation.id;
+    var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
 
-    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item">' + result.acrelation.authority.name + '</li>');
+    var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
     ul.append(li);
     {% if can_update %}
     var span = $('<span class="button-group button-group-xs"></span>');
