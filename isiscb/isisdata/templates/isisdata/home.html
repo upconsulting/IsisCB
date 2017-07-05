@@ -62,14 +62,11 @@
             {% for record in records_recent %}
             <li class="list-group-item">
                 <div>
-                    <span class="label label-info">{{record|to_class_name}}</span> <strong><a href="">{{ record.created_by.username }}</a></strong>
+                    <span class="label label-info">{{record|to_class_name}}</span> <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
                 </div>
                 <div>
                      <span class="text text-muted text-small"><script type="text/javascript">document.write(new Date('{{ record.created_on|date:"c" }}').toLocaleString());</script></span>
                  </div>
-                <div>
-                    <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
-                </div>
 
             </li>
             {% endfor %}
