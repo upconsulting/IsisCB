@@ -4,6 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from django.http import QueryDict
+from django.db.models import Q
 from isisdata.models import Citation, CRUDRule
 from isisdata.filters import CitationFilter
 from isisdata.operations import filter_queryset
@@ -123,8 +124,10 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
     #  case....
     allowed_prior = TrackingWorkflow.allowed(target_state)
 
-    queryset = queryset.filter(tracking_state__in=allowed_prior)
-
+    # bugfix ISISCB-1008: if None is in prior allowed states, we need to build a different filter
+    q = (Q(tracking_state__in=allowed_prior) | Q(tracking_state__isnull=True)) if None in allowed_prior else Q(tracking_state__in=allowed_prior)
+    queryset = queryset.filter(q)
+    
     idents = list(queryset.values_list('id', flat=True))
     try:
         queryset.update(tracking_state=target_state)
