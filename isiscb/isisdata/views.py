@@ -1467,16 +1467,25 @@ def home(request):
     """
     The landing view, at /.
     """
-    recent_citations = Citation.history.filter(public=True).filter(history_type="+").order_by('-history_date')[:10]
-    recent_authorities = Authority.history.filter(public=True).filter(history_type="+").order_by('-history_date')[:10]
 
+    start_index = 0
+    end_index = 10
     recent_records =[]
-    for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True)[:10]:
-        recent_records.append(Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id))
+
+    # unfortunately, citatations freshly created are public=False so we can't filter on that field when retrieving
+    # creation events, we have to test that after we got the real object form the history object
+    while len(recent_records) < 10:
+        recent_citations = Citation.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
+        recent_authorities = Authority.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
+
+        for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
+            record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
+            if record.public:
+                recent_records.append(record)
 
     context = {
         'active': 'home',
-        'records_recent': recent_records,
+        'records_recent': recent_records[:10],
         'comments_recent': Comment.objects.order_by('-modified_on')[:10],
     }
     return render(request, 'isisdata/home.html', context=context)

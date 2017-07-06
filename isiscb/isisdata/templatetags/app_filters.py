@@ -21,7 +21,9 @@ def get_label_string(record):
             'title': bleach_safe(get_title(record)),
             'year': bleach_safe(get_pub_year(record)),
             }
-        return u"{authors} <em>{title}</em> ({year})".format(**kwargs)
+        if record.type_controlled == Citation.BOOK:
+            return u"{authors} <em>{title}</em> ({year})".format(**kwargs)
+        return u'{authors} "{title}" ({year})'.format(**kwargs)
 
     if type(record) == Authority:
         return record.name
