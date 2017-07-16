@@ -9,7 +9,19 @@
     <!-- citation comments -->
     <div class="col-sm-12 col-md-12">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Records added in the past {{ interval }}</div>
+            <div class="panel-heading">
+              Records added in the past {{ interval }}
+              <span class="pull-right">
+                {% if interval == 'week' %}
+                <a style="color: white;" href="{% url 'last_month_records' %}"><i class="fa fa-calendar" aria-hidden="true"></i>
+Last month</a>
+                {% endif %}
+                {% if interval == 'month' %}
+                <a style="color: white;" href="{% url 'last_month_records' %}?interval=week"><i class="fa fa-calendar" aria-hidden="true"></i>
+Last week</a>
+                {% endif %}
+              </span>
+            </div>
             <ul class="list-group">
             {% for record in records_recent %}
             <li class="list-group-item">

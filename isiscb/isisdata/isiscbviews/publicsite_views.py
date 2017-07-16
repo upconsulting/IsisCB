@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from itertools import chain
 
-def last_month_records(request):
+def recent_records(request):
     """
     The landing view, at /.
     """
