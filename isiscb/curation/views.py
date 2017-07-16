@@ -1394,7 +1394,7 @@ def citations(request):
     fields = ('record_status_value', 'id', 'type_controlled', 'public',
               'tracking_state', 'modified_on', 'created_native',
               'publication_date', 'title_for_display', 'part_details_id',
-              'part_details__page_begin', 'part_details__page_end',)
+              'part_details__page_begin', 'part_details__page_end', 'part_details__pages_free_text')
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
