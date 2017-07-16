@@ -175,7 +175,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% endif %}
       {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
       <tr>
-        <td>Pages:</td><td>{% if citation.part_details.page_begin %}{{ citation.part_details.page_begin }}{% if citation.part_details.page_end %} - {{citation.part_details.page_end}}{% endif %}{% else %}{{ citation.part_details.pages_free_text }}{% endif %}</td>
+        <td>Pages:</td><td>{{ citation.part_details.pages }}</td>
       </tr>
       {% endif %}
     </table>

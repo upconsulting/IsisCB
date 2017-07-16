@@ -1674,6 +1674,15 @@ class PartDetails(models.Model):
     Provides the size of the work in pages, words, or other counters."""))
     extent_note = models.TextField(blank=True, null=True)
 
+    @property
+    def pages(self):
+        if not self.page_end and self.pages_free_text:
+            return self.pages_free_text
+
+        if self.page_begin and self.page_end:
+            return u'{0} - {1}'.format(self.page_begin, self.page_end)
+
+        return self.page_begin if self.page_begin else self.page_end
 
 class Place(models.Model):
     """
