@@ -57,7 +57,15 @@
     <!-- citation comments -->
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recently added records</div>
+            <div class="panel-heading">
+              Recently added records
+              <span class="pull-right">
+                <a style="color: white;" href="{% url 'recent_records' %}"><i class="fa fa-calendar" aria-hidden="true"></i>
+Last month</a>&nbsp; &nbsp;
+                <a style="color: white;" href="{% url 'recent_records' %}?interval=week"><i class="fa fa-calendar" aria-hidden="true"></i>
+Last week</a>
+              </span>
+            </div>
             <ul class="list-group">
             {% for record in records_recent %}
             <li class="list-group-item">
