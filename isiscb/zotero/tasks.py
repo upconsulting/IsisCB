@@ -201,7 +201,7 @@ def ingest_citation(request, accession, draftcitation):
             '_history_user': request.user,
             # ISISCB-960: use authority name for display, not draft authority
             #'name_for_display_in_citation': draft.name,
-            'name_for_display_in_citation': target.name,
+            'name_for_display_in_citation': target.name if target.name else draft.name,
             'record_history': _record_history_message(request, accession),
             'public': True,
             'record_status_value': CuratedMixin.ACTIVE,
