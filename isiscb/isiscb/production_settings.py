@@ -269,7 +269,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-# HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
 CELERY_RESULT_BACKEND = 'django-cache'#'django-cache'
@@ -303,6 +303,7 @@ CELERY_QUEUES = {
     }
 }
 CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
+CELERY_WORKER_PREFETCH_MULTIPLIER=1
 
 LOGIN_REDIRECT_URL = '/'
 
