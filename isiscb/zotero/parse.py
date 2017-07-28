@@ -10,6 +10,7 @@ from django.conf import settings
 from datetime import datetime
 from unidecode import unidecode
 
+import re
 # rdflib complains a lot.
 logging.getLogger("rdflib").setLevel(logging.ERROR)
 
@@ -302,12 +303,12 @@ class ZoteroIngest(object):
     def handle_extent(self, predicate, node):
         value = node.toPython()
         try:
-            value = eval(value)
-        except NameError:    # Not numeric.
-            return preciate, 0
+            value = float(value)
+        except ValueError:    # Not numeric.
+            return predicate, value
 
         if type(value) is float:
-            value = round(float)
+            value = round(value)
         try:
             return predicate, int(value)
         except ValueError:
