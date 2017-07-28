@@ -305,7 +305,7 @@ class ZoteroIngest(object):
         try:
             value = float(value)
         except ValueError:    # Not numeric.
-            return predicate, value
+            return predicate, str(value)
 
         if type(value) is float:
             value = round(value)

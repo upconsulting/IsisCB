@@ -157,8 +157,10 @@ class IngestManager(object):
         value = IngestManager._get(entry, 'extent', None)
         extent = 0
         extent_notes = ''
-        if value and isinstance(value, str):
-            extent = re.sub('[^0-9]', '', value)
+        if value:
+            extent = value
+            if isinstance(value, str):
+                extent = re.sub('[^0-9]', '', value)
             if extent:
                 extent = int(extent)
                 if "pp." in value or "p." in value:
