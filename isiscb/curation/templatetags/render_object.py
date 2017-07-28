@@ -159,6 +159,8 @@ def get_citation_periodical(citation_id):
 def get_page_numbers(obj):
     if 'part_details_id' not in obj:
         return u''
+    if not obj.get('part_details__page_end') and obj.get('part_details__pages_free_text'):
+        return obj.get('part_details__pages_free_text')
     return ' - '.join([str(p) for p in [obj.get('part_details__page_begin'), obj.get('part_details__page_end')] if p])
 
 @register.filter

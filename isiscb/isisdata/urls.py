@@ -6,6 +6,7 @@ from haystack.query import SearchQuerySet
 
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
+from isisdata.isiscbviews import publicsite_views
 
 from . import views
 
@@ -43,6 +44,7 @@ urlpatterns = [
     #url(r'^$', views.index, name='index'),
     url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='index'),
     url(r'^(?i)(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
+    url(r'^(?i)recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
     url(r'^(?i)user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
