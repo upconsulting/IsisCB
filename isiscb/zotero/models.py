@@ -326,7 +326,7 @@ class DraftACRelation(ImportedData):
 class DraftCitationLinkedData(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='linkeddata')
     name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
+    value = models.TextField()
 
 
 class DraftAuthorityLinkedData(ImportedData):

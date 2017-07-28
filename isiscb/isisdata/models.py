@@ -1750,7 +1750,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
                                      help_text="Title of the resource that the"
                                                " URN links to.")
 
-    url = models.CharField(max_length=255, blank=True, null=True,
+    url = models.TextField(blank=True, null=True,
                            help_text="If the URN is not an URL, you may"
                                      " optionally provide one here, for display"
                                      " purposes.")
