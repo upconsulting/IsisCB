@@ -161,10 +161,10 @@ class IngestManager(object):
             extent = value
             if isinstance(value, str):
                 extent = re.sub('[^0-9]', '', value)
-            if extent:
-                extent = int(extent)
                 if "pp." in value or "p." in value:
                     extent_notes = "pages"
+            if extent:
+                extent = int(extent)
 
         return {
             'extent': extent,
