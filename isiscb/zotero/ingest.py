@@ -137,6 +137,8 @@ class IngestManager(object):
         else:
             try:    # ISISCB-395: Skip malformed page numbers.
                 page_start, page_end = value
+                if page_end.endswith("p"):
+                    page_end = page_end[0:-1]
                 pages_free_text = u'-'.join(map(unicode, list(value)))
             except ValueError:    # free_text only.
                 page_start, page_end, pages_free_text = value[0], None, value[0]
@@ -144,6 +146,30 @@ class IngestManager(object):
             'page_start': page_start,
             'page_end': page_end,
             'pages_free_text': pages_free_text,
+        }
+
+    @staticmethod
+    def _get_extent_data(entry):
+        """
+        Generate data for :prop:`.DraftCitation.extent`, :prop:`.extent_note`, and
+        :prop:`.physical_details`.
+        """
+        value = IngestManager._get(entry, 'extent', None)
+        extent = 0
+        extent_notes = ''
+        if value:
+            extent = value
+            if isinstance(value, str):
+                extent = re.sub('[^0-9]', '', value)
+                if "pp." in value or "p." in value:
+                    extent_notes = "pages"
+            if extent:
+                extent = int(extent)
+
+        return {
+            'extent': extent,
+            'extent_note': extent_notes,
+            'physical_details': value
         }
 
     @staticmethod
@@ -326,6 +352,7 @@ class IngestManager(object):
         ))
 
         draft_citation_data.update(IngestManager._get_pages_data(entry))
+        draft_citation_data.update(IngestManager._get_extent_data(entry))
         draft_citation_data.update(IngestManager._get_dtype(entry))
         part_of_data = IngestManager._get(entry, 'part_of')
 
@@ -688,6 +715,8 @@ class IngestManager(object):
         """
         data = entry.get('part_of', [])
         def _cast(datum):
+            if not datum:
+                return None, None
             _type = IngestManager._get_dtype(datum)['type_controlled']
             if _type == DraftCitation.BOOK:
                 return None, None
