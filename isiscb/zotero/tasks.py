@@ -58,6 +58,7 @@ def ingest_citation(request, accession, draftcitation):
         ('abstract', 'abstract'),
         ('type_controlled', 'type_controlled'),
         ('book_series', 'book_series'),
+        ('physical_details', 'physical_details')
     ]
     partdetails_fields = [
         ('page_start', 'page_begin'),
@@ -66,6 +67,7 @@ def ingest_citation(request, accession, draftcitation):
         ('issue', 'issue_free_text'),
         ('volume', 'volume_free_text'),
         ('extent', 'extent'),
+        ('extent_note', 'extent_note'),
     ]
     int_only_fields = dict([
         ('page_start', 'pages_free_text'),

@@ -1739,8 +1739,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     description = models.TextField(blank=True)
 
-    universal_resource_name = models.CharField(max_length=255,
-                                               help_text="The value of the"
+    universal_resource_name = models.TextField(help_text="The value of the"
     " identifier (the actual DOI link or the value of the ISBN, etc). Will be a"
     " URN, URI, URL, or other unique identifier for a work, used as needed to"
     " provide information about how to find the digital object on the web or"
@@ -1750,7 +1749,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
                                      help_text="Title of the resource that the"
                                                " URN links to.")
 
-    url = models.CharField(max_length=255, blank=True, null=True,
+    url = models.TextField(blank=True, null=True,
                            help_text="If the URN is not an URL, you may"
                                      " optionally provide one here, for display"
                                      " purposes.")

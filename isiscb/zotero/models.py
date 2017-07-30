@@ -146,6 +146,9 @@ class DraftCitation(ImportedData):
     issue = models.CharField(max_length=100, blank=True, null=True)
     book_series = models.CharField(max_length=255, blank=True, null=True)
     extent = models.PositiveIntegerField(blank=True, null=True)
+    extent_note = models.TextField(blank=True, null=True)
+
+    physical_details = models.CharField(max_length=255, null=True, blank=True)
 
     language = models.ForeignKey(Language, blank=True, null=True)
 
@@ -323,7 +326,7 @@ class DraftACRelation(ImportedData):
 class DraftCitationLinkedData(ImportedData):
     citation = models.ForeignKey('DraftCitation', related_name='linkeddata')
     name = models.CharField(max_length=255)
-    value = models.CharField(max_length=255)
+    value = models.TextField()
 
 
 class DraftAuthorityLinkedData(ImportedData):
