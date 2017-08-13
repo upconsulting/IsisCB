@@ -132,21 +132,34 @@ class IngestManager(object):
         dict
         """
         value = IngestManager._get(entry, 'pages', None)
+
         if type(value) not in [tuple, list]:
-            page_start, page_end, pages_free_text = value, None, value
+            page_start, page_end, pages_free_text = IngestManager._extract_page_number(value), None, value
         else:
             try:    # ISISCB-395: Skip malformed page numbers.
                 page_start, page_end = value
-                if page_end.endswith("p"):
-                    page_end = page_end[0:-1]
+                # ISISCB-1029: numbers before and after dash should be used as page numbers (throw out everything else)
                 pages_free_text = u'-'.join(map(unicode, list(value)))
+                page_start = IngestManager._extract_page_number(page_start)
+                page_end = IngestManager._extract_page_number(page_end)
+
             except ValueError:    # free_text only.
-                page_start, page_end, pages_free_text = value[0], None, value[0]
+                print "value error"
+                page_start, page_end, pages_free_text = IngestManager._extract_page_number(value[0]), None, value[0]
         return {
             'page_start': page_start,
             'page_end': page_end,
             'pages_free_text': pages_free_text,
         }
+
+    @staticmethod
+    def _extract_page_number(page_free_text):
+        page_pattern = r".*?(?P<page>[0-9]+).*"
+        if page_free_text:
+            matcher = re.search(page_pattern, page_free_text)
+            if matcher:
+                return matcher.group("page")
+        return page_free_text
 
     @staticmethod
     def _get_extent_data(entry):
@@ -161,10 +174,9 @@ class IngestManager(object):
             extent = value
             if isinstance(value, str):
                 extent = re.sub('[^0-9]', '', value)
-                if "pp." in value or "p." in value:
-                    extent_notes = "pages"
             if extent:
                 extent = int(extent)
+                extent_notes = "pages"
 
         return {
             'extent': extent,

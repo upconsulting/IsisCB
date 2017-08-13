@@ -32,6 +32,7 @@ RESOURCE_CLASSES = [
 
 FIELD_NAMES = dict([
     (DC.title, u'title'),
+    (DCTERMS.alternative, u'title'),
     (DCTERMS.abstract, u'abstract'),
     (DC.date, u'publication_date'),
     (RDF.type, u'type_controlled'),

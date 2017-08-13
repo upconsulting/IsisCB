@@ -201,9 +201,7 @@ def ingest_citation(request, accession, draftcitation):
         # ISISCB-577 Created ACRelation records should be active by default.
         acr_data = {
             '_history_user': request.user,
-            # ISISCB-960: use authority name for display, not draft authority
-            #'name_for_display_in_citation': draft.name,
-            'name_for_display_in_citation': target.name if target else draft.name,
+            'name_for_display_in_citation': draft.name,
             'record_history': _record_history_message(request, accession),
             'public': True,
             'record_status_value': CuratedMixin.ACTIVE,
