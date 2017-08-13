@@ -138,6 +138,7 @@ class IngestManager(object):
         else:
             try:    # ISISCB-395: Skip malformed page numbers.
                 page_start, page_end = value
+                # ISISCB-1029: numbers before and after dash should be used as page numbers (throw out everything else)
                 pages_free_text = u'-'.join(map(unicode, list(value)))
                 page_start = IngestManager._extract_page_number(page_start)
                 page_end = IngestManager._extract_page_number(page_end)
@@ -172,7 +173,7 @@ class IngestManager(object):
         if value:
             extent = value
             if isinstance(value, str):
-                extent = re.sub('[^0-9]', '', value)                    
+                extent = re.sub('[^0-9]', '', value)
             if extent:
                 extent = int(extent)
                 extent_notes = "pages"
