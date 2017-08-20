@@ -251,6 +251,9 @@ def skip_authority_for_draft(request):
 @staff_member_required
 def create_authority_for_draft(request):
     draftauthority_id = request.GET.get('draftauthority')
+    authority_name = request.GET.get('authority_name')
+    authority_first_name = request.GET.get('authority_first_name')
+    authority_last_name = request.GET.get('authority_last_name')
     accession_id = request.GET.get('accession')
 
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
@@ -258,7 +261,7 @@ def create_authority_for_draft(request):
 
     # Authority instance from field data.
     authority_data = {
-        'name': draftauthority.name,
+        'name': authority_name if authority_name else draftauthority.name,
         'type_controlled': draftauthority.type_controlled,
         'public': True,
         'belongs_to': accession.ingest_to,
@@ -269,10 +272,12 @@ def create_authority_for_draft(request):
 
     #  Note: ISISCB-577 Created authority records should be active by default.
     if draftauthority.type_controlled == DraftAuthority.PERSON:
+        first_name = authority_first_name if authority_first_name else draftauthority.name_first
+        last_name = authority_last_name if authority_last_name else draftauthority.name_last
         model_class = Person
         authority_data.update({
-            'personal_name_last': draftauthority.name_last if draftauthority.name_last else u'',
-            'personal_name_first': draftauthority.name_first if draftauthority.name_first else u'',
+            'personal_name_last': last_name if last_name else u'',
+            'personal_name_first': first_name if first_name else u'',
             'personal_name_suffix': draftauthority.name_suffix if draftauthority.name_suffix else u'',
             'personal_name_preferred': draftauthority.name,
         })

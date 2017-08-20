@@ -80,6 +80,10 @@
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
+                                    {% if authority.type_controlled == "PE" %}
+                                    data-first-name="{{ authority.name_first }}"
+                                    data-last-name="{{ authority.name_last }}"
+                                    {% endif %}
                                     data-type="{{ authority.type_controlled }}">
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
@@ -87,6 +91,10 @@
                                         id="authority-{{ authority.id }}-link"
                                         data-id="{{ authority.id }}"
                                         data-name="{{ authority.name }}"
+                                        {% if authority.type_controlled == "PE" %}
+                                        data-first-name="{{ authority.name_first }}"
+                                        data-last-name="{{ authority.name_last }}"
+                                        {% endif %}
                                         data-type="{{ authority.type_controlled }}">
                                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
@@ -223,6 +231,8 @@ $('.draftauthority').click(function() {
     selected_authority = draftauthority_id;
     selected_authority_name = elem.attr('data-name');
     selected_authority_type = elem.attr('data-type');
+    selected_authority_first_name = elem.attr('data-first-name');
+    selected_authority_last_name = elem.attr('data-last-name');
 
     bindCreateNew();
     bindSkip();
@@ -479,14 +489,17 @@ var confirmResolveModal = function() {
   *  Execute resolution through creation of a new production authority record.
   */
 var confirmCreateModal = function() {
-    console.log('create a new authority:: confirmed');
+    //console.log('create a new authority:: confirmed');
+    var authority_name = $('#draftauthority_name_edit-create').val();
+    var authority_first_name = $('#draftauthority_first_name_edit-create').val();
+    var authority_last_name = $('#draftauthority_last_name_edit-create').val();
     $('#prompt-create-modal').modal('hide');
     var draftauthority_id = $('#draftauthority-id-container-create').val();
-    triggerCreateAuthority(draftauthority_id, function(created_authority_id) {
+    triggerCreateAuthority(draftauthority_id, authority_name, authority_first_name, authority_last_name, function(created_authority_id) {
         console.log('create a new authority:: done');
         getSimilarAuthorities(draftauthority_id, function(count, ids) {
 
-            console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
+            //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
 
             ids.forEach(function(di) {
                 triggerResolveAuthority(di, created_authority_id);
@@ -523,6 +536,14 @@ var bindCreateNew = function() {
             // $('#authority-id-container-create').val(suggestion_id);
             $('#similar_authority_count-create').text(count);
             $('#draftauthority_name-create').text(selected_authority_name);
+            $('#draftauthority_name_edit-create').val(selected_authority_name);
+            if (selected_authority_type == 'PE') {
+              $('#draftauthority_first_name_edit-create').val(selected_authority_first_name);
+              $('#draftauthority_last_name_edit-create').val(selected_authority_last_name);
+              $('#person_info').show();
+            } else {
+              $('#person_info').hide();
+            }
             // $('#authority_name-create').text(sname);
             $('#prompt-create-modal').modal('show');
         });
@@ -544,8 +565,8 @@ var bindSkip = function() {
     });
 }
 
-var triggerCreateAuthority = function(draftauthority_id, callback) {
-    $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&draftauthority=' + draftauthority_id, function(result) {
+var triggerCreateAuthority = function(draftauthority_id, authority_name, authority_first_name, authority_last_name, callback) {
+    $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&authority_name=' + authority_name + '&authority_first_name=' + authority_first_name + '&authority_last_name=' + authority_last_name + '&draftauthority=' + draftauthority_id, function(result) {
         callback(result.data.authority);
     });
 }
@@ -639,6 +660,15 @@ var bindModal = function() {
                 <p>
                     You are about to create a new production authority record based on the draft authority
                     <span class="text-warning" id="draftauthority_name-create"></span>.
+                </p>
+                <p>
+                  If needed, you can change the authority name:<br>
+                  <input type="text" id="draftauthority_name_edit-create" class="form-control" />
+                  <span id="person_info">
+                    <br>
+                    First name: <input type="text" id="draftauthority_first_name_edit-create" class="form-control" /><br>
+                    Last name: <input type="text" id="draftauthority_last_name_edit-create" class="form-control" />
+                  </span>
                 </p>
                 <p>
                     <input name="bulkapply" id="bulkapply-create" type="checkbox"></input> Apply this resolution to <span class="label label-primary" id="similar_authority_count-create"></span>
