@@ -550,7 +550,7 @@ class IngestManager(object):
 
     @staticmethod
     def generate_generic_acrelations(entry, field, draft_citation, authority_type,
-                                    acrelation_type):
+                                    acrelation_type, data_display_order_offset):
         """
         Generate new :class:`.DraftAuthority` and :class:`.DraftACRelation`
         instances from field-data.
@@ -590,11 +590,14 @@ class IngestManager(object):
                 _apply = IngestManager.apply_extra_data(extra)
                 draft_authority = _apply(draft_authority)
 
+            display_order = datum.get('data_display_order', '0.0')
+
             draft_acrelation = DraftACRelation.objects.create(**{
                 'authority': draft_authority,
                 'citation': draft_citation,
                 'part_of': draft_citation.part_of,
-                'type_controlled': acrelation_type
+                'type_controlled': acrelation_type,
+                'data_display_order': data_display_order_offset + float(display_order),
             })
             return draft_authority, draft_acrelation
         return map(_cast, entry.get(field, []))
@@ -810,10 +813,14 @@ class IngestManager(object):
         draft_citation = self.generate_draftcitation(entry, self.accession)
 
         acrelations = IngestManager.generate_subject_acrelations(entry, draft_citation)
+        data_display_order_offset = 0
         for field, authority_type, acrelation_type in GENERIC_ACRELATIONS:
             if draft_citation.type_controlled == DraftCitation.BOOK and field == 'part_of':
                 continue
-            acrelations += IngestManager.generate_generic_acrelations(entry, field, draft_citation, authority_type, acrelation_type)
+            contributors_acrels = IngestManager.generate_generic_acrelations(entry, field, draft_citation, authority_type, acrelation_type, data_display_order_offset)
+            # for data display order we need to know how many acrelations came before
+            data_display_order_offset += len(contributors_acrels)
+            acrelations += contributors_acrels
         acrelations += IngestManager.generate_publisher_acrelations(entry, draft_citation)
         acrelations += IngestManager.generate_contributor_acrelations(entry, draft_citation)
         IngestManager.generate_part_of_relations(entry, draft_citation)

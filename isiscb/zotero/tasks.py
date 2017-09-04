@@ -211,6 +211,7 @@ def ingest_citation(request, accession, draftcitation):
             'type_controlled': relation.type_controlled,
             'belongs_to': accession.ingest_to,
             'zotero_accession': accession,
+            'data_display_order': relation.data_display_order,
         }
         acrelation = ACRelation.objects.create(**acr_data)
 
