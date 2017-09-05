@@ -321,6 +321,7 @@ class DraftACRelation(ImportedData):
                                   related_query_name='acrelation_resolutions',
                                   content_type_field='for_model',
                                   object_id_field='for_instance_id')
+    data_display_order = models.FloatField(default=1.0)
 
 
 class DraftCitationLinkedData(ImportedData):
