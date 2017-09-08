@@ -101,6 +101,28 @@ def _citation_title(obj, extra):
         return u"Review of unknown publication"
     return u'Review of "%s"' % book.title
 
+# adjustment of export according to ISISCB-1033
+def create_acr_string(author):
+    return u' '.join(['ACR_ID ' + str(author[0]),
+               'ACRStatus ' + str(author[1]),
+               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]],
+               'ACRDisplayOrder ' + str(author[3]),
+               'ACRNameForDisplayInCitation ' + str(author[4]),
+               'AuthorityID ' + str(author[5]),
+               'AuthorityStatus ' + str(author[6]),
+               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]],
+               'AuthorityName ' + str(author[8])
+                ])
+acr_fields = ['id',
+          'record_status_value',
+          'type_controlled',
+          'data_display_order',
+          'name_for_display_in_citation',
+          'authority__id',
+          'authority__record_status_value',
+          'authority__type_controlled',
+          'authority__name'
+         ]
 
 def _citation_author(obj, extra):
     """
@@ -108,10 +130,9 @@ def _citation_author(obj, extra):
     """
     names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
-                                   .values_list('name_for_display_in_citation',
-                                                'authority__name')
-    return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
+                                   .values_list(*acr_fields)
 
+    return u' // '.join(map(create_acr_string, names))
 
 def _citation_editor(obj, extra):
     """
@@ -119,9 +140,8 @@ def _citation_editor(obj, extra):
     """
     names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
-                                   .values_list('name_for_display_in_citation',
-                                                'authority__name')
-    return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
+                                   .values_list(*acr_fields)
+    return u' // '.join(map(create_acr_string, names))
 
 
 def _subjects(obj, extra):
@@ -137,8 +157,7 @@ def _subjects(obj, extra):
             | Q(type_controlled=ACRelation.SUBJECT)) \
          & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(filter(lambda o: o is not None,
-                             list(qs.values_list('authority__name', flat=True))))
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _advisor(obj, extra):
@@ -148,9 +167,7 @@ def _advisor(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(type_controlled=ACRelation.ADVISOR))
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(filter(lambda o: o is not None,
-                             list(qs.values_list('authority__name', flat=True))))
-
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _category_numbers(obj, extra):
@@ -171,24 +188,14 @@ def _place_publisher(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u''
-    _first_publisher = qs.first()
-    if _first_publisher.authority:
-        return _first_publisher.authority.name
-    return u''
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _school(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u''
-    _first_school = qs.first()
-    if _first_school.authority:
-        return _first_school.authority.name
-    return u''
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _series(obj, extra):
