@@ -8,6 +8,9 @@
 
 {% for task in tasks %}
 <div class="row">
+    <div class="col-xs-12">
+      <p><br><em>{{ task.label }}</em></p>
+    </div>
     <div class="col-xs-4">
         <p>Field: {{ task.value.0 }}</p>
         <p>Value: {{ task.value.1 }}</p>
@@ -35,7 +38,7 @@
 
         <p class="text-warning">
             {% if task.max_value == 0 %}
-                Starting...
+                In Queue, please be patient, there are other jobs in front of this one.
             {% else %}
             <div class="progress">
               <div class="progress-bar" role="progressbar" aria-valuenow="70"

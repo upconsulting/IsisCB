@@ -6,9 +6,11 @@ from __future__ import absolute_import
 from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history
 
 from django import forms
+from django.http import QueryDict
 
 from isisdata.models import *
 import isisdata.tasks as dtasks
+from isisdata.filters import CitationFilter
 import json
 # TODO: refactor these actions to use bulk apply methods and then explicitly
 #  trigger search indexing (or whatever other post-save actions are needed).
@@ -32,6 +34,13 @@ class BaseAction(object):
             return [(name, field(**kwargs)) for name, field, kwargs in self.extra_fields]
         return []
 
+def _build_filter_label(filter_params_raw):
+    citation_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
+    filter_form = citation_filter.form
+    filter_data = {}
+    if filter_form.is_valid():
+        filter_data = filter_form.cleaned_data
+    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
 
 class PrependToRecordHistory(BaseAction):
     model = Citation
@@ -52,6 +61,8 @@ class PrependToRecordHistory(BaseAction):
         #  to check the return value or task state.
         task.async_uuid = result.id
         task.value = ('record_status_explanation', value)
+
+        task.label = 'Updating set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 
@@ -64,7 +75,7 @@ class SetRecordStatus(BaseAction):
     default_value_field = forms.ChoiceField
     default_value_field_kwargs = {
         'choices': CuratedMixin.STATUS_CHOICES,
-        'label': 'Set record ctatus',
+        'label': 'Set record status',
         'widget': forms.widgets.Select(attrs={'class': 'action-value'}),
     }
 
@@ -82,6 +93,7 @@ class SetRecordStatus(BaseAction):
         #  to check the return value or task state.
         task.async_uuid = result.id
         task.value = ('record_status_value', value)
+        task.label = 'Updating set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 
@@ -108,6 +120,7 @@ class SetRecordStatusExplanation(BaseAction):
         #  to check the return value or task state.
         task.async_uuid = result.id
         task.value = ('record_status_explanation', value)
+        task.label = 'Updating set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 
@@ -168,6 +181,7 @@ class SetTrackingStatus(BaseAction):
         #  to check the return value or task state.
         task.async_uuid = result.id
         task.value = ('record_status_explanation', value)
+        task.label = 'Updating set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 

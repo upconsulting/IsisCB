@@ -2159,6 +2159,7 @@ class AsyncTask(models.Model):
     max_value = models.FloatField(default=0.0)
     current_value = models.FloatField(default=0.0)
     state = models.CharField(max_length=10, blank=True, null=True)
+    label = models.TextField(default="")
 
     _value = models.TextField()
     """Use jsonpickle to serialize/deserialize return values."""
