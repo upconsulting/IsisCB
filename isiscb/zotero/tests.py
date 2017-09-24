@@ -777,17 +777,19 @@ class TestImportMethods(TestCase):
             u'authors': [{
                 u'name_first': u'Fokko Jan',
                 u'name': u'Fokko Jan Dijksterhuis',
-                u'name_last': u'Dijksterhuis'
+                u'name_last': u'Dijksterhuis',
+                u'data_display_order': '1.0'
             },{
                 u'name_first': u'Carsten',
                 u'name': u'Carsten Timmermann',
-                u'name_last': u'Timmermann'
+                u'name_last': u'Timmermann',
+                u'data_display_order': '2.0'
             }]
         }
 
         results = ingest.IngestManager.generate_generic_acrelations(
             data, 'authors', draftcitation, DraftAuthority.PERSON,
-            DraftACRelation.AUTHOR)
+            DraftACRelation.AUTHOR, 1)
         self.assertEqual(len(results), 2, "Should create two DraftACRelations.")
         self.assertIsInstance(results[0], tuple,
                               "Should return two objects per relation.")
@@ -797,6 +799,9 @@ class TestImportMethods(TestCase):
         self.assertIsInstance(results[0][1], DraftACRelation,
                               "The second object is the DraftACRelation"
                               " instance.")
+        # make sure acrelations data display order are calculated correctly
+        self.assertEqual(results[0][1].data_display_order, 2.0,
+                              "First DraftACRelation should have data display order = 2.0 but is " + str(results[0][1].data_display_order))
         for draft_authority, draft_relation in results:
             self.assertEqual(draft_relation.citation, draftcitation,
                              "The DraftACRelation should be linked to the"
@@ -1215,7 +1220,7 @@ class TestExtraDataParsing(TestCase):
 
         results = ingest.IngestManager.generate_generic_acrelations(
             data, 'authors', draftcitation, DraftAuthority.PERSON,
-            DraftACRelation.AUTHOR)
+            DraftACRelation.AUTHOR, 0)
         draftcitation.refresh_from_db()
         for relation in draftcitation.authority_relations.all():
             self.assertEqual(relation.authority.linkeddata.count(), 1)
@@ -1244,7 +1249,7 @@ class TestExtraDataParsing(TestCase):
         }
         ingest.IngestManager.generate_generic_acrelations(
             data, 'authors', draftcitation, DraftAuthority.PERSON,
-            DraftACRelation.AUTHOR)
+            DraftACRelation.AUTHOR, 0)
         draftcitation.refresh_from_db()
         for relation in draftcitation.authority_relations.all():
             auth = Authority.objects.create(name=relation.authority.name, type_controlled=relation.authority.type_controlled)

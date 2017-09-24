@@ -467,7 +467,6 @@ class ZoteroIngest(object):
         tuple
             Predicate and value.
         """
-
         norm = lambda s: s.toPython()
         author_data = []
         for s, p, o in self.graph.triples((node, None, None)):
@@ -476,15 +475,23 @@ class ZoteroIngest(object):
                 surname_iter = self.graph.objects(o, FOAF.surname)
                 forename = u' '.join(map(norm, [n for n in forename_iter]))
                 surname = u' '.join(map(norm, [n for n in surname_iter]))
-
                 data = {
                     u'name': ' '.join([forename, surname]).strip(),
                     u'name_last': surname,
                     u'name_first': forename,
+                    u'list_position': str(p),
                 }
                 if surname.startswith('http://'):
                     data.update({'uri': surname,})
                 author_data.append(data)
+
+        # sort authors by position in list and set data display order
+        author_data = sorted(author_data, key=lambda author: author[u'list_position'])
+        def set_idx(author):
+            lst_pos = author[u'list_position'][author[u'list_position'].rfind("_")+1:]
+            author[u'data_display_order'] = lst_pos
+        map(set_idx, author_data)
+
         return predicate, author_data
 
     def process(self, entry):
