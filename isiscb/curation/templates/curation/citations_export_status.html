@@ -6,6 +6,8 @@
 {% block content %}
 <div class="h2">Export citations</div>
 
+<p><br><em>{{ task.label }}</em></p>
+
 {% if task.state == 'SUCCESS' %}
 <p class="text-warning">
     Your export is complete; you can download it from
@@ -23,7 +25,7 @@
 
 <p class="text-warning">
     {% if task.max_value == 0 %}
-        Starting...
+        In Queue, please be patient, there are other jobs in front of this one.
     {% else %}
     <div class="progress">
       <div class="progress-bar" role="progressbar" aria-valuenow="70"
@@ -41,7 +43,7 @@
 {% endif %}
 
 <div class="clearfix">
-    <a class="btn btn-lg btn-success" href="{% url "curation:citation_list" %}">Done</a>
+    <a class="btn btn-md btn-success" href="{% url "curation:citation_list" %}">Return to Search Interface</a>
 </div>
 
 {% endblock %}

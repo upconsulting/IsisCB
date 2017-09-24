@@ -19,17 +19,23 @@ $('body').ready(function() {
     });
     $('#export').click(function() {
         form.attr('action', '{% url "curation:export-citations" %}');
+        form.attr('target', '_blank');
         form.submit();
     });
+    $('#bulk_change_submit').click(function() {
+      form.attr('action', '{% url "curation:citation-bulk-action" %}');
+      form.attr('target', '_blank');
+      form.submit();
+    })
 });
 </script>
 
-<form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form">
+<form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
     &nbsp;&nbsp;
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_citation' %}">Create new citation record</a>
 
-    <input class="btn btn-success btn-xs" type="submit" value="Bulk change" />
+    <input class="btn btn-success btn-xs" id="bulk_change_submit" type="submit" value="Bulk change" />
     <a class="btn btn-primary btn-xs" href="{% url 'curation:citation-bulk-select' %}">Bulk select</a>
 
     <a class="btn btn-primary btn-xs" href="#" id="export">

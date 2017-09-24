@@ -122,7 +122,7 @@ DATABASES = {
         'NAME': 'isiscb_new',
         'USER': 'upconsulting',
         'PASSWORD': 'upconsulting',
-        'HOST': 'localhost',
+        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
         'PORT': '5432',
     }
 }
@@ -130,7 +130,7 @@ DATABASES = {
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-        'URL': 'localhost:9200/',
+        'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
         'INDEX_NAME': 'haystack',
     },
 }
@@ -245,5 +245,5 @@ LICENSE = """This work is licensed under a Creative Commons
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
-CELERY_REDIS_HOST = 'redis://'
-CELERY_BROKER_URL = 'redis://'
+CELERY_REDIS_HOST = os.environ.get('CELERY_REDIS_HOST', 'redis://')
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://')
