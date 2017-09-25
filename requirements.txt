@@ -10,7 +10,7 @@ blessed==1.9.5
 boto==2.45.0
 botocore==1.4.28
 bz2file==0.98
-celery==4.0.2
+celery==4.1.0
 cement==2.8.2
 chardet==2.3.0
 colorama==0.3.7

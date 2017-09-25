@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.core.cache import caches
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
+from django.http import QueryDict
 from django.shortcuts import redirect
 from django.utils import formats
 from django.utils.http import urlencode
@@ -2391,6 +2392,13 @@ def export_citations_status(request):
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
 
+def _build_filter_label(filter_params_raw):
+    citation_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
+    filter_form = citation_filter.form
+    filter_data = {}
+    if filter_form.is_valid():
+        filter_data = filter_form.cleaned_data
+    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def export_citations(request):
@@ -2437,6 +2445,7 @@ def export_citations(request):
             #  to check the return value or task state.
             task.async_uuid = result.id
             task.value = _out_name
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw)
             task.save()
 
             # Send the user to a status view, which will show the export
