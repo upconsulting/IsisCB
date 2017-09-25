@@ -105,14 +105,14 @@ def _citation_title(obj, extra):
 # adjustment of export according to ISISCB-1033
 def create_acr_string(author, additional_fields = []):
     fields = ['ACR_ID ' + str(author[0]),
-               'ACRStatus ' + str(author[1]),
-               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]],
-               'ACRDisplayOrder ' + str(author[3]),
-               'ACRNameForDisplayInCitation ' + author[4],
-               'AuthorityID ' + str(author[5]),
-               'AuthorityStatus ' + str(author[6]),
-               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]],
-               'AuthorityName ' + author[8]
+               'ACRStatus ' + str(author[1]) if author[1] else u'',
+               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u'',
+               'ACRDisplayOrder ' + str(author[3]) if author[3] else u'',
+               'ACRNameForDisplayInCitation ' + author[4] if author[4] else u'',
+               'AuthorityID ' + str(author[5]) if author[5] else u'',
+               'AuthorityStatus ' + str(author[6]) if author[6] else u'',
+               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u'',
+               'AuthorityName ' + author[8] if author[8] else u''
                 ]
     return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
 acr_fields = ['id',
