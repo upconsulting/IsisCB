@@ -8,6 +8,7 @@ since these jobs will be performed asynchronously.
 
 from isisdata.models import *
 from django.utils.text import slugify
+import functools
 
 
 def generate_csv(stream, queryset, columns):
@@ -101,6 +102,57 @@ def _citation_title(obj, extra):
         return u"Review of unknown publication"
     return u'Review of "%s"' % book.title
 
+# adjustment of export according to ISISCB-1033
+def create_acr_string(author, additional_fields = []):
+    fields = ['ACR_ID ' + str(author[0]),
+               'ACRStatus ' + str(author[1]) if author[1] else u'',
+               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u'',
+               'ACRDisplayOrder ' + str(author[3]) if author[3] else u'',
+               'ACRNameForDisplayInCitation ' + author[4] if author[4] else u'',
+               'AuthorityID ' + str(author[5]) if author[5] else u'',
+               'AuthorityStatus ' + str(author[6]) if author[6] else u'',
+               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u'',
+               'AuthorityName ' + author[8] if author[8] else u''
+                ]
+    return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+acr_fields = ['id',
+          'record_status_value',
+          'type_controlled',
+          'data_display_order',
+          'name_for_display_in_citation',
+          'authority__id',
+          'authority__record_status_value',
+          'authority__type_controlled',
+          'authority__name'
+         ]
+
+def create_ccr_string(ccr, additional_fields = []):
+    fields = ['CCR_ID ' + str(ccr[0]),
+               'CCRStatus  ' + str(ccr[1]),
+               'CCRType  ' + dict(CCRelation.TYPE_CHOICES)[ccr[2]],
+               'CitationID  ' + str(ccr[3]),
+               'CitationStatus  ' + str(ccr[4]),
+               'CitationType  ' + dict(Citation.TYPE_CHOICES)[ccr[5]],
+               'CitationTitle  ' + ccr[6]
+                ]
+    return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+
+ccr_from_fields = ['id',
+          'record_status_value',
+          'type_controlled',
+          'object__id',
+          'object__record_status_value',
+          'object__type_controlled',
+          'object__title'
+         ]
+ccr_to_fields = ['id',
+          'record_status_value',
+          'type_controlled',
+          'subject__id',
+          'subject__record_status_value',
+          'subject__type_controlled',
+          'subject__title'
+         ]
 
 def _citation_author(obj, extra):
     """
@@ -108,10 +160,9 @@ def _citation_author(obj, extra):
     """
     names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
-                                   .values_list('name_for_display_in_citation',
-                                                'authority__name')
-    return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
+                                   .values_list(*acr_fields)
 
+    return u' // '.join(map(create_acr_string, names))
 
 def _citation_editor(obj, extra):
     """
@@ -119,9 +170,8 @@ def _citation_editor(obj, extra):
     """
     names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
-                                   .values_list('name_for_display_in_citation',
-                                                'authority__name')
-    return u'; '.join(map(lambda o: o[0] if o[0] else o[1], filter(lambda o: o[0] or o[1], names)))
+                                   .values_list(*acr_fields)
+    return u' // '.join(map(create_acr_string, names))
 
 
 def _subjects(obj, extra):
@@ -137,8 +187,7 @@ def _subjects(obj, extra):
             | Q(type_controlled=ACRelation.SUBJECT)) \
          & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(filter(lambda o: o is not None,
-                             list(qs.values_list('authority__name', flat=True))))
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _advisor(obj, extra):
@@ -148,9 +197,7 @@ def _advisor(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(type_controlled=ACRelation.ADVISOR))
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(filter(lambda o: o is not None,
-                             list(qs.values_list('authority__name', flat=True))))
-
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _category_numbers(obj, extra):
@@ -160,7 +207,7 @@ def _category_numbers(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     qs = obj.acrelation_set.filter(_q)
-    return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('authority__classification_code', flat=True))))
+    return u' // '.join(map(functools.partial(create_acr_string, additional_fields=['ClassificationCode']), qs.values_list(*(acr_fields+['authority__classification_code']))))
 
 
 def _language(obj, extra):
@@ -171,24 +218,14 @@ def _place_publisher(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u''
-    _first_publisher = qs.first()
-    if _first_publisher.authority:
-        return _first_publisher.authority.name
-    return u''
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _school(obj, extra):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u''
-    _first_school = qs.first()
-    if _first_school.authority:
-        return _first_school.authority.name
-    return u''
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 def _series(obj, extra):
@@ -217,6 +254,15 @@ def _isbn(obj, extra):
         return u''
     return qs.first().universal_resource_name
 
+def _linked_data(obj, extra):
+    """
+    Get linked data entries
+    """
+    qs = obj.linkeddata_entries.all()
+    if qs.count() == 0:
+        return u''
+
+    return u' // '.join(map(lambda x: u' '.join(['Type ' + x[0], 'URN ' + x[1]]), qs.values_list(*['type_controlled__name', 'universal_resource_name'])))
 
 def _pages(obj, extra):
     if not getattr(obj, 'part_details', None):
@@ -241,7 +287,7 @@ def _pages(obj, extra):
 def _pages_free_text(obj, extra):
     if not getattr(obj, 'part_details', None):
         return u""
-    return obj.part_details.pages_free_text
+    return obj.part_details.pages_free_text + " (From %s // To %s)" % (obj.part_details.page_begin if obj.part_details.page_begin else u'', obj.part_details.page_end if obj.part_details.page_end else u'')
 
 def _tracking(obj, type_controlled):
     qs = obj.tracking_records.filter(type_controlled=type_controlled)
@@ -283,21 +329,15 @@ def _journal_link(obj, extra):
 def _journal_volume(obj, extra):
     if not hasattr(obj, 'part_details') or obj.part_details is None:
         return u""
-    if obj.part_details.volume and len(obj.part_details.volume) > 0:
-        return obj.part_details.volume
-    return obj.part_details.volume_free_text
+    # ISISCB-1033
+    return obj.part_details.volume_free_text + u" (From %s // To %s)" % (obj.part_details.volume_begin if obj.part_details.volume_begin else u'', obj.part_details.volume_end if obj.part_details.volume_end else u'')
 
 
 def _journal_issue(obj, extra):
     if not hasattr(obj, 'part_details') or obj.part_details is None:
         return u""
-
-    if obj.part_details.issue_begin:
-        iss = str(obj.part_details.issue_begin)
-        if obj.part_details.issue_end:
-            iss += u" - " + str(obj.part_details.issue_end)
-        return iss
-    return obj.part_details.issue_free_text
+    # ISISCB-1033
+    return obj.part_details.issue_free_text + u" (From %s // To %s)" % (obj.part_details.issue_begin if obj.part_details.issue_begin else u'', obj.part_details.issue_end if obj.part_details.issue_end else u'')
 
 
 def _includes_series_article(obj, extra):
@@ -305,6 +345,44 @@ def _includes_series_article(obj, extra):
     extra += map(lambda o: o.subject, qs)
     return u"//".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
 
+def _related_authorities(obj, extra):
+    qs = obj.acrelation_set.all()
+    return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
+
+def _related_citations(obj, extra):
+    qs_from = obj.relations_from.all()
+    qs_to = obj.relations_to.all()
+
+    return u' // '.join(map(create_ccr_string, qs_from.values_list(*ccr_from_fields)) + map(create_ccr_string, qs_to.values_list(*ccr_to_fields)))
+
+
+def _extent(obj, extra):
+    if not hasattr(obj, 'part_details') or obj.part_details is None:
+        return u""
+    return u"%s (Note %s)" % (obj.part_details.extent if obj.part_details.extent else u'', obj.part_details.extent_note if obj.part_details.extent_note else u'')
+
+def _attributes(obj, extra):
+    qs = obj.attributes.all()
+
+    if qs.count() > 0:
+        return u' // '.join(map(lambda x: u' '.join(['Type ' + x.type_controlled.name, 'Value ' + str(x.value.cvalue()), 'FreeFormValue ' + x.value_freeform]), qs))
+
+    return u""
+
+def _record_status(obj, extra):
+    return u"%s (RecordStatusExplanation %s)"%(obj.get_record_status_value_display(), obj.record_status_explanation if obj.record_status_explanation else u'')
+
+def _dataset(obj, extra):
+    if not obj.belongs_to:
+        return u""
+
+    return obj.belongs_to.name
+
+def _created_on(obj, extra):
+    try:
+        return obj.history.get(history_type='+').history_date
+    except:
+        return u""
 
 object_id = Column(u'Record ID', lambda obj, extra: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
@@ -326,8 +404,7 @@ pages = Column('Pages', _pages)
 pages_free_text = Column('Pages Free Text', _pages_free_text)
 record_action = Column(u'Record Action',
                        lambda obj, extra: obj.get_record_action_display())
-record_nature = Column(u'Record Nature',
-                       lambda obj, extra: obj.get_record_status_value_display())
+record_nature = Column(u'Record Nature', _record_status)
 fully_entered = Column(u"FullyEntered",
                        lambda obj, extra: _tracking(obj, Tracking.FULLY_ENTERED))
 proofed = Column(u"Proofed", lambda obj, extra: _tracking(obj, Tracking.PROOFED))
@@ -345,7 +422,17 @@ advisor = Column("Advisor", _advisor)
 school = Column(u"School", _school)
 include_series_article = Column(u"Includes Series Article",
                                 _includes_series_article)
-
+extent = Column(u"Extent", _extent)
+linked_data = Column(u"Linked Data", _linked_data)
+attributes = Column(u"Attributes", _attributes)
+related_authorities = Column(u"Related Authorities", _related_authorities)
+related_citations = Column(u"Related Citations", _related_citations)
+abstract = Column(u"Abstract", lambda obj, extra: obj.abstract)
+staff_notes = Column(u"Staff Notes", lambda obj, extra: obj.administrator_notes)
+record_history = Column(u"Record History", lambda obj, extra: obj.record_history)
+dataset = Column(u"Dataset", _dataset)
+created_on = Column(u"Created Date", _created_on)
+modified_on = Column(u"Modified Date", lambda obj, extra: obj._history_date)
 
 CITATION_COLUMNS = [
     object_id,
@@ -363,7 +450,7 @@ CITATION_COLUMNS = [
     physical_details,
     series,
     isbn,
-    pages,
+    #pages,
     pages_free_text,
     record_action,
     record_nature,
@@ -378,5 +465,16 @@ CITATION_COLUMNS = [
     journal_issue,
     advisor,
     school,
-    include_series_article
+    include_series_article,
+    extent,
+    linked_data,
+    attributes,
+    related_authorities,
+    related_citations,
+    abstract,
+    staff_notes,
+    record_history,
+    dataset,
+    created_on,
+    modified_on
 ]
