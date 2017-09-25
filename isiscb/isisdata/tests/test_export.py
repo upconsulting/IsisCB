@@ -69,9 +69,10 @@ class TestCitationAuthorColumn(unittest.TestCase):
     def test_citation_has_single_author(self):
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        author = Authority.objects.create(name='Author', type_controlled=Authority.PERSON)
-        ACRelation.objects.create(citation=citation, authority=author, type_controlled=ACRelation.AUTHOR)
-        self.assertEqual(author.name, export.citation_author(citation, []))
+        author = Authority.objects.create(name='Author', id="AUT1", type_controlled=Authority.PERSON)
+        ACRelation.objects.create(citation=citation, id="ACR1", authority=author, type_controlled=ACRelation.AUTHOR)
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0  AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName Author"
+        self.assertEqual(expected, export.citation_author(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
         """
@@ -80,9 +81,10 @@ class TestCitationAuthorColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        author = Authority.objects.create(name='Author', type_controlled=Authority.PERSON)
-        relation = ACRelation.objects.create(citation=citation, authority=author, type_controlled=ACRelation.AUTHOR, name_for_display_in_citation='Some other name')
-        self.assertEqual(relation.name_for_display_in_citation, export.citation_author(citation, []))
+        author = Authority.objects.create(name='Author', id="AUT1", type_controlled=Authority.PERSON)
+        relation = ACRelation.objects.create(citation=citation, id="ACR1", authority=author, type_controlled=ACRelation.AUTHOR, name_for_display_in_citation='Some other name')
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0 ACRNameForDisplayInCitation Some other name AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName Author"
+        self.assertEqual(expected, export.citation_author(citation, []))
 
     def test_citation_has_multiple_authors(self):
         """
@@ -90,11 +92,13 @@ class TestCitationAuthorColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        author_one = Authority.objects.create(name='AuthorOne', type_controlled=Authority.PERSON)
-        author_two = Authority.objects.create(name='AuthorTwo', type_controlled=Authority.PERSON)
-        ACRelation.objects.create(citation=citation, authority=author_one, type_controlled=ACRelation.AUTHOR, data_display_order=1)
-        ACRelation.objects.create(citation=citation, authority=author_two, type_controlled=ACRelation.AUTHOR, data_display_order=2)
-        self.assertEqual(u'%s; %s' % (author_one.name, author_two.name), export.citation_author(citation, []))
+        author_one = Authority.objects.create(name='AuthorOne', id="AUT1", type_controlled=Authority.PERSON)
+        author_two = Authority.objects.create(name='AuthorTwo', id="AUT2", type_controlled=Authority.PERSON)
+        ACRelation.objects.create(citation=citation, id="ACR1", authority=author_one, type_controlled=ACRelation.AUTHOR, data_display_order=1)
+        ACRelation.objects.create(citation=citation, id="ACR2", authority=author_two, type_controlled=ACRelation.AUTHOR, data_display_order=2)
+        expected1 = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0  AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName AuthorOne"
+        expected2 = "ACR_ID ACR2 ACRStatus Active ACRType Author ACRDisplayOrder 2.0  AuthorityID AUT2 AuthorityStatus Active AuthorityType Person AuthorityName AuthorTwo"
+        self.assertEqual(u'%s // %s' % (expected1, expected2), export.citation_author(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -111,9 +115,10 @@ class TestCitationEditorColumn(unittest.TestCase):
     def test_citation_has_single_editor(self):
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        editor = Authority.objects.create(name='Editor', type_controlled=Authority.PERSON)
-        ACRelation.objects.create(citation=citation, authority=editor, type_controlled=ACRelation.EDITOR)
-        self.assertEqual(editor.name, export.citation_editor(citation, []))
+        editor = Authority.objects.create(name='Editor', id="ED1", type_controlled=Authority.PERSON)
+        ACRelation.objects.create(citation=citation, id="ACR1", authority=editor, type_controlled=ACRelation.EDITOR)
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0  AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName Editor"
+        self.assertEqual(expected, export.citation_editor(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
         """
@@ -122,9 +127,10 @@ class TestCitationEditorColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        editor = Authority.objects.create(name='Editor', type_controlled=Authority.PERSON)
-        relation = ACRelation.objects.create(citation=citation, authority=editor, type_controlled=ACRelation.EDITOR, name_for_display_in_citation='Some other name')
-        self.assertEqual(relation.name_for_display_in_citation, export.citation_editor(citation, []))
+        editor = Authority.objects.create(name='Editor', id="ED1", type_controlled=Authority.PERSON)
+        relation = ACRelation.objects.create(citation=citation, id="ACR1", authority=editor, type_controlled=ACRelation.EDITOR, name_for_display_in_citation='Some other name')
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0 ACRNameForDisplayInCitation Some other name AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName Editor"
+        self.assertEqual(expected, export.citation_editor(citation, []))
 
     def test_citation_has_multiple_authors(self):
         """
@@ -132,11 +138,13 @@ class TestCitationEditorColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.ARTICLE)
-        editor_one = Authority.objects.create(name='EditorOne', type_controlled=Authority.PERSON)
-        editor_two = Authority.objects.create(name='EditorTwo', type_controlled=Authority.PERSON)
-        ACRelation.objects.create(citation=citation, authority=editor_one, type_controlled=ACRelation.EDITOR, data_display_order=1)
-        ACRelation.objects.create(citation=citation, authority=editor_two, type_controlled=ACRelation.EDITOR, data_display_order=2)
-        self.assertEqual(u'%s; %s' % (editor_one.name, editor_two.name), export.citation_editor(citation, []))
+        editor_one = Authority.objects.create(name='EditorOne', id="ED1", type_controlled=Authority.PERSON)
+        editor_two = Authority.objects.create(name='EditorTwo', id="ED2", type_controlled=Authority.PERSON)
+        ACRelation.objects.create(citation=citation, id="ACR1", authority=editor_one, type_controlled=ACRelation.EDITOR, data_display_order=1)
+        ACRelation.objects.create(citation=citation, id="ACR2", authority=editor_two, type_controlled=ACRelation.EDITOR, data_display_order=2)
+        expected1 = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0  AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName EditorOne"
+        expected2 = "ACR_ID ACR2 ACRStatus Active ACRType Editor ACRDisplayOrder 2.0  AuthorityID ED2 AuthorityStatus Active AuthorityType Person AuthorityName EditorTwo"
+        self.assertEqual(u'%s // %s' % (expected1, expected2), export.citation_editor(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -217,9 +225,9 @@ class TestPagesFreeTextAreExported(unittest.TestCase):
     def test_pages(self):
         for ctype, _ in Citation.TYPE_CHOICES:
             citation = Citation.objects.create(type_controlled=ctype)
-            citation.part_details = PartDetails.objects.create(page_begin=15, pages_free_text='pages 15-17')
+            citation.part_details = PartDetails.objects.create(page_begin=15, page_end=17, pages_free_text='pages 15-17')
             citation.save()
-            self.assertEqual(export.pages_free_text(citation, []), "pages 15-17")
+            self.assertEqual("pages 15-17 (From 15 // To 17)", export.pages_free_text(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -276,24 +284,26 @@ class TestCitationSubjectColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.THESIS)
-        subject = Authority.objects.create(name='Test Authority',
+        subject = Authority.objects.create(name='Test Authority', id='1',
                                            type_controlled=Authority.CONCEPT)
-        ACRelation.objects.create(citation=citation, authority=subject,
+        ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.SUBJECT)
 
-        self.assertEqual(subject.name, export.subjects(citation, []))
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Subject ACRDisplayOrder 1.0  AuthorityID 1 AuthorityStatus Active AuthorityType Concept AuthorityName Test Authority"
+        self.assertEqual(expected, export.subjects(citation, []))
 
     def test_citation_has_school(self):
         """
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.THESIS)
-        subject = Authority.objects.create(name='Test Authority',
+        subject = Authority.objects.create(name='Test Authority', id='AU1',
                                            type_controlled=Authority.INSTITUTION)
-        ACRelation.objects.create(citation=citation, authority=subject,
+        ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.SCHOOL)
 
-        self.assertEqual(subject.name, export.school(citation, []))
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType School ACRDisplayOrder 1.0  AuthorityID AU1 AuthorityStatus Active AuthorityType Institution AuthorityName Test Authority"
+        self.assertEqual(expected, export.school(citation, []))
 
     def tearDown(self):
         Citation.objects.all().delete()
@@ -309,12 +319,13 @@ class TestCitationAdvisorColumn(unittest.TestCase):
         """
         citation = Citation.objects.create(title='The title',
                                            type_controlled=Citation.THESIS)
-        subject = Authority.objects.create(name='Test Authority',
+        subject = Authority.objects.create(name='Test Authority', id='AU1',
                                            type_controlled=Authority.PERSON)
-        ACRelation.objects.create(citation=citation, authority=subject,
+        ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.ADVISOR)
 
-        self.assertEqual(subject.name, export.advisor(citation, []))
+        expected = "ACR_ID ACR1 ACRStatus Active ACRType Advisor ACRDisplayOrder 1.0  AuthorityID AU1 AuthorityStatus Active AuthorityType Person AuthorityName Test Authority"
+        self.assertEqual(expected, export.advisor(citation, []))
 
 
     def tearDown(self):
