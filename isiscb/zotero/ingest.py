@@ -62,10 +62,16 @@ class IngestManager(object):
         return repr([entry.get(k, u'') for k in IngestManager.HASH_KEYS])
 
     def _update_or_create_draft_citation(self, data, linkeddata, ref=None, original=None):
+        # ISISCB-1048: if there is an ISBN and a URI, remove the URI
+        # this is ugly bug fixes the issue
+        linkeddata_no_uri = dict(linkeddata) if linkeddata else None
+        if linkeddata_no_uri and ('ISBN' in linkeddata_no_uri.keys() or 'DOI' in linkeddata_no_uri.keys()) and 'URI' in linkeddata_no_uri.keys():
+            linkeddata_no_uri.pop('URI')
+
         _base_key = (data.get('title'), data.get('type_controlled'), 'None', 'None')
         _partof_key = (data.get('title'), data.get('type_controlled'), repr(ref), 'None')
-        _linkeddata_key = (data.get('title'), data.get('type_controlled'), 'None', repr(linkeddata))
-        _combined_key = (data.get('title'), data.get('type_controlled'), repr(ref), repr(linkeddata))
+        _linkeddata_key = (data.get('title'), data.get('type_controlled'), 'None', repr(linkeddata_no_uri))
+        _combined_key = (data.get('title'), data.get('type_controlled'), repr(ref), repr(linkeddata_no_uri))
 
         draft_citation = None
         for _key in [_combined_key, _linkeddata_key, _partof_key, _base_key]:
