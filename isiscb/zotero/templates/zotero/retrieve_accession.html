@@ -108,6 +108,34 @@
             {% endwith %}
             {% endfor %}
 
+            {% if resolved_draftcitations %}
+            <h4>The following citations have been matched with production citations:</h4>
+            {% for citation in resolved_draftcitations %}
+              <div class="panel">
+                <div class="panel-body">
+                  <span class="h4">
+                      <a href="{{ citation.get_absolute_url }}">[{{ citation.get_type_controlled_display }}] {{ citation.title }}</a>
+                  </span>
+                  <div class="h5" style="line-height: 20px;">
+                      <span class="label label-warning">Matched to</span>
+ <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+                  </div>
+                  <h5>The following citations link to this production citation:</h5>
+                  <ul class="list-group">
+                    {% for from in citation.relations_from.all %}
+                      <div class="list-group-item clearfix">[{{from.get_type_controlled_display}}] {{ from.object.title }}</div>
+                    {% endfor %}
+                  </ul>
+                  <ul class="list-group">
+                    {% for to in citation.relations_to.all %}
+                      <div class="list-group-item clearfix">{{ to.subject.title }}</div>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            {% endfor %}
+            {% endif %}
+
         </div>
         <div class="col-xs-6" id="sticky">
             <div id="matching" style="visibility: hidden;">

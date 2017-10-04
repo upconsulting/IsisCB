@@ -62,10 +62,13 @@ class IngestManager(object):
         return repr([entry.get(k, u'') for k in IngestManager.HASH_KEYS])
 
     def _update_or_create_draft_citation(self, data, linkeddata, ref=None, original=None):
+        # ISISCB-1048: only use ISBNs for matching
+        linkeddata_isbn = dict(linkeddata).get('ISBN', None) if linkeddata else None
+
         _base_key = (data.get('title'), data.get('type_controlled'), 'None', 'None')
         _partof_key = (data.get('title'), data.get('type_controlled'), repr(ref), 'None')
-        _linkeddata_key = (data.get('title'), data.get('type_controlled'), 'None', repr(linkeddata))
-        _combined_key = (data.get('title'), data.get('type_controlled'), repr(ref), repr(linkeddata))
+        _linkeddata_key = (data.get('title'), data.get('type_controlled'), 'None', repr(linkeddata_isbn))
+        _combined_key = (data.get('title'), data.get('type_controlled'), repr(ref), repr(linkeddata_isbn))
 
         draft_citation = None
         for _key in [_combined_key, _linkeddata_key, _partof_key, _base_key]:
@@ -615,25 +618,26 @@ class IngestManager(object):
         draft_altcitation = self.draft_citation_map.get(identifier, None)
 
         # Sometimes explicit Citation IDs are used.
-        if not draft_altcitation:
-            reviewed_citation = None
-            if identifier.startswith('CBB'):
-                try:
-                    reviewed_citation = Citation.objects.get(pk=identifier)
-                except Citation.DoesNotExist:
-                    pass
+        # ISISCB-1048: let's link drafts to existing citations so there are no duplicates
+        reviewed_citation = None
+        if identifier.startswith('CBB'):
+            try:
+                reviewed_citation = Citation.objects.get(pk=identifier)
+            except Citation.DoesNotExist:
+                pass
 
-            # In other cases, the identifier is an ISBN; query by LinkedData.
-            if not reviewed_citation and identifier:
-                linkeddata = LinkedData.objects.filter(
-                    type_controlled__name__icontains = 'isbn',
-                    universal_resource_name = identifier).first()
-                if linkeddata:
-                    reviewed_citation = linkeddata.subject
+        # In other cases, the identifier is an ISBN; query by LinkedData.
+        if not reviewed_citation and identifier:
+            linkeddata = LinkedData.objects.filter(
+                type_controlled__name__icontains = 'isbn',
+                universal_resource_name = identifier).first()
+            if linkeddata:
+                reviewed_citation = linkeddata.subject
 
-            if reviewed_citation:
+        if reviewed_citation:
+            if not draft_altcitation:
                 # We have a Citation, but need a DraftCitation so that we can
-                #  create a DraftCCRelation.
+                # create a DraftCCRelation.
                 draft_altcitation = self._update_or_create_draft_citation({
                     'title': reviewed_citation.title,
                     'type_controlled': reviewed_citation.type_controlled,
@@ -643,10 +647,10 @@ class IngestManager(object):
                 #
                 # )
 
-                # This DraftCitation is already resolved, since we have
-                #  identified the record of interest in the production
-                #  database.
-                IngestManager.resolve(draft_altcitation, reviewed_citation)
+            # This DraftCitation is already resolved, since we have
+            #  identified the record of interest in the production
+            #  database.
+            IngestManager.resolve(draft_altcitation, reviewed_citation)
 
         if not draft_altcitation:
             if 'title' not in datum:
