@@ -85,8 +85,10 @@ class IngestManager(object):
                 break
         if not draft_citation:
             draft_citation = DraftCitation.objects.create(source_data=repr(original), **data)
-        self.draft_citation_hash[_combined_key] = draft_citation
-        return self.draft_citation_hash[_combined_key]
+        # ISISCB-1048: let's use the linkedata key to store and retrieve draft Citations
+        # otherwise books that are part of a series don't get found
+        self.draft_citation_hash[_linkeddata_key] = draft_citation
+        return self.draft_citation_hash[_linkeddata_key]
 
     @staticmethod
     def resolve(d, p):
