@@ -36,7 +36,8 @@ class ImportAccession(models.Model):
         for draftcitation in self.draftcitation_set.all():
             ready = True
             for relation in draftcitation.authority_relations.all():
-                if not relation.authority.processed:
+                # ISISCB-1048: if a citation is already been resolve it's ok
+                if not relation.authority.processed and not draftcitation.resolutions:
                     ready = False
                     break
             if ready:
