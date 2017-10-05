@@ -85,10 +85,14 @@ class IngestManager(object):
                 break
         if not draft_citation:
             draft_citation = DraftCitation.objects.create(source_data=repr(original), **data)
-        # ISISCB-1048: let's use the linkedata key to store and retrieve draft Citations
-        # otherwise books that are part of a series don't get found
-        self.draft_citation_hash[_linkeddata_key] = draft_citation
-        return self.draft_citation_hash[_linkeddata_key]
+        # ISISCB-1048: let's use the linkedata key (if there is an ISBN for a citation)
+        # to store and retrieve draft Citations, otherwise the combined key
+        # if we don't do this, books that are part of a series will be created twice during import
+        # as the combined key distinguishes books that are part of a series and that are not
+        # (even if they have the same ISBN)
+        _key_to_store = _linkeddata_key if linkeddata_isbn else _combined_key
+        self.draft_citation_hash[_key_to_store] = draft_citation
+        return self.draft_citation_hash[_key_to_store]
 
     @staticmethod
     def resolve(d, p):
