@@ -65,7 +65,7 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/(?P<ccrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_ccrelation_for_citation, name='delete_ccrelation_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/language/remove/$', views.delete_language_for_citation, name='delete_language_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/language/add/$', views.add_language_for_citation, name='add_language_for_citation'),
-
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/type/change$', views.change_record_type, name='change_record_type'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/acrelation/$', views.create_acrelation_for_citation, name='create_acrelation_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_citation, name='update_acrelation_for_citation'),

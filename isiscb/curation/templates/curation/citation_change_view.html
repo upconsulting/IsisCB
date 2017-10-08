@@ -74,6 +74,9 @@ var toggleTab = function(name) {
       <div class="row">
           <div class="col-md-12">
             <div class="form-group form-inline">
+              <a href="#" data-toggle="modal" data-target="#change_type_controlled_modal">
+                <i class="fa fa-pencil" aria-hidden="true"></i></a>
+
               <strong id="citation_type" data-type="{{instance.type_controlled}}">
  {{ instance.get_type_controlled_display }}</strong>:
               <strong class="text-warning">{{ instance.id }}</strong>
@@ -343,6 +346,39 @@ var delete_language = function() {
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div class="modal fade" id="change_type_controlled_modal" tabindex="-1" role="dialog" data-forward-type="list">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Change the type of this record</h4>
+      </div>
+        <div class="modal-body">
+          <form action="{% url 'curation:change_record_type' instance.id %}" method="POST" id="change_type_controlled_modal_form">
+            {% csrf_token %}
+            <input type="hidden" name="search" value="{{ search_key }}">
+            <input type="hidden" name="current" value="{{ current_index }}">
+
+            <p>
+              <label>New type:</label>
+              <select name="type_controlled" class="form-control">
+              {% for key, type in type_choices %}
+                <option value="{{ key }}">{{ type }}</option>
+              {% endfor %}
+              </select>
+            </p>
+            <p><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i>  Are you sure you want to change the type of this record? Some data that is displayed now might not be available anymore after you have changed the type.</p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button id="change_type_controlled_modal_cancel" type="button" class="btn btn-default" data-dismiss="modal">No, just cancel.</button>
+          <button id="change_type_controlled_modal_save" type="button" class="btn btn-primary">Yes, change type!</button>
+        </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 <script>
 //# sourceURL=script.js
 var language_creation_container = $('#create-language-item');
@@ -505,6 +541,10 @@ $( document ).ready(function() {
 
   });
 
+  $("#change_type_controlled_modal_save").on('click', function() {
+    $("#change_type_controlled_modal_form").submit();
+    $("#change_type_controlled_modal").hide();
+  });
 });
 
 function checkRecord() {
