@@ -1040,6 +1040,7 @@ def citation(request, citation_id):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
+        'type_choices': Citation.TYPE_CHOICES,
     }
     start = datetime.datetime.now()
 
@@ -1226,6 +1227,27 @@ def _build_result_set_links(request, context, model=Citation):
         'current_offset': (page_number - 1) * PAGE_SIZE
     })
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def change_record_type(request, citation_id):
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+    }
+
+    target = reverse('curation:curate_citation', args=(citation_id,))
+    if request.method == 'POST':
+        new_type = request.POST.get('type_controlled', None)
+        if dict(Citation.TYPE_CHOICES).get(new_type, None):
+            citation.type_controlled = new_type
+            citation.save();
+
+        if request.POST.get('search', None) and request.POST.get('current', None):
+            target += '?search=%s&current=%s' % (request.POST.get('search', None), request.POST.get('current', None))
+
+    return HttpResponseRedirect(target)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
