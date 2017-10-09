@@ -91,6 +91,8 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_citation, name='delete_linkeddata_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/$', views.linkeddata_for_citation, name='create_linkeddata_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/$', views.linkeddata_for_citation, name='update_linkeddata_for_citation'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates$', views.linkeddata_duplicates, name='linkeddata_duplicates'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.delete_linkeddata_duplicates, name='delete_linkeddata_duplicates'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/subjects/$', views.subjects_and_categories, name='subjects_and_categories'),
 
