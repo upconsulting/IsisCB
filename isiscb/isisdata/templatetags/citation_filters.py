@@ -21,6 +21,14 @@ def get_page_string(citation):
         return "p. " + str(page_end_string)
     return ""
 
+@register.filter
+def get_public_page_string(citation):
+    if not citation.part_details:
+        return ""
+    if citation.part_details.pages_free_text:
+        return citation.part_details.pages_free_text
+    else:
+        return citation.part_details.pages
 
 @register.filter
 def join_authors(authors, postfix):
