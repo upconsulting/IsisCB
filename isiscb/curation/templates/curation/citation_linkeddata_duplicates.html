@@ -1,0 +1,87 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+{% load general_tags %}
+{% load rules %}
+{% load permission_tags %}
+
+{% block content %}
+
+{% with 'linkeddata_entries'|create_perm_tuple:citation.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+{% if can_update %}
+
+<h3>Delete duplicate Linked Data entries for: {{citation.id}} </h3>
+
+According to Type and URN comparison, there exist {{ duplicate_entries|length }} duplicate Linked Data entries, which will be deleted if you proceed.
+
+<h4>The following Linked Data entries will be retained:</h4>
+
+<ul class="list-group">
+{% for key, linkeddata in unique_entries.items %}
+<li class="list-group-item linkeddata">
+
+    <i class="fa fa-check text-success" aria-hidden="true"></i>
+
+    {% if linkeddata.type_controlled %}
+    <span class="label label-primary">{{ linkeddata.type_controlled.name }}</span>
+    {% endif %}
+
+    {{ linkeddata.universal_resource_name }}
+    {% if linkeddata.resource_name %}
+    <span class="text-muted">{{ linkeddata.resource_name }}</span>
+    {% endif %}
+
+    <small class="text-muted">({{ linkeddata.id }})</small>
+
+    {% if not linkeddata.public %}
+    <i class="fa fa-eye-slash" title="This Linked Data entry is not public."></i>
+    {% endif %}
+</li>
+{% endfor %}
+</ul>
+
+<h4>The following duplicate Linked Data entries will be deleted:</h4>
+<ul class="list-group">
+{% for linkeddata in duplicate_entries %}
+<li class="list-group-item linkeddata">
+
+    <i class="fa fa-ban text-danger" aria-hidden="true"></i>
+
+    {% if linkeddata.type_controlled %}
+    <span class="label label-primary">{{ linkeddata.type_controlled.name }}</span>
+    {% endif %}
+
+    {{ linkeddata.universal_resource_name }}
+    {% if linkeddata.resource_name %}
+    <span class="text-muted">{{ linkeddata.resource_name }}</span>
+    {% endif %}
+
+    <small class="text-muted">({{ linkeddata.id }})</small>
+
+    {% if not linkeddata.public %}
+    <i class="fa fa-eye-slash" title="This Linked Data entry is not public."></i>
+    {% endif %}
+</li>
+{% endfor %}
+</ul>
+
+<form class="text-right" action="{% url 'curation:delete_linkeddata_duplicates' citation.id %}" method="POST">
+  {% csrf_token %}
+
+  <input type="hidden" name="search" value="{{ search }}">
+  <input type="hidden" name="current" value="{{ current }}">
+  <input type="hidden" name="delete_ids" value="{% for ld in duplicate_entries %}{{ ld.id }},{% endfor %}" >
+
+
+  <a href=" {% url 'curation:curate_citation' citation.id %}?search={{ search }}&current_index={{ current }}" class="btn btn-default">Cancel</a>
+  <button type="submit" class="btn btn-primary">Delete duplicates!</button>
+
+</form>
+
+{% endif %}
+{% endwith %}
+
+{% endblock %}

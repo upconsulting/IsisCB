@@ -20,6 +20,7 @@ def recent_records(request):
 
     recent_records =[]
 
+    # ISISCB-1045: remove limit of recent records
     nr_of_records = 20
     start_index = 0
     end_index = nr_of_records
@@ -27,17 +28,15 @@ def recent_records(request):
     done = False
     # unfortunately, citatations freshly created are public=False so we can't filter on that field when retrieving
     # creation events, we have to test that after we got the real object form the history object
-    while len(recent_records) < nr_of_records and not done:
+    while not done:
         recent_citations = Citation.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
         recent_authorities = Authority.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
 
         lastMonth = timezone.now() - datetime.timedelta(days=days)
-        print lastMonth
 
         for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
             record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
             if record.public:
-                print record.created_on
                 if record.created_on > lastMonth:
                     recent_records.append(record)
                 else:
@@ -49,7 +48,7 @@ def recent_records(request):
 
     context = {
         'active': 'home',
-        'records_recent': recent_records[:nr_of_records],
+        'records_recent': recent_records,
         # not very pretty but good enough for now
         'interval': interval,
     }

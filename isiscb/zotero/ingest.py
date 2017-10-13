@@ -414,8 +414,9 @@ class IngestManager(object):
         lookup = '-'.join(m.groups()[::-1]) if m else label.replace('=', '').strip()
 
         # Search for an Authority with that classification_code: "140-340".
+        # ISISCB-1011: only match authorities from "Weldon Classification System (2002-present)" - SPWC
         # .first() will return None if no matching Authority is found.
-        return Authority.objects.filter(classification_code=lookup).first()
+        return Authority.objects.filter(classification_code=lookup, classification_system=Authority.SPWC).first()
 
     @staticmethod
     def _find_explicit_authority(label, ident):

@@ -65,7 +65,7 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/(?P<ccrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_ccrelation_for_citation, name='delete_ccrelation_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/language/remove/$', views.delete_language_for_citation, name='delete_language_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/language/add/$', views.add_language_for_citation, name='add_language_for_citation'),
-
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/type/change$', views.change_record_type, name='change_record_type'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/acrelation/$', views.create_acrelation_for_citation, name='create_acrelation_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_citation, name='update_acrelation_for_citation'),
@@ -91,6 +91,8 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_citation, name='delete_linkeddata_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/$', views.linkeddata_for_citation, name='create_linkeddata_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/$', views.linkeddata_for_citation, name='update_linkeddata_for_citation'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates$', views.linkeddata_duplicates, name='linkeddata_duplicates'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.delete_linkeddata_duplicates, name='delete_linkeddata_duplicates'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/subjects/$', views.subjects_and_categories, name='subjects_and_categories'),
 
