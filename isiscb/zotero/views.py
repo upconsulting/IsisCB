@@ -185,12 +185,36 @@ def retrieve_accession(request, accession_id):
 
     template = 'zotero/retrieve_accession.html'
     accession = get_object_or_404(ImportAccession, pk=accession_id)
+    draftcitations = accession.draftcitation_set.filter(processed=False)
+
+    # ISISCB-1043: show warning if a citation might already be in the db
+    matching_citations_ld = {}
+    matching_citations_title = {}
+    for dcitation in draftcitations:
+        matches = []
+        linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
+        for draft_ld in linkeddata:
+            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+            matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
+            if matching_ld:
+                matches = [match.subject for match in matching_ld]
+                break
+
+        if matches:
+            matching_citations_ld[dcitation.id] = matches
+
+        possible_matches = Citation.objects.filter(title=dcitation.title)
+        if possible_matches:
+            matching_citations_title[dcitation.id] = possible_matches
+
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
         'accession': accession,
-        'draftcitations': accession.draftcitation_set.filter(processed=False),
-        'resolved_draftcitations': accession.draftcitation_set.filter(processed=True)
+        'draftcitations': draftcitations,
+        'resolved_draftcitations': accession.draftcitation_set.filter(processed=True),
+        'matching_citations_linkeddata': matching_citations_ld,
+        'matching_citations_title': matching_citations_title,
     }
     return render(request, template, context)
 

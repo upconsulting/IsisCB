@@ -70,6 +70,28 @@
                         {{ citation.extra|truncatechars:200 }}
                     </p>
                     {% endif %}
+                    {% if matching_citations_linkeddata|get_from_dict:citation.id or matching_citations_title|get_from_dict:citation.id %}
+                    <div>
+                      <hr>
+                      <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+ It looks like this citation might already be in the database:
+                      {% if matching_citations_linkeddata|get_from_dict:citation.id %}
+                      {% for cit in matching_citations_linkeddata|get_from_dict:citation.id %}
+                      <ul>
+                        <li>{% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a> (Matched through Linked Data entry)</li>
+                      </ul>
+                      {% endfor %}
+                      {% endif %}
+                      {% if matching_citations_title|get_from_dict:citation.id %}
+                      {% for cit in matching_citations_title|get_from_dict:citation.id %}
+                      <ul>
+                        <li>{% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a> (Matched through title)</li>
+                      </ul>
+                      {% endfor %}
+                      {% endif %}
+                    </div>
+                    {% endif %}
+
                     </div>
                     {% if acrelations.count > 0 %}
                     <ul class="list-group">
@@ -114,7 +136,7 @@
               <div class="panel">
                 <div class="panel-body">
                   <span class="h4">
-                      <a href="{{ citation.get_absolute_url }}">[{{ citation.get_type_controlled_display }}] {{ citation.title }}</a>
+                      <a href="{% url 'curation:curate_citation' citation.id %}" target="_blank">[{{ citation.get_type_controlled_display }}] {{ citation.title }}</a>
                   </span>
                   <div class="h5" style="line-height: 20px;">
                       <span class="label label-warning">Matched to</span>
