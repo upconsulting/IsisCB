@@ -1251,7 +1251,7 @@ def change_record_type(request, citation_id):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
-def linkeddata_duplicates(request, citation_id):
+def citation_linkeddata_duplicates(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
     context = {
@@ -1263,15 +1263,7 @@ def linkeddata_duplicates(request, citation_id):
     }
 
     linkeddata_entries = citation.linkeddata_entries.all()
-    unique_entries = {}
-    duplicate_entries = []
-
-    for ld in linkeddata_entries:
-        key = str(ld.type_controlled) + "_" + str(ld.universal_resource_name)
-        if key not in unique_entries:
-            unique_entries[key] = ld
-        else:
-            duplicate_entries.append(ld)
+    unique_entries, duplicate_entries = find_duplicates(linkeddata_entries)
 
     context.update({
         'unique_entries': unique_entries,
@@ -1282,10 +1274,47 @@ def linkeddata_duplicates(request, citation_id):
 
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def authority_linkeddata_duplicates(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+
+    context = {
+        'authority': authority,
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'search': request.GET.get('search', None),
+        'current': request.GET.get('current', None),
+    }
+
+    linkeddata_entries = authority.linkeddata_entries.all()
+    unique_entries, duplicate_entries = find_duplicates(linkeddata_entries)
+
+    context.update({
+        'unique_entries': unique_entries,
+        'duplicate_entries': duplicate_entries,
+    })
+
+    template = 'curation/authority_linkeddata_duplicates.html'
+
+    return render(request, template, context)
+
+def find_duplicates(linkeddata_entries):
+    unique_entries = {}
+    duplicate_entries = []
+
+    for ld in linkeddata_entries:
+        key = str(ld.type_controlled) + "_" + str(ld.universal_resource_name)
+        if key not in unique_entries:
+            unique_entries[key] = ld
+        else:
+            duplicate_entries.append(ld)
+
+    return unique_entries, duplicate_entries
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
-def delete_linkeddata_duplicates(request, citation_id):
+def citation_delete_linkeddata_duplicates(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
     context = {
@@ -1296,15 +1325,36 @@ def delete_linkeddata_duplicates(request, citation_id):
 
     target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=linkeddata'
     if request.method == 'POST':
-        for ld_id in request.POST.get('delete_ids', '').split(','):
-            if ld_id.strip():
-                linkeddata = get_object_or_404(LinkedData, pk=ld_id)
-                linkeddata.delete()
-
+        delete_duplicates(request.POST.get('delete_ids', ''))
         if request.POST.get('search', None) and request.POST.get('current', None):
             target += '&search=%s&current=%s' % (request.POST.get('search', None), request.POST.get('current', None))
 
     return HttpResponseRedirect(target)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def authority_delete_linkeddata_duplicates(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+
+    context = {
+        'authority': authority,
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+    }
+
+    target = reverse('curation:curate_authority', args=(authority_id,)) + '?tab=linkeddata'
+    if request.method == 'POST':
+        delete_duplicates(request.POST.get('delete_ids', ''))
+        if request.POST.get('search', None) and request.POST.get('current', None):
+            target += '&search=%s&current=%s' % (request.POST.get('search', None), request.POST.get('current', None))
+
+    return HttpResponseRedirect(target)
+
+def delete_duplicates(deleted_ids):
+    for ld_id in deleted_ids.split(','):
+        if ld_id.strip():
+            linkeddata = get_object_or_404(LinkedData, pk=ld_id)
+            linkeddata.delete()
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))

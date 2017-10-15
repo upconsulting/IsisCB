@@ -7,17 +7,17 @@
 
 {% block content %}
 
-{% with 'linkeddata_entries'|create_perm_tuple:citation.id as permTuple %}
-{% test_rule 'can_update_citation_field' user permTuple as can_update %}
-{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+{% with 'linkeddata_entries'|create_perm_tuple:authority.id as permTuple %}
+{% test_rule 'can_update_authority_field' user permTuple as can_update %}
+{% test_rule 'can_view_authority_field' user permTuple as can_view %}
 
 {% if can_update %}
 
-<h3>Delete duplicate Linked Data entries for: {{citation.id}} </h3>
+<h3>Delete duplicate Linked Data entries for: {{authority.id}} </h3>
 
 {% include "curation/fragment_linkeddata_duplicates.html" %}
 
-<form class="text-right" action="{% url 'curation:citation_delete_linkeddata_duplicates' citation.id %}" method="POST">
+<form class="text-right" action="{% url 'curation:authority_delete_linkeddata_duplicates' authority.id %}" method="POST">
   {% csrf_token %}
 
   <input type="hidden" name="search" value="{{ search }}">
@@ -25,7 +25,7 @@
   <input type="hidden" name="delete_ids" value="{% for ld in duplicate_entries %}{{ ld.id }},{% endfor %}" >
 
 
-  <a href=" {% url 'curation:curate_citation' citation.id %}?search={{ search }}&current_index={{ current }}" class="btn btn-default">Cancel</a>
+  <a href=" {% url 'curation:curate_authority' authority.id %}?search={{ search }}&current_index={{ current }}" class="btn btn-default">Cancel</a>
   <button type="submit" class="btn btn-primary">Delete duplicates!</button>
 
 </form>
