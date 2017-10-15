@@ -6,6 +6,13 @@
 {% with 'linkeddata_entries'|create_perm_tuple:instance.id as permTuple %}
 {% test_rule 'can_update_authority_field' user permTuple as can_update %}
 {% test_rule 'can_view_authority_field' user permTuple as can_view %}
+
+{% if can_update %}
+<div style="margin-bottom: 15px;" class="text-right">
+<a href="{% url 'curation:authority_linkeddata_duplicates' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Delete duplicate Linked Data entries</a>
+</div>
+{% endif %}
+
 <ul class="list-group">
 {% if can_view %}
 {% for linkeddata in instance.linkeddata_entries.all %}

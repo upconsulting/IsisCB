@@ -91,8 +91,8 @@ urlpatterns = [
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_citation, name='delete_linkeddata_for_citation_format'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/$', views.linkeddata_for_citation, name='create_linkeddata_for_citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/$', views.linkeddata_for_citation, name='update_linkeddata_for_citation'),
-    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates$', views.linkeddata_duplicates, name='linkeddata_duplicates'),
-    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.delete_linkeddata_duplicates, name='delete_linkeddata_duplicates'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates$', views.citation_linkeddata_duplicates, name='citation_linkeddata_duplicates'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.citation_delete_linkeddata_duplicates, name='citation_delete_linkeddata_duplicates'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/subjects/$', views.subjects_and_categories, name='subjects_and_categories'),
 
@@ -100,6 +100,8 @@ urlpatterns = [
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_linkeddata_for_authority, name='delete_linkeddata_for_authority_format'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/$', views.linkeddata_for_authority, name='create_linkeddata_for_authority'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/$', views.linkeddata_for_authority, name='update_linkeddata_for_authority'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/duplicates$', views.authority_linkeddata_duplicates, name='authority_linkeddata_duplicates'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.authority_delete_linkeddata_duplicates, name='authority_delete_linkeddata_duplicates'),
 
     url(r'^(?i)acrelation/quickcreate/$', views.quick_create_acrelation, name='quick_create_acrelation'),
 
