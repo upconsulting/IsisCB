@@ -15,3 +15,7 @@ def filter_unresolved(queryset):
 @register.filter(name='filter_unresolved_acrelation')
 def filter_unresolved_acrelation(queryset):
     return queryset.filter(authority__processed=False)
+
+@register.filter
+def get_from_dict(dictionary, key):
+    return dictionary.get(key)
