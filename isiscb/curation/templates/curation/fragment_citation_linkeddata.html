@@ -9,7 +9,7 @@
 
 {% if can_update %}
 <div style="margin-bottom: 15px;" class="text-right">
-<a href="{% url 'curation:linkeddata_duplicates' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Delete duplicate Linked Data entries</a>
+<a href="{% url 'curation:citation_linkeddata_duplicates' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Delete duplicate Linked Data entries</a>
 </div>
 {% endif %}
 

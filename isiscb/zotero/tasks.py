@@ -191,11 +191,12 @@ def ingest_citation(request, accession, draftcitation):
             #  Authority.
             for draftlinkeddata in draft.linkeddata.all():
                 ldtype, _ = LinkedDataType.objects.get_or_create(name=draftlinkeddata.name.upper())
-                LinkedData.objects.create(
-                    subject = target,
-                    universal_resource_name = draftlinkeddata.value,
-                    type_controlled = ldtype
-                )
+                if not target.linkeddata_entries.filter(type_controlled=ldtype, universal_resource_name=draftlinkeddata.value):
+                    LinkedData.objects.create(
+                        subject = target,
+                        universal_resource_name = draftlinkeddata.value,
+                        type_controlled = ldtype
+                    )
             draft.linkeddata.all().update(processed=True)
 
         # ISISCB-577 Created ACRelation records should be active by default.
