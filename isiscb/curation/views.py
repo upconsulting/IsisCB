@@ -1685,6 +1685,9 @@ def authority(request, authority_id):
             'filters': safe_get_request,
             'form': form,
             'instance': authority,
+            'acrelations': authority.acrelation_set.all()[0:20],
+            'end': 20,
+            'total_acrelations': authority.acrelation_set.count(),
             'person_form': person_form,
             'tracking_records': tracking_records,
             # 'total': filtered_objects.qs.count(),
@@ -1718,6 +1721,30 @@ def authority(request, authority_id):
     _build_result_set_links(request, context, model=Authority)
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def authority_acrelations(request, authority_id):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    template = 'curation/authority_acrelations.html'
+    context = {
+        'instance': authority,
+    }
+
+    start = int(request.GET.get('start', 0))
+    nr_of_acrelations = int(request.GET.get('nr', 0))
+
+    acrelation_count = authority.acrelation_set.count()
+    acrelations = []
+    if start <= acrelation_count:
+        end = start + nr_of_acrelations if start + nr_of_acrelations < acrelation_count else acrelation_count
+        acrelations = authority.acrelation_set.all()[start:end]
+        context.update({
+            'acrelations': acrelations,
+            'start': start,
+            'end': end,
+            'total_acrelations': acrelation_count,
+        })
+    return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_language_search(request):
