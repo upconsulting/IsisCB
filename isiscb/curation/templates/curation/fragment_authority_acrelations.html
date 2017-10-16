@@ -1,4 +1,5 @@
 {% load render_object %}
+{% load staticfiles %}
 
 {% load rules %}
 {% load permission_tags %}
@@ -40,53 +41,24 @@
     });
 </script>
 
-<ul class="list-group">
+<script src="{% static "isisdata/js/jquery.jscroll.js" %}" type="text/javascript"></script>
+<script>
+  $(document).ready(function() {
+    $('#acrelations_scroll').jscroll({
+      nextSelector:'a#nextPage',
+      autoTrigger: false,
+    });
+  });
+</script>
+
+
 {% if can_view %}
-{% for acrelation in instance.acrelation_set.all %}
-
-
-        <li class="list-group-item acrelation acrelation-type-{{ acrelation.type_controlled }} {% if not acrelation.public %}notpublic{% endif %} {% if not acrelation.citation.public %}record-notpublic{% endif %}" id="acrelation-{{ acrelation.id }}">
-          <div class="row">
-
-          {% if can_update %}
-          <a href="{% url "curation:update_acrelation_for_authority" instance.id acrelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
-          {% endif %}
-          <span class="col-sm-11">
-            <span class="label label-primary">{{ acrelation.get_type_controlled_display }}</span>
-            {% if acrelation.type_broad_controlled %}
-            <span class="label label-success">{{ acrelation.get_type_broad_controlled_display }}</span>
-            {% endif %}
-            {{ acrelation.citation|get_citation_title|safe }}
-            {% if acrelation.name_for_display_in_citation %}
-            <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-            {% endif %}
-
-            {% if not acrelation.citation.public %}
-            <i class="fa fa-eye-slash" title="The linked citation is not public."></i>
-            {% endif %}
-            {% if not acrelation.public %}
-            <i class="fa fa-minus-square" aria-hidden="true" title="This ACRelation is not public."></i>
-            {% endif %}
-          </span>
-          {% if can_update %}
-          </a>
-          {% endif %}
-
-
-          <span class="col-sm-1 text-right">
-            {% if can_update %}
-            <span class="button-group button-group-xs">
-            <a class="glyphicon glyphicon-remove delete delete-acrelation"
-                    type="button"
-                    acrelation-id="{{ acrelation.id }}"
-                    acrelation-title="{{ acrelation.citation|get_citation_title|safe }}"></a>
-            </span>
-            {% endif %}
-          </span>
-      </div>
-    </li>
-
-{% endfor %}
+<p>
+Total number of ACRelations: {{ total_acrelations }}
+</p>
+<ul id="acrelations_scroll" class="list-group">
+        {% include 'curation/authority_acrelations.html' %}
+</ul>
 {% if can_update %}
     <a class="list-group-item text-muted" href="{% url "curation:create_acrelation_for_authority" instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="glyphicon glyphicon-plus"></span> Create new relation
@@ -95,13 +67,15 @@
 {% endif %}
 
 {% if not can_view %}
+<ul class="list-group">
 <li class="list-group-item">
   <div class="alert alert-warning" role="alert">
   You do not have sufficient permissions to view related citations.
   </div>
 </li>
-{% endif %}
 </ul>
+{% endif %}
+
 
 {% endwith %}
 

@@ -188,8 +188,7 @@ def retrieve_accession(request, accession_id):
     draftcitations = accession.draftcitation_set.filter(processed=False)
 
     # ISISCB-1043: show warning if a citation might already be in the db
-    matching_citations_ld = {}
-    matching_citations_title = {}
+    matching_citations = {}
     for dcitation in draftcitations:
         matches = []
         linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
@@ -201,11 +200,12 @@ def retrieve_accession(request, accession_id):
                 break
 
         if matches:
-            matching_citations_ld[dcitation.id] = matches
+            matching_citations[dcitation.id] = { match: ["Linked Data"] for match in matches }
 
         possible_matches = Citation.objects.filter(title=dcitation.title)
         if possible_matches:
-            matching_citations_title[dcitation.id] = possible_matches
+            existing_matches = matching_citations.setdefault(dcitation.id, {})
+            [existing_matches.setdefault(match, []).append("Title") for match in possible_matches]
 
     context = {
         'curation_section': 'zotero',
@@ -213,8 +213,7 @@ def retrieve_accession(request, accession_id):
         'accession': accession,
         'draftcitations': draftcitations,
         'resolved_draftcitations': accession.draftcitation_set.filter(processed=True),
-        'matching_citations_linkeddata': matching_citations_ld,
-        'matching_citations_title': matching_citations_title,
+        'matching_citations': matching_citations,
     }
     return render(request, template, context)
 

@@ -2,7 +2,8 @@
 {% load addcss %}
 {% load staticfiles %}
 {% load zotero_tags %}
-
+{% load app_filters %}
+{% load render_object %}
 
 {% block content %}
 
@@ -70,24 +71,25 @@
                         {{ citation.extra|truncatechars:200 }}
                     </p>
                     {% endif %}
-                    {% if matching_citations_linkeddata|get_from_dict:citation.id or matching_citations_title|get_from_dict:citation.id %}
+                    {% if matching_citations|get_from_dict:citation.id %}
                     <div>
                       <hr>
                       <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
  It looks like this citation might already be in the database:
-                      {% if matching_citations_linkeddata|get_from_dict:citation.id %}
-                      {% for cit in matching_citations_linkeddata|get_from_dict:citation.id %}
+                      {% if matching_citations|get_from_dict:citation.id %}
+                      {% with matching_citations|get_from_dict:citation.id as matches %}
+                        {% for cit, match_types in matches.items %}
                       <ul>
-                        <li>{% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a> (Matched through Linked Data entry)</li>
+                        {% with cit.id|get_periodical_or_book_series as series %}
+                        {% with cit|get_book_if_chapter as book %}
+                        {% with cit|get_publisher as publisher %}
+                        <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
                       </ul>
+                        {% endwith %}
+                        {% endwith %}
+                        {% endwith %}
                       {% endfor %}
-                      {% endif %}
-                      {% if matching_citations_title|get_from_dict:citation.id %}
-                      {% for cit in matching_citations_title|get_from_dict:citation.id %}
-                      <ul>
-                        <li>{% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a> (Matched through title)</li>
-                      </ul>
-                      {% endfor %}
+                      {% endwith %}
                       {% endif %}
                     </div>
                     {% endif %}
