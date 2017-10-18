@@ -5,6 +5,17 @@
 
 {% block content %}
 
+<script src="{% static "isisdata/js/jquery.jscroll.js" %}" type="text/javascript"></script>
+<script>
+  $(document).ready(function() {
+    $('#recent_records_holder').jscroll({
+      nextSelector:'a#nextPage',
+      autoTrigger: true,
+      loadingHtml: '<center><i class="fa fa-spinner fa-spin"></i></center>'
+    });
+  });
+</script>
+
 <div class="row comments-log">
     <!-- citation comments -->
     <div class="col-sm-12 col-md-12">
@@ -22,36 +33,14 @@ Last week</a>
                 {% endif %}
               </span>
             </div>
-            <ul class="list-group">
-            {% for record in records_recent %}
-            <li class="list-group-item">
-                <div>
-                    {% if record|to_class_name == 'Citation' %}
-                    <span class="label label-info">
-                    {% endif %}
-                    {% if record|to_class_name == 'Authority' %}
-                    <span class="label label-warning">
-                    {% endif %}
-                    {{record|to_class_name}}</span>
-                    [{{ record.get_type_controlled_display }}] <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
-                </div>
-                <div>
-                  {% if record|to_class_name == 'Citation' and record.abstract %}
-                  {{ record.abstract|truncatewords:20 }}
-                  {% endif %}
-                  {% if record|to_class_name == 'Authority' and record.description %}
-                  {{ record.description|truncatewords:20 }}
-                  {% endif %}
-                </div>
-                <div>
-                     <span class="text text-warning text-small">Added to IsisCB on <script type="text/javascript">document.write(new Date('{{ record.created_on|date:"c" }}').toLocaleString());</script></span>
-                 </div>
-
-            </li>
-            {% endfor %}
+            <ul class="list-group" id="recent_records_holder" style="overflow-y: scroll">
+            {% include 'isisdata/fragment_recent_records.html' %}
             </ul>
         </div>
     </div>
 </div>
+<p id="scrollHint" class="small text-warning text-center">
+  <i class="fa fa-angle-double-down" aria-hidden="true"></i> Scroll down to load more...
+</p>
 
 {% endblock %}
