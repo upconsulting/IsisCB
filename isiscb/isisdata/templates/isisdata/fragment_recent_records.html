@@ -1,0 +1,32 @@
+{% load app_filters %}
+
+{% for record in records_recent %}
+<li class="list-group-item">
+    <div>
+        {% if record|to_class_name == 'Citation' %}
+        <span class="label label-info">
+        {% endif %}
+        {% if record|to_class_name == 'Authority' %}
+        <span class="label label-warning">
+        {% endif %}
+        {{record|to_class_name}}</span>
+        [{{ record.get_type_controlled_display }}] <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
+    </div>
+    <div>
+      {% if record|to_class_name == 'Citation' and record.abstract %}
+      {{ record.abstract|truncatewords:20 }}
+      {% endif %}
+      {% if record|to_class_name == 'Authority' and record.description %}
+      {{ record.description|truncatewords:20 }}
+      {% endif %}
+    </div>
+    <div>
+         <span class="text text-warning text-small">Added to IsisCB on {{ record.created_on|date:"c" }}</span>
+     </div>
+
+</li>
+{% endfor %}
+
+{% if records_recent %}
+<a id="nextPage" href="{% url 'recent_records_range' %}?interval={{interval}}&last_processed={{last_processed}}"><i class="fa fa-refresh" aria-hidden="true"></i> Load more...</a>
+{% endif %}
