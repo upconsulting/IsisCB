@@ -10,7 +10,7 @@
   $(document).ready(function() {
     $('#recent_records_holder').jscroll({
       nextSelector:'a#nextPage',
-      autoTrigger: true,
+      autoTrigger: false,
       loadingHtml: '<center><i class="fa fa-spinner fa-spin"></i></center>'
     });
   });
@@ -39,8 +39,5 @@ Last week</a>
         </div>
     </div>
 </div>
-<p id="scrollHint" class="small text-warning text-center">
-  <i class="fa fa-angle-double-down" aria-hidden="true"></i> Scroll down to load more...
-</p>
 
 {% endblock %}

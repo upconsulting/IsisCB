@@ -28,5 +28,7 @@
 {% endfor %}
 
 {% if records_recent %}
-<a id="nextPage" href="{% url 'recent_records_range' %}?interval={{interval}}&last_processed={{last_processed}}"><i class="fa fa-refresh" aria-hidden="true"></i> Load more...</a>
+<center>
+<a class="text-warning small" id="nextPage" href="{% url 'recent_records_range' %}?interval={{interval}}&last_processed={{last_processed}}"><i class="fa fa-refresh" aria-hidden="true"></i> Load more...</a>
+</center>
 {% endif %}
