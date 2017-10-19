@@ -8,12 +8,22 @@
 <script src="{% static "isisdata/js/jquery.jscroll.js" %}" type="text/javascript"></script>
 <script>
   $(document).ready(function() {
+    setdate();
+
     $('#recent_records_holder').jscroll({
       nextSelector:'a#nextPage',
       autoTrigger: false,
-      loadingHtml: '<center><i class="fa fa-spinner fa-spin"></i></center>'
-    });
+      loadingHtml: '<center><i class="fa fa-spinner fa-spin"></i></center>',
+      callback: setdate
+      });
   });
+
+  function setdate() {
+    $('.date').each(function() {
+      var date = $(this).text();
+      $(this).text((new Date(date).toLocaleString()));
+    });
+  }
 </script>
 
 <div class="row comments-log">
