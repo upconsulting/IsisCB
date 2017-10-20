@@ -150,6 +150,7 @@
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
       <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
+      <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Add Time Periods</a></li>
     </ul>
 
     <div class="tab-content">
@@ -198,7 +199,10 @@
       <!-- Category tab -->
       <div role="tabpanel" class="tab-pane" id="addCategories">
         {% include "curation/fragment_categories_page_categories.html" %}
+      </div>
 
+      <div role="tabpanel" class="tab-pane" id="addTimePeriods">
+        {% include "curation/fragment_categories_page_timeperiods.html" %}
       </div>
     </div>
     {% endif %}
