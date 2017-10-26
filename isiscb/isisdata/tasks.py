@@ -3,9 +3,10 @@ from celery import shared_task
 
 from django.http import QueryDict
 
-from isisdata.filters import CitationFilter
+from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
 from isisdata import export    # Oh man, so good.
+from isisdata import export_authority
 from isisdata.models import *
 
 import unicodecsv as csv
@@ -31,6 +32,27 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
     if user_id:
         _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
     queryset = CitationFilter(filter_params, queryset=_qs).qs
+    return queryset, filter_params_raw
+
+def _get_filtered_authority_queryset(filter_params_raw, user_id=None):
+    """
+
+    Parameters
+    ----------
+    params : str
+
+    Returns
+    -------
+    :class:`.QuerySet`
+    """
+
+    # We need a mutable QueryDict.
+    filter_params = QueryDict(filter_params_raw, mutable=True)
+
+    _qs = Authority.objects.all()
+    if user_id:
+        _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
+    queryset = AuthorityFilter(filter_params, queryset=_qs).qs
     return queryset, filter_params_raw
 
 
@@ -62,10 +84,14 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 
 
 @shared_task
-def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None):
+def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation'):
     print 'export to csv:: %s' % str(task_id)
-    columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
-    queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+    if export_type == 'Citation':
+        queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+        columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
+    else:
+        queryset, _ = _get_filtered_authority_queryset(filter_params_raw, user_id)
+        columns = filter(lambda o: o.slug in fields, export_authority.AUTHORITY_COLUMNS)
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()

@@ -6,7 +6,18 @@
 
 
 {% block object_list %}
-<a class="btn btn-primary btn-sm" href="{% url 'curation:create_authority' %}">Create new authority record</a>
+
+<span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
+<form action="" method="POST" id="bulk-form" target="_blank">
+    {% csrf_token %}
+    <a class="btn btn-primary btn-xs" href="{% url 'curation:create_authority' %}">Create new authority record</a>
+
+    <input type="hidden" value="{{ filter_params }}" name="filters" />
+    <a class="btn btn-primary btn-xs" href="#" id="export">
+      <span class="glyphicon glyphicon-cloud-download"></span>
+      Export
+  </a>
+</form>
 
 <table class="table table-responsive table-hover table-curation">
     <thead>
@@ -199,6 +210,13 @@ $(document).ready(function() {
       append = " (" + new Date().toLocaleString() + ")";
     }
     $('#zotero_accession_input').val("{{objects.zotero_accession_name}}" + append);
+
+    var form = $('#bulk-form');
+    $('#export').click(function() {
+        form.attr('action', '{% url "curation:export-authorities" %}');
+        form.attr('target', '_blank');
+        form.submit();
+    });
 });
 </script>
 {% endblock %}
