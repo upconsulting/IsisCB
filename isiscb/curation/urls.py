@@ -42,6 +42,9 @@ urlpatterns = [
     url(r'^(?i)citation/add$', views.create_citation, name="create_citation"),
     url(r'^(?i)authority/add$', views.create_authority, name="create_authority"),
 
+    url(r'^(?i)authority/export$', views.export_authorities, name="export-authorities"),
+    url(r'^(?i)authority/export/status$', views.export_authorities_status, name="export-authorities-status"),
+
     url(r'^(?i)zotero/accessions/search$', views.search_zotero_accessions, name='search-zotero-accessions'),
 
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),

@@ -5,6 +5,7 @@ from django.http import QueryDict
 
 from isisdata.models import *
 from isisdata import export    # This never gets old...
+from isisdata import export_authority
 from curation import actions
 
 import rules
@@ -695,3 +696,9 @@ class ExportCitationsForm(forms.Form):
     # compress_output = forms.BooleanField(required=False, initial=True,
     #                                      help_text="If selected, the output"
     #                                      " will be gzipped.")
+
+class ExportAuthorityForm(forms.Form):
+    export_name = forms.CharField(help_text='This tag will be added to the export filename')
+    export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())

@@ -1595,6 +1595,7 @@ def authorities(request):
     queryset = operations.filter_queryset(request.user,
                                           Authority.objects.values(*fields))
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
+    result_count = filtered_objects.qs.count()
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
     currentPage = all_params.get('page', 1)
@@ -1631,6 +1632,7 @@ def authorities(request):
         'filters_active': filters_active,
         'filter_params': encoded_params,
         'search_key': search_key,
+        'result_count': result_count,
         'current_page': currentPage,
         'current_offset': (currentPage - 1) * PAGE_SIZE
     })
@@ -2476,6 +2478,22 @@ def _get_filtered_queryset(request):
 
     return queryset, filter_params_raw
 
+def _get_filtered_queryset_authorities(request):
+    pks = request.POST.getlist('queryset')
+
+    filter_params_raw = request.POST.get('filters')
+    filter_params = QueryDict(filter_params_raw, mutable=True)
+    pks = request.POST.getlist('queryset')
+    if pks:
+        filter_params['id'] = ','.join(pks)
+
+    filter_params_raw = filter_params.urlencode().encode('utf-8')
+
+    _qs = operations.filter_queryset(request.user, Authority.objects.all())
+    queryset = AuthorityFilter(filter_params, queryset=_qs)
+
+    return queryset, filter_params_raw
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_action(request):
@@ -2537,8 +2555,10 @@ def bulk_action_status(request):
 # TODO: refactor around asynchronous tasks.
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def export_citations_status(request):
-    template = 'curation/citations_export_status.html'
-    context = {}
+    template = 'curation/export_status.html'
+    context = {
+        'exported_type': 'CITATION'
+    }
     # target = request.GET.get('target')
     task_id = request.GET.get('task_id')
     task = AsyncTask.objects.get(pk=task_id)
@@ -2548,9 +2568,27 @@ def export_citations_status(request):
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
 
-def _build_filter_label(filter_params_raw):
-    citation_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
-    filter_form = citation_filter.form
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_authorities_status(request):
+    template = 'curation/export_status.html'
+    context = {
+        'exported_type': 'AUTHORITY'
+    }
+    # target = request.GET.get('target')
+    task_id = request.GET.get('task_id')
+    task = AsyncTask.objects.get(pk=task_id)
+    target = task.value
+
+    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    context.update({'download_target': download_target, 'task': task})
+    return render(request, template, context)
+
+def _build_filter_label(filter_params_raw, filter_type='CITATION'):
+    if filter_type == 'AUTHORITY':
+        current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True))
+    else:
+        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
+    filter_form = current_filter.form
     filter_data = {}
     if filter_form.is_valid():
         filter_data = filter_form.cleaned_data
@@ -2595,7 +2633,7 @@ def export_citations(request):
             task = AsyncTask.objects.create()
             result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
-                                                    task.id)
+                                                    task.id, "Citation")
 
             # We can use the AsyncResult's UUID to access this task later, e.g.
             #  to check the return value or task state.
@@ -2621,6 +2659,72 @@ def export_citations(request):
 
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_authorities(request):
+    # TODO: move some of this stuff out to the export module.
+
+    template = 'curation/authorities_export.html'
+    context = {}
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:authority_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset_authorities(request)
+    print filter_params_raw
+    if isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    if request.GET.get('confirmed', False):
+        # The user has selected the desired configuration settings.
+        form = ExportAuthorityForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            # Start the export process.
+            tag = slugify(form.cleaned_data.get('export_name', 'export'))
+            fields = form.cleaned_data.get('fields')
+
+            # TODO: generalize this, so that we are not tied directly to S3.
+            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            _out_name = '%s--%s.csv' % (_datestamp, tag)
+            # _compress = form.cleaned_data.get('compress_output', False)
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                                            settings.AWS_SECRET_ACCESS_KEY,
+                                            settings.AWS_EXPORT_BUCKET_NAME,
+                                            _out_name)
+            
+            # if _compress:
+            #     s3_path += '.gz'
+
+            # We create the AsyncTask object first, so that we can keep it
+            #  updated while the task is running.
+            task = AsyncTask.objects.create()
+            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id, 'Authority')
+
+            # We can use the AsyncResult's UUID to access this task later, e.g.
+            #  to check the return value or task state.
+            task.async_uuid = result.id
+            task.value = _out_name
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, 'AUTHORITY')
+            task.save()
+
+            # Send the user to a status view, which will show the export
+            #  progress and a link to the finished export.
+            target = reverse('curation:export-authorities-status') \
+                     + '?' + urlencode({'task_id': task.id})
+            return HttpResponseRedirect(target)
+
+    else:       # Display the export configuration form.
+        form = ExportAuthorityForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+    })
+
+    return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def collections(request):
