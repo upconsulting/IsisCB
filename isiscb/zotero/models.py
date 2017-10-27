@@ -204,7 +204,7 @@ class DraftAuthority(ImportedData):
     name_suffix = models.CharField(max_length=255, null=True, blank=True)
     type_controlled = models.CharField(max_length=2, choices=TYPE_CHOICES,
                                        null=True, blank=True)
-
+    
     name_for_sort = models.CharField(max_length=2000, blank=True, null=True)
 
     resolutions = GenericRelation('InstanceResolutionEvent',

@@ -233,6 +233,7 @@ $('#search-tab').on('shown.bs.tab', function(e) {
 </script>
 
 <script>
+//@ sourceURL=newauthority.js
 var opts = {
   lines: 13 // The number of lines to draw
 , length: 4 // The length of each line
@@ -545,15 +546,17 @@ var confirmCreateModal = function() {
     var authority_name = $('#draftauthority_name_edit-create').val();
     var authority_first_name = $('#draftauthority_first_name_edit-create').val();
     var authority_last_name = $('#draftauthority_last_name_edit-create').val();
+    var authority_date = $('#draftauthority_date_edit-create').val();
+    var authority_source = $('#draftauthority_source_edit-create').val();
+    var authority_description = "Dates: " + authority_date + "<br>Source:" + authority_source;
+    var authority_type = $('#draftauthority_type_edit-create').val()
+
     $('#prompt-create-modal').modal('hide');
     var draftauthority_id = $('#draftauthority-id-container-create').val();
-    triggerCreateAuthority(draftauthority_id, authority_name, authority_first_name, authority_last_name, function(created_authority_id) {
+    triggerCreateAuthority(draftauthority_id, authority_type, authority_name, authority_first_name, authority_last_name, authority_description, function(created_authority_id) {
         console.log('create a new authority:: done');
         getSimilarAuthorities(draftauthority_id, function(count, ids) {
-
-            //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
-
-            ids.forEach(function(di) {
+          ids.forEach(function(di) {
                 triggerResolveAuthority(di, created_authority_id);
             });
         });
@@ -589,9 +592,12 @@ var bindCreateNew = function() {
             $('#similar_authority_count-create').text(count);
             $('#draftauthority_name-create').text(selected_authority_name);
             $('#draftauthority_name_edit-create').val(selected_authority_name);
+            $('#draftauthority_type_edit-create').val('')
             if (selected_authority_type == 'PE') {
               $('#draftauthority_first_name_edit-create').val(selected_authority_first_name);
               $('#draftauthority_last_name_edit-create').val(selected_authority_last_name);
+              $('#draftauthority_date_edit-create').val('');
+              $('#draftauthority_source_edit-create').val('');
               $('#person_info').show();
             } else {
               $('#person_info').hide();
@@ -617,8 +623,8 @@ var bindSkip = function() {
     });
 }
 
-var triggerCreateAuthority = function(draftauthority_id, authority_name, authority_first_name, authority_last_name, callback) {
-    $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&authority_name=' + authority_name + '&authority_first_name=' + authority_first_name + '&authority_last_name=' + authority_last_name + '&draftauthority=' + draftauthority_id, function(result) {
+var triggerCreateAuthority = function(draftauthority_id, authority_type, authority_name, authority_first_name, authority_last_name, authority_description, callback) {
+    $.get('{% url "create_authority_for_draft" %}?accession={{ accession.id }}&authority_name=' + authority_name + '&authority_type=' + authority_type + '&authority_first_name=' + authority_first_name + '&authority_last_name=' + authority_last_name + '&draftauthority=' + draftauthority_id + "&authority_description=" + authority_description, function(result) {
         callback(result.data.authority);
     });
 }
@@ -718,8 +724,23 @@ var bindModal = function() {
                   <input type="text" id="draftauthority_name_edit-create" class="form-control" />
                   <span id="person_info">
                     <br>
+                    Type: <select class="form-control" id="draftauthority_type_edit-create">
+                            <option value="PE">Person</option>
+                            <option value="IN">Institution</option>
+                            <option value="TI">Time Period</option>
+                            <option value="GE">Geographic Term</option>
+                            <option value="SE">Serial Publication</option>
+                            <option value="CT">Classification Term</option>
+                            <option value="CO">Concept</option>
+                            <option value="CW">Creative Work</option>
+                            <option value="EV">Event</option>
+                            <option value="CR">Cross-reference</option>
+                            <option value="PU">Publisher</option>
+                          </select><br>
                     First name: <input type="text" id="draftauthority_first_name_edit-create" class="form-control" /><br>
-                    Last name: <input type="text" id="draftauthority_last_name_edit-create" class="form-control" />
+                    Last name: <input type="text" id="draftauthority_last_name_edit-create" class="form-control" /><br>
+                    Dates: <input type="text" id="draftauthority_date_edit-create" class="form-control" /><br>
+                    Source: <input type="text" id="draftauthority_source_edit-create" class="form-control" />
                   </span>
                 </p>
                 <p>

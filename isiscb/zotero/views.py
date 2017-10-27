@@ -278,15 +278,23 @@ def create_authority_for_draft(request):
     authority_name = request.GET.get('authority_name')
     authority_first_name = request.GET.get('authority_first_name')
     authority_last_name = request.GET.get('authority_last_name')
+    authority_description = request.GET.get('authority_description')
+    authority_type = request.GET.get('authority_type', None)
     accession_id = request.GET.get('accession')
 
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     accession = get_object_or_404(ImportAccession, pk=accession_id)
 
+    try:
+        auth_type = authority_type if dict(DraftAuthority.TYPE_CHOICES)[authority_type] else draftauthority.type_controlled
+    except:
+        print "Invalid authority type"
+        auth_type = draftauthority.type_controlled
+
     # Authority instance from field data.
     authority_data = {
         'name': authority_name if authority_name else draftauthority.name,
-        'type_controlled': draftauthority.type_controlled,
+        'type_controlled': auth_type,
         'public': True,
         'belongs_to': accession.ingest_to,
         'record_status_value': CuratedMixin.ACTIVE,
@@ -304,6 +312,7 @@ def create_authority_for_draft(request):
             'personal_name_first': first_name if first_name else u'',
             'personal_name_suffix': draftauthority.name_suffix if draftauthority.name_suffix else u'',
             'personal_name_preferred': draftauthority.name,
+            'description': authority_description.replace('<br>','\n'),
         })
     else:
         model_class = Authority
