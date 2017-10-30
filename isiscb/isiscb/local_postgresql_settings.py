@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'rest_framework',
     'simple_history',
+    'social_django',
     'isisdata',
     'storages',
     'haystack',

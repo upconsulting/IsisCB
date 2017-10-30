@@ -195,23 +195,6 @@
     {{ form.additional_titles|addcss:"form-control" }}
 </div>
 
-{% for error in form.record_status_value.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.record_status_value.label }}</label>
-    {{ form.record_status_value|addcss:"form-control" }}
-</div>
-
-
-{% for error in form.record_status_explanation.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.record_status_explanation.label }}</label>
-    {{ form.record_status_explanation|addcss:"form-control" }}
-</div>
-
 {% for error in form.record_history.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
