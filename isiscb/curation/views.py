@@ -41,6 +41,7 @@ from curation import tasks as curation_tasks
 import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
+import bleach
 
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
@@ -1032,6 +1033,14 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     })
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_attribute_type_help_text(request, attribute_type_id):
+    print attribute_type_id
+    attribute_type = get_object_or_404(AttributeType, pk=attribute_type_id)
+
+    safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
+    return JsonResponse({'help_text': safe_text})
+
 import datetime
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -1058,6 +1067,8 @@ def citation(request, citation_id):
         template = 'curation/citation_change_view_article.html'
     elif citation.type_controlled == Citation.THESIS:
         template = 'curation/citation_change_view_thesis.html'
+    elif citation.type_controlled == Citation.WEBSITE:
+        template = 'curation/citation_change_view_website.html'
     else:
         template = 'curation/citation_change_view.html'
 
@@ -2691,7 +2702,7 @@ def export_authorities(request):
                                             settings.AWS_SECRET_ACCESS_KEY,
                                             settings.AWS_EXPORT_BUCKET_NAME,
                                             _out_name)
-            
+
             # if _compress:
             #     s3_path += '.gz'
 

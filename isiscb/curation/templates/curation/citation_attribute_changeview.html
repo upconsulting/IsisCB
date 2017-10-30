@@ -61,7 +61,7 @@
                 <div class="form-group">
                     <label class="col-md-4">{{ attribute_form.type_controlled.label }}</label>
                     <div class="col-md-8">
-                      {{ attribute_form.type_controlled|addcss:"form-control" }}
+                      {{ attribute_form.type_controlled|addcss:"form-control"}}
                     </div>
                 </div>
 
@@ -75,6 +75,12 @@
                     </div>
                 </div>
 
+                <div class="panel panel-default">
+                  <div class="panel-heading"><i class="fa fa-info-circle" aria-hidden="true"></i> How should I use this type?</div>
+                  <div class="panel-body">
+                    <div id="typeHelpText">Please select a type.</div>
+                  </div>
+                </div>
             </div>
             <div class="col-sm-6">
                 {% if value_form %}
@@ -128,12 +134,32 @@
 <script>
 $('#id_language').multiSelect()
 
-$('#id_attribute-type_controlled').change(function() {
+$(document).ready(function() {
+  $("#id_attribute-type_controlled").change(function() {
+    // set fields on the right
     var value = $(this).val();
     var container = $('#value_form_container');
     container.empty();
     var form = $('#form_for_' + value).clone();
     container.append(form);
+
+    // update help text
+    $.ajax({
+      url: "{% url 'curation:index' %}attributetype/" + $("#id_attribute-type_controlled").val() + "/helptext",
+      success: function(data) {
+        text = data['help_text'];
+        if (text != '') {
+          $("#typeHelpText").html(text);
+        } else {
+          $("#typeHelpText").html("Sorry, no help text available.");
+        }
+
+      },
+      failure: function(data) {
+        $("#typeHelpText").html("Sorry, no help text available.");
+      }
+    });
+  });
 });
 </script>
 

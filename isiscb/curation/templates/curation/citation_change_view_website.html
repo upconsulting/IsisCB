@@ -1,0 +1,138 @@
+{% extends "curation/citation_change_view.html" %}
+{% load addcss %}
+{% load render_object %}
+{% load permission_tags %}
+
+{% block citation_panel_left %}
+
+<!-- type of website -->
+
+{% with instance|get_citation_website_subtype as subtype %}
+<div class="noFormForms">
+  <small>
+   <label>Type of Website:</label>
+      <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if subtype %}
+            <span id="subtype">{{ subtype }}</span>
+            {% else %}
+            <em>Add website type</em>
+            {% endif %}
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+{% for error in form.title.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<label>Title of Item:</label>
+<div class="form-group">
+    {{ form.title|addcss:"form-control titleInput" }}
+</div>
+
+<!-- website title -->
+
+{% with instance|get_citation_website_title as webtitle %}
+<div class="noFormForms">
+  <small>
+   <label>Title of Website:</label>
+      <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if webtitle %}
+            <span id="webtitle">{{ webtitle }}</span>
+            {% else %}
+            <em>Add website title</em>
+            {% endif %}
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+<!-- Authors/editors/contributors -->
+{% with instance|get_authors_advisors as authors_advisor %}
+<div class="noFormForms">
+  <small>
+    <label>By:</label> <a class="text-warning cursor-link"
+            onclick="toggleTab('acrelations')">
+            {% if authors_advisor %}
+            <span id="author_editors">{{ authors_advisor }}</span>
+            {% else %}
+            <em>Add author, or editor</em>
+            {% endif %}
+
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+<!-- Publication date -->
+
+{% with instance|get_citation_pubdate as pubdate %}
+<div class="noFormForms">
+  <small>
+   <label>Date published:</label>
+      <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if pubdate %}
+            <span id="publication_date">{{ pubdate }}</span>
+            {% else %}
+            <em>Add publication date</em>
+            {% endif %}
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+<!-- Modification date -->
+
+{% with instance|get_citation_moddate as moddate %}
+<div class="noFormForms">
+  <small>
+   <label>Date modified:</label>
+      <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if moddate %}
+            <span id="modification_date">{{ moddate }}</span>
+            {% else %}
+            <em>Add modification date</em>
+            {% endif %}
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+<!-- Last accessed date -->
+
+{% with instance|get_citation_accdate as accdate %}
+<div class="noFormForms">
+  <small>
+   <label>Date last accessed:</label>
+      <a class="text-warning cursor-link"
+            onclick="toggleTab('attributes')">
+            {% if accdate %}
+            <span id="last_accessed_date">{{ accdate }}</span>
+            {% else %}
+            <em>Add last accessed date</em>
+            {% endif %}
+        </a>
+  </small>
+</div>
+{% endwith %}
+
+
+{% for error in form.edition_details.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+<div class="row">
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">{{ form.edition_details.label }}</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.edition_details|addcss:"form-control input-sm" }}
+  </div>
+</div>
+</div>
+
+{% endblock %}
