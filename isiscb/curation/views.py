@@ -1666,7 +1666,10 @@ def authority(request, authority_id):
         request_params = user_session.get('authority_request_params', "")
 
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-            person_form = PersonForm(request.user, authority_id, instance=authority.person)
+            try:
+                person_form = PersonForm(request.user, authority_id, instance=authority.person)
+            except Person.DoesNotExist:
+                person_form = PersonForm(request.user, authority_id)
 
         form = AuthorityForm(request.user, instance=authority, prefix='authority')
 
@@ -1694,8 +1697,22 @@ def authority(request, authority_id):
         })
 
     elif request.method == 'POST':
+        # check if type was changed to Person
+        # if it was changed from person to something else, we'll just keep it a person object for now
+        if request.POST.get('authority-type_controlled', '') == Authority.PERSON and authority.type_controlled != Authority.PERSON:
+            try:
+                # is object already a person
+                authority.person
+            except Person.DoesNotExist:
+                # if not make it one
+                person = Person(authority_ptr_id=authority.pk)
+                person.__dict__.update(authority.__dict__)
+                person.save()
         if authority.type_controlled == Authority.PERSON and hasattr(Authority, 'person'):
-            person_form = PersonForm(request.user, authority_id, request.POST, instance=authority.person)
+            try:
+                person_form = PersonForm(request.user, authority_id, request.POST, instance=authority.person)
+            except Person.DoesNotExist:
+                person_form = None
 
         form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
         if form.is_valid() and (person_form is None or person_form.is_valid()):
