@@ -58,11 +58,30 @@
             {% if authors_advisor %}
             <span id="author_editors">{{ authors_advisor }}</span>
             {% else %}
-            <em>Add author, or editor</em>
+            <em><span class="gylphicon glyphicon-plus"></span>  Add author, or editor</em>
             {% endif %}
 
         </a>
   </small>
+</div>
+{% endwith %}
+
+{% with instance|get_publisher as publisher %}
+<div class="form-group" style="margin-bottom: 0px;">
+    <div>
+        <label class="control-label input-sm">Publisher:</label>
+        {% if publisher.authority %}
+        <a class="text-warning cursor-link input-sm"
+            onclick="toggleTab('acrelations')">
+            <span id="publisher">{% if publisher.name_for_display_in_citation %}{{ publisher.name_for_display_in_citation }} {% else %} {{ publisher.authority.name }}{% endif %}</span>
+        </a>
+        {% else %}
+        <a class="text-warning input-sm"
+            href="{% url 'curation:create_acrelation_for_citation' instance.id %}?type_controlled=PU&search={{ search_key }}&current={{ current_index }}">
+            <span class="gylphicon glyphicon-plus"></span> Add Publisher
+        </a>
+        {% endif %}
+    </div>
 </div>
 {% endwith %}
 
