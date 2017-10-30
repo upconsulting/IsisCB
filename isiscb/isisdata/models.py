@@ -1587,6 +1587,10 @@ class AttributeType(models.Model):
                                            limit_choices_to=VALUETYPES,
                                            related_name='attribute_value')
 
+    attribute_help_text = models.TextField(default=None, null=True, blank=True, help_text=help_text("""
+    The help text the user sees when adding a new attribute of this type.
+    """))
+
     def __unicode__(self):
         return u'{0} ({1})'.format(self.name, self.value_content_type.model)
 

@@ -114,6 +114,38 @@ def get_citation_pubdate(obj):
     date = getattr(obj, 'publication_date', None)
     return 'missing' if not date else date.isoformat()[:4]
 
+@register.filter(name='get_citation_moddate')
+def get_citation_moddate(obj):
+    for attribute in obj.attributes.all():
+        if attribute.type_controlled.name == 'ModifiedDate':
+            return attribute.value.get_child_class().__unicode__()
+
+    return 'missing'
+
+@register.filter(name='get_citation_accdate')
+def get_citation_moddate(obj):
+    for attribute in obj.attributes.all():
+        if attribute.type_controlled.name == 'LastAccessedDate':
+            return attribute.value.get_child_class().__unicode__()
+
+    return 'missing'
+
+@register.filter(name='get_citation_website_title')
+def get_citation_website_title(obj):
+    for attribute in obj.attributes.all():
+        if attribute.type_controlled.name == 'WebsiteTitle':
+            return attribute.value.get_child_class().__unicode__()
+
+    return 'missing'
+
+@register.filter(name='get_citation_website_subtype')
+def get_citation_website_subtype(obj):
+    for attribute in obj.attributes.all():
+        if attribute.type_controlled.name == 'TypeOfWebsite':
+            return attribute.value.get_child_class().__unicode__()
+
+    return 'missing'
+
 
 @register.filter(name='get_citation_pubdate_fast')
 def get_citation_pubdate_fast(obj):
