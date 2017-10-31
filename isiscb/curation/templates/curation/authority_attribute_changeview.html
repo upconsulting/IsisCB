@@ -194,7 +194,7 @@ var delete_attribute = function() {
     $('#delete-attribute-modal').modal('hide');
     var attribute_id = $('#attribute-id-container').val();
     if (attribute_id) {
-        window.location.replace("{% url "delete_attribute_for_authority" instance.id attribute.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
+        window.location.replace("{% url "curation:delete_attribute_for_authority" instance.id attribute.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
     }
 }
 </script>
