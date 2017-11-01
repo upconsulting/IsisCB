@@ -1390,11 +1390,13 @@ class ACRelation(ReferencedEntity, CuratedMixin):
                 self.type_broad_controlled = self.PUBLICATION_HOST
 
         # Trigger indexing of Authority and Citation instances.
+        # ISISCB-1047: first the ACRelation needs to be saved so that the corrected data
+        # is being indexed when saving the authority and citation objects
+        super(ACRelation, self).save(*args, **kwargs)
         if self.authority:
             self.authority.save()
         if self.citation:
             self.citation.save()
-        super(ACRelation, self).save(*args, **kwargs)
 
 
 class AARelation(ReferencedEntity, CuratedMixin):
