@@ -2760,7 +2760,8 @@ def collections(request):
     List :class:`.Collection` instances.
     """
     from curation.filters import CitationCollectionFilter
-    collections = CitationCollection.objects.all()
+    # ISISCB-1050: reverse sort order of collections (newest first)
+    collections = CitationCollection.objects.all().order_by('-created')
 
     filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
     context = {
