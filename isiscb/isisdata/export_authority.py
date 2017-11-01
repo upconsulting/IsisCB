@@ -77,8 +77,18 @@ def _name_preferred(obj, extra):
 def _attributes(obj, extra):
     qs = obj.attributes.all()
 
+    def create_value_list(x):
+        return ['AttributeID ' + x.id,
+            'AttributeStatus ' + (x.record_status_value if x.record_status_value else ''),
+            'AttributeType ' + x.type_controlled.name,
+            'AttributeValue ' + str(x.value.cvalue()),
+            'AttributeFreeFormValue ' + (x.value_freeform if x.value_freeform else ''),
+            'AttributeStart ' + (', '.join([str(y) for y in x.value.cvalue()[0]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[0] else ""),
+            'AttributeEnd ' + (', '.join([str(y) for y in x.value.cvalue()[1]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[1] else ""),
+            'AttributeDescription ' + (x.description if x.description else '')]
+
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: u' '.join(['Attribute_ID ' + x.id, 'Status ' + x.record_status_value, 'Type ' + x.type_controlled.name, 'Value ' + str(x.value.cvalue()), 'FreeFormValue ' + x.value_freeform, 'Description ' + x.description]), qs))
+        return u' // '.join(map(lambda x: u' '.join(create_value_list(x)), qs))
 
     return u""
 
@@ -92,7 +102,7 @@ def _linked_data(obj, extra):
 
     return u' // '.join(map(lambda x: u' '.join(['LinkedData_ID ' + x[0], 'Status ' + x[1], 'Type ' + x[2], 'URN ' + x[3], 'ResourceName ' + x[4], 'URL ' + x[5]]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
 
-def _related_authorities(obj, extra):
+def _related_citations(obj, extra):
     qs = obj.acrelation_set.all()
     return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
@@ -107,7 +117,7 @@ name_suffix = export.Column(u"Name Suffix", _name_suffix)
 name_preferred = export.Column(u"Name Preferred", _name_preferred)
 attributes = export.Column(u"Attributes", _attributes)
 linked_data = export.Column(u"Linked Data", _linked_data)
-related_authorities = export.Column(u"Related Authorities", _related_authorities)
+related_citations = export.Column(u"Related Citations", _related_citations)
 
 
 AUTHORITY_COLUMNS = [
@@ -125,5 +135,5 @@ AUTHORITY_COLUMNS = [
     name_preferred,
     attributes,
     linked_data,
-    related_authorities,
+    related_citations,
 ]
