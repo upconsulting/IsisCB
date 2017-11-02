@@ -12,9 +12,9 @@ def create_acr_string(author, additional_fields = []):
                'ACRDisplayOrder ' + str(author[3]) if author[3] else u'',
                'ACRNameForDisplayInCitation ' + author[4] if author[4] else u'',
                'CitationID ' + str(author[5]) if author[5] else u'',
-               'AuthorityStatus ' + str(author[6]) if author[6] else u'',
-               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u'',
-               'AuthorityName ' + author[8] if author[8] else u''
+               'CitationStatus ' + str(author[6]) if author[6] else u'',
+               'CitationType ' + dict(Citation.TYPE_CHOICES)[author[7]] if author[7] else u'',
+               'CitationTitle ' + author[8] if author[8] else u''
                 ]
     return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
 acr_fields = ['id',
@@ -23,9 +23,9 @@ acr_fields = ['id',
           'data_display_order',
           'name_for_display_in_citation',
           'citation__id',
-          'authority__record_status_value',
-          'authority__type_controlled',
-          'authority__name'
+          'citation__record_status_value',
+          'citation__type_controlled',
+          'citation__title'
          ]
 
 def _redirect(obj, extra):
