@@ -316,12 +316,36 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     </div>
 
+    <div id="author_charts">
+      <div id="chart"></div>
+    </div>
+
 
     <div class="col-sm-4 col-md-3 main">
         {% include "isisdata/comments.html" %}
     </div>
   </div>
 
+  <!-- Load c3.css -->
+  <link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
+
+  <!-- Load d3.js and c3.js -->
+  <script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
+  <script src="{% static "isisdata/c3/c3.min.js" %}"></script>
+
+  <script>
+    $(document).ready(function() {
+      var chart = c3.generate({
+        bindto: '#chart',
+        data: {
+          columns: [
+            ['data1', 30, 200, 100, 400, 150, 250],
+            ['data2', 50, 20, 10, 40, 15, 25]
+          ]
+        }
+      });
+    });
+  </script>
 
 </div>
 {% endblock %}
