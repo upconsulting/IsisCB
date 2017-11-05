@@ -78,13 +78,20 @@ def _attributes(obj, extra):
     qs = obj.attributes.all()
 
     def create_value_list(x):
+        start, end = '', ''
+        if isinstance(x.value.cvalue(), list):
+            if len(x.value.cvalue()) > 0:
+                start = ', '.join([str(y) for y in x.value.cvalue()[0]]) if isinstance(x.value.cvalue()[0], list) else str(x.value.cvalue()[0])
+            if len(x.value.cvalue()) > 1:
+                end = ', '.join([str(y) for y in x.value.cvalue()[1]]) if isinstance(x.value.cvalue()[1], list) else str(x.value.cvalue()[1])
+
         return ['AttributeID ' + x.id,
             'AttributeStatus ' + (x.record_status_value if x.record_status_value else ''),
             'AttributeType ' + x.type_controlled.name,
             'AttributeValue ' + str(x.value.cvalue()),
             'AttributeFreeFormValue ' + (x.value_freeform if x.value_freeform else ''),
-            'AttributeStart ' + (', '.join([str(y) for y in x.value.cvalue()[0]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[0] else ""),
-            'AttributeEnd ' + (', '.join([str(y) for y in x.value.cvalue()[1]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[1] else ""),
+            'AttributeStart ' + start,
+            'AttributeEnd ' + end,
             'AttributeDescription ' + (x.description if x.description else '')]
 
     if qs.count() > 0:
