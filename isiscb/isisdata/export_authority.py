@@ -88,14 +88,14 @@ def _attributes(obj, extra):
         return ['AttributeID ' + x.id,
             'AttributeStatus ' + (x.record_status_value if x.record_status_value else ''),
             'AttributeType ' + x.type_controlled.name,
-            'AttributeValue ' + str(x.value.cvalue()),
+            'AttributeValue ' + (str(x.value.cvalue()) if x.value and x.value.cvalue() else ''),
             'AttributeFreeFormValue ' + (x.value_freeform if x.value_freeform else ''),
             'AttributeStart ' + start,
             'AttributeEnd ' + end,
             'AttributeDescription ' + (x.description if x.description else '')]
 
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: u' '.join(create_value_list(x)), qs))
+        return u' // '.join(map(lambda x: u' || '.join(create_value_list(x)), qs))
 
     return u""
 
