@@ -422,7 +422,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_publication_date(self, data):
         attributes = data.get('attributes', None)
-        return [attr['attributes__value_freeform'] if attr['attributes__value_freeform'] else attr['publication_date'] for attr in attributes
+        return [attr['attributes__value_freeform'] for attr in attributes
                 if attr['attributes__type_controlled__name'] == 'PublicationDate']
 
     def prepare_publication_date_for_sort(self, data):
