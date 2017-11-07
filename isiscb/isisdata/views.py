@@ -907,16 +907,20 @@ def authority(request, authority_id):
 
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
-    acr = ACRelation.objects.all().filter(authority__id=authority_id)
-    for a in acr:
-        print a.attributes.all()
-    #for year in range(1970, now.year):
-    #    acrelations = ACRelation.objects.all().filter(authority__id=authority_id)#, attributes__type_controlled__name='PublicationDate'), attributes__value_freeform=year)
-    #    print len(acrelations)
+    acr = ACRelation.objects.all().filter(authority__id=authority_id, public=True, citation__public=True)
+
+    counts = []
+    years = []
+    for year in range(1970, now.year):
+        acrelations = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
+        counts.append(len(acrelations))
+        years.append(str(year))
+
     data = {
-        'data1': [30, 200, 100, 400, 150, 250] ,
-        'data2': [50, 20, 10, 40, 15, 25]
-        }
+        'years': years,
+        'counts': counts,
+    }
+
 
     return JsonResponse(data)
 
