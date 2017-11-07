@@ -336,17 +336,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   //# sourceURL=chart.js
     $(document).ready(function() {
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
-        set1 = ['Data Set 1']
-        set1.push.apply(data.data1)
-        set2 = ['Data Set 2']
-        set2.push.apply(data.data2)
+        var set1 = ['Data Set 1']
+        set1 = set1.concat(data.data1)
+        var set2 = ['Data Set 2']
+        set2 = set2.concat(data.data2)
         var chart = c3.generate({
           bindto: '#chart',
           data: {
             columns: [
               set1,
               set2
-            ]
+            ],
+            type: 'bar'
           }
         });
       });

@@ -42,6 +42,7 @@ from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 
 from unidecode import unidecode
+import datetime
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -905,6 +906,13 @@ def authority(request, authority_id):
     return render(request, 'isisdata/authority.html', context)
 
 def authority_author_timeline(request, authority_id):
+    now = datetime.datetime.now()
+    acr = ACRelation.objects.all().filter(authority__id=authority_id)
+    for a in acr:
+        print a.attributes.all()
+    #for year in range(1970, now.year):
+    #    acrelations = ACRelation.objects.all().filter(authority__id=authority_id)#, attributes__type_controlled__name='PublicationDate'), attributes__value_freeform=year)
+    #    print len(acrelations)
     data = {
         'data1': [30, 200, 100, 400, 150, 250] ,
         'data2': [50, 20, 10, 40, 15, 25]
