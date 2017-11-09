@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^(?i)recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^(?i)recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^(?i)user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
