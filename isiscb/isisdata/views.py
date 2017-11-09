@@ -42,6 +42,7 @@ from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 
 from unidecode import unidecode
+import datetime
 
 
 class ReadOnlyLowerField(serializers.ReadOnlyField):
@@ -904,6 +905,44 @@ def authority(request, authority_id):
     }
     return render(request, 'isisdata/authority.html', context)
 
+def authority_author_timeline(request, authority_id):
+    now = datetime.datetime.now()
+
+    def calculate_weight(acr):
+        type_weights = {
+            ACRelation.AUTHOR: 1,
+            ACRelation.EDITOR: 0.5,
+            ACRelation.ADVISOR: 0.5,
+            ACRelation.CONTRIBUTOR: 0.25,
+        }
+        citation_type_weight = {
+            Citation.BOOK: 4,
+            Citation.THESIS: 2,
+            Citation.CHAPTER: 1,
+            Citation.ARTICLE: 1,
+            Citation.ESSAY_REVIEW: 0.67,
+            Citation.REVIEW: 0.33,
+        }
+        return type_weights.get(acr.type_controlled, 0)*citation_type_weight.get(acr.citation.type_controlled, 0)
+
+    acr = ACRelation.objects.all().filter(authority__id=authority_id, public=True, citation__public=True)
+    counts = []
+    years = []
+
+    for year in range(1970, now.year):
+        acrelations = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
+        weights = [calculate_weight(a) for a in acrelations]
+
+        counts.append(sum(weights))
+        years.append(str(year))
+
+    data = {
+        'years': years,
+        'counts': counts,
+    }
+
+
+    return JsonResponse(data)
 
 def citation(request, citation_id):
     """
