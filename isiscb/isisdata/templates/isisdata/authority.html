@@ -2,6 +2,7 @@
 {% load app_filters %}
 {% load staticfiles %}
 {% load search_filters %}
+{% load authority_filters %}
 
 {% block extra_head %}
 <script>
@@ -314,14 +315,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </tr>
   </table>
 
+  {% if authority|is_person %}
   <div id="author_charts">
+    <div><h3>Timeline</h3></div>
+    <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
     <div id="chart"></div>
   </div>
+  {% endif %}
 
     </div>
 
     <div class="col-sm-4 col-md-3 main">
-        {% include "isisdata/comments.html" %}
+      {% include "isisdata/comments.html" %}
     </div>
   </div>
 
@@ -332,11 +337,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
   <script src="{% static "isisdata/c3/c3.min.js" %}"></script>
 
+  {% if authority|is_person %}
   <script>
   //# sourceURL=chart.js
     $(document).ready(function() {
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
-        var cols = ['Years'].concat(data.counts);
+        $('#spinner').hide();
+        var cols = ['Weighted Contributions'].concat(data.counts);
         var years = ['x'].concat(data.years);
         var chart = c3.generate({
           bindto: '#chart',
@@ -350,6 +357,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     });
   </script>
+  {% endif %}
 
 </div>
 {% endblock %}
