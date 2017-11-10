@@ -592,12 +592,31 @@ var bindCreateNew = function() {
             $('#similar_authority_count-create').text(count);
             $('#draftauthority_name-create').text(selected_authority_name);
             $('#draftauthority_name_edit-create').val(selected_authority_name);
-            $('#draftauthority_type_edit-create').val('')
+            $('#draftauthority_first_name_edit-create').val('');
+            $('#draftauthority_last_name_edit-create').val('');
+            $('#draftauthority_type_edit-create').val(selected_authority_type);
+
+            // match anything in brackets if there are at least 3 digits (assuming a year is mentioned in that case)
+            var yearRegex = /\((.*?\d{3,4}.*?)\)/;
+            var yearResults = yearRegex.exec(selected_authority_name);
+            if (yearResults != null && typeof yearResults[1] != 'undefined') {
+              $('#draftauthority_date_edit-create').val(yearResults[1]);
+            } else {
+              $('#draftauthority_date_edit-create').val('');
+            }
+
+            var ldRegex = /\{(.+?)\}/;
+            var ldResults = ldRegex.exec(selected_authority_name);
+            if (ldResults != null && typeof ldResults[1] != 'undefined') {
+              $('#draftauthority_source_edit-create').val(ldResults[1]);
+            } else {
+              $('#draftauthority_source_edit-create').val('');
+            }
+
+
             if (selected_authority_type == 'PE') {
               $('#draftauthority_first_name_edit-create').val(selected_authority_first_name);
               $('#draftauthority_last_name_edit-create').val(selected_authority_last_name);
-              $('#draftauthority_date_edit-create').val('');
-              $('#draftauthority_source_edit-create').val('');
               $('#person_info').show();
             } else {
               $('#person_info').hide();
@@ -722,26 +741,26 @@ var bindModal = function() {
                 <p>
                   If needed, you can change the authority name:<br>
                   <input type="text" id="draftauthority_name_edit-create" class="form-control" />
-                  <span id="person_info">
-                    <br>
-                    Type: <select class="form-control" id="draftauthority_type_edit-create">
-                            <option value="PE">Person</option>
-                            <option value="IN">Institution</option>
-                            <option value="TI">Time Period</option>
-                            <option value="GE">Geographic Term</option>
-                            <option value="SE">Serial Publication</option>
-                            <option value="CT">Classification Term</option>
-                            <option value="CO">Concept</option>
-                            <option value="CW">Creative Work</option>
-                            <option value="EV">Event</option>
-                            <option value="CR">Cross-reference</option>
-                            <option value="PU">Publisher</option>
-                          </select><br>
+                  <br>
+                  Type: <select class="form-control" id="draftauthority_type_edit-create">
+                          <option value="PE">Person</option>
+                          <option value="IN">Institution</option>
+                          <option value="TI">Time Period</option>
+                          <option value="GE">Geographic Term</option>
+                          <option value="SE">Serial Publication</option>
+                          <option value="CT">Classification Term</option>
+                          <option value="CO">Concept</option>
+                          <option value="CW">Creative Work</option>
+                          <option value="EV">Event</option>
+                          <option value="CR">Cross-reference</option>
+                          <option value="PU">Publisher</option>
+                        </select><br>
+                    <span id="person_info">
                     First name: <input type="text" id="draftauthority_first_name_edit-create" class="form-control" /><br>
                     Last name: <input type="text" id="draftauthority_last_name_edit-create" class="form-control" /><br>
-                    Dates: <input type="text" id="draftauthority_date_edit-create" class="form-control" /><br>
-                    Source: <input type="text" id="draftauthority_source_edit-create" class="form-control" />
                   </span>
+                  Dates: <input type="text" id="draftauthority_date_edit-create" class="form-control" /><br>
+                  Source: <input type="text" id="draftauthority_source_edit-create" class="form-control" />
                 </p>
                 <p>
                     <input name="bulkapply" id="bulkapply-create" type="checkbox"></input> Apply this resolution to <span class="label label-primary" id="similar_authority_count-create"></span>
@@ -757,6 +776,18 @@ var bindModal = function() {
         </div>
     </div>
 </div>
+
+<script>
+//# sourceURL=bind.js
+$('#draftauthority_type_edit-create').change(function() {
+  var new_draftauthority_type = this.value;
+  if (new_draftauthority_type == 'PE') {
+    $('#person_info').show();
+  } else {
+    $('#person_info').hide();
+  }
+});
+</script>
 
 <div class="modal fade" id="prompt-skip-modal" tabindex="-1" role="dialog" aria-labelledby="prompt-skip-modal-label">
     <div class="modal-dialog" role="document">
