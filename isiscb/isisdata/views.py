@@ -925,21 +925,43 @@ def authority_author_timeline(request, authority_id):
         }
         return type_weights.get(acr.type_controlled, 0)*citation_type_weight.get(acr.citation.type_controlled, 0)
 
+    cache = caches['default']
+    cache_data = cache.get(authority_id + '_count_data', {})
+
+    if cache_data:
+        return JsonResponse(cache_data)
+
     acr = ACRelation.objects.all().filter(authority__id=authority_id, public=True, citation__public=True)
-    counts = []
+    books = []
+    theses = []
+    chapters = []
+    articles = []
+    reviews = []
     years = []
 
     for year in range(1970, now.year):
-        acrelations = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
-        weights = [calculate_weight(a) for a in acrelations]
+        #counts = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
+        #weights = [calculate_weight(a) for a in acrelations]
+        books.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).count())
+        theses.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.ADVISOR], citation__type_controlled=Citation.THESIS).count())
+        chapters.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).count())
+        articles.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).count())
+        reviews.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).count())
 
-        counts.append(sum(weights))
+        #counts.append(sum(weights))
         years.append(str(year))
 
     data = {
         'years': years,
-        'counts': counts,
+        #'counts': counts,
+        'books': books,
+        'theses': theses,
+        'chapters': chapters,
+        'articles': articles,
+        'reviews': reviews
     }
+
+    cache.set(authority_id + '_count_data', data)
 
 
     return JsonResponse(data)

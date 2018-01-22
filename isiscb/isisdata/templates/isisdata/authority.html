@@ -343,14 +343,35 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     $(document).ready(function() {
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
-        var cols = ['Weighted Contributions'].concat(data.counts);
-        var years = ['x'].concat(data.years);
+        var cols = [['books'].concat(data.books),
+                    ['theses'].concat(data.theses),
+                    ['chapters'].concat(data.chapters),
+                    ['articles'].concat(data.articles),
+                    ['reviews'].concat(data.reviews)];
+        var years = ['Years'].concat(data.years);
         var chart = c3.generate({
           bindto: '#chart',
           data: {
-            x: 'x',
-            columns: [years, cols],
-            type: 'bar'
+            x: 'Years',
+            columns: [years].concat(cols),
+            type: 'bar',
+            groups: [
+              ['books', 'theses', 'chapters', 'articles', 'reviews']
+            ],
+            colors: {
+              books: '#4785e8',
+              theses: '#ff4b4b',
+              chapters: '#b176c7',
+              articles: '#f9da5f',
+              reviews: '#ffae0f'
+            },
+            names: {
+              books: 'Book Author/Editor',
+              theses: 'Thesis Advisor',
+              chapters: 'Chapter Author',
+              articles: 'Article Author',
+              reviews: 'Reviews/Essay Reviews'
+            }
           }
         });
       });
