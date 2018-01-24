@@ -9,7 +9,7 @@
    "Logging": "/var/logs/",
    "containerDefinitions": [
      {
-       "memory": 1024;
+       "memory": 1024
      }
    ]
  }
