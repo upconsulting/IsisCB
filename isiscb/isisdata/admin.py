@@ -1099,6 +1099,55 @@ class IsisCBUserAdmin(UserAdmin):
     # def joined(self, obj, *args, **kwargs):
     #     return obj.date_joined
 
+class TrackingAdmin(admin.ModelAdmin):
+    list_display = ('get_citation_id','type_controlled', 'tracking_info', 'citation')
+    list_select_related = (
+        'citation',
+    )
+    readonly_fields = ['citation']
+    class Meta:
+        model = Tracking
+
+    def get_citation_id(self, obj):
+        return obj.citation.id
+    get_citation_id.short_description = 'Citation ID'
+    get_citation_id.admin_order_field = 'citation__id'
+
+class AuthorityTrackingAdmin(admin.ModelAdmin):
+    list_display = ('get_authority_id','type_controlled', 'tracking_info', 'authority')
+    list_select_related = (
+        'authority',
+    )
+    readonly_fields = ['authority']
+    class Meta:
+        model = AuthorityTracking
+
+    def get_authority_id(self, obj):
+        return obj.authority.id
+    get_authority_id.short_description = 'Authority ID'
+    get_authority_id.admin_order_field = 'authority__id'
+
+class CitationCollectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'createdBy', 'citation_count')
+    readonly_fields = ['citations']
+
+    def citation_count(self, obj):
+        return obj.citations.count()
+
+
+
+class IsisCBRoleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description')
+    readonly_fields = ['users', 'def_dataset_rules', 'def_zotero_rules', 'def_crud_rules']
+
+    def def_dataset_rules(self, obj):
+        return DatasetRule.objects.filter(role=obj.pk)
+
+    def def_zotero_rules(self, obj):
+        return ZoteroRule.objects.filter(role=obj.pk)
+
+    def def_crud_rules(self, obj):
+        return CRUDRule.objects.filter(role=obj.pk)
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
@@ -1115,7 +1164,10 @@ admin.site.register(SearchQuery, SearchQueryAdmin)
 admin.site.register(Language, LanguageAdmin)
 # Register your models here.
 admin.site.register(UserProfile, UserProfileAdmin)
-
+admin.site.register(Tracking, TrackingAdmin)
+admin.site.register(AuthorityTracking, AuthorityTrackingAdmin)
+admin.site.register(CitationCollection, CitationCollectionAdmin)
+#admin.site.register(IsisCBRole, IsisCBRoleAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, IsisCBUserAdmin)
