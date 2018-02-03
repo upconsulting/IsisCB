@@ -2716,7 +2716,7 @@ def export_authorities(request):
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
             # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = s3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
                                             settings.AWS_SECRET_ACCESS_KEY,
                                             settings.AWS_EXPORT_BUCKET_NAME,
                                             _out_name)
