@@ -19,11 +19,17 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
-        {% if field.label != 'Filters' %}
+      {% if field.label != 'Export linked records' %}
+      {% if field.label != 'Filters' %}
         <label>{{ field.label }}</label>
         <span class="pull-right">{{ field.help_text }}</span>
         {% endif %}
         {{ field|addcss:"form-control" }}
+      {% endif %}
+      {% if field.label == 'Export linked records' %}
+        <label>{{ field }} {{ field.label }} </label>
+      {% endif %}
+
     </div>
     <p class="text-muted text">
 

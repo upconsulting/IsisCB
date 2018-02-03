@@ -2644,6 +2644,7 @@ def export_citations(request):
             # Start the export process.
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
+            export_linked_records = form.cleaned_data.get('export_linked_records')
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2661,7 +2662,7 @@ def export_citations(request):
             task = AsyncTask.objects.create()
             result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
-                                                    task.id, "Citation")
+                                                    task.id, "Citation", export_linked_records)
 
             # We can use the AsyncResult's UUID to access this task later, e.g.
             #  to check the return value or task state.
@@ -2715,7 +2716,7 @@ def export_authorities(request):
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
             # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            s3_path = s3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
                                             settings.AWS_SECRET_ACCESS_KEY,
                                             settings.AWS_EXPORT_BUCKET_NAME,
                                             _out_name)

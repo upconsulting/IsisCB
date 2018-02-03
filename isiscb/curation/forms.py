@@ -691,6 +691,7 @@ class SelectCitationCollectionForm(forms.Form):
 class ExportCitationsForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    export_linked_records = forms.BooleanField(label='Export linked records', required=False)
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     # compress_output = forms.BooleanField(required=False, initial=True,
