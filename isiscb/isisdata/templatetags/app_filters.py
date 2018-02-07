@@ -100,7 +100,7 @@ def get_title(citation):
 def get_pub_year(citation):
     dates = citation.attributes.filter(type_controlled__name='PublicationDate')
     if dates:
-        return dates[0].value_freeform
+        return dates[0].value_freeform if dates[0].value_freeform else dates[0].value.cvalue().year
     return ''
 
 
