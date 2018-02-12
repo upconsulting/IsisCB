@@ -341,8 +341,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <script>
   //# sourceURL=chart.js
     $(document).ready(function() {
+      var titles;
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
+        titles = data.titles;
         var cols = [['books'].concat(data.books),
                     ['theses'].concat(data.theses),
                     ['chapters'].concat(data.chapters),
@@ -359,20 +361,47 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               ['books', 'theses', 'chapters', 'articles', 'reviews']
             ],
             colors: {
-              books: '#4785e8',
-              theses: '#ff4b4b',
-              chapters: '#b176c7',
-              articles: '#f9da5f',
-              reviews: '#ffae0f'
+              books: '#c7e9b4',
+              theses: '#7fcdbb',
+              chapters: '#41b6c4',
+              articles: '#2c7fb8',
+              reviews: '#253494'
             },
             names: {
               books: 'Book Author/Editor',
-              theses: 'Thesis Advisor',
+              theses: 'Thesis',
               chapters: 'Chapter Author',
               articles: 'Article Author',
               reviews: 'Reviews/Essay Reviews'
             }
-          }
+          },
+          tooltip: {
+            grouped: false,
+            contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+              var TITLE_LENGTH = 10;
+              var trimmed_titles = [];
+              var title_strings = titles[d[0].x][d[0].id];
+              for (var t in title_strings) {
+                var title = title_strings[t];
+                var parts = title.split(' ');
+                if (parts.length < TITLE_LENGTH) {
+                  trimmed_titles.push(title);
+                } else {
+                  trimmed_titles.push(parts.slice(0,TITLE_LENGTH).join(' ') + "...");
+                }
+              }
+              var panel = '<div class="panel panel-default">';
+              panel += '<div class="panel-heading">';
+              panel += '<h3 class="panel-title">' + d[0].x + ' - ' + d[0].name + ' (' + d[0].value + ')</h3>';
+              panel += '</div>';
+              panel += '<div class="panel-body">';
+              panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
+              panel += '</div>';
+              panel += '</div>';
+
+              return panel;
+            },
+          },
         });
       });
 

@@ -113,6 +113,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'attributes__id',
         'attributes__type_controlled__name',
         'attributes__value_freeform',
+        'attributes__value__attribute_id',
         'attributes__public',
         'acrelation__id',
         'acrelation__public',
@@ -422,8 +423,21 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_publication_date(self, data):
         attributes = data.get('attributes', None)
-        return [attr['attributes__value_freeform'] for attr in attributes
-                if attr['attributes__type_controlled__name'] == 'PublicationDate']
+
+        freeform_dates = [attr['attributes__value_freeform'] for attr in attributes
+                if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']]
+
+        if freeform_dates:
+            return freeform_dates
+
+        # this is a hack but it works, so :op
+        date_id = None
+        for attr in attributes:
+            if attr['attributes__type_controlled__name'] == 'PublicationDate':
+                attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
+                return [attr.value.cvalue().year]
+
+        return ""
 
     def prepare_publication_date_for_sort(self, data):
         """

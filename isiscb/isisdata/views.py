@@ -939,17 +939,34 @@ def authority_author_timeline(request, authority_id):
     reviews = []
     years = []
 
+    titles = {}
+
+    SHOWN_TITLES_COUNT = 3
     for year in range(1970, now.year):
         #counts = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
         #weights = [calculate_weight(a) for a in acrelations]
         books.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).count())
-        theses.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.ADVISOR], citation__type_controlled=Citation.THESIS).count())
+        theses.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.AUTHOR], citation__type_controlled=Citation.THESIS).count())
         chapters.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).count())
         articles.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).count())
         reviews.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).count())
 
+        book_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
+        thesis_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.AUTHOR], citation__type_controlled=Citation.THESIS).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
+        chapter_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
+        article_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
+        review_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
         #counts.append(sum(weights))
         years.append(str(year))
+        titles.update({
+            str(year): {
+                'books': [r.citation.title for r in book_records],
+                'theses': [r.citation.title for r in thesis_records],
+                'chapters': [r.citation.title for r in chapter_records],
+                'articles': [r.citation.title for r in article_records],
+                'reviews': [r.citation.title_for_display for r in review_records],
+            }
+        })
 
     data = {
         'years': years,
@@ -958,7 +975,8 @@ def authority_author_timeline(request, authority_id):
         'theses': theses,
         'chapters': chapters,
         'articles': articles,
-        'reviews': reviews
+        'reviews': reviews,
+        'titles': titles
     }
 
     cache.set(authority_id + '_count_data', data)

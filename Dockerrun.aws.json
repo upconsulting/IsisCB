@@ -6,5 +6,10 @@
        "HostDirectory": "/var/app"
      }
    ],
-   "Logging": "/var/logs/"
+   "Logging": "/var/logs/",
+   "containerDefinitions": [
+     {
+       "memory": 1024
+     }
+   ]
  }

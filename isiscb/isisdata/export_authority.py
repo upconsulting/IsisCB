@@ -7,25 +7,25 @@ import functools
 
 def create_acr_string(author, additional_fields = []):
     fields = ['ACR_ID ' + str(author[0]),
-               'ACRStatus ' + str(author[1]) if author[1] else u'',
-               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u'',
-               'ACRDisplayOrder ' + str(author[3]) if author[3] else u'',
-               'ACRNameForDisplayInCitation ' + author[4] if author[4] else u'',
-               'CitationID ' + str(author[5]) if author[5] else u'',
-               'AuthorityStatus ' + str(author[6]) if author[6] else u'',
-               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u'',
-               'AuthorityName ' + author[8] if author[8] else u''
+               'ACRStatus ' + (str(author[1]) if author[1] else u''),
+               'ACRType ' + (dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u''),
+               'ACRDisplayOrder ' + (str(author[3]) if author[3] else u''),
+               'ACRNameForDisplayInCitation ' + (author[4] if author[4] else u''),
+               'CitationID ' + (str(author[5]) if author[5] else u''),
+               'CitationStatus ' + (str(author[6]) if author[6] else u''),
+               'CitationType ' + (dict(Citation.TYPE_CHOICES)[author[7]] if author[7] else u''),
+               'CitationTitle ' + (author[8] if author[8] else u'')
                 ]
-    return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+    return u' || '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
 acr_fields = ['id',
           'record_status_value',
           'type_controlled',
           'data_display_order',
           'name_for_display_in_citation',
           'citation__id',
-          'authority__record_status_value',
-          'authority__type_controlled',
-          'authority__name'
+          'citation__record_status_value',
+          'citation__type_controlled',
+          'citation__title'
          ]
 
 def _redirect(obj, extra):
@@ -78,17 +78,24 @@ def _attributes(obj, extra):
     qs = obj.attributes.all()
 
     def create_value_list(x):
+        start, end = '', ''
+        if isinstance(x.value.cvalue(), list):
+            if len(x.value.cvalue()) > 0:
+                start = ', '.join([str(y) for y in x.value.cvalue()[0]]) if isinstance(x.value.cvalue()[0], list) else str(x.value.cvalue()[0])
+            if len(x.value.cvalue()) > 1:
+                end = ', '.join([str(y) for y in x.value.cvalue()[1]]) if isinstance(x.value.cvalue()[1], list) else str(x.value.cvalue()[1])
+
         return ['AttributeID ' + x.id,
             'AttributeStatus ' + (x.record_status_value if x.record_status_value else ''),
             'AttributeType ' + x.type_controlled.name,
-            'AttributeValue ' + str(x.value.cvalue()),
+            'AttributeValue ' + (str(x.value.cvalue()) if x.value and x.value.cvalue() else ''),
             'AttributeFreeFormValue ' + (x.value_freeform if x.value_freeform else ''),
-            'AttributeStart ' + (', '.join([str(y) for y in x.value.cvalue()[0]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[0] else ""),
-            'AttributeEnd ' + (', '.join([str(y) for y in x.value.cvalue()[1]]) if isinstance(x.value.cvalue(), list) and x.value.cvalue()[1] else ""),
+            'AttributeStart ' + start,
+            'AttributeEnd ' + end,
             'AttributeDescription ' + (x.description if x.description else '')]
 
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: u' '.join(create_value_list(x)), qs))
+        return u' // '.join(map(lambda x: u' || '.join(create_value_list(x)), qs))
 
     return u""
 
@@ -100,7 +107,7 @@ def _linked_data(obj, extra):
     if qs.count() == 0:
         return u''
 
-    return u' // '.join(map(lambda x: u' '.join(['LinkedData_ID ' + x[0], 'Status ' + x[1], 'Type ' + x[2], 'URN ' + x[3], 'ResourceName ' + x[4], 'URL ' + x[5]]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
+    return u' // '.join(map(lambda x: u' || '.join(['LinkedData_ID ' + x[0], 'Status ' + x[1], 'Type ' + x[2], 'URN ' + x[3], 'ResourceName ' + x[4], 'URL ' + x[5]]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
 
 def _related_citations(obj, extra):
     qs = obj.acrelation_set.all()
