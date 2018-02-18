@@ -943,8 +943,6 @@ def authority_author_timeline(request, authority_id):
 
     SHOWN_TITLES_COUNT = 3
     for year in range(1970, now.year):
-        #counts = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
-        #weights = [calculate_weight(a) for a in acrelations]
         books.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).count())
         theses.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.AUTHOR], citation__type_controlled=Citation.THESIS).count())
         chapters.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).count())
@@ -956,7 +954,7 @@ def authority_author_timeline(request, authority_id):
         chapter_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
         article_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
         review_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-        #counts.append(sum(weights))
+
         years.append(str(year))
         titles.update({
             str(year): {
