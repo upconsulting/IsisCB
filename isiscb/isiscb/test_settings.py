@@ -270,6 +270,6 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        return "notmigrations"
+        return None
 
 MIGRATION_MODULES = DisableMigrations()
