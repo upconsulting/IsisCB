@@ -968,7 +968,6 @@ def authority_author_timeline(request, authority_id):
 
     data = {
         'years': years,
-        #'counts': counts,
         'books': books,
         'theses': theses,
         'chapters': chapters,
@@ -978,8 +977,7 @@ def authority_author_timeline(request, authority_id):
     }
 
     cache.set(authority_id + '_count_data', data)
-
-
+    
     return JsonResponse(data)
 
 def citation(request, citation_id):
