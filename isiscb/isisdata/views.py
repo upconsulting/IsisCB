@@ -9,6 +9,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Q
+from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -931,53 +932,71 @@ def authority_author_timeline(request, authority_id):
     if cache_data:
         return JsonResponse(cache_data)
 
-    acr = ACRelation.objects.all().filter(authority__id=authority_id, public=True, citation__public=True)
-    books = []
-    theses = []
-    chapters = []
-    articles = []
-    reviews = []
+    acrelations = ACRelation.objects.all().prefetch_related(Prefetch('citation')).filter(
+        authority__id=authority_id, public=True, citation__public=True,
+        citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
+    books = {}
+    theses = {}
+    chapters = {}
+    articles = {}
+    reviews = {}
     years = []
 
-    titles = {}
+    def update_stats(dictionary, acrel):
+        record = dictionary.get(acrel.citation.publication_date.year, (0, []))
+        dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [acrel.citation.title_for_display])
+
+    for acrel in acrelations:
+        if acrel.citation.type_controlled == Citation.BOOK and acrel.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]:
+            update_stats(books, acrel)
+        elif acrel.citation.type_controlled == Citation.THESIS and acrel.type_controlled in [ACRelation.AUTHOR]:
+            update_stats(theses, acrel)
+        elif acrel.citation.type_controlled == Citation.CHAPTER and acrel.type_controlled in [ACRelation.AUTHOR]:
+            update_stats(chapters, acrel)
+        elif acrel.citation.type_controlled == Citation.ARTICLE and acrel.type_controlled in [ACRelation.AUTHOR]:
+            update_stats(articles, acrel)
+        elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] and acrel.type_controlled in [ACRelation.AUTHOR]:
+            update_stats(reviews, acrel)
+
+    book_count = []
+    thesis_count = []
+    article_count = []
+    chapter_count = []
+    review_count = []
 
     SHOWN_TITLES_COUNT = 3
+    titles = {}
+
     for year in range(1970, now.year):
-        books.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).count())
-        theses.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.AUTHOR], citation__type_controlled=Citation.THESIS).count())
-        chapters.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).count())
-        articles.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).count())
-        reviews.append(acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).count())
-
-        book_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.BOOK, type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-        thesis_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, type_controlled__in=[ACRelation.AUTHOR], citation__type_controlled=Citation.THESIS).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-        chapter_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.CHAPTER, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-        article_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled=Citation.ARTICLE, type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-        review_records = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year, citation__type_controlled__in=[Citation.REVIEW, Citation.ESSAY_REVIEW], type_controlled__in=[ACRelation.AUTHOR]).order_by('-citation__publication_date')[:SHOWN_TITLES_COUNT]
-
         years.append(str(year))
+        book_count.append(books.get(year, (0, []))[0])
+        thesis_count.append(theses.get(year, (0, []))[0])
+        article_count.append(articles.get(year, (0, []))[0])
+        chapter_count.append(chapters.get(year, (0, []))[0])
+        review_count.append(reviews.get(year, (0, []))[0])
+
         titles.update({
-            str(year): {
-                'books': [r.citation.title for r in book_records],
-                'theses': [r.citation.title for r in thesis_records],
-                'chapters': [r.citation.title for r in chapter_records],
-                'articles': [r.citation.title for r in article_records],
-                'reviews': [r.citation.title_for_display for r in review_records],
-            }
-        })
+                 str(year): {
+                     'books': [r for r in books.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'theses': [r for r in theses.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'chapters': [r for r in chapters.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'articles': [r for r in articles.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'reviews': [r for r in reviews.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                 }
+             })
 
     data = {
         'years': years,
-        'books': books,
-        'theses': theses,
-        'chapters': chapters,
-        'articles': articles,
-        'reviews': reviews,
+        'books': book_count,
+        'theses': thesis_count,
+        'chapters': chapter_count,
+        'articles': article_count,
+        'reviews': review_count,
         'titles': titles
     }
 
     cache.set(authority_id + '_count_data', data)
-    
+
     return JsonResponse(data)
 
 def citation(request, citation_id):
