@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'simple_history',
     'storages',
     # 'haystack',
-    # 'captcha',
+    'captcha',
     # "elasticstack",     # TODO: Do we need this?
     'oauth2_provider',
     # 'corsheaders',
@@ -122,14 +122,13 @@ DATABASES = {
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-#         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-#         'URL': ELASTICSEARCH_HOST,
-#         'INDEX_NAME': ELASTICSEARCH_INDEX,
-#     },
-# }
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        'URL': ELASTICSEARCH_HOST,
+        'INDEX_NAME': ELASTICSEARCH_INDEX,
+    },
+}
 #
 # ELASTICSEARCH_INDEX_SETTINGS = {
 #      "settings" : {
