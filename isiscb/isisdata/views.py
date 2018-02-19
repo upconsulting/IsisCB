@@ -944,7 +944,8 @@ def authority_author_timeline(request, authority_id):
 
     def update_stats(dictionary, acrel):
         record = dictionary.get(acrel.citation.publication_date.year, (0, []))
-        dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [acrel.citation.title_for_display])
+        title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
+        dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [title])
 
     for acrel in acrelations:
         if acrel.citation.type_controlled == Citation.BOOK and acrel.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]:
