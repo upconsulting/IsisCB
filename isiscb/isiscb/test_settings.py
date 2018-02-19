@@ -122,11 +122,12 @@ DATABASES = {
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
+# for some reason django wants this, since we are importing haystack class in views
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-        'URL': ELASTICSEARCH_HOST,
-        'INDEX_NAME': ELASTICSEARCH_INDEX,
+        'URL': 'localhost:9200/',
+        'INDEX_NAME': 'haystack',
     },
 }
 #
