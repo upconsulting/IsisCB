@@ -940,6 +940,7 @@ def authority_author_timeline(request, authority_id):
     chapters = {}
     articles = {}
     reviews = {}
+    others = {}
     years = []
 
     def update_stats(dictionary, acrel):
@@ -958,12 +959,15 @@ def authority_author_timeline(request, authority_id):
             update_stats(articles, acrel)
         elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] and acrel.type_controlled in [ACRelation.AUTHOR]:
             update_stats(reviews, acrel)
+        else:
+            update_stats(others, acrel)
 
     book_count = []
     thesis_count = []
     article_count = []
     chapter_count = []
     review_count = []
+    other_count = []
 
     SHOWN_TITLES_COUNT = 3
     titles = {}
@@ -975,6 +979,7 @@ def authority_author_timeline(request, authority_id):
         article_count.append(articles.get(year, (0, []))[0])
         chapter_count.append(chapters.get(year, (0, []))[0])
         review_count.append(reviews.get(year, (0, []))[0])
+        other_count.append(others.get(year, (0, []))[0])
 
         titles.update({
                  str(year): {
@@ -983,6 +988,7 @@ def authority_author_timeline(request, authority_id):
                      'chapters': [r for r in chapters.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
                      'articles': [r for r in articles.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
                      'reviews': [r for r in reviews.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'others': [r for r in others.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
                  }
              })
 
@@ -993,6 +999,7 @@ def authority_author_timeline(request, authority_id):
         'chapters': chapter_count,
         'articles': article_count,
         'reviews': review_count,
+        'others': other_count,
         'titles': titles
     }
 

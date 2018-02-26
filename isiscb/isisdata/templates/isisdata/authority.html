@@ -341,6 +341,30 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <script>
   //# sourceURL=chart.js
     $(document).ready(function() {
+
+      function buildTitles(d, titles, type) {
+        var TITLE_LENGTH = 10;
+        var trimmed_titles = [];
+        var title_strings = titles[d[type].x][d[type].id];
+        for (var t in title_strings) {
+          var title = title_strings[t];
+          var parts = title.split(' ');
+          if (parts.length < TITLE_LENGTH) {
+            trimmed_titles.push(title);
+          } else {
+            trimmed_titles.push(parts.slice(0,TITLE_LENGTH).join(' ') + "...");
+          }
+        }
+
+        var panel = '';
+        if (d[type].value > 0) {
+          panel += '<strong>' + d[type].x + ' - ' + d[type].name + ' (' + d[type].value + ')</strong>';
+          panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
+        }
+
+        return panel;
+      }
+
       var titles;
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
@@ -349,7 +373,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                     ['theses'].concat(data.theses),
                     ['chapters'].concat(data.chapters),
                     ['articles'].concat(data.articles),
-                    ['reviews'].concat(data.reviews)];
+                    ['reviews'].concat(data.reviews),
+                    ['others'].concat(data.others)];
         var years = ['Years'].concat(data.years);
         var chart = c3.generate({
           bindto: '#chart',
@@ -358,44 +383,41 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             columns: [years].concat(cols),
             type: 'bar',
             groups: [
-              ['books', 'theses', 'chapters', 'articles', 'reviews']
+              ['books', 'theses', 'chapters', 'articles', 'reviews', 'others']
             ],
             colors: {
-              books: '#c7e9b4',
-              theses: '#7fcdbb',
-              chapters: '#41b6c4',
-              articles: '#2c7fb8',
-              reviews: '#253494'
+              books: '#a0d285',
+              theses: '#70b5a5',
+              chapters: '#2f7b84',
+              articles: '#358ecc',
+              reviews: '#273696',
+              others: '#000108',
             },
             names: {
-              books: 'Book Author/Editor',
+              books: 'Book',
               theses: 'Thesis',
-              chapters: 'Chapter Author',
-              articles: 'Article Author',
-              reviews: 'Reviews/Essay Reviews'
+              chapters: 'Chapter',
+              articles: 'Article',
+              reviews: 'Review',
+              others: 'Other'
             }
           },
-          tooltip: {
-            grouped: false,
-            contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
-              var TITLE_LENGTH = 10;
-              var trimmed_titles = [];
-              var title_strings = titles[d[0].x][d[0].id];
-              for (var t in title_strings) {
-                var title = title_strings[t];
-                var parts = title.split(' ');
-                if (parts.length < TITLE_LENGTH) {
-                  trimmed_titles.push(title);
-                } else {
-                  trimmed_titles.push(parts.slice(0,TITLE_LENGTH).join(' ') + "...");
-                }
+          axis : {
+              y : {
+                  tick: {
+                      format: function(x) { return x % 1 === 0 ? x : ''; }
+                  }
               }
+          },
+          tooltip: {
+            grouped: true,
+            contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+
               var panel = '<div class="panel panel-default timeline">';
-              panel += '<div class="panel-heading">';
-              panel += '<h3 class="panel-title">' + d[0].x + ' - ' + d[0].name + ' (' + d[0].value + ')</h3>';
-              panel += '</div>';
               panel += '<div class="panel-body">';
-              panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
+              for (i=0; i<6; i++) {
+                panel += buildTitles(d, titles, i);
+              }
               panel += '</div>';
               panel += '</div>';
 
