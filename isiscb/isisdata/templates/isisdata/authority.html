@@ -315,13 +315,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </tr>
   </table>
 
-  {% if authority|is_person %}
   <div id="author_charts">
     <div><h3>Timeline</h3></div>
     <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
     <div id="chart"></div>
+    <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
   </div>
-  {% endif %}
 
     </div>
 
@@ -337,10 +336,24 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
   <script src="{% static "isisdata/c3/c3.min.js" %}"></script>
 
-  {% if authority|is_person %}
   <script>
   //# sourceURL=chart.js
-    $(document).ready(function() {
+  var titles;
+  var books;
+  var theses;
+  var chapters;
+  var articles;
+  var reviews;
+  var others;
+  var years;
+  var showReviews = true;
+
+  $(document).ready(function() {
+
+      $('#showReviewsCheckbox').change(function() {
+        showReviews = $(this).is(':checked');
+        renderChart();
+      });
 
       function buildTitles(d, titles, type) {
         var TITLE_LENGTH = 10;
@@ -358,24 +371,71 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
         var panel = '';
         if (d[type].value > 0) {
-          panel += '<strong>' + d[type].x + ' - ' + d[type].name + ' (' + d[type].value + ')</strong>';
+          panel += '<strong>' + d[type].name + ' (' + d[type].value + ')</strong>';
           panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
         }
 
         return panel;
       }
 
-      var titles;
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
         titles = data.titles;
-        var cols = [['books'].concat(data.books),
-                    ['theses'].concat(data.theses),
-                    ['chapters'].concat(data.chapters),
-                    ['articles'].concat(data.articles),
-                    ['reviews'].concat(data.reviews),
-                    ['others'].concat(data.others)];
-        var years = ['Years'].concat(data.years);
+        books = ['books'].concat(data.books);
+        theses = ['theses'].concat(data.theses);
+        chapters = ['chapters'].concat(data.chapters);
+        articles = ['articles'].concat(data.articles);
+        reviews = ['reviews'].concat(data.reviews);
+        others = ['others'].concat(data.others);
+        years = ['Years'].concat(data.years);
+        renderChart();
+      });
+
+
+      function renderChart() {
+        var cols;
+        var groups;
+        var colors;
+        var names;
+        // this is ugly but ah well
+        if (!showReviews) {
+          cols = [books, theses, chapters, articles, others];
+          groups = ['books', 'theses', 'chapters', 'articles', 'others']
+          colors = {
+            books: '#a0d285',
+            theses: '#70b5a5',
+            chapters: '#2f7b84',
+            articles: '#358ecc',
+            others: '#000108',
+          };
+          names = {
+            books: 'Book',
+            theses: 'Thesis',
+            chapters: 'Chapter',
+            articles: 'Article',
+            others: 'Other'
+          };
+        } else {
+          cols = [books, theses, chapters, articles, reviews, others];
+          groups = ['books', 'theses', 'chapters', 'articles', 'reviews', 'others'];
+          colors = {
+            books: '#a0d285',
+            theses: '#70b5a5',
+            chapters: '#2f7b84',
+            articles: '#358ecc',
+            reviews: '#273696',
+            others: '#000108',
+          };
+          names = {
+            books: 'Book',
+            theses: 'Thesis',
+            chapters: 'Chapter',
+            articles: 'Article',
+            reviews: 'Review',
+            others: 'Other'
+          };
+        }
+
         var chart = c3.generate({
           bindto: '#chart',
           data: {
@@ -383,24 +443,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             columns: [years].concat(cols),
             type: 'bar',
             groups: [
-              ['books', 'theses', 'chapters', 'articles', 'reviews', 'others']
+              groups
             ],
-            colors: {
-              books: '#a0d285',
-              theses: '#70b5a5',
-              chapters: '#2f7b84',
-              articles: '#358ecc',
-              reviews: '#273696',
-              others: '#000108',
-            },
-            names: {
-              books: 'Book',
-              theses: 'Thesis',
-              chapters: 'Chapter',
-              articles: 'Article',
-              reviews: 'Review',
-              others: 'Other'
-            }
+            colors: colors,
+            names: names,
           },
           axis : {
               y : {
@@ -414,8 +460,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
 
               var panel = '<div class="panel panel-default timeline">';
+              panel += '<div class="panel-heading">' + d[0].x + '</div>'
               panel += '<div class="panel-body">';
-              for (i=0; i<6; i++) {
+              var nrOfTypes = showReviews ? 6 : 5;
+              for (i=0; i<nrOfTypes; i++) {
                 panel += buildTitles(d, titles, i);
               }
               panel += '</div>';
@@ -425,11 +473,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             },
           },
         });
-      });
-
+      }
     });
   </script>
-  {% endif %}
 
 </div>
 {% endblock %}

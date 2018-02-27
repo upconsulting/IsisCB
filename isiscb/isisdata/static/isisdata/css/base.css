@@ -1,14 +1,18 @@
 /** Timeline **/
 
-/*.timeline .panel-body {
-  padding: 10px;
+.timeline .panel-heading {
+  font-size: 12px;
+  padding: 5px;
 }
 
-.timeline .panel-body ul {
-  padding-left: 20px;
-  padding-right: 3px;
-  margin-bottom: 0px;
-}*/
+.timeline .panel-body  {
+  font-size: 12px;
+  padding: 5px
+}
+
+.timeline ul {
+  margin-bottm: 5px;
+}
 
 /*body { padding-top: 125px; }*/
 
