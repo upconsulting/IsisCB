@@ -97,10 +97,19 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
     </table>
 
-    <h4>Resources in which {{ authority.name }} has the role:<h4>
+    <div id="publication_chart">
+      <div><h4>Timeline of citations associated with this authority separated by type.</h4></div>
+      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
+      <div id="chart"></div>
+      <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+    </div>
+
+    <hr>
+    <h4>Records associated with each authority separated by role.</h4>
+    <h5>Resources in which {{ authority.name }} has the role:</h5>
 
     {% if related_citations_author %}
-    <h4>Author</h4>
+    <h5><strong>Author</strong></h5>
 
       {% for rel_citation in related_citations_author %}
         {% with rel_citation.citation as citation_object %}
@@ -116,7 +125,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_editor %}
-    <h4 style="clear: both; padding-top: 10px">Editor</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Editor</strong></h5>
 
       {% for rel_citation in related_citations_editor %}
         {% with rel_citation.citation as citation_object %}
@@ -132,7 +141,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_advisor %}
-    <h4 style="clear: both; padding-top: 10px">Advisor</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Advisor</strong></h5>
 
       {% for rel_citation in related_citations_advisor %}
         {% with rel_citation.citation as citation_object %}
@@ -149,7 +158,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_contributor %}
-    <h4 style="clear: both; padding-top: 10px">Contributor</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Contributor</strong></h5>
 
       {% for rel_citation in related_citations_contributor %}
         {% with rel_citation.citation as citation_object %}
@@ -165,7 +174,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_translator %}
-    <h4 style="clear: both; padding-top: 10px">Translator</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Translator</strong></h5>
 
       {% for rel_citation in related_citations_translator %}
         {% with rel_citation.citation as citation_object %}
@@ -181,7 +190,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_subject %}
-    <h4 style="clear: both; padding-top: 10px">Subject</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Subject</strong></h5>
 
       {% for rel_citation in related_citations_subject %}
         {% with rel_citation.citation as citation_object %}
@@ -197,7 +206,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_category %}
-    <h4 style="clear: both; padding-top: 10px">Category</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Category</strong></h5>
 
       {% for rel_citation in related_citations_category %}
         {% with rel_citation.citation as citation_object %}
@@ -213,7 +222,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_publisher %}
-    <h4 style="clear: both; padding-top: 10px">Publisher</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Publisher</strong></h5>
 
       {% for rel_citation in related_citations_publisher %}
         {% with rel_citation.citation as citation_object %}
@@ -229,7 +238,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_school %}
-    <h4 style="clear: both; padding-top: 10px">School</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>School</strong></h5>
 
       {% for rel_citation in related_citations_school %}
         {% with rel_citation.citation as citation_object %}
@@ -245,7 +254,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_institution %}
-    <h4 style="clear: both; padding-top: 10px">Institution</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Institution</strong></h5>
 
       {% for rel_citation in related_citations_institution %}
         {% with rel_citation.citation as citation_object %}
@@ -261,7 +270,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_meeting %}
-    <h4 style="clear: both; padding-top: 10px">Institution</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Meeting</strong></h5>
 
       {% for rel_citation in related_citations_meeting %}
         {% with rel_citation.citation as citation_object %}
@@ -277,7 +286,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_periodical %}
-    <h4 style="clear: both; padding-top: 10px">Periodical</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Periodical</strong></h5>
 
       {% for rel_citation in related_citations_periodical %}
         {% with rel_citation.citation as citation_object %}
@@ -293,7 +302,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
 
     {% if related_citations_book_series %}
-    <h4 style="clear: both; padding-top: 10px">Book Series</h4>
+    <h5 style="clear: both; padding-top: 10px"><strong>Book Series</strong></h5>
 
       {% for rel_citation in related_citations_book_series %}
         {% with rel_citation.citation as citation_object %}
@@ -314,13 +323,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <td>{{ authority | get_uri }}</td>
     </tr>
   </table>
-
-  <div id="author_charts">
-    <div><h3>Timeline</h3></div>
-    <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
-    <div id="chart"></div>
-    <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
-  </div>
 
     </div>
 
