@@ -909,23 +909,6 @@ def authority(request, authority_id):
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
 
-    def calculate_weight(acr):
-        type_weights = {
-            ACRelation.AUTHOR: 1,
-            ACRelation.EDITOR: 0.5,
-            ACRelation.ADVISOR: 0.5,
-            ACRelation.CONTRIBUTOR: 0.25,
-        }
-        citation_type_weight = {
-            Citation.BOOK: 4,
-            Citation.THESIS: 2,
-            Citation.CHAPTER: 1,
-            Citation.ARTICLE: 1,
-            Citation.ESSAY_REVIEW: 0.67,
-            Citation.REVIEW: 0.33,
-        }
-        return type_weights.get(acr.type_controlled, 0)*citation_type_weight.get(acr.citation.type_controlled, 0)
-
     cache = caches['default']
     cache_data = cache.get(authority_id + '_count_data', {})
 
@@ -943,7 +926,11 @@ def authority_author_timeline(request, authority_id):
     others = {}
     years = []
 
+    counted_citations = []
     def update_stats(dictionary, acrel):
+        if acrel.citation.id in counted_citations:
+            return
+        counted_citations.append(acrel.citation.id)
         record = dictionary.get(acrel.citation.publication_date.year, (0, []))
         title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
         dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [title])
