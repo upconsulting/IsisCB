@@ -14,6 +14,10 @@
   margin-bottm: 5px;
 }
 
+div.timeline {
+  opacity: 0.9;
+}
+
 /*body { padding-top: 125px; }*/
 
 .mainjumbo p {
