@@ -466,7 +466,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
 
               var panel = '<div class="panel panel-default timeline">';
-              panel += '<div class="panel-heading">' + d[0].x + '</div>'
+              panel += '<div class="panel-heading"><strong>' + d[0].x + '</strong> (click on bar to see all citations)</div>'
               panel += '<div class="panel-body">';
               var nrOfTypes = showReviews ? 6 : 5;
               for (i=0; i<nrOfTypes; i++) {
