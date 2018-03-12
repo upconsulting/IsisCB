@@ -393,16 +393,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         renderChart();
       });
 
-
+      var current_groups;
       function renderChart() {
         var cols;
-        var groups;
         var colors;
         var names;
         // this is ugly but ah well
         if (!showReviews) {
           cols = [books, theses, chapters, articles, others];
-          groups = ['books', 'theses', 'chapters', 'articles', 'others']
+          current_groups = ['books', 'theses', 'chapters', 'articles', 'others']
           colors = {
             books: '#a0d285',
             theses: '#70b5a5',
@@ -419,7 +418,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           };
         } else {
           cols = [books, theses, chapters, articles, reviews, others];
-          groups = ['books', 'theses', 'chapters', 'articles', 'reviews', 'others'];
+          current_groups = ['books', 'theses', 'chapters', 'articles', 'reviews', 'others'];
           colors = {
             books: '#a0d285',
             theses: '#70b5a5',
@@ -445,7 +444,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             columns: [years].concat(cols),
             type: 'bar',
             groups: [
-              groups
+              current_groups
             ],
             colors: colors,
             names: names,
@@ -460,6 +459,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       format: function(x) { return x % 1 === 0 ? x : ''; }
                   }
               }
+          },
+          legend: {
+            item: {
+              onclick: function (id) {
+                chart.revert();
+                current_groups.forEach(function(element) {
+                  if (element != id) {
+                    chart.toggle(element);
+                  }
+                });
+              }
+            }
           },
           tooltip: {
             grouped: true,
