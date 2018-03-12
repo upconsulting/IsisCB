@@ -4,7 +4,7 @@
 <p>
   <span class="glyphicon glyphicon-book"></span>
   [{{ citation_object.get_type_controlled_display }}]
-  <br>
+  
   <!-- author -->
   {% if citation_object.get_all_contributors %}
     {{ citation_object.get_all_contributors|join_authors:"" }}
@@ -16,7 +16,11 @@
   <a href="{% url 'index' citation_object.id %}">{{ citation_object|get_title|bleach_safe }}</a>.
   <!-- book title -->
   {% if citation_object|get_book_title %}
-  In: <em>{{ citation_object|get_book_title }}</em> {% if not citation_object|get_page_string %}.{% endif %}
+  In: <em>{{ citation_object|get_book_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}
+  {% endif %}
+  <!-- journal title -->
+  {% if citation_object|get_journal_title %}
+    <em>{{ citation_object|get_journal_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}
   {% endif %}
 
 <!-- page numbers -->

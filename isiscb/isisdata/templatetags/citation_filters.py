@@ -63,6 +63,15 @@ def get_book_title(citation):
 
     return ""
 
+@register.filter
+def get_journal_title(citation):
+    if citation.type_controlled in [Citation.ARTICLE]:
+        parent_relation = ACRelation.objects.filter(citation=citation.id, type_controlled=ACRelation.PERIODICAL)
+        # we assume there is just one
+        if parent_relation:
+            return parent_relation[0].authority.name
+
+    return ""
 
 @register.filter
 def contributor_with_role_as_string(acrelation):

@@ -105,11 +105,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
 
     <hr>
-    <h4>Records associated with each authority separated by role.</h4>
-    <h5>Resources in which {{ authority.name }} has the role:</h5>
+    <h4>All records associated with this authority. <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">See a list of {{related_citations_count}} records.</a></h4>
+    <p>Records related by role:</p>
 
     {% if related_citations_author %}
-    <h5><strong>Author</strong></h5>
+    <p style="padding-top: 12px"><strong>Author</strong> (most recent) <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_author %}
         {% with rel_citation.citation as citation_object %}
@@ -117,31 +117,20 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-    <div class="pull-right">
-      {% if related_citations_author_count > 3 %}
-      <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} citations...</a>
-      {% endif %}
-    </div>
     {% endif %}
 
     {% if related_citations_editor %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Editor</strong></h5>
+    <p style="padding-top: 12px"><strong>Editor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_editor %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_editor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_advisor %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Advisor</strong></h5>
+    <p style="padding-top: 12px"><strong>Advisor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_advisor %}
         {% with rel_citation.citation as citation_object %}
@@ -149,172 +138,106 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-      <div class="pull-right">
-        {% if related_citations_advisor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
-        {% endif %}
-      </div>
-
     {% endif %}
 
     {% if related_citations_contributor %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Contributor</strong></h5>
+    <p style="padding-top: 12px"><strong>Contributor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} records related in this way.</a></h5>
 
       {% for rel_citation in related_citations_contributor %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_contributor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_translator %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Translator</strong></h5>
+    <p style="padding-top: 12px"><strong>Translator</strong> (most recent) <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_translator %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_translator_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_subject %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Subject</strong></h5>
+    <p style="padding-top: 12px"><strong>Subject</strong> (most recent) <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_subject %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_subject_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_category %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Category</strong></h5>
+    <p style="padding-top: 12px"><strong>Category</strong> (most recent) <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_category %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_category_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_publisher %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Publisher</strong></h5>
+    <p style="padding-top: 12px"><strong>Publisher</strong> (most recent) <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_publisher %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_publisher_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_school %}
-    <h5 style="clear: both; padding-top: 10px"><strong>School</strong></h5>
+    <p style="padding-top: 12px"><strong>School</strong> (most recent) <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_school %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_school_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_institution %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Institution</strong></h5>
+    <p style="padding-top: 12px"><strong>Institution</strong> (most recent) <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_institution %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_institution_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_meeting %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Meeting</strong></h5>
+    <p style="padding-top: 12px"><strong>Meeting</strong> (most recent) <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_meeting %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_meeting_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_periodical %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Periodical</strong></h5>
+    <p style="padding-top: 12px"><strong>Periodical</strong> (most recent) <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_periodical %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_periodical_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_book_series %}
-    <h5 style="clear: both; padding-top: 10px"><strong>Book Series</strong></h5>
+    <p style="padding-top: 12px"><strong>Book Series</strong> (most recent) <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_book_series %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_book_series_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     <table  class="details" style="margin-top: 40px;">

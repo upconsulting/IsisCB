@@ -792,6 +792,10 @@ def authority(request, authority_id):
                                                        .distinct('citation_id')\
                                                        .count()
 
+    related_citations_count = acrelation_qs.filter(authority=authority, citation__public=True)\
+                                                       .distinct('citation_id')\
+                                                       .count()
+
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
@@ -864,6 +868,7 @@ def authority(request, authority_id):
     context = {
         'authority_id': authority_id,
         'authority': authority,
+        'related_citations_count': related_citations_count,
         'related_citations_author': related_citations_author,
         'related_citations_author_count': related_citations_author_count,
         'related_citations_editor': related_citations_editor,
