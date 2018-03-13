@@ -1,10 +1,10 @@
 {% load app_filters %}
 {% load citation_filters %}
 
-<p>
+<p style="margin-left: 15px;">
   <span class="glyphicon glyphicon-book"></span>
   [{{ citation_object.get_type_controlled_display }}]
-  
+
   <!-- author -->
   {% if citation_object.get_all_contributors %}
     {{ citation_object.get_all_contributors|join_authors:"" }}
@@ -23,7 +23,12 @@
     <em>{{ citation_object|get_journal_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}
   {% endif %}
 
+  <!-- get school -->
+  {% if citation_object|get_school %}{{citation_object|get_school}}.{% endif %}
+
 <!-- page numbers -->
   {% if citation_object|get_page_string %}({{citation_object|get_page_string}}).{% endif %}
+
+
 
 </p>
