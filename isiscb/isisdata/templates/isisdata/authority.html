@@ -15,6 +15,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
 </script>
 
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
+
 <script src="{% static "isisdata/js/comments.js" %}"></script>
 
 <meta property="og:url"                content="{{ request.build_absolute_uri }}" />

@@ -29,6 +29,9 @@
 <!-- page numbers -->
   {% if citation_object|get_page_string %}({{citation_object|get_page_string}}).{% endif %}
 
-
+  <!-- Zotero -->
+  <span style="display:none;">
+     <abbr class="unapi-id" title="{{ citation_object.id|get_pk }}">unapi</abbr>
+  </span>
 
 </p>
