@@ -386,12 +386,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           legend: {
             item: {
               onclick: function (id) {
-                chart.revert();
-                current_groups.forEach(function(element) {
-                  if (element != id) {
-                    chart.toggle(element);
-                  }
-                });
+                return;
               }
             }
           },
@@ -411,6 +406,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
               return panel;
             },
+            position: function (data, width, height, element) {
+                 var cursorPos = d3.mouse(element)[0];
+                 var chartWidth = $('#chart').width();
+                 if (chartWidth/2 > cursorPos) {
+                   // put on right side of cursor
+                   // roughly even positioning from the cursor
+                   return {top: 5, left: parseInt(element.getAttribute('x')) + parseInt(element.getAttribute('width')) + 60};
+                 } else {
+                   // tooltip on left side of cursor
+                   return {top: 5, left: parseInt(element.getAttribute('x')) - width};
+                 }
+             },
           },
         });
       }
