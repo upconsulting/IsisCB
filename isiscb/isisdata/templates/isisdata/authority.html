@@ -100,7 +100,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </table>
 
     <div id="publication_chart">
-      <div><h4>Timeline of citations associated with this authority separated by type.</h4></div>
+      <div><h4>Publication dates of all citations associated with this authority record.</h4></div>
       <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
       <div id="chart"></div>
       <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
@@ -305,6 +305,19 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         return panel;
       }
 
+      /*
+       * Hide ticks without numbers
+       */
+      function hideTicks() {
+        $('.c3-axis-y .tick').each(function(idx, element) {
+          var line = $(element).find("line");
+          var text = $(element).find("text>tspan");
+          if (!text.text()) {
+            line.css("display", "none");
+          }
+        });
+      }
+
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
         titles = data.titles;
@@ -326,13 +339,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         // this is ugly but ah well
         if (!showReviews) {
           cols = [books, theses, chapters, articles, others];
-          current_groups = ['books', 'theses', 'chapters', 'articles', 'others']
+          current_groups = ['articles', 'books', 'chapters', 'others','theses']
           colors = {
-            books: '#a0d285',
-            theses: '#70b5a5',
-            chapters: '#2f7b84',
             articles: '#358ecc',
+            books: '#a0d285',
+            chapters: '#2f7b84',
             others: '#000108',
+            theses: '#70b5a5',
           };
           names = {
             books: 'Book',
@@ -343,14 +356,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           };
         } else {
           cols = [books, theses, chapters, articles, reviews, others];
-          current_groups = ['books', 'theses', 'chapters', 'articles', 'reviews', 'others'];
+          current_groups = ['articles', 'books', 'chapters', 'others','theses', 'reviews' ]
           colors = {
-            books: '#a0d285',
-            theses: '#70b5a5',
-            chapters: '#2f7b84',
             articles: '#358ecc',
-            reviews: '#273696',
+            books: '#a0d285',
+            chapters: '#2f7b84',
             others: '#000108',
+            reviews: '#273696',
+            theses: '#70b5a5',
           };
           names = {
             books: 'Book',
@@ -376,12 +389,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             onclick: function (d, element) {
               var date = d['x']
               window.location.href = '{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
+            },
+            order: function (t1, t2) {
+              return t1.id < t2.id;
             }
           },
           axis : {
               y : {
                   tick: {
-                      format: function(x) { return x % 1 === 0 ? x : ''; }
+                      format: function(x) { return x % 1 === 0 ? x : ''; },
                   }
               }
           },
@@ -390,7 +406,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               onclick: function (id) {
                 return;
               }
-            }
+            },
+            position: 'bottom',
+            show: true
           },
           tooltip: {
             grouped: true,
@@ -422,7 +440,28 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              },
           },
         });
+
+        d3.select('.container').insert('div', '.chart').attr('class', 'legend').selectAll('span')
+            .data(['books', 'chapters', 'reviews'])
+          .enter().append('span')
+            .attr('data-id', function (id) { return id; })
+            .html(function (id) { return id; })
+            .each(function (id) {
+                d3.select(this).style('background-color', chart.color(id));
+            })
+            .on('mouseover', function (id) {
+                chart.focus(id);
+            })
+            .on('mouseout', function (id) {
+                chart.revert();
+            })
+            .on('click', function (id) {
+                chart.toggle(id);
+            });
+
+        hideTicks();
       }
+
     });
   </script>
 
