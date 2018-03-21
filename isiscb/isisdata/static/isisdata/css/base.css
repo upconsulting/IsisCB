@@ -1,3 +1,28 @@
+/** Timeline **/
+
+div#publication_chart {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.timeline .panel-heading {
+  font-size: 12px;
+  padding: 5px;
+}
+
+.timeline .panel-body  {
+  font-size: 12px;
+  padding: 5px
+}
+
+.timeline ul {
+  margin-bottm: 5px;
+}
+
+div.timeline {
+  width: 400px;
+}
+
 /*body { padding-top: 125px; }*/
 
 .mainjumbo p {

@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'simple_history',
     'storages',
     # 'haystack',
-    # 'captcha',
+    'captcha',
     # "elasticstack",     # TODO: Do we need this?
     'oauth2_provider',
     # 'corsheaders',
@@ -122,14 +122,14 @@ DATABASES = {
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
-# HAYSTACK_CONNECTIONS = {
-#     'default': {
-#         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
-#         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
-#         'URL': ELASTICSEARCH_HOST,
-#         'INDEX_NAME': ELASTICSEARCH_INDEX,
-#     },
-# }
+# for some reason django wants this, since we are importing haystack class in views
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        'URL': 'localhost:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
 #
 # ELASTICSEARCH_INDEX_SETTINGS = {
 #      "settings" : {
@@ -270,6 +270,6 @@ class DisableMigrations(object):
         return True
 
     def __getitem__(self, item):
-        return "notmigrations"
+        return None
 
 MIGRATION_MODULES = DisableMigrations()

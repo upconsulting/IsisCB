@@ -9,6 +9,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
 from django.db.models import Q
+from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -791,6 +792,10 @@ def authority(request, authority_id):
                                                        .distinct('citation_id')\
                                                        .count()
 
+    related_citations_count = acrelation_qs.filter(authority=authority, citation__public=True)\
+                                                       .distinct('citation_id')\
+                                                       .count()
+
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
@@ -863,6 +868,7 @@ def authority(request, authority_id):
     context = {
         'authority_id': authority_id,
         'authority': authority,
+        'related_citations_count': related_citations_count,
         'related_citations_author': related_citations_author,
         'related_citations_author_count': related_citations_author_count,
         'related_citations_editor': related_citations_editor,
@@ -908,39 +914,88 @@ def authority(request, authority_id):
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
 
-    def calculate_weight(acr):
-        type_weights = {
-            ACRelation.AUTHOR: 1,
-            ACRelation.EDITOR: 0.5,
-            ACRelation.ADVISOR: 0.5,
-            ACRelation.CONTRIBUTOR: 0.25,
-        }
-        citation_type_weight = {
-            Citation.BOOK: 4,
-            Citation.THESIS: 2,
-            Citation.CHAPTER: 1,
-            Citation.ARTICLE: 1,
-            Citation.ESSAY_REVIEW: 0.67,
-            Citation.REVIEW: 0.33,
-        }
-        return type_weights.get(acr.type_controlled, 0)*citation_type_weight.get(acr.citation.type_controlled, 0)
+    cache = caches['default']
+    cache_data = cache.get(authority_id + '_count_data', {})
 
-    acr = ACRelation.objects.all().filter(authority__id=authority_id, public=True, citation__public=True)
-    counts = []
+    if cache_data:
+        return JsonResponse(cache_data)
+
+    acrelations = ACRelation.objects.all().prefetch_related(Prefetch('citation')).filter(
+        authority__id=authority_id, public=True, citation__public=True,
+        citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
+    books = {}
+    theses = {}
+    chapters = {}
+    articles = {}
+    reviews = {}
+    others = {}
     years = []
 
-    for year in range(1970, now.year):
-        acrelations = acr.filter(citation__attributes__type_controlled__name="PublicationDate", citation__attributes__value_freeform=year)
-        weights = [calculate_weight(a) for a in acrelations]
+    counted_citations = []
+    def update_stats(dictionary, acrel):
+        if acrel.citation.id in counted_citations:
+            return
+        counted_citations.append(acrel.citation.id)
+        record = dictionary.get(acrel.citation.publication_date.year, (0, []))
+        title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
+        dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [title])
 
-        counts.append(sum(weights))
+    for acrel in acrelations:
+        if acrel.citation.type_controlled == Citation.BOOK:
+            update_stats(books, acrel)
+        elif acrel.citation.type_controlled == Citation.THESIS:
+            update_stats(theses, acrel)
+        elif acrel.citation.type_controlled == Citation.CHAPTER:
+            update_stats(chapters, acrel)
+        elif acrel.citation.type_controlled == Citation.ARTICLE:
+            update_stats(articles, acrel)
+        elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
+            update_stats(reviews, acrel)
+        else:
+            update_stats(others, acrel)
+
+    book_count = []
+    thesis_count = []
+    article_count = []
+    chapter_count = []
+    review_count = []
+    other_count = []
+
+    SHOWN_TITLES_COUNT = 3
+    titles = {}
+
+    for year in range(1970, now.year):
         years.append(str(year))
+        book_count.append(books.get(year, (0, []))[0])
+        thesis_count.append(theses.get(year, (0, []))[0])
+        article_count.append(articles.get(year, (0, []))[0])
+        chapter_count.append(chapters.get(year, (0, []))[0])
+        review_count.append(reviews.get(year, (0, []))[0])
+        other_count.append(others.get(year, (0, []))[0])
+
+        titles.update({
+                 str(year): {
+                     'books': [r for r in books.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'theses': [r for r in theses.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'chapters': [r for r in chapters.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'articles': [r for r in articles.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'reviews': [r for r in reviews.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                     'others': [r for r in others.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
+                 }
+             })
 
     data = {
         'years': years,
-        'counts': counts,
+        'books': book_count,
+        'theses': thesis_count,
+        'chapters': chapter_count,
+        'articles': article_count,
+        'reviews': review_count,
+        'others': other_count,
+        'titles': titles
     }
 
+    cache.set(authority_id + '_count_data', data)
 
     return JsonResponse(data)
 
