@@ -14,7 +14,7 @@ celery==4.1.0
 cement==2.8.2
 chardet==2.3.0
 colorama==0.3.7
-Django==1.10.6
+Django==1.11.10
 django-autocomplete-light==2.3.2
 django-braces==1.8.1
 django-celery==3.2.1

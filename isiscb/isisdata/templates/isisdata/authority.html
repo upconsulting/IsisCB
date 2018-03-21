@@ -15,6 +15,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
 </script>
 
+<link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
+
 <script src="{% static "isisdata/js/comments.js" %}"></script>
 
 <meta property="og:url"                content="{{ request.build_absolute_uri }}" />
@@ -97,10 +99,19 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% endif %}
     </table>
 
-    <h4>Resources in which {{ authority.name }} has the role:<h4>
+    <div id="publication_chart">
+      <div><h4>Publication dates of all citations associated with this authority record.</h4></div>
+      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
+      <div id="chart"></div>
+      <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+    </div>
+
+    <hr>
+    <h4>All records associated with this authority. <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">See a list of {{related_citations_count}} records.</a></h4>
+    <p>Records related by role:</p>
 
     {% if related_citations_author %}
-    <h4>Author</h4>
+    <p style="padding-top: 12px"><strong>Author</strong> (most recent) <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_author %}
         {% with rel_citation.citation as citation_object %}
@@ -108,31 +119,20 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-    <div class="pull-right">
-      {% if related_citations_author_count > 3 %}
-      <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} citations...</a>
-      {% endif %}
-    </div>
     {% endif %}
 
     {% if related_citations_editor %}
-    <h4 style="clear: both; padding-top: 10px">Editor</h4>
+    <p style="padding-top: 12px"><strong>Editor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_editor %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_editor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_advisor %}
-    <h4 style="clear: both; padding-top: 10px">Advisor</h4>
+    <p style="padding-top: 12px"><strong>Advisor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} records related in this way.</a></p>
 
       {% for rel_citation in related_citations_advisor %}
         {% with rel_citation.citation as citation_object %}
@@ -140,172 +140,106 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       {% endfor %}
 
-      <div class="pull-right">
-        {% if related_citations_advisor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} citations...</a>
-        {% endif %}
-      </div>
-
     {% endif %}
 
     {% if related_citations_contributor %}
-    <h4 style="clear: both; padding-top: 10px">Contributor</h4>
+    <p style="padding-top: 12px"><strong>Contributor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} records related in this way.</a></h5>
 
       {% for rel_citation in related_citations_contributor %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_contributor_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_translator %}
-    <h4 style="clear: both; padding-top: 10px">Translator</h4>
+    <p style="padding-top: 12px"><strong>Translator</strong> (most recent) <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_translator %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_translator_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_subject %}
-    <h4 style="clear: both; padding-top: 10px">Subject</h4>
+    <p style="padding-top: 12px"><strong>Subject</strong> (most recent) <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_subject %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_subject_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_category %}
-    <h4 style="clear: both; padding-top: 10px">Category</h4>
+    <p style="padding-top: 12px"><strong>Category</strong> (most recent) <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_category %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_category_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_publisher %}
-    <h4 style="clear: both; padding-top: 10px">Publisher</h4>
+    <p style="padding-top: 12px"><strong>Publisher</strong> (most recent) <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_publisher %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_publisher_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_school %}
-    <h4 style="clear: both; padding-top: 10px">School</h4>
+    <p style="padding-top: 12px"><strong>School</strong> (most recent) <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_school %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_school_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_institution %}
-    <h4 style="clear: both; padding-top: 10px">Institution</h4>
+    <p style="padding-top: 12px"><strong>Institution</strong> (most recent) <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_institution %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_institution_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_meeting %}
-    <h4 style="clear: both; padding-top: 10px">Institution</h4>
+    <p style="padding-top: 12px"><strong>Meeting</strong> (most recent) <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_meeting %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_meeting_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_periodical %}
-    <h4 style="clear: both; padding-top: 10px">Periodical</h4>
+    <p style="padding-top: 12px"><strong>Periodical</strong> (most recent) <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_periodical %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_periodical_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     {% if related_citations_book_series %}
-    <h4 style="clear: both; padding-top: 10px">Book Series</h4>
+    <p style="padding-top: 12px"><strong>Book Series</strong> (most recent) <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations related in this way.</a></p>
 
       {% for rel_citation in related_citations_book_series %}
         {% with rel_citation.citation as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
       {% endfor %}
-
-      <div class="pull-right">
-        {% if related_citations_book_series_count > 3 %}
-        <span class="glyphicon glyphicon-book"></span> <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations...</a>
-        {% endif %}
-      </div>
     {% endif %}
 
     <table  class="details" style="margin-top: 40px;">
@@ -314,14 +248,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <td>{{ authority | get_uri }}</td>
     </tr>
   </table>
-
-  {% if authority|is_person %}
-  <div id="author_charts">
-    <div><h3>Timeline</h3></div>
-    <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
-    <div id="chart"></div>
-  </div>
-  {% endif %}
 
     </div>
 
@@ -337,27 +263,207 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
   <script src="{% static "isisdata/c3/c3.min.js" %}"></script>
 
-  {% if authority|is_person %}
   <script>
   //# sourceURL=chart.js
-    $(document).ready(function() {
+  var titles;
+  var books;
+  var theses;
+  var chapters;
+  var articles;
+  var reviews;
+  var others;
+  var years;
+  var showReviews = true;
+
+  $(document).ready(function() {
+
+      $('#showReviewsCheckbox').change(function() {
+        showReviews = $(this).is(':checked');
+        renderChart();
+      });
+
+      function buildTitles(d, titles, type) {
+        var TITLE_LENGTH = 10;
+        var trimmed_titles = [];
+        var title_strings = titles[d[type].x][d[type].id];
+        for (var t in title_strings) {
+          var title = title_strings[t];
+          var parts = title.split(' ');
+          if (parts.length < TITLE_LENGTH) {
+            trimmed_titles.push(title);
+          } else {
+            trimmed_titles.push(parts.slice(0,TITLE_LENGTH).join(' ') + "...");
+          }
+        }
+
+        var panel = '';
+        if (d[type].value > 0) {
+          panel += '<strong>' + d[type].name + ' (' + d[type].value + ')</strong>';
+          panel += '<ul><li>' + trimmed_titles.join('</li><li>') + '</li></ul>';
+        }
+
+        return panel;
+      }
+
+      /*
+       * Hide ticks without numbers
+       */
+      function hideTicks() {
+        $('.c3-axis-y .tick').each(function(idx, element) {
+          var line = $(element).find("line");
+          var text = $(element).find("text>tspan");
+          if (!text.text()) {
+            line.css("display", "none");
+          }
+        });
+      }
+
       $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
         $('#spinner').hide();
-        var cols = ['Weighted Contributions'].concat(data.counts);
-        var years = ['x'].concat(data.years);
+        titles = data.titles;
+        books = ['books'].concat(data.books);
+        theses = ['theses'].concat(data.theses);
+        chapters = ['chapters'].concat(data.chapters);
+        articles = ['articles'].concat(data.articles);
+        reviews = ['reviews'].concat(data.reviews);
+        others = ['others'].concat(data.others);
+        years = ['Years'].concat(data.years);
+        renderChart();
+      });
+
+      var current_groups;
+      function renderChart() {
+        var cols;
+        var colors;
+        var names;
+        // this is ugly but ah well
+        if (!showReviews) {
+          cols = [books, theses, chapters, articles, others];
+          current_groups = ['articles', 'books', 'chapters', 'others','theses']
+          colors = {
+            articles: '#358ecc',
+            books: '#a0d285',
+            chapters: '#2f7b84',
+            others: '#000108',
+            theses: '#70b5a5',
+          };
+          names = {
+            books: 'Book',
+            theses: 'Thesis',
+            chapters: 'Chapter',
+            articles: 'Article',
+            others: 'Other'
+          };
+        } else {
+          cols = [books, theses, chapters, articles, reviews, others];
+          current_groups = ['articles', 'books', 'chapters', 'others','theses', 'reviews' ]
+          colors = {
+            articles: '#358ecc',
+            books: '#a0d285',
+            chapters: '#2f7b84',
+            others: '#000108',
+            reviews: '#273696',
+            theses: '#70b5a5',
+          };
+          names = {
+            books: 'Book',
+            theses: 'Thesis',
+            chapters: 'Chapter',
+            articles: 'Article',
+            reviews: 'Review',
+            others: 'Other'
+          };
+        }
+
         var chart = c3.generate({
           bindto: '#chart',
           data: {
-            x: 'x',
-            columns: [years, cols],
-            type: 'bar'
-          }
+            x: 'Years',
+            columns: [years].concat(cols),
+            type: 'bar',
+            groups: [
+              current_groups
+            ],
+            colors: colors,
+            names: names,
+            onclick: function (d, element) {
+              var date = d['x']
+              window.location.href = '{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
+            },
+            order: function (t1, t2) {
+              return t1.id < t2.id;
+            }
+          },
+          axis : {
+              y : {
+                  tick: {
+                      format: function(x) { return x % 1 === 0 ? x : ''; },
+                  }
+              }
+          },
+          legend: {
+            item: {
+              onclick: function (id) {
+                return;
+              }
+            },
+            position: 'bottom',
+            show: true
+          },
+          tooltip: {
+            grouped: true,
+            contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+
+              var panel = '<div class="panel panel-default timeline">';
+              panel += '<div class="panel-heading"><strong>' + d[0].x + '</strong> (click on bar to see all citations)</div>'
+              panel += '<div class="panel-body">';
+              var nrOfTypes = showReviews ? 6 : 5;
+              for (i=0; i<nrOfTypes; i++) {
+                panel += buildTitles(d, titles, i);
+              }
+              panel += '</div>';
+              panel += '</div>';
+
+              return panel;
+            },
+            position: function (data, width, height, element) {
+                 var cursorPos = d3.mouse(element)[0];
+                 var chartWidth = $('#chart').width();
+                 if (chartWidth/2 > cursorPos) {
+                   // put on right side of cursor
+                   // roughly even positioning from the cursor
+                   return {top: 5, left: parseInt(element.getAttribute('x')) + parseInt(element.getAttribute('width')) + 60};
+                 } else {
+                   // tooltip on left side of cursor
+                   return {top: 5, left: parseInt(element.getAttribute('x')) - width};
+                 }
+             },
+          },
         });
-      });
+
+        d3.select('.container').insert('div', '.chart').attr('class', 'legend').selectAll('span')
+            .data(['books', 'chapters', 'reviews'])
+          .enter().append('span')
+            .attr('data-id', function (id) { return id; })
+            .html(function (id) { return id; })
+            .each(function (id) {
+                d3.select(this).style('background-color', chart.color(id));
+            })
+            .on('mouseover', function (id) {
+                chart.focus(id);
+            })
+            .on('mouseout', function (id) {
+                chart.revert();
+            })
+            .on('click', function (id) {
+                chart.toggle(id);
+            });
+
+        hideTicks();
+      }
 
     });
   </script>
-  {% endif %}
 
 </div>
 {% endblock %}

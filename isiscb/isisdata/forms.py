@@ -18,6 +18,8 @@ from isisdata import helper_methods
 from isisdata.models import Citation, Authority
 from openurl.models import *
 
+import re
+
 try:
     from django.utils.encoding import smart_text
 except ImportError:
@@ -34,6 +36,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
+    raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
@@ -133,7 +136,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
             return {'authority' : self.no_query_found(),
                     'citation': self.no_query_found()}
 
-
+        is_raw_search = self.cleaned_data['raw_search']
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
 
         # Removed: query sanitization already occurs (by design) in the
@@ -144,7 +147,11 @@ class MyFacetedSearchForm(FacetedSearchForm):
         # if query_tuple[1] == 'content':
         #     qstring = helper_methods.normalize(qstring)
 
-        sqs = self.searchqueryset.auto_query(*query_tuple)
+        # if we want several fields specified etc, we need to set the raw_search flag
+        if not is_raw_search:
+            sqs = self.searchqueryset.auto_query(*query_tuple)
+        else:
+            sqs = self.searchqueryset.raw_search(self.cleaned_data['q'])
 
         sqs_citation = sqs.load_all()
         sqs_authority = sqs_citation

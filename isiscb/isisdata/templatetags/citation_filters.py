@@ -7,7 +7,7 @@ register = template.Library()
 
 @register.filter
 def get_page_string(citation):
-    if citation.type_controlled != Citation.CHAPTER:
+    if citation.type_controlled not in [Citation.CHAPTER, Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW]:
         return ""
     if not getattr(citation, 'part_details', None):
         return ""
@@ -63,6 +63,25 @@ def get_book_title(citation):
 
     return ""
 
+@register.filter
+def get_journal_title(citation):
+    if citation.type_controlled in [Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW]:
+        parent_relation = ACRelation.objects.filter(citation=citation.id, type_controlled=ACRelation.PERIODICAL)
+        # we assume there is just one
+        if parent_relation:
+            return parent_relation[0].authority.name
+
+    return ""
+
+@register.filter
+def get_school(citation):
+    if citation.type_controlled in [Citation.THESIS]:
+        parent_relation = ACRelation.objects.filter(citation=citation.id, type_controlled=ACRelation.SCHOOL)
+        # we assume there is just one
+        if parent_relation:
+            return parent_relation[0].authority.name
+
+    return ""
 
 @register.filter
 def contributor_with_role_as_string(acrelation):
