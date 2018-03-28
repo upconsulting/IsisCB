@@ -703,3 +703,10 @@ class ExportAuthorityForm(forms.Form):
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
+
+class BulkChangeCSVForm(forms.Form):
+    csvFile = forms.FileField()
+    CHOICES = [
+        ('ADATT', 'Add Attributes')
+    ]
+    action = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
