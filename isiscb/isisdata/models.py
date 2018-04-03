@@ -35,7 +35,7 @@ from openurl.models import Institution
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue') \
-            | Q(model='isodatevalue') | Q(model='isodaterangevalue')
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue') | Q(model='authorityvalue')
 
 
 class Value(models.Model):
@@ -198,7 +198,7 @@ class ISODateRangeValue(Value):
         try:
             value = ISODateRangeValue.convert(value)
         except ValidationError:
-            raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
+            raise ValueError('Invalid value for ISODateRangeValue: ' + value.__repr__())
 
         for i, part in enumerate(self.PARTS):
             if i >= len(value):
@@ -476,6 +476,20 @@ class LocationValue(Value):
 
     class Meta:
         verbose_name = 'location'
+
+class AuthorityValue(Value):
+    """
+    An authority value. Points to an instance of :class:`.Authority`\.
+    """
+    value = models.ForeignKey('Authority')
+    name = models.TextField(blank=True, null=True)
+
+    def __unicorn__(self):
+        return self.value.__unicode__
+
+    class Meta:
+        verbose_name = 'authority'
+
 
 
 VALUE_MODELS = [

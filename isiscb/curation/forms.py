@@ -707,6 +707,6 @@ class ExportAuthorityForm(forms.Form):
 class BulkChangeCSVForm(forms.Form):
     csvFile = forms.FileField()
     CHOICES = [
-        ('ADATT', 'Add Attributes')
+        ('CRATT', 'Create Attributes')
     ]
-    action = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    action = forms.ChoiceField(choices=CHOICES)
