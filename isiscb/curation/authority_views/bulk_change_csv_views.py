@@ -38,12 +38,19 @@ def bulk_change_from_csv(request):
             #                                _out_name)
             s3_path = '/Users/jdamerow/Up/Isis/ISISCB-1021/uploads/' + _out_name
 
+            _error_name = '%s--%s' % (_datestamp, 'errors.csv')
+            #s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            #                                settings.AWS_SECRET_ACCESS_KEY,
+            #                                settings.AWS_EXPORT_BUCKET_NAME,
+            #                                _error_name)
+            s3_error_path = '/Users/jdamerow/Up/Isis/ISISCB-1021/uploads/' + _error_name
+
             with smart_open.smart_open(s3_path, 'wb') as f:
                 for chunk in uploaded_file.chunks():
                     f.write(chunk)
 
             task = AsyncTask.objects.create()
-            authority_tasks.add_attributes_to_authority.delay(s3_path, task.id)
+            authority_tasks.add_attributes_to_authority.delay(s3_path, s3_error_path, task.id)
             return HttpResponseRedirect(reverse('curation:authority_list'))
         context.update({
             'form': form

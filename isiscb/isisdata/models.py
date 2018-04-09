@@ -78,6 +78,7 @@ class Value(models.Model):
         cclass_name = self.child_class.lower()
         if hasattr(self, cclass_name):
             return getattr(self, cclass_name)
+        print 'none'
         return None
 
     @property
@@ -219,6 +220,11 @@ class ISODateRangeValue(Value):
             value = list(value)
             for i in xrange(2):
                 value[i] = ISODateValue.convert(value[i])
+        elif type(value) in [tuple, list] and len(value) == 1 and type(value[0]) in [tuple, list]:
+            try:
+                value = ISODateValue.convert(value[0])
+            except:
+                raise ValidationError('Not a valid ISO8601 date range')
         else:
             try:
                 value = ISODateValue.convert(value)
@@ -484,8 +490,8 @@ class AuthorityValue(Value):
     value = models.ForeignKey('Authority')
     name = models.TextField(blank=True, null=True)
 
-    def __unicorn__(self):
-        return self.value.__unicode__
+    def __unicode__(self):
+        return unicode(self.value)
 
     class Meta:
         verbose_name = 'authority'

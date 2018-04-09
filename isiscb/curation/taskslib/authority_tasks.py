@@ -20,7 +20,7 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 logger = logging.getLogger(__name__)
 
 @shared_task
-def add_attributes_to_authority(file_path, task_id):
+def add_attributes_to_authority(file_path, error_path, task_id):
     logging.info('Adding attributes from %s.' % (file_path))
     # this is a hack but the best I can come up with right now :op
     logging.debug('Make AuthorityValue exists in ContentType table...')
@@ -44,7 +44,7 @@ def add_attributes_to_authority(file_path, task_id):
             subject_id = row[COLUMN_NAME_ATTR_SUBJ_ID]
             try:
                 authority = Authority.objects.get(pk=subject_id)
-            except DoesNotExist:
+            except Authority.DoesNotExist:
                 logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
                 errors.append((subject_id, subject_id, 'Authority record does not exist.'))
                 current_count += 1
@@ -116,9 +116,15 @@ def add_attributes_to_authority(file_path, task_id):
                     })
                 except:
                     logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
-                    errors.append((subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Authority does not exist.'))
+                    errors.append((subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
+                    continue
 
 
-            print val_init_values
             value = avmodel_class(**val_init_values)
             value.save()
+
+            with smart_open.smart_open(error_path, 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerow(('ATT Subj ID', 'Affected object', 'Message'))
+                for error in errors:
+                    writer.writerow(error)
