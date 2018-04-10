@@ -32,7 +32,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         # we want to avoid loading everything in memory, in case it's a large file
         # we do not count the header, so we start at -1
         row_count = -1
-        for row in reader:
+        for row in csv.DictReader(f):
             row_count += 1
         task.max_value = row_count
         task.save()
