@@ -207,6 +207,8 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
+AWS_ATTRIBUTE_BUCKET_NAME = os.environ.get('AWS_ATTRIBUTE_BUCKET_NAME')
+
 DOMAIN = 'data.isiscb.org'
 URI_PREFIX = 'http://localhost:8000/isis/'
 EMAIL_USE_TLS = True

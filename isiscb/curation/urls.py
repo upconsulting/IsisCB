@@ -45,6 +45,7 @@ urlpatterns = [
 
     url(r'^(?i)authority/export$', views.export_authorities, name="export-authorities"),
     url(r'^(?i)authority/export/status$', views.export_authorities_status, name="export-authorities-status"),
+    url(r'^(?i)authority/attribute/add/status$', bulk_change_csv_views.add_attributes_status, name="add-attributes-status"),
 
     url(r'^(?i)zotero/accessions/search$', views.search_zotero_accessions, name='search-zotero-accessions'),
 

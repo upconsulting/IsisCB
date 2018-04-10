@@ -35,6 +35,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         for row in csv.reader(f):
             row_count += 1
         task.max_value = row_count
+        task.save()
         # reset file cursor to first data line
         f.seek(1)
         current_count = 0
@@ -47,8 +48,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
             except Authority.DoesNotExist:
                 logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
                 errors.append((subject_id, subject_id, 'Authority record does not exist.'))
-                current_count += 1
-                task.current_value = current_count
+                current_count = update_count(current_count, task)
                 continue
 
             related_name = row[COLUMN_NAME_ATTR_RELATED_NAME]
@@ -61,8 +61,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
             if not atype:
                 logger.error('Attribute type with name %s does not exist. Skipping attribute.' % (attribute_type))
                 errors.append((subject_id, attribute_type, 'Attribute type does not exist.'))
-                current_count += 1
-                task.current_value = current_count
+                current_count = update_count(current_count, task)
                 continue
 
             # we can be pretty sure there is just one
@@ -81,13 +80,8 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 'value_freeform': row[COLUMN_NAME_ATTR_DATE_FREE],
                 'administrator_notes': row[COLUMN_NAME_ATTR_NOTES]
             }
-            attribute = Attribute(**att_init_values)
-            attribute.save()
 
-            val_init_values = {
-                'attribute': attribute
-            }
-
+            val_init_values = {}
             if row[COLUMN_NAME_ATTR_VALUE]:
                 val_init_values.update({
                     'value': row[COLUMN_NAME_ATTR_VALUE]
@@ -107,6 +101,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 val_init_values.update({
                     'name': row[COLUMN_NAME_ATTR_PLACE_NAME]
                 })
+                att_init_values['value_freeform'] = row[COLUMN_NAME_ATTR_PLACE_NAME]
 
             if row[COLUMN_NAME_ATTR_PLACE_LINK]:
                 try:
@@ -117,14 +112,32 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 except:
                     logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
                     errors.append((subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
+                    current_count = update_count(current_count, task)
                     continue
 
+            attribute = Attribute(**att_init_values)
+            attribute.save()
+
+            val_init_values.update({
+                'attribute': attribute
+            })
 
             value = avmodel_class(**val_init_values)
             value.save()
 
-            with smart_open.smart_open(error_path, 'wb') as f:
-                writer = csv.writer(f)
-                writer.writerow(('ATT Subj ID', 'Affected object', 'Message'))
-                for error in errors:
-                    writer.writerow(error)
+            current_count = update_count(current_count, task)
+
+        with smart_open.smart_open(error_path, 'wb') as f:
+            writer = csv.writer(f)
+            writer.writerow(('ATT Subj ID', 'Affected object', 'Message'))
+            for error in errors:
+                writer.writerow(error)
+
+        task.state = 'SUCCESS'
+        task.save()
+
+def update_count(current_count, task):
+    current_count += 1
+    task.current_value = current_count
+    task.save()
+    return current_count
