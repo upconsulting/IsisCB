@@ -222,7 +222,7 @@ MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFI
 # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 AWS_EXPORT_BUCKET_NAME = os.environ.get('AWS_EXPORT_BUCKET_NAME')
-AWS_ATTRIBUTE_BUCKET_NAME = = os.environ.get('AWS_ATTRIBUTE_BUCKET_NAME')
+AWS_IMPORT_BUCKET_NAME = = os.environ.get('AWS_IMPORT_BUCKET_NAME')
 
 AWS_HEADERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',

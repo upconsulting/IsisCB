@@ -36,13 +36,13 @@ def bulk_change_from_csv(request):
             _out_name = '%s--%s' % (_datestamp, uploaded_file.name)
             s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
                                             settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_ATTRIBUTE_BUCKET_NAME,
+                                            settings.AWS_IMPORT_BUCKET_NAME,
                                             _out_name)
 
             _error_name = '%s--%s' % (_datestamp, 'errors.csv')
             s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
                                             settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_ATTRIBUTE_BUCKET_NAME,
+                                            settings.AWS_IMPORT_BUCKET_NAME,
                                             _error_name)
 
             with smart_open.smart_open(s3_path, 'wb') as f:
@@ -76,6 +76,6 @@ def add_attributes_status(request):
     task = AsyncTask.objects.get(pk=task_id)
     target = task.value
 
-    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_ATTRIBUTE_BUCKET_NAME, target)
+    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_IMPORT_BUCKET_NAME, target)
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
