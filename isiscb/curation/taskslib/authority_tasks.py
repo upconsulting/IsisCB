@@ -26,7 +26,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
     logging.debug('Make AuthorityValue exists in ContentType table...')
     ContentType.objects.get_or_create(model='authorityvalue', app_label='isisdata')
 
-    with smart_open.smart_open(file_path, 'r') as f:
+    with smart_open.smart_open(file_path, 'rb') as f:
         reader = csv.reader(f, encoding='utf-8')
         task = AsyncTask.objects.get(pk=task_id)
         # we want to avoid loading everything in memory, in case it's a large file
