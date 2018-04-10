@@ -27,12 +27,12 @@ def add_attributes_to_authority(file_path, error_path, task_id):
     ContentType.objects.get_or_create(model='authorityvalue', app_label='isisdata')
 
     with smart_open.smart_open(file_path, 'r') as f:
-        reader = csv.reader(f)
+        reader = csv.reader(f, encoding='utf-8')
         task = AsyncTask.objects.get(pk=task_id)
         # we want to avoid loading everything in memory, in case it's a large file
         # we do not count the header, so we start at -1
         row_count = -1
-        for row in csv.reader(f):
+        for row in reader:
             row_count += 1
         task.max_value = row_count
         task.save()
