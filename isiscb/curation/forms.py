@@ -165,6 +165,7 @@ class ISODateValueForm(forms.ModelForm):
 
 class AuthorityValueForm(forms.ModelForm):
     value = forms.CharField()
+    authority_name = forms.CharField(label='Name of stored authority')
 
     def __init__(self, *args, **kwargs):
         super(AuthorityValueForm, self).__init__(*args, **kwargs)
@@ -172,6 +173,8 @@ class AuthorityValueForm(forms.ModelForm):
 
         if instance and not self.is_bound:
             self.fields['value'].initial = instance.pk
+            self.fields['authority_name'].initial = instance.value.name
+            self.fields['authority_name'].widget.attrs['readonly'] = True
 
     def clean_value(self):
         value = self.cleaned_data['value']
