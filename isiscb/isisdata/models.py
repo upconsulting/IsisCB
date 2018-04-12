@@ -78,7 +78,6 @@ class Value(models.Model):
         cclass_name = self.child_class.lower()
         if hasattr(self, cclass_name):
             return getattr(self, cclass_name)
-        print 'none'
         return None
 
     @property
