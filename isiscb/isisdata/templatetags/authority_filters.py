@@ -10,5 +10,7 @@ def is_person(authority):
 @register.filter
 def is_attribute_visible(attribute):
     if type(attribute.value.get_child_class()) == AuthorityValue and attribute.value.get_child_class().value:
-        return attribute.value.get_child_class().value.public
-    return True
+        if not attribute.value.get_child_class().value.public:
+            return False
+
+    return attribute.public
