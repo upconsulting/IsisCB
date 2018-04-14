@@ -35,7 +35,7 @@ from openurl.models import Institution
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue') \
-            | Q(model='isodatevalue') | Q(model='isodaterangevalue')
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue') | Q(model='authorityvalue')
 
 
 class Value(models.Model):
@@ -198,7 +198,7 @@ class ISODateRangeValue(Value):
         try:
             value = ISODateRangeValue.convert(value)
         except ValidationError:
-            raise ValueError('Invalid value for ISODateRangeValue: %s' % value.__repr__())
+            raise ValueError('Invalid value for ISODateRangeValue: ' + value.__repr__())
 
         for i, part in enumerate(self.PARTS):
             if i >= len(value):
@@ -219,6 +219,11 @@ class ISODateRangeValue(Value):
             value = list(value)
             for i in xrange(2):
                 value[i] = ISODateValue.convert(value[i])
+        elif type(value) in [tuple, list] and len(value) == 1 and type(value[0]) in [tuple, list]:
+            try:
+                value = ISODateValue.convert(value[0])
+            except:
+                raise ValidationError('Not a valid ISO8601 date range')
         else:
             try:
                 value = ISODateValue.convert(value)
@@ -476,6 +481,20 @@ class LocationValue(Value):
 
     class Meta:
         verbose_name = 'location'
+
+class AuthorityValue(Value):
+    """
+    An authority value. Points to an instance of :class:`.Authority`\.
+    """
+    value = models.ForeignKey('Authority')
+    name = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return unicode(self.value)
+
+    class Meta:
+        verbose_name = 'authority'
+
 
 
 VALUE_MODELS = [

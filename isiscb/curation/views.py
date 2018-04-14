@@ -970,6 +970,8 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
         value_class = at.value_content_type.model_class()
         if value_class is ISODateValue:
             value_forms[at.id] = ISODateValueForm
+        elif value_class is AuthorityValue:
+            value_forms[at.id] = AuthorityValueForm
         else:
             value_forms[at.id] = modelform_factory(value_class,
                                     exclude=('attribute', 'child_class'))
