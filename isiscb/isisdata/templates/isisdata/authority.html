@@ -87,7 +87,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% if authority.description %}<p><strong>Description:</strong> {{ authority.description }}</p>{% endif %}
 
     {% for attribute in authority.attributes.all %}
+    {% if attribute|is_attribute_visible %}
     <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+    {% endif %}
     {% endfor %}
 
     <table class="details">

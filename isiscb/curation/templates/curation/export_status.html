@@ -4,14 +4,30 @@
 
 
 {% block content %}
-<div class="h2">Export {% if exported_type == 'CITATION' %} Citations {% else %} Authorities {% endif %}</div>
+<div class="h2">
+  {% if exported_type == 'CITATION' %}
+  Export Citations
+  {% endif %}
+  {% if exported_type == 'AUTHORITY' %}
+  Export Authorities
+  {% endif %}
+  {% if exported_type == 'AUTHORITY_ATTRIBUTES' %}
+  Importing Attributes
+  {% endif %}
+</div>
 
 <p><br><em>{{ task.label }}</em></p>
 
 {% if task.state == 'SUCCESS' %}
 <p class="text-warning">
+  {% if exported_type == 'CITATION' or exported_type == 'AUTHORITY' %}
     Your export is complete; you can download it from
     <a href="{{ download_target }}" target="_blank">{{ download_target }}</a>.
+  {% endif %}
+  {% if exported_type == 'AUTHORITY_ATTRIBUTES' %}
+    Your import is complete; you can download a list of errors that occurred during import from
+    <a href="{{ download_target }}" target="_blank">{{ download_target }}</a>.
+  {% endif %}
 </p>
 {% elif task.state == 'FAILURE' %}
 <p class="text-error">
@@ -45,7 +61,11 @@
 <div class="clearfix">
   {% if exported_type == 'CITATION' %}
     <a class="btn btn-md btn-success" href="{% url "curation:citation_list" %}">Return to Search Interface</a>
-  {% else %}
+  {% endif %}
+  {% if exported_type == 'AUTHORITY' %}
+    <a class="btn btn-md btn-success" href="{% url "curation:authority_list" %}">Return to Search Interface</a>
+  {% endif %}
+  {% if exported_type == 'AUTHORITY_ATTRIBUTES' %}
     <a class="btn btn-md btn-success" href="{% url "curation:authority_list" %}">Return to Search Interface</a>
   {% endif %}
 </div>

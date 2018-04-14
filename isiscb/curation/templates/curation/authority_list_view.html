@@ -16,7 +16,12 @@
     <a class="btn btn-primary btn-xs" href="#" id="export">
       <span class="glyphicon glyphicon-cloud-download"></span>
       Export
-  </a>
+    </a>
+
+    <a class="btn btn-primary btn-xs" href="#" id="bulk-change-csv">
+      <span class="glyphicon glyphicon-cloud-download"></span>
+      Bulk Change (CSV)
+    </a>
 </form>
 
 <table class="table table-responsive table-hover table-curation">
@@ -216,6 +221,10 @@ $(document).ready(function() {
         form.attr('action', '{% url "curation:export-authorities" %}');
         form.attr('target', '_blank');
         form.submit();
+    });
+
+    $('#bulk-change-csv').click(function() {
+        window.open('{% url "curation:bulk_change_from_csv" %}');
     });
 });
 </script>

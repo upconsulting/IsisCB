@@ -163,6 +163,33 @@ class ISODateValueForm(forms.ModelForm):
         model = ISODateValue
         fields = []
 
+class AuthorityValueForm(forms.ModelForm):
+    value = forms.CharField()
+    authority_name = forms.CharField(label='Name of stored authority')
+
+    def __init__(self, *args, **kwargs):
+        super(AuthorityValueForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+
+        if instance and not self.is_bound:
+            self.fields['value'].initial = instance.pk
+            self.fields['authority_name'].initial = instance.value.name
+            self.fields['authority_name'].widget.attrs['readonly'] = True
+
+    def clean_value(self):
+        value = self.cleaned_data['value']
+        try:
+            return Authority.objects.get(pk=value)
+        except:
+            raise forms.ValidationError('Authority record does not exist.')
+
+    def save(self, *args, **kwargs):
+        self.instance.value = self.cleaned_data.get('value')
+        super(AuthorityValueForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = AuthorityValue
+        fields = []
 
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
@@ -703,3 +730,10 @@ class ExportAuthorityForm(forms.Form):
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
+
+class BulkChangeCSVForm(forms.Form):
+    csvFile = forms.FileField()
+    CHOICES = [
+        ('CRATT', 'Create Attributes')
+    ]
+    action = forms.ChoiceField(choices=CHOICES)
