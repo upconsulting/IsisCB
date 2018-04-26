@@ -26,6 +26,9 @@ def add_attributes_to_authority(file_path, error_path, task_id):
     logging.debug('Make AuthorityValue exists in ContentType table...')
     ContentType.objects.get_or_create(model='authorityvalue', app_label='isisdata')
 
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
+
     with smart_open.smart_open(file_path, 'rb') as f:
         reader = csv.reader(f, encoding='utf-8')
         task = AsyncTask.objects.get(pk=task_id)
@@ -40,7 +43,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         f.seek(1)
         current_count = 0
         not_matching_subject_names = []
-        errors = []
+        results = []
         try:
             for row in csv.DictReader(f):
                 subject_id = row[COLUMN_NAME_ATTR_SUBJ_ID]
@@ -48,7 +51,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                     authority = Authority.objects.get(pk=subject_id)
                 except Authority.DoesNotExist:
                     logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
-                    errors.append((subject_id, subject_id, 'Authority record does not exist.'))
+                    results.append((ERROR, subject_id, subject_id, 'Authority record does not exist.'))
                     current_count = update_count(current_count, task)
                     continue
 
@@ -61,7 +64,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 atype = AttributeType.objects.filter(name=attribute_type)
                 if not atype:
                     logger.error('Attribute type with name %s does not exist. Skipping attribute.' % (attribute_type))
-                    errors.append((subject_id, attribute_type, 'Attribute type does not exist.'))
+                    results.append((ERROR, subject_id, attribute_type, 'Attribute type does not exist.'))
                     current_count = update_count(current_count, task)
                     continue
 
@@ -112,12 +115,13 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                         })
                     except:
                         logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
-                        errors.append((subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
+                        results.append((ERROR, subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
                         current_count = update_count(current_count, task)
                         continue
 
                 attribute = Attribute(**att_init_values)
                 attribute.save()
+                results.append((SUCCESS, subject_id, attribute.id, 'Added'))
 
                 val_init_values.update({
                     'attribute': attribute
@@ -130,13 +134,13 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         except Exception, e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
-            errors.append(("unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
         with smart_open.smart_open(error_path, 'wb') as f:
             writer = csv.writer(f)
-            writer.writerow(('ATT Subj ID', 'Affected object', 'Message'))
-            for error in errors:
-                writer.writerow(error)
+            writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
+            for result in results:
+                writer.writerow(result)
 
         task.state = 'SUCCESS'
         task.save()
