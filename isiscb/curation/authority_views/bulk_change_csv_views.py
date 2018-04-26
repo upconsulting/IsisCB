@@ -39,18 +39,18 @@ def bulk_change_from_csv(request):
                                             settings.AWS_EXPORT_BUCKET_NAME,
                                             _out_name)
 
-            _error_name = '%s--%s' % (_datestamp, 'errors.csv')
+            _results_name = '%s--%s' % (_datestamp, 'results.csv')
             s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
                                             settings.AWS_SECRET_ACCESS_KEY,
                                             settings.AWS_EXPORT_BUCKET_NAME,
-                                            _error_name)
+                                            _results_name)
 
             with smart_open.smart_open(s3_path, 'wb') as f:
                 for chunk in uploaded_file.chunks():
                     f.write(chunk)
 
             task = AsyncTask.objects.create()
-            task.value = _error_name
+            task.value = _results_name
             task.save()
             authority_tasks.add_attributes_to_authority.delay(s3_path, s3_error_path, task.id)
 
