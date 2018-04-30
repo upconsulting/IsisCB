@@ -32,18 +32,26 @@ def add_attributes_to_authority(file_path, error_path, task_id):
     with smart_open.smart_open(file_path, 'rb') as f:
         reader = csv.reader(f, encoding='utf-8')
         task = AsyncTask.objects.get(pk=task_id)
+
+        results = []
         # we want to avoid loading everything in memory, in case it's a large file
         # we do not count the header, so we start at -1
         row_count = -1
-        for row in csv.DictReader(f):
-            row_count += 1
+        try:
+            for row in csv.DictReader(f):
+                row_count += 1
+        except Exception, e:
+            logger.error("There was an unexpected error processing the CSV file.")
+            logger.exception(e)
+            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+
         task.max_value = row_count
         task.save()
         # reset file cursor to first data line
         f.seek(1)
         current_count = 0
         not_matching_subject_names = []
-        results = []
+
         try:
             for row in csv.DictReader(f):
                 subject_id = row[COLUMN_NAME_ATTR_SUBJ_ID]

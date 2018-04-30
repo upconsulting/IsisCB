@@ -544,7 +544,7 @@ class CuratedMixin(models.Model):
     INACTIVE = 'Inactive'
     STATUS_CHOICES = (
         (ACTIVE, 'Active'),
-        (DUPLICATE, 'Duplicate'),
+        (DUPLICATE, 'Delete'),
         (REDIRECT, 'Redirect'),
         (INACTIVE, 'Inactive'),
     )
