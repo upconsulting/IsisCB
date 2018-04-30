@@ -98,7 +98,7 @@ $('body').ready(function() {
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
                 </td>
                 <td>
-                  {% if object.record_status_value %}{{ object.record_status_value }}{% endif %}
+                  {% if object.record_status_value %}{{ object.record_status_value|get_status_label }}{% endif %}
                 </td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>

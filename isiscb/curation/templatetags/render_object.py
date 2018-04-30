@@ -247,3 +247,9 @@ def get_type_controlled_display(type_controlled):
 @register.filter
 def get_authority_type_controlled_display(type_controlled):
     return AUTHORITY_TYPES.get(type_controlled)
+
+@register.filter
+def get_status_label(status):
+    # get_record_status_type_display doesn't work in template because we don't have the object
+    status_dict = dict(CuratedMixin.STATUS_CHOICES)
+    return status_dict[status]
