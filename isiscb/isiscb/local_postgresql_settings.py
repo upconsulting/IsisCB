@@ -201,6 +201,8 @@ REST_FRAMEWORK = {
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
 
 AWS_HEADERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
