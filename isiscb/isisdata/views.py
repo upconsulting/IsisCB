@@ -17,7 +17,7 @@ from django.utils.translation import get_language
 from itertools import chain
 
 from haystack.generic_views import FacetedSearchView
-from haystack.query import EmptySearchQuerySet
+from haystack.query import EmptySearchQuerySet, SearchQuerySet
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -799,6 +799,18 @@ def authority(request, authority_id):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
+    # WordCloud
+    sqs =SearchQuerySet().facet('authors', size=20). \
+                facet('subjects', size=40)
+    word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
+            .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
+            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
+            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
+            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
+            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
+
+    word_cloud_subject_counts = list(filter(lambda x: x[1] > 2, word_cloud_results.facet_counts()['fields']['subjects']))
+    
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
     query_string = request.GET.get('query_string', None)
@@ -908,6 +920,7 @@ def authority(request, authority_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
+        'word_cloud_subject_counts': word_cloud_subject_counts,
     }
     return render(request, 'isisdata/authority.html', context)
 

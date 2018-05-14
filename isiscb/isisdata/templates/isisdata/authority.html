@@ -43,6 +43,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       &nbsp; &nbsp;
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
+      <div id="word_cloud_subjects">
+
+      </div>
+
     </div>
   </div>
   <div class="main col-sm-5 col-md-7">
@@ -262,8 +266,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   <link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
 
   <!-- Load d3.js and c3.js -->
-  <script src="{% static "isisdata/c3/d3.min.js" %}" charset="utf-8"></script>
   <script src="{% static "isisdata/c3/c3.min.js" %}"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="{% static "isisdata/js/d3-cloud-1.2.5/index.js" %}"></script>
 
   <script>
   //# sourceURL=chart.js
@@ -465,6 +470,56 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       }
 
     });
+
+    /* word cloud */
+    var frequency_list = [
+      {% for facet in word_cloud_subject_counts %}{"text":"{{ facet.0 }}", "size": {{facet.1}}},{% endfor %}
+    ]
+    var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20,100])
+            .range(["#0567a6", "#67b5aa", "#e8b60b", "#80bb2f", "#2fbba6", "#2f89bb", "#8b63f1", "#e663f1", "#f16393", "#e69b42", "#207522", "#3d5784"]);
+
+    var current_width = $("#word_cloud_subjects").width();
+    var current_height = 600;
+    var layout = d3.layout.cloud().size([current_width, current_height])
+            .words(frequency_list)
+            .padding(5)
+            .rotate(function() { return ~~(Math.random() * 2) * 90; })
+            .fontSize(function(d) { return d.size; })
+            .font("Impact")
+            .on("end", draw);
+
+    layout.start();
+
+    function draw(words) {
+        var current_width = $("#word_cloud_subjects").width();
+        var x = 40;
+        var y = 60; //$("#word_cloud_subjects").position().left;
+        d3.select("#word_cloud_subjects").append("svg")
+                .attr("width", current_width)
+                .attr("height", current_height)
+                .attr("class", "wordcloud")
+                .append("g")
+                // without the transform, words words would get cutoff to the left and top, they would
+                // appear outside of the SVG area
+                //.attr("transform", "translate(" + x + "," + y + ")")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + (layout.size()[1] / 2)+ ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return (d.size + 4) + "px"; })
+                .style("font-family", "Impact")
+                .style("fill", function(d, i) { return color(i); })
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; })
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) {
+                  return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+      }
   </script>
 
 </div>
