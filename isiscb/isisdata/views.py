@@ -800,8 +800,8 @@ def authority(request, authority_id):
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
     # WordCloud
-    sqs =SearchQuerySet().facet('authors', size=20). \
-                facet('subjects', size=40)
+    sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100)
     word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
             .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -809,8 +809,9 @@ def authority(request, authority_id):
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
 
-    word_cloud_subject_counts = list(filter(lambda x: x[1] > 2, word_cloud_results.facet_counts()['fields']['subjects']))
-    
+    word_cloud_subject_ids_counts = word_cloud_results.facet_counts()['fields']['subject_ids']
+    related_contributors_counts = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
+
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
     query_string = request.GET.get('query_string', None)
@@ -920,7 +921,8 @@ def authority(request, authority_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-        'word_cloud_subject_counts': word_cloud_subject_counts,
+        'word_cloud_subject_ids_counts': word_cloud_subject_ids_counts,
+        'related_contributors_counts': related_contributors_counts,
     }
     return render(request, 'isisdata/authority.html', context)
 
