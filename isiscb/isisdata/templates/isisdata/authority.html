@@ -3,6 +3,7 @@
 {% load staticfiles %}
 {% load search_filters %}
 {% load authority_filters %}
+{% load facet_filters %}
 
 {% block extra_head %}
 <script>
@@ -44,7 +45,90 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
       <hr>
     </div>
+    <div>
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>Related Subjects ({{word_cloud_subject_ids_counts|length}})</strong></div>
+        <div class="panel-body">
+          {% for facet in word_cloud_subject_ids_counts|slice:"7" %}
+          <a title="Go to authority record for {{facet.0|get_authority_name}}" href="{% url 'authority' facet.0 %}?"><i class="fa fa-info-circle"></i></i>
+ {{facet.0|get_authority_name}}</a> ({{facet.1}}) <br>
+          {% endfor %}
+
+          {% if word_cloud_subject_ids_counts|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>Related Authors & Contributors ({{related_contributors_counts|length}})</strong></div>
+        <div class="panel-body">
+          {% for facet in related_contributors_counts|slice:"7" %}
+          <a title="Go to authority record for {{facet.0|get_authority_name}}" href="{% url 'authority' facet.0 %}?"><i class="fa fa-info-circle"></i>
+ {{facet.0|get_authority_name}}</a> ({{facet.1}}) <br>
+          {% endfor %}
+
+          {% if related_contributors_counts|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
+
+<!-- facet modals -->
+<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Authors & Contributors</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for author in related_contributors_counts %}
+          <li><a title="Go to authority record for {{ author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }} </a>({{ author.1 }}) </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+<!-- subject Modal -->
+<div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Subjects</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for subject in word_cloud_subject_ids_counts %}
+              <li ><a title="Go to authority record for {{ subject.0|get_authority_name}}" href="{% url 'authority' subject.0 %}?"><i class="fa fa-info-circle"></i> {{ subject.0|get_authority_name }} </a>({{ subject.1 }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+
   <div class="main col-sm-5 col-md-7">
       <!-- Progress through search results, if arriving from search view. -->
       {% if search_results|length > 0 and fromsearch and search_current %}
@@ -76,8 +160,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}"></a>{% endif %}
             <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
-
-
     </div>
 
     {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
