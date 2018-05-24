@@ -148,16 +148,15 @@
   <div class="col-md-4">
     {% if can_update %}
     <ul class="nav nav-tabs" role="tablist">
-      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
-      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
-      <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Add Time Periods</a></li>
+      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
+      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
+      <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Eras</a></li>
     </ul>
-
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="addSubjects">
         <p>
           <div class="input-group">
-            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject...">
+            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
 
             <span class="input-group-btn">
               <span class="button-checkbox">
@@ -181,7 +180,7 @@
                 <input id="filterTimePeriods" type="checkbox" class="hidden" />
               </span>
               <span >
-                <button id="filterAll" type="button" class="btn btn-default" >All</button>
+                <button id="filterAll" type="button" class="btn btn-default" style="line-height:240%">All</button>
               </span>
             </span>
           </div>
@@ -391,7 +390,7 @@ $(document).ready(function() {
 
               // Inject the icon if applicable
               if ($button.find('.state-icon').length == 0) {
-                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i> ');
+                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
               }
           }
           init();
