@@ -296,7 +296,11 @@ function triggerSearchSubjects(e) {
             var newLi = $("<li></li>");
             newLi.addClass("list-group-item");
             newLi.attr('data-acrelation-id', r.name);
-            newLi.html(r.name + ' (' + r.citation_count + ') ');
+            var publicLink = $('<a></a>');
+            publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+            publicLink.attr('target', "_blank");
+            publicLink.html(r.name + ' (' + r.citation_count + ')' );
+            newLi.append(publicLink);
             var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
             suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
             newLi.append(suggestLink);
