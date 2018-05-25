@@ -43,6 +43,7 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
     url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='index'),
+    url(r'^$', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='isis-index'),
     url(r'^(?i)(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^(?i)recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^(?i)recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),

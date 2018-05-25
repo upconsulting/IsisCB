@@ -148,16 +148,16 @@
   <div class="col-md-4">
     {% if can_update %}
     <ul class="nav nav-tabs" role="tablist">
-      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Add Subjects</a></li>
-      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Add Categories</a></li>
-      <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Add Time Periods</a></li>
+      <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
+      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
+      <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Eras</a></li>
+      <li id="suggestTab" role="presentation"><a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggest</a></li>
     </ul>
-
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="addSubjects">
         <p>
           <div class="input-group">
-            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject...">
+            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
 
             <span class="input-group-btn">
               <span class="button-checkbox">
@@ -181,7 +181,7 @@
                 <input id="filterTimePeriods" type="checkbox" class="hidden" />
               </span>
               <span >
-                <button id="filterAll" type="button" class="btn btn-default" >All</button>
+                <button id="filterAll" type="button" class="btn btn-default" style="line-height:240%">All</button>
               </span>
             </span>
           </div>
@@ -203,6 +203,10 @@
 
       <div role="tabpanel" class="tab-pane" id="addTimePeriods">
         {% include "curation/fragment_categories_page_timeperiods.html" %}
+      </div>
+
+      <div role="tabpanel" class="tab-pane" id="suggest">
+        {% include "curation/fragment_categories_page_suggest.html" %}
       </div>
     </div>
     {% endif %}
@@ -292,8 +296,18 @@ function triggerSearchSubjects(e) {
             var newLi = $("<li></li>");
             newLi.addClass("list-group-item");
             newLi.attr('data-acrelation-id', r.name);
-            newLi.html(r.name + ' (' + r.citation_count + ') <span class="label label-primary pull-right">' + r.type + '</span>');
+            var publicLink = $('<a></a>');
+            publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+            publicLink.attr('target', "_blank");
+            publicLink.html(r.name + ' (' + r.citation_count + ')' );
+            newLi.append(publicLink);
+            var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
+            suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
+            newLi.append(suggestLink);
+            newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
             resultsContainer.append(newLi);
+
+            suggestLink.click(suggestSubjects);
 
             var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
             addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
@@ -332,6 +346,16 @@ var settings = {
         icon: 'glyphicon glyphicon-unchecked'
     }
 };
+
+function suggestSubjects(event) {
+  $("#suggestionSpinner").show();
+  var id = $(event.currentTarget).data('acrid');
+  var query = $(event.currentTarget).data('query');
+  $.get("{% url "curation:subjects_suggestions" instance.id %}?authority_id=" + id, function(result) {
+    showSuggestions(query, result);
+  });
+  $('#suggestTab a').tab("show");
+}
 
 $(document).ready(function() {
   $('#subjectSearchQuery').on('keyup', function() {
@@ -391,7 +415,7 @@ $(document).ready(function() {
 
               // Inject the icon if applicable
               if ($button.find('.state-icon').length == 0) {
-                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i> ');
+                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
               }
           }
           init();
