@@ -34,21 +34,11 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
-        # we want to avoid loading everything in memory, in case it's a large file
-        # we do not count the header, so we start at -1
-        row_count = -1
-        try:
-            for row in csv.DictReader(f):
-                row_count += 1
-        except Exception, e:
-            logger.error("There was an unexpected error processing the CSV file.")
-            logger.exception(e)
-            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+        row_count = _count_rows(f, results)
 
         task.max_value = row_count
         task.save()
-        # reset file cursor to first data line
-        f.seek(1)
+
         current_count = 0
         not_matching_subject_names = []
 
@@ -60,7 +50,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 except Authority.DoesNotExist:
                     logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
                     results.append((ERROR, subject_id, subject_id, 'Authority record does not exist.'))
-                    current_count = update_count(current_count, task)
+                    current_count = _update_count(current_count, task)
                     continue
 
                 related_name = row[COLUMN_NAME_ATTR_RELATED_NAME]
@@ -73,7 +63,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 if not atype:
                     logger.error('Attribute type with name %s does not exist. Skipping attribute.' % (attribute_type))
                     results.append((ERROR, subject_id, attribute_type, 'Attribute type does not exist.'))
-                    current_count = update_count(current_count, task)
+                    current_count = _update_count(current_count, task)
                     continue
 
                 # we can be pretty sure there is just one
@@ -124,7 +114,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                     except:
                         logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
                         results.append((ERROR, subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
-                        current_count = update_count(current_count, task)
+                        current_count = _update_count(current_count, task)
                         continue
 
                 attribute = Attribute(**att_init_values)
@@ -138,7 +128,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 value = avmodel_class(**val_init_values)
                 value.save()
 
-                current_count = update_count(current_count, task)
+                current_count = _update_count(current_count, task)
         except Exception, e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
@@ -153,8 +143,37 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         task.state = 'SUCCESS'
         task.save()
 
-def update_count(current_count, task):
+def _update_count(current_count, task):
     current_count += 1
     task.current_value = current_count
     task.save()
     return current_count
+
+def _count_rows(f, results):
+    # we want to avoid loading everything in memory, in case it's a large file
+    # we do not count the header, so we start at -1
+    row_count = -1
+    try:
+        for row in csv.DictReader(f):
+            row_count += 1
+    except Exception, e:
+        logger.error("There was an unexpected error processing the CSV file.")
+        logger.exception(e)
+        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+
+    # reset file cursor to first data line
+    f.seek(1)
+
+    return row_count
+
+@shared_task
+def update_attributes(file_path, error_path, task_id):
+    logging.info('Adding attributes from %s.' % (file_path))
+
+    results = []
+    row_count = _count_rows(f, results)
+
+    task.max_value = row_count
+    task.save()
+
+    current_count = 0

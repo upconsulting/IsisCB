@@ -733,7 +733,10 @@ class ExportAuthorityForm(forms.Form):
 
 class BulkChangeCSVForm(forms.Form):
     csvFile = forms.FileField()
+    CREATE_ATTR = 'CRATT'
+    UPDATE_ATTR = 'UPATT'
     CHOICES = [
-        ('CRATT', 'Create Attributes')
+        (CREATE_ATTR, 'Create Attributes'),
+        (UPDATE_ATTR, 'Update Attributes'),
     ]
     action = forms.ChoiceField(choices=CHOICES)

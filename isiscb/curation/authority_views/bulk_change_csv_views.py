@@ -15,6 +15,11 @@ from curation.taskslib import authority_tasks
 
 import smart_open
 
+ACTION_DICT = {
+    BulkChangeCSVForm.CREATE_ATTR: 'add_attributes_to_authority',
+    BulkChangeCSVForm.UPDATE_ATTR: 'update_attributes'
+}
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_change_from_csv(request):
     context = {
@@ -30,20 +35,21 @@ def bulk_change_from_csv(request):
     elif request.method == 'POST':
         form = BulkChangeCSVForm(request.POST, request.FILES)
         if form.is_valid():
+            bulk_method = getattr(authority_tasks,ACTION_DICT[form.cleaned_data['action']])
             uploaded_file = form.cleaned_data['csvFile']
             # store file in s3 so we can download when it's being processed
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s' % (_datestamp, uploaded_file.name)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
+            s3_path = '/Users/jdamerow/Up/Isis/ISISCB-1100/uploads/' + _out_name #'s3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                    #                        settings.AWS_SECRET_ACCESS_KEY,
+                    #                        settings.AWS_EXPORT_BUCKET_NAME,
+                    #                        _out_name)
 
             _results_name = '%s--%s' % (_datestamp, 'results.csv')
-            s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _results_name)
+            s3_error_path = '/Users/jdamerow/Up/Isis/ISISCB-1100/uploads/' + _results_name #s3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                            #                settings.AWS_SECRET_ACCESS_KEY,
+                            #                settings.AWS_EXPORT_BUCKET_NAME,
+                            #                _results_name)
 
             with smart_open.smart_open(s3_path, 'wb') as f:
                 for chunk in uploaded_file.chunks():
@@ -52,7 +58,8 @@ def bulk_change_from_csv(request):
             task = AsyncTask.objects.create()
             task.value = _results_name
             task.save()
-            authority_tasks.add_attributes_to_authority.delay(s3_path, s3_error_path, task.id)
+
+            bulk_method.delay(s3_path, s3_error_path, task.id)
 
             target = reverse('curation:add-attributes-status') \
                      + '?' + urlencode({'task_id': task.id})
@@ -76,6 +83,6 @@ def add_attributes_status(request):
     task = AsyncTask.objects.get(pk=task_id)
     target = task.value
 
-    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    download_target = 'test'#'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
