@@ -809,8 +809,8 @@ def authority(request, authority_id):
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
 
-    word_cloud_subject_ids_counts = word_cloud_results.facet_counts()['fields']['subject_ids']
-    related_contributors_counts = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
+    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
+    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -921,8 +921,8 @@ def authority(request, authority_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
-        'word_cloud_subject_ids_counts': word_cloud_subject_ids_counts,
-        'related_contributors_counts': related_contributors_counts,
+        'subject_ids_facet': subject_ids_facet,
+        'related_contributors_facet': related_contributors_facet,
     }
     return render(request, 'isisdata/authority.html', context)
 
