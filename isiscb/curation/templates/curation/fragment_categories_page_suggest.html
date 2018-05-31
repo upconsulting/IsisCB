@@ -1,0 +1,132 @@
+
+<p>
+  <div class="input-group">
+    <input type="text" id="suggestQuery" class="form-control" readonly style="height:3.4em">
+
+    <span class="input-group-btn">
+      <span class="button-checkbox">
+        <button type="button" class="btn" data-color="primary">C</button>
+        <input id="filterConceptSuggest" type="checkbox" class="hidden" />
+      </span>
+      <span class="button-checkbox">
+        <button type="button" class="btn" data-color="primary">P</button>
+        <input id="filterPersonSuggest" type="checkbox" class="hidden" />
+      </span>
+      <span class="button-checkbox">
+        <button type="button" class="btn" data-color="primary">I</button>
+        <input id="filterInstitutionSuggest" type="checkbox" class="hidden" />
+      </span>
+      <span class="button-checkbox">
+        <button type="button" class="btn" data-color="primary">G</button>
+        <input id="filterGeoTermSuggest" type="checkbox" class="hidden" />
+      </span>
+      <span class="button-checkbox">
+        <button type="button" class="btn" data-color="primary">T</button>
+        <input id="filterTimePeriodSuggest" type="checkbox" class="hidden" />
+      </span>
+      <span >
+        <button id="filterAllSuggest" type="button" class="btn btn-default" style="line-height:240%">All</button>
+      </span>
+    </span>
+  </div>
+</p>
+
+<div id="suggestionSpinner" class="text-center" style="margin-top: 20px; display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+
+<ul class="list-group" id="suggestions-list" style="max-height: 600px; overflow-y:scroll;">
+
+</ul>
+
+
+<script>
+//# sourceURL=suggest.js
+function showSuggestions(query, suggestions) {
+  $("#suggestQuery").attr('value', query);
+  var resultsContainer = $('#suggestions-list');
+  resultsContainer.empty();
+  resultsContainer.hide();
+  Array.prototype.forEach.call(suggestions.subjects, suggest => {
+    var newLi = $("<li></li>");
+    newLi.addClass("list-group-item");
+    newLi.attr('data-acrelation-id', suggest.id);
+    newLi.attr('data-type-controlled', suggest.type_controlled);
+    newLi.html(suggest.name + ' (' + suggest.count + ') ');
+    var suggestLink = $('<a href="#" data-acrid="' + suggest.id + '" data-query="' + suggest.name + '"></a>');
+    suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
+    newLi.append(suggestLink);
+    newLi.append($('<span class="label label-primary pull-right">' + suggest.type + '</span>'));
+    resultsContainer.append(newLi);
+
+    suggestLink.click(suggestSubjects);
+
+    var addBtn = $('<a href="#" data-id="' + suggest.id + '"></a>');
+    addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+    addBtn.click(addConcept);
+    newLi.prepend(addBtn);
+  });
+  $('#suggestionSpinner').hide();
+  resultsContainer.show();
+}
+
+$(document).ready(function() {
+  types = [];
+
+  $('#subjectSearchQuery').on('keyup', function() {
+    max_results = INITIAL_MAX_RESULTS;
+    triggerSearchSubjects();
+  });
+
+  // add checkbox search handlers
+  $("#filterConceptSuggest").change(function() {
+    filterTypeSuggest("CO", $("#filterConceptSuggest"));
+  });
+  $("#filterPersonSuggest").change(function() {
+    filterTypeSuggest("PE", $("#filterPersonSuggest"));
+  });
+  $("#filterInstitutionSuggest").change(function() {
+    filterTypeSuggest("IN", $("#filterInstitutionSuggest"));
+  });
+  $("#filterGeoTermSuggest").change(function() {
+    filterTypeSuggest("GE", $("#filterGeoTermSuggest"));
+  });
+  $("#filterTimePeriodSuggest").change(function() {
+    filterTypeSuggest("TI", $("#filterTimePeriodSuggest"));
+  });
+  $("#filterAllSuggest").click(function() {
+    $('.button-checkbox').each(function () {
+      var checkbox = $(this).find('input:checkbox');
+      checkbox.attr('checked', false);
+      updateDisplay(checkbox);
+    });
+    types = []
+    showFiltered();
+  });
+});
+
+function filterTypeSuggest(type, element) {
+  if (element.is(':checked')) {
+    types.push(type);
+  } else {
+    var typeIndex = types.indexOf(type);
+    if (typeIndex > -1) {
+      types.splice(typeIndex, 1);
+    }
+  }
+  showFiltered();
+}
+
+function showFiltered() {
+  $('#suggestions-list li').each(function(index,element) {
+    if (types.length == 0) {
+      $(element).show();
+    } else {
+      var elemType = $(element).data('type-controlled');
+      if ($.inArray(elemType, types) > -1) {
+        $(element).show();
+      } else {
+        $(element).hide();
+      }
+    }
+  });
+}
+</script>

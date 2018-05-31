@@ -38,6 +38,8 @@ from curation.forms import *
 from curation.contrib.views import check_rules
 from curation import tasks as curation_tasks
 
+from haystack.query import SearchQuerySet
+
 import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
@@ -174,6 +176,29 @@ def create_authority(request):
             })
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_subject_suggestions(request, citation_id):
+    authority_id = request.GET.get('authority_id', None)
+    sqs = SearchQuerySet().facet('subject_ids', size=100)
+    suggestion_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
+            .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
+            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
+            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
+            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
+            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
+
+    suggestion_results = suggestion_results.facet_counts()['fields']['subject_ids']
+    suggestion_results_ids = [s[0] for s in suggestion_results]
+    authorities = Authority.objects.filter(pk__in=suggestion_results_ids).values('id','name', 'type_controlled')
+    suggestion_results_dict = dict(suggestion_results)
+    for authority in authorities:
+        authority['count'] = suggestion_results_dict[authority['id']]
+        authority['type'] = dict(Authority.TYPE_CHOICES)[authority['type_controlled']]
+    authorities = sorted(authorities, key=lambda auth: auth['count'], reverse=True)
+    response_data = {
+        'subjects': list(authorities)
+    }
+    return JsonResponse(response_data)
 
 # TODO this method needs to be logged down!
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
