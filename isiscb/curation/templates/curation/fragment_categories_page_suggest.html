@@ -50,7 +50,11 @@ function showSuggestions(query, suggestions) {
     newLi.addClass("list-group-item");
     newLi.attr('data-acrelation-id', suggest.id);
     newLi.attr('data-type-controlled', suggest.type_controlled);
-    newLi.html(suggest.name + ' (' + suggest.count + ') ');
+    var publicLink = $('<a></a>');
+    publicLink.attr('href', '{% url 'isis-index' %}authority/' + suggest.id);
+    publicLink.attr('target', "_blank");
+    publicLink.html(suggest.name + ' (' + suggest.count + ')' );
+    newLi.append(publicLink);
     var suggestLink = $('<a href="#" data-acrid="' + suggest.id + '" data-query="' + suggest.name + '"></a>');
     suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
     newLi.append(suggestLink);
