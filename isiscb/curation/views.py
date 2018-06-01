@@ -2038,6 +2038,16 @@ def search_collections(request):
     } for col in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_authority_collections(request):
+    q = request.GET.get('query', None)
+    queryset = AuthorityCollection.objects.filter(name__icontains=q)
+    results = [{
+        'id': col.id,
+        'label': col.name,
+    } for col in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_zotero_accessions(request):

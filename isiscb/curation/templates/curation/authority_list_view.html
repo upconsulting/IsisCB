@@ -167,6 +167,14 @@
                 {{ objects.form.belongs_to|addcss:"form-control input-sm" }}
             </div>
 
+            {% for error in objects.form.in_collections.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label class="control-label">Collection</label>
+                {{ objects.form.in_collections}}
+                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control input-sm">
+            </div>
 
         </div>
 
@@ -211,6 +219,19 @@ $(document).ready(function() {
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
+    });
+
+    /* in collection javascript */
+    $('#in_collections_input').bootcomplete({
+        url:'{% url 'curation:search-authority-collections' %}',
+        minLength: 3,
+        idFieldName: 'in_collections'
+    });
+
+    $('#in_collections_input').on('input', function() {
+        if ($('#in_collections_input').val() == '') {
+          $('#id_in_collections').val('');
+        }
     });
 
     /* zotero accession javascript */
