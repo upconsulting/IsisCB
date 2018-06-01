@@ -14,7 +14,7 @@
     {% csrf_token %}
 
     {% for field in form %}
-    {% if field.label == 'Authority' %}
+    {% if field.label in "'Authority', 'Filters'" %}
     {{ field }}
     {% else %}
 
