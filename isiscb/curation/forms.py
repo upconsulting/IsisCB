@@ -709,6 +709,12 @@ class CitationCollectionForm(forms.ModelForm):
         model = CitationCollection
         exclude = ('created', 'createdBy', 'citations')
 
+class AuthorityCollectionForm(forms.ModelForm):
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
+    class Meta:
+        model = AuthorityCollection
+        exclude = ('created', 'createdBy', 'authorities')
+
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())

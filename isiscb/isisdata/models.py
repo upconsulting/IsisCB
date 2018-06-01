@@ -1932,6 +1932,19 @@ class CitationCollection(models.Model):
     def __unicode__(self):
         return '%s (%s)' % (self.name, self.createdBy.username)
 
+class AuthorityCollection(models.Model):
+    """
+    An arbitrary group of :class:`.Authority` instances.
+    """
+
+    name = models.CharField(max_length=255, blank=True, null=True)
+    authorities = models.ManyToManyField('Authority', related_name='in_collections')
+    createdBy = models.ForeignKey(User, related_name='authority_collections')
+    created = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.name, self.createdBy.username)
 
 
 def linkify(s, *args, **kwargs):

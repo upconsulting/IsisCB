@@ -2519,7 +2519,7 @@ def bulk_select_authority(request):
     context = {}
     return render(request, template, context)
 
-def _get_filtered_queryset(request):
+def _get_filtered_queryset(request, type='CITATION'):
     pks = request.POST.getlist('queryset')
 
     filter_params_raw = request.POST.get('filters')
@@ -2538,8 +2538,12 @@ def _get_filtered_queryset(request):
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
-    _qs = operations.filter_queryset(request.user, Citation.objects.all())
-    queryset = CitationFilter(filter_params, queryset=_qs)
+    if type is 'CITATION':
+        _qs = operations.filter_queryset(request.user, Citation.objects.all())
+        queryset = CitationFilter(filter_params, queryset=_qs)
+    else:
+        _qs = operations.filter_queryset(request.user, Authority.objects.all())
+        queryset = AuthorityFilter(filter_params, queryset=_qs)
 
     return queryset, filter_params_raw
 
@@ -2838,6 +2842,35 @@ def create_citation_collection(request):
 
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def create_authority_collection(request):
+    template = 'curation/authority_collection_create.html'
+    context = {}
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = AuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = AuthorityCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def add_citation_collection(request):

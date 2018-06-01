@@ -26,6 +26,19 @@
     <a class="btn btn-primary btn-xs" href="{% url 'curation:authority-bulk-select' %}">
       <i class="fa fa-check-circle" aria-hidden="true"></i> Bulk select
     </a>
+
+    <span class="dropdown">
+        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-folder-open"></span>
+            Authorities
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="" href="#" id="collection-create"><span class="glyphicon glyphicon-certificate"></span> Create new collection</a></li>
+            <!--<li><a class="" href="#" id="collection-add"><span class="glyphicon glyphicon-plus"></span> Add to existing collection</a></li>
+            <li><a class="" href="{% url "curation:collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>-->
+        </ul>
+    </span>
 </form>
 
 <table class="table table-responsive table-hover table-curation">
@@ -229,6 +242,12 @@ $(document).ready(function() {
 
     $('#bulk-change-csv').click(function() {
         window.open('{% url "curation:bulk_change_from_csv" %}');
+    });
+
+    var form = $('#bulk-form');
+    $('#collection-create').click(function() {
+        form.attr('action', '{% url "curation:create-authority-collection" %}');
+        form.submit();
     });
 });
 </script>
