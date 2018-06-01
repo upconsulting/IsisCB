@@ -1,0 +1,34 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load addcss %}
+
+{% block content %}
+<div class="h2">Add to an existing authority collection</div>
+
+<p class="text-warning">
+    This will add {{ queryset.count }} authorities to the collection that you
+    choose below.
+</p>
+
+<form class="form" action="?confirmed=true" method="POST">
+    {% csrf_token %}
+
+    {% for field in form %}
+    {% if field.label == 'Authority' %}
+    {{ field }}
+    {% else %}
+
+    {% for error in field.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field|addcss:"form-control" }}
+    </div>
+    {% endif %}
+    {% endfor %}
+    <div class="text-center">
+        <input type="submit" class="btn btn-success" value="Add" />
+    </div>
+</form>
+{% endblock %}

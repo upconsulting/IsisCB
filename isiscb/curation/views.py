@@ -2919,3 +2919,32 @@ def add_citation_collection(request):
         })
 
     return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def add_authority_collection(request):
+    template = 'curation/authority_collection_add.html'
+    context = {}
+
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = SelectAuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                collection = form.cleaned_data['collection']
+                collection.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectAuthorityCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)

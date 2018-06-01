@@ -62,6 +62,7 @@ urlpatterns = [
     url(r'^(?i)citation/select$', views.bulk_select_citation, name='citation-bulk-select'),
 
     url(r'^(?i)authority/collection$', views.authority_collections, name='authority-collections'),
+    url(r'^(?i)authority/collection/add$', views.add_authority_collection, name='add-authority-collection'),
     url(r'^(?i)authority/collection/search$', views.search_authority_collections, name='search-authority-collections'),
     url(r'^(?i)authority/collection/create$', views.create_authority_collection, name='create-authority-collection'),
     url(r'^(?i)authority/bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='bulk_change_from_csv'),

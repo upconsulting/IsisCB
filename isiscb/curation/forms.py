@@ -720,6 +720,9 @@ class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
+class SelectAuthorityCollectionForm(forms.Form):
+    collection = forms.ModelChoiceField(queryset=AuthorityCollection.objects.all())
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
 class ExportCitationsForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
