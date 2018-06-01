@@ -52,7 +52,7 @@ urlpatterns = [
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),
 
     url(r'^(?i)citation/collection$', views.collections, name='collections'),
-    url(r'^(?i)citation/collection/search$', views.search_collections, name='search-collections'),
+    url(r'^(?i)citation/collection/search$', views.search_citation_collections, name='search-collections'),
     url(r'^(?i)citation/collection/create$', views.create_citation_collection, name='create-citation-collection'),
     url(r'^(?i)citation/collection/add$', views.add_citation_collection, name='add-citation-collection'),
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),

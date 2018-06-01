@@ -2029,19 +2029,16 @@ def dataset(request, dataset_id=None):
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def search_collections(request):
-    q = request.GET.get('query', None)
-    queryset = CitationCollection.objects.filter(name__icontains=q)
-    results = [{
-        'id': col.id,
-        'label': col.name,
-    } for col in queryset[:20]]
-    return JsonResponse(results, safe=False)
+def search_citation_collections(request):
+    return _search_collections(request, CitationCollection)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_authority_collections(request):
+    return _search_collections(request, AuthorityCollection)
+
+def _search_collections(request, collection_class):
     q = request.GET.get('query', None)
-    queryset = AuthorityCollection.objects.filter(name__icontains=q)
+    queryset = collection_class.objects.filter(name__icontains=q)
     results = [{
         'id': col.id,
         'label': col.name,
