@@ -1418,7 +1418,12 @@ def _authorities_get_filter_params(request):
     Build ``filter_params`` for GET request in authority list view.
     """
 
-    search_key = request.GET.get('search')
+    if request.method == 'POST':
+        post_or_get = request.POST
+    else:
+        post_or_get = request.GET
+
+    search_key = post_or_get.get('search')
 
     additional_params_names = ["page"]
     all_params = {}
@@ -1429,18 +1434,18 @@ def _authorities_get_filter_params(request):
         filter_params = user_session.get('%s_authority_search_params' % search_key)
         all_params = {k: v for k, v in filter_params.iteritems()}
 
-    if len(request.GET.keys()) <= 1:
+    if len(post_or_get.keys()) <= 1:
         if filter_params is None:
             filter_params = user_session.get('authority_filter_params', None)
             all_params = user_session.get('authority_request_params', None)
         if filter_params is not None and all_params is not None:
             # page needs to be updated otherwise it keeps old page count
-            if request.GET.get('page'):
-                all_params['page'] = request.GET.get('page')
+            if post_or_get.get('page'):
+                all_params['page'] = post_or_get.get('page')
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = request.GET.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode().encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
@@ -1450,7 +1455,7 @@ def _authorities_get_filter_params(request):
         if not 'o' in filter_params.keys():
             filter_params['o'] = 'name_for_sort'
         for key in additional_params_names:
-            all_params[key] = request.GET.get(key, '')
+            all_params[key] = post_or_get.get(key, '')
 
         if 'o' not in filter_params:
             filter_params['o'] = 'name_for_sort'
@@ -1461,7 +1466,7 @@ def _authorities_get_filter_params(request):
                 filter_params['o'] = 'name_for_sort'
 
     for key in additional_params_names:
-        all_params[key] = request.GET.get(key, '')
+        all_params[key] = post_or_get.get(key, '')
     return filter_params, all_params
 
 
@@ -2508,6 +2513,11 @@ def bulk_select_citation(request):
     context = {}
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_select_authority(request):
+    template = 'curation/bulk_select_authority.html'
+    context = {}
+    return render(request, template, context)
 
 def _get_filtered_queryset(request):
     pks = request.POST.getlist('queryset')
