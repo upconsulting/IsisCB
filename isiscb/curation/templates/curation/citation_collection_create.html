@@ -14,7 +14,7 @@
     {% csrf_token %}
 
     {% for field in form %}
-    {% if field.label == 'Citations' %}
+    {% if field.label in "'Citations', 'Filters'" %}
     {{ field }}
     {% else %}
 

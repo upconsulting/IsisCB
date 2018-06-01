@@ -8,9 +8,11 @@
 {% block object_list %}
 
 
-<div class="h3">Citation Collections</div>
+<div class="h3">
+  {% if type == 'CITATION' %} Citation Collections {% else %} Authority Collections {% endif %}
+</div>
 <form action="" method="GET" id="">
-    <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
+    <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ filter_list|length }}</span>
 
     <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
@@ -26,7 +28,7 @@
 
             <tr class="">
                 <td>
-                    <a href="{% url "curation:citation_list" %}?in_collections={{object.id}}&collection_only=true">{{ object.name }}</a>
+                    <a href="{% if type == 'CITATION' %}{% url "curation:citation_list" %}{% else %}{% url "curation:authority_list" %}{% endif %}?in_collections={{object.id}}&collection_only=true">{{ object.name }}</a>
                 </td>
                 <td>
                     {{ object.createdBy }}
@@ -35,7 +37,11 @@
                     {{ object.created }}
                 </td>
                 <td>
+                  {% if type == 'CITATION' %}
                     {{ object.citations.count }}
+                  {% else %}
+                    {{ object.authorities.count }}
+                  {% endif %}
                 </td>
             </tr>
             {% endfor %}

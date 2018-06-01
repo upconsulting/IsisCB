@@ -2809,14 +2809,26 @@ def collections(request):
     List :class:`.Collection` instances.
     """
     from curation.filters import CitationCollectionFilter
-    # ISISCB-1050: reverse sort order of collections (newest first)
-    collections = CitationCollection.objects.all().order_by('-created')
+    return _list_collections(request, CitationCollectionFilter, CitationCollection, 'CITATION', 'curation/collection_list.html')
 
-    filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def authority_collections(request):
+    """
+    List :class:`.AuthorityCollection` instances.
+    """
+    from curation.filters import AuthorityCollectionFilter
+    return _list_collections(request, AuthorityCollectionFilter, AuthorityCollection, 'AUTHORITY', 'curation/collection_list.html')
+
+def _list_collections(request, collection_filter_class, collection_class, type, template):
+    # ISISCB-1050: reverse sort order of collections (newest first)
+    collections = collection_class.objects.all().order_by('-created')
+
+    filtered_objects = collection_filter_class(request.GET, queryset=collections)
     context = {
         'objects': filtered_objects,
+        'type': type,
     }
-    return render(request, 'curation/collection_list.html', context)
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
