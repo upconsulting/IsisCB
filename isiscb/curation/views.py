@@ -2029,9 +2029,16 @@ def dataset(request, dataset_id=None):
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def search_collections(request):
+def search_citation_collections(request):
+    return _search_collections(request, CitationCollection)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_authority_collections(request):
+    return _search_collections(request, AuthorityCollection)
+
+def _search_collections(request, collection_class):
     q = request.GET.get('query', None)
-    queryset = CitationCollection.objects.filter(name__icontains=q)
+    queryset = collection_class.objects.filter(name__icontains=q)
     results = [{
         'id': col.id,
         'label': col.name,
@@ -2519,7 +2526,7 @@ def bulk_select_authority(request):
     context = {}
     return render(request, template, context)
 
-def _get_filtered_queryset(request):
+def _get_filtered_queryset(request, type='CITATION'):
     pks = request.POST.getlist('queryset')
 
     filter_params_raw = request.POST.get('filters')
@@ -2538,8 +2545,12 @@ def _get_filtered_queryset(request):
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
-    _qs = operations.filter_queryset(request.user, Citation.objects.all())
-    queryset = CitationFilter(filter_params, queryset=_qs)
+    if type is 'CITATION':
+        _qs = operations.filter_queryset(request.user, Citation.objects.all())
+        queryset = CitationFilter(filter_params, queryset=_qs)
+    else:
+        _qs = operations.filter_queryset(request.user, Authority.objects.all())
+        queryset = AuthorityFilter(filter_params, queryset=_qs)
 
     return queryset, filter_params_raw
 
@@ -2798,14 +2809,26 @@ def collections(request):
     List :class:`.Collection` instances.
     """
     from curation.filters import CitationCollectionFilter
-    # ISISCB-1050: reverse sort order of collections (newest first)
-    collections = CitationCollection.objects.all().order_by('-created')
+    return _list_collections(request, CitationCollectionFilter, CitationCollection, 'CITATION', 'curation/collection_list.html')
 
-    filtered_objects = CitationCollectionFilter(request.GET, queryset=collections)
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def authority_collections(request):
+    """
+    List :class:`.AuthorityCollection` instances.
+    """
+    from curation.filters import AuthorityCollectionFilter
+    return _list_collections(request, AuthorityCollectionFilter, AuthorityCollection, 'AUTHORITY', 'curation/collection_list.html')
+
+def _list_collections(request, collection_filter_class, collection_class, type, template):
+    # ISISCB-1050: reverse sort order of collections (newest first)
+    collections = collection_class.objects.all().order_by('-created')
+
+    filtered_objects = collection_filter_class(request.GET, queryset=collections)
     context = {
         'objects': filtered_objects,
+        'type': type,
     }
-    return render(request, 'curation/collection_list.html', context)
+    return render(request, template, context)
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -2838,6 +2861,35 @@ def create_citation_collection(request):
 
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def create_authority_collection(request):
+    template = 'curation/authority_collection_create.html'
+    context = {}
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = AuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = AuthorityCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def add_citation_collection(request):
@@ -2859,6 +2911,35 @@ def add_citation_collection(request):
                 return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
         else:
             form = SelectCitationCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def add_authority_collection(request):
+    template = 'curation/authority_collection_add.html'
+    context = {}
+
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = SelectAuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                collection = form.cleaned_data['collection']
+                collection.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectAuthorityCollectionForm()
             form.fields['filters'].initial = filter_params_raw
 
         context.update({

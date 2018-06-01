@@ -52,7 +52,7 @@ urlpatterns = [
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),
 
     url(r'^(?i)citation/collection$', views.collections, name='collections'),
-    url(r'^(?i)citation/collection/search$', views.search_collections, name='search-collections'),
+    url(r'^(?i)citation/collection/search$', views.search_citation_collections, name='search-collections'),
     url(r'^(?i)citation/collection/create$', views.create_citation_collection, name='create-citation-collection'),
     url(r'^(?i)citation/collection/add$', views.add_citation_collection, name='add-citation-collection'),
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),
@@ -61,6 +61,10 @@ urlpatterns = [
     url(r'^(?i)citation/export/status$', views.export_citations_status, name="export-citations-status"),
     url(r'^(?i)citation/select$', views.bulk_select_citation, name='citation-bulk-select'),
 
+    url(r'^(?i)authority/collection$', views.authority_collections, name='authority-collections'),
+    url(r'^(?i)authority/collection/add$', views.add_authority_collection, name='add-authority-collection'),
+    url(r'^(?i)authority/collection/search$', views.search_authority_collections, name='search-authority-collections'),
+    url(r'^(?i)authority/collection/create$', views.create_authority_collection, name='create-authority-collection'),
     url(r'^(?i)authority/bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='bulk_change_from_csv'),
     url(r'^(?i)authority/select$', views.bulk_select_authority, name='authority-bulk-select'),
 
