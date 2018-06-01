@@ -18,50 +18,82 @@
       Export
     </a>
 
-    <a class="btn btn-primary btn-xs" href="#" id="bulk-change-csv">
-      <span class="glyphicon glyphicon-cloud-download"></span>
+    <a class="btn btn-success btn-xs" href="#" id="bulk-change-csv">
+      <span class="glyphicon glyphicon-cloud-upload"></span>
       Bulk Change (CSV)
     </a>
+
+    <a class="btn btn-primary btn-xs" href="{% url 'curation:authority-bulk-select' %}">
+      <i class="fa fa-check-circle" aria-hidden="true"></i> Bulk select
+    </a>
+
+    <span class="dropdown">
+        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" data-toggle="dropdown">
+            <span class="glyphicon glyphicon-folder-open"></span>
+            Authorities
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="small" href="#" id="collection-create"><span class="glyphicon glyphicon-certificate"></span> Create new collection</a></li>
+            <li><a class="small" href="#" id="collection-add"><span class="glyphicon glyphicon-plus"></span> Add to existing collection</a></li>
+            <li><a class="small" href="{% url "curation:authority-collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>
+        </ul>
+    </span>
+
+    <table class="table table-responsive table-hover table-curation">
+        <thead>
+            <tr>
+                <th width="3%">
+                    <input type="checkbox" name="select_all" id="select_all" />
+                    <script>
+                    $('#select_all').change(function(e) {
+                        if ($(this).prop('checked')) {
+                            $('.queryset-checkbox').prop('checked', true);
+                        } else {
+                            $('.queryset-checkbox').prop('checked', false);
+                        }
+                    });
+                    </script>
+                </th>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Tracking</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for object in filter_list %}
+            <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
+                <td>
+                    <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
+                </td>
+                <td>
+                    <a href="{% url "curation:curate_authority" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
+                    {% if not object.public %}
+                    <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
+                    {% endif %}
+                    {% if not object|are_related_objects_for_authority_public %}
+                    <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
+                    {% endif %}
+                    {% if object|is_public_inconsistent %}
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
+                    {% endif %}
+                    {% if object.record_status_value == object.REDIRECT %}
+                    <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
+                    {% endif %}
+                </td>
+                <td>{{ object.type_controlled|get_authority_type_controlled_display }}</td>
+                <td>{{ object.name|safe }}</td>
+                <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        </thead>
+
+    </table>
 </form>
-
-<table class="table table-responsive table-hover table-curation">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Type</th>
-            <th>Name</th>
-            <th>Tracking</th>
-
-        </tr>
-    </thead>
-    <tbody>
-        {% for object in filter_list %}
-        <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
-            <td>
-                <a href="{% url "curation:curate_authority" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
-                {% if not object.public %}
-                <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
-                {% endif %}
-                {% if not object|are_related_objects_for_authority_public %}
-                <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
-                {% endif %}
-                {% if object|is_public_inconsistent %}
-                <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
-                {% endif %}
-                {% if object.record_status_value == object.REDIRECT %}
-                <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
-                {% endif %}
-            </td>
-            <td>{{ object.type_controlled|get_authority_type_controlled_display }}</td>
-            <td>{{ object.name|safe }}</td>
-            <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-
-    </thead>
-
-</table>
 {% endblock %}
 
 {% block filter_form %}
@@ -150,6 +182,14 @@
                 {{ objects.form.belongs_to|addcss:"form-control input-sm" }}
             </div>
 
+            {% for error in objects.form.in_collections.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group clearable">
+                <label class="control-label">Collection</label>
+                {{ objects.form.in_collections}}
+                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control input-sm">
+            </div>
 
         </div>
 
@@ -196,6 +236,19 @@ $(document).ready(function() {
         $('.form-group.clearable select').val('');
     });
 
+    /* in collection javascript */
+    $('#in_collections_input').bootcomplete({
+        url:'{% url 'curation:search-authority-collections' %}',
+        minLength: 3,
+        idFieldName: 'in_collections'
+    });
+
+    $('#in_collections_input').on('input', function() {
+        if ($('#in_collections_input').val() == '') {
+          $('#id_in_collections').val('');
+        }
+    });
+
     /* zotero accession javascript */
     $('#zotero_accession_input').bootcomplete({
         url:'{% url 'curation:search-zotero-accessions' %}',
@@ -225,6 +278,16 @@ $(document).ready(function() {
 
     $('#bulk-change-csv').click(function() {
         window.open('{% url "curation:bulk_change_from_csv" %}');
+    });
+
+    var form = $('#bulk-form');
+    $('#collection-create').click(function() {
+        form.attr('action', '{% url "curation:create-authority-collection" %}');
+        form.submit();
+    });
+    $('#collection-add').click(function() {
+        form.attr('action', '{% url "curation:add-authority-collection" %}');
+        form.submit();
     });
 });
 </script>

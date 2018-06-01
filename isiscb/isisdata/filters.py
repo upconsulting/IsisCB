@@ -264,7 +264,7 @@ class CitationFilter(django_filters.FilterSet):
 class AuthorityFilter(django_filters.FilterSet):
     strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
-    id = django_filters.CharFilter(name='id', lookup_expr='exact')
+    id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
@@ -281,6 +281,7 @@ class AuthorityFilter(django_filters.FilterSet):
     dataset_list = [(ds.pk, ds.name) for ds in datasets ]
     belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
+    in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
 
@@ -312,7 +313,25 @@ class AuthorityFilter(django_filters.FilterSet):
 
     def __init__(self, params, **kwargs):
 
+        if 'in_collections' in params and params.get('collection_only', False):
+            in_coll = params.get('in_collections')
+            params = QueryDict('', mutable=True)
+            params['in_collections'] = in_coll
+
         super(AuthorityFilter, self).__init__(params, **kwargs)
+
+        in_coll = self.data.get('in_collections', None)
+        if in_coll:
+            try:
+                collection = AuthorityCollection.objects.get(pk=in_coll)
+                if collection:
+                    self.collection_name = collection.name
+            except AuthorityCollection.DoesNotExist:
+                self.collection_name = "Collection could not be found."
+
+            if self.data.get('collection_only', False):
+                self.data = {'in_collections': in_coll}
+            return
 
         zotero_acc = self.data.get('zotero_accession', None)
         if zotero_acc:
@@ -324,6 +343,13 @@ class AuthorityFilter(django_filters.FilterSet):
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
+    def filter_id(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        ids = [i.strip() for i in value.split(',')]
+        queryset = queryset.filter(pk__in=ids)
+        return queryset
 
     def filter_tracking_state(self, queryset, field, value):
         if not value:
@@ -351,3 +377,10 @@ class AuthorityFilter(django_filters.FilterSet):
         if len(authority_ids) == 1 and authority_ids[0] is None:
             return queryset.none()
         return queryset.filter(pk__in=authority_ids)
+
+    def filter_in_collections(self, queryset, field, value):
+        if not value:
+            return queryset
+        q = Q()
+
+        return queryset.filter(Q(in_collections=value))

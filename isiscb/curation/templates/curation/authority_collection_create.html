@@ -3,18 +3,18 @@
 {% load addcss %}
 
 {% block content %}
-<div class="h2">Create a new citation collection</div>
+<div class="h2">Create a new authority collection</div>
 
 <p class="text-warning">
-    This will create a new citation collection with {{ queryset.count }} citations.
-    You can add more citations later.
+    This will create a new authority collection with {{ queryset.count }} authorities.
+    You can add more authorities later.
 </p>
 
 <form class="form" action="?confirmed=true" method="POST">
     {% csrf_token %}
 
     {% for field in form %}
-    {% if field.label in "'Citations', 'Filters'" %}
+    {% if field.label in "'Authorities', 'Filters'" %}
     {{ field }}
     {% else %}
 
