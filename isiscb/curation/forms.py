@@ -737,6 +737,6 @@ class BulkChangeCSVForm(forms.Form):
     UPDATE_ATTR = 'UPATT'
     CHOICES = [
         (CREATE_ATTR, 'Create Attributes'),
-        (UPDATE_ATTR, 'Update Attributes'),
+        (UPDATE_ATTR, 'Update Elements'),
     ]
     action = forms.ChoiceField(choices=CHOICES)

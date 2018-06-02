@@ -2,6 +2,8 @@ from celery import shared_task
 
 from isisdata.models import *
 
+from django.apps import apps
+
 import logging
 import smart_open
 import unicodecsv as csv
@@ -162,18 +164,64 @@ def _count_rows(f, results):
         results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
     # reset file cursor to first data line
-    f.seek(1)
+    f.seek(0)
 
     return row_count
 
+ELEMENT_TYPES = {
+    'Attribute': Attribute,
+    'LinkedData': LinkedData,
+}
+
+ALLOWED_FIELDS = {
+    Attribute: ['description', 'value_freeform'],
+    LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes'],
+}
+
+COLUMN_NAME_TYPE = 'Table'
+COLUMN_NAME_ID = "Id"
+COLUMN_NAME_FIELD = "Field"
+COLUMN_NAME_VALUE = "Value"
+
 @shared_task
-def update_attributes(file_path, error_path, task_id):
-    logging.info('Adding attributes from %s.' % (file_path))
+def update_elements(file_path, error_path, task_id):
+    logging.info('Updating elements from %s.' % (file_path))
 
-    results = []
-    row_count = _count_rows(f, results)
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
 
-    task.max_value = row_count
-    task.save()
+    with smart_open.smart_open(file_path, 'rb') as f:
+        reader = csv.reader(f, encoding='utf-8')
+        task = AsyncTask.objects.get(pk=task_id)
 
-    current_count = 0
+        results = []
+        row_count = _count_rows(f, results)
+
+        task.max_value = row_count
+        task.save()
+
+        current_count = 0
+
+        try:
+            for row in csv.DictReader(f):
+                type = row[COLUMN_NAME_TYPE]
+                type_class = apps.get_model(app_label='isisdata', model_name=type)
+                element_id = row[COLUMN_NAME_ID]
+
+                element = type_class.objects.get(pk=element_id)
+                field_to_change = row[COLUMN_NAME_FIELD]
+                new_value = row[COLUMN_NAME_VALUE]
+
+                if field_to_change in ALLOWED_FIELDS[type_class]:
+                    setattr(element, field_to_change, new_value)
+                else:
+                    results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
+
+                element.save()
+
+                current_count = _update_count(current_count, task)
+
+        except Exception, e:
+            print e
+
+        print results

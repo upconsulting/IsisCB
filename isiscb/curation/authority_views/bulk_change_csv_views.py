@@ -17,7 +17,7 @@ import smart_open
 
 ACTION_DICT = {
     BulkChangeCSVForm.CREATE_ATTR: 'add_attributes_to_authority',
-    BulkChangeCSVForm.UPDATE_ATTR: 'update_attributes'
+    BulkChangeCSVForm.UPDATE_ATTR: 'update_elements'
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
