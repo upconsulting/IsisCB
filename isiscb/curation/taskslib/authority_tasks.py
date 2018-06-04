@@ -149,6 +149,7 @@ ELEMENT_TYPES = {
 ALLOWED_FIELDS = {
     Attribute: ['description', 'value_freeform', 'value__value'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes'],
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes']
 }
 
 COLUMN_NAME_TYPE = 'Table'
@@ -188,8 +189,13 @@ def update_elements(file_path, error_path, task_id):
                 if field_to_change in ALLOWED_FIELDS[type_class]:
                     # if we change a field that directly belongs to the class
                     if '__' not in field_to_change:
-                        setattr(element, field_to_change, new_value)
-                        element.save()
+                        # if there are choices make sure they are respected
+                        is_valid = _is_value_valid(element, field_to_change, new_value)
+                        if not is_valid:
+                            results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                        else:
+                            setattr(element, field_to_change, new_value)
+                            element.save()
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
@@ -201,13 +207,19 @@ def update_elements(file_path, error_path, task_id):
                                 if field_name == 'value':
                                     new_value = object_to_change.__class__.convert(new_value)
 
-                            setattr(object_to_change, field_name, new_value)
-                            object_to_change.save()
+                            # if there are choices make sure they are respected
+                            is_valid = _is_value_valid(object_to_change, field_name, new_value)
+                            if not is_valid:
+                                results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                            else:
+                                setattr(object_to_change, field_name, new_value)
+                                object_to_change.save()
                         except Exception, e:
                             logger.error(e)
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
 
                 else:
+                    logger.error(e)
                     results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
 
                 current_count = _update_count(current_count, task)
@@ -221,6 +233,14 @@ def update_elements(file_path, error_path, task_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _is_value_valid(element, field_to_change, new_value):
+    choices = element._meta.get_field(field_to_change).choices
+    if choices:
+        if new_value not in dict(choices):
+            return False
+
+    return True
 
 def _update_count(current_count, task):
     current_count += 1
