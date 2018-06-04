@@ -495,6 +495,15 @@ class AuthorityValue(Value):
     class Meta:
         verbose_name = 'authority'
 
+    @staticmethod
+    def convert(value):
+        if type(value) is Authority:
+            return value
+            
+        try:
+            return Authority.objects.get(pk=value)
+        except ValueError:
+            raise ValidationError('Must be the id of an existing authority.')
 
 
 VALUE_MODELS = [

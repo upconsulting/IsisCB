@@ -136,37 +136,10 @@ def add_attributes_to_authority(file_path, error_path, task_id):
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
-        with smart_open.smart_open(error_path, 'wb') as f:
-            writer = csv.writer(f)
-            writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
-            for result in results:
-                writer.writerow(result)
+        _save_results(error_path, results)
 
         task.state = 'SUCCESS'
         task.save()
-
-def _update_count(current_count, task):
-    current_count += 1
-    task.current_value = current_count
-    task.save()
-    return current_count
-
-def _count_rows(f, results):
-    # we want to avoid loading everything in memory, in case it's a large file
-    # we do not count the header, so we start at -1
-    row_count = -1
-    try:
-        for row in csv.DictReader(f):
-            row_count += 1
-    except Exception, e:
-        logger.error("There was an unexpected error processing the CSV file.")
-        logger.exception(e)
-        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
-
-    # reset file cursor to first data line
-    f.seek(0)
-
-    return row_count
 
 ELEMENT_TYPES = {
     'Attribute': Attribute,
@@ -174,7 +147,7 @@ ELEMENT_TYPES = {
 }
 
 ALLOWED_FIELDS = {
-    Attribute: ['description', 'value_freeform'],
+    Attribute: ['description', 'value_freeform', 'value__value'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes'],
 }
 
@@ -213,15 +186,68 @@ def update_elements(file_path, error_path, task_id):
                 new_value = row[COLUMN_NAME_VALUE]
 
                 if field_to_change in ALLOWED_FIELDS[type_class]:
-                    setattr(element, field_to_change, new_value)
+                    # if we change a field that directly belongs to the class
+                    if '__' not in field_to_change:
+                        setattr(element, field_to_change, new_value)
+                        element.save()
+                    # otherwise
+                    else:
+                        object, field_name = field_to_change.split('__')
+                        try:
+                            object_to_change = getattr(element, object)
+                            # if we have an attribute, we need to convert the value first
+                            if type_class == Attribute:
+                                object_to_change = object_to_change.get_child_class()
+                                if field_name == 'value':
+                                    new_value = object_to_change.__class__.convert(new_value)
+
+                            setattr(object_to_change, field_name, new_value)
+                            object_to_change.save()
+                        except Exception, e:
+                            logger.error(e)
+                            results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
+
                 else:
                     results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
-
-                element.save()
 
                 current_count = _update_count(current_count, task)
 
         except Exception, e:
-            print e
+            logger.error("There was an unexpected error processing the CSV file.")
+            logger.exception(e)
+            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
-        print results
+        _save_results(error_path, results)
+
+        task.state = 'SUCCESS'
+        task.save()
+
+def _update_count(current_count, task):
+    current_count += 1
+    task.current_value = current_count
+    task.save()
+    return current_count
+
+def _count_rows(f, results):
+    # we want to avoid loading everything in memory, in case it's a large file
+    # we do not count the header, so we start at -1
+    row_count = -1
+    try:
+        for row in csv.DictReader(f):
+            row_count += 1
+    except Exception, e:
+        logger.error("There was an unexpected error processing the CSV file.")
+        logger.exception(e)
+        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+
+    # reset file cursor to first data line
+    f.seek(0)
+
+    return row_count
+
+def _save_results(path, results):
+    with smart_open.smart_open(path, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
+        for result in results:
+            writer.writerow(result)

@@ -178,10 +178,13 @@ class AuthorityValueForm(forms.ModelForm):
 
     def clean_value(self):
         value = self.cleaned_data['value']
+
         try:
-            return Authority.objects.get(pk=value)
+            value = Authority.objects.get(id=value)
         except:
             raise forms.ValidationError('Authority record does not exist.')
+
+        return value
 
     def save(self, *args, **kwargs):
         self.instance.value = self.cleaned_data.get('value')
@@ -189,7 +192,7 @@ class AuthorityValueForm(forms.ModelForm):
 
     class Meta:
         model = AuthorityValue
-        fields = []
+        fields = ['value']
 
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)

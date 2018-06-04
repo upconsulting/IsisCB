@@ -1027,7 +1027,6 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
 
     elif request.method == 'POST':
-
         if attribute:    # Update.
             attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
 
