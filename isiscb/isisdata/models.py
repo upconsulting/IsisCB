@@ -499,7 +499,7 @@ class AuthorityValue(Value):
     def convert(value):
         if type(value) is Authority:
             return value
-            
+
         try:
             return Authority.objects.get(pk=value)
         except ValueError:
@@ -2195,6 +2195,9 @@ class AsyncTask(models.Model):
     state = models.CharField(max_length=10, blank=True, null=True)
     label = models.TextField(default="")
 
+    created_by = models.ForeignKey(User, related_name='tasks', null=True)
+    created_on = models.DateTimeField(null=True)
+
     _value = models.TextField()
     """Use jsonpickle to serialize/deserialize return values."""
 
@@ -2211,3 +2214,8 @@ class AsyncTask(models.Model):
         if self.max_value and self.max_value > 0:
             return 100.*self.current_value/self.max_value
         return 0.
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_on = datetime.datetime.utcnow()
+        return super(AsyncTask, self).save(*args, **kwargs)

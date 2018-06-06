@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.conf.urls import include, url
 
 from curation import views
-from curation.authority_views import bulk_change_csv_views
+from curation.bulk_views import bulk_change_csv_views
 import rules
 from .rules import *
 
@@ -38,6 +38,9 @@ urlpatterns = [
     url(r'^(?i)dashboard/$', views.dashboard, name='dashboard'),
     url(r'^(?i)datasets/$', views.datasets, name='datasets'),
     url(r'^(?i)citation/$', views.citations, name='citation_list'),
+    url(r'^(?i)bulk$', bulk_change_csv_views.bulk_changes, name='bulk_changes'),
+    url(r'^(?i)bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='general_bulk_change_from_csv'),
+    url(r'^(?i)bulk/csv/status$', bulk_change_csv_views.bulk_csv_status, name="bulk-csv-status"),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
 
     url(r'^(?i)citation/add$', views.create_citation, name="create_citation"),
@@ -45,7 +48,6 @@ urlpatterns = [
 
     url(r'^(?i)authority/export$', views.export_authorities, name="export-authorities"),
     url(r'^(?i)authority/export/status$', views.export_authorities_status, name="export-authorities-status"),
-    url(r'^(?i)authority/attribute/add/status$', bulk_change_csv_views.add_attributes_status, name="add-attributes-status"),
 
     url(r'^(?i)zotero/accessions/search$', views.search_zotero_accessions, name='search-zotero-accessions'),
 

@@ -1,0 +1,43 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Bulk Changes</h2>
+<small>
+
+<script>
+  $(document).ready(function() {
+    $('.date').each(function() {
+      var date = $(this).text();
+      $(this).text((new Date(date).toLocaleString()));
+    });
+
+    $(".goToTask").click(function() {
+         window.location = '{% url 'curation:bulk-csv-status' %}?task_id=' + $(this).data("task-id");
+     });
+  });
+</script>
+<table class="table table-hover table-curation">
+  <tr>
+    <th>Task ID</th>
+    <th>Created by</th>
+    <th>Created on</th>
+    <th>State</th>
+    <th>Total Records</th>
+    <th>Current progress</th>
+  </tr>
+  {% for task in tasks %}
+  <tr class="goToTask" data-task-id="{{task.id}}" style="cursor: pointer">
+    <td>{{ task.id }}</td>
+    <td>{{ task.created_by }}</td>
+    <td><span class="date">{{ task.created_on|get_iso_date_string }}</span></td>
+    <td>{{ task.state }}</td>
+    <td>{{ task.max_value }}</td>
+    <td>{{ task.current_value }}</td>
+  </tr>
+  {% endfor %}
+</table>
+</small>
+
+{% endblock %}
