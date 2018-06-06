@@ -25,7 +25,6 @@
     <th>Created on</th>
     <th>State</th>
     <th>Total Records</th>
-    <th>Current progress</th>
   </tr>
   {% for task in tasks %}
   <tr class="goToTask" data-task-id="{{task.id}}" style="cursor: pointer">
@@ -34,7 +33,6 @@
     <td><span class="date">{{ task.created_on|get_iso_date_string }}</span></td>
     <td>{{ task.state }}</td>
     <td>{{ task.max_value }}</td>
-    <td>{{ task.current_value }}</td>
   </tr>
   {% endfor %}
 </table>
