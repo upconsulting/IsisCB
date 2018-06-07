@@ -2,6 +2,8 @@ from celery import shared_task
 
 from isisdata.models import *
 
+from django.apps import apps
+
 import logging
 import smart_open
 import unicodecsv as csv
@@ -34,21 +36,11 @@ def add_attributes_to_authority(file_path, error_path, task_id):
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
-        # we want to avoid loading everything in memory, in case it's a large file
-        # we do not count the header, so we start at -1
-        row_count = -1
-        try:
-            for row in csv.DictReader(f):
-                row_count += 1
-        except Exception, e:
-            logger.error("There was an unexpected error processing the CSV file.")
-            logger.exception(e)
-            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+        row_count = _count_rows(f, results)
 
         task.max_value = row_count
         task.save()
-        # reset file cursor to first data line
-        f.seek(1)
+
         current_count = 0
         not_matching_subject_names = []
 
@@ -60,7 +52,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 except Authority.DoesNotExist:
                     logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
                     results.append((ERROR, subject_id, subject_id, 'Authority record does not exist.'))
-                    current_count = update_count(current_count, task)
+                    current_count = _update_count(current_count, task)
                     continue
 
                 related_name = row[COLUMN_NAME_ATTR_RELATED_NAME]
@@ -73,7 +65,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 if not atype:
                     logger.error('Attribute type with name %s does not exist. Skipping attribute.' % (attribute_type))
                     results.append((ERROR, subject_id, attribute_type, 'Attribute type does not exist.'))
-                    current_count = update_count(current_count, task)
+                    current_count = _update_count(current_count, task)
                     continue
 
                 # we can be pretty sure there is just one
@@ -124,7 +116,7 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                     except:
                         logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
                         results.append((ERROR, subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
-                        current_count = update_count(current_count, task)
+                        current_count = _update_count(current_count, task)
                         continue
 
                 attribute = Attribute(**att_init_values)
@@ -138,23 +130,144 @@ def add_attributes_to_authority(file_path, error_path, task_id):
                 value = avmodel_class(**val_init_values)
                 value.save()
 
-                current_count = update_count(current_count, task)
+                current_count = _update_count(current_count, task)
         except Exception, e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
-        with smart_open.smart_open(error_path, 'wb') as f:
-            writer = csv.writer(f)
-            writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
-            for result in results:
-                writer.writerow(result)
+        _save_results(error_path, results)
 
         task.state = 'SUCCESS'
         task.save()
 
-def update_count(current_count, task):
+ELEMENT_TYPES = {
+    'Attribute': Attribute,
+    'LinkedData': LinkedData,
+}
+
+ALLOWED_FIELDS = {
+    Attribute: ['description', 'value_freeform', 'value__value'],
+    LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes'],
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes']
+}
+
+COLUMN_NAME_TYPE = 'Table'
+COLUMN_NAME_ID = "Id"
+COLUMN_NAME_FIELD = "Field"
+COLUMN_NAME_VALUE = "Value"
+
+@shared_task
+def update_elements(file_path, error_path, task_id):
+    logging.info('Updating elements from %s.' % (file_path))
+
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
+
+    with smart_open.smart_open(file_path, 'rb') as f:
+        reader = csv.reader(f, encoding='utf-8')
+        task = AsyncTask.objects.get(pk=task_id)
+
+        results = []
+        row_count = _count_rows(f, results)
+
+        task.max_value = row_count
+        task.save()
+
+        current_count = 0
+
+        try:
+            for row in csv.DictReader(f):
+                type = row[COLUMN_NAME_TYPE]
+                type_class = apps.get_model(app_label='isisdata', model_name=type)
+                element_id = row[COLUMN_NAME_ID]
+
+                element = type_class.objects.get(pk=element_id)
+                field_to_change = row[COLUMN_NAME_FIELD]
+                new_value = row[COLUMN_NAME_VALUE]
+
+                if field_to_change in ALLOWED_FIELDS[type_class]:
+                    # if we change a field that directly belongs to the class
+                    if '__' not in field_to_change:
+                        # if there are choices make sure they are respected
+                        is_valid = _is_value_valid(element, field_to_change, new_value)
+                        if not is_valid:
+                            results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                        else:
+                            setattr(element, field_to_change, new_value)
+                            element.save()
+                    # otherwise
+                    else:
+                        object, field_name = field_to_change.split('__')
+                        try:
+                            object_to_change = getattr(element, object)
+                            # if we have an attribute, we need to convert the value first
+                            if type_class == Attribute:
+                                object_to_change = object_to_change.get_child_class()
+                                if field_name == 'value':
+                                    new_value = object_to_change.__class__.convert(new_value)
+
+                            # if there are choices make sure they are respected
+                            is_valid = _is_value_valid(object_to_change, field_name, new_value)
+                            if not is_valid:
+                                results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                            else:
+                                setattr(object_to_change, field_name, new_value)
+                                object_to_change.save()
+                        except Exception, e:
+                            logger.error(e)
+                            results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
+
+                else:
+                    logger.error(e)
+                    results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
+
+                current_count = _update_count(current_count, task)
+
+        except Exception, e:
+            logger.error("There was an unexpected error processing the CSV file.")
+            logger.exception(e)
+            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+
+        _save_results(error_path, results)
+
+        task.state = 'SUCCESS'
+        task.save()
+
+def _is_value_valid(element, field_to_change, new_value):
+    choices = element._meta.get_field(field_to_change).choices
+    if choices:
+        if new_value not in dict(choices):
+            return False
+
+    return True
+
+def _update_count(current_count, task):
     current_count += 1
     task.current_value = current_count
     task.save()
     return current_count
+
+def _count_rows(f, results):
+    # we want to avoid loading everything in memory, in case it's a large file
+    # we do not count the header, so we start at -1
+    row_count = -1
+    try:
+        for row in csv.DictReader(f):
+            row_count += 1
+    except Exception, e:
+        logger.error("There was an unexpected error processing the CSV file.")
+        logger.exception(e)
+        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+
+    # reset file cursor to first data line
+    f.seek(0)
+
+    return row_count
+
+def _save_results(path, results):
+    with smart_open.smart_open(path, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
+        for result in results:
+            writer.writerow(result)
