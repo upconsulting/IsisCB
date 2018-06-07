@@ -82,6 +82,14 @@
                 </ul>
               </li>
               {% endif %}
+              <li{% if curation_section == "bulk" %} class="active"{% endif %}>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Bulk Changes <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{% url "curation:bulk_changes" %}">Overview</a></li>
+                  <li><a href="{% url "curation:general_bulk_change_from_csv" %}">Bulk Changes from CSV</a></li>
+                </ul>
+              </li>
+
           </ul>
         </div>
       </div>

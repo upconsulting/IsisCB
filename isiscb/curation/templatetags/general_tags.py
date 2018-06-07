@@ -15,3 +15,7 @@ def get_uri(entry):
 
 def to_class_name(value):
     return value.__class__.__name__
+
+@register.filter
+def get_iso_date_string(date):
+    return date.isoformat()

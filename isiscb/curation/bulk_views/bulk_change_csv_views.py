@@ -15,21 +15,39 @@ from curation.taskslib import authority_tasks
 
 import smart_open
 
+ACTION_DICT = {
+    BulkChangeCSVForm.CREATE_ATTR: 'add_attributes_to_authority',
+    BulkChangeCSVForm.UPDATE_ATTR: 'update_elements'
+}
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_changes(request):
+
+
+    tasks = AsyncTask.objects.filter(created_on__isnull=False).order_by('-created_on')[:20]
+    context = {
+        'curation_section': 'bulk',
+        'tasks': tasks,
+    }
+
+    template = 'curation/bulk/bulk_changes.html'
+    return render(request, template, context)
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_change_from_csv(request):
     context = {
-        'curation_section': 'datasets',
-        'curation_subsection': 'authorities',
+        'curation_section': 'bulk',
     }
 
     if request.method == 'GET':
         context.update({
             'form': BulkChangeCSVForm()
         })
-        template = 'curation/authority/show_bulk_change_from_csv.html'
+        template = 'curation/bulk/show_bulk_change_from_csv.html'
     elif request.method == 'POST':
         form = BulkChangeCSVForm(request.POST, request.FILES)
         if form.is_valid():
+            bulk_method = getattr(authority_tasks,ACTION_DICT[form.cleaned_data['action']])
             uploaded_file = form.cleaned_data['csvFile']
             # store file in s3 so we can download when it's being processed
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -51,25 +69,27 @@ def bulk_change_from_csv(request):
 
             task = AsyncTask.objects.create()
             task.value = _results_name
+            task.created_by = request.user
             task.save()
-            authority_tasks.add_attributes_to_authority.delay(s3_path, s3_error_path, task.id)
 
-            target = reverse('curation:add-attributes-status') \
+            bulk_method.delay(s3_path, s3_error_path, task.id)
+
+            target = reverse('curation:bulk-csv-status') \
                      + '?' + urlencode({'task_id': task.id})
             return HttpResponseRedirect(target)
 
         context.update({
             'form': form
         })
-        template = 'curation/authority/show_bulk_change_from_csv.html'
+        template = 'curation/bulk/show_bulk_change_from_csv.html'
 
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def add_attributes_status(request):
+def bulk_csv_status(request):
     template = 'curation/export_status.html'
     context = {
-        'exported_type': 'AUTHORITY_ATTRIBUTES'
+        'exported_type': 'BULK_CHANGES'
     }
     # target = request.GET.get('target')
     task_id = request.GET.get('task_id')
