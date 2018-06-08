@@ -147,9 +147,9 @@ ELEMENT_TYPES = {
 }
 
 ALLOWED_FIELDS = {
-    Attribute: ['description', 'value_freeform', 'value__value'],
-    LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes'],
-    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes']
+    Attribute: ['description', 'value_freeform', 'value__value', 'record_status_value', 'record_status_explanation'],
+    LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes', 'record_status_value', 'record_status_explanation'],
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
 }
 
 COLUMN_NAME_TYPE = 'Table'
