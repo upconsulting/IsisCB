@@ -149,7 +149,42 @@ ELEMENT_TYPES = {
 ALLOWED_FIELDS = {
     Attribute: ['description', 'value_freeform', 'value__value', 'record_status_value', 'record_status_explanation'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes', 'record_status_value', 'record_status_explanation'],
-    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
+}
+
+FIELD_MAP = {
+    Attribute: {
+        'ATT Description': 'description',
+        'ATT Value': 'value__value',
+        'ATT Value Freeform': 'value_freeform',
+        'ATT Status': 'record_status_value',
+        'ATT RecordStatusExplanation': 'record_status_explanation',
+        'ATT DateFree': 'value_freeform',
+        'ATT DateBegin': 'value__start',
+        'ATT DateEnd': 'value__end',
+        'ATT PlaceName' : 'value__name',
+        'ATT PlaceLink' : 'value__value',
+        'ATT Notes': 'administrator_notes',
+    },
+    LinkedData: {
+        'LED URN': 'universal_resource_name',
+        'LED URL': 'url',
+        'LED Resource': 'resource_name',
+        'LED Notes': 'administrator_notes',
+        'LED Status': 'record_status_value',
+        'LED RecordStatusExplanation': 'record_status_explanation',
+    },
+    ACRelation: {
+        'ACR ID Auth': 'authority_id',
+        'ACR ID Cit': 'citation_id',
+        'ACR NameDisplay': 'name_for_display_in_citation',
+        'ACR Type': 'type_controlled',
+        'ACR DataDisplayOrder': 'data_display_order',
+        'ACR ConfidenceMeasure': 'confidence_measure',
+        'ACR Notes': 'administrator_notes',
+        'ACR Status': 'record_status_value',
+        'ACR RecordStatusExplanation': 'record_status_explanation',
+    }
 }
 
 COLUMN_NAME_TYPE = 'Table'
@@ -186,7 +221,8 @@ def update_elements(file_path, error_path, task_id):
                 field_to_change = row[COLUMN_NAME_FIELD]
                 new_value = row[COLUMN_NAME_VALUE]
 
-                if field_to_change in ALLOWED_FIELDS[type_class]:
+                if field_to_change in FIELD_MAP[type_class]:
+                    field_to_change = FIELD_MAP[type_class][field_to_change]
                     # if we change a field that directly belongs to the class
                     if '__' not in field_to_change:
                         # if there are choices make sure they are respected
@@ -204,7 +240,7 @@ def update_elements(file_path, error_path, task_id):
                             # if we have an attribute, we need to convert the value first
                             if type_class == Attribute:
                                 object_to_change = object_to_change.get_child_class()
-                                if field_name == 'value':
+                                if field_name in ['value', 'start', 'end']:
                                     new_value = object_to_change.__class__.convert(new_value)
 
                             # if there are choices make sure they are respected
