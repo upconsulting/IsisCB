@@ -192,6 +192,8 @@ COLUMN_NAME_ID = "Id"
 COLUMN_NAME_FIELD = "Field"
 COLUMN_NAME_VALUE = "Value"
 
+ADMIN_NOTES = 'administrator_notes'
+
 @shared_task
 def update_elements(file_path, error_path, task_id):
     logging.info('Updating elements from %s.' % (file_path))
@@ -222,6 +224,7 @@ def update_elements(file_path, error_path, task_id):
                 new_value = row[COLUMN_NAME_VALUE]
 
                 if field_to_change in FIELD_MAP[type_class]:
+                    field_in_csv = field_to_change
                     field_to_change = FIELD_MAP[type_class][field_to_change]
                     # if we change a field that directly belongs to the class
                     if '__' not in field_to_change:
@@ -230,7 +233,11 @@ def update_elements(file_path, error_path, task_id):
                         if not is_valid:
                             results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
                         else:
-                            setattr(element, field_to_change, new_value)
+                            if field_to_change == ADMIN_NOTES:
+                                _add_to_administrator_notes(element, new_value)
+                            else:
+                                setattr(element, field_to_change, new_value)
+                            _add_change_note(element, task.id, field_in_csv, field_to_change, new_value)
                             element.save()
                     # otherwise
                     else:
@@ -248,7 +255,11 @@ def update_elements(file_path, error_path, task_id):
                             if not is_valid:
                                 results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
                             else:
-                                setattr(object_to_change, field_name, new_value)
+                                if field_to_change == ADMIN_NOTES:
+                                    _add_to_administrator_notes(object_to_change, new_value)
+                                else:
+                                    setattr(object_to_change, field_name, new_value)
+                                _add_change_note(object_to_change, task.id, field_in_csv, field_name, new_value)
                                 object_to_change.save()
                         except Exception, e:
                             logger.error(e)
@@ -269,6 +280,17 @@ def update_elements(file_path, error_path, task_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _add_to_administrator_notes(element, value):
+    note = getattr(element, 'administrator_notes')
+    note = note + '\n\n' + value
+    setattr(element, ADMIN_NOTES, note)
+
+def _add_change_note(element, task_nr, field, field_name, value):
+    note = getattr(element, ADMIN_NOTES)
+    old_value = getattr(element, field_name)
+    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s".'%(task_nr, field, old_value, value)
+    setattr(element, ADMIN_NOTES, note)
 
 def _is_value_valid(element, field_to_change, new_value):
     choices = element._meta.get_field(field_to_change).choices
