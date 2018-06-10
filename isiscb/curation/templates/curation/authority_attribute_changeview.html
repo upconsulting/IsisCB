@@ -79,6 +79,10 @@
                     <div id="typeHelpText">Please select a type.</div>
                   </div>
                 </div>
+
+                <div class="form-group">
+                  <label class="col-md-12">Last updated on <span class="date">{{ attribute.modified_on|get_iso_date }}</span> by {{ attribute.modified_by }}</label>
+                </div>
             </div>
             <div class="col-sm-6">
                 {% if value_form %}

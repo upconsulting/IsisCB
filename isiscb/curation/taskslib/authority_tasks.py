@@ -22,7 +22,7 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 logger = logging.getLogger(__name__)
 
 @shared_task
-def add_attributes_to_authority(file_path, error_path, task_id):
+def add_attributes_to_authority(file_path, error_path, task_id, user_id):
     logging.info('Adding attributes from %s.' % (file_path))
     # this is a hack but the best I can come up with right now :op
     logging.debug('Make AuthorityValue exists in ContentType table...')
@@ -149,7 +149,42 @@ ELEMENT_TYPES = {
 ALLOWED_FIELDS = {
     Attribute: ['description', 'value_freeform', 'value__value', 'record_status_value', 'record_status_explanation'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes', 'record_status_value', 'record_status_explanation'],
-    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'type_broad_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
+}
+
+FIELD_MAP = {
+    Attribute: {
+        'ATT Description': 'description',
+        'ATT Value': 'value__value',
+        'ATT Value Freeform': 'value_freeform',
+        'ATT Status': 'record_status_value',
+        'ATT RecordStatusExplanation': 'record_status_explanation',
+        'ATT DateFree': 'value_freeform',
+        'ATT DateBegin': 'value__start',
+        'ATT DateEnd': 'value__end',
+        'ATT PlaceName' : 'value__name',
+        'ATT PlaceLink' : 'value__value',
+        'ATT Notes': 'administrator_notes',
+    },
+    LinkedData: {
+        'LED URN': 'universal_resource_name',
+        'LED URL': 'url',
+        'LED Resource': 'resource_name',
+        'LED Notes': 'administrator_notes',
+        'LED Status': 'record_status_value',
+        'LED RecordStatusExplanation': 'record_status_explanation',
+    },
+    ACRelation: {
+        'ACR ID Auth': 'authority_id',
+        'ACR ID Cit': 'citation_id',
+        'ACR NameDisplay': 'name_for_display_in_citation',
+        'ACR Type': 'type_controlled',
+        'ACR DataDisplayOrder': 'data_display_order',
+        'ACR ConfidenceMeasure': 'confidence_measure',
+        'ACR Notes': 'administrator_notes',
+        'ACR Status': 'record_status_value',
+        'ACR RecordStatusExplanation': 'record_status_explanation',
+    }
 }
 
 COLUMN_NAME_TYPE = 'Table'
@@ -157,8 +192,10 @@ COLUMN_NAME_ID = "Id"
 COLUMN_NAME_FIELD = "Field"
 COLUMN_NAME_VALUE = "Value"
 
+ADMIN_NOTES = 'administrator_notes'
+
 @shared_task
-def update_elements(file_path, error_path, task_id):
+def update_elements(file_path, error_path, task_id, user_id):
     logging.info('Updating elements from %s.' % (file_path))
 
     SUCCESS = 'SUCCESS'
@@ -186,7 +223,9 @@ def update_elements(file_path, error_path, task_id):
                 field_to_change = row[COLUMN_NAME_FIELD]
                 new_value = row[COLUMN_NAME_VALUE]
 
-                if field_to_change in ALLOWED_FIELDS[type_class]:
+                if field_to_change in FIELD_MAP[type_class]:
+                    field_in_csv = field_to_change
+                    field_to_change = FIELD_MAP[type_class][field_to_change]
                     # if we change a field that directly belongs to the class
                     if '__' not in field_to_change:
                         # if there are choices make sure they are respected
@@ -194,17 +233,25 @@ def update_elements(file_path, error_path, task_id):
                         if not is_valid:
                             results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
                         else:
-                            setattr(element, field_to_change, new_value)
+                            if field_to_change == ADMIN_NOTES:
+                                _add_to_administrator_notes(element, new_value)
+                            else:
+                                setattr(element, field_to_change, new_value)
+                            setattr(element, 'modified_by_id', user_id)
+                            _add_change_note(element, task.id, field_in_csv, field_to_change, new_value)
                             element.save()
+                            results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
                         try:
                             object_to_change = getattr(element, object)
+                            object_to_update_timestamp = object_to_change
                             # if we have an attribute, we need to convert the value first
                             if type_class == Attribute:
                                 object_to_change = object_to_change.get_child_class()
-                                if field_name == 'value':
+                                object_to_update_timestamp = element
+                                if field_name in ['value', 'start', 'end']:
                                     new_value = object_to_change.__class__.convert(new_value)
 
                             # if there are choices make sure they are respected
@@ -212,14 +259,21 @@ def update_elements(file_path, error_path, task_id):
                             if not is_valid:
                                 results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
                             else:
-                                setattr(object_to_change, field_name, new_value)
+                                if field_to_change == ADMIN_NOTES:
+                                    _add_to_administrator_notes(object_to_change, new_value)
+                                else:
+                                    setattr(object_to_change, field_name, new_value)
                                 object_to_change.save()
+                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value)
+                                setattr(object_to_update_timestamp, 'modified_by_id', user_id)
+                                object_to_update_timestamp.save()
+                                results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
                         except Exception, e:
                             logger.error(e)
+                            logger.exception(e)
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
 
                 else:
-                    logger.error(e)
                     results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
 
                 current_count = _update_count(current_count, task)
@@ -233,6 +287,16 @@ def update_elements(file_path, error_path, task_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _add_to_administrator_notes(element, value):
+    note = getattr(element, 'administrator_notes')
+    note = note + '\n\n' + value if note else value
+    setattr(element, ADMIN_NOTES, note)
+
+def _add_change_note(element, task_nr, field, field_name, value):
+    note = getattr(element, ADMIN_NOTES) if getattr(element, ADMIN_NOTES) else ''
+    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed to "%s".'%(task_nr, field, value)
+    setattr(element, ADMIN_NOTES, note)
 
 def _is_value_valid(element, field_to_change, new_value):
     choices = element._meta.get_field(field_to_change).choices

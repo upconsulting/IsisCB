@@ -253,3 +253,7 @@ def get_status_label(status):
     # get_record_status_type_display doesn't work in template because we don't have the object
     status_dict = dict(CuratedMixin.STATUS_CHOICES)
     return status_dict[status]
+
+@register.filter
+def get_iso_date(date):
+    return '' if not date else date.isoformat()
