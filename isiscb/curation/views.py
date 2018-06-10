@@ -923,10 +923,12 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         value_class = at.value_content_type.model_class()
         if value_class is ISODateValue:
             value_forms[at.id] = ISODateValueForm
+        elif value_class is AuthorityValue:
+            value_forms[at.id] = AuthorityValueForm
         else:
             value_forms[at.id] = modelform_factory(value_class,
                                     exclude=('attribute', 'child_class'))
-    
+
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
         if hasattr(attribute, 'value'):
