@@ -350,6 +350,7 @@ def create_acrelation_for_authority(request, authority_id):
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
+            form.instance.modified_by = request.user
             form.save()
 
             target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
@@ -387,6 +388,7 @@ def acrelation_for_authority(request, authority_id, acrelation_id):
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
+            form.instance.modified_by = request.user
             form.save()
             target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
             if search_key and current_index:
@@ -427,6 +429,7 @@ def create_acrelation_for_citation(request, citation_id):
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
+            form.instance.modified_by = request.user
             form.save()
             target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
             if search_key and current_index:
@@ -463,6 +466,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     elif request.method == 'POST':
         form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
         if form.is_valid():
+            form.instance.modified_by = request.user
             form.save()
             target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
             if search_key and current_index:
@@ -833,6 +837,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
         if linkeddata_form.is_valid():
             linkeddata_form.instance.subject = citation
+            linkeddata_form.instance.modified_by = request.user
             linkeddata_form.save()
 
             target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
@@ -885,6 +890,7 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
 
         if linkeddata_form.is_valid():
             linkeddata_form.instance.subject = authority
+            linkeddata_form.instance.modified_by = request.user
             linkeddata_form.save()
 
             target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=linkeddata'
@@ -920,7 +926,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         else:
             value_forms[at.id] = modelform_factory(value_class,
                                     exclude=('attribute', 'child_class'))
-
+    
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
         if hasattr(attribute, 'value'):
@@ -961,6 +967,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
         if attribute_form.is_valid() and value_form and value_form.is_valid():
 
             attribute_form.instance.source = citation
+            attribute_form.instance.modified_by = request.user
             attribute_form.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
@@ -1041,7 +1048,10 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
         if attribute_form.is_valid() and value_form and value_form.is_valid():
             attribute_form.instance.source = authority
+            attribute_form.instance.modified_by = request.user
             attribute_form.save()
+
+            attribute.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 

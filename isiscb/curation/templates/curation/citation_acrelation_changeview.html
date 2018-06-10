@@ -144,6 +144,10 @@
                 </div>
                 {{ form.authority }}
                 {{ form.citation }}
+
+                <div class="form-group">
+                  <label class="col-md-12">Last updated on <span class="date">{{ acrelation.modified_on|get_iso_date }}</span> by {{ acrelation.modified_by }}</label>
+                </div>
             </div>
             <div class="col-sm-6">
 

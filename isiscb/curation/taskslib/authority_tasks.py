@@ -22,7 +22,7 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 logger = logging.getLogger(__name__)
 
 @shared_task
-def add_attributes_to_authority(file_path, error_path, task_id):
+def add_attributes_to_authority(file_path, error_path, task_id, user_id):
     logging.info('Adding attributes from %s.' % (file_path))
     # this is a hack but the best I can come up with right now :op
     logging.debug('Make AuthorityValue exists in ContentType table...')
@@ -195,7 +195,7 @@ COLUMN_NAME_VALUE = "Value"
 ADMIN_NOTES = 'administrator_notes'
 
 @shared_task
-def update_elements(file_path, error_path, task_id):
+def update_elements(file_path, error_path, task_id, user_id):
     logging.info('Updating elements from %s.' % (file_path))
 
     SUCCESS = 'SUCCESS'
@@ -237,16 +237,20 @@ def update_elements(file_path, error_path, task_id):
                                 _add_to_administrator_notes(element, new_value)
                             else:
                                 setattr(element, field_to_change, new_value)
+                            setattr(element, 'modified_by_id', user_id)
                             _add_change_note(element, task.id, field_in_csv, field_to_change, new_value)
                             element.save()
+                            results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
                         try:
                             object_to_change = getattr(element, object)
+                            object_to_update_timestamp = object_to_change
                             # if we have an attribute, we need to convert the value first
                             if type_class == Attribute:
                                 object_to_change = object_to_change.get_child_class()
+                                object_to_update_timestamp = element
                                 if field_name in ['value', 'start', 'end']:
                                     new_value = object_to_change.__class__.convert(new_value)
 
@@ -259,14 +263,17 @@ def update_elements(file_path, error_path, task_id):
                                     _add_to_administrator_notes(object_to_change, new_value)
                                 else:
                                     setattr(object_to_change, field_name, new_value)
-                                _add_change_note(object_to_change, task.id, field_in_csv, field_name, new_value)
                                 object_to_change.save()
+                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value)
+                                setattr(object_to_update_timestamp, 'modified_by_id', user_id)
+                                object_to_update_timestamp.save()
+                                results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
                         except Exception, e:
                             logger.error(e)
+                            logger.exception(e)
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
 
                 else:
-                    logger.error(e)
                     results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
 
                 current_count = _update_count(current_count, task)
@@ -283,13 +290,12 @@ def update_elements(file_path, error_path, task_id):
 
 def _add_to_administrator_notes(element, value):
     note = getattr(element, 'administrator_notes')
-    note = note + '\n\n' + value
+    note = note + '\n\n' + value if note else value
     setattr(element, ADMIN_NOTES, note)
 
 def _add_change_note(element, task_nr, field, field_name, value):
-    note = getattr(element, ADMIN_NOTES)
-    old_value = getattr(element, field_name)
-    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s".'%(task_nr, field, old_value, value)
+    note = getattr(element, ADMIN_NOTES) if getattr(element, ADMIN_NOTES) else ''
+    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed to "%s".'%(task_nr, field, value)
     setattr(element, ADMIN_NOTES, note)
 
 def _is_value_valid(element, field_to_change, new_value):
