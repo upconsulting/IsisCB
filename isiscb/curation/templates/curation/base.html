@@ -45,6 +45,16 @@
                 }
             }
         });
+
+        $(document).ready(function() {
+          setdate();
+          function setdate() {
+            $('.date').each(function() {
+              var date = $(this).text();
+              $(this).text((new Date(date).toLocaleString()));
+            });
+          }
+        });
         </script>
         {% block extrahead %}
         {% endblock %}
