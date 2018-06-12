@@ -72,7 +72,7 @@ def bulk_change_from_csv(request):
             task.created_by = request.user
             task.save()
 
-            bulk_method.delay(s3_path, s3_error_path, task.id)
+            bulk_method.delay(s3_path, s3_error_path, task.id, request.user.id)
 
             target = reverse('curation:bulk-csv-status') \
                      + '?' + urlencode({'task_id': task.id})
