@@ -3,10 +3,13 @@ from celery import shared_task
 from isisdata.models import *
 
 from django.apps import apps
+from django.core.exceptions import ObjectDoesNotExist
 
 import logging
 import smart_open
 import unicodecsv as csv
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 COLUMN_NAME_ATTR_SUBJ_ID = 'ATT Subj ID'
 COLUMN_NAME_ATTR_RELATED_NAME = 'Related Record Name'
@@ -201,6 +204,8 @@ def update_elements(file_path, error_path, task_id, user_id):
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
 
+    result_file_headers = ('Status', 'Type', 'Element Id', 'Message', 'Modification Date')
+
     with smart_open.smart_open(file_path, 'rb') as f:
         reader = csv.reader(f, encoding='utf-8')
         task = AsyncTask.objects.get(pk=task_id)
@@ -214,12 +219,21 @@ def update_elements(file_path, error_path, task_id, user_id):
         current_count = 0
 
         try:
+            current_time = datetime.now(tzlocal()).isoformat()
             for row in csv.DictReader(f):
+                # update timestamp for long running processes
+                current_time = datetime.now(tzlocal()).isoformat()
                 type = row[COLUMN_NAME_TYPE]
                 type_class = apps.get_model(app_label='isisdata', model_name=type)
                 element_id = row[COLUMN_NAME_ID]
 
-                element = type_class.objects.get(pk=element_id)
+                try:
+                    element = type_class.objects.get(pk=element_id)
+                except ObjectDoesNotExist:
+                    results.append((ERROR, type, element_id, '%s with id %s does not exist.'%(type_class, element_id), current_time))
+                    current_count = _update_count(current_count, task)
+                    continue
+
                 field_to_change = row[COLUMN_NAME_FIELD]
                 new_value = row[COLUMN_NAME_VALUE]
 
@@ -231,7 +245,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                         # if there are choices make sure they are respected
                         is_valid = _is_value_valid(element, field_to_change, new_value)
                         if not is_valid:
-                            results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                            results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
                         else:
                             if field_to_change == ADMIN_NOTES:
                                 _add_to_administrator_notes(element, new_value)
@@ -240,7 +254,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                             setattr(element, 'modified_by_id', user_id)
                             _add_change_note(element, task.id, field_in_csv, field_to_change, new_value)
                             element.save()
-                            results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
+                            results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
@@ -257,7 +271,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                             # if there are choices make sure they are respected
                             is_valid = _is_value_valid(object_to_change, field_name, new_value)
                             if not is_valid:
-                                results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value)))
+                                results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
                             else:
                                 if field_to_change == ADMIN_NOTES:
                                     _add_to_administrator_notes(object_to_change, new_value)
@@ -267,23 +281,25 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value)
                                 setattr(object_to_update_timestamp, 'modified_by_id', user_id)
                                 object_to_update_timestamp.save()
-                                results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated'))
+                                results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', object_to_update_timestamp.modified_on))
                         except Exception, e:
                             logger.error(e)
                             logger.exception(e)
-                            results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object)))
+                            results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object), current_time))
 
                 else:
-                    results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change)))
+                    results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change), current_time))
 
                 current_count = _update_count(current_count, task)
-
+        except KeyError, e:
+            logger.exception("There was a column error processing the CSV file.")
+            results.append((ERROR, "column error", "", "There was a column error processing the CSV file. Have you provided the correct column headers? " + repr(e), current_time))
         except Exception, e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
-            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+            results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e), current_time))
 
-        _save_results(error_path, results)
+        _save_csv_file(error_path, result_file_headers, results)
 
         task.state = 'SUCCESS'
         task.save()
@@ -328,6 +344,13 @@ def _count_rows(f, results):
     f.seek(0)
 
     return row_count
+
+def _save_csv_file(path, headers, data):
+    with smart_open.smart_open(path, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        for line in data:
+            writer.writerow(line)
 
 def _save_results(path, results):
     with smart_open.smart_open(path, 'wb') as f:
