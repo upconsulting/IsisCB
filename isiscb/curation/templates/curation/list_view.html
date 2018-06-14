@@ -16,17 +16,26 @@
 <div class="panel-body" style="padding: 8px;">
 
 <div class="clearfix">
-  <div class="btn-group pull-right" style="margin-left: 10px;">
+  <div class="col-md-3">
+    {{ objects.form.o|addcss:"form-control input-xs" }}
+  </div>
+  <div class="col-md-6">
+      <div class="btn-group" style="width:100%">
+          <button data-toggle="collapse"
+              class="btn btn-xs btn-primary"
+              data-target="#filters" style="width:100%">
+              <i class="fa fa-filter" aria-hidden="true"></i> Show/hide filters
+          </button>
+      </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="btn-group pull-right" style="margin-left: 10px;">
       <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
       <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+    </div>
   </div>
-  <div class="btn-group pull-right">
-      <button data-toggle="collapse"
-          class="btn btn-xs btn-primary"
-          data-target="#filters">
-          <i class="fa fa-filter" aria-hidden="true"></i> Show/hide filters
-      </button>
-  </div>
+
 </div>
 
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
@@ -34,10 +43,12 @@
     <form id="filter_form" class="form-horizontal clearfix">
       {% csrf_token %}
         {% for field in objects.form %}
+        {% if field.label != 'Ordering' %}
         <div class="form-group clearable">
             <label>{{ field.label }}</label>
             {{ field|addcss:"form-control" }}
         </div>
+        {% endif %}
         {% endfor %}
 
     </form>
@@ -53,6 +64,10 @@ $(document).ready(function() {
     });
 
     $("#submit-form-btn").on('click', function() {
+      var sortOrder = $("#id_o").val();
+      var sortField = $('<input type="hidden" name="o"></input>');
+      sortField.val(sortOrder);
+      $("#filter_form").append(sortField);
       $("#filter_form").submit();
     });
 

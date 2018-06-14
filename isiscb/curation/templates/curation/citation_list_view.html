@@ -209,20 +209,18 @@ $('body').ready(function() {
             {% for error in objects.form.id.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">{{ objects.form.id.label }}</label>
-                <div class="col-lg-10">
-                  {{ objects.form.id|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.id|addcss:"form-control;Id" }}
                 </div>
             </div>
 
             {% for error in objects.form.title.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">{{ objects.form.title.label }}</label>
-                <div class="col-lg-10">
-                  {{ objects.form.title|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.title|addcss:"form-control;Title" }}
                 </div>
             </div>
 
@@ -230,22 +228,20 @@ $('body').ready(function() {
             {% for error in objects.form.author_or_editor.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">Author/Ed.</label>
-                <div class="col-lg-10">
-                  {{ objects.form.author_or_editor|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.author_or_editor|addcss:"form-control;Author/Ed." }}
                 </div>
             </div>
 
             {% for error in objects.form.publication_date_from.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">Published</label>
-                <div class="col-lg-5">
-                  {{ objects.form.publication_date_from|addcss:"form-control;From" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-6">
+                  {{ objects.form.publication_date_from|addcss:"form-control;Published from" }}
                 </div>
-                <div class="col-lg-5">
+                <div class="col-lg-6">
                   {{ objects.form.publication_date_to|addcss:"form-control;To" }}
                 </div>
             </div>
@@ -253,26 +249,14 @@ $('body').ready(function() {
                 <div class="col-xs-12">
 
                 </div>
-                <!-- <div class="col-xs-6">
-                    {% for error in objects.form.publication_date_to.errors %}
-                    <div class="alert alert-warning">{{ error }}</div>
-                    {% endfor %}
-                    <div class="form-group form-group-sm clearable">
-                        <label class="col-lg-3 control-label">to</label>
-                        <div class="col-lg-9">
-
-                        </div>
-                    </div>
-                </div> -->
             </div>
 
             {% for error in objects.form.periodical.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">Periodical</label>
-                <div class="col-lg-10">
-                  {{ objects.form.periodical|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.periodical|addcss:"form-control;Periodical" }}
                 </div>
             </div>
         </div>
@@ -280,77 +264,60 @@ $('body').ready(function() {
           {% for error in objects.form.type_controlled.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-3 control-label">Rec. Type</label>
-              <div class="col-lg-9">
-                {{ objects.form.type_controlled|addcss:"form-control" }}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.type_controlled|addcss:"form-control;Rec. Type" }}
               </div>
           </div>
 
           {% for error in objects.form.record_status.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-3 control-label">Rec. Status</label>
-              <div class="col-lg-9">
-                {{ objects.form.record_status|addcss:"form-control" }}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.record_status|addcss:"form-control;Rec. Status" }}
               </div>
           </div>
 
           {% for error in objects.form.zotero_accession.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-3 control-label">Zotero Acc.</label>
-              <div class="col-lg-9">
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
                 {{ objects.form.zotero_accession|addcss:"form-control" }}
-                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
+                <input id="zotero_accession_input" placeholder="Zotero Acc.: type at least 3 characters to search" type="text" class="form-control">
               </div>
           </div>
 
           {% for error in objects.form.belongs_to.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-3 control-label">Database</label>
-              <div class="col-lg-9">
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
-                <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
+                <input id="belongs_to_input" placeholder="Database: type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
           </div>
 
           {% for error in objects.form.in_collections.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-3 control-label">Collection</label>
-              <div class="col-lg-9">
-                {{ objects.form.in_collections}}
-                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.in_collections|addcss:""}}
+                <input id="in_collections_input" placeholder="Collection: type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
               </div>
           </div>
 
         </div>
 
         <div class="col-sm-4">
-            {% for error in objects.form.o.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">{{ objects.form.o.label }}</label>
-                <div class="col-lg-10">
-                  {{ objects.form.o|addcss:"form-control" }}
-                </div>
-            </div>
-
-
           {% for error in objects.form.abstract.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-sm clearable">
-              <label class="col-lg-2 control-label">{{ objects.form.abstract.label }}</label>
-              <div class="col-lg-10">
-                {{ objects.form.abstract|addcss:"form-control" }}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.abstract|addcss:"form-control;Abstract" }}
               </div>
           </div>
 
@@ -358,39 +325,35 @@ $('body').ready(function() {
             {% for error in objects.form.description.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">{{ objects.form.description.label }}</label>
-                <div class="col-lg-10">
-                  {{ objects.form.description|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.description|addcss:"form-control;Description" }}
                 </div>
             </div>
 
             {% for error in objects.form.subject.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="col-lg-2 control-label">Subject</label>
-                <div class="col-lg-10">
-                  {{ objects.form.subject|addcss:"form-control" }}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.subject|addcss:"form-control;Subject" }}
                 </div>
             </div>
 
             {% for error in objects.form.publisher.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm  clearable">
-                <label class="col-lg-2 control-label">Publisher</label>
-                <div class="col-lg-10">
-                  {{ objects.form.publisher|addcss:"form-control" }}
+            <div class="form-group form-group-xs  clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.publisher|addcss:"form-control;Publisher" }}
                 </div>
             </div>
 
             {% for error in objects.form.tracking_state.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-sm  clearable">
-                <label class="col-lg-2 control-label">Tracking</label>
-                <div class="col-lg-10">
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
                   {{ objects.form.tracking_state|addcss:"form-control" }}
                 </div>
             </div>
@@ -401,6 +364,22 @@ $('body').ready(function() {
 <script>
 $(document).ready(function() {
   //# sourceURL=source.js
+
+
+    $.each($('select'), function(index, value) {
+      if ($(value).val() == '') {
+        $(value).css('color', '#888');
+      }
+    });
+
+    $('select').change(function() {
+      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All') {
+        $(this).css('color', '#000');
+      } else {
+        $(this).css('color', '#888');
+      }
+
+    });
 
     /* in collection javascript */
     $('#in_collections_input').bootcomplete({

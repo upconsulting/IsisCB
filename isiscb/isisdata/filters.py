@@ -44,7 +44,7 @@ class CitationFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method='filter_id')
     # title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     title = django_filters.CharFilter(method='filter_title')
-    type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
+    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
     # publication_date_from = django_filters.MethodFilter()
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
@@ -63,12 +63,12 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
-    record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status = django_filters.ChoiceFilter(name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
+    tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
 
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
@@ -144,7 +144,9 @@ class CitationFilter(django_filters.FilterSet):
             'title': 'Title',
             'start_page': 'Start page',
             'modified': 'Last modified'
-        }
+        },
+
+        empty_label="Sort order (select one)",
     )
 
     # def get_ordering_field(self):
