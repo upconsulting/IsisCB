@@ -21,7 +21,7 @@ django-celery==3.2.1
 django-celery-results==1.0.1
 django-cors-headers==1.1.0
 django-extensions==1.5.5
-django-filter==1.0.2
+django-filter==1.1.0
 django-guardian==1.4.9
 django-haystack==2.6.0
 django-ipware==1.1.3

@@ -54,6 +54,12 @@ class CitationFilter(django_filters.FilterSet):
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
     description = django_filters.CharFilter(method='filter_description')
 
+    created_on_from = django_filters.CharFilter(method='filter_modified_on_from')
+    created_on_to = django_filters.CharFilter(method='filter_modified_on_to')
+
+    modified_on_from = django_filters.CharFilter(method='filter_created_on_from')
+    modified_on_to = django_filters.CharFilter(method='filter_created_on_to')
+
     # author_or_editor = django_filters.MethodFilter()
     author_or_editor = django_filters.CharFilter(method='filter_author_or_editor')
     # periodical = django_filters.MethodFilter()
@@ -69,7 +75,6 @@ class CitationFilter(django_filters.FilterSet):
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
-
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
@@ -149,31 +154,6 @@ class CitationFilter(django_filters.FilterSet):
         empty_label="Sort order (select one)",
     )
 
-    # def get_ordering_field(self):
-    #     if self._meta.order_by:
-    #         if isinstance(self._meta.order_by, (list, tuple)):
-    #             if isinstance(self._meta.order_by[0], (list, tuple)):
-    #                 # e.g. (('field', 'Display name'), ...)
-    #                 choices = [(f[0], f[1]) for f in self._meta.order_by]
-    #             else:
-    #                 choices = []
-    #                 for f in self._meta.order_by:
-    #                     if f[0] == '-':
-    #                         label = _('%s (descending)' % capfirst(f[1:]))
-    #                     else:
-    #                         label = capfirst(f)
-    #                     choices.append((f, label))
-    #         else:
-    #             # add asc and desc field names
-    #             # use the filter's label if provided
-    #             choices = []
-    #             for f, fltr in self.filters.items():
-    #                 choices.extend([
-    #                     (f, fltr.label or capfirst(f)),
-    #                     ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
-    #                 ])
-    #         return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
-
     def filter_id(self, queryset, name, value):
         if not value:
             return queryset
@@ -217,6 +197,36 @@ class CitationFilter(django_filters.FilterSet):
         except:
             return queryset
         return queryset.filter(publication_date__lte=date)
+
+    def filter_created_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+
+        return queryset.filter(created_native__gte=date)
+
+    def filter_created_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_native__lte=date)
+
+    def filter_modified_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+
+        return queryset.filter(modified_on__gte=date)
+
+    def filter_modified_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__lte=date)
 
     def filter_author_or_editor(self, queryset, name, value):
         if not value:

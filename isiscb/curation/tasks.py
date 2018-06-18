@@ -80,6 +80,27 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
     queryset = CitationFilter(filter_params, queryset=_qs).qs
     return queryset, filter_params_raw
 
+@shared_task
+def save_creation_date_to_model(user_id, filter_params_raw, prepend_value, task_id=None):
+    from isisdata.models import AsyncTask
+
+    queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+    task = AsyncTask.objects.get(pk=task_id)
+    try:
+        for i, obj in enumerate(queryset):
+            task.current_value += 1
+            task.save()
+            obj.save_without_historical_record()
+        task.state = 'SUCCESS'
+        task.save()
+    except Exception as E:
+        print 'save_creation_date_to_model failed for %s:: %s' % (filter_params_raw, prepend_value),
+        print E
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+            task.value = str(E)
+            task.state = 'FAILURE'
+            task.save()
 
 @shared_task
 def bulk_prepend_record_history(user_id, filter_params_raw, prepend_value, task_id=None):
@@ -127,7 +148,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
     # bugfix ISISCB-1008: if None is in prior allowed states, we need to build a different filter
     q = (Q(tracking_state__in=allowed_prior) | Q(tracking_state__isnull=True)) if None in allowed_prior else Q(tracking_state__in=allowed_prior)
     queryset = queryset.filter(q)
-    
+
     idents = list(queryset.values_list('id', flat=True))
     try:
         queryset.update(tracking_state=target_state)

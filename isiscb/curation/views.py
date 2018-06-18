@@ -2634,7 +2634,7 @@ def bulk_action_status(request):
     context = {}
     task_ids = request.GET.getlist('task')
     tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
-
+    
     context.update({'tasks': tasks})
     return render(request, template, context)
 

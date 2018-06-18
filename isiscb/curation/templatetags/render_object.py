@@ -12,7 +12,6 @@ try:
 except AttributeType.DoesNotExist:
     PUBLICATION_DATE = -1
 
-
 @register.filter(name='render_object')
 def render_object(obj):
     model_name = obj.__class__.__name__

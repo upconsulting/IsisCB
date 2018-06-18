@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
+from django.core.exceptions import ObjectDoesNotExist
 import jsonpickle
 
 
@@ -576,6 +577,7 @@ class CuratedMixin(models.Model):
             self.public = True
         else:
             self.public = False
+
         return super(CuratedMixin, self).save(*args, **kwargs)
 
     @property
@@ -586,7 +588,13 @@ class CuratedMixin(models.Model):
         Retrieves the date of the (one and only) creation HistoricalRecord for
         an instance.
         """
-        return self.history.get(history_type='+').history_date
+        try:
+            return self.history.get(history_type='+').history_date
+        except ObjectDoesNotExist:
+            if self.created_on_fm:
+                return self.created_on_fm
+            else:
+                return self.history.order_by('modified_on')[0].history_date
 
     @property
     def created_by(self):
@@ -596,7 +604,13 @@ class CuratedMixin(models.Model):
         Retrieves the user on the (one and only) creation HistoricalRecord for
         an instance.
         """
-        return self.history.get(history_type='+').history_user
+        try:
+            return self.history.get(history_type='+').history_user
+        except ObjectDoesNotExist:
+            if self.created_on_fm:
+                return self.created_by_fm
+            else:
+                return self.history.order_by('modified_on')[0].history_user
 
     created_on_fm = models.DateTimeField(null=True, help_text=help_text("""
     Value of CreatedOn from the original FM database."""))
