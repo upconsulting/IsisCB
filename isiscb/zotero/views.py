@@ -132,6 +132,7 @@ def accessions(request):
         'curation_subsection': 'accessions',
         'objects': filtered_objects,
     }
+    
     template = 'zotero/accessions.html'
     return render(request, template, context)
 

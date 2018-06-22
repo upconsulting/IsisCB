@@ -17,7 +17,9 @@
 
 <div class="clearfix">
   <div class="col-md-3">
+    {% if objects.form.o %}
     {{ objects.form.o|addcss:"form-control input-xs" }}
+    {% endif %}
   </div>
   <div class="col-md-6">
       <div class="btn-group" style="width:100%">

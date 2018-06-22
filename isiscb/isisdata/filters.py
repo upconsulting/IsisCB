@@ -13,6 +13,8 @@ from curation.tracking import TrackingWorkflow
 from django_filters import filters
 from django.http import QueryDict
 
+import pytz
+
 
 filters.LOOKUP_TYPES = [
     ('', '---------'),
@@ -54,11 +56,11 @@ class CitationFilter(django_filters.FilterSet):
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
     description = django_filters.CharFilter(method='filter_description')
 
-    created_on_from = django_filters.CharFilter(method='filter_modified_on_from')
-    created_on_to = django_filters.CharFilter(method='filter_modified_on_to')
+    created_on_from = django_filters.CharFilter(method='filter_created_on_from')
+    created_on_to = django_filters.CharFilter(method='filter_created_on_to')
 
-    modified_on_from = django_filters.CharFilter(method='filter_created_on_from')
-    modified_on_to = django_filters.CharFilter(method='filter_created_on_to')
+    modified_on_from = django_filters.CharFilter(method='filter_modified_on_from')
+    modified_on_to = django_filters.CharFilter(method='filter_modified_on_to')
 
     # author_or_editor = django_filters.MethodFilter()
     author_or_editor = django_filters.CharFilter(method='filter_author_or_editor')
@@ -204,21 +206,40 @@ class CitationFilter(django_filters.FilterSet):
         except:
             return queryset
 
-        return queryset.filter(created_native__gte=date)
+        # if modified_on is set use this field
+        # if not use created_on_fm field
+        query = Q(created_native__isnull=False) & Q(created_native__gte=date) \
+                | Q(created_on_fm__isnull=False) & Q(created_on_fm__gte=date) \
+
+        # if we don't have a creation date, we'll assume it was created in 2014
+        # when data was originally imported
+        if date <= datetime.datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.UTC):
+            query = query | Q(created_on_fm__isnull=True) & Q(created_native__isnull=True)
+        return queryset.filter(query)
 
     def filter_created_on_to(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
             return queryset
-        return queryset.filter(created_native__lte=date)
+
+        # if modified_on is set use this field
+        # if not use created_on_fm field
+        query = Q(created_native__isnull=False) & Q(created_native__lte=date) \
+                | Q(created_on_fm__isnull=False) & Q(created_on_fm__lte=date) \
+
+        # if we don't have a creation date, we'll assume it was created in 2014
+        # when data was originally imported
+        if date >= datetime.datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.UTC):
+            query = query | (Q(created_on_fm__isnull=True) & Q(created_native__isnull=True))
+
+        return queryset.filter(query)
 
     def filter_modified_on_from(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
             return queryset
-
         return queryset.filter(modified_on__gte=date)
 
     def filter_modified_on_to(self, queryset, name, value):

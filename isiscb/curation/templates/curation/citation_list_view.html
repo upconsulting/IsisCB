@@ -145,7 +145,7 @@ $('body').ready(function() {
                     {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
                 </td>
                 <td>
-                    {% if object.created_native %}{{ object.created_native }}{% endif %}
+                    {% if object.created_native %}{{ object.created_native }}{% else %}{% if object.created_on_fm %} {{ object.created_on_fm }}{% endif %}{% endif %}
                 </td>
             </tr>
             {% endwith %}

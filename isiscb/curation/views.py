@@ -1578,7 +1578,7 @@ def citations(request):
     fields = ('record_status_value', 'id', 'type_controlled', 'public',
               'tracking_state', 'modified_on', 'created_native',
               'publication_date', 'title_for_display', 'part_details_id',
-              'part_details__page_begin', 'part_details__page_end', 'part_details__pages_free_text')
+              'part_details__page_begin', 'part_details__page_end', 'part_details__pages_free_text', 'created_on_fm')
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
@@ -2634,7 +2634,7 @@ def bulk_action_status(request):
     context = {}
     task_ids = request.GET.getlist('task')
     tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
-    
+
     context.update({'tasks': tasks})
     return render(request, template, context)
 
