@@ -594,7 +594,9 @@ class CuratedMixin(models.Model):
             if self.created_on_fm:
                 return self.created_on_fm
             else:
-                return self.history.order_by('modified_on')[0].history_date
+                if self.history:
+                    return self.history.order_by('modified_on')[0].history_date
+        return None
 
     @property
     def created_by(self):
@@ -607,10 +609,13 @@ class CuratedMixin(models.Model):
         try:
             return self.history.get(history_type='+').history_user
         except ObjectDoesNotExist:
-            if self.created_on_fm:
+            if self.created_by_fm:
                 return self.created_by_fm
             else:
-                return self.history.order_by('modified_on')[0].history_user
+                try:
+                    return self.history.order_by('modified_on')[0].history_user
+                except:
+                    return None
 
     created_on_fm = models.DateTimeField(null=True, help_text=help_text("""
     Value of CreatedOn from the original FM database."""))
@@ -741,6 +746,9 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     created_native = models.DateTimeField(blank=True, null=True)
+    created_by_native = models.ForeignKey(User, null=True, blank=True,
+                                    help_text=help_text("""
+    The user who created this object."""), related_name="creator_of")
 
     def save(self, *args, **kwargs):
         def get_related(obj):

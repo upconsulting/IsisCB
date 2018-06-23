@@ -1578,7 +1578,9 @@ def citations(request):
     fields = ('record_status_value', 'id', 'type_controlled', 'public',
               'tracking_state', 'modified_on', 'created_native',
               'publication_date', 'title_for_display', 'part_details_id',
-              'part_details__page_begin', 'part_details__page_end', 'part_details__pages_free_text', 'created_on_fm')
+              'part_details__page_begin', 'part_details__page_end',
+              'part_details__pages_free_text', 'created_on_fm',
+              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name' )
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
@@ -2077,6 +2079,19 @@ def search_datasets(request):
         'id': ds.id,
         'label': ds.name,
     } for ds in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_users(request):
+    q = request.GET.get('query', None)
+    if q:
+        q = q.strip()
+    queryset = User.objects.all().filter(Q(username__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q))
+    results = [{
+        'id': u.id,
+        'label': "%s %s (%s)" % (u.first_name, u.last_name, u.username)
+    } for u in queryset[:20]]
+    print results
     return JsonResponse(results, safe=False)
 
 

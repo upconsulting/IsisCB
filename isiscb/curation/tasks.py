@@ -9,6 +9,9 @@ from isisdata.models import Citation, CRUDRule
 from isisdata.filters import CitationFilter
 from isisdata.operations import filter_queryset
 from django.contrib.auth.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _load_model_instance(module, cname, pk, qs=False):
@@ -81,7 +84,7 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
     return queryset, filter_params_raw
 
 @shared_task
-def save_creation_date_to_model(user_id, filter_params_raw, prepend_value, task_id=None):
+def save_creator_to_citation(user_id, filter_params_raw, prepend_value, task_id=None):
     from isisdata.models import AsyncTask
 
     queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
@@ -90,12 +93,13 @@ def save_creation_date_to_model(user_id, filter_params_raw, prepend_value, task_
         for i, obj in enumerate(queryset):
             task.current_value += 1
             task.save()
-            obj.save_without_historical_record()
+            created_by = obj.created_by
+            if isinstance(created_by, User):
+                Citation.objects.filter(pk=obj.id).update(created_by_native=created_by)
         task.state = 'SUCCESS'
         task.save()
     except Exception as E:
-        print 'save_creation_date_to_model failed for %s:: %s' % (filter_params_raw, prepend_value),
-        print E
+        logger.exception('save_creator_to_citation failed for %s:: %s' % (filter_params_raw, prepend_value))
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)
             task.value = str(E)
@@ -165,8 +169,8 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
             task.save()
             print 'success:: %s' % str(task_id)
     except Exception as E:
-        print 'bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state),
-        print E
+        logger.error('bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state))
+        logger.error(E)
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)
             task.value = str(E)

@@ -52,6 +52,7 @@ urlpatterns = [
     url(r'^(?i)zotero/accessions/search$', views.search_zotero_accessions, name='search-zotero-accessions'),
 
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),
+    url(r'^(?i)users/search$', views.search_users, name='search-users'),
 
     url(r'^(?i)citation/collection$', views.collections, name='collections'),
     url(r'^(?i)citation/collection/search$', views.search_citation_collections, name='search-collections'),

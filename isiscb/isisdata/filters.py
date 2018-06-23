@@ -12,6 +12,7 @@ from unidecode import unidecode
 from curation.tracking import TrackingWorkflow
 from django_filters import filters
 from django.http import QueryDict
+from django.contrib.auth.models import User
 
 import pytz
 from django.conf import settings
@@ -77,6 +78,7 @@ class CitationFilter(django_filters.FilterSet):
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
+    created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
@@ -122,6 +124,16 @@ class CitationFilter(django_filters.FilterSet):
                     self.dataset_name = ds.name
             except Dataset.DoesNotExist:
                 self.dataset_name = "Dataset could not be found."
+
+        created_by_native = self.data.get('created_by_native', None)
+        if created_by_native:
+            try:
+                created_by = User.objects.get(pk=created_by_native)
+                if created_by:
+                    self.creator_first_name = created_by.first_name
+                    self.creator_last_name = created_by.last_name
+            except User.DoesNotExist:
+                self.creator_last_name = "user does not exist."
 
     class Meta:
         model = Citation

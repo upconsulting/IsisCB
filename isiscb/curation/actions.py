@@ -3,7 +3,7 @@ Asynchronous functions for bulk changes to the database.
 """
 
 from __future__ import absolute_import
-from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_date_to_model
+from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creator_to_citation
 
 from django import forms
 from django.http import QueryDict
@@ -67,23 +67,23 @@ class PrependToRecordHistory(BaseAction):
 
 class StoreCreationDateToModel(BaseAction):
     model = Citation
-    label = u'Store creation date to model'
+    label = u'Store creator to citations'
 
     default_value_field = forms.CharField
     default_value_field_kwargs = {
-        'label': 'Storing creation date to model',
+        'label': 'Storing creator to citations',
         'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Storing creation date'}),
     }
 
     def apply(self, user, filter_params_raw, value, **extra):
         task = AsyncTask.objects.create()
-        result = save_creation_date_to_model.delay(user.id, filter_params_raw,
+        result = save_creator_to_citation.delay(user.id, filter_params_raw,
                                                    value, task.id)
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
         task.async_uuid = result.id
         task.value = ('created_native', '')
-        task.label = 'Storing dates in model for set with filters: ' + _build_filter_label(filter_params_raw)
+        task.label = 'Storing creator in citation for set with filters: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 

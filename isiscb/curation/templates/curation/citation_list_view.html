@@ -86,6 +86,7 @@ $('body').ready(function() {
                 <th width="5%">Tracking</th>
                 <th width="12%">Modified</th>
                 <th width="12%">Created</th>
+                <th width="8%">Created by</th>
             </tr>
         </thead>
         <tbody>
@@ -146,6 +147,11 @@ $('body').ready(function() {
                 </td>
                 <td>
                     {% if object.created_native %}{{ object.created_native }}{% else %}{% if object.created_on_fm %} {{ object.created_on_fm }}{% endif %}{% endif %}
+                </td>
+                <td>
+                  {% if object.created_by_native %}
+                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
+                  {% endif %}
                 </td>
             </tr>
             {% endwith %}
@@ -348,6 +354,16 @@ $('body').ready(function() {
               </div>
           </div>
 
+          {% for error in objects.form.created_by_native.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.created_by_native }}
+                <input id="creator_input" placeholder="Creator: type at least 3 characters to search" type="text" value="{{objects.creator_first_name}} {{ objects.creator_last_name}}" class="form-control">
+              </div>
+          </div>
+
         </div>
 
         <div class="col-sm-3">
@@ -463,6 +479,19 @@ $(document).ready(function() {
     $('#belongs_to_input').on('input', function() {
         if ($('#belongs_to_input').val() == '') {
           $('#id_belongs_to').val('');
+        }
+    });
+
+    /* 'creator' javascript */
+    $('#creator_input').bootcomplete({
+        url:'{% url 'curation:search-users' %}',
+        minLength: 3,
+        idFieldName: 'created_by_native'
+    });
+
+    $('#creator_input').on('input', function() {
+        if ($('#creator_input').val() == '') {
+          $('#id_created_by_native').val('');
         }
     });
 });
