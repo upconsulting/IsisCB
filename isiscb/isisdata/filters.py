@@ -14,6 +14,8 @@ from django_filters import filters
 from django.http import QueryDict
 
 import pytz
+from django.conf import settings
+import iso8601
 
 
 filters.LOOKUP_TYPES = [
@@ -213,7 +215,8 @@ class CitationFilter(django_filters.FilterSet):
 
         # if we don't have a creation date, we'll assume it was created in 2014
         # when data was originally imported
-        if date <= datetime.datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.UTC):
+        default_date = iso8601.parse_date(settings.CITATION_CREATION_DEFAULT_DATE)
+        if date <= default_date:
             query = query | Q(created_on_fm__isnull=True) & Q(created_native__isnull=True)
         return queryset.filter(query)
 
@@ -230,7 +233,8 @@ class CitationFilter(django_filters.FilterSet):
 
         # if we don't have a creation date, we'll assume it was created in 2014
         # when data was originally imported
-        if date >= datetime.datetime(2014, 1, 1, 0, 0, 0, tzinfo=pytz.UTC):
+        default_date = iso8601.parse_date(settings.CITATION_CREATION_DEFAULT_DATE)
+        if date >= default_date:
             query = query | (Q(created_on_fm__isnull=True) & Q(created_native__isnull=True))
 
         return queryset.filter(query)
