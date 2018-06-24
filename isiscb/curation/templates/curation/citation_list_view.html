@@ -87,6 +87,7 @@ $('body').ready(function() {
                 <th width="12%">Modified</th>
                 <th width="12%">Created</th>
                 <th width="8%">Created by</th>
+                <th width="8%">Modified by</th>
             </tr>
         </thead>
         <tbody>
@@ -151,6 +152,11 @@ $('body').ready(function() {
                 <td>
                   {% if object.created_by_native %}
                     {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if object.modified_by %}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
                   {% endif %}
                 </td>
             </tr>
@@ -412,6 +418,17 @@ $('body').ready(function() {
                 {{ objects.form.modified_on_to|addcss:"form-control;Modified before" }}
               </div>
           </div>
+
+          {% for error in objects.form.modified_by.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-12">
+                {{ objects.form.modified_by }}
+                <input id="modifier_input" placeholder="Modified by: type at least 3 characters to search" type="text" value="{{objects.modifier_first_name}} {{ objects.modifier_last_name}}" class="form-control">
+              </div>
+          </div>
+
         </div>
       </div>
       </div>
@@ -492,6 +509,19 @@ $(document).ready(function() {
     $('#creator_input').on('input', function() {
         if ($('#creator_input').val() == '') {
           $('#id_created_by_native').val('');
+        }
+    });
+
+    /* 'modifier' javascript */
+    $('#modifier_input').bootcomplete({
+        url:'{% url 'curation:search-users' %}',
+        minLength: 3,
+        idFieldName: 'modified_by'
+    });
+
+    $('#modifier_input').on('input', function() {
+        if ($('#modifier_input').val() == '') {
+          $('#id_modified_by').val('');
         }
     });
 });

@@ -1580,7 +1580,9 @@ def citations(request):
               'publication_date', 'title_for_display', 'part_details_id',
               'part_details__page_begin', 'part_details__page_end',
               'part_details__pages_free_text', 'created_on_fm',
-              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name' )
+              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by' )
+
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 

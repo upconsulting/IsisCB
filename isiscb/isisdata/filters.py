@@ -79,6 +79,7 @@ class CitationFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
+    modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
@@ -133,7 +134,17 @@ class CitationFilter(django_filters.FilterSet):
                     self.creator_first_name = created_by.first_name
                     self.creator_last_name = created_by.last_name
             except User.DoesNotExist:
-                self.creator_last_name = "user does not exist."
+                self.creator_last_name = "User does not exist."
+
+        modified_by = self.data.get('modified_by', None)
+        if modified_by:
+            try:
+                modifier = User.objects.get(pk=modified_by)
+                if modifier:
+                    self.modifier_first_name = modifier.first_name
+                    self.modifier_last_name = modifier.last_name
+            except User.DoesNotExist:
+                self.modifier_last_name = "User does not exist."
 
     class Meta:
         model = Citation
