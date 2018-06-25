@@ -145,10 +145,20 @@ $('body').ready(function() {
                     {{ object.tracking_state|get_tracking_state_display }}
                 </td>
                 <td>
-                    {% if object.modified_on %}{{ object.modified_on }}{% else %}{{ object.modified_on_fm }}{% endif %}
+                    {% if object.modified_on %}
+                      <span class="list_date">{{ object.modified_on|date:"c" }}</span>
+                    {% else %}
+                      <span class="list_date">{{ object.modified_on_fm|date:"c" }}</span>
+                    {% endif %}
                 </td>
                 <td>
-                    {% if object.created_native %}{{ object.created_native }}{% else %}{% if object.created_on_fm %} {{ object.created_on_fm }}{% endif %}{% endif %}
+                    {% if object.created_native %}
+                      <span class="list_date">{{ object.created_native|date:"c" }}</span>
+                      {% else %}
+                      {% if object.created_on_fm %}
+                        <span class="list_date">{{ object.created_on_fm|date:"c" }}</span>
+                      {% endif %}
+                    {% endif %}
                 </td>
                 <td>
                   {% if object.created_by_native %}
@@ -211,6 +221,28 @@ $('body').ready(function() {
       $('#filter_form').submit();
     });
 
+    setdate();
+
+    var options = { weekday: "long", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+    function setdate() {
+      $('.list_date').each(function() {
+        var date = new Date($(this).text());
+        year = date.getFullYear();
+        month = date.getMonth()+1;
+        day = date.getDate();
+        hours = date.getHours();
+        minutes = date.getMinutes();
+
+        if (day < 10) {
+          day = '0' + day;
+        }
+        if (month < 10) {
+          month = '0' + month;
+        }
+
+        $(this).text(year + '-' + month + '-' + day + " " + hours + ":" + minutes);
+      });
+    }
   });
 </script>
 {% endblock %}
