@@ -165,7 +165,8 @@ class CitationFilter(django_filters.FilterSet):
             ('publication_date', 'publication_date'),
             ('title', 'title_for_sort'),
             ('part_details__page_begin', 'start_page'),
-            ('modified_on', 'modified')
+            ('modified_on', 'modified'),
+            ('created_native', 'created')
         ),
 
         # labels do not need to retain order

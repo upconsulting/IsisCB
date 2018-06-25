@@ -3,7 +3,7 @@ Asynchronous functions for bulk changes to the database.
 """
 
 from __future__ import absolute_import
-from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creator_to_citation
+from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_to_citation
 
 from django import forms
 from django.http import QueryDict
@@ -65,19 +65,19 @@ class PrependToRecordHistory(BaseAction):
         task.save()
         return task.id
 
-class StoreCreationDateToModel(BaseAction):
+class StoreCreationDataToModel(BaseAction):
     model = Citation
-    label = u'Store creator to citations'
+    label = u'Store creation data to citations'
 
     default_value_field = forms.CharField
     default_value_field_kwargs = {
-        'label': 'Storing creator to citations',
-        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Storing creation date'}),
+        'label': 'Storing creation data to citations',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Storing creation data'}),
     }
 
     def apply(self, user, filter_params_raw, value, **extra):
         task = AsyncTask.objects.create()
-        result = save_creator_to_citation.delay(user.id, filter_params_raw,
+        result = save_creation_to_citation.delay(user.id, filter_params_raw,
                                                    value, task.id)
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
@@ -208,4 +208,4 @@ class SetTrackingStatus(BaseAction):
 
 
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDateToModel]
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel]

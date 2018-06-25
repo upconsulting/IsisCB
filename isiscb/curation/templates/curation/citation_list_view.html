@@ -1,10 +1,14 @@
 {% extends "curation/list_view.html" %}
 {% load addcss %}
 {% load general_tags %}
+{% load staticfiles %}
 {% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
 
+{% block extrahead %}
+<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
+{% endblock %}
 
 {% block object_list %}
 <script>
@@ -227,20 +231,9 @@ $('body').ready(function() {
     function setdate() {
       $('.list_date').each(function() {
         var date = new Date($(this).text());
-        year = date.getFullYear();
-        month = date.getMonth()+1;
-        day = date.getDate();
-        hours = date.getHours();
-        minutes = date.getMinutes();
+        var m = moment(date);
 
-        if (day < 10) {
-          day = '0' + day;
-        }
-        if (month < 10) {
-          month = '0' + month;
-        }
-
-        $(this).text(year + '-' + month + '-' + day + " " + hours + ":" + minutes);
+        $(this).text(m.format("YYYY-MM-DD h:mma"));
       });
     }
   });

@@ -9,7 +9,8 @@ from isisdata.models import Citation, CRUDRule
 from isisdata.filters import CitationFilter
 from isisdata.operations import filter_queryset
 from django.contrib.auth.models import User
-import logging
+import logging, iso8601
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
     return queryset, filter_params_raw
 
 @shared_task
-def save_creator_to_citation(user_id, filter_params_raw, prepend_value, task_id=None):
+def save_creation_to_citation(user_id, filter_params_raw, prepend_value, task_id=None):
     from isisdata.models import AsyncTask
 
     queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
@@ -94,8 +95,17 @@ def save_creator_to_citation(user_id, filter_params_raw, prepend_value, task_id=
             task.current_value += 1
             task.save()
             created_by = obj.created_by
+            # store creator
             if isinstance(created_by, User):
                 Citation.objects.filter(pk=obj.id).update(created_by_native=created_by)
+            # store creation date
+            if not obj.created_native:
+                if obj.created_on_fm:
+                    Citation.objects.filter(pk=obj.id).update(created_native=obj.created_on_fm)
+                else:
+                    default_date = iso8601.parse_date(settings.CITATION_CREATION_DEFAULT_DATE)
+                    Citation.objects.filter(pk=obj.id).update(created_native=default_date)
+
         task.state = 'SUCCESS'
         task.save()
     except Exception as E:
