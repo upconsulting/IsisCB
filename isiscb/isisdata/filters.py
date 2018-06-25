@@ -131,8 +131,7 @@ class CitationFilter(django_filters.FilterSet):
             try:
                 created_by = User.objects.get(pk=created_by_native)
                 if created_by:
-                    self.creator_first_name = created_by.first_name
-                    self.creator_last_name = created_by.last_name
+                    self.creator_name = " ".join([created_by.first_name, created_by.last_name])
             except User.DoesNotExist:
                 self.creator_last_name = "User does not exist."
 
@@ -141,8 +140,7 @@ class CitationFilter(django_filters.FilterSet):
             try:
                 modifier = User.objects.get(pk=modified_by)
                 if modifier:
-                    self.modifier_first_name = modifier.first_name
-                    self.modifier_last_name = modifier.last_name
+                    self.modifier_name = " ".join([modifier.first_name, modifier.last_name])
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 

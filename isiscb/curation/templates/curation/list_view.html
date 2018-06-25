@@ -18,7 +18,10 @@
 <div class="clearfix">
   <div class="col-md-3">
     {% if objects.form.o %}
+    <div class="form-inline">
     {{ objects.form.o|addcss:"form-control input-xs" }}
+    <button class="btn btn-primary btn-xs" type="submit" id="submit-form-btn-sort"><i class="fa fa-sort-amount-asc" style="padding: 2px;"></i></button>
+  </div>
     {% endif %}
   </div>
   <div class="col-md-6">
@@ -30,14 +33,6 @@
           </button>
       </div>
   </div>
-
-  <div class="col-md-3">
-    <div class="btn-group pull-right" style="margin-left: 10px;">
-      <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
-      <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-    </div>
-  </div>
-
 </div>
 
 <div class="collapse{% if filters_active %} in{% endif %}" id="filters">
@@ -52,9 +47,14 @@
         </div>
         {% endif %}
         {% endfor %}
-
     </form>
     {% endblock %}
+    <div class="col-md-12 text-center">
+      <div class="btn-group">
+        <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+        <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+      </div>
+    </div>
 </div>
 
 <script>
@@ -66,15 +66,23 @@ $(document).ready(function() {
     });
 
     $("#submit-form-btn").on('click', function() {
-      var sortOrder = $("#id_o").val();
-      var sortField = $('<input type="hidden" name="o"></input>');
-      sortField.val(sortOrder);
-      $("#filter_form").append(sortField);
-      $("#filter_form").submit();
+      submitSearchForm();
+    });
+
+    $("#submit-form-btn-sort").on('click', function() {
+      submitSearchForm();
     });
 
     highlightFilters();
 });
+
+function submitSearchForm() {
+  var sortOrder = $("#id_o").val();
+  var sortField = $('<input type="hidden" name="o"></input>');
+  sortField.val(sortOrder);
+  $("#filter_form").append(sortField);
+  $("#filter_form").submit();
+}
 
 function highlightFilters() {
   $('#filter_form .form-group').each(function(idx, element) {

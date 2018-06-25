@@ -12,6 +12,17 @@ a {
     color: #032544;
 }
 
+/* Popover */
+.popover {
+    font-size: 11px;
+}
+
+.popover_info {
+  height:22px;
+  line-height:22px;
+  color:#666;
+}
+
 .input-xs {
   height: 22px;
   padding: 2px 5px;

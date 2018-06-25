@@ -1,5 +1,6 @@
 {% extends "curation/list_view.html" %}
 {% load addcss %}
+{% load general_tags %}
 {% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
@@ -238,38 +239,38 @@ $('body').ready(function() {
                 </div>
             </div>
 
+            {% for error in objects.form.periodical.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
             <div class="form-group form-group-xs clearable">
-                <div class="col-lg-6">
-                  {% for error in objects.form.periodical.errors %}
-                  <div class="alert alert-warning">{{ error }}</div>
-                  {% endfor %}
-                  <div class="form-group form-group-xs clearable" style="margin-bottom:0px;">
-                      <div class="col-lg-12">
-                        {{ objects.form.periodical|addcss:"form-control;Periodical" }}
-                      </div>
-                  </div>
+                <div class="col-lg-12">
+                  {{ objects.form.periodical|addcss:"form-control;Periodical" }}
                 </div>
-                <div class="col-lg-6">
-                  {% for error in objects.form.publisher.errors %}
-                  <div class="alert alert-warning">{{ error }}</div>
-                  {% endfor %}
-                  <div class="form-group form-group-xs clearable" style="margin-bottom:0px;" >
-                      <div class="col-lg-12">
-                        {{ objects.form.publisher|addcss:"form-control;Publisher" }}
-                      </div>
-                  </div>
+            </div>
+
+            {% for error in objects.form.publisher.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-xs clearable">
+                <div class="col-lg-12">
+                  {{ objects.form.publisher|addcss:"form-control;Publisher" }}
                 </div>
             </div>
 
             {% for error in objects.form.publication_date_from.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <div class="col-lg-6">
-                  {{ objects.form.publication_date_from|addcss:"form-control;Published after" }}
+            {% for error in objects.form.publication_date_before.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-xs clearable has-feedback">
+                <div class="col-lg-6" style="padding-right:2px">
+                  {{ objects.form.publication_date_from|add_popover:"form-control;Published after;Example: 2017-05-31" }}
+                  <a href="" style="right:0px;"  class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
-                <div class="col-lg-6">
-                  {{ objects.form.publication_date_to|addcss:"form-control;Published before" }}
+                <div class="col-lg-6" style="padding-left:2px">
+                  {{ objects.form.publication_date_to|add_popover:"form-control;Published before;Example: 2017-05-31" }}
+                  <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
             </div>
             <div class="row">
@@ -345,31 +346,32 @@ $('body').ready(function() {
               </div>
           </div>
 
-          {% for error in objects.form.created_on_from.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          {% for error in objects.form.created_on_to.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <div class="col-lg-6">
-                {{ objects.form.created_on_from|addcss:"form-control;Created after" }}
-              </div>
-              <div class="col-lg-6">
-                {{ objects.form.created_on_to|addcss:"form-control;Created before" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.created_by_native.errors %}
+          {% for error in objects.form.modified_by.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
               <div class="col-lg-12">
-                {{ objects.form.created_by_native }}
-                <input id="creator_input" placeholder="Creator: type at least 3 characters to search" type="text" value="{{objects.creator_first_name}} {{ objects.creator_last_name}}" class="form-control">
+                {{ objects.form.modified_by }}
+                <input id="modifier_input" placeholder="Modified by: type at least 3 characters to search" type="text" value="{{objects.modifier_name}}" class="form-control">
               </div>
           </div>
 
+          {% for error in objects.form.modified_on_from.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          {% for error in objects.form.modified_on_to.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-6" style="padding-right:2px">
+                {{ objects.form.modified_on_from|add_popover:"form-control;Mod. after;Example: 2017-05-31" }}
+                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+              </div>
+              <div class="col-lg-6" style="padding-left:2px">
+                {{ objects.form.modified_on_to|add_popover:"form-control;Mod. before;Example: 2017-05-31" }}
+                <a href="" style="padding-right:20px;" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+              </div>
+          </div>
         </div>
 
         <div class="col-sm-3">
@@ -404,39 +406,40 @@ $('body').ready(function() {
               </div>
           </div>
 
-          {% for error in objects.form.modified_on_from.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          {% for error in objects.form.modified_on_to.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <div class="col-lg-6">
-                {{ objects.form.modified_on_from|addcss:"form-control;Modified after" }}
-              </div>
-              <div class="col-lg-6">
-                {{ objects.form.modified_on_to|addcss:"form-control;Modified before" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.modified_by.errors %}
+          {% for error in objects.form.created_by_native.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
               <div class="col-lg-12">
-                {{ objects.form.modified_by }}
-                <input id="modifier_input" placeholder="Modified by: type at least 3 characters to search" type="text" value="{{objects.modifier_first_name}} {{ objects.modifier_last_name}}" class="form-control">
+                {{ objects.form.created_by_native }}
+                <input id="creator_input" placeholder="Creator: type at least 3 characters to search" type="text" value="{{objects.creator_name}}" class="form-control">
               </div>
           </div>
 
+          {% for error in objects.form.created_on_from.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          {% for error in objects.form.created_on_to.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <div class="col-lg-6" style="padding-right:2px">
+                {{ objects.form.created_on_from|add_popover:"form-control;Created after;Example: 2017-05-31" }}
+                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+              </div>
+              <div class="col-lg-6" style="padding-left:2px">
+                {{ objects.form.created_on_to|add_popover:"form-control;Created before;Example: 2017-05-31;bottom" }}
+                <a href="" style="padding-right:20px;" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+              </div>
+          </div>
         </div>
       </div>
-      </div>
 </form>
+
 <script>
 $(document).ready(function() {
   //# sourceURL=source.js
-
+    $('[data-toggle="popover"]').popover();
 
     $.each($('select'), function(index, value) {
       if ($(value).val() == '') {
