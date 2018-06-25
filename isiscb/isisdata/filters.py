@@ -228,38 +228,13 @@ class CitationFilter(django_filters.FilterSet):
         try:
             date = iso8601.parse_date(value)
         except:
-            return queryset
-
-        # if modified_on is set use this field
-        # if not use created_on_fm field
-        query = Q(created_native__isnull=False) & Q(created_native__gte=date) \
-                | Q(created_on_fm__isnull=False) & Q(created_on_fm__gte=date) \
-
-        # if we don't have a creation date, we'll assume it was created in 2014
-        # when data was originally imported
-        default_date = iso8601.parse_date(settings.CITATION_CREATION_DEFAULT_DATE)
-        if date <= default_date:
-            query = query | Q(created_on_fm__isnull=True) & Q(created_native__isnull=True)
-        return queryset.filter(query)
+            return queryset.filter(created_native__gte=date)
 
     def filter_created_on_to(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
-            return queryset
-
-        # if modified_on is set use this field
-        # if not use created_on_fm field
-        query = Q(created_native__isnull=False) & Q(created_native__lte=date) \
-                | Q(created_on_fm__isnull=False) & Q(created_on_fm__lte=date) \
-
-        # if we don't have a creation date, we'll assume it was created in 2014
-        # when data was originally imported
-        default_date = iso8601.parse_date(settings.CITATION_CREATION_DEFAULT_DATE)
-        if date >= default_date:
-            query = query | (Q(created_on_fm__isnull=True) & Q(created_native__isnull=True))
-
-        return queryset.filter(query)
+            return queryset.filter(created_native__lte=date)
 
     def filter_modified_on_from(self, queryset, name, value):
         try:
