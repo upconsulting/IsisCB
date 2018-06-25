@@ -594,8 +594,9 @@ class CuratedMixin(models.Model):
             if self.created_on_fm:
                 return self.created_on_fm
             else:
-                if self.history:
-                    return self.history.order_by('modified_on')[0].history_date
+                first = self.history.order_by('modified_on').first()
+                if first:
+                    return first.history_date
         return None
 
     @property
