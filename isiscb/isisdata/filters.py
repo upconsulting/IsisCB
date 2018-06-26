@@ -229,13 +229,15 @@ class CitationFilter(django_filters.FilterSet):
         try:
             date = iso8601.parse_date(value)
         except:
-            return queryset.filter(created_native__gte=date)
+            return queryset
+        return queryset.filter(created_native__gte=date)
 
     def filter_created_on_to(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
         except:
-            return queryset.filter(created_native__lte=date)
+            return queryset
+        return queryset.filter(created_native__lte=date)
 
     def filter_modified_on_from(self, queryset, name, value):
         try:
