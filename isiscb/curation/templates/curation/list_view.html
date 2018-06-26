@@ -77,6 +77,12 @@ $(document).ready(function() {
     });
 
     highlightFilters();
+
+    $(".form-control").keypress(function(e) {
+      if(e.which == 13) {
+          submitSearchForm();
+      }
+    });
 });
 
 function submitSearchForm() {
