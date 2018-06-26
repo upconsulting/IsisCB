@@ -1580,7 +1580,8 @@ def citations(request):
               'tracking_state', 'modified_on', 'created_native',
               'publication_date', 'title_for_display', 'part_details_id',
               'part_details__page_begin', 'part_details__page_end',
-              'part_details__pages_free_text', 'created_on_fm',
+              'part_details__pages_free_text', 'part_details__volume_free_text',
+              'part_details__issue_free_text', 'created_on_fm',
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by' )
 

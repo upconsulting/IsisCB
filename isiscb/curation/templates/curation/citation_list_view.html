@@ -68,7 +68,7 @@ $('body').ready(function() {
     <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
-                <th width="3%">
+                <th style="width:20px;">
                     <input type="checkbox" name="select_all" id="select_all" />
                     <script>
                     $('#select_all').change(function(e) {
@@ -80,19 +80,21 @@ $('body').ready(function() {
                     });
                     </script>
                 </th>
-                <th width="5%">Status</th>
+                <th width="2%"><i class="fa fa-cog" aria-hidden="true" title="Status"></i></th>
                 <th width="5%">ID</th>
-                <th width="5%">Type</th>
-                <th>Title  <span style="cursor: pointer;" id="sort_title"></span></th>
+                <th width="2%"><i class="fa fa-book" aria-hidden="true" title="Type"></i></th>
+                <th width="15%" style="min-width:300px">Title  <span style="cursor: pointer;" id="sort_title"></span></th>
                 <th>Author/Editor(s)</th>
-                <th width="8%">Published <span style="cursor: pointer;" id="sort_published"></span></th>
-                <th width="15%">Periodical</th>
+                <th width="5%">Publi. <span style="cursor: pointer;" id="sort_published"></span></th>
+                <th width="10%">Periodical</th>
+                <th width="3%">Vol.</th>
+                <th width="3%">Nr.</th>
                 <th width="5%">Pages</th>
-                <th width="5%">Tracking</th>
-                <th width="12%">Modified</th>
-                <th width="12%">Created</th>
-                <th width="8%">Created by</th>
-                <th width="8%">Modified by</th>
+                <th width="2%"><i class="fa fa-tags" aria-hidden="true" title="Tracking"></i></th>
+                <th width="9%">Modified</th>
+                <th width="5%">Mod. by</th>
+                <th width="8%">Created</th>
+                <th width="5%">Created by</th>
             </tr>
         </thead>
         <tbody>
@@ -107,7 +109,7 @@ $('body').ready(function() {
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
                 </td>
                 <td>
-                  {% if object.record_status_value %}{{ object.record_status_value|get_status_label }}{% endif %}
+                  {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
                 </td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
@@ -125,7 +127,7 @@ $('body').ready(function() {
                     <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
                     {% endif %}
                 </td>
-                <td>{{ object.type_controlled|get_type_controlled_display }}</td>
+                <td><span title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}</span></td>
                 <td>{{ object.title_for_display|safe }}</td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}&tab=acrelations">
@@ -139,14 +141,20 @@ $('body').ready(function() {
                 </td>
                 <td>
                     <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
-                        {{ object.id|get_citation_periodical }}
+                        {{ object.id|get_citation_periodical|truncatechars:25 }}
                     </a>
+                </td>
+                <td>
+                  {% if object.part_details__volume_free_text %}{{ object.part_details__volume_free_text }}{% endif %}
+                </td>
+                <td>
+                  {% if object.part_details__issue_free_text %}{{ object.part_details__issue_free_text }}{% endif %}
                 </td>
                 <td>
                     {{ object|get_page_numbers }}
                 </td>
                 <td>
-                    {{ object.tracking_state|get_tracking_state_display }}
+                    {% if object.tracking_state %}<span title="{{object.tracking_state|get_tracking_state_display}}">{{ object.tracking_state|get_tracking_state_display|cut_characters:3 }}</span>{% endif %}
                 </td>
                 <td>
                     {% if object.modified_on %}
@@ -154,6 +162,11 @@ $('body').ready(function() {
                     {% else %}
                       <span class="list_date">{{ object.modified_on_fm|date:"c" }}</span>
                     {% endif %}
+                </td>
+                <td>
+                  {% if object.modified_by %}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
+                  {% endif %}
                 </td>
                 <td>
                     {% if object.created_native %}
@@ -167,11 +180,6 @@ $('body').ready(function() {
                 <td>
                   {% if object.created_by_native %}
                     {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if object.modified_by %}
-                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
                   {% endif %}
                 </td>
             </tr>
@@ -233,7 +241,7 @@ $('body').ready(function() {
         var date = new Date($(this).text());
         var m = moment(date);
 
-        $(this).text(m.format("YYYY-MM-DD h:mma"));
+        $(this).text(m.format("YYYY-MM-DD"));
       });
     }
   });

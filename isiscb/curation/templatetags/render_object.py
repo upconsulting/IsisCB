@@ -256,3 +256,9 @@ def get_status_label(status):
 @register.filter
 def get_iso_date(date):
     return '' if not date else date.isoformat()
+
+@register.filter
+def cut_characters(string, cut):
+    if string and len(string) > cut:
+        return string[:cut]
+    return string
