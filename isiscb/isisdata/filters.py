@@ -16,7 +16,8 @@ from django.contrib.auth.models import User
 
 import pytz
 from django.conf import settings
-import iso8601
+import iso8601, unicodedata
+
 
 
 filters.LOOKUP_TYPES = [
@@ -189,7 +190,7 @@ class CitationFilter(django_filters.FilterSet):
         return queryset
 
     def filter_title(self, queryset, name, value):
-        value = unidecode(value)
+        value = normalize(unidecode(value))
         if not value:
             return queryset
         for part in value.split():
@@ -253,6 +254,7 @@ class CitationFilter(django_filters.FilterSet):
     def filter_author_or_editor(self, queryset, name, value):
         if not value:
             return queryset
+        value = normalize(unidecode(value))
         for part in value.split():
             queryset = queryset.filter(
                         acrelation__authority__name__icontains=part,
