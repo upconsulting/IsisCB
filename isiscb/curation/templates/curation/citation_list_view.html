@@ -244,7 +244,6 @@ $('body').ready(function() {
 <form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
         <div class="col-sm-4">
-
             {% for error in objects.form.title.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}

@@ -1496,7 +1496,7 @@ def _citations_get_filter_params(request):
 
     all_params = {}
     additional_params_names = ["page", "zotero_accession", "in_collections",
-                               'collection_only']
+                               'collection_only', 'show_filters']
     user_session = request.session
     filter_params = None
     if search_key:
@@ -1570,7 +1570,8 @@ def citations(request):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'filter_params': encoded_params,
-        'search_key': search_key
+        'search_key': search_key,
+        'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())

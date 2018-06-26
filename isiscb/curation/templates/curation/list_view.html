@@ -47,6 +47,7 @@
         </div>
         {% endif %}
         {% endfor %}
+        <input type="hidden" id="show_filters" value="False" />
     </form>
     {% endblock %}
     {% block filter_submit %}
@@ -60,6 +61,9 @@
 </div>
 
 <script>
+//# sourceURL=main-list.js
+var showFilters = '{{ show_filters }}';
+
 $(document).ready(function() {
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
@@ -83,6 +87,18 @@ $(document).ready(function() {
           submitSearchForm();
       }
     });
+
+    $('#filters').on('hide.bs.collapse', function () {
+      showFilters = 'False';
+    });
+
+    $('#filters').on('show.bs.collapse', function () {
+      showFilters = 'True';
+    });
+
+    if (showFilters == 'True') {
+      $('#filters').collapse();
+    }
 });
 
 function submitSearchForm() {
@@ -90,6 +106,9 @@ function submitSearchForm() {
   var sortField = $('<input type="hidden" name="o"></input>');
   sortField.val(sortOrder);
   $("#filter_form").append(sortField);
+  var showFiltersField = $('<input type="hidden" name="show_filters"></input>');
+  showFiltersField.val(showFilters);
+  $("#filter_form").append(showFiltersField);
   $("#filter_form").submit();
 }
 
