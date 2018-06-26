@@ -31,12 +31,16 @@ a {
   border-radius: 3px;
 }
 
-.form-group-xs .form-control {
+.form-group-xs .form-control, .form-group-xs .control-label {
   height: 22px;
   padding: 2px 5px;
   font-size: 12px;
   line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
   border-radius: 3px;
+}
+
+.date-input {
+  background-color: #fdf7e6;
 }
 
 #citationView a, #authorityView a {

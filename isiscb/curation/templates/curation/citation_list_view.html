@@ -249,7 +249,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-xs clearable">
-                <div class="col-lg-12">
+                <label class="col-lg-2 control-label">{{ objects.form.title.label }}</label>
+                <div class="col-lg-10">
                   {{ objects.form.title|addcss:"form-control;Title" }}
                 </div>
             </div>
@@ -259,7 +260,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-xs clearable">
-                <div class="col-lg-12">
+                <label class="col-lg-2 control-label">Au./Ed.</label>
+                <div class="col-lg-10">
                   {{ objects.form.author_or_editor|addcss:"form-control;Author/Ed." }}
                 </div>
             </div>
@@ -268,7 +270,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-xs clearable">
-                <div class="col-lg-12">
+               <label class="col-lg-2 control-label">Periodical</label>
+                <div class="col-lg-10">
                   {{ objects.form.periodical|addcss:"form-control;Periodical" }}
                 </div>
             </div>
@@ -277,7 +280,8 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-xs clearable">
-                <div class="col-lg-12">
+                <label class="col-lg-2 control-label">Publisher</label>
+                <div class="col-lg-10">
                   {{ objects.form.publisher|addcss:"form-control;Publisher" }}
                 </div>
             </div>
@@ -289,11 +293,12 @@ $('body').ready(function() {
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
             <div class="form-group form-group-xs clearable has-feedback">
-                <div class="col-lg-6" style="padding-right:2px">
-                  {{ objects.form.publication_date_from|add_popover:"form-control;Published after" }}
+                <label class="col-lg-2 control-label">Pub date</label>
+                <div class="col-lg-5" style="padding-right:2px">
+                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after" }}
                 </div>
-                <div class="col-lg-6" style="padding-left:2px">
-                  {{ objects.form.publication_date_to|add_popover:"form-control;Published before;All dates in format 2017-05-31;bottom" }}
+                <div class="col-lg-5" style="padding-left:2px">
+                  {{ objects.form.publication_date_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
                   <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
             </div>
@@ -308,7 +313,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="padding-left:5px;">Id</label>
+              <div class="col-lg-10">
                 {{ objects.form.id|addcss:"form-control;Id" }}
               </div>
           </div>
@@ -317,7 +323,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="padding-left:5px;">Abstract</label>
+              <div class="col-lg-10">
                 {{ objects.form.abstract|addcss:"form-control;Abstract" }}
               </div>
           </div>
@@ -326,7 +333,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="padding-left:5px;">Descript</label>
+              <div class="col-lg-10">
                 {{ objects.form.description|addcss:"form-control;Description" }}
               </div>
           </div>
@@ -335,7 +343,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="padding-left:5px;">Subject</label>
+              <div class="col-lg-10">
                 {{ objects.form.subject|addcss:"form-control;Subject" }}
               </div>
           </div>
@@ -353,7 +362,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Type</label>
+              <div class="col-lg-10">
                 {{ objects.form.type_controlled|addcss:"form-control;Rec. Type" }}
               </div>
           </div>
@@ -362,7 +372,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Status</label>
+              <div class="col-lg-10">
                 {{ objects.form.record_status|addcss:"form-control;Rec. Status" }}
               </div>
           </div>
@@ -371,7 +382,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Tracking</label>
+              <div class="col-lg-10">
                 {{ objects.form.tracking_state|addcss:"form-control" }}
               </div>
           </div>
@@ -380,7 +392,8 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modifier</label>
+              <div class="col-lg-10">
                 {{ objects.form.modified_by }}
                 <input id="modifier_input" placeholder="Modified by: type at least 3 characters to search" type="text" value="{{objects.modifier_name}}" class="form-control">
               </div>
@@ -393,11 +406,12 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-6" style="padding-right:2px">
-                {{ objects.form.modified_on_from|add_popover:"form-control;Mod. after" }}
+              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modified</label>
+              <div class="col-lg-5" style="padding-right:2px">
+                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after" }}
               </div>
-              <div class="col-lg-6" style="padding-left:2px">
-                {{ objects.form.modified_on_to|add_popover:"form-control;Mod. before" }}
+              <div class="col-lg-5" style="padding-left:2px">
+                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before" }}
               </div>
           </div>
         </div>
@@ -408,9 +422,10 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label">Database</label>
+              <div class="col-lg-10">
                 {{ objects.form.belongs_to|addcss:"form-control" }}
-                <input id="belongs_to_input" placeholder="Database: type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
+                <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
               </div>
           </div>
 
@@ -418,9 +433,10 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label">Collection</label>
+              <div class="col-lg-10">
                 {{ objects.form.in_collections|addcss:""}}
-                <input id="in_collections_input" placeholder="Collection: type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
+                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
               </div>
           </div>
 
@@ -428,9 +444,10 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label">Zotero</label>
+              <div class="col-lg-10">
                 {{ objects.form.zotero_accession|addcss:"form-control" }}
-                <input id="zotero_accession_input" placeholder="Zotero Acc.: type at least 3 characters to search" type="text" class="form-control">
+                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
               </div>
           </div>
 
@@ -438,9 +455,10 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-12">
+              <label class="col-lg-2 control-label">Creator</label>
+              <div class="col-lg-10">
                 {{ objects.form.created_by_native }}
-                <input id="creator_input" placeholder="Creator: type at least 3 characters to search" type="text" value="{{objects.creator_name}}" class="form-control">
+                <input id="creator_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.creator_name}}" class="form-control">
               </div>
           </div>
 
@@ -451,11 +469,12 @@ $('body').ready(function() {
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <div class="col-lg-6" style="padding-right:2px">
-                {{ objects.form.created_on_from|add_popover:"form-control;Created after" }}
+              <label class="col-lg-2 control-label">Created</label>
+              <div class="col-lg-5" style="padding-right:2px">
+                {{ objects.form.created_on_from|add_popover:"form-control date-input;after" }}
               </div>
-              <div class="col-lg-6" style="padding-left:2px">
-                {{ objects.form.created_on_to|add_popover:"form-control;Created before" }}
+              <div class="col-lg-5" style="padding-left:2px">
+                {{ objects.form.created_on_to|add_popover:"form-control date-input;before" }}
 
               </div>
           </div>
@@ -475,7 +494,7 @@ $(document).ready(function() {
     });
 
     $('select').change(function() {
-      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All' || $(this).find("option:selected").text().includes("(select one)")) {
+      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All') {
         $(this).css('color', '#000');
       } else {
         $(this).css('color', '#888');
