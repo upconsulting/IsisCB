@@ -290,11 +290,10 @@ $('body').ready(function() {
             {% endfor %}
             <div class="form-group form-group-xs clearable has-feedback">
                 <div class="col-lg-6" style="padding-right:2px">
-                  {{ objects.form.publication_date_from|add_popover:"form-control;Published after;Example: 2017-05-31" }}
-                  <a href="" style="right:0px;"  class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+                  {{ objects.form.publication_date_from|add_popover:"form-control;Published after" }}
                 </div>
                 <div class="col-lg-6" style="padding-left:2px">
-                  {{ objects.form.publication_date_to|add_popover:"form-control;Published before;Example: 2017-05-31" }}
+                  {{ objects.form.publication_date_to|add_popover:"form-control;Published before;All dates in format 2017-05-31;bottom" }}
                   <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
                 </div>
             </div>
@@ -341,6 +340,12 @@ $('body').ready(function() {
               </div>
           </div>
 
+          <div class="pull-right">
+            <div class="btn-group">
+              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
+          </div>
         </div>
 
         <div class="col-sm-2">
@@ -389,12 +394,10 @@ $('body').ready(function() {
           {% endfor %}
           <div class="form-group form-group-xs clearable">
               <div class="col-lg-6" style="padding-right:2px">
-                {{ objects.form.modified_on_from|add_popover:"form-control;Mod. after;Example: 2017-05-31" }}
-                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+                {{ objects.form.modified_on_from|add_popover:"form-control;Mod. after" }}
               </div>
               <div class="col-lg-6" style="padding-left:2px">
-                {{ objects.form.modified_on_to|add_popover:"form-control;Mod. before;Example: 2017-05-31" }}
-                <a href="" style="padding-right:20px;" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+                {{ objects.form.modified_on_to|add_popover:"form-control;Mod. before" }}
               </div>
           </div>
         </div>
@@ -449,12 +452,11 @@ $('body').ready(function() {
           {% endfor %}
           <div class="form-group form-group-xs clearable">
               <div class="col-lg-6" style="padding-right:2px">
-                {{ objects.form.created_on_from|add_popover:"form-control;Created after;Example: 2017-05-31" }}
-                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+                {{ objects.form.created_on_from|add_popover:"form-control;Created after" }}
               </div>
               <div class="col-lg-6" style="padding-left:2px">
-                {{ objects.form.created_on_to|add_popover:"form-control;Created before;Example: 2017-05-31;bottom" }}
-                <a href="" style="padding-right:20px;" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+                {{ objects.form.created_on_to|add_popover:"form-control;Created before" }}
+
               </div>
           </div>
         </div>
@@ -473,7 +475,7 @@ $(document).ready(function() {
     });
 
     $('select').change(function() {
-      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All') {
+      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All' || $(this).find("option:selected").text().includes("(select one)")) {
         $(this).css('color', '#000');
       } else {
         $(this).css('color', '#888');
@@ -554,4 +556,8 @@ $(document).ready(function() {
     });
 });
 </script>
+{% endblock %}
+
+{% block filter_submit %}
+<!-- nothing -->
 {% endblock %}
