@@ -242,6 +242,7 @@ $('body').ready(function() {
         var m = moment(date);
 
         $(this).text(m.format("YYYY-MM-DD"));
+        $(this).attr('title', m.format("YYYY-MM-DD h:mma"));
       });
     }
   });
