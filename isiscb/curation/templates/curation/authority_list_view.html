@@ -58,7 +58,7 @@ $('body').ready(function() {
     <table class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
-                <th width="3%">
+                <th style="width:20px;">
                     <input type="checkbox" name="select_all" id="select_all" />
                     <script>
                     $('#select_all').change(function(e) {
@@ -70,9 +70,11 @@ $('body').ready(function() {
                     });
                     </script>
                 </th>
-                <th>ID</th>
-                <th>Type</th>
+                <th width="2%"><i class="fa fa-thumbs-o-up" aria-hidden="true" title="Status"></i></th>
+                <th width="5%">ID</th>
+                <th width="5%">Type</th>
                 <th>Name</th>
+                <th>Dates</th>
                 <th>Tracking</th>
 
             </tr>
@@ -82,6 +84,9 @@ $('body').ready(function() {
             <tr class="{% if not object.public or not object|are_related_objects_for_authority_public %}notpublic{% endif %}">
                 <td>
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
+                </td>
+                <td>
+                  {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
                 </td>
                 <td>
                     <a href="{% url "curation:curate_authority" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>

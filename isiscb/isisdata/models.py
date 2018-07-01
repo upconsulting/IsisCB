@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import jsonpickle
 
 
@@ -590,6 +590,8 @@ class CuratedMixin(models.Model):
         """
         try:
             return self.history.get(history_type='+').history_date
+        except MultipleObjectsReturned:
+            return self.history.get(history_type='+')[0].history_date
         except ObjectDoesNotExist:
             if self.created_on_fm:
                 return self.created_on_fm
