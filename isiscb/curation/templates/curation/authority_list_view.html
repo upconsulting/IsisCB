@@ -6,10 +6,23 @@
 
 
 {% block object_list %}
+<script>
+$('body').ready(function() {
+    var form = $('#bulk-form');
+    $('#bulk_change_submit').click(function() {
+      form.attr('action', '{% url "curation:citation-bulk-action" %}');
+      form.attr('target', '_blank');
+      form.submit();
+    })
+});
+</script>
 
 <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
 <form action="" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
+
+    <input type="hidden" name="objectType" value="{{ object_type }}">
+
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_authority' %}">Create new authority record</a>
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
@@ -17,6 +30,8 @@
       <span class="glyphicon glyphicon-cloud-download"></span>
       Export
     </a>
+
+    <input class="btn btn-success btn-xs" id="bulk_change_submit" type="submit" value="Bulk change" />
 
     <a class="btn btn-success btn-xs" href="#" id="bulk-change-csv">
       <span class="glyphicon glyphicon-cloud-upload"></span>
@@ -102,129 +117,155 @@
     font-size: 0.8em;
 }
 </style>
-<form id="filter_form" class="form clearfix" action="{% url 'curation:authority_list' %}" method="GET" >
-    <div class="row">
-        <div class="col-sm-4">
+<form id="filter_form" class="form-horizontal clearfix" action="{% url 'curation:authority_list' %}" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
+    <div >
+        <div class="col-sm-3">
+          {% for error in objects.form.name.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">{{ objects.form.name.label }}</label>
+              <div class="col-lg-10">
+                {{ objects.form.name|addcss:"form-control " }}
+              </div>
+          </div>
+
+          {% for error in objects.form.classification_system.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Class.Syst.</label>
+              <div class="col-lg-10">
+                {{ objects.form.classification_system|addcss:"form-control " }}
+              </div>
+          </div>
+
+          {% for error in objects.form.classification_code.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Clas.Code</label>
+              <div class="col-lg-10">
+                {{ objects.form.classification_code|addcss:"form-control " }}
+              </div>
+          </div>
+
+          {% for error in objects.form.classification_hierarchy.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Clas.Hier.</label>
+              <div class="col-lg-10">
+                {{ objects.form.classification_hierarchy|addcss:"form-control" }}
+              </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+
+
+
             {% for error in objects.form.id.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.id.label }}</label>
-                {{ objects.form.id|addcss:"form-control input-sm" }}
-
+            <div class="form-group form-group-xs clearable">
+                <label class="col-lg-2 control-label">{{ objects.form.id.label }}</label>
+                <div class="col-lg-10">
+                  {{ objects.form.id|addcss:"form-control " }}
+                </div>
             </div>
 
-            {% for error in objects.form.type_controlled.errors %}
+            {% for error in objects.form.description.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.type_controlled.label }}</label>
-                {{ objects.form.type_controlled|addcss:"form-control input-sm" }}
-            </div>
-
-            {% for error in objects.form.classification_system.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.classification_system.label }}</label>
-                {{ objects.form.classification_system|addcss:"form-control input-sm" }}
-            </div>
-
-            {% for error in objects.form.zotero_accession.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-sm clearable">
-                <label class="control-label">Zotero Acc.</label>
-                {{ objects.form.zotero_accession|addcss:"form-control" }}
-                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
-            </div>
-
-            {% for error in objects.form.tracking_state.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">Tracking</label>
-                {{ objects.form.tracking_state|addcss:"form-control input-sm" }}
-            </div>
-
-
-        </div>
-        <div class="col-sm-4">
-            {% for error in objects.form.name.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.name.label }}</label>
-                {{ objects.form.name|addcss:"form-control input-sm" }}
-            </div>
-
-            {% for error in objects.form.classification_code.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.classification_code.label }}</label>
-                {{ objects.form.classification_code|addcss:"form-control input-sm" }}
+            <div class="form-group form-group-xs clearable">
+                <label class="control-label col-lg-2">Descrip.</label>
+                <div class="col-lg-10">
+                  {{ objects.form.description|addcss:"form-control " }}
+                </div>
             </div>
 
             {% for error in objects.form.linked_data.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">Linked Data</label>
-                {{ objects.form.linked_data|addcss:"form-control input-sm" }}
+            <div class="form-group form-group-xs clearable">
+                <label class="control-label col-lg-2" style="padding-right: 0px;">LD Type</label>
+                <div class="col-lg-10">
+                  {{ objects.form.linked_data|addcss:"form-control " }}
+                </div>
             </div>
 
-            {% for error in objects.form.belongs_to.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.belongs_to.label }}</label>
-                {{ objects.form.belongs_to|addcss:"form-control input-sm" }}
-            </div>
 
-            {% for error in objects.form.in_collections.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">Collection</label>
-                {{ objects.form.in_collections}}
-                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control input-sm">
-            </div>
+
 
         </div>
 
-        <div class="col-sm-4">
-            {% for error in objects.form.description.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.description.label }}</label>
-                {{ objects.form.description|addcss:"form-control input-sm" }}
-            </div>
+        <div class="col-sm-3">
 
-            {% for error in objects.form.classification_hierarchy.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.classification_hierarchy.label }}</label>
-                {{ objects.form.classification_hierarchy|addcss:"form-control input-sm" }}
-            </div>
+          {% for error in objects.form.type_controlled.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="col-lg-2 control-label">{{ objects.form.type_controlled.label }}</label>
+              <div class="col-lg-10">
+                {{ objects.form.type_controlled|addcss:"form-control " }}
+              </div>
+          </div>
 
-            {% for error in objects.form.record_status_value.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.record_status_value.label }}</label>
-                {{ objects.form.record_status_value|addcss:"form-control input-sm" }}
-            </div>
+          {% for error in objects.form.record_status_value.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Status</label>
+              <div class="col-lg-10">
+                {{ objects.form.record_status_value|addcss:"form-control" }}
+              </div>
+          </div>
 
-            {% for error in objects.form.o.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group clearable">
-                <label class="control-label">{{ objects.form.o.label }}</label>
-                {{ objects.form.o|addcss:"form-control input-sm" }}
-            </div>
+          {% for error in objects.form.tracking_state.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Tracking</label>
+              <div class="col-lg-10">
+                {{ objects.form.tracking_state|addcss:"form-control " }}
+              </div>
+          </div>
+        </div>
+
+        <div class="col-sm-3">
+          {% for error in objects.form.belongs_to.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Database</label>
+              <div class="col-lg-10">
+                {{ objects.form.belongs_to|addcss:"form-control " }}
+              </div>
+          </div>
+
+          {% for error in objects.form.in_collections.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="control-label col-lg-2">Collection</label>
+              <div class="col-lg-10">
+                {{ objects.form.in_collections}}
+                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
+              </div>
+          </div>
+
+          {% for error in objects.form.zotero_accession.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs  clearable">
+              <label class="control-label col-lg-2">Zotero</label>
+              {{ objects.form.zotero_accession|addcss:"form-control" }}
+              <div class="col-lg-10">
+                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
+              </div>
+          </div>
+
+
         </div>
     </div>
 

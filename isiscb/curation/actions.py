@@ -54,8 +54,14 @@ class PrependToRecordHistory(BaseAction):
 
     def apply(self, user, filter_params_raw, value, **extra):
         task = AsyncTask.objects.create()
-        result = bulk_prepend_record_history.delay(user.id, filter_params_raw,
+        type = extra['object_type'] if extra['object_type'] else None
+        if type:
+            result = bulk_prepend_record_history.delay(user.id, filter_params_raw,
+                                                   value, task.id, type)
+        else:
+            result = bulk_prepend_record_history.delay(user.id, filter_params_raw,
                                                    value, task.id)
+                                                   
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
         task.async_uuid = result.id
@@ -77,8 +83,14 @@ class StoreCreationDataToModel(BaseAction):
 
     def apply(self, user, filter_params_raw, value, **extra):
         task = AsyncTask.objects.create()
+
+        type = extra['object_type'] if extra['object_type'] else None
+        if type:
+            result = save_creation_to_citation.delay(user.id, filter_params_raw,
+                                                   value, task.id, type)
         result = save_creation_to_citation.delay(user.id, filter_params_raw,
-                                                   value, task.id)
+                                               value, task.id)
+
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
         task.async_uuid = result.id
@@ -105,7 +117,14 @@ class SetRecordStatus(BaseAction):
         #  group of tasks is executed.
 
         task = AsyncTask.objects.create()
-        result = dtasks.bulk_update_citations.delay(user.id,
+        type = extra['object_type'] if extra['object_type'] else None
+        if type:
+            result = dtasks.bulk_update_citations.delay(user.id,
+                                                        filter_params_raw,
+                                                        'record_status_value',
+                                                        value, task.id, type)
+        else:
+            result = dtasks.bulk_update_citations.delay(user.id,
                                                     filter_params_raw,
                                                     'record_status_value',
                                                     value, task.id)
@@ -132,7 +151,14 @@ class SetRecordStatusExplanation(BaseAction):
 
     def apply(self, user, filter_params_raw, value, **extra):
         task = AsyncTask.objects.create()
-        result = dtasks.bulk_update_citations.delay(user.id,
+        type = extra['object_type'] if extra['object_type'] else None
+        if type:
+            result = dtasks.bulk_update_citations.delay(user.id,
+                                                        filter_params_raw,
+                                                        'record_status_explanation',
+                                                        value, task.id, type)
+        else:
+            result = dtasks.bulk_update_citations.delay(user.id,
                                                     filter_params_raw,
                                                     'record_status_explanation',
                                                     value, task.id)
@@ -194,9 +220,14 @@ class SetTrackingStatus(BaseAction):
             transition_labels: %s
         }""" % (transition_counts, allowable_states, transition_labels)
 
-    def apply(self, user, filter_params_raw, value, info='', notes=''):
+    def apply(self, user, filter_params_raw, value, info='', notes='', **extra):
         task = AsyncTask.objects.create()
-        result = bulk_change_tracking_state.delay(user.id, filter_params_raw, value, info, notes, task.id)
+
+        type = extra['object_type'] if extra['object_type'] else None
+        if type:
+            result = bulk_change_tracking_state.delay(user.id, filter_params_raw, value, info, notes, task.id, type)
+        else:
+            result = bulk_change_tracking_state.delay(user.id, filter_params_raw, value, info, notes, task.id)
 
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.

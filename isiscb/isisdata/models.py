@@ -791,7 +791,7 @@ class Citation(ReferencedEntity, CuratedMixin):
             try:
                 self.created_native = self.created_on
             except HistoricalCitation.DoesNotExist:
-                self.created_native = self.created_on_fm
+                pass
 
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         self.title_for_display = get_display_title(self)
@@ -1055,9 +1055,22 @@ class Authority(ReferencedEntity, CuratedMixin):
     name_for_sort = models.CharField(max_length=2000,  db_index=True, blank=True, null=True)
     """ASCII-normalized name."""
 
+    created_on_stored = models.DateTimeField(blank=True, null=True)
+    created_by_stored = models.ForeignKey(User, null=True, blank=True,
+                                    help_text=help_text("""
+    The user who created this object."""), related_name="creator_of_object")
+
+
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
         super(Authority, self).save(*args, **kwargs)
+
+        if not self.created_on_stored:
+            try:
+                self.created_on_stored = self.created_on
+            except HistoricalCitation.DoesNotExist:
+                pass
+
 
     @property
     def normalized_name(self):

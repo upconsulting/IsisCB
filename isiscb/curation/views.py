@@ -1630,6 +1630,7 @@ def authorities(request):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
+        'object_type': 'AUTHORITY',
     }
 
     user_session = request.session
@@ -2556,7 +2557,7 @@ def bulk_select_authority(request):
     context = {}
     return render(request, template, context)
 
-def _get_filtered_queryset(request, type='CITATION'):
+def _get_filtered_queryset(request, object_type='CITATION'):
     pks = request.POST.getlist('queryset')
 
     filter_params_raw = request.POST.get('filters')
@@ -2575,7 +2576,7 @@ def _get_filtered_queryset(request, type='CITATION'):
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
-    if type is 'CITATION':
+    if object_type is 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)
     else:
@@ -2610,10 +2611,12 @@ def bulk_action(request):
     or implicit via the ``filters`` from the list view.
     """
     template = 'curation/bulkaction.html'
-    queryset, filter_params_raw = _get_filtered_queryset(request)
-    if isinstance(queryset, CitationFilter):
+    object_type = request.POST.get('objectType', 'CITATION')
+    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
-    form_class = bulk_action_form_factory(queryset=queryset)
+
+    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
     context = {
         'extra_data': '\n'.join(form_class.extra_data.values())
     }
@@ -2628,7 +2631,7 @@ def bulk_action(request):
         form = form_class(request.POST)
         form.fields['filters'].initial = filter_params_raw
         if form.is_valid():
-            tasks = form.apply(request.user, filter_params_raw)
+            tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
             # task_id = form.apply(queryset.qs, request.user)[0]
             return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
     else:
@@ -2640,8 +2643,10 @@ def bulk_action(request):
         # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
     context.update({
         'form': form,
+        'object_type': type,
     })
     return render(request, template, context)
+
 
 
 
