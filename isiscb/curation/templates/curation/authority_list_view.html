@@ -76,6 +76,7 @@ $('body').ready(function() {
                 <th width="5%">Type</th>
                 <th width="20%">Name</th>
                 <th>Dates</th>
+                <th>LinkedData</th>
                 <th>Tracking</th>
 
             </tr>
@@ -114,6 +115,12 @@ $('body').ready(function() {
                   {% endfor %}
                   {% endif %}
                   {% endwith %}
+                </td>
+                <td>
+                  {% if object.linkeddata_entries__type_controlled %}
+                  {{ object.linkeddata_entries__universal_resource_name }}
+                  ({{ object.linkeddata_entries__type_controlled|get_linkeddata_name}})
+                  {% endif %}
                 </td>
                 <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
             </tr>

@@ -1652,9 +1652,9 @@ def authorities(request):
 
     template = 'curation/authority_list_view.html'
     fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
-              'tracking_state', 'attributes')
+              'tracking_state', 'attributes', 'linkeddata_entries', 'linkeddata_entries__type_controlled', 'linkeddata_entries__universal_resource_name')
     queryset = operations.filter_queryset(request.user,
-                                          Authority.objects.values(*fields))
+                                          Authority.objects.select_related('linkeddata_entries').values(*fields))
 
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
     result_count = filtered_objects.qs.count()

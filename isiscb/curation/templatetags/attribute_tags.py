@@ -10,3 +10,9 @@ def get_dates(attr_ids):
     if not isinstance(attr_ids, list):
         attr_ids = [attr_ids]
     return [a for a in Attribute.objects.all().filter(pk__in=attr_ids) if type(a.value.get_child_class()) in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue]]
+
+@register.filter()
+def get_linkeddata_name(id):
+    if not id:
+        return None
+    return LinkedDataType.objects.all().get(pk=id).name
