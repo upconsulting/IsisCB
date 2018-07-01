@@ -589,9 +589,7 @@ class CuratedMixin(models.Model):
         an instance.
         """
         try:
-            return self.history.get(history_type='+').history_date
-        except MultipleObjectsReturned:
-            return self.history.get(history_type='+')[0].history_date
+            return self.history.get(history_type='+').first().history_date
         except ObjectDoesNotExist:
             if self.created_on_fm:
                 return self.created_on_fm
