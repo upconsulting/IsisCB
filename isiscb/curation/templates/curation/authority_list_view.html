@@ -3,6 +3,7 @@
 {% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
+{% load attribute_tags %}
 
 
 {% block object_list %}
@@ -73,7 +74,7 @@ $('body').ready(function() {
                 <th width="2%"><i class="fa fa-thumbs-o-up" aria-hidden="true" title="Status"></i></th>
                 <th width="5%">ID</th>
                 <th width="5%">Type</th>
-                <th>Name</th>
+                <th width="20%">Name</th>
                 <th>Dates</th>
                 <th>Tracking</th>
 
@@ -105,6 +106,15 @@ $('body').ready(function() {
                 </td>
                 <td>{{ object.type_controlled|get_authority_type_controlled_display }}</td>
                 <td>{{ object.name|safe }}</td>
+                <td>
+                  {% with dates=object.attributes|get_dates %}
+                  {% if dates %}
+                  {% for date in dates %}
+                    {{ date }}
+                  {% endfor %}
+                  {% endif %}
+                  {% endwith %}
+                </td>
                 <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
             </tr>
             {% endfor %}
