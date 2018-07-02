@@ -230,7 +230,7 @@ AUTHORITY_TYPES = dict(Authority.TYPE_CHOICES)
 
 @register.filter
 def get_tracking_state_display(state):
-    return TRACKING_STATES.get(state)
+    return TRACKING_STATES.get(state) if TRACKING_STATES.get(state) else state
 
 
 @register.filter

@@ -167,6 +167,7 @@ def create_authority(request):
 
             form.cleaned_data['public'] = False
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
+            form.instance.created_by_stored = request.user
             authority = form.save()
 
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
@@ -1053,7 +1054,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             attribute_form.instance.modified_by = request.user
             attribute_form.save()
 
-            attribute.save()
+            attribute_form.instance.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
@@ -1147,6 +1148,7 @@ def citation(request, citation_id):
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.instance.modified_by = request.user
             form.save()
             if partdetails_form:
                 partdetails_form.save()
@@ -1652,7 +1654,10 @@ def authorities(request):
 
     template = 'curation/authority_list_view.html'
     fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
-              'tracking_state', 'attributes', 'linkeddata_entries', 'linkeddata_entries__type_controlled', 'linkeddata_entries__universal_resource_name')
+              'tracking_state', 'modified_on', 'modified_on_fm',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by',
+              'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name',
+              'created_on_stored')
     queryset = operations.filter_queryset(request.user,
                                           Authority.objects.select_related('linkeddata_entries').values(*fields))
 
@@ -1783,6 +1788,7 @@ def authority(request, authority_id):
             if person_form:
                 person_form.save()
 
+            form.instance.modified_by = request.user
             form.save()
 
             target = reverse('curation:curate_authority', args=[authority.id,])

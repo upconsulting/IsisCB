@@ -4,7 +4,11 @@
 {% load render_object %}
 {% load permission_tags %}
 {% load attribute_tags %}
+{% load staticfiles %}
 
+{% block extrahead %}
+<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
+{% endblock %}
 
 {% block object_list %}
 <script>
@@ -14,7 +18,20 @@ $('body').ready(function() {
       form.attr('action', '{% url "curation:citation-bulk-action" %}');
       form.attr('target', '_blank');
       form.submit();
-    })
+    });
+
+    setdate();
+
+    var options = { weekday: "long", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" };
+    function setdate() {
+      $('.list_date').each(function() {
+        var date = new Date($(this).text());
+        var m = moment(date);
+
+        $(this).text(m.format("YYYY-MM-DD"));
+        $(this).attr('title', m.format("YYYY-MM-DD h:mma"));
+      });
+    }
 });
 </script>
 
@@ -76,9 +93,14 @@ $('body').ready(function() {
                 <th width="5%">Type</th>
                 <th width="20%">Name</th>
                 <th>Dates</th>
+                <th>Attributes</th>
                 <th>LinkedData</th>
-                <th>Tracking</th>
-
+                <th width="2%"><i class="fa fa-link" aria-hidden="true" title="ACR count"></i></th>
+                <th width="2%"><i class="fa fa-check-square-o" aria-hidden="true" title="Tracking"></i></th>
+                <th width="9%">Modified</th>
+                <th width="5%">Mod. by</th>
+                <th width="8%">Created</th>
+                <th width="5%">Created by</th>
             </tr>
         </thead>
         <tbody>
@@ -108,21 +130,63 @@ $('body').ready(function() {
                 <td>{{ object.type_controlled|get_authority_type_controlled_display }}</td>
                 <td>{{ object.name|safe }}</td>
                 <td>
-                  {% with dates=object.attributes|get_dates %}
+                  {% with dates=object|get_dates %}
                   {% if dates %}
-                  {% for date in dates %}
-                    {{ date }}
+                  {{ dates|join:", "}}
+                  {% endif %}
+                  {% endwith %}
+                </td>
+                <td>
+                  {% with attrs=object|get_attributes %}
+                  {% if attrs %}
+                  {% for attr in attrs %}
+                    {{ attr }}
                   {% endfor %}
                   {% endif %}
                   {% endwith %}
                 </td>
                 <td>
-                  {% if object.linkeddata_entries__type_controlled %}
-                  {{ object.linkeddata_entries__universal_resource_name }}
-                  ({{ object.linkeddata_entries__type_controlled|get_linkeddata_name}})
+                  {% with lds=object|get_linkeddata %}
+                  {% for ld in lds %}
+                    {{ ld.universal_resource_name }}
+                    ({{ ld.type_controlled.name}}){% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                  {% endwith %}
+                </td>
+                <td>
+                  {{ object|get_acr_count }}
+                </td>
+                <td>
+                  {% if object.tracking_state %}
+                    <span title="{{object.tracking_state|get_authority_tracking_state_display}}">{{ object.tracking_state|get_authority_tracking_state_display|cut_characters:3 }}</span>
                   {% endif %}
                 </td>
-                <td>{{ object.tracking_state|get_authority_tracking_state_display }}</td>
+                <td>
+                    {% if object.modified_on %}
+                      <span class="list_date">{{ object.modified_on|date:"c" }}</span>
+                    {% else %}
+                      <span class="list_date">{{ object.modified_on_fm|date:"c" }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                  {% if object.modified_by %}
+                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
+                  {% endif %}
+                </td>
+                <td>
+                    {% if object.created_on_stored %}
+                      <span class="list_date">{{ object.created_on_stored|date:"c" }}</span>
+                      {% else %}
+                      {% if object.created_on_fm %}
+                        <span class="list_date">{{ object.created_on_fm|date:"c" }}</span>
+                      {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                  {% if object.created_by_stored %}
+                    {{ object.created_by_stored__first_name }} {{ object.created_by_stored__last_name }}
+                  {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

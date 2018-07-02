@@ -580,6 +580,10 @@ class CuratedMixin(models.Model):
 
         return super(CuratedMixin, self).save(*args, **kwargs)
 
+    def save_obj(self, user, *args, **kwargs):
+        self.modified_by = user
+        self.save(args, kwargs)
+
     @property
     def created_on(self):
         """
@@ -656,7 +660,6 @@ class CuratedMixin(models.Model):
     @_history_date.setter
     def _history_date(self, value):
         self.modified_on = value
-
 
 
 class ReferencedEntity(models.Model):
@@ -1135,7 +1138,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
-    NONE = 'No'
+    NONE = 'NO'
     TRACKING_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),
