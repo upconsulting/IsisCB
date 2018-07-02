@@ -311,7 +311,11 @@ class AuthorityFilter(django_filters.FilterSet):
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
-    linked_data = django_filters.CharFilter(method='filter_linked_data')
+    linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
+    linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+
+    attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
+    attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
@@ -322,6 +326,15 @@ class AuthorityFilter(django_filters.FilterSet):
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
+
+    created_on_from = django_filters.CharFilter(method='filter_created_on_from')
+    created_on_to = django_filters.CharFilter(method='filter_created_on_to')
+
+    modified_on_from = django_filters.CharFilter(method='filter_modified_on_from')
+    modified_on_to = django_filters.CharFilter(method='filter_modified_on_to')
+    created_by_stored = django_filters.CharFilter(widget=forms.HiddenInput())
+    modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
+
 
     class Meta:
         model = Authority
@@ -381,6 +394,24 @@ class AuthorityFilter(django_filters.FilterSet):
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
+        created_by_stored = self.data.get('created_by_stored', None)
+        if created_by_stored:
+            try:
+                created_by = User.objects.get(pk=created_by_stored)
+                if created_by:
+                    self.creator_name = " ".join([created_by.first_name, created_by.last_name])
+            except User.DoesNotExist:
+                self.creator_last_name = "User does not exist."
+
+        modified_by = self.data.get('modified_by', None)
+        if modified_by:
+            try:
+                modifier = User.objects.get(pk=modified_by)
+                if modifier:
+                    self.modifier_name = " ".join([modifier.first_name, modifier.last_name])
+            except User.DoesNotExist:
+                self.modifier_last_name = "User does not exist."
+
     def filter_id(self, queryset, name, value):
         if not value:
             return queryset
@@ -405,11 +436,26 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset
 
     def filter_linked_data(self, queryset, name, value):
+        '''
+        Filter by linked data types
+        '''
         if not value:
             return queryset
         authority_ids = LinkedData.objects\
-                            .filter(universal_resource_name__contains=value)\
-                            .values_list('authorities__id', flat=True)\
+                            .filter(type_controlled_id=value)\
+                            .values_list('subject_instance_id', flat=True)\
+                            .distinct()
+
+        if len(authority_ids) == 1 and authority_ids[0] is None:
+            return queryset.none()
+        return queryset.filter(pk__in=authority_ids)
+
+    def filter_attribute_type(self, queryset, name, value):
+        if not value:
+            return queryset
+        authority_ids = Attribute.objects\
+                            .filter(type_controlled_id=value)\
+                            .values_list('source_instance_id', flat=True)\
                             .distinct()
 
         if len(authority_ids) == 1 and authority_ids[0] is None:
@@ -422,3 +468,31 @@ class AuthorityFilter(django_filters.FilterSet):
         q = Q()
 
         return queryset.filter(Q(in_collections=value))
+
+    def filter_created_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_on_stored__gte=date)
+
+    def filter_created_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_on_stored__lte=date)
+
+    def filter_modified_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__gte=date)
+
+    def filter_modified_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__lte=date)

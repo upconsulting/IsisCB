@@ -1701,7 +1701,8 @@ def authorities(request):
         'search_key': search_key,
         'result_count': result_count,
         'current_page': currentPage,
-        'current_offset': (currentPage - 1) * PAGE_SIZE
+        'current_offset': (currentPage - 1) * PAGE_SIZE,
+        'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
     })
     return render(request, template, context)
 
@@ -2080,6 +2081,16 @@ def search_zotero_accessions(request):
         'label': accession.name,
         'date': accession.imported_on
     } for accession in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_linked_data_type(request):
+    q = request.GET.get('query', None)
+    queryset = LinkedDataType.objects.filter(name__icontains=q)
+    results = [{
+        'id': ld_type.id,
+        'label': ld_type.name,
+    } for ld_type in queryset[:20]]
     return JsonResponse(results, safe=False)
 
 
