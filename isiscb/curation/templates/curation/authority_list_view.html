@@ -425,6 +425,21 @@ $('body').ready(function() {
 $(document).ready(function() {
     $('[data-toggle="popover"]').popover();
 
+    $.each($('select'), function(index, value) {
+      if ($(value).val() == '') {
+        $(value).css('color', '#888');
+      }
+    });
+
+    $('select').change(function() {
+      if ($(this).val() != '' || $(this).find("option:selected").text() == 'All') {
+        $(this).css('color', '#000');
+      } else {
+        $(this).css('color', '#888');
+      }
+
+    });
+
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
