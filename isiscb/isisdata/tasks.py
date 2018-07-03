@@ -13,7 +13,7 @@ import unicodecsv as csv
 import math, smart_open
 
 
-def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
+def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='CITATION'):
     """
 
     Parameters
@@ -28,10 +28,17 @@ def _get_filtered_citation_queryset(filter_params_raw, user_id=None):
     # We need a mutable QueryDict.
     filter_params = QueryDict(filter_params_raw, mutable=True)
 
-    _qs = Citation.objects.all()
+    if object_type == 'AUTHORITY':
+        _qs = Authority.objects.all()
+    else:
+        _qs = Citation.objects.all()
     if user_id:
         _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
-    queryset = CitationFilter(filter_params, queryset=_qs).qs
+
+    if object_type == 'AUTHORITY':
+        queryset = AuthorityFilter(filter_params, queryset=_qs).qs
+    else:
+        queryset = CitationFilter(filter_params, queryset=_qs).qs
     return queryset, filter_params_raw
 
 def _get_filtered_authority_queryset(filter_params_raw, user_id=None):
@@ -57,8 +64,8 @@ def _get_filtered_authority_queryset(filter_params_raw, user_id=None):
 
 
 @shared_task
-def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None):
-    queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None, object_type='CITATION'):
+    queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
@@ -87,7 +94,7 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True):
     print 'export to csv:: %s' % str(task_id)
     if export_type == 'Citation':
-        queryset, _ = _get_filtered_citation_queryset(filter_params_raw, user_id)
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
         columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
     else:
         queryset, _ = _get_filtered_authority_queryset(filter_params_raw, user_id)

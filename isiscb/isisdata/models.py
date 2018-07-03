@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse as core_reverse
 from django.utils.safestring import mark_safe
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import jsonpickle
 
 
@@ -576,7 +577,12 @@ class CuratedMixin(models.Model):
             self.public = True
         else:
             self.public = False
+
         return super(CuratedMixin, self).save(*args, **kwargs)
+
+    def save_obj(self, user, *args, **kwargs):
+        self.modified_by = user
+        self.save(args, kwargs)
 
     @property
     def created_on(self):
@@ -586,7 +592,18 @@ class CuratedMixin(models.Model):
         Retrieves the date of the (one and only) creation HistoricalRecord for
         an instance.
         """
-        return self.history.get(history_type='+').history_date
+        try:
+            record = self.history.filter(history_type='+').first()
+            if record:
+                return record.history_date
+        except ObjectDoesNotExist:
+            if self.created_on_fm:
+                return self.created_on_fm
+            else:
+                first = self.history.order_by('modified_on').first()
+                if first:
+                    return first.history_date
+        return None
 
     @property
     def created_by(self):
@@ -596,7 +613,16 @@ class CuratedMixin(models.Model):
         Retrieves the user on the (one and only) creation HistoricalRecord for
         an instance.
         """
-        return self.history.get(history_type='+').history_user
+        try:
+            return self.history.get(history_type='+').history_user
+        except ObjectDoesNotExist:
+            if self.created_by_fm:
+                return self.created_by_fm
+            else:
+                try:
+                    return self.history.order_by('modified_on')[0].history_user
+                except:
+                    return None
 
     created_on_fm = models.DateTimeField(null=True, help_text=help_text("""
     Value of CreatedOn from the original FM database."""))
@@ -634,7 +660,6 @@ class CuratedMixin(models.Model):
     @_history_date.setter
     def _history_date(self, value):
         self.modified_on = value
-
 
 
 class ReferencedEntity(models.Model):
@@ -727,6 +752,9 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     created_native = models.DateTimeField(blank=True, null=True)
+    created_by_native = models.ForeignKey(User, null=True, blank=True,
+                                    help_text=help_text("""
+    The user who created this object."""), related_name="creator_of")
 
     def save(self, *args, **kwargs):
         def get_related(obj):
@@ -768,7 +796,7 @@ class Citation(ReferencedEntity, CuratedMixin):
             try:
                 self.created_native = self.created_on
             except HistoricalCitation.DoesNotExist:
-                self.created_native = self.created_on_fm
+                pass
 
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         self.title_for_display = get_display_title(self)
@@ -1032,9 +1060,22 @@ class Authority(ReferencedEntity, CuratedMixin):
     name_for_sort = models.CharField(max_length=2000,  db_index=True, blank=True, null=True)
     """ASCII-normalized name."""
 
+    created_on_stored = models.DateTimeField(blank=True, null=True)
+    created_by_stored = models.ForeignKey(User, null=True, blank=True,
+                                    help_text=help_text("""
+    The user who created this object."""), related_name="creator_of_object")
+
+
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
         super(Authority, self).save(*args, **kwargs)
+
+        if not self.created_on_stored:
+            try:
+                self.created_on_stored = self.created_on
+            except HistoricalCitation.DoesNotExist:
+                pass
+
 
     @property
     def normalized_name(self):
@@ -1097,7 +1138,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     PROOFED = 'PD'
     FULLY_ENTERED = 'FU'
     BULK_DATA = 'BD'
-    NONE = 'No'
+    NONE = 'NO'
     TRACKING_CHOICES = (
         (HSTM_UPLOAD, 'HSTM Upload'),
         (PRINTED, 'Printed'),

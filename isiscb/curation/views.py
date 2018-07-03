@@ -167,6 +167,7 @@ def create_authority(request):
 
             form.cleaned_data['public'] = False
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
+            form.instance.created_by_stored = request.user
             authority = form.save()
 
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
@@ -1053,7 +1054,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             attribute_form.instance.modified_by = request.user
             attribute_form.save()
 
-            attribute.save()
+            attribute_form.instance.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
@@ -1147,6 +1148,7 @@ def citation(request, citation_id):
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.instance.modified_by = request.user
             form.save()
             if partdetails_form:
                 partdetails_form.save()
@@ -1496,7 +1498,7 @@ def _citations_get_filter_params(request):
 
     all_params = {}
     additional_params_names = ["page", "zotero_accession", "in_collections",
-                               'collection_only']
+                               'collection_only', 'show_filters']
     user_session = request.session
     filter_params = None
     if search_key:
@@ -1570,7 +1572,8 @@ def citations(request):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'filter_params': encoded_params,
-        'search_key': search_key
+        'search_key': search_key,
+        'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
@@ -1578,7 +1581,12 @@ def citations(request):
     fields = ('record_status_value', 'id', 'type_controlled', 'public',
               'tracking_state', 'modified_on', 'created_native',
               'publication_date', 'title_for_display', 'part_details_id',
-              'part_details__page_begin', 'part_details__page_end', 'part_details__pages_free_text')
+              'part_details__page_begin', 'part_details__page_end',
+              'part_details__pages_free_text', 'part_details__volume_free_text',
+              'part_details__issue_free_text', 'created_on_fm',
+              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by' )
+
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
@@ -1624,6 +1632,7 @@ def authorities(request):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
+        'object_type': 'AUTHORITY',
     }
 
     user_session = request.session
@@ -1645,9 +1654,13 @@ def authorities(request):
 
     template = 'curation/authority_list_view.html'
     fields = ('id', 'name', 'type_controlled', 'public', 'record_status_value',
-              'tracking_state')
+              'tracking_state', 'modified_on', 'modified_on_fm',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by',
+              'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name',
+              'created_on_stored')
     queryset = operations.filter_queryset(request.user,
-                                          Authority.objects.values(*fields))
+                                          Authority.objects.select_related('linkeddata_entries').values(*fields))
+
     filtered_objects = AuthorityFilter(filter_params, queryset=queryset)
     result_count = filtered_objects.qs.count()
 
@@ -1688,7 +1701,8 @@ def authorities(request):
         'search_key': search_key,
         'result_count': result_count,
         'current_page': currentPage,
-        'current_offset': (currentPage - 1) * PAGE_SIZE
+        'current_offset': (currentPage - 1) * PAGE_SIZE,
+        'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
     })
     return render(request, template, context)
 
@@ -1775,6 +1789,7 @@ def authority(request, authority_id):
             if person_form:
                 person_form.save()
 
+            form.instance.modified_by = request.user
             form.save()
 
             target = reverse('curation:curate_authority', args=[authority.id,])
@@ -2068,6 +2083,16 @@ def search_zotero_accessions(request):
     } for accession in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_linked_data_type(request):
+    q = request.GET.get('query', None)
+    queryset = LinkedDataType.objects.filter(name__icontains=q)
+    results = [{
+        'id': ld_type.id,
+        'label': ld_type.name,
+    } for ld_type in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_datasets(request):
@@ -2077,6 +2102,19 @@ def search_datasets(request):
         'id': ds.id,
         'label': ds.name,
     } for ds in queryset[:20]]
+    return JsonResponse(results, safe=False)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def search_users(request):
+    q = request.GET.get('query', None)
+    if q:
+        q = q.strip()
+    queryset = User.objects.all().filter(Q(username__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q))
+    results = [{
+        'id': u.id,
+        'label': "%s %s (%s)" % (u.first_name, u.last_name, u.username)
+    } for u in queryset[:20]]
+    print results
     return JsonResponse(results, safe=False)
 
 
@@ -2537,7 +2575,7 @@ def bulk_select_authority(request):
     context = {}
     return render(request, template, context)
 
-def _get_filtered_queryset(request, type='CITATION'):
+def _get_filtered_queryset(request, object_type='CITATION'):
     pks = request.POST.getlist('queryset')
 
     filter_params_raw = request.POST.get('filters')
@@ -2556,7 +2594,7 @@ def _get_filtered_queryset(request, type='CITATION'):
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode().encode('utf-8')
 
-    if type is 'CITATION':
+    if object_type is 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)
     else:
@@ -2591,10 +2629,12 @@ def bulk_action(request):
     or implicit via the ``filters`` from the list view.
     """
     template = 'curation/bulkaction.html'
-    queryset, filter_params_raw = _get_filtered_queryset(request)
-    if isinstance(queryset, CitationFilter):
+    object_type = request.POST.get('objectType', 'CITATION')
+    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
-    form_class = bulk_action_form_factory(queryset=queryset)
+
+    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
     context = {
         'extra_data': '\n'.join(form_class.extra_data.values())
     }
@@ -2609,7 +2649,7 @@ def bulk_action(request):
         form = form_class(request.POST)
         form.fields['filters'].initial = filter_params_raw
         if form.is_valid():
-            tasks = form.apply(request.user, filter_params_raw)
+            tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
             # task_id = form.apply(queryset.qs, request.user)[0]
             return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
     else:
@@ -2621,8 +2661,10 @@ def bulk_action(request):
         # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
     context.update({
         'form': form,
+        'object_type': type,
     })
     return render(request, template, context)
+
 
 
 

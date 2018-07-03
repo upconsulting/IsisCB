@@ -24,6 +24,10 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
 
+    {% if object_type %}
+    <input type="hidden" name="objectType" value="{{ object_type }}" />
+    {% endif %}
+
     {{ form.filter_params }}
 
     <div class="row">

@@ -19,3 +19,15 @@ def to_class_name(value):
 @register.filter
 def get_iso_date_string(date):
     return date.isoformat()
+
+@register.filter
+def add_popover(field, css_placeholder_text):
+    parts = css_placeholder_text.split(';')
+    placeholder = parts[1] if len(parts) >= 2 else ''
+    text = parts[2] if len(parts) >= 3 else ''
+    orientation = parts[3] if len(parts) >= 4 else 'right'
+    css = parts[0]
+    
+    return field.as_widget(attrs={"class": css, "placeholder": placeholder, \
+                    "data-toggle": "popover", "data-trigger":"hover", \
+                    "data-placement": orientation, "data-content": text})

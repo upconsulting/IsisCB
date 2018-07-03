@@ -227,3 +227,5 @@ LICENSE = """This work is licensed under a Creative Commons Attribution-NonComme
 MARKUP_FIELD_TYPES = (
     ('markdown', markdown.markdown),
 )
+
+CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"

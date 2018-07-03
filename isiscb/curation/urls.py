@@ -50,8 +50,10 @@ urlpatterns = [
     url(r'^(?i)authority/export/status$', views.export_authorities_status, name="export-authorities-status"),
 
     url(r'^(?i)zotero/accessions/search$', views.search_zotero_accessions, name='search-zotero-accessions'),
+    url(r'^(?i)zotero/linkeddata/type/search$', views.search_linked_data_type, name='search-linked-data-type'),
 
     url(r'^(?i)datasets/search$', views.search_datasets, name='search-datasets'),
+    url(r'^(?i)users/search$', views.search_users, name='search-users'),
 
     url(r'^(?i)citation/collection$', views.collections, name='collections'),
     url(r'^(?i)citation/collection/search$', views.search_citation_collections, name='search-collections'),

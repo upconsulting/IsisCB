@@ -16,16 +16,22 @@
 <div class="panel-body" style="padding: 8px;">
 
 <div class="clearfix">
-  <div class="btn-group pull-right" style="margin-left: 10px;">
-      <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
-      <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+  <div class="col-md-3">
+    {% if objects.form.o %}
+    <div class="form-inline">
+    {{ objects.form.o|addcss:"form-control input-xs" }}
+    <button class="btn btn-primary btn-xs" type="submit" id="submit-form-btn-sort"><i class="fa fa-sort-amount-asc" style="padding: 2px;"></i></button>
   </div>
-  <div class="btn-group pull-right">
-      <button data-toggle="collapse"
-          class="btn btn-xs btn-primary"
-          data-target="#filters">
-          <i class="fa fa-filter" aria-hidden="true"></i> Show/hide filters
-      </button>
+    {% endif %}
+  </div>
+  <div class="col-md-6">
+      <div class="btn-group" style="width:100%">
+          <button data-toggle="collapse"
+              class="btn btn-xs btn-primary"
+              data-target="#filters" style="width:100%">
+              <i class="fa fa-filter" aria-hidden="true"></i> Show/hide filters
+          </button>
+      </div>
   </div>
 </div>
 
@@ -34,30 +40,77 @@
     <form id="filter_form" class="form-horizontal clearfix">
       {% csrf_token %}
         {% for field in objects.form %}
+        {% if field.label != 'Ordering' %}
         <div class="form-group clearable">
             <label>{{ field.label }}</label>
             {{ field|addcss:"form-control" }}
         </div>
+        {% endif %}
         {% endfor %}
-
+        <input type="hidden" id="show_filters" value="False" />
     </form>
+    {% endblock %}
+    {% block filter_submit %}
+    <div class="col-md-12 text-center">
+      <div class="btn-group">
+        <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+        <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+      </div>
+    </div>
     {% endblock %}
 </div>
 
 <script>
+//# sourceURL=main-list.js
+var showFilters = '{{ show_filters }}';
+
 $(document).ready(function() {
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
         highlightFilters();
+        submitSearchForm();
     });
 
     $("#submit-form-btn").on('click', function() {
-      $("#filter_form").submit();
+      submitSearchForm();
+    });
+
+    $("#submit-form-btn-sort").on('click', function() {
+      submitSearchForm();
     });
 
     highlightFilters();
+
+    $(".form-control").keypress(function(e) {
+      if(e.which == 13) {
+          submitSearchForm();
+      }
+    });
+
+    $('#filters').on('hide.bs.collapse', function () {
+      showFilters = 'False';
+    });
+
+    $('#filters').on('show.bs.collapse', function () {
+      showFilters = 'True';
+    });
+
+    if (showFilters == 'True') {
+      $('#filters').collapse();
+    }
 });
+
+function submitSearchForm() {
+  var sortOrder = $("#id_o").val();
+  var sortField = $('<input type="hidden" name="o"></input>');
+  sortField.val(sortOrder);
+  $("#filter_form").append(sortField);
+  var showFiltersField = $('<input type="hidden" name="show_filters"></input>');
+  showFiltersField.val(showFilters);
+  $("#filter_form").append(showFiltersField);
+  $("#filter_form").submit();
+}
 
 function highlightFilters() {
   $('#filter_form .form-group').each(function(idx, element) {
