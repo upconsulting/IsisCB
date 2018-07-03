@@ -6,5 +6,5 @@ def addcss(field, css):
     parts = css.split(';')
     placeholder = parts[1] if len(parts) == 2 else ''
     css = parts[0]
-
+    
     return field.as_widget(attrs={"class": css, "placeholder": placeholder})

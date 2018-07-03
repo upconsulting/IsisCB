@@ -12,6 +12,12 @@ from unidecode import unidecode
 from curation.tracking import TrackingWorkflow
 from django_filters import filters
 from django.http import QueryDict
+from django.contrib.auth.models import User
+
+import pytz
+from django.conf import settings
+import iso8601, unicodedata
+
 
 
 filters.LOOKUP_TYPES = [
@@ -44,7 +50,7 @@ class CitationFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method='filter_id')
     # title = django_filters.MethodFilter(name='title', lookup_type='icontains')
     title = django_filters.CharFilter(method='filter_title')
-    type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
+    type_controlled = django_filters.ChoiceFilter(empty_label="Rec. Type (select one)", choices=[('', 'All')] + list(Citation.TYPE_CHOICES))
     # publication_date_from = django_filters.MethodFilter()
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
@@ -53,6 +59,12 @@ class CitationFilter(django_filters.FilterSet):
     abstract = django_filters.CharFilter(method='filter_abstract')
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
     description = django_filters.CharFilter(method='filter_description')
+
+    created_on_from = django_filters.CharFilter(method='filter_created_on_from')
+    created_on_to = django_filters.CharFilter(method='filter_created_on_to')
+
+    modified_on_from = django_filters.CharFilter(method='filter_modified_on_from')
+    modified_on_to = django_filters.CharFilter(method='filter_modified_on_to')
 
     # author_or_editor = django_filters.MethodFilter()
     author_or_editor = django_filters.CharFilter(method='filter_author_or_editor')
@@ -63,13 +75,14 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
-    record_status = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status = django_filters.ChoiceFilter(name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
+    created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
+    modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
-    tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
-
+    tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
     # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
     # order = ChoiceMethodFilter(name='order', choices=order_by)
@@ -114,6 +127,24 @@ class CitationFilter(django_filters.FilterSet):
             except Dataset.DoesNotExist:
                 self.dataset_name = "Dataset could not be found."
 
+        created_by_native = self.data.get('created_by_native', None)
+        if created_by_native:
+            try:
+                created_by = User.objects.get(pk=created_by_native)
+                if created_by:
+                    self.creator_name = " ".join([created_by.first_name, created_by.last_name])
+            except User.DoesNotExist:
+                self.creator_last_name = "User does not exist."
+
+        modified_by = self.data.get('modified_by', None)
+        if modified_by:
+            try:
+                modifier = User.objects.get(pk=modified_by)
+                if modifier:
+                    self.modifier_name = " ".join([modifier.first_name, modifier.last_name])
+            except User.DoesNotExist:
+                self.modifier_last_name = "User does not exist."
+
     class Meta:
         model = Citation
         fields = [
@@ -135,7 +166,8 @@ class CitationFilter(django_filters.FilterSet):
             ('publication_date', 'publication_date'),
             ('title', 'title_for_sort'),
             ('part_details__page_begin', 'start_page'),
-            ('modified_on', 'modified')
+            ('modified_on', 'modified'),
+            ('created_native', 'created')
         ),
 
         # labels do not need to retain order
@@ -144,33 +176,10 @@ class CitationFilter(django_filters.FilterSet):
             'title': 'Title',
             'start_page': 'Start page',
             'modified': 'Last modified'
-        }
-    )
+        },
 
-    # def get_ordering_field(self):
-    #     if self._meta.order_by:
-    #         if isinstance(self._meta.order_by, (list, tuple)):
-    #             if isinstance(self._meta.order_by[0], (list, tuple)):
-    #                 # e.g. (('field', 'Display name'), ...)
-    #                 choices = [(f[0], f[1]) for f in self._meta.order_by]
-    #             else:
-    #                 choices = []
-    #                 for f in self._meta.order_by:
-    #                     if f[0] == '-':
-    #                         label = _('%s (descending)' % capfirst(f[1:]))
-    #                     else:
-    #                         label = capfirst(f)
-    #                     choices.append((f, label))
-    #         else:
-    #             # add asc and desc field names
-    #             # use the filter's label if provided
-    #             choices = []
-    #             for f, fltr in self.filters.items():
-    #                 choices.extend([
-    #                     (f, fltr.label or capfirst(f)),
-    #                     ("-%s" % (f), _('%s (descending)' % (fltr.label or capfirst(f))))
-    #                 ])
-    #         return forms.ChoiceField(widget=forms.HiddenInput(attrs={'value':"publication_date"}), choices=choices, initial="publication_date")
+        empty_label="Sort order (select one)",
+    )
 
     def filter_id(self, queryset, name, value):
         if not value:
@@ -181,7 +190,7 @@ class CitationFilter(django_filters.FilterSet):
         return queryset
 
     def filter_title(self, queryset, name, value):
-        value = unidecode(value)
+        value = normalize(unidecode(value))
         if not value:
             return queryset
         for part in value.split():
@@ -216,9 +225,38 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
         return queryset.filter(publication_date__lte=date)
 
+    def filter_created_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_native__gte=date)
+
+    def filter_created_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_native__lte=date)
+
+    def filter_modified_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__gte=date)
+
+    def filter_modified_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__lte=date)
+
     def filter_author_or_editor(self, queryset, name, value):
         if not value:
             return queryset
+        value = normalize(unidecode(value))
         for part in value.split():
             queryset = queryset.filter(
                         acrelation__authority__name__icontains=part,
@@ -273,7 +311,11 @@ class AuthorityFilter(django_filters.FilterSet):
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
-    linked_data = django_filters.CharFilter(method='filter_linked_data')
+    linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
+    linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+
+    attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
+    attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
@@ -284,6 +326,15 @@ class AuthorityFilter(django_filters.FilterSet):
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TRACKING_CHOICES), method='filter_tracking_state')
+
+    created_on_from = django_filters.CharFilter(method='filter_created_on_from')
+    created_on_to = django_filters.CharFilter(method='filter_created_on_to')
+
+    modified_on_from = django_filters.CharFilter(method='filter_modified_on_from')
+    modified_on_to = django_filters.CharFilter(method='filter_modified_on_to')
+    created_by_stored = django_filters.CharFilter(widget=forms.HiddenInput())
+    modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
+
 
     class Meta:
         model = Authority
@@ -343,6 +394,24 @@ class AuthorityFilter(django_filters.FilterSet):
             except ImportAccession.DoesNotExist:
                 self.zotero_accession_name = "Zotero accession could not be found."
 
+        created_by_stored = self.data.get('created_by_stored', None)
+        if created_by_stored:
+            try:
+                created_by = User.objects.get(pk=created_by_stored)
+                if created_by:
+                    self.creator_name = " ".join([created_by.first_name, created_by.last_name])
+            except User.DoesNotExist:
+                self.creator_last_name = "User does not exist."
+
+        modified_by = self.data.get('modified_by', None)
+        if modified_by:
+            try:
+                modifier = User.objects.get(pk=modified_by)
+                if modifier:
+                    self.modifier_name = " ".join([modifier.first_name, modifier.last_name])
+            except User.DoesNotExist:
+                self.modifier_last_name = "User does not exist."
+
     def filter_id(self, queryset, name, value):
         if not value:
             return queryset
@@ -367,11 +436,26 @@ class AuthorityFilter(django_filters.FilterSet):
         return queryset
 
     def filter_linked_data(self, queryset, name, value):
+        '''
+        Filter by linked data types
+        '''
         if not value:
             return queryset
         authority_ids = LinkedData.objects\
-                            .filter(universal_resource_name__contains=value)\
-                            .values_list('authorities__id', flat=True)\
+                            .filter(type_controlled_id=value)\
+                            .values_list('subject_instance_id', flat=True)\
+                            .distinct()
+
+        if len(authority_ids) == 1 and authority_ids[0] is None:
+            return queryset.none()
+        return queryset.filter(pk__in=authority_ids)
+
+    def filter_attribute_type(self, queryset, name, value):
+        if not value:
+            return queryset
+        authority_ids = Attribute.objects\
+                            .filter(type_controlled_id=value)\
+                            .values_list('source_instance_id', flat=True)\
                             .distinct()
 
         if len(authority_ids) == 1 and authority_ids[0] is None:
@@ -384,3 +468,31 @@ class AuthorityFilter(django_filters.FilterSet):
         q = Q()
 
         return queryset.filter(Q(in_collections=value))
+
+    def filter_created_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_on_stored__gte=date)
+
+    def filter_created_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(created_on_stored__lte=date)
+
+    def filter_modified_on_from(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__gte=date)
+
+    def filter_modified_on_to(self, queryset, name, value):
+        try:
+            date = iso8601.parse_date(value)
+        except:
+            return queryset
+        return queryset.filter(modified_on__lte=date)

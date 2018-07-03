@@ -252,3 +252,5 @@ HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 CELERY_REDIS_HOST = os.environ.get('CELERY_REDIS_HOST', 'redis://')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://')
+
+CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"

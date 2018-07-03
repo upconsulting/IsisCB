@@ -322,3 +322,5 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
     'social_core.pipeline.social_auth.associate_by_email',
 )
+
+CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"

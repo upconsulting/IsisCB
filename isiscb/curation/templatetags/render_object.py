@@ -12,7 +12,6 @@ try:
 except AttributeType.DoesNotExist:
     PUBLICATION_DATE = -1
 
-
 @register.filter(name='render_object')
 def render_object(obj):
     model_name = obj.__class__.__name__
@@ -231,7 +230,7 @@ AUTHORITY_TYPES = dict(Authority.TYPE_CHOICES)
 
 @register.filter
 def get_tracking_state_display(state):
-    return TRACKING_STATES.get(state)
+    return TRACKING_STATES.get(state) if TRACKING_STATES.get(state) else state
 
 
 @register.filter
@@ -257,3 +256,9 @@ def get_status_label(status):
 @register.filter
 def get_iso_date(date):
     return '' if not date else date.isoformat()
+
+@register.filter
+def cut_characters(string, cut):
+    if string and len(string) > cut:
+        return string[:cut]
+    return string

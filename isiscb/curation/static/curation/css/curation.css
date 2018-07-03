@@ -12,6 +12,37 @@ a {
     color: #032544;
 }
 
+/* Popover */
+.popover {
+    font-size: 11px;
+}
+
+.popover_info {
+  height:22px;
+  line-height:22px;
+  color:#666;
+}
+
+.input-xs {
+  height: 22px;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 3px;
+}
+
+.form-group-xs .form-control, .form-group-xs .control-label {
+  height: 22px;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 3px;
+}
+
+.date-input {
+  background-color: #fdf7e6;
+}
+
 #citationView a, #authorityView a {
   cursor: pointer;
   color: #032544;

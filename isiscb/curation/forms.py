@@ -655,7 +655,7 @@ class AttributeForm(forms.ModelForm):
 
 
 class BulkActionForm(forms.Form):
-    def apply(self, user, filter_params_raw):
+    def apply(self, user, filter_params_raw, extra=None):
         selected_actions = self.cleaned_data.get('action')
         tasks = []
         for action_name in selected_actions:
@@ -664,6 +664,8 @@ class BulkActionForm(forms.Form):
                 k.split('__')[1]: v for k, v in self.cleaned_data.iteritems()
                 if k.startswith(action_name) and not k == action_name and '__' in k
             }
+            if extra:
+                extra_data.update(extra)
             # Load and instantiate the corresponding action class.
             action = getattr(actions, action_name)()    # Object is callable.
             tasks.append(action.apply(user, filter_params_raw, action_value, **extra_data))
@@ -677,6 +679,7 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
     # For the Media inner class.
     media_attrs = {'js': ('curation/js/bulkaction.js', )}
     queryset = kwargs.pop('queryset', None)
+    object_type = kwargs.pop('object_type', 'CITATION')
 
     parent = (object,)
     if hasattr(form, 'Meta'):
@@ -686,7 +689,10 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
     form_class_attrs = {'Meta': Meta}
     action_choices = []
     extra_data = {}
-    for action_class in actions.AVAILABLE_ACTIONS:
+
+    # hack until we also make tracking status work
+    avail_actions = [actions.StoreCreationDataToModel] if object_type == 'AUTHORITY' else actions.AVAILABLE_ACTIONS
+    for action_class in avail_actions:
         if hasattr(action_class, 'extra_js'):
             media_attrs['js'] = tuple(list(media_attrs['js']) + [action_class.extra_js])
 
