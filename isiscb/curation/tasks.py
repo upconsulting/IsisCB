@@ -9,7 +9,7 @@ from isisdata.models import Citation, CRUDRule, Authority
 from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
 from django.contrib.auth.models import User
-import logging, iso8601
+import logging, iso8601, datetime
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ def bulk_prepend_record_history(user_id, filter_params_raw, prepend_value, task_
     prepend_value = 'On %s, %s wrote: %s\n\n' % (now, user.username, prepend_value)
 
     queryset, _ = _get_filtered_record_queryset(filter_params_raw, user_id, type=object_type)
-    queryset.update(record_history=Concat(V(prepend_value), 'record_history'))
+    queryset.update(record_history=Concat(V(prepend_value), 'record_history'), modified_by=user_id, modified_on=datetime.datetime.now())
 
     try:
         if task_id:
@@ -181,7 +181,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
 
     idents = list(queryset.values_list('id', flat=True))
     try:
-        queryset.update(tracking_state=target_state)
+        queryset.update(tracking_state=target_state, modified_by=user_id, modified_on=datetime.datetime.now())
         for ident in idents:
             if object_type == 'AUTHORITY':
                 AuthorityTracking.objects.create(authority_id=ident,
