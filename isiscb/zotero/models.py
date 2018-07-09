@@ -144,7 +144,7 @@ class DraftCitation(ImportedData):
     page_end = models.CharField(max_length=100, blank=True, null=True)
     pages_free_text = models.CharField(max_length=100, blank=True, null=True)
     volume = models.CharField(max_length=100, blank=True, null=True)
-    issue = models.CharField(max_length=100, blank=True, null=True)
+    issue = models.CharField(max_length=255, blank=True, null=True)
     book_series = models.CharField(max_length=255, blank=True, null=True)
     extent = models.PositiveIntegerField(blank=True, null=True)
     extent_note = models.TextField(blank=True, null=True)
