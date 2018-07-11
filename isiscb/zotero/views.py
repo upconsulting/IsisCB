@@ -132,7 +132,7 @@ def accessions(request):
         'curation_subsection': 'accessions',
         'objects': filtered_objects,
     }
-    
+
     template = 'zotero/accessions.html'
     return render(request, template, context)
 
@@ -169,7 +169,10 @@ def create_accession(request):
                 destination.write(form.cleaned_data['zotero_rdf'].file.read())
                 path = destination.name
 
-            ingest.IngestManager(parse.ZoteroIngest(path), instance).process()
+            errors = []
+            ingest.IngestManager(parse.ZoteroIngest(path), instance).process(errors)
+            instance.import_errors = errors
+            instance.save()
             return HttpResponseRedirect(reverse('retrieve_accession', args=[instance.id,]))
     context.update({'form': form})
 
