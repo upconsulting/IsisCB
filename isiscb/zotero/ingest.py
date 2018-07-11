@@ -842,7 +842,7 @@ class IngestManager(object):
         IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation
 
-    def process(self, errors):
+    def process(self, errors=[]):
         for entry in self.parser:
             try:
                 draft_citation = self.process_entry(entry, self.accession)
