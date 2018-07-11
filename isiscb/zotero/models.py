@@ -29,6 +29,7 @@ class ImportAccession(models.Model):
     name = models.CharField(max_length=255, db_index=True)
     ingest_to = models.ForeignKey(Dataset, null=True)
     processed = models.BooleanField(default=False)
+    import_errors = models.TextField(null=True, blank=True)
 
     @property
     def citations_ok(self):

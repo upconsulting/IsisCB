@@ -756,6 +756,10 @@ class IngestManager(object):
                 else:
                     return None, None
 
+                # ISISCB-1121: if journal title is empty, ignore
+                if not IngestManager._get(datum, 'title'):
+                    return None, None
+
                 # Per ISISCB-734, DraftAuthorities that are the target of a
                 #  Book Series relation should be processed by default.
                 draft_authority = DraftAuthority.objects.create(
@@ -838,14 +842,17 @@ class IngestManager(object):
         IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation
 
-    def process(self):
+    def process(self, errors=[]):
         for entry in self.parser:
-            draft_citation = self.process_entry(entry, self.accession)
-            linkeddata = IngestManager.generate_citation_linkeddata(entry, draft_citation)
-            self.draft_citation_map[draft_citation.id] = draft_citation
-            for linkeddatum in linkeddata:
-                self.draft_citation_map[linkeddatum.value] = draft_citation
-            self.draft_citations.append((entry, draft_citation))
+            try:
+                draft_citation = self.process_entry(entry, self.accession)
+                linkeddata = IngestManager.generate_citation_linkeddata(entry, draft_citation)
+                self.draft_citation_map[draft_citation.id] = draft_citation
+                for linkeddatum in linkeddata:
+                    self.draft_citation_map[linkeddatum.value] = draft_citation
+                self.draft_citations.append((entry, draft_citation))
+            except Exception, e:
+                errors.append((e, entry))
 
         for entry, draft_citation in self.draft_citations:
             self.generate_reviewed_works_relations(entry, draft_citation)
@@ -854,5 +861,5 @@ class IngestManager(object):
         return self.accession.draftcitation_set.all()
 
 
-def process(parser, accession):
-    return IngestManager(parser, accession).process()
+def process(parser, accession, errors=[]):
+    return IngestManager(parser, accession).process(errors)
