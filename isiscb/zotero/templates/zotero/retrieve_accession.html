@@ -23,12 +23,21 @@
 <div class="h3">
     <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
 </div>
+
+{% if accession.import_errors %}
+<div class="alert alert-danger" role="alert">
+  <i class="fa fa-exclamation-triangle" aria-hidden="true"></i><b> There were import errors!</b><br>
+{{ accession.import_errors }}
+</div>
+{% endif %}
+
 <div class="h4">Authority Resolution</div>
 
 <a href="{% url "ingest_accession" accession.id %}?confirmed=true"
     class="btn btn-success">
     Ingest citations
 </a>
+
 {% if accession.resolved %}
 <p class="text-danger">
     All authority records in this accession have been resolved.
