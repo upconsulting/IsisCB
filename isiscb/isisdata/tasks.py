@@ -79,6 +79,7 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
                 task.current_value = i
                 task.save()
             setattr(obj, field, value)
+            obj.modified_by_id = user_id
             obj.save()
         task.state = 'SUCCESS'
         task.save()

@@ -578,6 +578,11 @@ class CuratedMixin(models.Model):
         else:
             self.public = False
 
+        # fixing issue with simple history where modifier is not saved
+        if hasattr(HistoricalRecords.thread, 'request'):
+            if HistoricalRecords.thread.request.user:
+                self.modified_by = HistoricalRecords.thread.request.user
+
         return super(CuratedMixin, self).save(*args, **kwargs)
 
     def save_obj(self, user, *args, **kwargs):
@@ -798,8 +803,15 @@ class Citation(ReferencedEntity, CuratedMixin):
             except HistoricalCitation.DoesNotExist:
                 pass
 
+        # fixing issue with simple history where hisotyr user is not saved
+        if not self.id:
+            if hasattr(HistoricalRecords.thread, 'request'):
+                if HistoricalRecords.thread.request.user:
+                    self.created_by_native = HistoricalRecords.thread.request.user
+
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         self.title_for_display = get_display_title(self)
+
         super(Citation, self).save(*args, **kwargs)
 
     @property
