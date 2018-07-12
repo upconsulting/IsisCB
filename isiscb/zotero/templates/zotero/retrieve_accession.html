@@ -24,7 +24,11 @@
     <span class="text-warning">Zotero accession:</span> {{ accession.name }} <span class="small">Created by {{ accession.imported_by }} on {{ accession.imported_on }}</span>
 </div>
 
-{% if accession.import_errors %}
+{% comment %}
+We need to better store errors and then this should be a simple if errors block.
+But for now the list is stored as string :-p
+{% endcomment %}
+{% if accession.import_errors and accession.import_errors != '[]'%}
 <div class="alert alert-danger" role="alert">
   <i class="fa fa-exclamation-triangle" aria-hidden="true"></i><b> There were import errors!</b><br>
 {{ accession.import_errors }}
