@@ -338,7 +338,7 @@ def _count_rows(f, results):
     except Exception, e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
-        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+        results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
     # reset file cursor to first data line
     f.seek(0)
