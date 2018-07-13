@@ -52,16 +52,18 @@ def bulk_change_from_csv(request):
             # store file in s3 so we can download when it's being processed
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s' % (_datestamp, uploaded_file.name)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
+            s3_path = '/Users/jdamerow/Up/Isis/exports/' + _out_name
+            #s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            #                                settings.AWS_SECRET_ACCESS_KEY,
+            #                                settings.AWS_EXPORT_BUCKET_NAME,
+            #                                _out_name)
 
             _results_name = '%s--%s' % (_datestamp, 'results.csv')
-            s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _results_name)
+            s3_error_path = '/Users/jdamerow/Up/Isis/exports/' + _results_name
+            #s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            #                                settings.AWS_SECRET_ACCESS_KEY,
+            #                                settings.AWS_EXPORT_BUCKET_NAME,
+            #                                _results_name)
 
             with smart_open.smart_open(s3_path, 'wb') as f:
                 for chunk in uploaded_file.chunks():
@@ -96,6 +98,6 @@ def bulk_csv_status(request):
     task = AsyncTask.objects.get(pk=task_id)
     target = task.value
 
-    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    download_target = '/Users/jdamerow/Up/Isis/exports/' + target #'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
     context.update({'download_target': download_target, 'task': task})
     return render(request, template, context)
