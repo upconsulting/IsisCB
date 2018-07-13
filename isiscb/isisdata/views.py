@@ -1639,7 +1639,11 @@ def api_documentation(request):
 
 def build_openurl(endpoint, citation):
     coins = get_coins_from_citation(citation)
-    return  endpoint + '?' + coins
+    # ISISCBFP-53: some endpoints might already contain part of the query string
+    if '?' not in endpoint:
+        return  endpoint + '?' + coins
+
+    return  endpoint + '&' + coins
 
 
 def get_linkresolver_url_by_ip(request, citation):
