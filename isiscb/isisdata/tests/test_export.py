@@ -71,7 +71,7 @@ class TestCitationAuthorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         author = Authority.objects.create(name='Author', id="AUT1", type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, id="ACR1", authority=author, type_controlled=ACRelation.AUTHOR)
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0  AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName Author"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Author || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID AUT1 || AuthorityStatus Active || AuthorityType Person || AuthorityName Author"
         self.assertEqual(expected, export.citation_author(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
@@ -83,7 +83,7 @@ class TestCitationAuthorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         author = Authority.objects.create(name='Author', id="AUT1", type_controlled=Authority.PERSON)
         relation = ACRelation.objects.create(citation=citation, id="ACR1", authority=author, type_controlled=ACRelation.AUTHOR, name_for_display_in_citation='Some other name')
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0 ACRNameForDisplayInCitation Some other name AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName Author"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Author || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation Some other name || AuthorityID AUT1 || AuthorityStatus Active || AuthorityType Person || AuthorityName Author"
         self.assertEqual(expected, export.citation_author(citation, []))
 
     def test_citation_has_multiple_authors(self):
@@ -96,8 +96,8 @@ class TestCitationAuthorColumn(unittest.TestCase):
         author_two = Authority.objects.create(name='AuthorTwo', id="AUT2", type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, id="ACR1", authority=author_one, type_controlled=ACRelation.AUTHOR, data_display_order=1)
         ACRelation.objects.create(citation=citation, id="ACR2", authority=author_two, type_controlled=ACRelation.AUTHOR, data_display_order=2)
-        expected1 = "ACR_ID ACR1 ACRStatus Active ACRType Author ACRDisplayOrder 1.0  AuthorityID AUT1 AuthorityStatus Active AuthorityType Person AuthorityName AuthorOne"
-        expected2 = "ACR_ID ACR2 ACRStatus Active ACRType Author ACRDisplayOrder 2.0  AuthorityID AUT2 AuthorityStatus Active AuthorityType Person AuthorityName AuthorTwo"
+        expected1 = "ACR_ID ACR1 || ACRStatus Active || ACRType Author || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID AUT1 || AuthorityStatus Active || AuthorityType Person || AuthorityName AuthorOne"
+        expected2 = "ACR_ID ACR2 || ACRStatus Active || ACRType Author || ACRDisplayOrder 2.0 || ACRNameForDisplayInCitation  || AuthorityID AUT2 || AuthorityStatus Active || AuthorityType Person || AuthorityName AuthorTwo"
         self.assertEqual(u'%s // %s' % (expected1, expected2), export.citation_author(citation, []))
 
     def tearDown(self):
@@ -117,7 +117,7 @@ class TestCitationEditorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         editor = Authority.objects.create(name='Editor', id="ED1", type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, id="ACR1", authority=editor, type_controlled=ACRelation.EDITOR)
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0  AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName Editor"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Editor || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID ED1 || AuthorityStatus Active || AuthorityType Person || AuthorityName Editor"
         self.assertEqual(expected, export.citation_editor(citation, []))
 
     def test_citation_has_single_author_with_display_name(self):
@@ -129,7 +129,7 @@ class TestCitationEditorColumn(unittest.TestCase):
                                            type_controlled=Citation.ARTICLE)
         editor = Authority.objects.create(name='Editor', id="ED1", type_controlled=Authority.PERSON)
         relation = ACRelation.objects.create(citation=citation, id="ACR1", authority=editor, type_controlled=ACRelation.EDITOR, name_for_display_in_citation='Some other name')
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0 ACRNameForDisplayInCitation Some other name AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName Editor"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Editor || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation Some other name || AuthorityID ED1 || AuthorityStatus Active || AuthorityType Person || AuthorityName Editor"
         self.assertEqual(expected, export.citation_editor(citation, []))
 
     def test_citation_has_multiple_authors(self):
@@ -142,8 +142,8 @@ class TestCitationEditorColumn(unittest.TestCase):
         editor_two = Authority.objects.create(name='EditorTwo', id="ED2", type_controlled=Authority.PERSON)
         ACRelation.objects.create(citation=citation, id="ACR1", authority=editor_one, type_controlled=ACRelation.EDITOR, data_display_order=1)
         ACRelation.objects.create(citation=citation, id="ACR2", authority=editor_two, type_controlled=ACRelation.EDITOR, data_display_order=2)
-        expected1 = "ACR_ID ACR1 ACRStatus Active ACRType Editor ACRDisplayOrder 1.0  AuthorityID ED1 AuthorityStatus Active AuthorityType Person AuthorityName EditorOne"
-        expected2 = "ACR_ID ACR2 ACRStatus Active ACRType Editor ACRDisplayOrder 2.0  AuthorityID ED2 AuthorityStatus Active AuthorityType Person AuthorityName EditorTwo"
+        expected1 = "ACR_ID ACR1 || ACRStatus Active || ACRType Editor || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID ED1 || AuthorityStatus Active || AuthorityType Person || AuthorityName EditorOne"
+        expected2 = "ACR_ID ACR2 || ACRStatus Active || ACRType Editor || ACRDisplayOrder 2.0 || ACRNameForDisplayInCitation  || AuthorityID ED2 || AuthorityStatus Active || AuthorityType Person || AuthorityName EditorTwo"
         self.assertEqual(u'%s // %s' % (expected1, expected2), export.citation_editor(citation, []))
 
     def tearDown(self):
@@ -289,7 +289,7 @@ class TestCitationSubjectColumn(unittest.TestCase):
         ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.SUBJECT)
 
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Subject ACRDisplayOrder 1.0  AuthorityID 1 AuthorityStatus Active AuthorityType Concept AuthorityName Test Authority"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Subject || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID 1 || AuthorityStatus Active || AuthorityType Concept || AuthorityName Test Authority"
         self.assertEqual(expected, export.subjects(citation, []))
 
     def test_citation_has_school(self):
@@ -302,7 +302,7 @@ class TestCitationSubjectColumn(unittest.TestCase):
         ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.SCHOOL)
 
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType School ACRDisplayOrder 1.0  AuthorityID AU1 AuthorityStatus Active AuthorityType Institution AuthorityName Test Authority"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType School || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID AU1 || AuthorityStatus Active || AuthorityType Institution || AuthorityName Test Authority"
         self.assertEqual(expected, export.school(citation, []))
 
     def tearDown(self):
@@ -324,7 +324,7 @@ class TestCitationAdvisorColumn(unittest.TestCase):
         ACRelation.objects.create(citation=citation, authority=subject, id='ACR1',
                                   type_controlled=ACRelation.ADVISOR)
 
-        expected = "ACR_ID ACR1 ACRStatus Active ACRType Advisor ACRDisplayOrder 1.0  AuthorityID AU1 AuthorityStatus Active AuthorityType Person AuthorityName Test Authority"
+        expected = "ACR_ID ACR1 || ACRStatus Active || ACRType Advisor || ACRDisplayOrder 1.0 || ACRNameForDisplayInCitation  || AuthorityID AU1 || AuthorityStatus Active || AuthorityType Person || AuthorityName Test Authority"
         self.assertEqual(expected, export.advisor(citation, []))
 
 

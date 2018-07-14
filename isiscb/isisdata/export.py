@@ -105,16 +105,16 @@ def _citation_title(obj, extra):
 # adjustment of export according to ISISCB-1033
 def create_acr_string(author, additional_fields = []):
     fields = ['ACR_ID ' + str(author[0]),
-               'ACRStatus ' + str(author[1]) if author[1] else u'',
-               'ACRType ' + dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u'',
-               'ACRDisplayOrder ' + str(author[3]) if author[3] else u'',
-               'ACRNameForDisplayInCitation ' + author[4] if author[4] else u'',
-               'AuthorityID ' + str(author[5]) if author[5] else u'',
-               'AuthorityStatus ' + str(author[6]) if author[6] else u'',
-               'AuthorityType ' + dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u'',
-               'AuthorityName ' + author[8] if author[8] else u''
+               'ACRStatus ' + (str(author[1]) if author[1] else u''),
+               'ACRType ' + (dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u''),
+               'ACRDisplayOrder ' + (str(author[3]) if author[3] else u''),
+               'ACRNameForDisplayInCitation ' + (author[4] if author[4] else u''),
+               'AuthorityID ' + (str(author[5]) if author[5] else u''),
+               'AuthorityStatus ' + (str(author[6]) if author[6] else u''),
+               'AuthorityType ' + (dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u''),
+               'AuthorityName ' + (author[8] if author[8] else u'')
                 ]
-    return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+    return u' || '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
 acr_fields = ['id',
           'record_status_value',
           'type_controlled',
@@ -135,7 +135,7 @@ def create_ccr_string(ccr, additional_fields = []):
                'CitationType  ' + dict(Citation.TYPE_CHOICES)[ccr[5]],
                'CitationTitle  ' + ccr[6]
                 ]
-    return u' '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+    return u' || '.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
 
 ccr_from_fields = ['id',
           'record_status_value',
@@ -311,7 +311,7 @@ def _link_to_record(obj, extra):
     qs = obj.ccrelations.filter(_q)
     extra += map(lambda o: o.subject, qs)
     ids += list(qs.values_list('subject__id', flat=True))
-    return u"//".join(filter(lambda o: o is not None, ids))
+    return u" // ".join(filter(lambda o: o is not None, ids))
 
 
 def _journal_link(obj, extra):
@@ -343,7 +343,7 @@ def _journal_issue(obj, extra):
 def _includes_series_article(obj, extra):
     qs = obj.relations_to.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
     extra += map(lambda o: o.subject, qs)
-    return u"//".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
+    return u" // ".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
 
 def _related_authorities(obj, extra):
     qs = obj.acrelation_set.all()
