@@ -153,7 +153,7 @@ ALLOWED_FIELDS = {
     Attribute: ['description', 'value_freeform', 'value__value', 'record_status_value', 'record_status_explanation'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes', 'record_status_value', 'record_status_explanation'],
     ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation'],
-    CCRelation: ['subject_id', 'object_id', 'name', 'description', 'type_controlled', 'belongs_to', 'data_display_order', 'administrator_notes', 'record_status_value', 'record_status_explanation']
+    CCRelation: ['subject_id', 'object_id', 'name', 'description', 'type_controlled', 'belongs_to_id', 'data_display_order', 'administrator_notes', 'record_status_value', 'record_status_explanation']
 }
 
 FIELD_MAP = {
@@ -196,7 +196,7 @@ FIELD_MAP = {
         'CCR Description': 'description',
         'CCR Type': 'type_controlled',
         'CCR DisplayOrder': 'data_display_order',
-        'CCR Dataset': 'belongs_to',
+        'CCR Dataset': 'belongs_to_id',
         'CCR Notes': 'administrator_notes',
         'CCR Status': 'record_status_value',
         'CCR RecordStatusExplanation': 'record_status_explanation',
