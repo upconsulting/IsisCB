@@ -754,9 +754,11 @@ class BulkChangeCSVForm(forms.Form):
     NO_CHOICE = None
     CREATE_ATTR = 'CRATT'
     UPDATE_ATTR = 'UPATT'
+    CREATE_LINKED_DATA = 'CRLD'
     CHOICES = [
         (NO_CHOICE, '-------------'),
         (CREATE_ATTR, 'Create Attributes'),
         (UPDATE_ATTR, 'Update Elements'),
+        (CREATE_LINKED_DATA, 'Create Linked Data')
     ]
     action = forms.ChoiceField(choices=CHOICES)

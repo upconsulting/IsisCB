@@ -11,13 +11,15 @@ from isisdata import tasks as data_tasks
 
 from curation.forms import *
 
-from curation.taskslib import authority_tasks
+from curation.taskslib import authority_tasks, creation_tasks
 
 import smart_open
+import operator
 
 ACTION_DICT = {
-    BulkChangeCSVForm.CREATE_ATTR: 'add_attributes_to_authority',
-    BulkChangeCSVForm.UPDATE_ATTR: 'update_elements'
+    BulkChangeCSVForm.CREATE_ATTR: (authority_tasks, 'add_attributes_to_authority'),
+    BulkChangeCSVForm.UPDATE_ATTR: (authority_tasks, 'update_elements'),
+    BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_linked_data')
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -47,7 +49,7 @@ def bulk_change_from_csv(request):
     elif request.method == 'POST':
         form = BulkChangeCSVForm(request.POST, request.FILES)
         if form.is_valid():
-            bulk_method = getattr(authority_tasks,ACTION_DICT[form.cleaned_data['action']])
+            bulk_method = getattr(ACTION_DICT[form.cleaned_data['action']][0], ACTION_DICT[form.cleaned_data['action']][1])
             uploaded_file = form.cleaned_data['csvFile']
             # store file in s3 so we can download when it's being processed
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
