@@ -35,6 +35,7 @@ def create_linked_data(file_path, error_path, task_id, user_id):
 
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
+    WARNING = 'WARNING'
 
     with smart_open.smart_open(file_path, 'rb') as f:
         reader = csv.reader(f, encoding='utf-8')
@@ -115,9 +116,10 @@ def create_linked_data(file_path, error_path, task_id, user_id):
                     auth_name = row[COL_AUTH_NAME]
                     # check authority name
                     if auth_name != authority.name:
-                        results.append((ERROR, authority_id, authority_id, "Authority name (%s) and provided name (%s) do not match."%(authority.name, auth_name)))
+                        results.append((WARNING, authority_id, authority_id, "Authority name (%s) and provided name (%s) do not match."%(authority.name, auth_name)))
 
                 linked_data = LinkedData(**properties)
+                linked_data._history_user = User.objects.get(pk=user_id)
                 linked_data.save()
                 results.append((SUCCESS, authority_id, linked_data.id, 'Added'))
 
