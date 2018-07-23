@@ -27,7 +27,11 @@ def add_popover(field, css_placeholder_text):
     text = parts[2] if len(parts) >= 3 else ''
     orientation = parts[3] if len(parts) >= 4 else 'right'
     css = parts[0]
-    
+
     return field.as_widget(attrs={"class": css, "placeholder": placeholder, \
                     "data-toggle": "popover", "data-trigger":"hover", \
                     "data-placement": orientation, "data-content": text})
+
+@register.filter(name='field_type')
+def field_type(field):
+    return field.field.widget.__class__.__name__
