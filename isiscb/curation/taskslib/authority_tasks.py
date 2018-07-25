@@ -152,7 +152,8 @@ ELEMENT_TYPES = {
 ALLOWED_FIELDS = {
     Attribute: ['description', 'value_freeform', 'value__value', 'record_status_value', 'record_status_explanation'],
     LinkedData: ['description', 'universal_resource_name', 'resource_name', 'url', 'administrator_notes', 'record_status_value', 'record_status_explanation'],
-    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation']
+    ACRelation: ['citation_id', 'authority_id', 'name_for_display_in_citation', 'description', 'type_controlled', 'data_display_order', 'confidence_measure','administrator_notes', 'record_status_value', 'record_status_explanation'],
+    CCRelation: ['subject_id', 'object_id', 'name', 'description', 'type_controlled', 'belongs_to_id', 'data_display_order', 'administrator_notes', 'record_status_value', 'record_status_explanation']
 }
 
 FIELD_MAP = {
@@ -187,6 +188,18 @@ FIELD_MAP = {
         'ACR Notes': 'administrator_notes',
         'ACR Status': 'record_status_value',
         'ACR RecordStatusExplanation': 'record_status_explanation',
+    },
+    CCRelation: {
+        'CCR ID Cit Subj': 'subject_id',
+        'CCR ID Cit Obj': 'object_id',
+        'CCR Name': 'name',
+        'CCR Description': 'description',
+        'CCR Type': 'type_controlled',
+        'CCR DisplayOrder': 'data_display_order',
+        'CCR Dataset': 'belongs_to_id',
+        'CCR Notes': 'administrator_notes',
+        'CCR Status': 'record_status_value',
+        'CCR RecordStatusExplanation': 'record_status_explanation',
     }
 }
 
@@ -338,7 +351,7 @@ def _count_rows(f, results):
     except Exception, e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
-        results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
+        results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
     # reset file cursor to first data line
     f.seek(0)

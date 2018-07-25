@@ -737,6 +737,7 @@ class ExportCitationsForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     export_linked_records = forms.BooleanField(label='Export linked records', required=False)
+    use_pipe_delimiter = forms.BooleanField(label='Use "||" to separate related authority and citation fields', required=False)
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     # compress_output = forms.BooleanField(required=False, initial=True,
@@ -754,9 +755,11 @@ class BulkChangeCSVForm(forms.Form):
     NO_CHOICE = None
     CREATE_ATTR = 'CRATT'
     UPDATE_ATTR = 'UPATT'
+    CREATE_LINKED_DATA = 'CRLD'
     CHOICES = [
         (NO_CHOICE, '-------------'),
         (CREATE_ATTR, 'Create Attributes'),
         (UPDATE_ATTR, 'Update Elements'),
+        (CREATE_LINKED_DATA, 'Create Linked Data')
     ]
     action = forms.ChoiceField(choices=CHOICES)

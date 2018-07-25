@@ -92,7 +92,7 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 
 
 @shared_task
-def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True):
+def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print 'export to csv:: %s' % str(task_id)
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
@@ -119,12 +119,12 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
                     task.current_value = i
                     task.save()
                 if obj:
-                    writer.writerow(map(lambda c: c(obj, extra), columns))
+                    writer.writerow(map(lambda c: c(obj, extra, config), columns))
 
             if export_extra:
                 for obj in extra:
                     if obj:
-                        writer.writerow(map(lambda c: c(obj, []), columns))
+                        writer.writerow(map(lambda c: c(obj, [], config), columns))
 
         task.state = 'SUCCESS'
         task.save()

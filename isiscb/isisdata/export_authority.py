@@ -28,13 +28,13 @@ acr_fields = ['id',
           'citation__title'
          ]
 
-def _redirect(obj, extra):
+def _redirect(obj, extra, config={}):
     if not obj.redirect_to:
         return u""
 
     return obj.redirect_to.id
 
-def _last_name(obj, extra):
+def _last_name(obj, extra, config={}):
     if obj.type_controlled == Authority.PERSON:
         try:
             person = Person.objects.get(pk=obj.id)
@@ -44,7 +44,7 @@ def _last_name(obj, extra):
             return u""
     return u""
 
-def _first_name(obj, extra):
+def _first_name(obj, extra, config={}):
     if obj.type_controlled == Authority.PERSON:
         try:
             person = Person.objects.get(pk=obj.id)
@@ -54,7 +54,7 @@ def _first_name(obj, extra):
             return u""
     return u""
 
-def _name_suffix(obj, extra):
+def _name_suffix(obj, extra, config={}):
     if obj.type_controlled == Authority.PERSON:
         try:
             person = Person.objects.get(pk=obj.id)
@@ -64,7 +64,7 @@ def _name_suffix(obj, extra):
             return u""
     return u""
 
-def _name_preferred(obj, extra):
+def _name_preferred(obj, extra, config={}):
     if obj.type_controlled == Authority.PERSON:
         try:
             person = Person.objects.get(pk=obj.id)
@@ -74,7 +74,7 @@ def _name_preferred(obj, extra):
             return u""
     return u""
 
-def _attributes(obj, extra):
+def _attributes(obj, extra, config={}):
     qs = obj.attributes.all()
 
     def create_value_list(x):
@@ -99,7 +99,7 @@ def _attributes(obj, extra):
 
     return u""
 
-def _linked_data(obj, extra):
+def _linked_data(obj, extra, config={}):
     """
     Get linked data entries
     """
@@ -109,15 +109,15 @@ def _linked_data(obj, extra):
 
     return u' // '.join(map(lambda x: u' || '.join(['LinkedData_ID ' + x[0], 'Status ' + x[1], 'Type ' + x[2], 'URN ' + x[3], 'ResourceName ' + x[4], 'URL ' + x[5]]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
 
-def _related_citations(obj, extra):
+def _related_citations(obj, extra, config={}):
     qs = obj.acrelation_set.all()
     return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
 redirect = export.Column(u'Redirect', _redirect)
-name = export.Column(u'Name', lambda obj, extra: obj.name)
-description = export.Column(u'Description', lambda obj, extra: obj.description)
-classification_system = export.Column(u'Classification System', lambda obj, extra: obj.get_classification_system_display())
+name = export.Column(u'Name', lambda obj, extra, config={}: obj.name)
+description = export.Column(u'Description', lambda obj, extra, config={}: obj.description)
+classification_system = export.Column(u'Classification System', lambda obj, extra, config={}: obj.get_classification_system_display())
 last_name = export.Column(u"Last Name", _last_name)
 first_name = export.Column(u"First Name", _first_name)
 name_suffix = export.Column(u"Name Suffix", _name_suffix)
