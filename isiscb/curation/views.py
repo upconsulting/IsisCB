@@ -2737,6 +2737,7 @@ def export_citations(request):
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
             export_linked_records = form.cleaned_data.get('export_linked_records')
+            use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2749,12 +2750,17 @@ def export_citations(request):
             # if _compress:
             #     s3_path += '.gz'
 
+            # configuration for export
+            config = {
+                'authority_delimiter': " || " if use_pipe_delimiter else " ",
+            }
+
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
             result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
-                                                    task.id, "Citation", export_linked_records)
+                                                    task.id, "Citation", export_linked_records, config)
 
             # We can use the AsyncResult's UUID to access this task later, e.g.
             #  to check the return value or task state.
