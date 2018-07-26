@@ -12,9 +12,9 @@ def get_dates(obj):
     if not attrs:
         return None
 
-    return [a for a in attrs if _get_attr_value(a)]
+    return [a for a in attrs if _get_attr_date_value(a)]
 
-def _get_attr_value(attr):
+def _get_attr_date_value(attr):
     try:
         return attr if attr.value and type(attr.value.get_child_class()) in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue] else None
     except Exception, e:
@@ -31,7 +31,14 @@ def get_attributes(obj):
     if not attrs:
         return None
 
-    return [a for a in attrs if type(a.value.get_child_class()) not in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue]]
+    return [a for a in attrs if _get_attr_non_date_value(a)]
+
+def _get_attr_non_date_value(attr):
+    try:
+        return attr if attr.value and type(attr.value.get_child_class()) not in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue] else None
+    except Exception, e:
+        print e
+        return None
 
 @register.filter()
 def get_acr_count(obj):
