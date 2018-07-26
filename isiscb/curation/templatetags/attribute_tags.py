@@ -9,7 +9,7 @@ def get_dates(obj):
     if not attrs:
         return None
 
-    return [a for a in attrs if type(a.value.get_child_class()) in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue]]
+    return [a for a in attrs if a.value and type(a.value.get_child_class()) in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue]]
 
 @register.filter()
 def get_linkeddata(obj):
