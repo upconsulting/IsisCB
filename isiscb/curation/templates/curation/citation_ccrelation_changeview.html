@@ -357,7 +357,26 @@ $(document).ready(function() {
                       choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '" data-type_id="' + r.type_id + '"></a>';
                       choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
                       choice_elem += '</span>';
-                      choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
+                      title = r.title.slice(0,40);
+                      if (r.title.length > 40) {
+                        title += "...";
+                      }
+                      authors = r.authors.slice(0, 40);
+                      if (r.authors.length > 40) {
+                        authors += "...";
+                      }
+                      choice_elem += ' <span class="label label-success">' + r.type + '</span> <i>' + title + '</i> by ' + authors ;
+
+                      if (r.journal != null && r.journal != "") {
+                        journal = r.journal.slice(0, 15);
+                        if (r.journal.length > 15) {
+                          journal += "...";
+                        }
+                        choice_elem += ' in ' + journal;
+                      }
+
+                      choice_elem += ' <span class="label label-default">' + r.datestring + '</span>';
+
                       if (r.description != null) {
                           choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
                       }
