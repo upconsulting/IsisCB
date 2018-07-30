@@ -2473,6 +2473,7 @@ def quick_and_dirty_citation_search(request):
     result_ids = []
     results = []
     in_publication_types = [ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
+    chapter_types = [CCRelation.INCLUDES_CHAPTER]
     for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset)):
         # there are duplicates since everything that starts with a term
         # also contains the term.
@@ -2484,9 +2485,16 @@ def quick_and_dirty_citation_search(request):
             break
 
         journal = ""
-        journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
-        if journal_obj and journal_obj.first():
-            journal = journal_obj.first().authority.name
+        if obj.type_controlled == Citation.ARTICLE:
+            journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
+            if journal_obj and journal_obj.first():
+                journal = journal_obj.first().authority.name
+
+        book = ""
+        if obj.type_controlled == Citation.CHAPTER:
+            book_obj = obj.ccrelations.filter(type_controlled__in=chapter_types)
+            if book_obj and book_obj.first():
+                book = book_obj.first().subject.title
 
         result_ids.append(obj.id)
         results.append({
@@ -2498,6 +2506,7 @@ def quick_and_dirty_citation_search(request):
             'datestring': _get_datestring_for_citation(obj),
             'description': obj.description,
             'journal': journal,
+            'book': book,
             'url': reverse("curation:curate_citation", args=(obj.id,)),
             'public':obj.public,
         })
