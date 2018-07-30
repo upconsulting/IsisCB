@@ -3,9 +3,11 @@ from django.utils.safestring import SafeText
 from django.db.models import Q
 
 from isisdata.models import *
+import logging
 
 register = template.Library()
 
+logger = logging.getLogger(__name__)
 
 try:
     PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
@@ -108,7 +110,12 @@ def get_authors_editors_preloaded(citation_id):
 def get_citation_pubdate(obj):
     for attribute in obj.attributes.all():
         if attribute.type_controlled.name == 'PublicationDate':
-            return attribute.value.get_child_class().__unicode__()
+            try:
+                return attribute.value.get_child_class().__unicode__()
+            except Exception, e:
+                logger.error("Could not get publication date.")
+                logger.error(e)
+                return ""
 
     date = getattr(obj, 'publication_date', None)
     return 'missing' if not date else date.isoformat()[:4]
