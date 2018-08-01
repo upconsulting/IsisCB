@@ -2459,9 +2459,11 @@ def quick_and_dirty_citation_search(request):
     queryset = Citation.objects.all()
     queryset_exact = Citation.objects.all()
     queryset_sw = Citation.objects.all()
+    queryset_by_id = Citation.objects.all()
 
     queryset_exact = queryset_exact.filter(title_for_sort=q)
     queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)
+    queryset_by_id = queryset_by_id.filter(id=q)
 
     for part in q.split():
         queryset = queryset.filter(title_for_sort__icontains=part)
@@ -2472,7 +2474,9 @@ def quick_and_dirty_citation_search(request):
 
     result_ids = []
     results = []
-    for i, obj in enumerate(chain(queryset_exact, queryset_sw, queryset)):
+    in_publication_types = [ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
+    chapter_types = [CCRelation.INCLUDES_CHAPTER]
+    for i, obj in enumerate(chain(queryset_by_id, queryset_exact, queryset_sw, queryset)):
         # there are duplicates since everything that starts with a term
         # also contains the term.
         if obj.id in result_ids:
@@ -2481,6 +2485,18 @@ def quick_and_dirty_citation_search(request):
             continue
         if i == N:
             break
+
+        journal = ""
+        if obj.type_controlled == Citation.ARTICLE:
+            journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
+            if journal_obj and journal_obj.first():
+                journal = journal_obj.first().authority.name
+
+        book = ""
+        if obj.type_controlled == Citation.CHAPTER:
+            book_obj = obj.ccrelations.filter(type_controlled__in=chapter_types)
+            if book_obj and book_obj.first():
+                book = book_obj.first().subject.title
 
         result_ids.append(obj.id)
         results.append({
@@ -2491,6 +2507,8 @@ def quick_and_dirty_citation_search(request):
             'authors': _get_authors_editors(obj),
             'datestring': _get_datestring_for_citation(obj),
             'description': obj.description,
+            'journal': journal,
+            'book': book,
             'url': reverse("curation:curate_citation", args=(obj.id,)),
             'public':obj.public,
         })
