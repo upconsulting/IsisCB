@@ -4,12 +4,14 @@ from isisdata.models import *
 
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.models import User
 
 import logging
 import smart_open
 import unicodecsv as csv
 from datetime import datetime
 from dateutil.tz import tzlocal
+import time
 
 COLUMN_NAME_ATTR_SUBJ_ID = 'ATT Subj ID'
 COLUMN_NAME_ATTR_RELATED_NAME = 'Related Record Name'
@@ -230,7 +232,6 @@ def update_elements(file_path, error_path, task_id, user_id):
         task.save()
 
         current_count = 0
-
         try:
             current_time = datetime.now(tzlocal()).isoformat()
             for row in csv.DictReader(f):
@@ -265,7 +266,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                             else:
                                 setattr(element, field_to_change, new_value)
                             setattr(element, 'modified_by_id', user_id)
-                            _add_change_note(element, task.id, field_in_csv, field_to_change, new_value)
+                            _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, user_id, current_time)
                             element.save()
                             results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
                     # otherwise
@@ -291,7 +292,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 else:
                                     setattr(object_to_change, field_name, new_value)
                                 object_to_change.save()
-                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value)
+                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value, user_id, current_time)
                                 setattr(object_to_update_timestamp, 'modified_by_id', user_id)
                                 object_to_update_timestamp.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', object_to_update_timestamp.modified_on))
@@ -322,9 +323,11 @@ def _add_to_administrator_notes(element, value):
     note = note + '\n\n' + value if note else value
     setattr(element, ADMIN_NOTES, note)
 
-def _add_change_note(element, task_nr, field, field_name, value):
+def _add_change_note(element, task_nr, field, field_name, value, modified_by, modified_on):
+    user = User.objects.get(pk=modified_by)
+    mod_time = time.strftime("%m/%d/%y %r %Z")
     note = getattr(element, ADMIN_NOTES) if getattr(element, ADMIN_NOTES) else ''
-    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed to "%s".'%(task_nr, field, value)
+    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed to "%s" by %s on %s.'%(task_nr, field, value, user.username, mod_time)
     setattr(element, ADMIN_NOTES, note)
 
 def _is_value_valid(element, field_to_change, new_value):
