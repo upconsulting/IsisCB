@@ -259,9 +259,9 @@ $('#id_language').multiSelect()
 <script>
 //# sourceURL=ccrel.js
 $(document).ready(function() {
-    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title|safe }}{% endif %}";
+    var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title|escapejs|safe }}{% endif %}";
     var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
-    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title|safe }}{% endif %}";
+    var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title|escapejs|safe }}{% endif %}";
     var object_id = "{% if ccrelation %}{{ ccrelation.object.id }}{% endif %}";
 
     var subject_search_input = $('#citation-search-subject');
@@ -346,40 +346,7 @@ $(document).ready(function() {
                   // do nothing
               },
               success: function(result) {
-                  results_container.empty();
-                  result.results.forEach(function(r) {
-                      var choice_elem = '<li class="list-group-item search-result';
-                      if (r.public != true) {
-                        choice_elem += ' record-notpublic';
-                      }
-                      choice_elem += '">';
-                      choice_elem += '<span class="button-group button-group-xs">';
-                      choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.title + '" data-authors="' + r.authors + '" data-type="' + r.type + '" data-type_id="' + r.type_id + '"></a>';
-                      choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
-                      choice_elem += '</span>';
-                      choice_elem += ' <span class="label label-success">' + r.type + '</span> <strong>' + r.title + '</strong> <span class="label label-default">' + r.datestring + '</span>';
-                      if (r.description != null) {
-                          choice_elem += ' | <span class="text-muted">' + r.description + '</span>';
-                      }
-                      if (r.public != true) {
-                        choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                      }
-                      choice_elem += '</li>';
-
-                      results_container.append(choice_elem);
-                  });
-                  if (result.results.length == max_results) {
-                    var load_more = `
-                      <li class="list-group-item search-result">
-                        <div class="text-right" id="load-more"><a>Load more...</a></div>
-                      </li>
-                    `;
-                    results_container.append(load_more);
-                    $('#load-more').click(function() {
-                        max_results += 10;
-                        triggerSearch();
-                    });
-                  }
+                  {% include 'curation/citation_search_dropdown.js' %}
 
                   $('.select-citation').click(function() {
                       var selected = $(this);
