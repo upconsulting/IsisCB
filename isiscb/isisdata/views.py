@@ -1588,9 +1588,12 @@ def home(request):
         recent_authorities = Authority.history.filter(history_type="+").order_by('-history_date')[start_index:end_index]
 
         for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
-            record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
-            if record.public:
-                recent_records.append(record)
+            try:
+                record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
+                if record.public:
+                    recent_records.append(record)
+            except Exception, e:
+                print e
 
     context = {
         'active': 'home',
