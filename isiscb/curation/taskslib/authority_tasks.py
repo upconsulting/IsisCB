@@ -233,7 +233,8 @@ def update_elements(file_path, error_path, task_id, user_id):
 
         current_count = 0
         try:
-            current_time = datetime.now(tzlocal()).isoformat()
+            current_time_obj = datetime.now(tzlocal())
+            current_time = current_time_obj.isoformat()
             for row in csv.DictReader(f):
                 # update timestamp for long running processes
                 current_time = datetime.now(tzlocal()).isoformat()
@@ -262,11 +263,13 @@ def update_elements(file_path, error_path, task_id, user_id):
                             results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
                         else:
                             if field_to_change == ADMIN_NOTES:
-                                _add_to_administrator_notes(element, new_value)
+                                _add_to_administrator_notes(element, new_value, task.id, user_id, current_time_obj)
                             else:
+                                old_value = getattr(element, field_to_change)
                                 setattr(element, field_to_change, new_value)
+                                _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, old_value, user_id, current_time_obj)
                             setattr(element, 'modified_by_id', user_id)
-                            _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, user_id, current_time)
+
                             element.save()
                             results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
                     # otherwise
@@ -287,12 +290,14 @@ def update_elements(file_path, error_path, task_id, user_id):
                             if not is_valid:
                                 results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
                             else:
+                                old_value = getattr(object_to_change, field_name)
                                 if field_to_change == ADMIN_NOTES:
-                                    _add_to_administrator_notes(object_to_change, new_value)
+                                    _add_to_administrator_notes(object_to_change, new_value, task.id, user_id, current_time_obj)
+                                    old_value = old_value[:10] + "..."
                                 else:
                                     setattr(object_to_change, field_name, new_value)
                                 object_to_change.save()
-                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value, user_id, current_time)
+                                _add_change_note(object_to_update_timestamp, task.id, field_in_csv, field_name, new_value, old_value, user_id, current_time_obj)
                                 setattr(object_to_update_timestamp, 'modified_by_id', user_id)
                                 object_to_update_timestamp.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', object_to_update_timestamp.modified_on))
@@ -318,16 +323,22 @@ def update_elements(file_path, error_path, task_id, user_id):
         task.state = 'SUCCESS'
         task.save()
 
-def _add_to_administrator_notes(element, value):
+def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_on):
     note = getattr(element, 'administrator_notes')
-    note = note + '\n\n' + value if note else value
+    if note:
+        note += '\n\n'
+    user = User.objects.get(pk=modified_by)
+    mod_time = modified_on.strftime("%m/%d/%y %r %Z")
+    note += "%s added the following in bulk change #%s on %s:"%(user.username, task_nr, mod_time)
+    note += '\n'
+    note += value
     setattr(element, ADMIN_NOTES, note)
 
-def _add_change_note(element, task_nr, field, field_name, value, modified_by, modified_on):
+def _add_change_note(element, task_nr, field, field_name, value, old_value, modified_by, modified_on):
     user = User.objects.get(pk=modified_by)
-    mod_time = time.strftime("%m/%d/%y %r %Z")
-    note = getattr(element, ADMIN_NOTES) if getattr(element, ADMIN_NOTES) else ''
-    note = note + '\n\nThis record was changed as part of bulk change #%s. "%s" was changed to "%s" by %s on %s.'%(task_nr, field, value, user.username, mod_time)
+    mod_time = modified_on.strftime("%m/%d/%y %r %Z")
+    note = getattr(element, ADMIN_NOTES) + '\n\n' if getattr(element, ADMIN_NOTES) else ''
+    note += 'This record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s" by %s on %s.'%(task_nr, field, old_value, value, user.username, mod_time)
     setattr(element, ADMIN_NOTES, note)
 
 def _is_value_valid(element, field_to_change, new_value):
