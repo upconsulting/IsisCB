@@ -24,7 +24,7 @@ from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
-from isisdata.utils import strip_punctuation
+from isisdata.utils import strip_punctuation, normalize
 from isisdata import operations
 from isisdata.filters import *
 from isisdata import tasks as data_tasks
@@ -2455,6 +2455,9 @@ def quick_and_dirty_citation_search(request):
     N = int(request.GET.get('max', 20))
     if not q or len(q) < 3:
         return JsonResponse({'results': []})
+
+    # ISISCB-1132: ccr relations do not find titles with hyphens etc
+    q = normalize(q)
 
     queryset = Citation.objects.all()
     queryset_exact = Citation.objects.all()
