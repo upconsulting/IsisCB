@@ -200,7 +200,7 @@ def _create_acrelation(row, user_id, results):
         return
 
     try:
-        Authority.objects.filter(pk=authority_id)
+        Authority.objects.get(pk=authority_id)
     except Exception, e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(authority_id)))
@@ -216,10 +216,11 @@ def _create_acrelation(row, user_id, results):
         return
 
     try:
-        Citation.objects.filter(pk=citation_id)
+        Citation.objects.get(pk=citation_id)
     except Exception, e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(citation_id)))
+        return
 
     properties.update({
         'citation_id': citation_id,
@@ -246,7 +247,7 @@ def _create_acrelation(row, user_id, results):
         })
 
     if row[COL_ACR_STATUS]:
-        status_id = STATUS_MAP[row[COL_ACR_STATUS]]
+        status_id = STATUS_MAP.get(row[COL_ACR_STATUS], None)
         if status_id:
             properties.update({
                 'record_status_value': status_id
@@ -255,7 +256,7 @@ def _create_acrelation(row, user_id, results):
             properties.update({
                 'record_status_value': STATUS_MAP['Inactive']
             })
-            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s.'%(row[COL_ACR_STATUS])))
+            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(row[COL_ACR_STATUS])))
 
 
     if row[COL_ACR_EXPLANATION]:
