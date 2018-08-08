@@ -19,7 +19,8 @@ import operator
 ACTION_DICT = {
     BulkChangeCSVForm.CREATE_ATTR: (authority_tasks, 'add_attributes_to_authority'),
     BulkChangeCSVForm.UPDATE_ATTR: (authority_tasks, 'update_elements'),
-    BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_linked_data')
+    BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_linked_data'),
+    BulkChangeCSVForm.CREATE_ACRELATIONS: (creation_tasks, 'create_records', 'acrelation')
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -74,7 +75,11 @@ def bulk_change_from_csv(request):
             task.created_by = request.user
             task.save()
 
-            bulk_method.delay(s3_path, s3_error_path, task.id, request.user.id)
+            # this is ugly but the easiest for now
+            if ACTION_DICT[form.cleaned_data['action']][1] == 'create_records':
+                bulk_method.delay(s3_path, s3_error_path, task.id, request.user.id, ACTION_DICT[form.cleaned_data['action']][2])
+            else:
+                bulk_method.delay(s3_path, s3_error_path, task.id, request.user.id)
 
             target = reverse('curation:bulk-csv-status') \
                      + '?' + urlencode({'task_id': task.id})
