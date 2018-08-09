@@ -107,7 +107,7 @@ def _linked_data(obj, extra, config={}):
     if qs.count() == 0:
         return u''
 
-    return u' // '.join(map(lambda x: u' || '.join(['LinkedData_ID ' + x[0], 'Status ' + x[1], 'Type ' + x[2], 'URN ' + x[3], 'ResourceName ' + x[4], 'URL ' + x[5]]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
+    return u' // '.join(map(lambda x: u' || '.join(['LinkedData_ID ' + (x[0] if x[0] else ''), 'Status ' + (x[1] if x[1] else ''), 'Type ' + (x[2] if x[2] else ''), 'URN ' + (x[3] if x[3] else ''), 'ResourceName ' + (x[4] if x[4] else ''), 'URL ' + (x[5] if x[5] else '')]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
 
 def _related_citations(obj, extra, config={}):
     qs = obj.acrelation_set.all()

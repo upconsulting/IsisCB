@@ -268,7 +268,7 @@ def _linked_data(obj, extra, config={}):
     if qs.count() == 0:
         return u''
 
-    return u' // '.join(map(lambda x: u' '.join(['Type ' + x[0], 'URN ' + x[1]]), qs.values_list(*['type_controlled__name', 'universal_resource_name'])))
+    return u' // '.join(map(lambda x: u' '.join(['Type ' + (x[0] if x[0] else ''), 'URN ' + (x[1] if x[1] else '')]), qs.values_list(*['type_controlled__name', 'universal_resource_name'])))
 
 def _pages(obj, extra, config={}):
     if not getattr(obj, 'part_details', None):
