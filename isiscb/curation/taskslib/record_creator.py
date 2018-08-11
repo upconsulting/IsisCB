@@ -433,6 +433,12 @@ def _create_authority(row, user_id, results, task_id, created_on):
             'record_status_explanation': explain
         })
 
+    # for whatever reason, no history object is created for authorities
+    properties.update({
+        'created_by_stored_id': user_id,
+        'created_on_stored': created_on.isoformat()
+    })
+
     _add_creation_note(properties, task_id, user_id, created_on)
     if auth_type == Authority.PERSON:
         authority = Person(**properties)
@@ -451,6 +457,5 @@ def _add_creation_note(properties, task_id, user_id, created_on):
     })
 
 def _create_record(record, user_id, results):
-    record._history_user = User.objects.get(pk=user_id)
     record.save()
     results.append((SUCCESS, record.id, record.id, 'Added'))
