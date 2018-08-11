@@ -1080,7 +1080,6 @@ class Authority(ReferencedEntity, CuratedMixin):
 
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
-        super(Authority, self).save(*args, **kwargs)
 
         if not self.created_on_stored:
             try:
@@ -1088,6 +1087,7 @@ class Authority(ReferencedEntity, CuratedMixin):
             except HistoricalCitation.DoesNotExist:
                 pass
 
+        super(Authority, self).save(*args, **kwargs)
 
     @property
     def normalized_name(self):

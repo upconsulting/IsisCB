@@ -100,9 +100,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
     _add_creation_note(properties, task_id, user_id, created_on)
 
     linked_data = LinkedData(**properties)
-    linked_data._history_user = User.objects.get(pk=user_id)
-    linked_data.save()
-    results.append((SUCCESS, subject_id, linked_data.id, 'Added'))
+    _create_record(linked_data, user_id, results)
 
 def _create_acrelation(row, user_id, results, task_id, created_on):
     COl_ACR_TYPE = 'ACR Type'
@@ -203,9 +201,7 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     _add_creation_note(properties, task_id, user_id, created_on)
 
     acr_relation = ACRelation(**properties)
-    acr_relation._history_user = User.objects.get(pk=user_id)
-    acr_relation.save()
-    results.append((SUCCESS, acr_relation.id, acr_relation.id, 'Added'))
+    _create_record(acr_relation, user_id, results)
 
 
 def _create_ccrelation(row, user_id, results, task_id, created_on):
@@ -287,10 +283,169 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
     _add_creation_note(properties, task_id, user_id, created_on)
 
     ccr_relation = CCRelation(**properties)
-    ccr_relation._history_user = User.objects.get(pk=user_id)
-    ccr_relation.save()
-    results.append((SUCCESS, ccr_relation.id, ccr_relation.id, 'Added'))
+    _create_record(ccr_relation, user_id, results)
 
+def _create_authority(row, user_id, results, task_id, created_on):
+    COl_TYPE = 'CBA Type'
+    COL_NAME = 'CBA Name'
+    COL_FIRST = 'CBA First'
+    COL_LAST = 'CBA Last'
+    COL_SUFFIX = 'CBA Suff'
+    COL_PREFERRED = 'CBA Preferred'
+    COL_REDIRECT = 'CBA Redirect'
+    COL_CLASS_CODE = 'CBA ClassCode'
+    COL_CLASS_HIERARCHY = 'CBA ClassHier'
+    COL_CLASS_SYSTEM = 'CBA ClassSystem'
+    COL_DESCRIPTION = 'CBA Description'
+    COL_DATASET = 'CBA Dataset'
+    COL_NOTES = 'CBA Notes'
+    COL_STATUS = 'CBA Status'
+    COL_EXPLANATION = 'CBA RecordStatusExplanation'
+
+    properties = {}
+
+    auth_type = row[COl_TYPE]
+    if not auth_type:
+        results.append((ERROR, "Authority type missing", "", "There was no Authority type provided. Skipping."))
+        return
+
+    if auth_type not in dict(Authority.TYPE_CHOICES).keys():
+        results.append((ERROR, "Authority type does not exist.", "", "The Authority Type %s does not exist. Skipping."%(auth_type)))
+        return
+
+    properties.update({
+        'type_controlled': auth_type,
+    })
+
+    redirect_to = row[COL_REDIRECT]
+    if redirect_to:
+        try:
+            Authority.objects.get(pk=redirect_to)
+            properties.update({
+                'redirect_to_id': redirect_to,
+            })
+        except Exception, e:
+            logger.error(e)
+            results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(redirect_to)))
+            return
+
+    name = row[COL_NAME]
+    if name:
+        properties.update({
+            'name': name,
+        })
+
+    first_name = row[COL_FIRST]
+    if first_name:
+        if auth_type == Authority.PERSON:
+            properties.update({
+                'personal_name_first': first_name,
+            })
+        else:
+            results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. First name will be ignored."%(name)))
+
+    last_name = row[COL_LAST]
+    if last_name:
+        if auth_type == Authority.PERSON:
+            properties.update({
+                'personal_name_last': last_name,
+            })
+        else:
+            results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Last name will be ignored."%(name)))
+
+    suffix = row[COL_SUFFIX]
+    if suffix:
+        if auth_type == Authority.PERSON:
+            properties.update({
+                'personal_name_suffix': suffix,
+            })
+        else:
+            results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Suffix will be ignored."%(name)))
+
+    preferred = row[COL_PREFERRED]
+    if preferred:
+        if auth_type == Authority.PERSON:
+            properties.update({
+                'personal_name_preferred': preferred,
+            })
+        else:
+            results.append((WARNING, "Authority is not a person but a %s."%(auth_type), "", "The Authority with name %s is not a person. Preferred name will be ignored."%(name)))
+
+    class_system = row[COL_CLASS_SYSTEM]
+    if class_system:
+        if class_system not in dict(Authority.CLASS_SYSTEM_CHOICES).keys():
+            results.append((WARNING, "Classification System does not exist.", "", "The Classification System %s does not exist."%(class_system)))
+        else:
+            properties.update({
+                'classification_system': class_system,
+            })
+
+    class_code = row[COL_CLASS_CODE]
+    if class_code:
+        properties.update({
+            'classification_code': class_code,
+        })
+
+    class_hier = row[COL_CLASS_HIERARCHY]
+    if class_hier:
+        properties.update({
+            'classification_hierarchy': class_hier,
+        })
+
+    description = row[COL_DESCRIPTION]
+    if description:
+        properties.update({
+            'description': description,
+        })
+
+    dataset = row[COL_DATASET]
+    if dataset:
+        try:
+            belongs_to = Dataset.objects.filter(name=dataset).first()
+            properties.update({
+                'belongs_to_id': belongs_to.id,
+            })
+        except:
+            results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
+
+    notes = row[COL_NOTES]
+    if notes:
+        properties.update({
+            'administrator_notes': notes
+        })
+
+    status = row[COL_STATUS]
+    if status:
+        status_id = STATUS_MAP.get(status, None)
+        if status_id:
+            properties.update({
+                'record_status_value': status_id
+            })
+        else:
+            properties.update({
+                'record_status_value': STATUS_MAP['Inactive']
+            })
+            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(status)))
+
+    explain = row[COL_EXPLANATION]
+    if explain:
+        properties.update({
+            'record_status_explanation': explain
+        })
+
+    # for whatever reason, no history object is created for authorities
+    properties.update({
+        'created_by_stored_id': user_id,
+        'created_on_stored': created_on.isoformat()
+    })
+
+    _add_creation_note(properties, task_id, user_id, created_on)
+    if auth_type == Authority.PERSON:
+        authority = Person(**properties)
+    else:
+        authority = Authority(**properties)
+
+    _create_record(authority, user_id, results)
 
 def _add_creation_note(properties, task_id, user_id, created_on):
     user = User.objects.get(pk=user_id)
@@ -300,3 +455,7 @@ def _add_creation_note(properties, task_id, user_id, created_on):
         RECORD_HISTORY: "This record was created as part of the bulk creation #%s by %s on %s."%(task_id, user.username, mod_time),
         'modified_by_id': user_id,
     })
+
+def _create_record(record, user_id, results):
+    record.save()
+    results.append((SUCCESS, record.id, record.id, 'Added'))
