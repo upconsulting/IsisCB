@@ -80,6 +80,16 @@
                   </div>
                 </div>
 
+                {% for error in attribute_form.record_history.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-12">{{ attribute_form.record_history.label }}</label>
+                    <div class="col-md-12">
+                      {{ attribute_form.record_history|addcss:"form-control" }}
+                    </div>
+                </div>
+
                 <div class="form-group">
                   <label class="col-md-12">Last updated on <span class="date">{{ attribute.modified_on|get_iso_date }}</span> by {{ attribute.modified_by }}</label>
                 </div>
