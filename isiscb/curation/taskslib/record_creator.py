@@ -293,4 +293,5 @@ def _add_creation_note(properties, task_id, user_id, created_on):
 
     properties.update({
         RECORD_HISTORY: "This record was created as part of the bulk creation #%s by %s on %s."%(task_id, user.username, mod_time),
+        'modified_by_id': user_id,
     })

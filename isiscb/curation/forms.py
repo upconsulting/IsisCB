@@ -637,7 +637,8 @@ class AttributeForm(forms.ModelForm):
             'description',
             'value_freeform',
             'record_status_value',
-            'record_status_explanation'
+            'record_status_explanation',
+            'record_history'
         ]
 
     def __init__(self, *args, **kwargs):

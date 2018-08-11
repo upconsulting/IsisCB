@@ -49,6 +49,8 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
         current_count = 0
         not_matching_subject_names = []
 
+        current_time_obj = datetime.now(tzlocal())
+
         try:
             for row in csv.DictReader(f):
                 subject_id = row[COLUMN_NAME_ATTR_SUBJ_ID]
@@ -124,6 +126,8 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
                         current_count = _update_count(current_count, task)
                         continue
 
+                _add_creation_note(att_init_values, task_id, user_id, current_time_obj)
+
                 attribute = Attribute(**att_init_values)
                 attribute.save()
                 results.append((SUCCESS, subject_id, attribute.id, 'Added'))
@@ -145,6 +149,15 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _add_creation_note(properties, task_id, user_id, created_on):
+    user = User.objects.get(pk=user_id)
+    mod_time = created_on.strftime("%m/%d/%y %r %Z")
+
+    properties.update({
+        RECORD_HISTORY: "This record was created as part of the bulk creation #%s by %s on %s."%(task_id, user.username, mod_time),
+        'modified_by_id': user_id,
+    })
 
 ELEMENT_TYPES = {
     'Attribute': Attribute,
