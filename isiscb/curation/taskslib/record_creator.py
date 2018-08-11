@@ -35,15 +35,20 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
         results.append((ERROR, "Authority missing", "", "There was no authority provided."))
         return
     else:
-        authority_id = row[COL_LD_AUTHORITY]
+        subject_id = row[COL_LD_AUTHORITY]
         try:
-            authority = Authority.objects.get(pk=authority_id)
+            if subject_id.startswith(Authority.ID_PREFIX):
+                subject = Authority.objects.get(pk=subject_id)
+            else:
+                subject = Citation.objects.get(pk=subject_id)
+
             properties.update({
-                'subject': authority
+                'subject': subject
             })
-        except Authority.DoesNotExist:
-            logger.error('Authority with id %s does not exist. Skipping attribute.' % (authority_id))
-            results.append((ERROR, authority_id, authority_id, 'Authority record does not exist.'))
+        except Exception, e:
+            logger.error('Related record with id %s does not exist. Skipping attribute.' % (subject_id))
+            logger.exception(e)
+            results.append((ERROR, subject_id, subject_id, 'Related record does not exist.'))
             return
 
     if row[COL_LD_URN]:
@@ -62,7 +67,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
             properties.update({
                 'record_status_value': STATUS_MAP['Inactive']
             })
-            results.append((ERROR, authority_id, "", 'Invalid Status: %s.'%(status_id)))
+            results.append((ERROR, subject_id, "", 'Invalid Status: %s.'%(status_id)))
 
     if row[COL_LD_NOTE]:
         properties.update({
@@ -75,29 +80,29 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
         })
 
     if row[COL_LD_TYPE]:
-        type = row[COL_LD_TYPE]
-        type_obj = LinkedDataType.objects.filter(name=type).first()
+        ld_type = row[COL_LD_TYPE]
+        type_obj = LinkedDataType.objects.filter(name=ld_type).first()
         if type_obj:
             properties.update({
                 'type_controlled_id': type_obj.pk
             })
         else:
-            results.append((ERROR, authority_id, authority_id, "Object type does not exist: " + type))
-            logger.error('Linked Data Type %s does not exist. Skipping linked data.' % (type))
+            results.append((ERROR, subject_id, subject_id, "Object type does not exist: " + ld_type))
+            logger.error('Linked Data Type %s does not exist. Skipping linked data.' % (ld_type))
             return
 
-    if row[COL_AUTH_NAME]:
+    if row[COL_AUTH_NAME] and type(subject) is Authority:
         auth_name = row[COL_AUTH_NAME]
         # check authority name
-        if auth_name != authority.name:
-            results.append((WARNING, authority_id, authority_id, "Authority name (%s) and provided name (%s) do not match."%(authority.name, auth_name)))
+        if auth_name != subject.name:
+            results.append((WARNING, subject_id, subject_id, "Related record name (%s) and provided name (%s) do not match."%(subject.name, auth_name)))
 
     _add_creation_note(properties, task_id, user_id, created_on)
 
     linked_data = LinkedData(**properties)
     linked_data._history_user = User.objects.get(pk=user_id)
     linked_data.save()
-    results.append((SUCCESS, authority_id, linked_data.id, 'Added'))
+    results.append((SUCCESS, subject_id, linked_data.id, 'Added'))
 
 def _create_acrelation(row, user_id, results, task_id, created_on):
     COl_ACR_TYPE = 'ACR Type'
