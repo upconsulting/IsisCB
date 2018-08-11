@@ -37,7 +37,7 @@ class CCRelationForm(forms.ModelForm):
         fields = [
             'type_controlled', 'data_display_order', 'subject',
             'object', 'record_status_value', 'record_status_explanation',
-            'administrator_notes',
+            'administrator_notes', 'record_history',
         ]
         labels = {
             'administrator_notes': 'Staff notes'
@@ -111,7 +111,7 @@ class ACRelationForm(forms.ModelForm):
             'name_for_display_in_citation', 'data_display_order',
             'confidence_measure', 'authority', 'citation',
             'record_status_value', 'record_status_explanation',
-            'administrator_notes'
+            'administrator_notes', 'record_history'
         ]
         labels = {
             'administrator_notes': 'Staff notes',
@@ -337,7 +337,8 @@ class LinkedDataForm(forms.ModelForm):
         fields = [
             'universal_resource_name', 'resource_name', 'url',
             'type_controlled', 'record_status_value',
-            'record_status_explanation', 'administrator_notes'
+            'record_status_explanation', 'administrator_notes',
+            'record_history'
         ]
 
     def __init__(self, *args, **kwargs):

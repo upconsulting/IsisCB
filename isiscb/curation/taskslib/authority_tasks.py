@@ -211,6 +211,7 @@ COLUMN_NAME_FIELD = "Field"
 COLUMN_NAME_VALUE = "Value"
 
 ADMIN_NOTES = 'administrator_notes'
+RECORD_HISTORY = 'record_history'
 
 @shared_task
 def update_elements(file_path, error_path, task_id, user_id):
@@ -324,7 +325,7 @@ def update_elements(file_path, error_path, task_id, user_id):
         task.save()
 
 def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_on):
-    note = getattr(element, 'administrator_notes')
+    note = getattr(element, ADMIN_NOTES)
     if note:
         note += '\n\n'
     user = User.objects.get(pk=modified_by)
@@ -337,9 +338,9 @@ def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_
 def _add_change_note(element, task_nr, field, field_name, value, old_value, modified_by, modified_on):
     user = User.objects.get(pk=modified_by)
     mod_time = modified_on.strftime("%m/%d/%y %r %Z")
-    note = getattr(element, ADMIN_NOTES) + '\n\n' if getattr(element, ADMIN_NOTES) else ''
+    note = getattr(element, RECORD_HISTORY) + '\n\n' if getattr(element, RECORD_HISTORY) else ''
     note += 'This record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s" by %s on %s.'%(task_nr, field, old_value, value, user.username, mod_time)
-    setattr(element, ADMIN_NOTES, note)
+    setattr(element, RECORD_HISTORY, note)
 
 def _is_value_valid(element, field_to_change, new_value):
     choices = element._meta.get_field(field_to_change).choices

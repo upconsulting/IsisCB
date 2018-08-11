@@ -19,7 +19,7 @@ import operator
 ACTION_DICT = {
     BulkChangeCSVForm.CREATE_ATTR: (authority_tasks, 'add_attributes_to_authority'),
     BulkChangeCSVForm.UPDATE_ATTR: (authority_tasks, 'update_elements'),
-    BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_linked_data'),
+    BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_records', 'linkeddata'),
     BulkChangeCSVForm.CREATE_ACRELATIONS: (creation_tasks, 'create_records', 'acrelation'),
     BulkChangeCSVForm.CREATE_CCRELATIONS: (creation_tasks, 'create_records', 'ccrelation')
 }

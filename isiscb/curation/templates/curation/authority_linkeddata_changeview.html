@@ -11,7 +11,7 @@
     <input type="hidden" name="current" value="{{ current_index }}">
 
     <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-5">
+        <div class="col-md-6">
           <div class="row">
               <div class="col-md-12">
                 <div class="form-group form-inline">
@@ -33,7 +33,7 @@
               </div>
             </div>
           </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Authority</a>
         </div>
@@ -58,8 +58,8 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.type_controlled.label }}</label>
-                    <div class="col-md-8">
+                    <label class="col-md-2">{{ linkeddata_form.type_controlled.label }}</label>
+                    <div class="col-md-10">
                       {{ linkeddata_form.type_controlled|addcss:"form-control" }}
                       <p class="text-muted text-small">{{ linkeddata_form.type_controlled.help_text }}</p>
                     </div>
@@ -71,8 +71,8 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">URN</label>
-                    <div class="col-md-8">
+                    <label class="col-md-2">URN</label>
+                    <div class="col-md-10">
                       {{ linkeddata_form.universal_resource_name|addcss:"form-control" }}
                       <p class="text-muted text-small">{{ linkeddata_form.universal_resource_name.help_text }}</p>
                     </div>
@@ -82,8 +82,8 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.resource_name.label }}</label>
-                    <div class="col-md-8">
+                    <label class="col-md-2">{{ linkeddata_form.resource_name.label }}</label>
+                    <div class="col-md-10">
                       {{ linkeddata_form.resource_name|addcss:"form-control" }}
                       <p class="text-muted text-small">{{ linkeddata_form.resource_name.help_text }}</p>
                     </div>
@@ -93,8 +93,8 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">URL</label>
-                    <div class="col-md-8">
+                    <label class="col-md-2">URL</label>
+                    <div class="col-md-10">
                       {{ linkeddata_form.url|addcss:"form-control" }}
                       <p class="text-muted text-small">{{ linkeddata_form.url.help_text }}</p>
                     </div>
@@ -104,10 +104,20 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.administrator_notes.label }}</label>
-                    <div class="col-md-8">
+                    <label class="col-md-2">{{ linkeddata_form.administrator_notes.label }}</label>
+                    <div class="col-md-10">
                       {{ linkeddata_form.administrator_notes|addcss:"form-control" }}
                       <p class="text-muted text-small">{{ linkeddata_form.administrator_notes.help_text }}</p>
+                    </div>
+                </div>
+
+                {% for error in form.record_history.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-2">{{ linkeddata_form.record_history.label }}</label>
+                    <div class="col-md-10">
+                      {{ linkeddata_form.record_history|addcss:"form-control" }}
                     </div>
                 </div>
 
