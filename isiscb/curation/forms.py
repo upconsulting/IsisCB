@@ -760,12 +760,14 @@ class BulkChangeCSVForm(forms.Form):
     CREATE_LINKED_DATA = 'CRLD'
     CREATE_ACRELATIONS = 'CRACR'
     CREATE_CCRELATIONS = 'CRCCR'
+    CREATE_AUTHORITIES = 'CRAUTH'
     CHOICES = [
         (NO_CHOICE, '-------------'),
         (CREATE_ATTR, 'Create Attributes'),
         (UPDATE_ATTR, 'Update Elements'),
         (CREATE_LINKED_DATA, 'Create Linked Data'),
         (CREATE_ACRELATIONS, 'Create ACRelations'),
-        (CREATE_CCRELATIONS, 'Create CCRelations')
+        (CREATE_CCRELATIONS, 'Create CCRelations'),
+        (CREATE_AUTHORITIES, 'Create Authorities'),
     ]
     action = forms.ChoiceField(choices=CHOICES)
