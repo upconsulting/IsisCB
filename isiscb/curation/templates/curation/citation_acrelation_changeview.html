@@ -142,6 +142,17 @@
                       {{ form.administrator_notes|addcss:"form-control" }}
                     </div>
                 </div>
+
+                {% for error in form.record_history.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-12">{{ form.record_history.label }}</label>
+                    <div class="col-md-12">
+                      {{ form.record_history|addcss:"form-control" }}
+                    </div>
+                </div>
+                
                 {{ form.authority }}
                 {{ form.citation }}
 
