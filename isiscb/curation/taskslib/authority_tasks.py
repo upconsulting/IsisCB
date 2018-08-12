@@ -376,6 +376,8 @@ def _add_change_note(element, task_nr, field, field_name, value, old_value, modi
     note += 'This record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s" by %s on %s.'%(task_nr, field, old_value, value, user.username, mod_time)
     setattr(element, RECORD_HISTORY, note)
 
+    element._history_user=user
+
 def _is_value_valid(element, field_to_change, new_value):
     if field_to_change.startswith(TYPED_PREFIX):
         return True
