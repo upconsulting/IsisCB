@@ -192,6 +192,7 @@ FIELD_MAP = {
         'LED Notes': 'administrator_notes',
         'LED Status': 'record_status_value',
         'LED RecordStatusExplanation': 'record_status_explanation',
+        'LED Subj ID': 'typed:subject',
     },
     ACRelation: {
         'ACR ID Auth': 'authority_id',
@@ -226,6 +227,8 @@ COLUMN_NAME_VALUE = "Value"
 ADMIN_NOTES = 'administrator_notes'
 RECORD_HISTORY = 'record_history'
 
+TYPED_PREFIX = 'typed:'
+
 @shared_task
 def update_elements(file_path, error_path, task_id, user_id):
     logging.info('Updating elements from %s.' % (file_path))
@@ -253,8 +256,14 @@ def update_elements(file_path, error_path, task_id, user_id):
                 # update timestamp for long running processes
                 current_time = datetime.now(tzlocal()).isoformat()
                 type = row[COLUMN_NAME_TYPE]
-                type_class = apps.get_model(app_label='isisdata', model_name=type)
                 element_id = row[COLUMN_NAME_ID]
+
+                try:
+                    type_class = apps.get_model(app_label='isisdata', model_name=type)
+                except Exception, e:
+                    results.append((ERROR, type, element_id, '%s is not a valid type.'%(type), current_time))
+                    current_count = _update_count(current_count, task)
+                    continue
 
                 try:
                     element = type_class.objects.get(pk=element_id)
@@ -279,6 +288,18 @@ def update_elements(file_path, error_path, task_id, user_id):
                             if field_to_change == ADMIN_NOTES:
                                 _add_to_administrator_notes(element, new_value, task.id, user_id, current_time_obj)
                             else:
+                                # in some cases we have authority or citation as relation
+                                # this is in cases like subject of linkeddata
+                                # it needs to be amended if there are objects that can link to other types
+                                # than authorities/citations
+                                if field_to_change.startswith(TYPED_PREFIX):
+                                    field_to_change = field_to_change[len(TYPED_PREFIX):]
+                                    if new_value.startswith(Authority.ID_PREFIX):
+                                        linked_element = Authority.objects.get(pk=new_value)
+                                    else:
+                                        linked_element = Citation.objects.get(pk=new_value)
+                                    new_value = linked_element
+
                                 old_value = getattr(element, field_to_change)
                                 setattr(element, field_to_change, new_value)
                                 _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, old_value, user_id, current_time_obj)
@@ -355,7 +376,11 @@ def _add_change_note(element, task_nr, field, field_name, value, old_value, modi
     note += 'This record was changed as part of bulk change #%s. "%s" was changed from "%s" to "%s" by %s on %s.'%(task_nr, field, old_value, value, user.username, mod_time)
     setattr(element, RECORD_HISTORY, note)
 
+    element._history_user=user
+
 def _is_value_valid(element, field_to_change, new_value):
+    if field_to_change.startswith(TYPED_PREFIX):
+        return True
     choices = element._meta.get_field(field_to_change).choices
     if choices:
         if new_value not in dict(choices):
