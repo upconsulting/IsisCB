@@ -212,10 +212,27 @@ FIELD_MAP = {
         'CCR Description': 'description',
         'CCR Type': 'type_controlled',
         'CCR DisplayOrder': 'data_display_order',
-        'CCR Dataset': 'belongs_to_id',
+        'CCR Dataset': 'find:Dataset:name:belongs_to',
         'CCR Notes': 'administrator_notes',
         'CCR Status': 'record_status_value',
         'CCR RecordStatusExplanation': 'record_status_explanation',
+    },
+    Authority: {
+        'CBA Type': 'type_controlled',
+        'CBA Name': 'name',
+        'CBA Redirect': 'redirect_to_id',
+        'CBA ClassCode': 'classification_code',
+        'CBA ClassHier': 'classification_hierarchy',
+        'CBA ClassSystem': 'classification_system',
+        'CBA Description': 'description',
+        'CBA Dataset': 'find:Dataset:name:belongs_to',
+        'CBA Notes': 'administrator_notes',
+        'CBA Status': 'record_status_value',
+        'CBA RecordStatusExplanation': 'record_status_explanation',
+        'CBA First': 'personal_name_first',
+        'CBA Last': 'personal_name_last',
+        'CBA Suff':  'personal_name_suffix',
+        'CBA Preferred': 'personal_name_preferred',
     }
 }
 
@@ -228,6 +245,7 @@ ADMIN_NOTES = 'administrator_notes'
 RECORD_HISTORY = 'record_history'
 
 TYPED_PREFIX = 'typed:'
+FIND_PREFIX = 'find:'
 
 @shared_task
 def update_elements(file_path, error_path, task_id, user_id):
@@ -267,6 +285,9 @@ def update_elements(file_path, error_path, task_id, user_id):
 
                 try:
                     element = type_class.objects.get(pk=element_id)
+                    # we need special handling of persons, this is ugly but ahh well
+                    if type == "Authority" and element.type_controlled == Authority.PERSON:
+                        element = Person.objects.get(pk=element_id)
                 except ObjectDoesNotExist:
                     results.append((ERROR, type, element_id, '%s with id %s does not exist.'%(type_class, element_id), current_time))
                     current_count = _update_count(current_count, task)
@@ -285,28 +306,40 @@ def update_elements(file_path, error_path, task_id, user_id):
                         if not is_valid:
                             results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
                         else:
-                            if field_to_change == ADMIN_NOTES:
-                                _add_to_administrator_notes(element, new_value, task.id, user_id, current_time_obj)
-                            else:
-                                # in some cases we have authority or citation as relation
-                                # this is in cases like subject of linkeddata
-                                # it needs to be amended if there are objects that can link to other types
-                                # than authorities/citations
-                                if field_to_change.startswith(TYPED_PREFIX):
-                                    field_to_change = field_to_change[len(TYPED_PREFIX):]
-                                    if new_value.startswith(Authority.ID_PREFIX):
-                                        linked_element = Authority.objects.get(pk=new_value)
-                                    else:
-                                        linked_element = Citation.objects.get(pk=new_value)
-                                    new_value = linked_element
+                            try:
+                                if field_to_change == ADMIN_NOTES:
+                                    _add_to_administrator_notes(element, new_value, task.id, user_id, current_time_obj)
+                                else:
+                                    # in some cases we have authority or citation as relation
+                                    # this is in cases like subject of linkeddata
+                                    # it needs to be amended if there are objects that can link to other types
+                                    # than authorities/citations
+                                    if field_to_change.startswith(TYPED_PREFIX):
+                                        field_to_change = field_to_change[len(TYPED_PREFIX):]
+                                        if new_value.startswith(Authority.ID_PREFIX):
+                                            linked_element = Authority.objects.get(pk=new_value)
+                                        else:
+                                            linked_element = Citation.objects.get(pk=new_value)
+                                        new_value = linked_element
 
-                                old_value = getattr(element, field_to_change)
-                                setattr(element, field_to_change, new_value)
-                                _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, old_value, user_id, current_time_obj)
-                            setattr(element, 'modified_by_id', user_id)
+                                    if field_to_change.startswith(FIND_PREFIX):
+                                        field_to_change, new_value = _find_value(field_to_change, new_value)
 
-                            element.save()
-                            results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
+                                    old_value = getattr(element, field_to_change)
+                                    setattr(element, field_to_change, new_value)
+
+                                    # some fields need special handling
+                                    _specific_post_processing(element, field_to_change, new_value, old_value)
+
+                                    _add_change_note(element, task.id, field_in_csv, field_to_change, new_value, old_value, user_id, current_time_obj)
+                                setattr(element, 'modified_by_id', user_id)
+
+                                element.save()
+                                results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
+                            except Exception, e:
+                                logger.error(e)
+                                logger.exception(e)
+                                results.append((ERROR, type, element_id, 'Something went wrong. %s was not changed.'%(field_to_change), current_time))
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
@@ -358,6 +391,28 @@ def update_elements(file_path, error_path, task_id, user_id):
         task.state = 'SUCCESS'
         task.save()
 
+def _specific_post_processing(element, field_name, new_value, old_value):
+    # turn authority non-person into person
+    if type(element) == Authority and field_name == 'type_controlled':
+        if new_value == Authority.PERSON and old_value != Authority.PERSON:
+            try:
+                # is object already a person
+                element.person
+            except Person.DoesNotExist:
+                # if not make it one
+                person = Person(authority_ptr_id=element.pk)
+                person.__dict__.update(element.__dict__)
+                person.save()
+
+# to specify a find operation, fields need to be in format find:type:field:linking_field (e.g. find:Dataset:name:belongs_to_id)
+def _find_value(field_to_change, new_value):
+    field_parts = field_to_change.split(":")
+    model = apps.get_model("isisdata." + field_parts[1])
+    filter_params = { field_parts[2]:new_value }
+    linked_element = model.objects.filter(**filter_params).first()
+    return field_parts[3], linked_element
+
+
 def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_on):
     note = getattr(element, ADMIN_NOTES)
     if note:
@@ -379,7 +434,7 @@ def _add_change_note(element, task_nr, field, field_name, value, old_value, modi
     element._history_user=user
 
 def _is_value_valid(element, field_to_change, new_value):
-    if field_to_change.startswith(TYPED_PREFIX):
+    if ":" in field_to_change:
         return True
     choices = element._meta.get_field(field_to_change).choices
     if choices:
