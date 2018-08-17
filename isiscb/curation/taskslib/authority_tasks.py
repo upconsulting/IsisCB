@@ -247,7 +247,7 @@ FIELD_MAP = {
         'CBB IssueFreeText': 'part_details__issue_free_text',
         'CBB PageBegin': 'part_details__page_begin',
         'CBB PageEnd': 'part_details__page_end',
-        'CBB PagesFreeText': 'part_details__page_free_text',
+        'CBB PagesFreeText': 'part_details__pages_free_text',
         'CBB VolumeBegin': 'part_details__volume_begin',
         'CBB VolumeEnd': 'part_details__volume_end',
         'CBB VolumeFreeText': 'part_details__volume_free_text',
@@ -376,6 +376,9 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 object_to_update_timestamp = element
                                 if field_name in ['value', 'start', 'end']:
                                     new_value = object_to_change.__class__.convert(new_value)
+                            # this is a hack, but ahh well
+                            if type(object_to_change) == PartDetails:
+                                object_to_update_timestamp = element
 
                             # if there are choices make sure they are respected
                             is_valid = _is_value_valid(object_to_change, field_name, new_value)
