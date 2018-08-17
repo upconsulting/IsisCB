@@ -233,6 +233,30 @@ FIELD_MAP = {
         'CBA Last': 'personal_name_last',
         'CBA Suff':  'personal_name_suffix',
         'CBA Preferred': 'personal_name_preferred',
+    },
+    Citation: {
+        'CBB Type': 'type_controlled',
+        'CBB Title': 'title',
+        'CBB Abstract': 'abstract',
+        'CBB Description': 'description',
+        'CBB EditionDetails': 'edition_details',
+        'CBB Language': 'find:Language:name:language:multi',
+        'CBB PhysicalDetails': 'physical_details',
+        'CBB IssueBegin':'part_details__issue_begin',
+        'CBB IssueEnd': 'part_details__issue_end',
+        'CBB IssueFreeText': 'part_details__issue_free_text',
+        'CBB PageBegin': 'part_details__page_begin',
+        'CBB PageEnd': 'part_details__page_end',
+        'CBB PagesFreeText': 'part_details__pages_free_text',
+        'CBB VolumeBegin': 'part_details__volume_begin',
+        'CBB VolumeEnd': 'part_details__volume_end',
+        'CBB VolumeFreeText': 'part_details__volume_free_text',
+        'CBB Extent': 'part_details__extent',
+        'CBB ExtentNote': 'part_details__extent_note',
+        'CBB Dataset': 'find:Dataset:name:belongs_to',
+        'CBB Notes': 'administrator_notes',
+        'CBB Status': 'record_status_value',
+        'CBB RecordStatusExplanation': 'record_status_explanation',
     }
 }
 
@@ -273,23 +297,23 @@ def update_elements(file_path, error_path, task_id, user_id):
             for row in csv.DictReader(f):
                 # update timestamp for long running processes
                 current_time = datetime.now(tzlocal()).isoformat()
-                type = row[COLUMN_NAME_TYPE]
+                elem_type = row[COLUMN_NAME_TYPE]
                 element_id = row[COLUMN_NAME_ID]
 
                 try:
-                    type_class = apps.get_model(app_label='isisdata', model_name=type)
+                    type_class = apps.get_model(app_label='isisdata', model_name=elem_type)
                 except Exception, e:
-                    results.append((ERROR, type, element_id, '%s is not a valid type.'%(type), current_time))
+                    results.append((ERROR, elem_type, element_id, '%s is not a valid type.'%(elem_type), current_time))
                     current_count = _update_count(current_count, task)
                     continue
 
                 try:
                     element = type_class.objects.get(pk=element_id)
                     # we need special handling of persons, this is ugly but ahh well
-                    if type == "Authority" and element.type_controlled == Authority.PERSON:
+                    if elem_type == "Authority" and element.type_controlled == Authority.PERSON:
                         element = Person.objects.get(pk=element_id)
                 except ObjectDoesNotExist:
-                    results.append((ERROR, type, element_id, '%s with id %s does not exist.'%(type_class, element_id), current_time))
+                    results.append((ERROR, elem_type, element_id, '%s with id %s does not exist.'%(type_class, element_id), current_time))
                     current_count = _update_count(current_count, task)
                     continue
 
@@ -304,7 +328,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                         # if there are choices make sure they are respected
                         is_valid = _is_value_valid(element, field_to_change, new_value)
                         if not is_valid:
-                            results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
+                            results.append((ERROR, elem_type, element_id, '%s is not a valid value.'%(new_value), current_time))
                         else:
                             try:
                                 if field_to_change == ADMIN_NOTES:
@@ -323,7 +347,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                                         new_value = linked_element
 
                                     if field_to_change.startswith(FIND_PREFIX):
-                                        field_to_change, new_value = _find_value(field_to_change, new_value)
+                                        field_to_change, new_value = _find_value(field_to_change, new_value, element)
 
                                     old_value = getattr(element, field_to_change)
                                     setattr(element, field_to_change, new_value)
@@ -339,7 +363,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                             except Exception, e:
                                 logger.error(e)
                                 logger.exception(e)
-                                results.append((ERROR, type, element_id, 'Something went wrong. %s was not changed.'%(field_to_change), current_time))
+                                results.append((ERROR, elem_type, element_id, 'Something went wrong. %s was not changed.'%(field_to_change), current_time))
                     # otherwise
                     else:
                         object, field_name = field_to_change.split('__')
@@ -352,11 +376,14 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 object_to_update_timestamp = element
                                 if field_name in ['value', 'start', 'end']:
                                     new_value = object_to_change.__class__.convert(new_value)
+                            # this is a hack, but ahh well
+                            if type(object_to_change) == PartDetails:
+                                object_to_update_timestamp = element
 
                             # if there are choices make sure they are respected
                             is_valid = _is_value_valid(object_to_change, field_name, new_value)
                             if not is_valid:
-                                results.append((ERROR, type, element_id, '%s is not a valid value.'%(new_value), current_time))
+                                results.append((ERROR, elem_type, element_id, '%s is not a valid value.'%(new_value), current_time))
                             else:
                                 old_value = getattr(object_to_change, field_name)
                                 if field_to_change == ADMIN_NOTES:
@@ -375,7 +402,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object), current_time))
 
                 else:
-                    results.append((ERROR, type, element_id, 'Field %s cannot be changed.'%(field_to_change), current_time))
+                    results.append((ERROR, elem_type, element_id, 'Field %s cannot be changed.'%(field_to_change), current_time))
 
                 current_count = _update_count(current_count, task)
         except KeyError, e:
@@ -403,13 +430,22 @@ def _specific_post_processing(element, field_name, new_value, old_value):
                 person = Person(authority_ptr_id=element.pk)
                 person.__dict__.update(element.__dict__)
                 person.save()
+    if type(element) == Citation and field_name == 'type_controlled':
+        if new_value in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS]:
+            if not hasattr(element, 'part_details'):
+                element.part_details = PartDetails()
+
 
 # to specify a find operation, fields need to be in format find:type:field:linking_field (e.g. find:Dataset:name:belongs_to_id)
-def _find_value(field_to_change, new_value):
+def _find_value(field_to_change, new_value, element):
     field_parts = field_to_change.split(":")
     model = apps.get_model("isisdata." + field_parts[1])
     filter_params = { field_parts[2]:new_value }
     linked_element = model.objects.filter(**filter_params).first()
+    if len(field_parts) > 4:
+        if field_parts[4] == "multi":
+            old_value = getattr(element, field_parts[3])
+            linked_element = list(old_value.all()) + [linked_element]
     return field_parts[3], linked_element
 
 
