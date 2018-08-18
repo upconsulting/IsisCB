@@ -23,6 +23,7 @@ ACTION_DICT = {
     BulkChangeCSVForm.CREATE_ACRELATIONS: (creation_tasks, 'create_records', 'acrelation'),
     BulkChangeCSVForm.CREATE_CCRELATIONS: (creation_tasks, 'create_records', 'ccrelation'),
     BulkChangeCSVForm.CREATE_AUTHORITIES: (creation_tasks, 'create_records', 'authority'),
+    BulkChangeCSVForm.CREATE_CITATIONS: (creation_tasks, 'create_records', 'citation'),
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

@@ -66,6 +66,7 @@ CREATION_METHODS =  {
     'ccrelation': record_creator._create_ccrelation,
     'linkeddata': record_creator._create_linkeddata,
     'authority': record_creator._create_authority,
+    'citation': record_creator._create_citation,
 }
 
 def _update_count(current_count, task):
