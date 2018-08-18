@@ -24,6 +24,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
     COL_LD_URN = 'LED URN'
     COL_LD_STATUS = 'LED Status'
     COL_LD_NOTE = 'LED Note'
+    COL_LD_EXPLANATION = 'LED RecordStatusExplanation'
     COL_LD_RESOURCE = 'LED Resource'
     COL_LD_AUTHORITY = 'LED Subj ID'
     COL_LD_TYPE = 'LED Type'
@@ -51,33 +52,11 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
             results.append((ERROR, subject_id, subject_id, 'Related record does not exist.'))
             return
 
-    if row[COL_LD_URN]:
-        properties.update({
-            'universal_resource_name': row[COL_LD_URN]
-        })
-
-    if row[COL_LD_STATUS]:
-        status = row[COL_LD_STATUS]
-        status_id = STATUS_MAP[status]
-        if status_id:
-            properties.update({
-                'record_status_value': status_id
-            })
-        else:
-            properties.update({
-                'record_status_value': STATUS_MAP['Inactive']
-            })
-            results.append((ERROR, subject_id, "", 'Invalid Status: %s.'%(status_id)))
-
-    if row[COL_LD_NOTE]:
-        properties.update({
-            'administrator_notes': row[COL_LD_NOTE]
-        })
-
-    if row[COL_LD_RESOURCE]:
-        properties.update({
-            'resource_name': row[COL_LD_RESOURCE]
-        })
+    _add_optional_simple_property(row, COL_LD_URN, properties, 'universal_resource_name')
+    _add_optional_simple_property(row, COL_LD_NOTE, properties, 'administrator_notes')
+    _add_status(row, COL_LD_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_LD_EXPLANATION, properties, 'record_status_explanation')
+    _add_optional_simple_property(row, COL_LD_RESOURCE, properties, 'resource_name')
 
     if row[COL_LD_TYPE]:
         ld_type = row[COL_LD_TYPE]
@@ -103,7 +82,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
     _create_record(linked_data, user_id, results)
 
 def _create_acrelation(row, user_id, results, task_id, created_on):
-    COl_ACR_TYPE = 'ACR Type'
+    COL_ACR_TYPE = 'ACR Type'
     COL_ACR_NAME_DISPLAY = 'ACR NameDisplay'
     COL_ACR_AUTHORITY_ID = 'ACR ID Auth'
     COL_ACR_CITATION_ID = 'ACR ID Cit'
@@ -115,18 +94,8 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    acr_type = row[COl_ACR_TYPE]
-    if not acr_type:
-        results.append((ERROR, "ACR type missing", "", "There was no ACR type provided. Skipping."))
+    if not _add_type(row, COL_ACR_TYPE, ACRelation, results, properties):
         return
-
-    if acr_type not in dict(ACRelation.TYPE_CHOICES).keys():
-        results.append((ERROR, "ACR type does not exist.", "", "The ACR Type %s does not exist. Skipping."%(acr_type)))
-        return
-
-    properties.update({
-        'type_controlled': acr_type,
-    })
 
     authority_id = row[COL_ACR_AUTHORITY_ID]
     if not authority_id:
@@ -160,43 +129,14 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
         'citation_id': citation_id,
     })
 
-    if row[COL_ACR_NAME_DISPLAY]:
-        properties.update({
-            'name_for_display_in_citation': row[COL_ACR_NAME_DISPLAY]
-        })
+    _add_optional_simple_property(row, COL_ACR_NAME_DISPLAY, properties, 'name_for_display_in_citation')
+    _add_optional_simple_property(row, COL_ACR_DISPLAY_ORDER, properties, 'data_display_order')
+    _add_optional_simple_property(row, COL_ACR_CONFIDENCE, properties, 'confidence_measure')
 
-    if row[COL_ACR_DISPLAY_ORDER]:
-        properties.update({
-            'data_display_order': row[COL_ACR_DISPLAY_ORDER]
-        })
+    _add_optional_simple_property(row, COL_ACR_NOTES, properties, 'administrator_notes')
+    _add_status(row, COL_ACR_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_ACR_EXPLANATION, properties, 'record_status_explanation')
 
-    if row[COL_ACR_CONFIDENCE]:
-        properties.update({
-            'confidence_measure': row[COL_ACR_CONFIDENCE]
-        })
-
-    if row[COL_ACR_NOTES]:
-        properties.update({
-            'administrator_notes': row[COL_ACR_NOTES]
-        })
-
-    if row[COL_ACR_STATUS]:
-        status_id = STATUS_MAP.get(row[COL_ACR_STATUS], None)
-        if status_id:
-            properties.update({
-                'record_status_value': status_id
-            })
-        else:
-            properties.update({
-                'record_status_value': STATUS_MAP['Inactive']
-            })
-            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(row[COL_ACR_STATUS])))
-
-
-    if row[COL_ACR_EXPLANATION]:
-        properties.update({
-            'record_status_explanation': row[COL_ACR_EXPLANATION]
-        })
 
     _add_creation_note(properties, task_id, user_id, created_on)
 
@@ -205,7 +145,7 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
 
 def _create_ccrelation(row, user_id, results, task_id, created_on):
-    COl_CCR_TYPE = 'CCR Type'
+    COL_CCR_TYPE = 'CCR Type'
     COL_CCR_OBJECT = 'CCR ID Cit Obj'
     COL_CCR_SUBJECT = 'CCR ID Cit Subj'
     COL_CCR_DISPLAY_ORDER = 'CCR DataDisplayOrder'
@@ -215,18 +155,8 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    ccr_type = row[COl_CCR_TYPE]
-    if not ccr_type:
-        results.append((ERROR, "CCR type missing", "", "There was no CCR type provided. Skipping."))
+    if not _add_type(row, COL_CCR_TYPE, CCRelation, results, properties):
         return
-
-    if ccr_type not in dict(CCRelation.TYPE_CHOICES).keys():
-        results.append((ERROR, "CCR type does not exist.", "", "The CCR Type %s does not exist. Skipping."%(ccr_type)))
-        return
-
-    properties.update({
-        'type_controlled': ccr_type,
-    })
 
     subject_id = row[COL_CCR_SUBJECT]
     try:
@@ -257,36 +187,106 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
             'data_display_order': row[COL_CCR_DISPLAY_ORDER]
         })
 
-    if row[COL_CCR_NOTES]:
-        properties.update({
-            'administrator_notes': row[COL_CCR_NOTES]
-        })
-
-    if row[COL_CCR_STATUS]:
-        status_id = STATUS_MAP.get(row[COL_CCR_STATUS], None)
-        if status_id:
-            properties.update({
-                'record_status_value': status_id
-            })
-        else:
-            properties.update({
-                'record_status_value': STATUS_MAP['Inactive']
-            })
-            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(row[COL_CCR_STATUS])))
-
-
-    if row[COL_CCR_EXPLANATION]:
-        properties.update({
-            'record_status_explanation': row[COL_CCR_EXPLANATION]
-        })
+    _add_optional_simple_property(row, COL_CCR_NOTES, properties, 'administrator_notes')
+    _add_status(row, COL_CCR_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_CCR_EXPLANATION, properties, 'record_status_explanation')
 
     _add_creation_note(properties, task_id, user_id, created_on)
 
     ccr_relation = CCRelation(**properties)
     _create_record(ccr_relation, user_id, results)
 
+def _create_citation(row, user_id, results, task_id, created_on):
+    COL_TYPE = 'CBB Type'
+    COL_TITLE = 'CBB Title'
+    COL_ABSTRACT = 'CBB Abstract'
+    COL_DESCRIPTION = 'CBB Description'
+    COL_ED_DETAILS = 'CBB EditionDetails'
+    COL_LANGUAGE = 'CBB Language'
+    COL_PHYS_DETAILS = 'CBB PhysicalDetails'
+    COL_ISSUE_BEGIN = 'CBB IssueBegin'
+    COL_ISSUE_END = 'CBB IssueEnd'
+    COL_ISSUE_FREETEXT = 'CBB IssueFreeText'
+    COL_PAGE_BEGIN = 'CBB PageBegin'
+    COL_PAGE_END = 'CBB PageEnd'
+    COL_PAGES_FREETEXT = 'CBB PagesFreeText'
+    COL_VOL_BEGIN = 'CBB VolumeBegin'
+    COL_VOL_END = 'CBB VolumeEnd'
+    COL_VOL_FREETEXT = 'CBB VolumeFreeText'
+    COL_EXTENT = 'CBB Extent'
+    COL_EXTENT_NOTE = 'CBB ExtentNote'
+    COL_DATASET = 'CBB Dataset'
+    COL_NOTES = 'CBB Notes'
+    COL_STATUS = 'CBB Status'
+    COL_EXPLANATION = 'CBB RecordStatusExplanation'
+
+    properties = {}
+
+    if not _add_type(row, COL_TYPE, Citation, results, properties):
+        return
+
+    _add_optional_simple_property(row, COL_TITLE, properties, 'title')
+    _add_optional_simple_property(row, COL_ABSTRACT, properties, 'abstract')
+    _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
+    _add_optional_simple_property(row, COL_ED_DETAILS, properties, 'edition_details')
+    _add_optional_simple_property(row, COL_PHYS_DETAILS, properties, 'physical_details')
+
+    _add_dataset(row, COL_DATASET, properties, results)
+
+    language = row[COL_LANGUAGE]
+    language_obj = None
+    if language:
+        try:
+            language_obj = Language.objects.filter(name=language).first()
+        except Exception, e:
+            logger.error(e)
+            results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
+
+
+    # create properties for part details
+    properties_part_details = {}
+    _add_optional_simple_property(row, COL_ISSUE_BEGIN, properties_part_details, 'issue_begin')
+    _add_optional_simple_property(row, COL_ISSUE_END, properties_part_details, 'issue_end')
+    _add_optional_simple_property(row, COL_ISSUE_FREETEXT, properties_part_details, 'issue_free_text')
+    _add_optional_simple_property(row, COL_PAGE_BEGIN, properties_part_details, 'page_begin')
+    _add_optional_simple_property(row, COL_PAGE_END, properties_part_details, 'page_end')
+    _add_optional_simple_property(row, COL_PAGES_FREETEXT, properties_part_details, 'pages_free_text')
+    _add_optional_simple_property(row, COL_VOL_BEGIN, properties_part_details, 'volume_begin')
+    _add_optional_simple_property(row, COL_VOL_END, properties_part_details, 'volume_end')
+    _add_optional_simple_property(row, COL_VOL_FREETEXT, properties_part_details, 'volume_free_text')
+    _add_optional_simple_property(row, COL_EXTENT, properties_part_details, 'extent')
+    _add_optional_simple_property(row, COL_EXTENT_NOTE, properties_part_details, 'extent_note')
+
+    part_details = None
+    citation_type = row[COL_TYPE]
+    if citation_type in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS]:
+        part_details = PartDetails(**properties_part_details)
+    else:
+        if properties_part_details:
+            part_details = PartDetails(**properties_part_details)
+            results.append((WARNING, "Part details info provided but record type (%s) does not use part details."%(citation_type), "", "Values were added but won't be visible."))
+
+    if part_details:
+        part_details.save()
+        properties.update({
+            'part_details_id': part_details.id
+        })
+
+    _add_optional_simple_property(row, COL_NOTES, properties, 'administrator_notes')
+    _add_status(row, COL_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_EXPLANATION, properties, 'record_status_explanation')
+
+    _add_creation_note(properties, task_id, user_id, created_on)
+
+    citation = Citation(**properties)
+    _create_record(citation, user_id, results)
+
+    if language_obj:
+        citation.language.add(language_obj)
+        citation.save()
+
 def _create_authority(row, user_id, results, task_id, created_on):
-    COl_TYPE = 'CBA Type'
+    COL_TYPE = 'CBA Type'
     COL_NAME = 'CBA Name'
     COL_FIRST = 'CBA First'
     COL_LAST = 'CBA Last'
@@ -304,19 +304,10 @@ def _create_authority(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    auth_type = row[COl_TYPE]
-    if not auth_type:
-        results.append((ERROR, "Authority type missing", "", "There was no Authority type provided. Skipping."))
+    if not _add_type(row, COL_TYPE, Authority, results, properties):
         return
 
-    if auth_type not in dict(Authority.TYPE_CHOICES).keys():
-        results.append((ERROR, "Authority type does not exist.", "", "The Authority Type %s does not exist. Skipping."%(auth_type)))
-        return
-
-    properties.update({
-        'type_controlled': auth_type,
-    })
-
+    auth_type = row[COL_TYPE]
     redirect_to = row[COL_REDIRECT]
     if redirect_to:
         try:
@@ -380,58 +371,15 @@ def _create_authority(row, user_id, results, task_id, created_on):
                 'classification_system': class_system,
             })
 
-    class_code = row[COL_CLASS_CODE]
-    if class_code:
-        properties.update({
-            'classification_code': class_code,
-        })
+    _add_optional_simple_property(row, COL_CLASS_CODE, properties, 'classification_code')
+    _add_optional_simple_property(row, COL_CLASS_HIERARCHY, properties, 'classification_hierarchy')
+    _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
 
-    class_hier = row[COL_CLASS_HIERARCHY]
-    if class_hier:
-        properties.update({
-            'classification_hierarchy': class_hier,
-        })
+    _add_dataset(row, COL_DATASET, properties, results)
 
-    description = row[COL_DESCRIPTION]
-    if description:
-        properties.update({
-            'description': description,
-        })
-
-    dataset = row[COL_DATASET]
-    if dataset:
-        try:
-            belongs_to = Dataset.objects.filter(name=dataset).first()
-            properties.update({
-                'belongs_to_id': belongs_to.id,
-            })
-        except:
-            results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
-
-    notes = row[COL_NOTES]
-    if notes:
-        properties.update({
-            'administrator_notes': notes
-        })
-
-    status = row[COL_STATUS]
-    if status:
-        status_id = STATUS_MAP.get(status, None)
-        if status_id:
-            properties.update({
-                'record_status_value': status_id
-            })
-        else:
-            properties.update({
-                'record_status_value': STATUS_MAP['Inactive']
-            })
-            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(status)))
-
-    explain = row[COL_EXPLANATION]
-    if explain:
-        properties.update({
-            'record_status_explanation': explain
-        })
+    _add_optional_simple_property(row, COL_NOTES, properties, 'administrator_notes')
+    _add_status(row, COL_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_EXPLANATION, properties, 'record_status_explanation')
 
     # for whatever reason, no history object is created for authorities
     properties.update({
@@ -446,6 +394,54 @@ def _create_authority(row, user_id, results, task_id, created_on):
         authority = Authority(**properties)
 
     _create_record(authority, user_id, results)
+
+def _add_type(row, col_type_heading, obj_type, results, properties):
+    auth_type = row[col_type_heading]
+    if not auth_type:
+        results.append((ERROR, "%s type missing"%(obj_type.__name__), "", "There was no %s type provided. Skipping."%(obj_type.__name__)))
+        return False
+
+    if auth_type not in dict(obj_type.TYPE_CHOICES).keys():
+        results.append((ERROR, "%s type does not exist."%(obj_type.__name__), "", "The %s Type %s does not exist. Skipping."%(obj_type.__name__, auth_type)))
+        return False
+
+    properties.update({
+        'type_controlled': auth_type,
+    })
+    return True
+
+def _add_dataset(row, col_dataset_heading, properties, results):
+    dataset = row[col_dataset_heading]
+    if dataset:
+        try:
+            belongs_to = Dataset.objects.filter(name=dataset).first()
+            properties.update({
+                'belongs_to_id': belongs_to.id,
+            })
+        except:
+            results.append((WARNING, "Dataset does not exist.", "", "The dataset %s does not exist."%(dataset)))
+
+
+def _add_status(row, col_status_heading, properties, results):
+    status = row[col_status_heading]
+    if status:
+        status_id = STATUS_MAP.get(status, None)
+        if status_id:
+            properties.update({
+                'record_status_value': status_id
+            })
+        else:
+            properties.update({
+                'record_status_value': STATUS_MAP['Inactive']
+            })
+            results.append((WARNING, "Status does not exist.", "", 'Invalid Status: %s. New record is set to Inactive.'%(status)))
+
+def _add_optional_simple_property(row, col_heading, properties, field_name):
+    value = row[col_heading]
+    if value:
+        properties.update({
+            field_name: value,
+        })
 
 def _add_creation_note(properties, task_id, user_id, created_on):
     user = User.objects.get(pk=user_id)
