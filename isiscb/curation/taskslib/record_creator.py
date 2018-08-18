@@ -52,19 +52,11 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
             results.append((ERROR, subject_id, subject_id, 'Related record does not exist.'))
             return
 
-    if row[COL_LD_URN]:
-        properties.update({
-            'universal_resource_name': row[COL_LD_URN]
-        })
-
+    _add_optional_simple_property(row, COL_LD_URN, properties, 'universal_resource_name')
     _add_optional_simple_property(row, COL_LD_NOTE, properties, 'administrator_notes')
     _add_status(row, COL_LD_STATUS, properties, results)
     _add_optional_simple_property(row, COL_LD_EXPLANATION, properties, 'record_status_explanation')
-
-    if row[COL_LD_RESOURCE]:
-        properties.update({
-            'resource_name': row[COL_LD_RESOURCE]
-        })
+    _add_optional_simple_property(row, COL_LD_RESOURCE, properties, 'resource_name')
 
     if row[COL_LD_TYPE]:
         ld_type = row[COL_LD_TYPE]
@@ -90,7 +82,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
     _create_record(linked_data, user_id, results)
 
 def _create_acrelation(row, user_id, results, task_id, created_on):
-    COl_ACR_TYPE = 'ACR Type'
+    COL_ACR_TYPE = 'ACR Type'
     COL_ACR_NAME_DISPLAY = 'ACR NameDisplay'
     COL_ACR_AUTHORITY_ID = 'ACR ID Auth'
     COL_ACR_CITATION_ID = 'ACR ID Cit'
@@ -102,18 +94,8 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    acr_type = row[COl_ACR_TYPE]
-    if not acr_type:
-        results.append((ERROR, "ACR type missing", "", "There was no ACR type provided. Skipping."))
+    if not _add_type(row, COL_ACR_TYPE, ACRelation, results, properties):
         return
-
-    if acr_type not in dict(ACRelation.TYPE_CHOICES).keys():
-        results.append((ERROR, "ACR type does not exist.", "", "The ACR Type %s does not exist. Skipping."%(acr_type)))
-        return
-
-    properties.update({
-        'type_controlled': acr_type,
-    })
 
     authority_id = row[COL_ACR_AUTHORITY_ID]
     if not authority_id:
@@ -147,20 +129,9 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
         'citation_id': citation_id,
     })
 
-    if row[COL_ACR_NAME_DISPLAY]:
-        properties.update({
-            'name_for_display_in_citation': row[COL_ACR_NAME_DISPLAY]
-        })
-
-    if row[COL_ACR_DISPLAY_ORDER]:
-        properties.update({
-            'data_display_order': row[COL_ACR_DISPLAY_ORDER]
-        })
-
-    if row[COL_ACR_CONFIDENCE]:
-        properties.update({
-            'confidence_measure': row[COL_ACR_CONFIDENCE]
-        })
+    _add_optional_simple_property(row, COL_ACR_NAME_DISPLAY, properties, 'name_for_display_in_citation')
+    _add_optional_simple_property(row, COL_ACR_DISPLAY_ORDER, properties, 'data_display_order')
+    _add_optional_simple_property(row, COL_ACR_CONFIDENCE, properties, 'confidence_measure')
 
     _add_optional_simple_property(row, COL_ACR_NOTES, properties, 'administrator_notes')
     _add_status(row, COL_ACR_STATUS, properties, results)
@@ -174,7 +145,7 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
 
 def _create_ccrelation(row, user_id, results, task_id, created_on):
-    COl_CCR_TYPE = 'CCR Type'
+    COL_CCR_TYPE = 'CCR Type'
     COL_CCR_OBJECT = 'CCR ID Cit Obj'
     COL_CCR_SUBJECT = 'CCR ID Cit Subj'
     COL_CCR_DISPLAY_ORDER = 'CCR DataDisplayOrder'
@@ -184,18 +155,8 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    ccr_type = row[COl_CCR_TYPE]
-    if not ccr_type:
-        results.append((ERROR, "CCR type missing", "", "There was no CCR type provided. Skipping."))
+    if not _add_type(row, COL_CCR_TYPE, CCRelation, results, properties):
         return
-
-    if ccr_type not in dict(CCRelation.TYPE_CHOICES).keys():
-        results.append((ERROR, "CCR type does not exist.", "", "The CCR Type %s does not exist. Skipping."%(ccr_type)))
-        return
-
-    properties.update({
-        'type_controlled': ccr_type,
-    })
 
     subject_id = row[COL_CCR_SUBJECT]
     try:
@@ -346,6 +307,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
     if not _add_type(row, COL_TYPE, Authority, results, properties):
         return
 
+    auth_type = row[COL_TYPE]
     redirect_to = row[COL_REDIRECT]
     if redirect_to:
         try:
