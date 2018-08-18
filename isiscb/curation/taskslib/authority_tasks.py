@@ -26,6 +26,93 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 
 logger = logging.getLogger(__name__)
 
+
+@shared_task
+def merge_authorities(file_path, error_path, task_id, user_id):
+    logging.info('Merging duplicate authorities and redirecting.')
+
+    SUCCESS = 'SUCCESS'
+    ERROR = 'ERROR'
+
+    COL_MASTER_AUTH = 'CBA ID Master'
+    COL_DUPLICATE_AUTH = 'CBA ID Duplicate'
+    COL_NOTE = 'Note'
+
+    with smart_open.smart_open(file_path, 'rb') as f:
+        reader = csv.reader(f, encoding='utf-8')
+        task = AsyncTask.objects.get(pk=task_id)
+
+        results = []
+        row_count = _count_rows(f, results)
+
+        task.max_value = row_count
+        task.save()
+
+        current_count = 0
+        not_matching_subject_names = []
+
+        current_time_obj = datetime.now(tzlocal())
+
+        try:
+            for row in csv.DictReader(f):
+                master_id = row[COL_MASTER_AUTH]
+                duplicate_id = row[COL_DUPLICATE_AUTH]
+                note = row[COL_NOTE]
+
+                try:
+                    master = Authority.objects.get(pk=master_id)
+                except Exception, e:
+                    logger.error('Authority with id %s does not exist. Skipping.' % (master_id))
+                    results.append((ERROR, master_id, 'Authority record does not exist.', ""))
+                    current_count = _update_count(current_count, task)
+                    continue
+
+                try:
+                    duplicate = Authority.objects.get(pk=duplicate_id)
+                except Exception, e:
+                    logger.error('Authority with id %s does not exist. Skipping.' % (duplicate_id))
+                    results.append((ERROR, duplicate_id, 'Authority record does not exist.', ""))
+                    current_count = _update_count(current_count, task)
+                    continue
+
+                for attr in duplicate.attributes.all():
+                    attr.source = master
+                    _add_change_note(attr, task_id, 'source', 'source', master_id, duplicate_id, user_id, current_time_obj)
+                    attr.record_history += '\n' + note
+                    attr.save()
+
+                for ld in duplicate.linkeddata_entries.all():
+                    ld.subject = master
+                    _add_change_note(ld, task_id, 'source', 'source', master_id, duplicate_id, user_id, current_time_obj)
+                    ld.record_history += '\n' + note
+                    ld.save()
+
+                for acr in duplicate.acrelations.all():
+                    acr.authority = master
+                    _add_change_note(acr, task_id, 'source', 'source', master_id, duplicate_id, user_id, current_time_obj)
+                    acr.record_history += '\n' + note
+                    acr.save()
+
+                # change duplicate record to redirect
+                duplicate.redirect_to = master
+                old_status = duplicate.record_status_value
+                duplicate.record_status_value = CuratedMixin.REDIRECT
+                _add_change_note(duplicate, task_id, 'record_status_value', 'record_status_value', "Redirect to %s"%(master_id), old_status, user_id, current_time_obj)
+                duplicate.record_history += '\n' + note
+                duplicate.save()
+                results.append((SUCCESS, "Records Merged", "%s and %s were successfully merged. Master is %s."%(master_id, duplicate_id, master_id), ""))
+
+                current_count = _update_count(current_count, task)
+        except Exception, e:
+            logger.error("There was an unexpected error processing the CSV file.")
+            logger.exception(e)
+            results.append((ERROR, "unexpected error", "There was an unexpected error processing the CSV file: " + repr(e), ""))
+
+        _save_results(error_path, results, ('Type', 'Title', 'Message', ''))
+
+        task.state = 'SUCCESS'
+        task.save()
+
 @shared_task
 def add_attributes_to_authority(file_path, error_path, task_id, user_id):
     logging.info('Adding attributes from %s.' % (file_path))
@@ -145,7 +232,7 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
 
-        _save_results(error_path, results)
+        _save_results(error_path, results, ('Type', 'ATT Subj ID', 'Affected object', 'Message'))
 
         task.state = 'SUCCESS'
         task.save()
@@ -509,9 +596,9 @@ def _save_csv_file(path, headers, data):
         for line in data:
             writer.writerow(line)
 
-def _save_results(path, results):
+def _save_results(path, results, headings):
     with smart_open.smart_open(path, 'wb') as f:
         writer = csv.writer(f)
-        writer.writerow(('Type', 'ATT Subj ID', 'Affected object', 'Message'))
+        writer.writerow(headings)
         for result in results:
             writer.writerow(result)
