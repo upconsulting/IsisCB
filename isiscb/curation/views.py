@@ -2492,7 +2492,7 @@ def quick_and_dirty_citation_search(request):
         journal = ""
         if obj.type_controlled == Citation.ARTICLE:
             journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
-            if journal_obj and journal_obj.first():
+            if journal_obj and journal_obj.first() and journal_obj.first().authority:
                 journal = journal_obj.first().authority.name
 
         book = ""
