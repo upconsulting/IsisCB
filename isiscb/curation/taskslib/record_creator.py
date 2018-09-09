@@ -149,9 +149,9 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
     COL_CCR_OBJECT = 'CCR ID Cit Obj'
     COL_CCR_SUBJECT = 'CCR ID Cit Subj'
     COL_CCR_DISPLAY_ORDER = 'CCR DataDisplayOrder'
-    COL_CCR_NOTES = 'ACR Notes'
-    COL_CCR_STATUS = 'ACR Status'
-    COL_CCR_EXPLANATION = 'ACR RecordStatusExplanation'
+    COL_CCR_NOTES = 'CCR Notes'
+    COL_CCR_STATUS = 'CCR Status'
+    COL_CCR_EXPLANATION = 'CCR RecordStatusExplanation'
 
     properties = {}
 
