@@ -1625,6 +1625,7 @@ def authorities(request):
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'object_type': 'AUTHORITY',
+        'record_status_redirect': CuratedMixin.REDIRECT,
     }
 
     user_session = request.session
