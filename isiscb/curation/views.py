@@ -1566,6 +1566,7 @@ def citations(request):
         'filter_params': encoded_params,
         'search_key': search_key,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
+        'record_status_redirect': CuratedMixin.REDIRECT,
     }
 
     queryset = operations.filter_queryset(request.user, Citation.objects.all())
