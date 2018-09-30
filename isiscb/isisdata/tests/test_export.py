@@ -477,14 +477,15 @@ class TestTrackingColumn(unittest.TestCase):
         book = Citation.objects.create(title='The book title',
                                        type_controlled=Citation.BOOK)
         test_value = 'test'
-        Tracking.objects.create(citation=book,
+        t = Tracking.objects.create(citation=book,
                                 type_controlled=Tracking.FULLY_ENTERED,
-                                tracking_info=test_value)
-
+                                tracking_info=test_value,
+                                )
 
 
         value = export.fully_entered(book, [])
-        self.assertEqual(value, test_value)
+        expected = "%s: %s"%(t.id, t.modified_on)
+        self.assertEqual(value, expected)
 
     def test_proofed(self):
         """
@@ -492,9 +493,13 @@ class TestTrackingColumn(unittest.TestCase):
         book = Citation.objects.create(title='The book title',
                                        type_controlled=Citation.BOOK)
         test_value = 'test'
-        Tracking.objects.create(citation=book,
+        t = Tracking.objects.create(citation=book,
                                 type_controlled=Tracking.PROOFED,
                                 tracking_info=test_value)
+
+        value = export.proofed(book, [])
+        expected = "%s: %s"%(t.id, t.modified_on)
+        self.assertEqual(value, expected)
 
     def test_spw_checked(self):
         """
@@ -502,12 +507,13 @@ class TestTrackingColumn(unittest.TestCase):
         book = Citation.objects.create(title='The book title',
                                        type_controlled=Citation.BOOK)
         test_value = 'test'
-        Tracking.objects.create(citation=book,
+        t = Tracking.objects.create(citation=book,
                                 type_controlled=Tracking.AUTHORIZED,
                                 tracking_info=test_value)
 
         value = export.spw_checked(book, [])
-        self.assertEqual(value, test_value)
+        expected = "%s: %s"%(t.id, t.modified_on)
+        self.assertEqual(value, expected)
 
     def test_published_print(self):
         """
@@ -515,12 +521,13 @@ class TestTrackingColumn(unittest.TestCase):
         book = Citation.objects.create(title='The book title',
                                        type_controlled=Citation.BOOK)
         test_value = 'test'
-        Tracking.objects.create(citation=book,
+        t = Tracking.objects.create(citation=book,
                                 type_controlled=Tracking.PRINTED,
                                 tracking_info=test_value)
 
         value = export.published_print(book, [])
-        self.assertEqual(value, test_value)
+        expected = "%s: %s"%(t.id, t.modified_on)
+        self.assertEqual(value, expected)
 
     def test_published_rlg(self):
         """
@@ -528,12 +535,13 @@ class TestTrackingColumn(unittest.TestCase):
         book = Citation.objects.create(title='The book title',
                                        type_controlled=Citation.BOOK)
         test_value = 'test'
-        Tracking.objects.create(citation=book,
+        t = Tracking.objects.create(citation=book,
                                 type_controlled=Tracking.HSTM_UPLOAD,
                                 tracking_info=test_value)
 
         value = export.published_rlg(book, [])
-        self.assertEqual(value, test_value)
+        expected = "%s: %s"%(t.id, t.modified_on)
+        self.assertEqual(value, expected)
 
     def tearDown(self):
         Citation.objects.all().delete()

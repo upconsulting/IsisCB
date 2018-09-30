@@ -298,7 +298,11 @@ def _pages_free_text(obj, extra, config={}):
 def _tracking(obj, type_controlled):
     qs = obj.tracking_records.filter(type_controlled=type_controlled)
     if qs.count() > 0:
-        return u'//'.join(filter(lambda o: o is not None, list(qs.values_list('tracking_info', flat=True))))
+        # format: tracking id: date or tracking info
+        # this is ugly but well:
+        # if there is a creation date (modification date since we never change them again), use the date
+        # otherwise use tracking info
+        return u'//'.join(map(lambda o: "%s: %s"%(o[1], (o[2] if o[2] else (o[0] if o[0] else ""))), list(qs.values_list('tracking_info', 'id', 'modified_on'))))
     return u""
 
 
