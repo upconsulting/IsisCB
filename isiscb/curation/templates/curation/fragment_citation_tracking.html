@@ -40,6 +40,15 @@
     {% else %}
       <small>No details provided.</small>
     {% endif %}
+    <hr>
+    <div class="text-right" style="margin: -10px; ">
+      {% if tracking.modified_by %}
+      {# if there is a modifier then we will also have a modifiction date #}
+      <small>Created by {{ tracking.modified_by }} on {{ tracking.modified_on }}</small>
+      {% else %}
+      <small>No creation info available. Most likely this record was created in the old system.</small>
+      {% endif %}
+    </div>
   </div>
 </div>
 
