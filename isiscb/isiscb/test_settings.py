@@ -111,10 +111,10 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb_new',
+        'NAME': 'isiscb',
         'USER': 'postgres',
-        'PASSWORD': 'upconsulting',
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
