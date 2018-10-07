@@ -750,6 +750,7 @@ class ExportCitationsForm(forms.Form):
 class ExportAuthorityForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    export_metadata = forms.BooleanField(label="Export metadata", required=False)
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
