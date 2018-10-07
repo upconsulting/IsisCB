@@ -388,11 +388,16 @@ def _dataset(obj, extra, config={}):
 
     return obj.belongs_to.name
 
+# metadata columns
 def _created_on(obj, extra, config={}):
     try:
-        return obj.history.get(history_type='+').history_date
+        if type(obj) == Citation:
+            return obj.created_native
+        else:
+            return obj.created_on_stored
     except:
         return u""
+
 
 object_id = Column(u'Record ID', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
@@ -441,8 +446,11 @@ abstract = Column(u"Abstract", lambda obj, extra, config={}: obj.abstract)
 staff_notes = Column(u"Staff Notes", lambda obj, extra, config={}: obj.administrator_notes)
 record_history = Column(u"Record History", lambda obj, extra, config={}: obj.record_history)
 dataset = Column(u"Dataset", _dataset)
+# metadata columns
 created_on = Column(u"Created Date", _created_on)
 modified_on = Column(u"Modified Date", lambda obj, extra, config={}: obj._history_date)
+creator = Column(u"Creator", lambda obj, extra, config={}: obj.created_by_native)
+modifier = Column(u"Modifier", lambda obj, extra, config={}: obj.modified_by)
 
 CITATION_COLUMNS = [
     object_id,
@@ -486,5 +494,7 @@ CITATION_COLUMNS = [
     record_history,
     dataset,
     created_on,
-    modified_on
+    modified_on,
+    creator,
+    modifier,
 ]

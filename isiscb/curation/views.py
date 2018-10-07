@@ -2760,6 +2760,7 @@ def export_citations(request):
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
             export_linked_records = form.cleaned_data.get('export_linked_records')
+            export_metadata = form.cleaned_data.get('export_metadata', False)
             use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
 
             # TODO: generalize this, so that we are not tied directly to S3.
@@ -2776,6 +2777,7 @@ def export_citations(request):
             # configuration for export
             config = {
                 'authority_delimiter': " || " if use_pipe_delimiter else " ",
+                'export_metadata': export_metadata
             }
 
             # We create the AsyncTask object first, so that we can keep it
