@@ -114,7 +114,7 @@ def create_acr_string(author, additional_fields = [], delimiter=u" "):
                'AuthorityType ' + (dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u''),
                'AuthorityName ' + (author[8] if author[8] else u'')
                 ]
-    return delimiter.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+    return delimiter.join(fields + [field_name + ' ' + (str(author[9+idx]) if author[9+idx] else u'') for idx,field_name in enumerate(additional_fields)])
 acr_fields = ['id',
           'record_status_value',
           'type_controlled',
@@ -154,6 +154,15 @@ ccr_to_fields = ['id',
           'subject__title'
          ]
 
+def _get_metadata_fields(config):
+    fields = acr_fields
+    additional_fields = []
+    if config['export_metadata']:
+        fields = acr_fields + ['authority__created_by_stored__username', 'authority__modified_by__username', 'authority__administrator_notes', 'authority__record_history', 'authority__modified_on', 'authority__created_on_stored']
+        additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
+
+    return fields, additional_fields
+
 def _get_fields_delimiter(config):
     if 'authority_delimiter' in config:
         return config['authority_delimiter']
@@ -164,20 +173,23 @@ def _citation_author(obj, extra, config={}):
     """
     Get the names of all authors on a citation.
     """
+    fields, additional_fields = _get_metadata_fields(config)
+
     names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
-                                   .values_list(*acr_fields)
+                                   .values_list(*fields)
 
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), names))
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), names))
 
 def _citation_editor(obj, extra, config={}):
     """
     Get the names of all editors on a citation.
     """
+    fields, additional_fields = _get_metadata_fields(config)
     names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
-                                   .values_list(*acr_fields)
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), names))
+                                   .values_list(*fields)
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), names))
 
 
 def _subjects(obj, extra, config={}):
@@ -193,7 +205,9 @@ def _subjects(obj, extra, config={}):
             | Q(type_controlled=ACRelation.SUBJECT)) \
          & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), qs.values_list(*acr_fields)))
+
+    fields, additional_fields = _get_metadata_fields(config)
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
 def _advisor(obj, extra, config={}):
@@ -203,7 +217,8 @@ def _advisor(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(type_controlled=ACRelation.ADVISOR))
     qs = obj.acrelation_set.filter(_q)
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), qs.values_list(*acr_fields)))
+    fields, additional_fields = _get_metadata_fields(config)
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
 def _category_numbers(obj, extra, config={}):
@@ -213,7 +228,9 @@ def _category_numbers(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     qs = obj.acrelation_set.filter(_q)
-    return u' // '.join(map(functools.partial(create_acr_string, additional_fields=['ClassificationCode'], delimiter=_get_fields_delimiter(config)), qs.values_list(*(acr_fields+['authority__classification_code']))))
+    fields, additional_fields = _get_metadata_fields(config)
+    additional_fields += ['ClassificationCode']
+    return u' // '.join(map(functools.partial(create_acr_string, additional_fields=additional_fields, delimiter=_get_fields_delimiter(config)), qs.values_list(*(fields+['authority__classification_code']))))
 
 
 def _language(obj, extra, config={}):
@@ -224,14 +241,16 @@ def _place_publisher(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), qs.values_list(*acr_fields)))
+    fields, additional_fields = _get_metadata_fields(config)
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
 def _school(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), qs.values_list(*acr_fields)))
+    fields, additional_fields = _get_metadata_fields(config)
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
 def _series(obj, extra, config={}):
@@ -357,7 +376,9 @@ def _includes_series_article(obj, extra, config={}):
 
 def _related_authorities(obj, extra, config={}):
     qs = obj.acrelation_set.all()
-    return u' // '.join(map(functools.partial(create_acr_string,delimiter=_get_fields_delimiter(config)), qs.values_list(*acr_fields)))
+    fields, additional_fields = _get_metadata_fields(config)
+
+    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 def _related_citations(obj, extra, config={}):
     qs_from = obj.relations_from.all()
