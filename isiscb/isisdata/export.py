@@ -135,7 +135,7 @@ def create_ccr_string(ccr, additional_fields = [], delimiter=u" "):
                'CitationType  ' + dict(Citation.TYPE_CHOICES)[ccr[5]],
                'CitationTitle  ' + ccr[6]
                 ]
-    return delimiter.join(fields + [field_name + ' ' + str(author[9+idx]) for idx,field_name in enumerate(additional_fields)])
+    return delimiter.join(fields + [field_name + ' ' + (str(ccr[7+idx]) if ccr[7+idx] else u'') for idx,field_name in enumerate(additional_fields)])
 
 ccr_from_fields = ['id',
           'record_status_value',
@@ -154,11 +154,28 @@ ccr_to_fields = ['id',
           'subject__title'
          ]
 
-def _get_metadata_fields(config):
+def _get_metadata_fields_authority(config):
     fields = acr_fields
     additional_fields = []
     if config['export_metadata']:
         fields = acr_fields + ['authority__created_by_stored__username', 'authority__modified_by__username', 'authority__administrator_notes', 'authority__record_history', 'authority__modified_on', 'authority__created_on_stored']
+        additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
+
+    return fields, additional_fields
+
+def _get_metadata_fields_citation(config, type):
+    ccr_fields = ['id',
+              'record_status_value',
+              'type_controlled',
+              type + '__id',
+              type + '__record_status_value',
+              type + '__type_controlled',
+              type + '__title'
+             ]
+    fields = ccr_fields
+    additional_fields = []
+    if config['export_metadata']:
+        fields = ccr_from_fields + [type + '__created_by_native__username', type + '__modified_by__username', type + '__administrator_notes', type + '__record_history', type + '__modified_on', type + '__created_native']
         additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
 
     return fields, additional_fields
@@ -173,7 +190,7 @@ def _citation_author(obj, extra, config={}):
     """
     Get the names of all authors on a citation.
     """
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
 
     names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
@@ -185,7 +202,7 @@ def _citation_editor(obj, extra, config={}):
     """
     Get the names of all editors on a citation.
     """
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
@@ -206,7 +223,7 @@ def _subjects(obj, extra, config={}):
          & ~Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
 
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
@@ -217,7 +234,7 @@ def _advisor(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & (Q(type_controlled=ACRelation.ADVISOR))
     qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
@@ -228,7 +245,7 @@ def _category_numbers(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     additional_fields += ['ClassificationCode']
     return u' // '.join(map(functools.partial(create_acr_string, additional_fields=additional_fields, delimiter=_get_fields_delimiter(config)), qs.values_list(*(fields+['authority__classification_code']))))
 
@@ -241,7 +258,7 @@ def _place_publisher(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
@@ -249,7 +266,7 @@ def _school(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.SCHOOL)
     qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
     return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
 
@@ -287,7 +304,21 @@ def _linked_data(obj, extra, config={}):
     if qs.count() == 0:
         return u''
 
-    return u' // '.join(map(lambda x: u' '.join(['Type ' + (x[0] if x[0] else ''), 'URN ' + (x[1] if x[1] else '')]), qs.values_list(*['type_controlled__name', 'universal_resource_name'])))
+    additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
+
+    def entry(ld, delimiter=u" "):
+        fields = ['Type ' + (str(ld.type_controlled.name) if ld.type_controlled.name else u''),
+                   'URN ' + (str(ld.universal_resource_name) if ld.universal_resource_name else u''),
+                   'CreatedBy ' + (str(ld.created_by) if ld.created_by else u''),
+                   'ModifiedBy ' + (str(ld.modified_by) if ld.modified_by else u''),
+                   'StaffNotes ' + (str(ld.administrator_notes) if ld.administrator_notes else u''),
+                   'RecordHistory ' + (str(ld.record_history) if ld.record_history else u''),
+                   'ModifiedOn ' + (str(ld.modified_on) if ld.modified_on else u''),
+                   'CreatedOn ' + (str(ld.created_on) if ld.created_on else u''),
+                    ]
+        return delimiter.join(fields)
+
+    return u' // '.join(map(lambda x: entry(x), qs))
 
 def _pages(obj, extra, config={}):
     if not getattr(obj, 'part_details', None):
@@ -376,7 +407,7 @@ def _includes_series_article(obj, extra, config={}):
 
 def _related_authorities(obj, extra, config={}):
     qs = obj.acrelation_set.all()
-    fields, additional_fields = _get_metadata_fields(config)
+    fields, additional_fields = _get_metadata_fields_authority(config)
 
     return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
 
@@ -384,7 +415,10 @@ def _related_citations(obj, extra, config={}):
     qs_from = obj.relations_from.all()
     qs_to = obj.relations_to.all()
 
-    return u' // '.join(map(functools.partial(create_ccr_string,delimiter=_get_fields_delimiter(config)), qs_from.values_list(*ccr_from_fields)) + map(functools.partial(create_ccr_string,delimiter=_get_fields_delimiter(config)), qs_to.values_list(*ccr_to_fields)))
+    fields_object, additional_fields_object = _get_metadata_fields_citation(config, 'object')
+    fields_subject, additional_fields_subject = _get_metadata_fields_citation(config, 'subject')
+
+    return u' // '.join(map(functools.partial(create_ccr_string,additional_fields=additional_fields_object, delimiter=_get_fields_delimiter(config)), qs_from.values_list(*fields_object)) + map(functools.partial(create_ccr_string,additional_fields=additional_fields_subject,delimiter=_get_fields_delimiter(config)), qs_to.values_list(*fields_subject)))
 
 
 def _extent(obj, extra, config={}):
