@@ -175,7 +175,7 @@ def _get_metadata_fields_citation(config, type):
     fields = ccr_fields
     additional_fields = []
     if 'export_metadata' in config and config['export_metadata']:
-        fields = ccr_from_fields + [type + '__created_by_native__username', type + '__modified_by__username', type + '__administrator_notes', type + '__record_history', type + '__modified_on', type + '__created_native']
+        fields = ccr_fields + [type + '__created_by_native__username', type + '__modified_by__username', type + '__administrator_notes', type + '__record_history', type + '__modified_on', type + '__created_native']
         additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
 
     return fields, additional_fields
