@@ -157,7 +157,7 @@ ccr_to_fields = ['id',
 def _get_metadata_fields_authority(config):
     fields = acr_fields
     additional_fields = []
-    if config['export_metadata']:
+    if 'export_metadata' in config and config['export_metadata']:
         fields = acr_fields + ['authority__created_by_stored__username', 'authority__modified_by__username', 'authority__administrator_notes', 'authority__record_history', 'authority__modified_on', 'authority__created_on_stored']
         additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
 
@@ -174,7 +174,7 @@ def _get_metadata_fields_citation(config, type):
              ]
     fields = ccr_fields
     additional_fields = []
-    if config['export_metadata']:
+    if 'export_metadata' in config and config['export_metadata']:
         fields = ccr_from_fields + [type + '__created_by_native__username', type + '__modified_by__username', type + '__administrator_notes', type + '__record_history', type + '__modified_on', type + '__created_native']
         additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
 
@@ -308,7 +308,9 @@ def _linked_data(obj, extra, config={}):
 
     def entry(ld, delimiter=u" "):
         fields = ['Type ' + (str(ld.type_controlled.name) if ld.type_controlled.name else u''),
-                   'URN ' + (str(ld.universal_resource_name) if ld.universal_resource_name else u''),
+                   'URN ' + (str(ld.universal_resource_name) if ld.universal_resource_name else u'')]
+        if 'export_metadata' in config and config['export_metadata']:
+            fields += [
                    'CreatedBy ' + (str(ld.created_by) if ld.created_by else u''),
                    'ModifiedBy ' + (str(ld.modified_by) if ld.modified_by else u''),
                    'StaffNotes ' + (str(ld.administrator_notes) if ld.administrator_notes else u''),
@@ -318,7 +320,7 @@ def _linked_data(obj, extra, config={}):
                     ]
         return delimiter.join(fields)
 
-    return u' // '.join(map(lambda x: entry(x), qs))
+    return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
 
 def _pages(obj, extra, config={}):
     if not getattr(obj, 'part_details', None):
@@ -429,8 +431,23 @@ def _extent(obj, extra, config={}):
 def _attributes(obj, extra, config={}):
     qs = obj.attributes.all()
 
+    def entry(attr, delimiter=u" "):
+        fields = ['Type ' + (str(attr.type_controlled.name) if attr.type_controlled.name else u''),
+                   'Value ' + (str(attr.value.cvalue()) if attr.value.cvalue() else u''),
+                   'FreeFormValue ' + (attr.value_freeform if attr.value_freeform else u'')]
+        if 'export_metadata' in config and config['export_metadata']:
+            fields += [
+                   'CreatedBy ' + (str(attr.created_by) if attr.created_by else u''),
+                   'ModifiedBy ' + (str(attr.modified_by) if attr.modified_by else u''),
+                   'StaffNotes ' + (str(attr.administrator_notes) if attr.administrator_notes else u''),
+                   'RecordHistory ' + (str(attr.record_history) if attr.record_history else u''),
+                   'ModifiedOn ' + (str(attr.modified_on) if attr.modified_on else u''),
+                   'CreatedOn ' + (str(attr.created_on) if attr.created_on else u''),
+                    ]
+        return delimiter.join(fields)
+
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: u' '.join(['Type ' + x.type_controlled.name, 'Value ' + str(x.value.cvalue()), 'FreeFormValue ' + x.value_freeform]), qs))
+        return u' // '.join(map(lambda x: entry(x), qs))
 
     return u""
 
