@@ -447,7 +447,7 @@ def _attributes(obj, extra, config={}):
         return delimiter.join(fields)
 
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: entry(x), qs))
+        return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
 
     return u""
 
