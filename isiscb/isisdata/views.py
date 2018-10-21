@@ -979,7 +979,8 @@ def authority_author_timeline(request, authority_id):
     SHOWN_TITLES_COUNT = 3
     titles = {}
 
-    for year in range(1970, now.year):
+    # including the current year
+    for year in range(1970, now.year+1):
         years.append(str(year))
         book_count.append(books.get(year, (0, []))[0])
         thesis_count.append(theses.get(year, (0, []))[0])
