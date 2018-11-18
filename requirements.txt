@@ -14,7 +14,7 @@ celery==4.1.0
 cement==2.8.2
 chardet==3.0.2
 colorama==0.3.7
-Django==1.11.10
+Django==1.11.15
 django-autocomplete-light==2.3.2
 django-braces==1.11.0
 django-celery-results==1.0.1
@@ -74,7 +74,7 @@ PyYAML==3.11
 rdflib==4.2.1
 redis==2.10.5
 regex==2016.11.21
-requests==2.9.1
+requests==2.20.0
 requests-oauthlib==0.8.0
 rules==1.2
 semantic-version==2.5.0
