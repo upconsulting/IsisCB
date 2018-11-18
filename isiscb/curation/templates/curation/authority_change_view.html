@@ -184,6 +184,14 @@
                       <label>{{ form.belongs_to.label }}</label>
                       {{ form.belongs_to|addcss:"form-control input-sm" }}
                   </div>
+
+                  {% for error in form.administrator_notes.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ form.administrator_notes.label }}</label>
+                      {{ form.administrator_notes|addcss:"form-control input-sm" }}
+                  </div>
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">

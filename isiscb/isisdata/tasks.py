@@ -94,6 +94,13 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 @shared_task
 def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print 'export to csv:: %s' % str(task_id)
+    if config['export_metadata']:
+        fields.append('creator')
+        fields.append('modifier')
+        fields.append('staff-notes')
+        fields.append('record-history')
+        fields.append('modified-date')
+        fields.append('created-date')
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
         columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)

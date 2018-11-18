@@ -2760,6 +2760,7 @@ def export_citations(request):
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
             export_linked_records = form.cleaned_data.get('export_linked_records')
+            export_metadata = form.cleaned_data.get('export_metadata', False)
             use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
 
             # TODO: generalize this, so that we are not tied directly to S3.
@@ -2776,6 +2777,7 @@ def export_citations(request):
             # configuration for export
             config = {
                 'authority_delimiter': " || " if use_pipe_delimiter else " ",
+                'export_metadata': export_metadata
             }
 
             # We create the AsyncTask object first, so that we can keep it
@@ -2832,6 +2834,7 @@ def export_authorities(request):
             # Start the export process.
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
+            export_metadata = form.cleaned_data.get('export_metadata', False)
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2845,12 +2848,17 @@ def export_authorities(request):
             # if _compress:
             #     s3_path += '.gz'
 
+            # configuration for export
+            config = {
+                'export_metadata': export_metadata
+            }
+
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
             result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
-                                                    task.id, 'Authority')
+                                                    task.id, 'Authority', config=config)
 
             # We can use the AsyncResult's UUID to access this task later, e.g.
             #  to check the return value or task state.

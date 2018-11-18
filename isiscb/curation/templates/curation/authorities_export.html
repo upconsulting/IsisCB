@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load staticfiles %}
 {% load addcss %}
+{% load general_tags %}
 
 {% block content %}
 <div class="h2">Export authorities</div>
@@ -19,11 +20,16 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
-        {% if field.label != 'Filters' %}
+      {% if field|field_type != 'CheckboxInput' %}
+        {% if field|field_type != 'HiddenInput' %}
         <label>{{ field.label }}</label>
-        <span class="pull-right">{{ field.help_text }}</span>
         {% endif %}
+        <span class="pull-right">{{ field.help_text }}</span>
         {{ field|addcss:"form-control" }}
+      {% endif %}
+      {% if field|field_type == 'CheckboxInput' %}
+        <label>{{ field }} {{ field.label }} </label>
+      {% endif %}
     </div>
     <p class="text-muted text">
 

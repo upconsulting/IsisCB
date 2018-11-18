@@ -10,6 +10,7 @@ env:
     - SOCIAL_AUTH_TWITTER_KEY=''
     - SOCIAL_AUTH_FACEBOOK_SECRET=''
     - SOCIAL_AUTH_TWITTER_SECRET=''
+    - BOTO_CONFIG=/dev/null
 before_script:
 - psql -c 'create database isiscb;' -U postgres
 before_install:

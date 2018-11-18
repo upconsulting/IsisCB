@@ -125,6 +125,7 @@ name_preferred = export.Column(u"Name Preferred", _name_preferred)
 attributes = export.Column(u"Attributes", _attributes)
 linked_data = export.Column(u"Linked Data", _linked_data)
 related_citations = export.Column(u"Related Citations", _related_citations)
+creator = export.Column(u"Creator", lambda obj, extra, config={}: obj.created_by_stored)
 
 
 AUTHORITY_COLUMNS = [
@@ -135,7 +136,6 @@ AUTHORITY_COLUMNS = [
     name,
     description,
     classification_system,
-    export.record_history,
     last_name,
     first_name,
     name_suffix,
@@ -143,4 +143,10 @@ AUTHORITY_COLUMNS = [
     attributes,
     linked_data,
     related_citations,
+    export.staff_notes,
+    export.record_history,
+    export.created_on,
+    export.modified_on,
+    creator,
+    export.modifier,
 ]
