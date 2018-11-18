@@ -12,6 +12,11 @@ a {
     color: #032544;
 }
 
+/* Input fields */
+select.high_input {
+  min-height: 350px;
+}
+
 /* Popover */
 .popover {
     font-size: 11px;

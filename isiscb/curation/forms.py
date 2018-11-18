@@ -739,6 +739,7 @@ class ExportCitationsForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     export_linked_records = forms.BooleanField(label="Export linked records (make sure that the 'Link to Record' Field is selected in the field list)", required=False)
+    export_metadata = forms.BooleanField(label="Export metadata", required=False)
     use_pipe_delimiter = forms.BooleanField(label='Use "||" to separate related authority and citation fields', required=False)
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
@@ -749,6 +750,7 @@ class ExportCitationsForm(forms.Form):
 class ExportAuthorityForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
+    export_metadata = forms.BooleanField(label="Export metadata", required=False)
     fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
