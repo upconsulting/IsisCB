@@ -12,6 +12,17 @@ a {
     color: #032544;
 }
 
+.no-gutter {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.no-gutter [class*='col-']:not(:first-child),
+.no-gutter [class*='col-']:not(:last-child) {
+  padding-right: 0;
+  padding-left: 0;
+}
+
 /* Input fields */
 select.high_input {
   min-height: 350px;

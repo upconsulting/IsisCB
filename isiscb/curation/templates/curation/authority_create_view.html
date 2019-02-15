@@ -5,62 +5,347 @@
 
 {% block content %}
 
+<script>
+//# sourceURL=input.js
+$(function() {
+  $(".personInput").hide();
+  $(".dateInput").hide();
+
+  $("#id_linkeddata-type_controlled").prop('required', false);
+  $("#id_start").prop('required', false);
+  $("#id_end").prop('required', false);
+
+  var selectedType = $("#typeDropdownDiv>select").val();
+  if (selectedType == "PE") {
+    $(".personInput").show();
+  } else {
+    $(".personInput").hide();
+  }
+  $("#typeDropdownDiv>select").change(function() {
+    var selectedType = $("#typeDropdownDiv>select").val();
+    if (selectedType == "PE") {
+      $(".personInput").show();
+    } else {
+      $(".personInput").hide();
+    }
+
+    var properNameTypes = ["PE", "IN", "GE"];
+    if (properNameTypes.includes(selectedType)) {
+      $("#id_authority-classification_system").val("PN");
+    } else {
+      $("#id_authority-classification_system").val("SPWC");
+    }
+  });
+
+  $("#attributeDropdownDiv>select").change(function() {
+    var selectedType = $("#attributeDropdownDiv>select option:selected").text();
+    if (selectedType.includes("(isodaterangevalue)")) {
+      $(".dateInput").show();
+      $("#id_start").prop('required', true);
+      $("#id_end").prop('required', false);
+    } else {
+      $(".dateInput").hide();
+      $("#id_start").prop('required', false);
+      $("#id_end").prop('required', false);
+    }
+
+    var value = $("#attributeDropdownDiv>select option:selected").val();
+    var container = $('#value_form_container');
+    container.empty();
+    var form = $('#form_for_' + value).clone();
+    container.append(form);
+  });
+
+  $("#id_authority-name").change(function() {
+    var selectedType = $("#typeDropdownDiv>select").val();
+    if (selectedType == "PE") {
+      var fullName = $("#id_authority-name").val();
+      var lastName = "";
+      var firstName = "";
+      var suffix = "";
+      if (fullName.includes(",")) {
+        lastName = fullName.slice(0, fullName.indexOf(",")).trim();
+        firstName = fullName.slice(fullName.indexOf(",") + 1).trim();
+        if (firstName.includes(",")) {
+          suffix = firstName.slice(firstName.lastIndexOf(",") + 1).trim();
+          firstName = firstName.slice(0, firstName.lastIndexOf(",")).trim();
+        }
+      } else if (fullName.includes(" ")) {
+        lastName = fullName.slice(fullName.lastIndexOf(" ") + 1).trim();
+        firstName = fullName.slice(0, fullName.lastIndexOf(" ")).trim();
+      } else {
+        lastName = fullName.trim();
+      }
+
+      $("#id_person-personal_name_last").val(lastName);
+      $("#id_person-personal_name_first").val(firstName);
+      $("#id_person-personal_name_suffix").val(suffix);
+    }
+  });
+
+  $("#id_attribute-value_freeform").change(function() {
+    var selectedType = $("#attributeDropdownDiv>select option:selected").text();
+    if (selectedType.includes("(isodaterangevalue)")) {
+      var start = "";
+      var end = "";
+      var freetext = $("#id_attribute-value_freeform").val();
+      if (freetext.includes("-")) {
+        start = freetext.slice(0, freetext.indexOf("-")).trim();
+        end = freetext.slice(freetext.indexOf("-") + 1).trim();
+      } else {
+        start = freetext.trim();
+      }
+      $("#id_value-start").val(start);
+      $("#id_value-end").val(end);
+    }
+  });
+
+
+  $("#id_linkeddata-type_controlled").change(function() {
+    var label = $("#id_linkeddata-type_controlled option:selected").text();
+    if (label == "URI") {
+      label = "";
+    }
+    $("#id_linkeddata-resource_name").val(label);
+  });
+});
+</script>
 
 <form class="form" action="{% url 'curation:create_authority' %}" method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_create_authority_header.html" %}
 
+    <div class="h4">Authority Details</div>
 
-<div class="row">
-    <div class="col-sm-12">
-        <div class="h4">Authority Details</div>
-        <div class="row">
-            <div class="col-xs-12">
-                {% for error in form.type_controlled.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control"}}
+        <div class="form-group row">
+          <div class="col-md-4 ">
+          {% for error in form.type_controlled.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="no-gutter">
+              <div class="col-md-2"><label>{{ form.type_controlled.label }}</label></div>
+              <div class="col-md-10" id="typeDropdownDiv">{{ form.type_controlled|addcss:"form-control"}}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-4 ">
+              {% for error in form.name.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="no-gutter">
+                  <label class="col-md-2">{{ form.name.label }}</label>
+                    <div class="col-md-10">{{ form.name|addcss:"form-control"}}</div>
+              </div>
+            </div>
+
+          <div class="col-md-3 personInput">
+            {% for error in person_form.personal_name_last.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="no-gutter">
+                <label class="col-md-2">Last</label>
+                <div class="col-md-10">{{ person_form.personal_name_last|addcss:"form-control"}}</div>
+            </div>
+          </div>
+
+          <div class="col-md-3 personInput">
+            {% for error in person_form.personal_name_first.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="no-gutter">
+                <label class="col-md-2">First</label>
+                <div class="col-md-10">{{ person_form.personal_name_first|addcss:"form-control"}}</div>
+            </div>
+          </div>
+
+          <div class="col-md-2 personInput">
+            {% for error in person_form.personal_name_suffix.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="no-gutter">
+                <label class="col-md-3">Suffix</label>
+                <div class="col-md-9">{{ person_form.personal_name_suffix|addcss:"form-control"}}</div>
+            </div>
+          </div>
+      </div>
+
+      <div class="form-group row">
+        <div class="col-md-3">
+          {% for error in attribute_form.type_controlled.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">Attribute Type</label>
+              <div class="col-md-9" id="attributeDropdownDiv">{{ attribute_form.type_controlled|addcss:"form-control"}}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          {% for error in attribute_form.value_freeform.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">Freeform</label>
+              <div class="col-md-9">{{ attribute_form.value_freeform|addcss:"form-control"}}</div>
+          </div>
+        </div>
+
+        <input type="hidden" id="id_attribute-record_status_value" name="attribute-record_status_value" value="Active" />
+
+        <div class="col-md-6" id="value_form_container">
+          {% with nr_of_fields=value_form.fields|length %}
+          <div class="row">
+            {% for field in value_form %}
+            <div class="col-md-{% if nr_of_fields is 1 %}12{% endif %}{% if nr_of_fields is 2 %}6{% endif %}">
+            <div class="form-group no-gutter">
+                <label class="col-md-3">{{ field.label }}</label>
+                <div class="col-md-9">
+                  {{ field|addcss:"form-control" }}
                 </div>
             </div>
-        </div>
+            </div>
+            {% if field.errors %}
+            <script>
+              var errorMsg = "";
+            {% for error in field.errors %}
+              errorMsg += "{{ error }}";
+            {% endfor %}
+            $("#id_value-value").popover({
+              'content': errorMsg,
+              'title': 'Error',
+              'placement': 'top',
+            });
+            $("#id_value-value").popover('show');
 
-        {% for error in form.name.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.name.label }}</label>
-            {{ form.name|addcss:"form-control"}}
+            $(".popover-title").css('background-color', '#ffc6c6');
+            </script>
+            {% endif %}
+            {% endfor %}
         </div>
-
-        {% for error in form.description.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.description.label }}</label>
-            {{ form.description|addcss:"form-control"}}
-        </div>
-
-        {% for error in form.classification_system.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_system.label }}</label>
-            {{ form.classification_system|addcss:"form-control"}}
-        </div>
-
-        {% for error in form.classification_code.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_code.label }}</label>
-            {{ form.classification_code|addcss:"form-control"}}
-        </div>
+        {% endwith %}
+      </div>
     </div>
 
-</div>
+      <div class="form-group row">
+        <div class="col-md-3">
+          {% for error in linkeddata_form.type_controlled.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">Linked Data Type</label>
+              <div class="col-md-9">{{ linkeddata_form.type_controlled|addcss:"form-control"}}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          {% for error in linkeddata_form.universal_resource_name.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">URN</label>
+              <div class="col-md-9" >
+                <input type="text" name="linkeddata-universal_resource_name" id="id_linkeddata-universal_resource_name" {% if linkeddata_form.universal_resource_name.value %}value="{{linkeddata_form.universal_resource_name.value}}"{% endif %} class="form-control"></input>
+              </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          {% for error in linkeddata_form.resource_name.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">Resource Name</label>
+              <div class="col-md-9">{{ linkeddata_form.resource_name|addcss:"form-control"}}</div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          {% for error in linkeddata_form.url.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="no-gutter">
+              <label class="col-md-3">URL</label>
+              <div class="col-md-9" >
+                <input type="text" name="linkeddata-url" id="id_linkeddata-url" class="form-control"></input>
+              </div>
+          </div>
+        </div>
+
+        </div>
+
+        <div class="row">
+        <div class="col-md-6">
+          {% for error in form.classification_system.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group no-gutter">
+              <label>{{ form.classification_system.label }}</label>
+              {{ form.classification_system|addcss:"form-control"}}
+          </div>
+
+          {% for error in form.belongs_to.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group no-gutter">
+              <label>{{ form.belongs_to.label }}</label>
+              {{ form.belongs_to|addcss:"form-control input-sm" }}
+          </div>
+
+          {% for error in form.administrator_notes.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group no-gutter">
+              <label>{{ form.administrator_notes.label }}</label>
+              {{ form.administrator_notes|addcss:"form-control input-sm" }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          {% for error in form.description.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group no-gutter">
+              <label>{{ form.description.label }}</label>
+              {{ form.description|addcss:"form-control"}}
+          </div>
+        </div>
+        </div>
 
 </form>
+
+<div id="value_forms" style="visibility: hidden;">
+    {% for id, form in value_forms %}
+    <div id="form_for_{{id}}" class="row">
+        {% with nr_of_fields=form.fields|length %}
+        {% for field in form %}
+        <div class="col-md-{% if nr_of_fields is 1 %}12{% endif %}{% if nr_of_fields is 2 %}6{% endif %}">
+        <div class="form-group no-gutter">
+            <label class="col-md-3">{{ field.label }}</label>
+            <div class="col-md-9" id="value_input_div_{{id}}">
+              {{ field|addcss:"form-control" }}
+            </div>
+        </div>
+        </div>
+
+        {% if field.errors %}
+        <script>
+          var errorMsg = "";
+        {% for error in field.errors %}
+          errorMsg.append({{ error }});
+        {% endfor %}
+        $("#value_input_div_{{id}}").popover({
+          'content': errorMsg;
+          'title': 'Error';
+        });
+        $("#value_input_div_{{id}}").popover('show');
+        </script>
+        {% endif %}
+        {% endfor %}
+        {% endwith %}
+    </div>
+    {% endfor %}
+</div>
+
 {% endblock %}
