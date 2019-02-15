@@ -147,21 +147,58 @@ def create_authority(request):
     }
 
     template = 'curation/authority_create_view.html'
-    person_form = None
+
+
+    value_forms = {}
+    for at in AttributeType.objects.all():
+        value_class = at.value_content_type.model_class()
+        if value_class is ISODateValue:
+            value_forms[at.id] = ISODateValueForm
+        elif value_class is AuthorityValue:
+            value_forms[at.id] = AuthorityValueForm
+        else:
+            value_forms[at.id] = modelform_factory(value_class,
+                                    exclude=('attribute', 'child_class'))
+
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
+        person_form = PersonForm(request.user, authority_id=None, prefix='person')
+        attribute_form = AttributeForm(prefix="attribute")
+        daterange_form = modelform_factory(ISODateRangeValue,
+                                exclude=('attribute', 'child_class'))
+        linkeddata_form = LinkedDataForm(prefix='linkeddata')
 
         context.update({
             'form': form,
+            'person_form': person_form,
+            'attribute_form': attribute_form,
+            'linkeddata_form': linkeddata_form,
+            'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
         })
     elif request.method == 'POST':
         authority = Authority()
+        person_form = None
         if request.POST.get('authority-type_controlled', '') == Authority.PERSON:
             authority = Person()
-            person_form = PersonForm(request.user, None, request.POST, instance=authority)
+            person_form = PersonForm(request.user, None, request.POST, prefix='person', instance=authority)
 
         form = AuthorityForm(request.user, request.POST, prefix='authority', instance=authority)
-        if form.is_valid() and (person_form is None or person_form.is_valid()):
+
+        linkeddata_form = None
+        if request.POST.get("linkeddata-type_controlled", ''):
+            linkeddata_form = LinkedDataForm(request.POST, prefix='linkeddata')
+
+        attribute_form = None
+        value_form = None
+        if request.POST.get("attribute-type_controlled", ''):
+            selected_attr_type_controlled = request.POST.get('attribute-type_controlled', None)
+            if selected_attr_type_controlled:
+                attribute_form = AttributeForm(request.POST, prefix='attribute')
+                attribute_form.instance.record_status_value = CuratedMixin.ACTIVE
+                value_form_class = value_forms[int(selected_attr_type_controlled)]
+                value_form = value_form_class(request.POST, prefix='value')
+
+        if form.is_valid() and (person_form is None or person_form.is_valid()) and (linkeddata_form is None or linkeddata_form.is_valid()) and (attribute_form is None or (attribute_form.is_valid() and value_form and value_form.is_valid())):
             if person_form:
                 person_form.save()
 
@@ -170,10 +207,31 @@ def create_authority(request):
             form.instance.created_by_stored = request.user
             authority = form.save()
 
+            if linkeddata_form:
+                # we need to make sure the subjec type is authority, or the generic relations don't work
+                linkeddata_form.instance.subject = Authority.objects.get(pk=authority.id)
+                linkeddata_form.save()
+
+            if attribute_form:
+                attribute_form.instance.source = Authority.objects.get(pk=authority.id)
+                attribute_form.instance.modified_by = request.user
+                attribute_form.instance.save()
+
+                value_form.instance.attribute = attribute_form.instance
+                attribute_form.instance.source = authority
+
+                value_form.save()
+
+
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
         else:
             context.update({
                 'form' : form,
+                'person_form': person_form if person_form else PersonForm(request.user, authority_id=None, prefix='person'),
+                'attribute_form': attribute_form if attribute_form else AttributeForm(prefix="attribute"),
+                'linkeddata_form': linkeddata_form if linkeddata_form else LinkedDataForm(prefix='linkeddata'),
+                'value_form': value_form,
+                'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
             })
     return render(request, template, context)
 

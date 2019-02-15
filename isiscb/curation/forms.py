@@ -653,7 +653,7 @@ class AttributeForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         if self.instance.id:
             self.fields['type_controlled'].initial = self.instance.type_controlled
-        super(AttributeForm, self).save(*args, **kwargs)
+        return super(AttributeForm, self).save(*args, **kwargs)
 
 
 class BulkActionForm(forms.Form):
