@@ -37,6 +37,7 @@ from curation.forms import *
 
 from curation.contrib.views import check_rules
 from curation import tasks as curation_tasks
+import curation.view_helpers as view_helpers
 
 from haystack.query import SearchQuerySet
 
@@ -44,6 +45,7 @@ import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
 import bleach
+
 
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
@@ -149,16 +151,7 @@ def create_authority(request):
     template = 'curation/authority_create_view.html'
 
 
-    value_forms = {}
-    for at in AttributeType.objects.all():
-        value_class = at.value_content_type.model_class()
-        if value_class is ISODateValue:
-            value_forms[at.id] = ISODateValueForm
-        elif value_class is AuthorityValue:
-            value_forms[at.id] = AuthorityValueForm
-        else:
-            value_forms[at.id] = modelform_factory(value_class,
-                                    exclude=('attribute', 'child_class'))
+    value_forms = view_helpers._create_attribute_value_forms()
 
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
@@ -972,16 +965,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
 
-    value_forms = {}
-    for at in AttributeType.objects.all():
-        value_class = at.value_content_type.model_class()
-        if value_class is ISODateValue:
-            value_forms[at.id] = ISODateValueForm
-        elif value_class is AuthorityValue:
-            value_forms[at.id] = AuthorityValueForm
-        else:
-            value_forms[at.id] = modelform_factory(value_class,
-                                    exclude=('attribute', 'child_class'))
+    value_forms = view_helpers._create_attribute_value_forms()
 
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
@@ -1051,16 +1035,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
 
-    value_forms = {}
-    for at in AttributeType.objects.all():
-        value_class = at.value_content_type.model_class()
-        if value_class is ISODateValue:
-            value_forms[at.id] = ISODateValueForm
-        elif value_class is AuthorityValue:
-            value_forms[at.id] = AuthorityValueForm
-        else:
-            value_forms[at.id] = modelform_factory(value_class,
-                                    exclude=('attribute', 'child_class'))
+    value_forms = view_helpers._create_attribute_value_forms()
 
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
