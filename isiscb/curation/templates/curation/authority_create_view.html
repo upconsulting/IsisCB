@@ -2,6 +2,11 @@
 {% load addcss %}
 {% load render_object %}
 {% load permission_tags %}
+{% load static %}
+
+{% block extrahead %}
+<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
+{% endblock %}
 
 {% block content %}
 
@@ -9,11 +14,22 @@
 //# sourceURL=input.js
 $(function() {
   $(".personInput").hide();
-  $(".dateInput").hide();
 
   $("#id_linkeddata-type_controlled").prop('required', false);
   $("#id_start").prop('required', false);
   $("#id_end").prop('required', false);
+
+
+   $('.form-control').keydown(function (e) {
+      if (e.which === 13) {
+          var controls = $('.form-control:visible');
+          var index = controls.index(this) + 1;
+          if (index > 0 && index < controls.length) {
+            controls.eq(index).focus();
+            e.preventDefault();
+          }
+      }
+  });
 
   var selectedType = $("#typeDropdownDiv>select").val();
   if (selectedType == "PE") {
@@ -29,7 +45,7 @@ $(function() {
       $(".personInput").hide();
     }
 
-    var properNameTypes = ["PE", "IN", "GE"];
+    var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
     if (properNameTypes.includes(selectedType)) {
       $("#id_authority-classification_system").val("PN");
     } else {
@@ -40,11 +56,9 @@ $(function() {
   $("#attributeDropdownDiv>select").change(function() {
     var selectedType = $("#attributeDropdownDiv>select option:selected").text();
     if (selectedType.includes("(isodaterangevalue)")) {
-      $(".dateInput").show();
       $("#id_start").prop('required', true);
       $("#id_end").prop('required', false);
     } else {
-      $(".dateInput").hide();
       $("#id_start").prop('required', false);
       $("#id_end").prop('required', false);
     }
@@ -97,6 +111,18 @@ $(function() {
       }
       $("#id_value-start").val(start);
       $("#id_value-end").val(end);
+    } else if (selectedType.includes("(isodatevalue)")) {
+      var freetext = $("#id_attribute-value_freeform").val();
+      // if we have only year, let's do it with regex, since moment.js does weird things
+      var yearRegex = /^[1-9]{4}$/;
+      var matches = freetext.match(yearRegex);
+      if (matches != null) {
+        $("#id_value-value").val(freetext + "-01-01");
+        return;
+      }
+
+      var m = moment(freetext);
+      $("#id_value-value").val(m.format("YYYY-MM-DD"));
     }
   });
 
@@ -315,12 +341,12 @@ $(function() {
 
 </form>
 
-<div id="value_forms" style="visibility: hidden;">
+<div id="value_forms" class="hide">
     {% for id, form in value_forms %}
     <div id="form_for_{{id}}" class="row">
         {% with nr_of_fields=form.fields|length %}
         {% for field in form %}
-        <div class="col-md-{% if nr_of_fields is 1 %}12{% endif %}{% if nr_of_fields is 2 %}6{% endif %}">
+        <div class="col-md-6">
         <div class="form-group no-gutter">
             <label class="col-md-3">{{ field.label }}</label>
             <div class="col-md-9" id="value_input_div_{{id}}">
