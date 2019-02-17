@@ -164,7 +164,7 @@ class ISODateValueForm(forms.ModelForm):
         fields = []
 
 class AuthorityValueForm(forms.ModelForm):
-    value = forms.CharField()
+    value = forms.CharField(label="Authority ID")
     authority_name = forms.CharField(label='Name of stored authority')
 
     def __init__(self, *args, **kwargs):
@@ -340,6 +340,9 @@ class LinkedDataForm(forms.ModelForm):
             'record_status_explanation', 'administrator_notes',
             'record_history'
         ]
+        labels = {
+            'universal_resource_name': 'URN (link to authority)'
+        }
 
     def __init__(self, *args, **kwargs):
         super(LinkedDataForm, self).__init__(*args, **kwargs)
