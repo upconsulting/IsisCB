@@ -4,10 +4,6 @@
 {% load permission_tags %}
 {% load static %}
 
-{% block extrahead %}
-<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
-{% endblock %}
-
 {% block content %}
 
 <script>
@@ -24,11 +20,17 @@ $(function() {
       if (e.which === 13) {
           var controls = $('.form-control:visible');
           var index = controls.index(this) + 1;
-          if (index > 0 && index < controls.length) {
+          if (index > 0 && index < controls.length && $(this).prop('nodeName') != "TEXTAREA") {
             controls.eq(index).focus();
             e.preventDefault();
           }
       }
+  });
+
+  $("#id_authority-belongs_to option").each(function() {
+     if ($(this).text() == 'Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)') {
+       $("#id_authority-belongs_to").val($(this).val());
+     }
   });
 
   var selectedType = $("#typeDropdownDiv>select").val();
@@ -68,6 +70,32 @@ $(function() {
     container.empty();
     var form = $('#form_for_' + value).clone();
     container.append(form);
+
+    // ugly, but ah, what can we do
+    if (selectedType.includes("Gender")) {
+      var selectInput = $("#id-value");
+      var genderDiv = $('<div class="col-md-3"></div>');
+      var maleButton = $('<span><i class="fa fa-male" aria-hidden="true"></i><span>');
+      maleButton.append("<span style='margin-right: 20px;'> Male</span>");
+      maleButton.css('cursor', 'pointer');
+      maleButton.on('click', function() {
+        $("#id_attribute-value_freeform").val("Male");
+        $("#id_value-value").val("Male");
+      });
+      genderDiv.append(maleButton);
+      var femaleButton = $('<span><i class="fa fa-female" aria-hidden="true"></i><span>');
+      femaleButton.append("<span> Female</span>");
+      femaleButton.css('cursor', 'pointer');
+      femaleButton.on('click', function() {
+        $("#id_attribute-value_freeform").val("Female");
+        $("#id_value-value").val("Female");
+      });
+      genderDiv.append(femaleButton);
+      form.append(genderDiv);
+    } else if (selectedType.includes("LastAccessedDate")) {
+      $("#id_attribute-value_freeform").val(moment().format("YYYY-MM-DD"));
+      $("#id_value-value").val(moment().format("YYYY-MM-DD"));
+    }
   });
 
   $("#id_authority-name").change(function() {
@@ -120,7 +148,6 @@ $(function() {
         $("#id_value-value").val(freetext + "-01-01");
         return;
       }
-
       var m = moment(freetext);
       $("#id_value-value").val(m.format("YYYY-MM-DD"));
     }
@@ -199,7 +226,7 @@ $(function() {
       </div>
 
       <div class="form-group row">
-        <div class="col-md-3">
+        <div class="col-md-3" id="attributeTypeCell">
           {% for error in attribute_form.type_controlled.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
@@ -266,37 +293,25 @@ $(function() {
           </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-5">
           {% for error in linkeddata_form.universal_resource_name.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
           <div class="no-gutter">
-              <label class="col-md-3">URN</label>
-              <div class="col-md-9" >
+              <label class="col-md-4">URN (link to authority)</label>
+              <div class="col-md-8" >
                 <input type="text" name="linkeddata-universal_resource_name" id="id_linkeddata-universal_resource_name" {% if linkeddata_form.universal_resource_name.value %}value="{{linkeddata_form.universal_resource_name.value}}"{% endif %} class="form-control"></input>
               </div>
           </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-4">
           {% for error in linkeddata_form.resource_name.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
           <div class="no-gutter">
-              <label class="col-md-3">Resource Name</label>
-              <div class="col-md-9">{{ linkeddata_form.resource_name|addcss:"form-control"}}</div>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          {% for error in linkeddata_form.url.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-          <div class="no-gutter">
-              <label class="col-md-3">URL</label>
-              <div class="col-md-9" >
-                <input type="text" name="linkeddata-url" id="id_linkeddata-url" class="form-control"></input>
-              </div>
+              <label class="col-md-4">Resource Name</label>
+              <div class="col-md-8">{{ linkeddata_form.resource_name|addcss:"form-control"}}</div>
           </div>
         </div>
 
@@ -374,4 +389,8 @@ $(function() {
     {% endfor %}
 </div>
 
+{% endblock %}
+
+{% block extrahead %}
+<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
 {% endblock %}
