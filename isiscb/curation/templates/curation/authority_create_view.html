@@ -161,13 +161,75 @@ $(function() {
     }
     $("#id_linkeddata-resource_name").val(label);
   });
+
+  
+  $("#searchExplorePublic").click(function() {
+    searchService("{% url 'isis-index' %}?models=isisdata.authority&q=")
+  });
+  $("#searchExploreCuration").click(function() {
+    searchService("{% url 'curation:authority_list' %}?name=");
+  });
+  $("#searchWikipedia").click(function() {
+    searchService("https://en.wikipedia.org/w/index.php?search=");
+  });
+  $("#searchGoogle").click(function() {
+    searchService("https://www.google.com/search?q=");
+  });
+  $("#searchViaf").click(function() {
+    var searchTerm = $("#searchInput").val();
+    if (searchTerm != null && searchTerm != '') {
+      var url = "http://viaf.org/viaf/search?query=local.names%20all%20%22" + searchTerm + "%22&sortKeys=holdingscount&recordSchema=BriefVIAF"
+      var win = window.open(url, '_blank');
+      if (win) {
+          win.focus();
+      } else {
+          alert('Please allow popups to use this feature.');
+      }
+    }
+  });
+
 });
+
+function searchService(url) {
+  var searchTerm = $("#searchInput").val();
+  if (searchTerm != null && searchTerm != '') {
+    var url = url + searchTerm;
+    var win = window.open(url, '_blank');
+    if (win) {
+        win.focus();
+    } else {
+        alert('Please allow popups to use this feature.');
+    }
+  }
+}
 </script>
 
 <form class="form" action="{% url 'curation:create_authority' %}" method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_create_authority_header.html" %}
+
+<div class="panel-group" id="searchBox" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#searchBox" href="#searchBoxBody" aria-expanded="true" aria-controls="searchBoxBody">
+          <i class="fa fa-search" aria-hidden="true"></i> Search
+        </a>
+      </h4>
+    </div>
+    <div id="searchBoxBody" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
+        <input class="form-control" style="margin-bottom: 10px;" id="searchInput" placeholder="Enter search term...">
+        <button id="searchExplorePublic" class="btn btn-primary btn-sm">Explore, Authority Search</button>
+        <button id="searchExploreCuration" class="btn btn-primary btn-sm">Explore, Curation Authority Search</button>
+        <button id="searchWikipedia" class="btn btn-primary btn-sm">Wikipedia</button>
+        <button id="searchGoogle" class="btn btn-primary btn-sm">Google</button>
+        <button id="searchViaf" class="btn btn-primary btn-sm">Viaf</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     <div class="h4">Authority Details</div>
 
