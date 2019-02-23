@@ -9,6 +9,28 @@
 <script>
 //# sourceURL=input.js
 $(function() {
+
+  function actOnType(selectedType) {
+    if (selectedType == "PE") {
+      $(".personInput").show();
+      $("#attributeDropdownDiv>select option").each(function(idx, elem) {
+        if ($(elem).text().includes("BirthToDeathDates")) {
+          $("#attributeDropdownDiv>select").val($(elem).val()).trigger('change');
+        }
+      });
+    } else {
+      $(".personInput").hide();
+    }
+
+    if (["PE", "IN", "GE"].includes(selectedType) ) {
+      $("#id_linkeddata-type_controlled option").each(function(idx, elem) {
+        if ($(elem).text() == "VIAF") {
+          $("#id_linkeddata-type_controlled").val($(elem).val()).trigger('change');
+        }
+      });
+    }
+  }
+
   $(".personInput").hide();
 
   $("#id_linkeddata-type_controlled").prop('required', false);
@@ -33,19 +55,10 @@ $(function() {
      }
   });
 
-  var selectedType = $("#typeDropdownDiv>select").val();
-  if (selectedType == "PE") {
-    $(".personInput").show();
-  } else {
-    $(".personInput").hide();
-  }
+  actOnType($("#typeDropdownDiv>select").val());
   $("#typeDropdownDiv>select").change(function() {
     var selectedType = $("#typeDropdownDiv>select").val();
-    if (selectedType == "PE") {
-      $(".personInput").show();
-    } else {
-      $(".personInput").hide();
-    }
+    actOnType(selectedType);
 
     var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
     if (properNameTypes.includes(selectedType)) {
@@ -162,21 +175,41 @@ $(function() {
     $("#id_linkeddata-resource_name").val(label);
   });
 
-  
-  $("#searchExplorePublic").click(function() {
+
+  $("#searchExplorePublic").click(function(e) {
+    e.preventDefault();
     searchService("{% url 'isis-index' %}?models=isisdata.authority&q=")
   });
-  $("#searchExploreCuration").click(function() {
+  $("#searchExploreCuration").click(function(e) {
+    e.preventDefault();
     searchService("{% url 'curation:authority_list' %}?name=");
   });
-  $("#searchWikipedia").click(function() {
+  $("#searchWikipedia").click(function(e) {
+    e.preventDefault();
     searchService("https://en.wikipedia.org/w/index.php?search=");
   });
-  $("#searchGoogle").click(function() {
+  $("#searchGoogle").click(function(e) {
+    e.preventDefault();
     searchService("https://www.google.com/search?q=");
   });
-  $("#searchViaf").click(function() {
-    var searchTerm = $("#searchInput").val();
+  $("#searchLCCN").click(function(e) {
+    e.preventDefault();
+    var searchTerm = $("#id_authority-name").val();
+    if (searchTerm != null && searchTerm != '') {
+      var url = "https://authorities.loc.gov/cgi-bin/Pwebrecon.cgi?Search_Arg=" + searchTerm + "&Search_Code=SHED_&CNT=100"
+      var win = window.open(url, '_blank');
+      if (win) {
+          win.focus();
+      } else {
+          alert('Please allow popups to use this feature.');
+      }
+    }
+  });
+
+
+  $("#searchViaf").click(function(e) {
+    e.preventDefault();
+    var searchTerm = $("#id_authority-name").val();
     if (searchTerm != null && searchTerm != '') {
       var url = "http://viaf.org/viaf/search?query=local.names%20all%20%22" + searchTerm + "%22&sortKeys=holdingscount&recordSchema=BriefVIAF"
       var win = window.open(url, '_blank');
@@ -191,7 +224,7 @@ $(function() {
 });
 
 function searchService(url) {
-  var searchTerm = $("#searchInput").val();
+  var searchTerm = $("#id_authority-name").val();
   if (searchTerm != null && searchTerm != '') {
     var url = url + searchTerm;
     var win = window.open(url, '_blank');
@@ -220,12 +253,12 @@ function searchService(url) {
     </div>
     <div id="searchBoxBody" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
       <div class="panel-body">
-        <input class="form-control" style="margin-bottom: 10px;" id="searchInput" placeholder="Enter search term...">
         <button id="searchExplorePublic" class="btn btn-primary btn-sm">Explore, Authority Search</button>
         <button id="searchExploreCuration" class="btn btn-primary btn-sm">Explore, Curation Authority Search</button>
         <button id="searchWikipedia" class="btn btn-primary btn-sm">Wikipedia</button>
         <button id="searchGoogle" class="btn btn-primary btn-sm">Google</button>
         <button id="searchViaf" class="btn btn-primary btn-sm">Viaf</button>
+        <button id="searchLCCN" class="btn btn-primary btn-sm">LCCN</button>
       </div>
     </div>
   </div>
