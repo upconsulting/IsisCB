@@ -178,19 +178,21 @@ def create_authority(request):
         form = AuthorityForm(request.user, request.POST, prefix='authority', instance=authority)
 
         linkeddata_form = None
-        if request.POST.get("linkeddata-type_controlled", ''):
+        linkeddata_urm = request.POST.get('linkeddata-universal_resource_name', None)
+        linkeddata_type = request.POST.get("linkeddata-type_controlled", None)
+        if linkeddata_urm and linkeddata_type:
             linkeddata_form = LinkedDataForm(request.POST, prefix='linkeddata')
 
         attribute_form = None
         value_form = None
         if request.POST.get("attribute-type_controlled", ''):
             selected_attr_type_controlled = request.POST.get('attribute-type_controlled', None)
-            if selected_attr_type_controlled:
+            attr_freeform = request.POST.get('attribute-value_freeform', None)
+            if selected_attr_type_controlled and attr_freeform:
                 attribute_form = AttributeForm(request.POST, prefix='attribute')
                 attribute_form.instance.record_status_value = CuratedMixin.ACTIVE
                 value_form_class = value_forms[int(selected_attr_type_controlled)]
                 value_form = value_form_class(request.POST, prefix='value')
-
         if form.is_valid() and (person_form is None or person_form.is_valid()) and (linkeddata_form is None or linkeddata_form.is_valid()) and (attribute_form is None or (attribute_form.is_valid() and value_form and value_form.is_valid())):
             if person_form:
                 person_form.save()
@@ -1845,7 +1847,7 @@ def authority(request, authority_id):
             target = reverse('curation:curate_authority', args=[authority.id,])
             search = request.POST.get('search')
             current = request.POST.get('current')
-            print search, current
+
             if search and current:
                 target += '?search=%s&current=%s' % (search, current)
             return HttpResponseRedirect(target)
