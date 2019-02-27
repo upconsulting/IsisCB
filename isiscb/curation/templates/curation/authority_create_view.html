@@ -31,11 +31,23 @@ $(function() {
     }
   }
 
+  function setDefaultDataset() {
+    $("#id_authority-belongs_to option").each(function() {
+       if ($(this).text() == 'Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)') {
+         $("#id_authority-belongs_to").val($(this).val());
+       }
+    });
+  }
+
   $(".personInput").hide();
 
   $("#id_linkeddata-type_controlled").prop('required', false);
   $("#id_start").prop('required', false);
   $("#id_end").prop('required', false);
+  $("#value_form_container input").prop('required', false);
+  $("#value_form_container select").prop('required', false);
+  $("#value_forms input").prop('required', false);
+  $("#value_forms select").prop('required', false);
 
 
    $('.form-control').keydown(function (e) {
@@ -49,13 +61,11 @@ $(function() {
       }
   });
 
-  $("#id_authority-belongs_to option").each(function() {
-     if ($(this).text() == 'Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)') {
-       $("#id_authority-belongs_to").val($(this).val());
-     }
-  });
+
 
   actOnType($("#typeDropdownDiv>select").val());
+  setDefaultDataset();
+
   $("#typeDropdownDiv>select").change(function() {
     var selectedType = $("#typeDropdownDiv>select").val();
     actOnType(selectedType);
@@ -149,6 +159,7 @@ $(function() {
         end = freetext.slice(freetext.indexOf("-") + 1).trim();
       } else {
         start = freetext.trim();
+        end = '0';
       }
       $("#id_value-start").val(start);
       $("#id_value-end").val(end);
@@ -221,6 +232,19 @@ $(function() {
     }
   });
 
+  $("#reset").click(function(e) {
+    var name = $("#id_authority-name").val();
+    $("input:not(#createAuthorityButton)").val('');
+    $("select").val('');
+    var container = $('#value_form_container');
+    container.empty();
+
+    $("#id_authority-name").val(name);
+    setDefaultDataset();
+    $("#id_authority-classification_system").val("SPWC");
+    e.preventDefault();
+  });
+
 });
 
 function searchService(url) {
@@ -242,31 +266,7 @@ function searchService(url) {
 
 {% include "curation/fragment_create_authority_header.html" %}
 
-<div class="panel-group" id="searchBox" role="tablist" aria-multiselectable="true">
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne">
-      <h4 class="panel-title">
-        <a role="button" data-toggle="collapse" data-parent="#searchBox" href="#searchBoxBody" aria-expanded="true" aria-controls="searchBoxBody">
-          <i class="fa fa-search" aria-hidden="true"></i> Search
-        </a>
-      </h4>
-    </div>
-    <div id="searchBoxBody" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-      <div class="panel-body">
-        <button id="searchExplorePublic" class="btn btn-primary btn-sm">Explore, Authority Search</button>
-        <button id="searchExploreCuration" class="btn btn-primary btn-sm">Explore, Curation Authority Search</button>
-        <button id="searchWikipedia" class="btn btn-primary btn-sm">Wikipedia</button>
-        <button id="searchGoogle" class="btn btn-primary btn-sm">Google</button>
-        <button id="searchViaf" class="btn btn-primary btn-sm">Viaf</button>
-        <button id="searchLCCN" class="btn btn-primary btn-sm">LCCN</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-    <div class="h4">Authority Details</div>
-
-        <div class="form-group row">
+        <div class="form-group row" style="padding-top: 10px;">
           <div class="col-md-4 ">
           {% for error in form.type_controlled.errors %}
             <div class="alert alert-danger">{{ error }}</div>
@@ -320,7 +320,7 @@ function searchService(url) {
           </div>
       </div>
 
-      <div class="form-group row">
+      <div class="form-group row" id="attribute-row">
         <div class="col-md-3" id="attributeTypeCell">
           {% for error in attribute_form.type_controlled.errors %}
           <div class="alert alert-danger">{{ error }}</div>
@@ -361,12 +361,12 @@ function searchService(url) {
             {% for error in field.errors %}
               errorMsg += "{{ error }}";
             {% endfor %}
-            $("#id_value-value").popover({
+            $("#id_value-{{ field.name }}").popover({
               'content': errorMsg,
               'title': 'Error',
               'placement': 'top',
             });
-            $("#id_value-value").popover('show');
+            $("#id_value-{{ field.name }}").popover('show');
 
             $(".popover-title").css('background-color', '#ffc6c6');
             </script>

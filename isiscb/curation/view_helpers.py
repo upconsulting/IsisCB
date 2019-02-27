@@ -1,4 +1,5 @@
 from django.forms import modelform_factory, formset_factory
+from django.forms.widgets import *
 from isisdata.models import *
 from curation.forms import *
 
