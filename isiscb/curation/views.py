@@ -1806,19 +1806,19 @@ def authority(request, authority_id):
         # attributes ISISCB-1161
         first_attributes = authority.attributes.all()[:3]
         attribute_forms = []
-        current_value_forms = []
         if first_attributes:
             for idx in range(3):
+                value_form_class = -1
                 if idx < len(first_attributes):
                     attribute = first_attributes[idx]
                     if hasattr(attribute, 'value'):
                         value = attribute.value.get_child_class()
                         value_form_class = value_forms[attribute.type_controlled.id]
                         attribute_form = AttributeForm(instance=attribute, prefix='attribute'+str(idx))
-                        current_value_forms.append(value_form_class)
+                        attribute_forms.append((attribute_form, value_form_class(instance=attribute.value, prefix="value" + str(idx))))
                 else:
                     attribute_form = AttributeForm(prefix='attribute'+str(idx))
-                attribute_forms.append(attribute_form)
+                    attribute_forms.append((attribute_form, None))
 
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}

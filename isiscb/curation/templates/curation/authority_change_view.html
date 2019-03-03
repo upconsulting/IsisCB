@@ -172,13 +172,13 @@
                 <!-- 2nd column -->
                 <div class="col-sm-6">
 
+                <div class="row">
                   {{ form.redirect_to }}
                   {% for error in form.redirect_to.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
 
-                  <div class="row">
-                      <label class="col-xs-3">{{ form.redirect_to.label }}</label>
+                      <label class="col-xs-3" style="padding-left: 0px;">{{ form.redirect_to.label }}</label>
 
                       <div class="input-group col-xs-9">
                           <input type="text"
@@ -196,6 +196,39 @@
                       </div>
                   </div>
 
+                  <div class="row">
+                  <h5>Attributes</h5>
+                  </div>
+                  {% for attr_forms in attribute_forms %}
+                  <div class="row">
+
+                    {% for error in attr_forms.0.type_controlled.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    <div class="no-gutter">
+                        <label class="col-md-1">Type</label>
+                        <div class="col-md-4" id="attributeDropdownDiv">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs"}}</div>
+                        <label class="col-md-2">Freeform</label>
+                        <div class="col-md-5">{{ attr_forms.0.value_freeform|addcss:"form-control input-xs"}}</div>
+                    </div>
+                  </div>
+
+                    {% if attr_forms.1 %}
+                    {% for field in attr_forms.1 %}
+                    <div class="row">
+                      <div class="no-gutter">
+                        <div class="col-md-5"></div>
+                        <label class="col-md-2">
+                          {{ field.label}}
+                        </label>
+                        <div class="col-md-5">{{ field|addcss:"form-control input-xs"}}</div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+
+                  {% endfor %}
 
 
                 </div>
