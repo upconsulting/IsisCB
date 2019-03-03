@@ -5,17 +5,15 @@
 <div class="row">
 <div class="col-md-4">
 <div class="h4">
-    <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance.name|safe }}</strong>
+    <span class="text-warning"><a href="{{ instance|get_uri }}">{{ instance.id }}</a></span> | <strong>{{ instance.name|safe }}</strong>
 </div>
 <div class="h5">
     <span class="text-warning">{{ instance.get_type_controlled_display }}:</span> {{ instance|get_date_attributes }}
 </div>
-<p class="">
-    <span class="label label-primary">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
-</p>
 </div>
 
-<div class="col-md-4 text-center">
+<div class="row col-md-8">
+<div class="col-md-6 text-center">
   {% if previous %}
   <a href="{% url 'curation:curate_authority' previous %}?search={{ search_key }}&current={{ previous_index }}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
   {% endif %}
@@ -30,10 +28,26 @@
   {% endif %}
 </div>
 
-<div class="col-md-4 text-right">
+<div class="col-md-6 text-right">
     Record {{ index }} of {{ total }}
     <div class="btn-group">
         <input type="submit" value="Save" class="btn btn-success" />
     </div>
+
+</div>
+</div>
+<div class="row col-md-8" style="padding-top: 10px;">
+  <div class="button-group text-right col-md-12">
+    <div class="row">
+        <input type="text" id="searchAuthorityExternal" style="width: 300px" class="pull-left form-control input-xs" placeholder="Enter text to search using buttons on the right."/>
+        <button id="searchExplorePublic" class="btn btn-primary btn-xs">Explore, Authority Search</button>
+        <button id="searchExploreCuration" class="btn btn-primary btn-xs">Explore, Curation Authority Search</button>
+        <button id="searchWikipedia" class="btn btn-primary btn-xs">Wikipedia</button>
+        <button id="searchGoogle" class="btn btn-primary btn-xs">Google</button>
+        <button id="searchViaf" class="btn btn-primary btn-xs">Viaf</button>
+        <button id="searchLCCN" class="btn btn-primary btn-xs">LCCN</button>
+
+    </div>
+  </div>
 </div>
 </div>

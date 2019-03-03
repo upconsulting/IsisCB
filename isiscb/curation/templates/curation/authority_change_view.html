@@ -30,7 +30,7 @@
 
 <div id="authorityView" >
 
-<form class="form" action="." method="POST">
+<form class="form form-horizontal" action="." method="POST">
     {% csrf_token %}
 
     <input type="hidden" name="search" value="{{ search_key }}">
@@ -48,8 +48,8 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control input-sm"}}
+                    <label class="col-xs-3">{{ form.type_controlled.label }}</label>
+                    <div class="col-xs-9">{{ form.type_controlled|addcss:"form-control input-xs"}}</div>
                 </div>
             </div>
 
@@ -58,82 +58,90 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ form.record_status_value.label }}</label>
-                    {{ form.record_status_value|addcss:"form-control input-sm"}}
+                    <label class="col-xs-3">Status</label>
+                    <div class="col-xs-9">{{ form.record_status_value|addcss:"form-control input-xs"}}</div>
                 </div>
             </div>
         </div>
 
-        {{ form.redirect_to }}
-        {% for error in form.redirect_to.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-
-        <div class="form-group">
-            <label>{{ form.redirect_to.label }}</label>
-
-            <div class="input-group">
-                <input type="text"
-                    class="form-control input-sm"
-                    name="authority-search"
-                    autocomplete="off"
-                    id="authority-search" />
-                    <ul class="list-group" id="results-container"></ul>
-                <span class="input-group-btn">
-                    <span class="btn" id="remove_redirect">
-                        <span class="glyphicon glyphicon-remove"
-                            style="color: red;"></span>
-                    </span>
-                </span>
-            </div>
+        <div class="row ">
+          {% for error in form.name.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+            <label class="col-xs-2">{{ form.name.label }}</label>
+            <div class="col-xs-10">{{ form.name|addcss:"form-control input-xs"}}</div>
         </div>
 
-        {% for error in form.name.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.name.label }}</label>
-            {{ form.name|addcss:"form-control input-sm"}}
-        </div>
+        {% if person_form %}
+        <div class="row " style="padding-top: 10px;">
+          {% for error in person_form.personal_name_last.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          {% for error in person_form.personal_name_first.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          {% for error in person_form.personal_name_suffix.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <label class="col-xs-1">Last</label>
+          <div class="col-xs-4">{{ person_form.personal_name_last|addcss:"form-control input-xs"}}</div>
 
+          <label class="col-xs-1" style="padding-left: 0px;">First</label>
+          <div class="col-xs-3">{{ person_form.personal_name_first|addcss:"form-control input-xs"}}</div>
+
+          <label class="col-xs-1" style="padding-left: 0px;">Suffix</label>
+          <div class="col-xs-2">{{ person_form.personal_name_suffix|addcss:"form-control input-xs"}}</div>
+        </div>
+        {% endif %}
+
+        <div class="row">
         {% for error in form.description.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.description.label }}</label>
-            {{ form.description|addcss:"form-control input-sm"}}
+        <div class="col-xs-12">
+            <label class="control-label">{{ form.description.label }}</label>
+            <div>{{ form.description|addcss:"form-control input-xs"}}</div>
+        </div>
         </div>
 
+        <div class="row" style="padding-top: 10px;">
         {% for error in form.classification_system.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_system.label }}</label>
-            {{ form.classification_system|addcss:"form-control input-sm"}}
+        <div>
+            <label class="col-xs-3">{{ form.classification_system.label }}</label>
+            <div class="col-xs-9">{{ form.classification_system|addcss:"form-control input-xs"}}</div>
+        </div>
         </div>
 
+        <div class="row">
         {% for error in form.classification_code.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_code.label }}</label>
-            {{ form.classification_code|addcss:"form-control input-sm"}}
+        <div>
+            <label class="col-xs-3">{{ form.classification_code.label }}</label>
+            <div class="col-xs-9">{{ form.classification_code|addcss:"form-control input-xs"}}</div>
+        </div>
         </div>
 
-        {% for error in form.record_status_explanation.errors %}
+        <div class="row">
+        {% for error in form.belongs_to.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.record_status_explanation.label }}</label>
-            {{ form.record_status_explanation|addcss:"form-control input-sm"}}
+        <div>
+            <label class="col-xs-3">{{ form.belongs_to.label }}</label>
+            <div class="col-xs-9">{{ form.belongs_to|addcss:"form-control input-xs" }}</div>
+        </div>
         </div>
 
-        {% for error in form.record_history.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.record_history.label }}</label>
-            {{ form.record_history|addcss:"form-control input-sm"}}
+        <div class="row">
+          {% for error in form.administrator_notes.errors %}
+          <div class="alert alert-danger">{{ error }}</div>
+          {% endfor %}
+          <div class="col-xs-12">
+              <label>{{ form.administrator_notes.label }}</label>
+              {{ form.administrator_notes|addcss:"form-control input-xs" }}
+          </div>
         </div>
     </div>
     <div class="col-sm-8">
@@ -161,39 +169,77 @@
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
 
+                <!-- 2nd column -->
                 <div class="col-sm-6">
-                    {% if person_form %}
-                    <div class="h4">Person Details</div>
-                    {% for field in person_form %}
-                    {% for error in field.errors %}
+
+                  {{ form.redirect_to }}
+                  {% for error in form.redirect_to.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+
+                  <div class="row">
+                      <label class="col-xs-3">{{ form.redirect_to.label }}</label>
+
+                      <div class="input-group col-xs-9">
+                          <input type="text"
+                              class="form-control input-xs"
+                              name="authority-search"
+                              autocomplete="off"
+                              id="authority-search" />
+                              <ul class="list-group" id="results-container"></ul>
+                          <span class="input-group-btn" style="padding-top: 0px;">
+                              <span class="btn" style="padding-top: 2px; padding-left: 3px;" id="remove_redirect">
+                                  <span class="glyphicon glyphicon-remove"
+                                      style="color: red;"></span>
+                              </span>
+                          </span>
+                      </div>
+                  </div>
+
+
+
+                </div>
+
+                <!-- 3rd column -->
+                <div class="col-sm-6">
+
+                  <div class="row">
+                    {% for error in form.record_status_explanation.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    <div class="form-group form-group-xs">
+                        <label class="col-xs-3">Status Explanation</label>
+                        <div class="col-xs-9">{{ form.record_status_explanation|addcss:"form-control input-xs"}}</div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    {% for error in form.record_history.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="form-group">
-                        <label>{{ field.label }}</label>
-                        {{ field|addcss:"form-control input-sm" }}
+                        <label class="col-xs-12">{{ form.record_history.label }}</label>
+                        <div class="col-xs-12">{{ form.record_history|addcss:"form-control input-xs"}}</div>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                  </div>
 
-                <div class="col-sm-6">
-                  {% for error in form.belongs_to.errors %}
+                  {% if person_form %}
+                  <div class="row">
+                  <h5>Unused fields</h5>
+
+                  {% for error in person_form.personal_name_preferred.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
                   <div class="form-group">
-                      <label>{{ form.belongs_to.label }}</label>
-                      {{ form.belongs_to|addcss:"form-control input-sm" }}
+                    <label class="col-xs-3">Preferred name</label>
+                    <div class="col-xs-9">{{ person_form.personal_name_preferred|addcss:"form-control input-xs"}}</div>
                   </div>
+                  </div>
+                  {% endif %}
 
-                  {% for error in form.administrator_notes.errors %}
-                  <div class="alert alert-danger">{{ error }}</div>
-                  {% endfor %}
-                  <div class="form-group">
-                      <label>{{ form.administrator_notes.label }}</label>
-                      {{ form.administrator_notes|addcss:"form-control input-sm" }}
-                  </div>
                 </div>
             </div>
+
             <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">
                 {% include "curation/fragment_authority_attributes.html" %}
             </div>
@@ -248,6 +294,9 @@
 $('#id_language').multiSelect()
 
 $(document).ready(function() {
+
+    setRedirectFieldAccessiblity();
+
     var lastSearch = $.now();
     var waiting = false;
 
@@ -305,10 +354,87 @@ $(document).ready(function() {
         });
     });
 
+    $("#id_authority-record_status_value").change(function() {
+      setRedirectFieldAccessiblity();
+    });
+
     $('#remove_redirect').on("click", function(e) {
+      // if status is not redirect, let's not let the user remove the redirect
+      var statusVal = $("#id_authority-record_status_value").val();
+      if (statusVal == 'Redirect') {
         $('#id_authority-redirect_to').val("");
         $('#authority-search').val("");
+      }
     });
+
+    $("#searchExplorePublic").click(function(e) {
+      e.preventDefault();
+      searchService("{% url 'isis-index' %}?models=isisdata.authority&q=")
+    });
+    $("#searchExploreCuration").click(function(e) {
+      e.preventDefault();
+      searchService("{% url 'curation:authority_list' %}?name=");
+    });
+    $("#searchWikipedia").click(function(e) {
+      e.preventDefault();
+      searchService("https://en.wikipedia.org/w/index.php?search=");
+    });
+    $("#searchGoogle").click(function(e) {
+      e.preventDefault();
+      searchService("https://www.google.com/search?q=");
+    });
+    $("#searchLCCN").click(function(e) {
+      e.preventDefault();
+      var searchTerm = $("#searchAuthorityExternal").val();
+      if (searchTerm != null && searchTerm != '') {
+        var url = "https://authorities.loc.gov/cgi-bin/Pwebrecon.cgi?Search_Arg=" + searchTerm + "&Search_Code=SHED_&CNT=100"
+        var win = window.open(url, '_blank');
+        if (win) {
+            win.focus();
+        } else {
+            alert('Please allow popups to use this feature.');
+        }
+      }
+    });
+
+
+    $("#searchViaf").click(function(e) {
+      e.preventDefault();
+      var searchTerm = $("#searchAuthorityExternal").val();
+      if (searchTerm != null && searchTerm != '') {
+        var url = "http://viaf.org/viaf/search?query=local.names%20all%20%22" + searchTerm + "%22&sortKeys=holdingscount&recordSchema=BriefVIAF"
+        var win = window.open(url, '_blank');
+        if (win) {
+            win.focus();
+        } else {
+            alert('Please allow popups to use this feature.');
+        }
+      }
+    });
+
+  function searchService(url) {
+    var searchTerm = $("#searchAuthorityExternal").val();
+    if (searchTerm != null && searchTerm != '') {
+      var url = url + searchTerm;
+      var win = window.open(url, '_blank');
+      if (win) {
+          win.focus();
+      } else {
+          alert('Please allow popups to use this feature.');
+      }
+    }
+  }
+
+  function setRedirectFieldAccessiblity() {
+    var statusVal = $("#id_authority-record_status_value").val();
+    if (statusVal == 'Redirect') {
+      $('#authority-search').attr('readonly', false);
+      $("#remove_redirect").removeClass("disabled");
+    } else {
+      $('#authority-search').attr('readonly', true);
+      $("#remove_redirect").addClass("disabled");
+    }
+  }
 });
 </script>
 {% endblock %}

@@ -1773,6 +1773,7 @@ def authority(request, authority_id):
     template = 'curation/authority_change_view.html'
 
     person_form = None
+    value_forms = view_helpers._create_attribute_value_forms()
     if request.method == 'GET':
 
         user_session = request.session
@@ -1802,10 +1803,28 @@ def authority(request, authority_id):
         if not get_request.get('zotero_accession', ''):
             get_request['zotero_accession'] = ''
 
+        # attributes ISISCB-1161
+        first_attributes = authority.attributes.all()[:3]
+        attribute_forms = []
+        current_value_forms = []
+        if first_attributes:
+            for idx in range(3):
+                if idx < len(first_attributes):
+                    attribute = first_attributes[idx]
+                    if hasattr(attribute, 'value'):
+                        value = attribute.value.get_child_class()
+                        value_form_class = value_forms[attribute.type_controlled.id]
+                        attribute_form = AttributeForm(instance=attribute, prefix='attribute'+str(idx))
+                        current_value_forms.append(value_form_class)
+                else:
+                    attribute_form = AttributeForm(prefix='attribute'+str(idx))
+                attribute_forms.append(attribute_form)
+
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}
         for key, value in get_request.items():
             safe_get_request[escape(key)] = escape(value)
+
         context.update({
             'request_params': request_params,
             'filters': safe_get_request,
@@ -1816,6 +1835,7 @@ def authority(request, authority_id):
             'total_acrelations': authority.acrelation_set.count(),
             'person_form': person_form,
             'tracking_records': tracking_records,
+            'attribute_forms': attribute_forms,
             # 'total': filtered_objects.qs.count(),
         })
 
