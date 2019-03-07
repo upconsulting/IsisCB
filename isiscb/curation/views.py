@@ -1041,6 +1041,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
+        
         if hasattr(attribute, 'value'):
             value = attribute.value.get_child_class()
             value_form_class = value_forms[attribute.type_controlled.id]
@@ -1069,13 +1070,15 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
             attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
 
             value_instance = value if value else None
-            value_form = value_form_class(request.POST, instance=value_instance, prefix='value')
+            if value_form_class:
+                value_form = value_form_class(request.POST, instance=value_instance, prefix='value')
         else:    # Create.
             attribute_form = AttributeForm(request.POST, prefix='attribute')
             selected_type_controlled = request.POST.get('attribute-type_controlled', None)
             if selected_type_controlled:
                 value_form_class = value_forms[int(selected_type_controlled)]
-                value_form = value_form_class(request.POST, prefix='value')
+                if value_form_class:
+                    value_form = value_form_class(request.POST, prefix='value')
 
         if attribute_form.is_valid() and value_form and value_form.is_valid():
             attribute_form.instance.source = authority
@@ -1774,6 +1777,9 @@ def authority(request, authority_id):
 
     person_form = None
     value_forms = view_helpers._create_attribute_value_forms()
+    context.update({
+        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+    })
     if request.method == 'GET':
 
         user_session = request.session
@@ -1806,24 +1812,23 @@ def authority(request, authority_id):
         # attributes ISISCB-1161
         first_attributes = authority.attributes.all()[:3]
         attribute_forms = []
-        if first_attributes:
-            for idx in range(3):
-                value_form_class = -1
-                if idx < len(first_attributes):
-                    attribute = first_attributes[idx]
-                    if hasattr(attribute, 'value'):
-                        value = attribute.value.get_child_class()
-                        value_form_class = value_forms[attribute.type_controlled.id]
-                        attribute_form = AttributeForm(instance=attribute, prefix='attribute'+str(idx))
-                        attribute_forms.append((attribute_form, value_form_class(instance=attribute.value, prefix="value" + str(idx))))
-                else:
-                    attribute_form = AttributeForm(prefix='attribute'+str(idx))
-                    attribute_forms.append((attribute_form, None))
+        for idx in range(3):
+            if idx < len(first_attributes):
+                attribute = first_attributes[idx]
+                if hasattr(attribute, 'value'):
+                    value = attribute.value.get_child_class()
+                    value_form_class = value_forms[attribute.type_controlled.id]
+                    attribute_form = AttributeForm(instance=attribute, prefix='attribute'+str(idx))
+                    forms = (attribute_form, value_form_class(instance=value, prefix="value" + str(idx)))
+                    attribute_forms.append(forms)
+            else:
+                attribute_forms.append(_create_empty_attribute_value_forms(idx))
 
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}
         for key, value in get_request.items():
             safe_get_request[escape(key)] = escape(value)
+
 
         context.update({
             'request_params': request_params,
@@ -1836,7 +1841,6 @@ def authority(request, authority_id):
             'person_form': person_form,
             'tracking_records': tracking_records,
             'attribute_forms': attribute_forms,
-            # 'total': filtered_objects.qs.count(),
         })
 
     elif request.method == 'POST':
@@ -1857,12 +1861,61 @@ def authority(request, authority_id):
             except Person.DoesNotExist:
                 person_form = None
 
+        attribute_forms = []
+        attributes_valid = True
+        attribute_forms_to_save = []
+        for idx in range(3):
+            attr_form_prefix = 'attribute' + str(idx)
+            value_form_prefix = 'value' + str(idx)
+            attribute_id = request.POST.get(attr_form_prefix + '-id', '')
+            if attribute_id:
+                attribute = get_object_or_404(Attribute, pk=attribute_id)
+                value = None
+                if hasattr(attribute, 'value'):
+                    value = attribute.value.get_child_class()
+                    value_form_class = value_forms[attribute.type_controlled.id]
+                attribute_form = AttributeForm(request.POST, instance=attribute, prefix="attribute"+str(idx))
+
+                value_instance = value if value else None
+                value_form = value_form_class(request.POST, instance=value_instance, prefix=value_form_prefix)
+
+                form_pair = (attribute_form, value_form)
+                attribute_forms.append(form_pair)
+                attribute_forms_to_save.append(form_pair)
+                attributes_valid = attributes_valid and attribute_form.is_valid() and value_form.is_valid()
+            else:
+                if request.POST.get(attr_form_prefix + "-type_controlled", ''):
+                    selected_attr_type_controlled = request.POST.get(attr_form_prefix + '-type_controlled', None)
+                    attr_freeform = request.POST.get(attr_form_prefix + '-value_freeform', None)
+                    if selected_attr_type_controlled and attr_freeform:
+                        attribute_form = AttributeForm(request.POST, prefix=attr_form_prefix)
+                        value_form_class = value_forms[int(selected_attr_type_controlled)]
+                        value_form = value_form_class(request.POST, prefix=value_form_prefix)
+
+                        form_pair = (attribute_form, value_form)
+                        attribute_forms.append(form_pair)
+                        attribute_forms_to_save.append(form_pair)
+                        attributes_valid = attributes_valid and attribute_form.is_valid() and value_form.is_valid()
+                else:
+                    attribute_forms.append(_create_empty_attribute_value_forms(idx))
+
         form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
-        if form.is_valid() and (person_form is None or person_form.is_valid()):
+        if form.is_valid() and (person_form is None or person_form.is_valid()) and attributes_valid:
+
             if person_form:
                 person_form.save()
 
             form.save()
+
+            # save attributes
+            for attr_form, value_form in attribute_forms_to_save:
+                attr_form.instance.source = authority
+                attr_form.instance.modified_by = request.user
+                attr = attr_form.save()
+
+                value_form.instance.attribute = attr
+                value_form.save()
+
 
             target = reverse('curation:curate_authority', args=[authority.id,])
             search = request.POST.get('search')
@@ -1876,10 +1929,14 @@ def authority(request, authority_id):
             'form': form,
             'person_form': person_form,
             'instance': authority,
-            # 'partdetails_form': partdetails_form,
+            'attribute_forms': attribute_forms,
         })
     _build_result_set_links(request, context, model=Authority)
     return render(request, template, context)
+
+def _create_empty_attribute_value_forms(idx):
+    return (AttributeForm(prefix='attribute'+str(idx)), None)
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))

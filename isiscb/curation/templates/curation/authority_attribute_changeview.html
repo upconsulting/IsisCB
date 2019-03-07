@@ -8,7 +8,7 @@
     {% csrf_token %}
     <input type="hidden" name="search" value="{{ search_key }}">
     <input type="hidden" name="current" value="{{ current_index }}">
-
+    {{ attribute_form.id }}
     <div class="row" style="margin-bottom: 20px;">
         <div class="col-md-5">
           <div class="row">

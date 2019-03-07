@@ -201,36 +201,58 @@
                   </div>
                   {% for attr_forms in attribute_forms %}
                   <div class="row">
-
+                    {{ attr_forms.0.id }}
+                    <input type="hidden" name="{{attr_forms.0.prefix}}-record_status_value" id="id_{{attr_forms.0.prefix}}-record_status_value" value="{{attr_forms.0.record_status_value.value}}" />
                     {% for error in attr_forms.0.type_controlled.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="no-gutter">
                         <label class="col-md-1">Type</label>
-                        <div class="col-md-4" id="attributeDropdownDiv">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs"}}</div>
+                        <div class="col-md-4" data-form-prefix="{{attr_forms.0.prefix}}">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs attributeDropDown"}}</div>
                         <label class="col-md-2">Freeform</label>
                         <div class="col-md-5">{{ attr_forms.0.value_freeform|addcss:"form-control input-xs"}}</div>
                     </div>
                   </div>
 
-                    {% if attr_forms.1 %}
-                    {% for field in attr_forms.1 %}
-                    <div class="row">
-                      <div class="no-gutter">
-                        <div class="col-md-5"></div>
-                        <label class="col-md-2">
-                          {{ field.label}}
-                        </label>
-                        <div class="col-md-5">{{ field|addcss:"form-control input-xs"}}</div>
+                    <div id="{{attr_forms.0.prefix}}_attribute_value_form_container" data-form-prefix="{{ attr_forms.1.prefix }}">
+                      {% if attr_forms.1 %}
+                      {% for field in attr_forms.1 %}
+                      <div class="row">
+                        <div class="no-gutter">
+                          <div class="col-md-5"></div>
+                          <label class="col-md-2">
+                            {{ field.label}}
+                          </label>
+                          <div class="col-md-5"">{{ field|addcss:"form-control input-xs"}}</div>
+                        </div>
                       </div>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
+                      {% if field.errors %}
+                      <script>
+                        var errorMsg = "";
+                      {% for error in field.errors %}
+                        errorMsg += "{{ error }}";
+                      {% endfor %}
+                      $("#id_{{attr_forms.1.prefix}}-{{ field.name }}").popover({
+                        'content': errorMsg,
+                        'title': 'Error',
+                        'placement': 'top',
+                      });
+                      $("#id_{{attr_forms.1.prefix}}-{{ field.name }}").popover('show');
 
+                      $(".popover-title").css('background-color', '#ffc6c6');
+                      </script>
+                      {% endif %}
+                      {% endfor %}
+                      {% endif %}
 
+                      </div>
                   {% endfor %}
 
-
+                  {% if instance.attributes.all|length > 3 %}
+                    <div class="pull-right">
+                      <a href="?tab=attributes">More...</a>
+                    </div>
+                  {% endif %}
                 </div>
 
                 <!-- 3rd column -->
@@ -322,6 +344,40 @@
 </form>
 </div>
 
+<div id="value_forms" class="hide">
+    {% for id, form in value_forms %}
+    <div id="form_for_{{id}}" >
+        {% with nr_of_fields=form.fields|length %}
+        {% for field in form %}
+        <div class="row">
+          <div class="no-gutter">
+            <div class="col-md-5"></div>
+            <label class="col-md-2">
+              {{ field.label}}
+            </label>
+            <div class="col-md-5">{{ field|addcss:"form-control input-xs"}}</div>
+          </div>
+        </div>
+
+        {% if field.errors %}
+        <script>
+          var errorMsg = "";
+        {% for error in field.errors %}
+          errorMsg.append({{ error }});
+        {% endfor %}
+        $("#value_input_div_{{id}}").popover({
+          'content': errorMsg;
+          'title': 'Error';
+        });
+        $("#value_input_div_{{id}}").popover('show');
+        </script>
+        {% endif %}
+        {% endfor %}
+        {% endwith %}
+    </div>
+    {% endfor %}
+</div>
+
 <script>
 //# sourceURL=test.js
 $('#id_language').multiSelect()
@@ -398,6 +454,26 @@ $(document).ready(function() {
         $('#id_authority-redirect_to').val("");
         $('#authority-search').val("");
       }
+    });
+
+    $(".attributeDropDown").change(function() {
+      var value = $(this).find("option:selected").val();
+      var formPrefix = $(this).parent().data("form-prefix");
+      var container = $("#" + formPrefix + "_attribute_value_form_container");
+      container.empty();
+      var valueFormPrefix = container.data("form-prefix");
+      if (valueFormPrefix == '' || valueFormPrefix == null) {
+        // this is so ugly, but ah well, f****** django
+        valueFormPrefix = formPrefix.replace("attribute", "value");
+      }
+      var form = $('#form_for_' + value).clone();
+      form.find("input, textarea, select").each(function() {
+        var name = $(this).attr("name").replace("value-", valueFormPrefix + "-");
+        $(this).attr("name", name);
+        var id = $(this).attr("id").replace("value-", valueFormPrefix + "-");
+        $(this).attr("id", name);
+      });
+      container.append(form);
     });
 
     $("#searchExplorePublic").click(function(e) {

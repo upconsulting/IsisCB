@@ -631,11 +631,13 @@ class AttributeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
+    id = forms.CharField(required=False, widget=forms.widgets.HiddenInput())
 
     class Meta:
         model = Attribute
 
         fields = [
+            'id',
             'type_controlled',
             'description',
             'value_freeform',
