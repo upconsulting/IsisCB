@@ -1917,8 +1917,8 @@ def authority(request, authority_id):
             if linkeddata_id:
                 linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
                 linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix=linkeddata_form_prefix)
-            if request.POST.get(linkeddata_form_prefix + "-type_controlled", ''):    # Create.
-                linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix=linkeddata_form_prefix)
+            elif request.POST.get(linkeddata_form_prefix + "-type_controlled", ''):    # Create.
+                linkeddata_form = LinkedDataForm(request.POST, prefix=linkeddata_form_prefix)
 
             if linkeddata_form:
                 linkeddata_forms_to_save.append(linkeddata_form)
