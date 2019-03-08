@@ -171,36 +171,11 @@
 
                 <!-- 2nd column -->
                 <div class="col-sm-6">
-
-                <div class="row">
-                  {{ form.redirect_to }}
-                  {% for error in form.redirect_to.errors %}
-                  <div class="alert alert-danger">{{ error }}</div>
-                  {% endfor %}
-
-                      <label class="col-xs-3" style="padding-left: 0px;">{{ form.redirect_to.label }}</label>
-
-                      <div class="input-group col-xs-9">
-                          <input type="text"
-                              class="form-control input-xs"
-                              name="authority-search"
-                              autocomplete="off"
-                              id="authority-search" />
-                              <ul class="list-group" id="results-container"></ul>
-                          <span class="input-group-btn" style="padding-top: 0px;">
-                              <span class="btn" style="padding-top: 2px; padding-left: 3px;" id="remove_redirect">
-                                  <span class="glyphicon glyphicon-remove"
-                                      style="color: red;"></span>
-                              </span>
-                          </span>
-                      </div>
-                  </div>
-
                   <div class="row">
-                  <h5>Attributes</h5>
+                  <h5 style="margin-top: 0px;">Attributes</h5>
                   </div>
                   {% for attr_forms in attribute_forms %}
-                  <div class="row">
+                  <div class="row" style="padding-right: 20px;">
                     {{ attr_forms.0.id }}
                     <input type="hidden" name="{{attr_forms.0.prefix}}-record_status_value" id="id_{{attr_forms.0.prefix}}-record_status_value" value="{{attr_forms.0.record_status_value.value}}" />
                     {% for error in attr_forms.0.type_controlled.errors %}
@@ -217,7 +192,7 @@
                     <div id="{{attr_forms.0.prefix}}_attribute_value_form_container" data-form-prefix="{{ attr_forms.1.prefix }}">
                       {% if attr_forms.1 %}
                       {% for field in attr_forms.1 %}
-                      <div class="row">
+                      <div class="row" style="padding-right: 20px;">
                         <div class="no-gutter">
                           <div class="col-md-5"></div>
                           <label class="col-md-2">
@@ -253,10 +228,59 @@
                       <a href="?tab=attributes">More...</a>
                     </div>
                   {% endif %}
+
+                  <div class="row">
+                  <h5 style="margin-top: 20px;">Linked Data</h5>
+                  </div>
+
+                  {% for linkeddata_form in linkeddata_forms %}
+                  <div class="row" style="padding-right: 20px;">
+                    {{ linkeddata_form.id }}
+                    <input type="hidden" name="{{linkeddata_form.prefix}}-record_status_value" id="id_{{linkeddata_form.prefix}}-record_status_value" value="{{linkeddata_form.record_status_value.value}}" />
+                    {% for error in linkeddata_form.type_controlled.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    <div class="no-gutter">
+                        <div class="col-md-4" data-form-prefix="{{linkeddata_form.prefix}}">{{ linkeddata_form.type_controlled|addcss:"form-control input-xs linkeddata_type_controlled"}}</div>
+                        <div class="col-md-4">{{ linkeddata_form.universal_resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_urn;URN"}}</div>
+                        <div class="col-md-4">{{ linkeddata_form.resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_resource_name;Resource Name"}}</div>
+                    </div>
+                  </div>
+                  {% endfor %}
+
+                  {% if instance.linkeddata_entries.all|length > 3 %}
+                    <div class="pull-right">
+                      <a href="?tab=linkeddata">More...</a>
+                    </div>
+                  {% endif %}
+
                 </div>
 
                 <!-- 3rd column -->
                 <div class="col-sm-6">
+                  <div class="row">
+                    {{ form.redirect_to }}
+                    {% for error in form.redirect_to.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+
+                        <label class="col-xs-3" style="padding-left: 0px;">{{ form.redirect_to.label }}</label>
+
+                        <div class="input-group col-xs-9">
+                            <input type="text"
+                                class="form-control input-xs"
+                                name="authority-search"
+                                autocomplete="off"
+                                id="authority-search" />
+                                <ul class="list-group" id="results-container"></ul>
+                            <span class="input-group-btn" style="padding-top: 0px;">
+                                <span class="btn" style="padding-top: 2px; padding-left: 3px;" id="remove_redirect">
+                                    <span class="glyphicon glyphicon-remove"
+                                        style="color: red;"></span>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
 
                   <div class="row">
                     {% for error in form.record_status_explanation.errors %}
@@ -349,7 +373,7 @@
     <div id="form_for_{{id}}" >
         {% with nr_of_fields=form.fields|length %}
         {% for field in form %}
-        <div class="row">
+        <div class="row" style="padding-right: 20px;">
           <div class="no-gutter">
             <div class="col-md-5"></div>
             <label class="col-md-2">
@@ -385,6 +409,9 @@ $('#id_language').multiSelect()
 $(document).ready(function() {
 
     setRedirectFieldAccessiblity();
+
+    $(".linkeddata_type_controlled").prop('required', false);
+    $(".linkeddata_urn").prop('required', false);
 
     var lastSearch = $.now();
     var waiting = false;

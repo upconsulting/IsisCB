@@ -1041,7 +1041,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
     if attribute_id:
         attribute = get_object_or_404(Attribute, pk=attribute_id)
-        
+
         if hasattr(attribute, 'value'):
             value = attribute.value.get_child_class()
             value_form_class = value_forms[attribute.type_controlled.id]
@@ -1811,7 +1811,9 @@ def authority(request, authority_id):
 
         # attributes ISISCB-1161
         first_attributes = authority.attributes.all()[:3]
+        first_linkeddata = authority.linkeddata_entries.all()[:3]
         attribute_forms = []
+        linkeddata_forms = []
         for idx in range(3):
             if idx < len(first_attributes):
                 attribute = first_attributes[idx]
@@ -1823,6 +1825,11 @@ def authority(request, authority_id):
                     attribute_forms.append(forms)
             else:
                 attribute_forms.append(_create_empty_attribute_value_forms(idx))
+
+            linked_data = None
+            if idx < len(first_linkeddata):
+                linked_data = first_linkeddata[idx]
+            linkeddata_forms.append(LinkedDataForm(instance=linked_data, prefix='linkeddata'+str(idx)))
 
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}
@@ -1841,6 +1848,7 @@ def authority(request, authority_id):
             'person_form': person_form,
             'tracking_records': tracking_records,
             'attribute_forms': attribute_forms,
+            'linkeddata_forms': linkeddata_forms,
         })
 
     elif request.method == 'POST':
@@ -1899,9 +1907,29 @@ def authority(request, authority_id):
                 else:
                     attribute_forms.append(_create_empty_attribute_value_forms(idx))
 
-        form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
-        if form.is_valid() and (person_form is None or person_form.is_valid()) and attributes_valid:
+        linkeddata_forms = []
+        linkeddata_valid = True
+        linkeddata_forms_to_save = []
+        for idx in range(3):
+            linkeddata_form_prefix = 'linkeddata' + str(idx)
+            linkeddata_id = request.POST.get(linkeddata_form_prefix + '-id', '')
+            linkeddata_form = None
+            if linkeddata_id:
+                linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
+                linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix=linkeddata_form_prefix)
+            if request.POST.get(linkeddata_form_prefix + "-type_controlled", ''):    # Create.
+                linkeddata_form = LinkedDataForm(request.POST, instance=linkeddata, prefix=linkeddata_form_prefix)
 
+            if linkeddata_form:
+                linkeddata_forms_to_save.append(linkeddata_form)
+                linkeddata_valid = linkeddata_valid and linkeddata_form.is_valid()
+            else:
+                linkeddata_form = LinkedDataForm(prefix=linkeddata_form_prefix)
+
+            linkeddata_forms.append(linkeddata_form)
+
+        form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
+        if form.is_valid() and (person_form is None or person_form.is_valid()) and attributes_valid and linkeddata_valid:
             if person_form:
                 person_form.save()
 
@@ -1909,13 +1937,16 @@ def authority(request, authority_id):
 
             # save attributes
             for attr_form, value_form in attribute_forms_to_save:
-                attr_form.instance.source = authority
+                attr_form.instance.source = Authority.objects.get(pk=authority.id)
                 attr_form.instance.modified_by = request.user
                 attr = attr_form.save()
 
                 value_form.instance.attribute = attr
                 value_form.save()
 
+            for linkeddata_form in linkeddata_forms_to_save:
+                linkeddata_form.instance.subject = Authority.objects.get(pk=authority.id)
+                linkeddata_form.save()
 
             target = reverse('curation:curate_authority', args=[authority.id,])
             search = request.POST.get('search')
@@ -1930,6 +1961,7 @@ def authority(request, authority_id):
             'person_form': person_form,
             'instance': authority,
             'attribute_forms': attribute_forms,
+            'linkeddata_forms': linkeddata_forms,
         })
     _build_result_set_links(request, context, model=Authority)
     return render(request, template, context)

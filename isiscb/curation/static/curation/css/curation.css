@@ -23,6 +23,9 @@ a {
   padding-left: 0;
 }
 
+textarea.onelineTextarea {
+  height: 22px;
+}
 /* Input fields */
 select.high_input {
   min-height: 350px;

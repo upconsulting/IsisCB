@@ -331,6 +331,7 @@ class CitationForm(forms.ModelForm):
 
 
 class LinkedDataForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.widgets.HiddenInput())
 
     class Meta:
         model = LinkedData
@@ -338,7 +339,7 @@ class LinkedDataForm(forms.ModelForm):
             'universal_resource_name', 'resource_name', 'url',
             'type_controlled', 'record_status_value',
             'record_status_explanation', 'administrator_notes',
-            'record_history'
+            'record_history', 'id'
         ]
         labels = {
             'universal_resource_name': 'URN (link to authority)'
