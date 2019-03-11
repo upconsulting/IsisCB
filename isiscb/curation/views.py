@@ -147,6 +147,18 @@ def create_authority(request):
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
     }
+    if request.GET.get('draft_authority_id', None) and request.GET.get('zotero_accession', None):
+        context.update({
+            'authority_name': request.GET.get('name', None),
+            'draft_authority_id': request.GET.get('draft_authority_id', None),
+            'zotero_accession': request.GET.get('zotero_accession', None),
+        })
+    if request.POST.get('draft_authority_id', None) and request.POST.get('zotero_accession', None):
+        context.update({
+            'authority_name': request.POST.get('name', None),
+            'draft_authority_id': request.POST.get('draft_authority_id', None),
+            'zotero_accession': request.POST.get('zotero_accession', None),
+        })
 
     template = 'curation/authority_create_view.html'
 
@@ -217,7 +229,11 @@ def create_authority(request):
 
                 value_form.save()
 
-
+            zotero_accession = request.POST.get('zotero_accession', None)
+            draft_authority_id = request.POST.get('draft_authority_id', None)
+            # if we're in a zotero ingest procedure
+            if zotero_accession:
+                return HttpResponseRedirect("%s?draft_authority_id=%s&resolved_authority_id=%s" % (reverse('retrieve_accession', args=(zotero_accession,)), draft_authority_id, authority.id))
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
         else:
             context.update({
