@@ -14,7 +14,7 @@ $(function() {
     if (selectedType == "PE") {
       $(".personInput").show();
       $("#attributeDropdownDiv>select option").each(function(idx, elem) {
-        if ($(elem).text().includes("BirthToDeathDates")) {
+        if ($(elem).text().includes("Birth-Death")) {
           $("#attributeDropdownDiv>select").val($(elem).val()).trigger('change');
         }
       });
