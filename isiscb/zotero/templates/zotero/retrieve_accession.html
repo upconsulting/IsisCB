@@ -246,6 +246,7 @@ $('#search-tab').on('shown.bs.tab', function(e) {
 </script>
 
 <script>
+//# sourceURL=accession.js
 var opts = {
   lines: 13 // The number of lines to draw
 , length: 4 // The length of each line
@@ -311,81 +312,6 @@ $('.draftauthority').click(function() {
     $('#authority-search').trigger('keyup');
     $('#matching').css('visibility', 'visible');
 
-    // $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + selected_authority_name, {
-    //     beforeSend: function(response) {
-    //         elem.find('.suggestion-status').spin(opts);
-    //     },
-    //     success: function(response) {
-    //         console.log(response);
-    //         $('#matching').css('visibility', 'visible');
-    //
-    //         var target = $('.suggestion-results-list');
-    //         target.empty();
-    //         if (response.results.length == 0) {
-    //             target.append('<div class="alert alert-warning">No matches found</div>');
-    //         } else {
-    //
-    //             response.results.forEach(function(suggestion) {
-    //                 var suggestElem = `
-    //                     <li class="list-group-item">
-    //                         <div class="row">
-    //                             <div class="col-xs-2">
-    //                                 <span class="button-group button-group-md">
-    //                                     <a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion"
-    //                                         id="authority-suggestion-` + suggestion.id + `"
-    //                                         data-suggestion="` + suggestion.id + `"
-    //                                         data-authority="` + draftauthority_id + `"
-    //                                         data-name="` + suggestion.name + `">
-    //                                     </a>
-    //                                 </span>
-    //                             </div>
-    //                             <div class="col-xs-10">
-    //                                 <div class="h5">
-    //                                     <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
-    //                                         class="suggested-authority-anchor"
-    //                                         target="_blank"
-    //                                         data-toggle="tooltip"
-    //                                         data-container="body"
-    //                                         data-html="true"
-    //                                         data-placement="left"
-    //                                         data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
-    //                                     <div class="pull-right col-sm-3">
-    //                                         <div class="progress" style="height: 14px;">
-    //                                             <div class="progress-bar"
-    //                                                 role="progressbar"
-    //                                                 aria-valuenow="`+ suggestion.match +`"
-    //                                                 aria-valuemin="0"
-    //                                                 aria-valuemax="1"
-    //                                                 style="width: `+ suggestion.match*100 +`%;">
-    //                                                     <span class="sr-only">`+ suggestion.match +`</span>
-    //                                             </div>
-    //                                         </div>
-    //                                     </div>
-    //                                 </div>
-    //                                 <div>
-    //                                     <span class="h5 text-danger">
-    //                                         ` + suggestion.type_controlled + `
-    //                                     </span>
-    //                                 </div>
-    //
-    //                                 <div class="suggestion-reasons">
-    //                 `;
-    //
-    //                 target.append(suggestElem);
-    //             });
-    //
-    //             $('.suggested-authority-anchor[data-toggle="tooltip"]').tooltip({
-    //                 template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-    //             });
-    //         }
-    //
-    //         $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
-    //             $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
-    //         });
-    //         bindSuggestions();
-    //
-    //     }
-    // });
 });
 
 $(document).ready(function() {
@@ -476,7 +402,25 @@ $(document).ready(function() {
             }
         });
     });
+
+    {% if draft_authority_id and resolved_authority_id %}
+    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}");
+    {% endif %}
 });
+
+function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id) {
+  triggerResolveAuthority(draftauthority_id, created_authority_id);
+  getSimilarAuthorities(draftauthority_id, function(count, ids) {
+
+      //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
+
+      ids.forEach(function(di) {
+          triggerResolveAuthority(di, created_authority_id);
+      });
+  });
+
+  cleanupResolvedAuthority(draftauthority_id);
+}
 
 var selectNextAuthority = function() {
     $('.draftauthority').first().trigger('click');
@@ -595,23 +539,7 @@ var confirmSkipModal = function() {
 
 var bindCreateNew = function() {
     $('.resolve-with-create').click(function(e) {
-        var suggestElem = $(this);
-        getSimilarAuthorities(selected_authority, function(count, ids) {
-            $('#draftauthority-id-container-create').val(selected_authority);
-            // $('#authority-id-container-create').val(suggestion_id);
-            $('#similar_authority_count-create').text(count);
-            $('#draftauthority_name-create').text(selected_authority_name);
-            $('#draftauthority_name_edit-create').val(selected_authority_name);
-            if (selected_authority_type == 'PE') {
-              $('#draftauthority_first_name_edit-create').val(selected_authority_first_name);
-              $('#draftauthority_last_name_edit-create').val(selected_authority_last_name);
-              $('#person_info').show();
-            } else {
-              $('#person_info').hide();
-            }
-            // $('#authority_name-create').text(sname);
-            $('#prompt-create-modal').modal('show');
-        });
+      window.location = "{% url 'curation:create_authority' %}?zotero_accession={{ accession.id }}&name=" + selected_authority_name + "&draft_authority_id=" + selected_authority;
     });
 }
 

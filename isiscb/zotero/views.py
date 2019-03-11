@@ -218,6 +218,8 @@ def retrieve_accession(request, accession_id):
         'draftcitations': draftcitations,
         'resolved_draftcitations': accession.draftcitation_set.filter(processed=True),
         'matching_citations': matching_citations,
+        'draft_authority_id': request.GET.get('draft_authority_id', None),
+        'resolved_authority_id': request.GET.get('resolved_authority_id', None),
     }
     return render(request, template, context)
 
@@ -235,6 +237,7 @@ def similar_authorities(request):
                         name=draftauthority.name,
                         processed=False,
                         type_controlled=draftauthority.type_controlled)
+
     queryset = queryset.exclude(pk=draftauthority_id)
     response_data = {
         'count': queryset.count(),
@@ -253,9 +256,12 @@ def resolve_authority(request):
     authority = get_object_or_404(Authority, pk=authority_id)
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
 
-    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
-    draftauthority.processed = True
-    draftauthority.save()
+    if not draftauthority.processed:
+        resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+        draftauthority.processed = True
+        draftauthority.save()
+    else:
+        resolution = InstanceResolutionEvent.objects.get(for_instance_id=draftauthority.id, to_instance_id=authority.id)
 
     return JsonResponse({'data': resolution.id})
 
