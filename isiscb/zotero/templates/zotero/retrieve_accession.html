@@ -539,7 +539,7 @@ var confirmSkipModal = function() {
 
 var bindCreateNew = function() {
     $('.resolve-with-create').click(function(e) {
-      window.location = "{% url 'curation:create_authority' %}?zotero_accession={{ accession.id }}&name=" + selected_authority_name + "&draft_authority_id=" + selected_authority;
+      window.location = "{% url 'curation:create_authority' %}?zotero_accession={{ accession.id }}&name=" + selected_authority_name + "&draft_authority_id=" + selected_authority + "&selected_authority_type=" + selected_authority_type;
     });
 }
 

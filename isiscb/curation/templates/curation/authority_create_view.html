@@ -53,6 +53,7 @@ $(function() {
   $("#id_authority-name").val("{{ authority_name }}")
   {% endif %}
 
+
    $('.form-control').keydown(function (e) {
       if (e.which === 13) {
           var controls = $('.form-control:visible');
@@ -65,9 +66,14 @@ $(function() {
   });
 
 
-
+  {% if selected_authority_type == 'PE' %}
+  $("#typeDropdownDiv>select").val('PE');
+  {% endif %}
   actOnType($("#typeDropdownDiv>select").val());
   setDefaultDataset();
+  setPersonName();
+  setAttributeFields();
+  setLinkedDataLabel();
 
   $("#typeDropdownDiv>select").change(function() {
     var selectedType = $("#typeDropdownDiv>select").val();
@@ -86,6 +92,41 @@ $(function() {
   });
 
   $("#attributeDropdownDiv>select").change(function() {
+    setAttributeFields();
+  });
+
+  $("#id_authority-name").change(function() {
+    setPersonName() ;
+  });
+
+  function setPersonName() {
+    var selectedType = $("#typeDropdownDiv>select").val();
+    if (selectedType == "PE") {
+      var fullName = $("#id_authority-name").val();
+      var lastName = "";
+      var firstName = "";
+      var suffix = "";
+      if (fullName.includes(",")) {
+        lastName = fullName.slice(0, fullName.indexOf(",")).trim();
+        firstName = fullName.slice(fullName.indexOf(",") + 1).trim();
+        if (firstName.includes(",")) {
+          suffix = firstName.slice(firstName.lastIndexOf(",") + 1).trim();
+          firstName = firstName.slice(0, firstName.lastIndexOf(",")).trim();
+        }
+      } else if (fullName.includes(" ")) {
+        lastName = fullName.slice(fullName.lastIndexOf(" ") + 1).trim();
+        firstName = fullName.slice(0, fullName.lastIndexOf(" ")).trim();
+      } else {
+        lastName = fullName.trim();
+      }
+
+      $("#id_person-personal_name_last").val(lastName);
+      $("#id_person-personal_name_first").val(firstName);
+      $("#id_person-personal_name_suffix").val(suffix);
+    }
+  }
+
+  function setAttributeFields() {
     var selectedType = $("#attributeDropdownDiv>select option:selected").text();
     if (selectedType.includes("(isodaterangevalue)")) {
       $("#id_start").prop('required', true);
@@ -126,37 +167,6 @@ $(function() {
       $("#id_attribute-value_freeform").val(moment().format("YYYY-MM-DD"));
       $("#id_value-value").val(moment().format("YYYY-MM-DD"));
     }
-  });
-
-  $("#id_authority-name").change(function() {
-    setPersonName() ;
-  });
-
-  function setPersonName() {
-    var selectedType = $("#typeDropdownDiv>select").val();
-    if (selectedType == "PE") {
-      var fullName = $("#id_authority-name").val();
-      var lastName = "";
-      var firstName = "";
-      var suffix = "";
-      if (fullName.includes(",")) {
-        lastName = fullName.slice(0, fullName.indexOf(",")).trim();
-        firstName = fullName.slice(fullName.indexOf(",") + 1).trim();
-        if (firstName.includes(",")) {
-          suffix = firstName.slice(firstName.lastIndexOf(",") + 1).trim();
-          firstName = firstName.slice(0, firstName.lastIndexOf(",")).trim();
-        }
-      } else if (fullName.includes(" ")) {
-        lastName = fullName.slice(fullName.lastIndexOf(" ") + 1).trim();
-        firstName = fullName.slice(0, fullName.lastIndexOf(" ")).trim();
-      } else {
-        lastName = fullName.trim();
-      }
-
-      $("#id_person-personal_name_last").val(lastName);
-      $("#id_person-personal_name_first").val(firstName);
-      $("#id_person-personal_name_suffix").val(suffix);
-    }
   }
 
   $("#id_attribute-value_freeform").change(function() {
@@ -190,12 +200,16 @@ $(function() {
 
 
   $("#id_linkeddata-type_controlled").change(function() {
+    setLinkedDataLabel();
+  });
+
+  function setLinkedDataLabel() {
     var label = $("#id_linkeddata-type_controlled option:selected").text();
     if (label == "URI") {
       label = "";
     }
     $("#id_linkeddata-resource_name").val(label);
-  });
+  }
 
 
   $("#searchExplorePublic").click(function(e) {
@@ -280,6 +294,9 @@ function searchService(url) {
     {% endif %}
     {% if draft_authority_id %}
     <input type="hidden" name="draft_authority_id" value="{{ draft_authority_id }}" />
+    {% endif %}
+    {% if selected_authority_type %}
+    <input type="hidden" name="selected_authority_type" value="{{ selected_authority_type }}" />
     {% endif %}
 
 {% include "curation/fragment_create_authority_header.html" %}
