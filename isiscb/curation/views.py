@@ -152,12 +152,14 @@ def create_authority(request):
             'authority_name': request.GET.get('name', None),
             'draft_authority_id': request.GET.get('draft_authority_id', None),
             'zotero_accession': request.GET.get('zotero_accession', None),
+            'selected_authority_type': request.GET.get('selected_authority_type', None),
         })
     if request.POST.get('draft_authority_id', None) and request.POST.get('zotero_accession', None):
         context.update({
             'authority_name': request.POST.get('name', None),
             'draft_authority_id': request.POST.get('draft_authority_id', None),
             'zotero_accession': request.POST.get('zotero_accession', None),
+            'selected_authority_type': request.POST.get('selected_authority_type', None),
         })
 
     template = 'curation/authority_create_view.html'
