@@ -49,6 +49,9 @@ $(function() {
   $("#value_forms input").prop('required', false);
   $("#value_forms select").prop('required', false);
 
+  {% if authority_name %}
+  $("#id_authority-name").val("{{ authority_name }}")
+  {% endif %}
 
    $('.form-control').keydown(function (e) {
       if (e.which === 13) {
@@ -75,6 +78,10 @@ $(function() {
       $("#id_authority-classification_system").val("PN");
     } else {
       $("#id_authority-classification_system").val("SPWC");
+    }
+
+    if (selectedType == "PE") {
+      setPersonName() ;
     }
   });
 
@@ -122,6 +129,10 @@ $(function() {
   });
 
   $("#id_authority-name").change(function() {
+    setPersonName() ;
+  });
+
+  function setPersonName() {
     var selectedType = $("#typeDropdownDiv>select").val();
     if (selectedType == "PE") {
       var fullName = $("#id_authority-name").val();
@@ -146,7 +157,7 @@ $(function() {
       $("#id_person-personal_name_first").val(firstName);
       $("#id_person-personal_name_suffix").val(suffix);
     }
-  });
+  }
 
   $("#id_attribute-value_freeform").change(function() {
     var selectedType = $("#attributeDropdownDiv>select option:selected").text();
@@ -263,6 +274,13 @@ function searchService(url) {
 
 <form class="form" action="{% url 'curation:create_authority' %}" method="POST">
     {% csrf_token %}
+
+    {% if zotero_accession %}
+    <input type="hidden" name="zotero_accession" value="{{ zotero_accession }}" />
+    {% endif %}
+    {% if draft_authority_id %}
+    <input type="hidden" name="draft_authority_id" value="{{ draft_authority_id }}" />
+    {% endif %}
 
 {% include "curation/fragment_create_authority_header.html" %}
 
