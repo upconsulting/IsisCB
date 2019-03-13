@@ -18,6 +18,9 @@
     bottom: -10px;
     position: fixed;
 }
+.resolved {
+  font-size: 12px;
+}
 </style>
 
 <div class="h3">
@@ -57,6 +60,7 @@ But for now the list is stored as string :-p
         <div class="col-xs-6" id="left-panel-column">
             {% for citation in draftcitations %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
+            {% with citation.authority_relations.all as all_acrelations %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
                     <div class="panel-body">
                         <span class="pull-right btn-group">
@@ -111,9 +115,9 @@ But for now the list is stored as string :-p
                     {% if acrelations.count > 0 %}
                     <ul class="list-group">
 
-                        {% for acrelation in acrelations %}
+                        {% for acrelation in all_acrelations %}
                             {% with acrelation.authority as authority %}
-                                <div class="list-group-item clearfix"
+                                <div class="list-group-item clearfix {% if authority.resolved %}disabled{% endif %}"
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
@@ -124,6 +128,7 @@ But for now the list is stored as string :-p
                                     data-type="{{ authority.type_controlled }}">
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
+                                    {% if not authority.resolved %}
                                     <a class="draftauthority"
                                         id="authority-{{ authority.id }}-link"
                                         data-id="{{ authority.id }}"
@@ -134,7 +139,16 @@ But for now the list is stored as string :-p
                                         {% endif %}
                                         data-type="{{ authority.type_controlled }}">
                                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
-                                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                                      <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                                      {% else %}
+                                      <span class="text-info">
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
+                                      {% with authority.resolutions.first.to_instance as resolved_authority %}
+                                      {{ resolved_authority.name }} ({{resolved_authority.id}})
+                                      {% endwith %}
+                                      </span>
+                                      </span>
+                                      {% endif %}
                                     </a>
                                 </div>
                             {% endwith %}
@@ -142,6 +156,7 @@ But for now the list is stored as string :-p
                     </ul>
                     {% endif %}
                 </div>
+            {% endwith %}
             {% endwith %}
             {% endfor %}
 
@@ -427,8 +442,15 @@ var selectNextAuthority = function() {
 }
 
 var cleanupResolvedAuthority = function(draftauthority_id) {
-    $("#authority-" + draftauthority_id).remove();
-    $('#matching').css('visibility', 'hidden');
+    $("#authority-" + draftauthority_id).addClass("disabled");
+    var text = $("#authority-" + draftauthority_id + "-link>strong").text();
+    var label = $("#authority-" + draftauthority_id + "-link>span.label-primary");
+    $("#authority-" + draftauthority_id + "-link").remove();
+
+    var span = $('<span class="text-info"></span>');
+    span.append(label);
+    span.append($('<span class="resolved"> ' + text + '</span>'));
+    $("#authority-" + draftauthority_id).append(span);
     selectNextAuthority();
 }
 
