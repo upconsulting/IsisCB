@@ -263,7 +263,10 @@ def resolve_authority(request):
     else:
         resolution = InstanceResolutionEvent.objects.get(for_instance_id=draftauthority.id, to_instance_id=authority.id)
 
-    return JsonResponse({'data': resolution.id})
+    return JsonResponse({'data': {
+        'authority_id': authority.id,
+        'authority_name': authority.name,
+    }})
 
 
 @check_rules('has_zotero_access')

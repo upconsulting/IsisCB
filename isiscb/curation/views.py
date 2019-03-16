@@ -235,7 +235,7 @@ def create_authority(request):
             draft_authority_id = request.POST.get('draft_authority_id', None)
             # if we're in a zotero ingest procedure
             if zotero_accession:
-                return HttpResponseRedirect("%s?draft_authority_id=%s&resolved_authority_id=%s" % (reverse('retrieve_accession', args=(zotero_accession,)), draft_authority_id, authority.id))
+                return HttpResponseRedirect("%s?draft_authority_id=%s&resolved_authority_id=%s&resolved_authority_name=%s" % (reverse('retrieve_accession', args=(zotero_accession,)), draft_authority_id, authority.id, authority.name))
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
         else:
             context.update({
