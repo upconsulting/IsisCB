@@ -17,6 +17,7 @@ from zotero import tasks, parse, ingest
 from zotero.suggest import suggest_citation, suggest_authority
 
 import tempfile
+import json
 
 
 def _field_data(instance):
@@ -206,7 +207,13 @@ def retrieve_accession(request, accession_id):
         if matches:
             matching_citations[dcitation.id] = { match: ["Linked Data"] for match in matches }
 
-        possible_matches = Citation.objects.filter(title=dcitation.title)
+        possible_matches = Citation.objects.filter(title=dcitation.title, type_controlled=dcitation.type_controlled)
+        if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
+            series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
+            if series and len(series) > 0:
+                possible_matches = possible_matches.filter(acrelation__type_controlled=ACRelation.PERIODICAL)
+                possible_matches = possible_matches.filter(acrelation__authority__name=series[0].authority.name)
+
         if possible_matches:
             existing_matches = matching_citations.setdefault(dcitation.id, {})
             [existing_matches.setdefault(match, []).append("Title") for match in possible_matches]
