@@ -117,7 +117,7 @@ But for now the list is stored as string :-p
 
                         {% for acrelation in all_acrelations %}
                             {% with acrelation.authority as authority %}
-                                <div class="list-group-item clearfix {% if authority.resolved %}disabled{% endif %}"
+                                <div class="list-group-item clearfix {% if authority.resolved %}disabled{% endif %} {% if not authority.resolved and authority.processed %}list-group-item-danger{% endif %} }"
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
@@ -128,7 +128,7 @@ But for now the list is stored as string :-p
                                     data-type="{{ authority.type_controlled }}">
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
-                                    {% if not authority.resolved %}
+                                    {% if not authority.resolved and not authority.processed %}
                                     <a class="draftauthority"
                                         id="authority-{{ authority.id }}-link"
                                         data-id="{{ authority.id }}"
@@ -140,12 +140,18 @@ But for now the list is stored as string :-p
                                         data-type="{{ authority.type_controlled }}">
                                         <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                                       <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                                      {% else %}
+                                      {% elif authority.resolved and authority.processed%}
                                       <span class="text-info">
                                       <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
                                       {% with authority.resolutions.first.to_instance as resolved_authority %}
                                       {{ resolved_authority.name }} ({{resolved_authority.id}})
                                       {% endwith %}
+                                      </span>
+                                      </span>
+                                      {% else %}
+                                      <span class="text-info">
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }}
+                                        <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>
                                       </span>
                                       </span>
                                       {% endif %}
@@ -442,7 +448,11 @@ var selectNextAuthority = function() {
 }
 
 var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name) {
-    $("#authority-" + draftauthority_id).addClass("disabled");
+    if (authority_id != null && authority_id != "") {
+      $("#authority-" + draftauthority_id).addClass("disabled");
+    } else {
+      $("#authority-" + draftauthority_id).addClass("list-group-item-danger");
+    }
     var drafAuthorityName = $("#authority-" + draftauthority_id).data('name');
     var label = $("#authority-" + draftauthority_id + " span.label-primary");
     $("#authority-" + draftauthority_id + "-link").remove();
@@ -450,7 +460,15 @@ var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authori
 
     var span = $('<span class="text-info"></span>');
     span.append(label);
-    span.append($('<span class="resolved"> ' + drafAuthorityName + ' <span class="glyphicon glyphicon-chevron-right"></span> ' + authority_name + ' (' + authority_id + ')' + '</span>'));
+    var textSpan = $('<span class="resolved"></span>')
+    var textContent = " " + drafAuthorityName;
+    if (authority_id != null && authority_id != "") {
+      textContent += ' <span class="glyphicon glyphicon-chevron-right"></span> ' + authority_name + ' (' + authority_id + ')';
+    } else {
+      textContent += ' <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>';
+    }
+    textSpan.append(textContent);
+    span.append(textSpan);
     $("#authority-" + draftauthority_id).append(span);
     selectNextAuthority();
 }
@@ -579,6 +597,7 @@ var bindCreateNew = function() {
 
 var bindSkip = function() {
     $('.resolve-with-skip').click(function(e) {
+      /*
         var suggestElem = $(this);
         getSimilarAuthorities(selected_authority, function(count, ids) {
             $('#draftauthority-id-container-skip').val(selected_authority);
@@ -588,6 +607,19 @@ var bindSkip = function() {
             // $('#authority_name-create').text(sname);
             $('#prompt-skip-modal').modal('show');
         });
+      */
+      var draftauthority_id = selected_authority;
+      triggerSkipAuthority(draftauthority_id, function() {
+          getSimilarAuthorities(draftauthority_id, function(count, ids) {
+              ids.forEach(function(di) {
+                  triggerSkipAuthority(di, function() {
+                      cleanupResolvedAuthority(di, '', '')
+                  });
+              });
+          });
+
+          cleanupResolvedAuthority(draftauthority_id, '', '');
+      });
     });
 }
 
