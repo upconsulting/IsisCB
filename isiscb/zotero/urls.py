@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'accession/create/$', create_accession, name='create_accession'),
     url(r'accession/(?P<accession_id>[0-9]+)/$', retrieve_accession, name='retrieve_accession'),
     url(r'accession/(?P<accession_id>[0-9]+)/ingest/$', ingest_accession, name='ingest_accession'),
+    url(r'accession/(?P<accession_id>[0-9]+)/matches/(?P<draftcitation_id>[0-9]+)$', possible_matching_citations, name='possible_matching_citations'),
 
     url(r'authority/resolve/$', resolve_authority, name='resolve_authority'),
     url(r'authority/create/$', create_authority_for_draft, name='create_authority_for_draft'),

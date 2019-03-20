@@ -96,15 +96,21 @@ But for now the list is stored as string :-p
                       {% if matching_citations|get_from_dict:citation.id %}
                       {% with matching_citations|get_from_dict:citation.id as matches %}
                         {% for cit, match_types in matches.items %}
-                      <ul>
-                        {% with cit.id|get_periodical_or_book_series as series %}
-                        {% with cit|get_book_if_chapter as book %}
-                        {% with cit|get_publisher as publisher %}
-                        <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
-                      </ul>
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
+                        {% if cit == 'MORE' %}
+                        <ul>
+                          <li>There are {{ match_types }} citation matched by title that are not displayed here. <a href="{% url 'possible_matching_citations' accession.id citation.id %}" target="_blank">Show matches in new window.</a></li>
+                        </ul>
+                        {% else %}
+                        <ul>
+                          {% with cit.id|get_periodical_or_book_series as series %}
+                          {% with cit|get_book_if_chapter as book %}
+                          {% with cit|get_publisher as publisher %}
+                          <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
+                          {% endwith %}
+                          {% endwith %}
+                          {% endwith %}
+                        </ul>
+                        {% endif %}
                       {% endfor %}
                       {% endwith %}
                       {% endif %}
