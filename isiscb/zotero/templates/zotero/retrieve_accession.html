@@ -102,10 +102,12 @@ But for now the list is stored as string :-p
                         </ul>
                         {% else %}
                         <ul>
-                          {% with cit.id|get_periodical_or_book_series as series %}
+                          {% with cit|get_periodical_or_book_series as series %}
                           {% with cit|get_book_if_chapter as book %}
                           {% with cit|get_publisher as publisher %}
-                          <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
+                          {% with cit|get_authors_editors as authors %}
+                          <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ authors}}. {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
+                          {% endwith %}
                           {% endwith %}
                           {% endwith %}
                           {% endwith %}
