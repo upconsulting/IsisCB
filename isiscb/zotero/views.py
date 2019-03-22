@@ -299,6 +299,16 @@ def resolve_authority(request):
         'authority_name': authority.name,
     }})
 
+@check_rules('has_zotero_access')
+@staff_member_required
+def draft_authority(request, accession_id, draftauthority_id):
+    if request.method == 'DELETE':
+        draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+        draftauthority.delete()
+
+        return JsonResponse({'data': 'Success'})
+
+    return JsonResponse({'data': 'Method not supported.'})
 
 @check_rules('has_zotero_access')
 @staff_member_required
@@ -468,7 +478,7 @@ def ingest_accession(request, accession_id):
     if confirmed:
         ingested = tasks.ingest_accession(request, accession)
         context.update({'ingested': ingested})
-        template = 'zotero/ingest_accession_success.html'
+        return HttpResponseRedirect("%s?zotero_accession=%s&belongs_to=%s&o=publication_date" % (reverse('curation:citation_list'), accession_id, accession.ingest_to.id))
     else:
         template = 'zotero/ingest_accession_prompt.html'
 

@@ -137,23 +137,27 @@ But for now the list is stored as string :-p
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
                                     {% if not authority.resolved and not authority.processed %}
-                                    <a class="draftauthority"
-                                        id="authority-{{ authority.id }}-link"
-                                        data-id="{{ authority.id }}"
-                                        data-name="{{ authority.name }}"
-                                        {% if authority.type_controlled == "PE" %}
-                                        data-first-name="{{ authority.name_first }}"
-                                        data-last-name="{{ authority.name_last }}"
-                                        {% endif %}
-                                        data-type="{{ authority.type_controlled }}">
-                                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
-                                      <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                                      <a class="draftauthority"
+                                          id="authority-{{ authority.id }}-link"
+                                          data-id="{{ authority.id }}"
+                                          data-name="{{ authority.name }}"
+                                          {% if authority.type_controlled == "PE" %}
+                                          data-first-name="{{ authority.name_first }}"
+                                          data-last-name="{{ authority.name_last }}"
+                                          {% endif %}
+                                          data-type="{{ authority.type_controlled }}">
+                                          <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
+                                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                                      </a>
                                       {% elif authority.resolved and authority.processed%}
                                       <span class="text-info">
                                       <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
                                       {% with authority.resolutions.first.to_instance as resolved_authority %}
                                       {{ resolved_authority.name }} ({{resolved_authority.id}})
                                       {% endwith %}
+                                      <div class="pull-right">
+                                      <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
+                                      </div>
                                       </span>
                                       </span>
                                       {% else %}
@@ -163,7 +167,6 @@ But for now the list is stored as string :-p
                                       </span>
                                       </span>
                                       {% endif %}
-                                    </a>
                                 </div>
                             {% endwith %}
                         {% endfor %}
@@ -435,6 +438,18 @@ $(document).ready(function() {
     {% if draft_authority_id and resolved_authority_id %}
     resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}");
     {% endif %}
+
+    $(".deleteDraftAuthority").click(function(e) {
+      e.preventDefault();
+      var authorityId = $(this).data('draftauthority-id');
+      $.ajax({
+        url: '{% url "retrieve_accession" accession.id %}drafts/authority/' + authorityId,
+        type: 'DELETE',
+        success: function(result) {
+            $("#authority-" + authorityId).remove();
+        }
+      });
+    });
 });
 
 function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, created_authority_name) {
@@ -552,33 +567,6 @@ function resolveConfirmedAuthority(draftauthority_id, suggestion_id) {
   });
 }
 
-
-/**
-  *  Execute resolution through creation of a new production authority record.
-  */
-// var confirmCreateModal = function() {
-//     //console.log('create a new authority:: confirmed');
-//     var authority_name = $('#draftauthority_name_edit-create').val();
-//     var authority_first_name = $('#draftauthority_first_name_edit-create').val();
-//     var authority_last_name = $('#draftauthority_last_name_edit-create').val();
-//     $('#prompt-create-modal').modal('hide');
-//     var draftauthority_id = $('#draftauthority-id-container-create').val();
-//     triggerCreateAuthority(draftauthority_id, authority_name, authority_first_name, authority_last_name, function(created_authority_id) {
-//         console.log('create a new authority:: done');
-//         getSimilarAuthorities(draftauthority_id, function(count, ids) {
-//
-//             //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
-//
-//             ids.forEach(function(di) {
-//                 triggerResolveAuthority(di, created_authority_id);
-//             });
-//         });
-//
-//         cleanupResolvedAuthority(draftauthority_id);
-//     });
-//
-// }
-
 var confirmSkipModal = function() {
     $('#prompt-skip-modal').modal('hide');
     var draftauthority_id = $('#draftauthority-id-container-skip').val();
@@ -605,17 +593,6 @@ var bindCreateNew = function() {
 
 var bindSkip = function() {
     $('.resolve-with-skip').click(function(e) {
-      /*
-        var suggestElem = $(this);
-        getSimilarAuthorities(selected_authority, function(count, ids) {
-            $('#draftauthority-id-container-skip').val(selected_authority);
-            // $('#authority-id-container-create').val(suggestion_id);
-            $('#similar_authority_count-skip').text(count);
-            $('#draftauthority_name-skip').text(selected_authority_name);
-            // $('#authority_name-create').text(sname);
-            $('#prompt-skip-modal').modal('show');
-        });
-      */
       var draftauthority_id = selected_authority;
       triggerSkipAuthority(draftauthority_id, function() {
           getSimilarAuthorities(draftauthority_id, function(count, ids) {
