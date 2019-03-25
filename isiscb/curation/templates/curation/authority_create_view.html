@@ -66,8 +66,8 @@ $(function() {
   });
 
 
-  {% if selected_authority_type == 'PE' %}
-  $("#typeDropdownDiv>select").val('PE');
+  {% if selected_authority_type %}
+  $("#typeDropdownDiv>select").val("{{ selected_authority_type }}");
   {% endif %}
   actOnType($("#typeDropdownDiv>select").val());
   setDefaultDataset();

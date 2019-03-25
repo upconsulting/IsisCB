@@ -17,6 +17,7 @@ from zotero import tasks, parse, ingest
 from zotero.suggest import suggest_citation, suggest_authority
 
 import tempfile
+import json
 
 
 def _field_data(instance):
@@ -194,22 +195,7 @@ def retrieve_accession(request, accession_id):
     # ISISCB-1043: show warning if a citation might already be in the db
     matching_citations = {}
     for dcitation in draftcitations:
-        matches = []
-        linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
-        for draft_ld in linkeddata:
-            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
-            matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
-            if matching_ld:
-                matches = [match.subject for match in matching_ld]
-                break
-
-        if matches:
-            matching_citations[dcitation.id] = { match: ["Linked Data"] for match in matches }
-
-        possible_matches = Citation.objects.filter(title=dcitation.title)
-        if possible_matches:
-            existing_matches = matching_citations.setdefault(dcitation.id, {})
-            [existing_matches.setdefault(match, []).append("Title") for match in possible_matches]
+        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True)
 
     context = {
         'curation_section': 'zotero',
@@ -223,6 +209,51 @@ def retrieve_accession(request, accession_id):
     }
     return render(request, template, context)
 
+@check_rules('has_zotero_access')
+@staff_member_required
+def possible_matching_citations(request, accession_id, draftcitation_id):
+    template = 'zotero/show_citation_matches.html'
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+    matches = _find_citation_matches(draftcitation, False)
+    context = {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+        'citation': draftcitation,
+        'matching_citations': matches,
+    }
+    return render(request, template, context)
+
+def _find_citation_matches(dcitation, limit_matches):
+    matches = []
+    linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
+    for draft_ld in linkeddata:
+        ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+        matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
+        if matching_ld:
+            matches = [match.subject for match in matching_ld]
+            break
+
+    matched_by = {}
+    if matches:
+        matched_by = { match: ["Linked Data"] for match in matches }
+
+    possible_matches = Citation.objects.filter(title=dcitation.title, type_controlled=dcitation.type_controlled)
+    possible_matches = possible_matches.prefetch_related('related_authorities')
+    if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
+        series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
+        if series and len(series) > 0:
+            possible_matches = possible_matches.filter(acrelation__type_controlled=ACRelation.PERIODICAL)
+            possible_matches = possible_matches.filter(acrelation__authority__name=series[0].authority.name)
+
+    possible_matches_count = possible_matches.count()
+    if possible_matches_count < 3 or not limit_matches:
+        [matched_by.setdefault(match, []).append("Title") for match in possible_matches]
+    else:
+        matched_by['MORE'] = possible_matches_count
+
+    return matched_by
 
 @check_rules('has_zotero_access')
 @staff_member_required
@@ -263,8 +294,21 @@ def resolve_authority(request):
     else:
         resolution = InstanceResolutionEvent.objects.get(for_instance_id=draftauthority.id, to_instance_id=authority.id)
 
-    return JsonResponse({'data': resolution.id})
+    return JsonResponse({'data': {
+        'authority_id': authority.id,
+        'authority_name': authority.name,
+    }})
 
+@check_rules('has_zotero_access')
+@staff_member_required
+def draft_authority(request, accession_id, draftauthority_id):
+    if request.method == 'DELETE':
+        draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+        draftauthority.delete()
+
+        return JsonResponse({'data': 'Success'})
+
+    return JsonResponse({'data': 'Method not supported.'})
 
 @check_rules('has_zotero_access')
 @staff_member_required
@@ -434,7 +478,7 @@ def ingest_accession(request, accession_id):
     if confirmed:
         ingested = tasks.ingest_accession(request, accession)
         context.update({'ingested': ingested})
-        template = 'zotero/ingest_accession_success.html'
+        return HttpResponseRedirect("%s?zotero_accession=%s&belongs_to=%s&o=start_page" % (reverse('curation:citation_list'), accession_id, accession.ingest_to.id))
     else:
         template = 'zotero/ingest_accession_prompt.html'
 
