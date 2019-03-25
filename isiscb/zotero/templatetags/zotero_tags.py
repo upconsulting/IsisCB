@@ -25,13 +25,9 @@ def get_from_dict(dictionary, key):
 @register.filter
 def get_periodical_or_book_series(citation):
     rtypes = [ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
-    atype_display = dict(Authority.TYPE_CHOICES)
-    #relations = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
-    relations = [acr for acr in citation.related_authorities.all() if acr.type_controlled in rtypes]
-    if not relations:
-        return None
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.name, atype_display.get(obj.type_controlled, 'none')), relations))
-    #return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', ''), atype_display.get(obj['authority__type_controlled'], 'none')), relations))
+    atype_display = dict(ACRelation.TYPE_CHOICES)
+    relations = ACRelation.objects.filter(citation_id=citation.id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
+    return ', '.join(map(lambda obj: '%s' % (obj.get('authority__name', '')), relations))
 
 @register.filter
 def get_book_if_chapter(citation):

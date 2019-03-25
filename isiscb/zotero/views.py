@@ -478,7 +478,7 @@ def ingest_accession(request, accession_id):
     if confirmed:
         ingested = tasks.ingest_accession(request, accession)
         context.update({'ingested': ingested})
-        return HttpResponseRedirect("%s?zotero_accession=%s&belongs_to=%s&o=publication_date" % (reverse('curation:citation_list'), accession_id, accession.ingest_to.id))
+        return HttpResponseRedirect("%s?zotero_accession=%s&belongs_to=%s&o=start_page" % (reverse('curation:citation_list'), accession_id, accession.ingest_to.id))
     else:
         template = 'zotero/ingest_accession_prompt.html'
 
