@@ -72,8 +72,7 @@ def get_citation_title(obj):
 
 @register.filter(name='get_publisher')
 def get_publisher(obj):
-    acrel = obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
-    return acrel
+    return obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
 
 @register.filter(name='get_isbn')
 def get_isbn(obj):
@@ -89,6 +88,11 @@ def get_doi(obj):
 @register.filter(name='get_authors_editors')
 def get_authors_editors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+                if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
+
+@register.filter(name='get_authors_editors_no_type')
+def get_authors_editors_no_type(obj):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
 

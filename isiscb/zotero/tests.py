@@ -235,8 +235,9 @@ class TestBookSeries(TestCase):
                 if rel.type_controlled == DraftACRelation.SUBJECT:
                     # We have matched all percent-encoded subject authorities.
                     self.assertFalse(rel.authority.name.startswith('='))
-            if citation.book_series is not None:
-                self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
+            # ISISCB-1163: book series relation are not generate anymore
+            #if citation.book_series is not None:
+            #    self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
 
     def tearDown(self):
         clearAll()
@@ -937,7 +938,7 @@ class TestImportMethods(TestCase):
         }
 
         result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
-        self.assertEqual(len(result), 2, "Should yield two records")
+        self.assertEqual(len(result), 1, "Should yield one records")
 
 
     def test_generate_citation_linkeddata(self):
@@ -1302,7 +1303,7 @@ class BookSeriesShouldBeSkippedAutomatically(TestCase):
         }
 
         result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
-        self.assertEqual(len(result), 2, "Should yield two records")
+        self.assertEqual(len(result), 1, "Should yield one records")
 
         for authority, relation in result:
             if relation.type_controlled == ACRelation.BOOK_SERIES:

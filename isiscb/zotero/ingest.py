@@ -750,9 +750,10 @@ class IngestManager(object):
                 if IngestManager._get(datum, 'type_controlled').lower() == 'journal':
                     _type = Authority.SERIAL_PUBLICATION
                     _rel_type = ACRelation.PERIODICAL
-                elif IngestManager._get(datum, 'type_controlled').lower() == 'series':
-                    _type = Authority.SERIAL_PUBLICATION
-                    _rel_type = ACRelation.BOOK_SERIES
+                # ISISCB-1163: remove series relation
+                #elif IngestManager._get(datum, 'type_controlled').lower() == 'series':
+                #    _type = Authority.SERIAL_PUBLICATION
+                #    _rel_type = ACRelation.BOOK_SERIES
                 else:
                     return None, None
 
