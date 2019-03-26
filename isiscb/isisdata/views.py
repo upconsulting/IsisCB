@@ -570,86 +570,86 @@ def statistics(request):
     # set timeout (in sec) to one day
     cache_timeout = 86400
 
-    cache = caches['default']
-    citations_count = cache.get('statistics_citation')
-    if not citations_count:
-        citations_count = Citation.objects.filter(public=True).count()
-        cache.set('statistics_citation', citations_count, cache_timeout)
+    # cache = caches['default']
+    # citations_count = cache.get('statistics_citation')
+    # if not citations_count:
+    #     citations_count = Citation.objects.filter(public=True).count()
+    #     cache.set('statistics_citation', citations_count, cache_timeout)
 
-    authority_count = cache.get('statistics_authority')
-    if not authority_count:
-        authority_count = Authority.objects.filter(public=True).count()
-        cache.set('statistics_authority', authority_count, cache_timeout)
-
-    acrelation_count = cache.get('statistics_acrelation')
-    if not acrelation_count:
-        acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
-        cache.set('statistics_acrelation', acrelation_count, cache_timeout)
-
-    ccrelation_count = cache.get('statistics_ccrelation')
-    if not ccrelation_count:
-        ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
-
-    aarelation_count = cache.get('statistics_aarelation')
-    if not aarelation_count:
-        aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        cache.set('statistics_aarelation', aarelation_count, cache_timeout)
-
-    # by curator
-    curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
-    curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
-    curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
-    curator_moon_count = _get_count_by_dataset('curators_moon',"(Suzanne Moon, ed.)", cache_timeout)
-
-    # by citation type
-    books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
-    articles_count = _get_count_citation_type('statistics_article', "AR", cache_timeout)
-    chapters_count = _get_count_citation_type('statistics_chapter', "CH", cache_timeout)
-    reviews_count = _get_count_citation_type('statistics_review', "RE", cache_timeout)
-    theses_count = _get_count_citation_type('statistics_thesis', "TH", cache_timeout)
-
-    # by authority type
-    persons_count = _get_count_authority_type('statistics_person', "PE", cache_timeout)
-    institutions_count = _get_count_authority_type('statistics_institution', "IN", cache_timeout)
-    time_periods_count = _get_count_authority_type('statistics_time_period', "TI", cache_timeout)
-    geographic_terms_count = _get_count_authority_type('statistics_geographic_term', "GE", cache_timeout)
-    serial_publications_count = _get_count_authority_type('statistics_serial_publication', "SE", cache_timeout)
-    classification_terms_count = _get_count_authority_type('statistics_classification_term', "CT", cache_timeout)
-    concepts_count = _get_count_authority_type('statistics_concepts', "CO", cache_timeout)
-    creative_works_count = _get_count_authority_type('statistics_creative_work', "CW", cache_timeout)
-    events_count = _get_count_authority_type('statistics_event', "EV", cache_timeout)
-    crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
-    publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
+    # authority_count = cache.get('statistics_authority')
+    # if not authority_count:
+    #     authority_count = Authority.objects.filter(public=True).count()
+    #     cache.set('statistics_authority', authority_count, cache_timeout)
+    #
+    # acrelation_count = cache.get('statistics_acrelation')
+    # if not acrelation_count:
+    #     acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
+    #     cache.set('statistics_acrelation', acrelation_count, cache_timeout)
+    #
+    # ccrelation_count = cache.get('statistics_ccrelation')
+    # if not ccrelation_count:
+    #     ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+    #     cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
+    #
+    # aarelation_count = cache.get('statistics_aarelation')
+    # if not aarelation_count:
+    #     aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+    #     cache.set('statistics_aarelation', aarelation_count, cache_timeout)
+    #
+    # # by curator
+    # curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
+    # curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
+    # curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
+    # curator_moon_count = _get_count_by_dataset('curators_moon',"(Suzanne Moon, ed.)", cache_timeout)
+    #
+    # # by citation type
+    # books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
+    # articles_count = _get_count_citation_type('statistics_article', "AR", cache_timeout)
+    # chapters_count = _get_count_citation_type('statistics_chapter', "CH", cache_timeout)
+    # reviews_count = _get_count_citation_type('statistics_review', "RE", cache_timeout)
+    # theses_count = _get_count_citation_type('statistics_thesis', "TH", cache_timeout)
+    #
+    # # by authority type
+    # persons_count = _get_count_authority_type('statistics_person', "PE", cache_timeout)
+    # institutions_count = _get_count_authority_type('statistics_institution', "IN", cache_timeout)
+    # time_periods_count = _get_count_authority_type('statistics_time_period', "TI", cache_timeout)
+    # geographic_terms_count = _get_count_authority_type('statistics_geographic_term', "GE", cache_timeout)
+    # serial_publications_count = _get_count_authority_type('statistics_serial_publication', "SE", cache_timeout)
+    # classification_terms_count = _get_count_authority_type('statistics_classification_term', "CT", cache_timeout)
+    # concepts_count = _get_count_authority_type('statistics_concepts', "CO", cache_timeout)
+    # creative_works_count = _get_count_authority_type('statistics_creative_work', "CW", cache_timeout)
+    # events_count = _get_count_authority_type('statistics_event', "EV", cache_timeout)
+    # crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
+    # publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
 
     context = {
         'active': 'about',
-        'citations_count': citations_count,
-        'authority_count': authority_count,
-        'relation_count': acrelation_count + ccrelation_count + aarelation_count,
-        # curators
-        'curator_neu_count': curator_neu_count,
-        'curator_harvey_count': curator_harvey_count,
-        'curator_weldon_count': curator_weldon_count,
-        'curator_moon_count': curator_moon_count,
-        # citation types
-        'books_count': books_count,
-        'articles_count': articles_count,
-        'chapters_count': chapters_count,
-        'reviews_count': reviews_count,
-        'theses_count': theses_count,
-        # authority types
-        'persons_count': persons_count,
-        'institutions_count': institutions_count,
-        'time_periods_count': time_periods_count,
-        'geographic_terms_count': geographic_terms_count,
-        'serial_publications_count': serial_publications_count,
-        'classification_terms_count': classification_terms_count,
-        'concepts_count': concepts_count,
-        'creative_works_count': creative_works_count,
-        'events_count': events_count,
-        'crossreferences_count': crossreferences_count,
-        'publishers_count': publishers_count,
+        # 'citations_count': citations_count,
+        # 'authority_count': authority_count,
+        # 'relation_count': acrelation_count + ccrelation_count + aarelation_count,
+        # # curators
+        # 'curator_neu_count': curator_neu_count,
+        # 'curator_harvey_count': curator_harvey_count,
+        # 'curator_weldon_count': curator_weldon_count,
+        # 'curator_moon_count': curator_moon_count,
+        # # citation types
+        # 'books_count': books_count,
+        # 'articles_count': articles_count,
+        # 'chapters_count': chapters_count,
+        # 'reviews_count': reviews_count,
+        # 'theses_count': theses_count,
+        # # authority types
+        # 'persons_count': persons_count,
+        # 'institutions_count': institutions_count,
+        # 'time_periods_count': time_periods_count,
+        # 'geographic_terms_count': geographic_terms_count,
+        # 'serial_publications_count': serial_publications_count,
+        # 'classification_terms_count': classification_terms_count,
+        # 'concepts_count': concepts_count,
+        # 'creative_works_count': creative_works_count,
+        # 'events_count': events_count,
+        # 'crossreferences_count': crossreferences_count,
+        # 'publishers_count': publishers_count,
     }
     return render(request, 'isisdata/statistics.html', context=context)
 

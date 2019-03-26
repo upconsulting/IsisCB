@@ -16,9 +16,9 @@
     <h5>Types of records:</h5>
 
     <ul>
-      <li>Bibliographical citation records: {{ citations_count|intcomma }}</li>
-      <li>Authority records: {{ authority_count|intcomma }}</li>
-      <li>Relationships: {{ relation_count|intword }}</li>
+      <li>Bibliographical citation records: 217,866</li>
+      <li>Authority records: 169,817</li>
+      <li>Relationships: 1.5 million</li>
     </ul>
 
     <h5 style="margin-top: 25px;">Temporal scope of the bibliographical data:</h5>
@@ -28,62 +28,46 @@
     <h5 style="margin-top: 25px;">Curators of the bibliographical data: </h5>
 
     <ul>
-      <li>Citations to works curated by John Neu (1970-1999): {{curator_neu_count|intcomma}}</li>
-      <li>Citations to works curated by Joy Harvey (2000-2001): {{ curator_harvey_count|intcomma }}</li>
-      <li>Citations to works curated by Stephen Weldon (2002-present): {{ curator_weldon_count|intcomma }}</li>
-      <li>Citations to works curated for the Society for the History of Technology: {{ curator_moon_count|intcomma }}</li>
+      <li>Citations to works curated by John Neu (1970-1999): 119,086</li>
+      <li>Citations to works curated by Joy Harvey (2000-2001): 4,842</li>
+      <li>Citations to works curated by Stephen Weldon (2002-present): 105,662</li>
+      <li>Citations to works curated for the Society for the History of Technology: 1,756</li>
     </ul>
 
     <h5 style="margin-top: 25px;">Citations:</h5>
 
     <ul>
-      <li>Books: {{ books_count|intcomma }}</li>
-      <li>Journal articles: {{ articles_count|intcomma }}</li>
-      <li>Chapters: {{ chapters_count|intcomma }}</li>
-      <li>Reviews: {{ reviews_count|intcomma }}</li>
-      <li>Theses: {{ theses_count|intcomma }}</li>
+      <li>Books: 52,797</li>
+      <li>Journal articles: 79,565</li>
+      <li>Chapters: 23,728</li>
+      <li>Reviews: 52,942</li>
+      <li>Theses: 6,822</li>
     </ul>
 
     <h5 style="margin-top: 25px;">Authorities</h5>
 
     <ul>
-      <li>Persons: {{ persons_count|intcomma }}</li>
+      <li>Persons: 142,163</li>
 
-      {% if institutions_count > 0 %}
-      <li>Institutions: {{ institutions_count|intcomma }}</li>
-      {% endif %}
+      <li>Institutions: 12,086</li>
 
-      <li>Geographic Terms: {{ geographic_terms_count|intcomma }}</li>
-      <li>Concepts: {{ concepts_count|intcomma }}</li>
+      <li>Geographic Terms: 693</li>
+      <li>Concepts: 6,984</li>
 
-      {% if time_periods_count > 0 %}
-      <li>Time Periods: {{ time_periods_count|intcomma }}</li>
-      {% endif %}
+      <li>Time Periods: 76</li>
 
-      {% if serial_publications_count > 0 %}
-      <li>Serial Publications: {{ serial_publications_count|intcomma }}</li>
-      {% endif %}
+      <li>Serial Publications: 3,876</li>
 
-      {% if classification_terms_count > 0 %}
-      <li>Classification Terms: {{ classification_terms_count|intcomma }}</li>
-      {% endif %}
+      <li>Classification Terms: 2,218</li>
 
-      {% if creative_works_count > 0 %}
-      <li>Creative Works: {{ creative_works_count|intcomma }}</li>
-      {% endif %}
+      <li>Creative Works: 7</li>
 
-      {% if events_count > 0 %}
-      <li>Events: {{ events_count|intcomma }}</li>
-      {% endif %}
+      <li>Events: 24</li>
 
-      {% if crossreferences_count > 0 %}
-      <li>Cross References: {{ crossreferences_count|intcomma }}</li>
-      {% endif %}
+      <li>Cross References: 1,226</li>
 
-      {% if publishers_count > 0 %}
-      <li>Publisher: {{ publishers_count|intcomma }}</li>
-      {% endif %}
-
+      <li>Publisher: 449</li>
+      
     </ul>
 
   </div>
