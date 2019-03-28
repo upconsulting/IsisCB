@@ -7,7 +7,7 @@
 {% load permission_tags %}
 
 {% block extrahead %}
-<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
+<script src="{% static 'curation/js/moment.js' %}" type="text/javascript"></script>
 {% endblock %}
 
 {% block object_list %}
@@ -61,6 +61,10 @@ $('body').ready(function() {
             <li><a class="" href="{% url "curation:collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>
         </ul>
     </span>
+    <a class="btn btn-primary btn-xs" href="#" id="link_records_btn" data-toggle="modal" data-target="#linkRecordsModal">
+      <i class="fa fa-link" aria-hidden="true"></i>
+        Link Records
+    </a>
 
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
@@ -128,18 +132,18 @@ $('body').ready(function() {
                     {% endif %}
                 </td>
                 <td><span title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}</span></td>
-                <td>{{ object.title_for_display|safe }}</td>
-                <td>
+                <td id="title-{{object.id}}">{{ object.title_for_display|safe }}</td>
+                <td id="authors-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}&tab=acrelations">
                         {{ object.id|get_authors_editors_preloaded }}
                     </a>
                 </td>
-                <td>
+                <td id="date-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?tab=attributes">
                         {{ object.publication_date.year }}
                     </a>
                 </td>
-                <td>
+                <td id="periodical-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
                         {{ object.id|get_citation_periodical|truncatechars:25 }}
                     </a>
@@ -150,7 +154,7 @@ $('body').ready(function() {
                 <td>
                   {% if object.part_details__issue_free_text %}{{ object.part_details__issue_free_text }}{% endif %}
                 </td>
-                <td>
+                <td id="page-{{object.id}}">
                     {{ object|get_page_numbers }}
                 </td>
                 <td>
@@ -490,9 +494,70 @@ $('body').ready(function() {
       </div>
 </form>
 
+<div id="linkRecordsModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Link Records</h4>
+      </div>
+      <div class="modal-body">
+        <p>You have selected the following citations:</p>
+        <div id="citationInListTemplate" data-citation-id="" style="display:none;"></div>
+        <div>
+          <small id="link_citations_list">
+
+          </small>
+        </div>
+
+        <form id="link_citations_form">
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Link Records</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script>
 $(document).ready(function() {
-  //# sourceURL=source.js
+    //# sourceURL=source.js
+
+    $("#linkRecordsModal").on("show.bs.modal", function(e) {
+      $(".table-curation").find("input:checked").each(function(idx, input) {
+        var citationId = $(input).val();
+        var citationDiv = $("#citationInListTemplate").clone();
+        var title = $("#title-" + citationId).text();
+        var authors = $("#authors-" + citationId + ">a");
+        var authorsArray = [];
+        authors.each(function(idx, elem) {
+          authorsArray.push($(elem).text());
+        });
+        var authorsText = authorsArray.join(", ");
+        var date = $("#date-" + citationId + ">a").text();
+        var page = $("#page-" + citationId).text();
+        var periodical = $("#periodical-" + citationId).text();
+
+        var citationText = '<i class="fa fa-check-square-o" aria-hidden="true"></i> ' + authorsText.trim() + ". " + title
+        if (periodical) {
+          citationText += ". In: " + periodical;
+        }
+        if (date.trim()) {
+          citationText += " (" + date.trim() + ")";
+        }
+        citationDiv.html(citationText);
+        citationDiv.show();
+        $("#link_citations_list").append(citationDiv);
+      });
+    });
+
+    $('#linkRecordsModal').on('hidden.bs.modal', function (e) {
+      $("#link_citations_list").empty();
+    })
+
     $('[data-toggle="popover"]').popover();
 
     $.each($('select'), function(index, value) {
