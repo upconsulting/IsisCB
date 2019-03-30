@@ -4,6 +4,7 @@ from django.conf.urls import include, url
 
 from curation import views
 from curation.bulk_views import bulk_change_csv_views
+from curation.bulk_views import citation_views
 import rules
 from .rules import *
 
@@ -61,6 +62,7 @@ urlpatterns = [
     url(r'^(?i)citation/collection/add$', views.add_citation_collection, name='add-citation-collection'),
     url(r'^(?i)citation/bulk$', views.bulk_action, name='citation-bulk-action'),
     url(r'^(?i)citation/bulk/status$', views.bulk_action_status, name='citation-bulk-action-status'),
+    url(r'^(?i)citation/bulk/ccr/create$', citation_views.bulk_create_ccr, name='bulk-create-ccr'),
     url(r'^(?i)citation/export$', views.export_citations, name="export-citations"),
     url(r'^(?i)citation/export/status$', views.export_citations_status, name="export-citations-status"),
     url(r'^(?i)citation/select$', views.bulk_select_citation, name='citation-bulk-select'),

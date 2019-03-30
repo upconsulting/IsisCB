@@ -35,6 +35,29 @@ $('body').ready(function() {
 });
 </script>
 
+<div id="msgBoxError" class="alert alert-danger" role="alert" style="display: none;">
+  <button type="button" class="close" id="closeErrorBoxBtn" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <div id="msgBoxErrorText"></div>
+</div>
+<div id="msgBoxSuccess" class="alert alert-success" role="alert" style="display: none;">
+  <button type="button" class="close" id="closeSuccessBoxBtn" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <div id="msgBoxSuccessText"></div>
+</div>
+
+<script>
+  $(function() {
+    $("#closeErrorBoxBtn").click(function() {
+      $("#msgBoxError").hide();
+      $("#msgBoxErrorText").empty();
+    });
+
+    $("#closeSuccessBoxBtn").click(function() {
+      $("#msgBoxSuccess").hide();
+      $("#msgBoxSuccessText").empty();
+    });
+  });
+</script>
+
 <form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
     &nbsp;&nbsp;
@@ -65,7 +88,6 @@ $('body').ready(function() {
       <i class="fa fa-link" aria-hidden="true"></i>
         Link Records
     </a>
-
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
     <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
@@ -497,27 +519,45 @@ $('body').ready(function() {
 <div id="linkRecordsModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Link Records</h4>
-      </div>
-      <div class="modal-body">
-        <p>You have selected the following citations:</p>
-        <div id="citationInListTemplate" data-citation-id="" style="display:none;"></div>
-        <div>
-          <small id="link_citations_list">
-
-          </small>
+      <form id="link_citations_form">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Link Records</h4>
         </div>
+        <div class="modal-body">
+          <p>Please select the subject citation for the new CCRelations:</p>
+          <select name="ccr_subject" class="form-control">
+            {% for object in filter_list %}
+                <option value="{{object.id}}">
+                  [{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}]
+                  {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
+                </option>
+            {% endfor %}
+          <select>
 
-        <form id="link_citations_form">
+          <p style="margin-top: 20px;">Please select the type of the new CCRelations:</p>
+          <select name="CCRType" class="form-control">
+            {% for choice in ccrelation_choices %}
+              <option value="{{choice.0}}">{{choice.1}}</option>
+            {% endfor %}
+          </select>
 
-        </form>
+          <div id="hiddenCitationFields"></div>
+
+          <p style="margin-top: 20px;">You have selected the following citations to be linked:</p>
+          <div id="citationInListTemplate" data-citation-id="" style="display:none;"></div>
+          <div>
+            <small id="link_citations_list">
+
+            </small>
+          </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary">Link Records</button>
+        <button type="button" class="btn btn-primary" id="submitCCRButton">Link Records</button>
       </div>
+    </form>
+
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
@@ -551,12 +591,45 @@ $(document).ready(function() {
         citationDiv.html(citationText);
         citationDiv.show();
         $("#link_citations_list").append(citationDiv);
+
+        var hiddenInput = $('<input type="hidden" name="citationId"/>');
+        hiddenInput.val(citationId);
+        $("#hiddenCitationFields").append(hiddenInput);
       });
     });
 
     $('#linkRecordsModal').on('hidden.bs.modal', function (e) {
       $("#link_citations_list").empty();
-    })
+      $("#hiddenCitationFields").empty();
+    });
+
+    $("#submitCCRButton").click(function(e) {
+      e.preventDefault();
+
+      data = new FormData(document.querySelector("form#link_citations_form"));
+
+      $.ajax({
+        url: '{% url 'curation:bulk-create-ccr' %}',
+        data: data,
+        contentType : false,
+	      processData : false,
+	      enctype: 'multipart/form-data',
+        type: 'POST',
+        success: function ( data ) {
+            $('#linkRecordsModal').modal('hide');
+            if (data["failed"] == null || data["failed"].length > 0) {
+              var failed = $("<div></div>");
+              var failedText = "CCRelation creation failed for the following citations (all other succeeded): " + data["failed"];
+              failed.text(failedText);
+              $("#msgBoxErrorText").append(failed);
+              $("#msgBoxError").show();
+            } else {
+              $("#msgBoxSuccessText").text("CCRelations successfully created.");
+              $("#msgBoxSuccess").show();
+            }
+        }
+      });
+    });
 
     $('[data-toggle="popover"]').popover();
 

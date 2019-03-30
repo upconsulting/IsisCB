@@ -1620,6 +1620,7 @@ def citations(request):
         'search_key': search_key,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
         'record_status_redirect': CuratedMixin.REDIRECT,
+        'ccrelation_choices': CCRelation.TYPE_CHOICES,
     }
 
     # ISISCB-1157: don't show any result if there are no filters set
