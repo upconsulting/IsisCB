@@ -18,8 +18,17 @@ def bulk_create_ccr(request):
 
     if request.method == 'POST':
         cctype = request.POST.get('CCRType', None)
-        ccr_subject_id = request.POST.get('ccr_subject', None)
-        ccr_subject = get_object_or_404(Citation, pk=ccr_subject_id)
+        ccr_subject_id = request.POST.get('ccrSubject', None)
+        ccr_pasted_subject_id = request.POST.get('pastedCitationId', None)
+
+        if not ccr_subject_id and not ccr_pasted_subject_id:
+            return JsonResponse({"msg": "No citation id provided"}, status=403)
+
+        # pasted id gets precedence over dropdown
+        if ccr_pasted_subject_id:
+            ccr_subject = get_object_or_404(Citation, pk=ccr_pasted_subject_id)
+        else:
+            ccr_subject = get_object_or_404(Citation, pk=ccr_subject_id)
         citation_ids  = request.POST.getlist('citationId', None)
 
         if not rules.can_edit_record(request.user, ccr_subject):

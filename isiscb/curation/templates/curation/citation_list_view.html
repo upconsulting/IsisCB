@@ -525,15 +525,21 @@ $('body').ready(function() {
           <h4 class="modal-title">Link Records</h4>
         </div>
         <div class="modal-body">
+
+          <div id="ccrCreationValidationBox" class="alert alert-danger" role="alert" style="display: none"></div>
+
           <p>Please select the subject citation for the new CCRelations:</p>
-          <select name="ccr_subject" class="form-control">
+          <select id="ccrSubjectDropdown" name="ccrSubject" class="form-control">
+            <option value="">Select one or paste citation ID below</option>
             {% for object in filter_list %}
-                <option value="{{object.id}}">
-                  [{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}]
-                  {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
-                </option>
+            <option value="{{object.id}}">
+              [{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}]
+              {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
+            </option>
             {% endfor %}
           <select>
+          <p style="margin-top: 20px;">Or enter a citation ID:</p>
+          <input type="text" class="form-control" name="pastedCitationId" id="pastedSubjectId" />
 
           <p style="margin-top: 20px;">Please select the type of the new CCRelations:</p>
           <select name="CCRType" class="form-control">
@@ -601,13 +607,31 @@ $(document).ready(function() {
     $('#linkRecordsModal').on('hidden.bs.modal', function (e) {
       $("#link_citations_list").empty();
       $("#hiddenCitationFields").empty();
+      $("#ccrSubjectDropdown").val('');
+      $("#pastedSubjectId").val('');
+      $("#ccrCreationValidationBox").hide();
     });
 
     $("#submitCCRButton").click(function(e) {
       e.preventDefault();
 
-      data = new FormData(document.querySelector("form#link_citations_form"));
+      var subjectDropDownId = $("#ccrSubjectDropdown").val();
+      var subjectPastedId = $("#pastedSubjectId").val();
 
+      if ((subjectDropDownId == null || subjectDropDownId.trim() == "")
+              && (subjectPastedId == null || subjectPastedId.trim() == "")) {
+        $("#ccrCreationValidationBox").text("Please select a subject citation from the drop down menu or past a citation ID.");
+        $("#ccrCreationValidationBox").show();
+        return;
+      }
+
+      if ($("#hiddenCitationFields input").length == 0) {
+        $("#ccrCreationValidationBox").text("Please select at least one citation from the list.");
+        $("#ccrCreationValidationBox").show();
+        return;
+      }
+
+      data = new FormData(document.querySelector("form#link_citations_form"));
       $.ajax({
         url: '{% url 'curation:bulk-create-ccr' %}',
         data: data,
