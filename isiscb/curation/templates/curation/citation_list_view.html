@@ -31,7 +31,22 @@ $('body').ready(function() {
       form.attr('action', '{% url "curation:citation-bulk-action" %}');
       form.attr('target', '_blank');
       form.submit();
-    })
+    });
+
+    $('.queryset-checkbox').change(function() {
+      if ($('.queryset-checkbox:checked').length > 0) {
+        $("#link_records_btn").removeAttr("disabled");
+      } else {
+        $("#link_records_btn").attr("disabled", "true");
+      }
+    });
+
+    $("#link_records_btn").click(function(e) {
+      if ($(this).attr("disabled") == false || $(this).attr("disabled") == undefined) {
+        $("#linkRecordsModal").modal("show");
+      }
+      e.preventDefault();
+    });
 });
 </script>
 
@@ -84,7 +99,7 @@ $('body').ready(function() {
             <li><a class="" href="{% url "curation:collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>
         </ul>
     </span>
-    <a class="btn btn-primary btn-xs" href="#" id="link_records_btn" data-toggle="modal" data-target="#linkRecordsModal">
+    <a class="btn btn-primary btn-xs" disabled href="#" id="link_records_btn">
       <i class="fa fa-link" aria-hidden="true"></i>
         Link Records
     </a>
