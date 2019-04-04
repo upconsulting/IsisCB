@@ -65,6 +65,7 @@
 var showFilters = '{{ show_filters }}';
 
 $(document).ready(function() {
+
     $('#clear-filters').on('click', function() {
         $('.form-group.clearable input').val('');
         $('.form-group.clearable select').val('');
@@ -81,7 +82,7 @@ $(document).ready(function() {
     });
 
     highlightFilters();
-
+    
     $(".form-control").keypress(function(e) {
       if(e.which == 13) {
           submitSearchForm();

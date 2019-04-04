@@ -24,6 +24,9 @@ def bulk_create_ccr(request):
         if not ccr_subject_id and not ccr_pasted_subject_id:
             return JsonResponse({"msg": "No citation id provided"}, status=403)
 
+        if not cctype:
+            return JsonResponse({"msg": "No CCR type provided."}, status=403)
+
         # pasted id gets precedence over dropdown
         if ccr_pasted_subject_id:
             ccr_subject = get_object_or_404(Citation, pk=ccr_pasted_subject_id)
@@ -53,7 +56,7 @@ def bulk_create_ccr(request):
 
             ccrelation.type_controlled = cctype
             if ccr_object.part_details:
-                ccrelation.data_display_order = ccr_object.part_details.page_begin
+                ccrelation.data_display_order = ccr_object.part_details.page_begin if ccr_object.part_details.page_begin else 0
             ccrelation.record_history = "This record has been created as part of a bulk CCRelation creation on " + now + "."
             ccrelation.save()
 

@@ -28,7 +28,7 @@
 
             <tr class="">
                 <td>
-                    <a href="{% if type == 'CITATION' %}{% url "curation:citation_list" %}{% else %}{% url "curation:authority_list" %}{% endif %}?in_collections={{object.id}}&collection_only=true">{{ object.name }}</a>
+                    <a href="{% if type == 'CITATION' %}{% url "curation:citation_list" %}{% else %}{% url "curation:authority_list" %}{% endif %}?title=&in_collections={{object.id}}&collection_only=true">{{ object.name }}</a>
                 </td>
                 <td>
                     {{ object.createdBy }}
