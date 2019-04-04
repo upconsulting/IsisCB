@@ -241,9 +241,10 @@
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="no-gutter">
-                        <div class="col-md-4" data-form-prefix="{{linkeddata_form.prefix}}">{{ linkeddata_form.type_controlled|addcss:"form-control input-xs linkeddata_type_controlled"}}</div>
-                        <div class="col-md-4">{{ linkeddata_form.universal_resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_urn;URN"}}</div>
+                        <div class="col-md-3" data-form-prefix="{{linkeddata_form.prefix}}">{{ linkeddata_form.type_controlled|addcss:"form-control input-xs linkeddata_type_controlled"}}</div>
+                        <div class="col-md-4">{{ linkeddata_form.universal_resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_urn;URL/URI/URN;rows:2"}}</div>
                         <div class="col-md-4">{{ linkeddata_form.resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_resource_name;Resource Name"}}</div>
+                        <div class="col-md-1"><i style="padding-left:3px; padding-top: 3px;" class="fa fa-thumbs-o-up linkCheck" aria-hidden="true"></i></div>
                     </div>
                   </div>
                   {% endfor %}
@@ -571,6 +572,11 @@ $(document).ready(function() {
       $("#remove_redirect").addClass("disabled");
     }
   }
+
+  $(".linkCheck").click(function(e) {
+    var urn = $(this).closest(".no-gutter").find(".linkeddata_urn");
+    console.log($(urn.get(0)).text());
+  });
 });
 </script>
 {% endblock %}
