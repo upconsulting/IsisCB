@@ -47,17 +47,13 @@ def bulk_create_ccr(request):
                 continue
 
             ccrelation = CCRelation()
-            if cctype is not CCRelation.REVIEW_OF:
-                ccrelation.object = ccr_object
-                ccrelation.subject = ccr_subject
-            else:
-                ccrelation.object = ccr_subject
-                ccrelation.subject = ccr_object
+            ccrelation.object = ccr_object
+            ccrelation.subject = ccr_subject
 
             ccrelation.type_controlled = cctype
             if ccr_object.part_details:
                 ccrelation.data_display_order = ccr_object.part_details.page_begin if ccr_object.part_details.page_begin else 0
-            ccrelation.record_history = "This record has been created as part of a bulk CCRelation creation on " + now + "."
+            ccrelation.record_history = "This record has been created as part of a bulk CCRelation creation on %s. %s linked to %s via %s."%(now, ccr_subject.id, ccr_object.id, ccrelation._render_type_controlled())
             ccrelation.save()
 
             success.append(citation_id)

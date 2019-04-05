@@ -156,7 +156,7 @@ function toggleLinkRecordsBtn() {
             {% with object.attributes as attributes %}
             <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
                 <td>
-                    <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" />
+                    <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" data-citation-type="{{object.type_controlled}}"/>
                 </td>
                 <td>
                   {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
@@ -262,7 +262,7 @@ function toggleLinkRecordsBtn() {
           <select id="ccrSubjectDropdown" name="ccrSubject" class="form-control">
             <option value="">Select one or paste citation ID below</option>
             {% for object in filter_list %}
-            <option value="{{object.id}}">
+            <option value="{{object.id}}" data-citation-type="{{object.type_controlled}}">
               [{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}]
               {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
             </option>
@@ -290,8 +290,19 @@ function toggleLinkRecordsBtn() {
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="submitCCRButton">Link Records</button>
+        <div id="ccrCreationButtons">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="submitCCRButton">Link Records</button>
+        </div>
+        <div id="ccrCreationWarning" style="display: none;">
+          <div class="alert alert-warning text-left" role="alert">
+            <span id="ccrCreationWarningText"></span>
+            <p class="text-right">
+            <button id="ccrContinueCreation" class="btn btn-primary btn-sm">Yes, continue!</button>
+            <button id="ccrCancelCreation" class="btn btn-default btn-sm">Go back</button>
+            </p>
+          </div>
+        </div>
       </div>
     </form>
 
@@ -300,6 +311,7 @@ function toggleLinkRecordsBtn() {
 </div><!-- /.modal -->
 
 <script>
+//# sourceURL=modals.js
   $(document).ready(function() {
     var sortOrder = $("#id_o").val();
 
@@ -351,9 +363,11 @@ function toggleLinkRecordsBtn() {
     }
 
     $("#linkRecordsModal").on("show.bs.modal", function(e) {
+      var citationTypes = [];
       $(".table-curation td").find("input:checked").each(function(idx, input) {
         var citationId = $(input).val();
         var citationDiv = $("#citationInListTemplate").clone();
+        citationDiv.removeAttr("id");
         var title = $("#title-" + citationId).text();
         var authors = $("#authors-" + citationId + ">a");
         var authorsArray = [];
@@ -378,9 +392,29 @@ function toggleLinkRecordsBtn() {
 
         var hiddenInput = $('<input type="hidden" name="citationId"/>');
         hiddenInput.val(citationId);
+        hiddenInput.data("citation-type", $(input).data("citation-type"));
         $("#hiddenCitationFields").append(hiddenInput);
+
+        citationTypes.push($(input).data("citation-type"));
       });
+
+      setDefaultCCRType(citationTypes);
     });
+
+    function setDefaultCCRType(citationTypes) {
+      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "RE") {
+        $("#CCRType").val("RB");
+        return;
+      }
+      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "CH") {
+        $("#CCRType").val("IC");
+        return;
+      }
+      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "AR") {
+        $("#CCRType").val("ISA");
+        return;
+      }
+    }
 
     $('#linkRecordsModal').on('hidden.bs.modal', function (e) {
       $("#link_citations_list").empty();
@@ -417,6 +451,51 @@ function toggleLinkRecordsBtn() {
         return;
       }
 
+      var citationTypes = [];
+      $("#hiddenCitationFields input").each(function(idx, input) {
+        citationTypes.push($(input).data("citation-type"));
+      });
+      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "RE") {
+        var subjectType = $("#ccrSubjectDropdown option:selected").data("citation-type");
+        if (subjectType == 'RE' || subjectType == 'ES') {
+          $("#ccrCreationValidationBox").text("Subject of CCRelation cannot be a Review or Essay Review. Please select another one.");
+          $("#ccrCreationValidationBox").show();
+          return;
+        }
+      }
+
+      var showWarning = false;
+      $("#hiddenCitationFields input").each(function(idx, elem) {
+        if ($(elem).val() == subjectPastedId || ((subjectPastedId == null || subjectPastedId == '') && $(elem).val() == subjectDropDownId)) {
+          $("#ccrCreationButtons").hide();
+          $("#ccrCreationWarningText").text("You are about to link " + $(elem).val() + " to itself. Are you sure you want to continue?");
+          $("#ccrCreationWarning").show();
+          showWarning = true;
+          return;
+        }
+      });
+
+      if (showWarning) {
+        $("#ccrCreationValidationBox").hide();
+        return;
+      }
+
+      submitCCR();
+    });
+
+    $("#ccrCancelCreation").click(function(e) {
+      e.preventDefault();
+      $("#ccrCreationWarningText").text("");
+      $("#ccrCreationWarning").hide();
+      $("#ccrCreationButtons").show();
+    });
+
+    $("#ccrContinueCreation").click(function(e) {
+      e.preventDefault();
+      submitCCR();
+    });
+
+    function submitCCR() {
       data = new FormData(document.querySelector("form#link_citations_form"));
       $.ajax({
         url: '{% url 'curation:bulk-create-ccr' %}',
@@ -447,7 +526,7 @@ function toggleLinkRecordsBtn() {
           $("#msgBoxError").show();
         }
       });
-    });
+    }
 
   });
 </script>
