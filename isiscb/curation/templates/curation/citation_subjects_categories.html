@@ -128,7 +128,12 @@
       <h5><b>Subjects</b></h5>
       <ul id="subject-list-group" class="list-group">
         {% for acrel in instance|get_subjects %}
-           <li id="subject-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
+             {% if acrel.authority %}
+             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+             {% else %}
+             <span class="text-muted">{{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">
                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
