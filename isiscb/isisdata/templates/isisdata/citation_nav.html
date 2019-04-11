@@ -6,15 +6,13 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
     {% for subject in subjects %}
+    {% if subject.authority %}
     <li>
-        {% if subject.authority %}
         <a href="{% url 'authority' subject.authority.id %}">
-        {% endif %}
-            {{ subject.authority.name }} <i class="fa fa-info-circle"></i>
-        {% if subject.authority %}
+        {{ subject.authority.name }} <i class="fa fa-info-circle"></i>
         </a>
-        {% endif %}
     </li>
+    {% endif %}
     {% endfor %}
 </ul>
 {% endif %}
@@ -28,15 +26,13 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
     {% for time in time_periods %}
+    {% if time.authority %}
     <li>
-        {% if time.authority %}
         <a href="{% url 'authority' time.authority.id %}">
-        {% endif %}
-            {{ time.authority.name }} <i class="fa fa-info-circle"></i>
-        {% if time.authority %}
+        {{ time.authority.name }} <i class="fa fa-info-circle"></i>
         </a>
-        {% endif %}
     </li>
+    {% endif %}
     {% endfor %}
 </ul>
 {% endif %}
@@ -50,15 +46,13 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
     {% for place in places %}
+    {% if place.authority %}
     <li>
-        {% if place.authority %}
         <a href="{% url 'authority' place.authority.id %}">
-        {% endif %}
-            {{ place.authority.name }} <i class="fa fa-info-circle"></i>
-        {% if place.authority %}
+        {{ place.authority.name }} <i class="fa fa-info-circle"></i>
         </a>
-        {% endif %}
     </li>
+    {% endif %}
     {% endfor %}
 </ul>
 {% endif %}
@@ -75,42 +69,14 @@
 <!-- CSS class not being applied, hence this uglyness -->
 <ul class="topics_list">
   {% for category in categories %}
+    {% if category.authority %}
     <li>
-        {% if category.authority %}
         <a href="{% url 'authority' category.authority.id %}">
-        {% endif %}
-            {{ category.authority.name }} <i class="fa fa-info-circle"></i>
-        {% if category.authority %}
+        {{ category.authority.name }} <i class="fa fa-info-circle"></i>
         </a>
-        {% endif %}
     </li>
+    {% endif %}
   {% endfor %}
 </ul>
 {% endif %}
 <!-- End Categories list -->
-{% comment %}
-<!--<div class="panel-group" id="type_panel">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion"
-          href="#collapsePersons">
-          Persons <span class="badge">{{ persons|length }}</span>
-        </a>
-      </h4>
-    </div>
-    <div id="collapsePersons" class="panel-collapse collapse in">
-      <div class="facet_panel panel-body">
-          <ul>
-          {% for person in persons %}
-            <li><a href="{% url 'authority' person.authority.id %}">{{ person.authority.name }}</a></li>
-          {% endfor %}
-          </ul>
-          {% if not persons %}
-            <p>There are no persons.</p>
-          {% endif %}
-      </div>
-    </div>
-  </div>
-</div>-->
-{% endcomment %}
