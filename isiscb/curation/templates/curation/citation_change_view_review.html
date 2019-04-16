@@ -13,13 +13,22 @@
 </div>
 
 <!-- Authors/editors/contributors -->
-{% with instance|get_authors_editors as authors_editors %}
+{% with instance|get_authors_editors_relations as authors_editors_acrs %}
 <div class="noFormForms">
   <small>
     <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
-            {% if authors_editors %}
-            <span id="author_editors">{{ authors_editors }}</span>
+            <span id="author_editors">
+            {% if authors_editors_acrs %}
+            {% for acr in authors_editors_acrs %}
+            {% if acr.authority %}
+            {{ acr.authority.name }}
+            {% else %}
+            {{ acr.name_for_display_in_citation }}
+            <i class="fa fa-chain-broken" aria-hidden="true"></i>
+            {% endif %}
+            {% endfor %}
+            </span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
@@ -50,7 +59,7 @@
 <!-- Review of -->
 <div class="noFormForms">
   <small>
-  <label>Reviews of: </label>
+  <label>Review of: </label>
   {% with instance|get_reviewed_books as reviewed_books %}
   {% if reviewed_books %}
   {% for book in reviewed_books %}
@@ -79,17 +88,25 @@
 </div>
 </div>
 
-{% with instance|get_citation_periodical as journal %}
+{% with instance|get_citation_periodical_relations as journal_acr %}
 <div class="noFormForms">
   <small>
     <label>In:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
-            {% if journal %}
-            {{ journal }}
+            {% if journal_acr %}
+            <span id="journal">
+            {% for acr in journal_acr %}
+            {% if acr.authority %}
+            {{ acr.authority.name }}
+            {% else %}
+            {{ acr.name_for_display_in_citation }}
+            <i class="fa fa-chain-broken" aria-hidden="true"></i>
+            {% endif %}
+            {% endfor %}
+            </span>
             {% else %}
             <em>Add journal</em>
             {% endif %}
-
         </a>
   </small>
 </div>
