@@ -13,13 +13,23 @@
 </div>
 
 <!-- Authors/editors/contributors -->
-{% with instance|get_authors_editors as authors_editors %}
+{% with instance|get_authors_editors_relations as authors_editors_acrs %}
 <div class="noFormForms">
   <small>
     <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
-            {% if authors_editors %}
-            <span id="author_editors">{{ authors_editors }}</span>
+            {% if authors_editors_acrs %}
+            <span id="author_editors">
+            {% for acr in authors_editors_acrs %}
+            {% if acr.authority %}
+            {{ acr.authority.name }}
+            {% else %}
+            {{ acr.name_for_display_in_citation }}
+            <i class="fa fa-chain-broken" aria-hidden="true"></i>
+            {% endif %}
+            ({{acr.get_type_controlled_display}})
+            {% endfor %}
+            </span>
             {% else %}
             <em>Add author, editor, or contributor</em>
             {% endif %}
@@ -28,6 +38,7 @@
   </small>
 </div>
 {% endwith %}
+
 
 <!-- Publication date -->
 
