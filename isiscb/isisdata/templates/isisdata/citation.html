@@ -121,7 +121,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </span>
 
     {% if authors|length > 0 %}
-    <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }} <i class="fa fa-info-circle"></i>;{% if acrelation.authority %}</a>{% endif %} {% endfor %}
+    <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }};{% if acrelation.authority %}<i class="fa fa-info-circle"></i></a>{% endif %} {% endfor %}
     {% endif %}
 
     {% if citation.abstract %}
@@ -158,9 +158,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <table class="details">
       {% for prop in properties_map %}
 
-      {% if prop.authority %}
-      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> <a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }} <i class="fa fa-info-circle"></i></a></td></tr>
-      {% endif %}
+
+      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }} <i class="fa fa-info-circle"></i></a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}</td></tr>
+
 
       {% endfor %}
       {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}

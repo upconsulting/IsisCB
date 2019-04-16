@@ -49,16 +49,26 @@
 </div>
 {% endwith %}
 
-<!-- Authors/editors/contributors -->
-{% with instance|get_authors_advisors as authors_advisor %}
+<<!-- Authors/editors/contributors -->
+{% with instance|get_authors_editors_relations as authors_editors_acrs %}
 <div class="noFormForms">
   <small>
     <label>By:</label> <a class="text-warning cursor-link"
             onclick="toggleTab('acrelations')">
-            {% if authors_advisor %}
-            <span id="author_editors">{{ authors_advisor }}</span>
+            <span id="author_editors">
+            {% if authors_editors_acrs %}
+            {% for acr in authors_editors_acrs %}
+            {% if acr.authority %}
+            {{ acr.authority.name }}
             {% else %}
-            <em><span class="gylphicon glyphicon-plus"></span>  Add author, or editor</em>
+            {{ acr.name_for_display_in_citation }}
+            <i class="fa fa-chain-broken" aria-hidden="true"></i>
+            {% endif %}
+            ({{acr.get_type_controlled_display}})
+            {% endfor %}
+            </span>
+            {% else %}
+            <em>Add author, editor, or contributor</em>
             {% endif %}
 
         </a>
