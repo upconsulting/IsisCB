@@ -142,3 +142,63 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
         task.value = str(E)
         task.state = 'FAILURE'
         task.save()
+
+@shared_task
+def create_timeline(authority_id, timeline_id):
+    now = datetime.datetime.now()
+
+    acrelations = ACRelation.objects.all().filter(
+        authority__id=authority_id, public=True, citation__public=True,
+        citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
+
+    SHOWN_TITLES_COUNT = 3
+
+    counted_citations = []
+    timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
+    cached_years = {}
+    for acrel in acrelations:
+        if acrel.citation.id in counted_citations:
+            continue
+
+        counted_citations.append(acrel.citation.id)
+        year = acrel.citation.publication_date.year
+
+        if not cached_years.get(year, None):
+            cached_year = CachedTimelineYear()
+            cached_year.year = year
+            cached_year.timeline_year = timeline_cache
+            cached_year.book_count = 0
+            cached_year.thesis_count = 0
+            cached_year.chapter_count = 0
+            cached_year.article_count = 0
+            cached_year.review_count = 0
+            cached_year.other_count = 0
+            cached_years[year] = cached_year
+            cached_year.save()
+
+        title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
+        if cached_year.titles.all().count() <= SHOWN_TITLES_COUNT:
+            cached_title = CachedTimelineTitle()
+            cached_title.title = title
+            cached_title.citation = acrel.citation
+            cached_title.timeline_year = cached_year
+            cached_title.citation_type = acrel.citation.type_controlled
+            cached_title.save()
+
+        if acrel.citation.type_controlled == Citation.BOOK:
+            cached_year.book_count += 1
+        elif acrel.citation.type_controlled == Citation.THESIS:
+            cached_year.thesis_count += 1
+        elif acrel.citation.type_controlled == Citation.CHAPTER:
+            cached_year.chapter_count += 1
+        elif acrel.citation.type_controlled == Citation.ARTICLE:
+            cached_year.article_count += 1
+        elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
+            cached_year.review_count += 1
+        else:
+            cached_year.other_count += 1
+        cached_year.save()
+        timeline_cache.save()
+
+    timeline_cache.complete = True
+    timeline_cache.save()

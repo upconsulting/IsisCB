@@ -4,7 +4,7 @@ from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator,int_list_validator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -2120,6 +2120,45 @@ class UserProfile(models.Model):
     A user can 'claim' an Authority record, asserting that the record refers to
     theirself."""))
 
+
+# --------------------- cache objects -------------------------------
+
+class CachedTimeline(models.Model):
+    """
+    Caches timeline data generated for authorities.
+    """
+    created_at = models.DateTimeField(auto_now_add=True)
+    authority_id = models.CharField(max_length=255, blank=True, null=True)
+    complete = models.BooleanField(default=False)
+
+
+class CachedTimelineYear(models.Model):
+    """
+    Caches timeline data for one year.
+    """
+    year = models.IntegerField()
+    timeline_year = models.ForeignKey(CachedTimeline, related_name='years')
+
+    book_count = models.BigIntegerField()
+    thesis_count = models.BigIntegerField()
+    chapter_count = models.BigIntegerField()
+    article_count = models.BigIntegerField()
+    review_count = models.BigIntegerField()
+    other_count = models.BigIntegerField()
+
+
+class CachedTimelineTitle(models.Model):
+    """
+    Caches timeline data for one title.
+    """
+    title = models.TextField()
+    authors = models.TextField()
+    citation = models.ForeignKey(Citation, blank=True, null=True)
+
+    timeline_year = models.ForeignKey(CachedTimelineYear, related_name='titles')
+    citation_type = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='type',
+                                       choices=Citation.TYPE_CHOICES)
 
 # ---------------------- Curation models ----------------------------
 

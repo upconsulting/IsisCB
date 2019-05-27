@@ -254,3 +254,6 @@ CELERY_REDIS_HOST = os.environ.get('CELERY_REDIS_HOST', 'redis://')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://')
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
+
+# time till next timeline refresh in hours (720 = 30 days)
+AUTHORITY_TIMELINE_REFRESH_TIME = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME', 720)
