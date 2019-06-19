@@ -16,7 +16,7 @@ before_script:
 before_install:
 - pip install -U pip
 - pip install -U six
-- pip install -U setuptools==33.1.1
+- pip install -U setuptools==41.0.1
 script:
 - pip install nose
 - cd isiscb
