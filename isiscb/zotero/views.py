@@ -194,8 +194,9 @@ def retrieve_accession(request, accession_id):
 
     # ISISCB-1043: show warning if a citation might already be in the db
     matching_citations = {}
+    ldtype_cache = {}
     for dcitation in draftcitations:
-        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True)
+        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, type_cache=ldtype_cache)
 
     context = {
         'curation_section': 'zotero',
@@ -225,11 +226,14 @@ def possible_matching_citations(request, accession_id, draftcitation_id):
     }
     return render(request, template, context)
 
-def _find_citation_matches(dcitation, limit_matches):
+def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     matches = []
     linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
     for draft_ld in linkeddata:
-        ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+        ldtype = type_cache.get(draft_ld.name.upper(), None)
+        if not ldtype:
+            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+            type_cache[draft_ld.name.upper()] = ldtype
         matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
         if matching_ld:
             matches = [match.subject for match in matching_ld]
