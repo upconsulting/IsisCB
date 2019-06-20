@@ -57,7 +57,7 @@ INSTALLED_APPS = (
     'curation',
     'pagination',
     'rules.apps.AutodiscoverRulesConfig',
-    'debug_toolbar'
+    #'debug_toolbar'
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -77,10 +77,10 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'isisdata.middleware.ProfileMiddleware',
     'pagination.middleware.PaginationMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-INTERNAL_IPS = [ '127.0.0.1']
+#INTERNAL_IPS = [ '127.0.0.1']
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'social.backends.facebook.FacebookOAuth2',
