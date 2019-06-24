@@ -266,6 +266,7 @@ def authority_author_timeline(request, authority_id):
     cached_timeline = cached_timelines[0] if cached_timelines else None
 
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
+    data = {}
     if not cached_timeline or (cached_timeline and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)):
         print "Refreshing timeline for " + authority_id
         timeline = CachedTimeline()
@@ -273,7 +274,10 @@ def authority_author_timeline(request, authority_id):
         timeline.save()
         create_timeline.delay(authority_id, timeline.id)
 
-    data = {}
+        data.update({
+            'status': 'generating',
+        })
+
     if cached_timeline:
         years = [year.year for year in cached_timeline.years.all()]
         book_count = [year.book_count for year in cached_timeline.years.all()]
@@ -297,6 +301,7 @@ def authority_author_timeline(request, authority_id):
             })
 
         data.update({
+            'status': 'done',
             'years': years,
             'books': book_count,
             'theses': thesis_count,

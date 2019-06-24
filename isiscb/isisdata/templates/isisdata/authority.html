@@ -406,18 +406,29 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         });
       }
 
-      $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
-        $('#spinner').hide();
-        titles = data.titles;
-        books = ['books'].concat(data.books);
-        theses = ['theses'].concat(data.theses);
-        chapters = ['chapters'].concat(data.chapters);
-        articles = ['articles'].concat(data.articles);
-        reviews = ['reviews'].concat(data.reviews);
-        others = ['others'].concat(data.others);
-        years = ['Years'].concat(data.years);
-        renderChart();
-      });
+      function pollForTimeline() {
+        $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
+          if (data.status == 'done') {
+            $('#spinner').hide();
+            titles = data.titles;
+            books = ['books'].concat(data.books);
+            theses = ['theses'].concat(data.theses);
+            chapters = ['chapters'].concat(data.chapters);
+            articles = ['articles'].concat(data.articles);
+            reviews = ['reviews'].concat(data.reviews);
+            others = ['others'].concat(data.others);
+            years = ['Years'].concat(data.years);
+            renderChart();
+          } else if (data.status == 'generating') {
+            setTimeout(pollForTimeline, 1000)
+          } else {
+            $('#spinner').hide();
+            $("#chart").append("Timeline could not be loaded. An error occurred.")
+          }
+        });
+      }
+
+      pollForTimeline();
 
       var current_groups;
       function renderChart() {
