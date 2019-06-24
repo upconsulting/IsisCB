@@ -26,6 +26,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#INTERNAL_IPS = ['127.0.0.1']
+
 MIGRATION_MODULES = {
     'isisdata': 'isisdata.migrations'
 }
@@ -57,7 +59,7 @@ INSTALLED_APPS = (
     'curation',
     'pagination',
     'rules.apps.AutodiscoverRulesConfig',
-    #'debug_toolbar'
+    #'debug_toolbar',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -73,6 +75,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'isisdata.middleware.ProfileMiddleware',
