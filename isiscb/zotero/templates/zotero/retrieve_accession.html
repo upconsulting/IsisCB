@@ -61,6 +61,7 @@ But for now the list is stored as string :-p
             {% for citation in draftcitations %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
             {% with citation.authority_relations.all as all_acrelations %}
+            {% with citation.resolutions.first as citation_resolution %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
                     <div class="panel-body">
                         <span class="pull-right btn-group">
@@ -71,9 +72,9 @@ But for now the list is stored as string :-p
                     <span class="h4">
                         <a href="{{ citation.get_absolute_url }}">{{ citation.title }}</a>
                     </span>
-                    {% if citation.resolutions.count > 0 %}
+                    {% if citation_resolution %}
                     <div class="h5">
-                        Matched to <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+                        Matched to <a class="text-warning" href="{{ citation_resolution.get_absolute_url }}">{{ citation }}</a>
                     </div>
                     {% endif %}
                     {% if citation.abstract %}
@@ -125,7 +126,8 @@ But for now the list is stored as string :-p
 
                         {% for acrelation in all_acrelations %}
                             {% with acrelation.authority as authority %}
-                                <div class="list-group-item clearfix {% if authority.resolved %}disabled{% endif %} {% if not authority.resolved and authority.processed %}list-group-item-danger{% endif %} }"
+                            {% with authority.resolutions.first as authority_resolution %}
+                                <div class="list-group-item clearfix {% if authority_resolution %}disabled{% endif %} {% if not authority_resolution and authority.processed %}list-group-item-danger{% endif %} }"
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
@@ -136,7 +138,7 @@ But for now the list is stored as string :-p
                                     data-type="{{ authority.type_controlled }}">
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
-                                    {% if not authority.resolved and not authority.processed %}
+                                    {% if not authority_resolution and not authority.processed %}
                                       <a class="draftauthority"
                                           id="authority-{{ authority.id }}-link"
                                           data-id="{{ authority.id }}"
@@ -149,12 +151,10 @@ But for now the list is stored as string :-p
                                           <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
                                       </a>
-                                      {% elif authority.resolved and authority.processed%}
+                                      {% elif authority_resolution and authority.processed%}
                                       <span class="text-info">
                                       <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
-                                      {% with authority.resolutions.first.to_instance as resolved_authority %}
-                                      {{ resolved_authority.name }} ({{resolved_authority.id}})
-                                      {% endwith %}
+                                      {{ authority_resolution.name }} ({{authority_resolution.id}})
                                       <div class="pull-right">
                                       <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
                                       </div>
@@ -172,10 +172,12 @@ But for now the list is stored as string :-p
                                       {% endif %}
                                 </div>
                             {% endwith %}
+                            {% endwith %}
                         {% endfor %}
                     </ul>
                     {% endif %}
                 </div>
+            {% endwith %}
             {% endwith %}
             {% endwith %}
             {% endfor %}
@@ -190,7 +192,7 @@ But for now the list is stored as string :-p
                   </span>
                   <div class="h5" style="line-height: 20px;">
                       <span class="label label-warning">Matched to</span>
- <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+ <a class="text-warning" href="{{ citation.resolutions.first.get_absolute_url }}">{{ citation }}</a>
                   </div>
                   <h5>The following citations link to this production citation:</h5>
                   <ul class="list-group">
