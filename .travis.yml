@@ -17,6 +17,7 @@ before_install:
 - pip install -U pip
 - pip install -U six
 - pip install -U setuptools==33.1.1
+- sudo apt-get install libgnutls28-dev
 script:
 - pip install nose
 - cd isiscb

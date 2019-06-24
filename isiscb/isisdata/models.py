@@ -1830,7 +1830,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     " identifier (the actual DOI link or the value of the ISBN, etc). Will be a"
     " URN, URI, URL, or other unique identifier for a work, used as needed to"
     " provide information about how to find the digital object on the web or"
-    " to identify the physical object uniquely.")
+    " to identify the physical object uniquely.", db_index=True)
 
     resource_name = models.CharField(max_length=255, blank=True, null=True,
                                      help_text="Title of the resource that the"

@@ -9,6 +9,7 @@ from isisdata.views import IsisSearchView
 from isisdata.isiscbviews import publicsite_views, authority_views
 
 from . import views
+from django.conf import settings
 
 sqs = SearchQuerySet().facet('authors', size=100). \
         facet('type', size=100). \
@@ -63,3 +64,9 @@ urlpatterns = [
     url(r'^(?i)api', views.api_documentation, name='api'),
     url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
+
+#if settings.DEBUG:
+#    import debug_toolbar
+#    urlpatterns = [
+#        url('__debug__/', include(debug_toolbar.urls)),
+#    ] + urlpatterns

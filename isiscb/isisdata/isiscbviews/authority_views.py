@@ -50,83 +50,83 @@ def authority(request, authority_id):
     related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
                                              .order_by('-citation__publication_date')[:show_nr]
     related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
-                                                  .distinct('citation_id')\
+                                                  .values('citation_id').distinct('citation_id')\
                                                   .count()
 
     related_citations_editor = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
                                             .order_by('-citation__publication_date')[:show_nr]
     related_citations_editor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
-                                                  .distinct('citation_id')\
+                                                  .values('citation_id').distinct('citation_id')\
                                                   .count()
 
     related_citations_advisor = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
                                              .order_by('-citation__publication_date')[:show_nr]
     related_citations_advisor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
-                                             .distinct('citation_id')\
+                                             .values('citation_id').distinct('citation_id')\
                                              .count()
 
     related_citations_contributor = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
                                                  .order_by('-citation__publication_date')[:show_nr]
     related_citations_contributor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
-                                                               .distinct('citation_id')\
+                                                               .values('citation_id').distinct('citation_id')\
                                                                .count()
 
     related_citations_translator = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
                                                 .order_by('-citation__publication_date')[:show_nr]
     related_citations_translator_count = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
-                                                .distinct('citation_id')\
+                                                .values('citation_id').distinct('citation_id')\
                                                 .count()
 
     related_citations_subject = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
                                              .order_by('-citation__publication_date')[:show_nr]
     related_citations_subject_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
-                                                   .distinct('citation_id')\
+                                                   .values('citation_id').distinct('citation_id')\
                                                    .count()
 
     related_citations_category = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
                                               .order_by('-citation__publication_date')[:show_nr]
     related_citations_category_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
-                                                    .distinct('citation_id')\
+                                                    .values('citation_id').distinct('citation_id')\
                                                     .count()
 
     related_citations_publisher = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
                                                .order_by('-citation__publication_date')[:show_nr]
     related_citations_publisher_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
-                                                     .distinct('citation_id')\
+                                                     .values('citation_id').distinct('citation_id')\
                                                      .count()
 
     related_citations_school = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
                                             .order_by('-citation__publication_date')[:show_nr]
     related_citations_school_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
-                                                  .distinct('citation_id')\
+                                                  .values('citation_id').distinct('citation_id')\
                                                   .count()
 
     related_citations_institution = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
                                                  .order_by('-citation__publication_date')[:show_nr]
     related_citations_institution_count = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
-                                                       .distinct('citation_id')\
+                                                       .values('citation_id').distinct('citation_id')\
                                                        .count()
 
     related_citations_meeting = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
                                              .order_by('-citation__publication_date')[:show_nr]
     related_citations_meeting_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
-                                                   .distinct('citation_id')\
+                                                   .values('citation_id').distinct('citation_id')\
                                                    .count()
 
     related_citations_periodical = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
                                                 .order_by('-citation__publication_date')[:show_nr]
     related_citations_periodical_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
-                                                      .distinct('citation_id')\
+                                                      .values('citation_id').distinct('citation_id')\
                                                       .count()
 
     related_citations_book_series = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
                                                  .order_by('-citation__publication_date')[:show_nr]
     related_citations_book_series_count = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
-                                                       .distinct('citation_id')\
+                                                       .values('citation_id').distinct('citation_id')\
                                                        .count()
 
     related_citations_count = acrelation_qs.filter(authority=authority, citation__public=True)\
-                                                       .distinct('citation_id')\
+                                                       .values('citation_id').distinct('citation_id')\
                                                        .count()
 
     # Location of authority in REST API
