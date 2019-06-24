@@ -9,6 +9,7 @@ from isisdata.views import IsisSearchView
 from isisdata.isiscbviews import publicsite_views
 
 from . import views
+from django.conf import settings
 
 from django.conf import settings
 
