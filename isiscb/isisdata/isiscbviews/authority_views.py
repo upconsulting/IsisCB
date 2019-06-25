@@ -271,7 +271,7 @@ def authority_author_timeline(request, authority_id):
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
         timeline.save()
-        create_timeline.delay(authority_id, timeline.id)
+        create_timeline.apply_async(args=[authority_id, timeline.id], queue="graph_tasks")
 
         data.update({
             'status': 'generating',
