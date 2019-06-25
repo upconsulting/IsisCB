@@ -262,12 +262,11 @@ def authority(request, authority_id):
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
 
-    cached_timelines = CachedTimeline.objects.filter(complete=True, authority_id=authority_id).order_by('-created_at')
+    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at')
     cached_timeline = cached_timelines[0] if cached_timelines else None
-
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
-    if not cached_timeline or (cached_timeline and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)):
+    if not cached_timeline or (cached_timeline and cached_timeline.complete and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)):
         print "Refreshing timeline for " + authority_id
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
@@ -279,122 +278,42 @@ def authority_author_timeline(request, authority_id):
         })
 
     if cached_timeline:
-        years = [year.year for year in cached_timeline.years.all()]
-        book_count = [year.book_count for year in cached_timeline.years.all()]
-        thesis_count = [year.thesis_count for year in cached_timeline.years.all()]
-        chapter_count = [year.chapter_count for year in cached_timeline.years.all()]
-        article_count = [year.article_count for year in cached_timeline.years.all()]
-        review_count = [year.review_count for year in cached_timeline.years.all()]
-        other_count = [year.other_count for year in cached_timeline.years.all()]
+        if cached_timeline.complete:
+            years = [year.year for year in cached_timeline.years.all()]
+            book_count = [year.book_count for year in cached_timeline.years.all()]
+            thesis_count = [year.thesis_count for year in cached_timeline.years.all()]
+            chapter_count = [year.chapter_count for year in cached_timeline.years.all()]
+            article_count = [year.article_count for year in cached_timeline.years.all()]
+            review_count = [year.review_count for year in cached_timeline.years.all()]
+            other_count = [year.other_count for year in cached_timeline.years.all()]
 
-        titles = {}
-        for year in cached_timeline.years.all():
-            titles.update({
-                str(year.year): {
-                     'books': [title.title for title in year.titles.filter(citation_type=Citation.BOOK)],
-                     'theses': [title.title for title in year.titles.filter(citation_type=Citation.THESIS)],
-                     'chapters': [title.title for title in year.titles.filter(citation_type=Citation.CHAPTER)],
-                     'articles': [title.title for title in year.titles.filter(citation_type=Citation.ARTICLE)],
-                     'reviews': [title.title for title in year.titles.filter(citation_type__in=[Citation.REVIEW, Citation.ESSAY_REVIEW])],
-                     'others': [title.title for title in year.titles.exclude(citation_type__in=[Citation.BOOK, Citation.THESIS, Citation.CHAPTER, Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW])],
-                }
+            titles = {}
+            for year in cached_timeline.years.all():
+                titles.update({
+                    str(year.year): {
+                         'books': [title.title for title in year.titles.filter(citation_type=Citation.BOOK)],
+                         'theses': [title.title for title in year.titles.filter(citation_type=Citation.THESIS)],
+                         'chapters': [title.title for title in year.titles.filter(citation_type=Citation.CHAPTER)],
+                         'articles': [title.title for title in year.titles.filter(citation_type=Citation.ARTICLE)],
+                         'reviews': [title.title for title in year.titles.filter(citation_type__in=[Citation.REVIEW, Citation.ESSAY_REVIEW])],
+                         'others': [title.title for title in year.titles.exclude(citation_type__in=[Citation.BOOK, Citation.THESIS, Citation.CHAPTER, Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW])],
+                    }
+                })
+
+            data.update({
+                'status': 'done',
+                'years': years,
+                'books': book_count,
+                'theses': thesis_count,
+                'chapters': chapter_count,
+                'articles': article_count,
+                'reviews': review_count,
+                'others': other_count,
+                'titles': titles,
             })
-
-        data.update({
-            'status': 'done',
-            'years': years,
-            'books': book_count,
-            'theses': thesis_count,
-            'chapters': chapter_count,
-            'articles': article_count,
-            'reviews': review_count,
-            'others': other_count,
-            'titles': titles,
-        })
-
-    # cache = caches['default']
-    # cache_data = cache.get(authority_id + '_count_data', {})
-    #
-    # if cache_data:
-    #     return JsonResponse(cache_data)
-    #
-    # acrelations = ACRelation.objects.all().prefetch_related(Prefetch('citation')).filter(
-    #     authority__id=authority_id, public=True, citation__public=True,
-    #     citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
-    # books = {}
-    # theses = {}
-    # chapters = {}
-    # articles = {}
-    # reviews = {}
-    # others = {}
-    # years = []
-    #
-    # counted_citations = []
-    # def update_stats(dictionary, acrel):
-    #     if acrel.citation.id in counted_citations:
-    #         return
-    #     counted_citations.append(acrel.citation.id)
-    #     record = dictionary.get(acrel.citation.publication_date.year, (0, []))
-    #     title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
-    #     dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [title])
-    #
-    # for acrel in acrelations:
-    #     if acrel.citation.type_controlled == Citation.BOOK:
-    #         update_stats(books, acrel)
-    #     elif acrel.citation.type_controlled == Citation.THESIS:
-    #         update_stats(theses, acrel)
-    #     elif acrel.citation.type_controlled == Citation.CHAPTER:
-    #         update_stats(chapters, acrel)
-    #     elif acrel.citation.type_controlled == Citation.ARTICLE:
-    #         update_stats(articles, acrel)
-    #     elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
-    #         update_stats(reviews, acrel)
-    #     else:
-    #         update_stats(others, acrel)
-    #
-    # book_count = []
-    # thesis_count = []
-    # article_count = []
-    # chapter_count = []
-    # review_count = []
-    # other_count = []
-    #
-    # SHOWN_TITLES_COUNT = 3
-    # titles = {}
-    #
-    # # including the current year
-    # for year in range(1970, now.year+1):
-    #     years.append(str(year))
-    #     book_count.append(books.get(year, (0, []))[0])
-    #     thesis_count.append(theses.get(year, (0, []))[0])
-    #     article_count.append(articles.get(year, (0, []))[0])
-    #     chapter_count.append(chapters.get(year, (0, []))[0])
-    #     review_count.append(reviews.get(year, (0, []))[0])
-    #     other_count.append(others.get(year, (0, []))[0])
-    #
-    #     titles.update({
-    #              str(year): {
-    #                  'books': [r for r in books.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #                  'theses': [r for r in theses.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #                  'chapters': [r for r in chapters.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #                  'articles': [r for r in articles.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #                  'reviews': [r for r in reviews.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #                  'others': [r for r in others.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-    #              }
-    #          })
-
-    # data = {
-    #     'years': years,
-    #     'books': book_count,
-    #     'theses': thesis_count,
-    #     'chapters': chapter_count,
-    #     'articles': article_count,
-    #     'reviews': review_count,
-    #     'others': other_count,
-    #     'titles': titles
-    # }
-    #
-    # cache.set(authority_id + '_count_data', data)
-
+        else:
+            data.update({
+                'status': 'generating',
+            })
 
     return JsonResponse(data)
