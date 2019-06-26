@@ -177,6 +177,8 @@ def create_timeline(authority_id, timeline_id):
             cached_year.other_count = 0
             cached_years[year] = cached_year
             cached_year.save()
+            print "chache year"
+            print year
 
         title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
         if cached_year.titles.all().count() <= SHOWN_TITLES_COUNT:
