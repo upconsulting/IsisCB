@@ -12,10 +12,10 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 # app.conf.broker_url = 'redis://localhost:6379/0'
 # app.conf.result_backend = 'django-db'
 # app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-app.conf.task_default_queue = 'default'
+app.conf.task_default_queue = settings.CELERY_DEFAULT_QUEUE
 app.conf.task_queues = (
-    Queue('default',    routing_key='task.#'),
-    Queue('graph_tasks', routing_key='graph.#'),
+    Queue(settings.CELERY_DEFAULT_QUEUE,    routing_key='task.#'),
+    Queue(settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#'),
 )
 
 @app.task(bind=True)
