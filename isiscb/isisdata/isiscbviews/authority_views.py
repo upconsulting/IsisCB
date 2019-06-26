@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.core.cache import caches
 from django.db.models import Prefetch
 
+from django.conf import settings
+
 from rest_framework.reverse import reverse
 
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
@@ -271,7 +273,7 @@ def authority_author_timeline(request, authority_id):
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
         timeline.save()
-        create_timeline.apply_async(args=[authority_id, timeline.id], queue="graph_tasks")
+        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE)
 
         data.update({
             'status': 'generating',
