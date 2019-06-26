@@ -9,6 +9,8 @@ from isisdata import export    # Oh man, so good.
 from isisdata import export_authority
 from isisdata.models import *
 
+from django.conf import settings
+
 import unicodecsv as csv
 import math, smart_open
 
@@ -149,7 +151,7 @@ def create_timeline(authority_id, timeline_id):
 
     acrelations = ACRelation.objects.all().filter(
         authority__id=authority_id, public=True, citation__public=True,
-        citation__attributes__type_controlled__name="Year Published").order_by('-citation__publication_date')
+        citation__attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE).order_by('-citation__publication_date')
 
     SHOWN_TITLES_COUNT = 3
 
