@@ -149,7 +149,7 @@ def create_timeline(authority_id, timeline_id):
 
     acrelations = ACRelation.objects.all().filter(
         authority__id=authority_id, public=True, citation__public=True,
-        citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
+        citation__attributes__type_controlled__name="Year Published").order_by('-citation__publication_date')
 
     SHOWN_TITLES_COUNT = 3
 
@@ -175,7 +175,7 @@ def create_timeline(authority_id, timeline_id):
             cached_year.other_count = 0
             cached_years[year] = cached_year
             cached_year.save()
-            
+
         title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
         if cached_year.titles.all().count() <= SHOWN_TITLES_COUNT:
             cached_title = CachedTimelineTitle()
