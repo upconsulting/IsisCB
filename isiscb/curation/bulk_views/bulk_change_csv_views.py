@@ -28,6 +28,16 @@ ACTION_DICT = {
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_tasks(request):
+    timelines = CachedTimeline.objects.order_by('-created_at')[:50]
+    context = {
+        'curation_section': 'bulk',
+        'timelines': timelines,
+    }
+    template = 'curation/bulk/timelines.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_changes(request):
 
 

@@ -261,3 +261,18 @@ CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
 
 # time till next timeline refresh in hours (720 = 30 days)
 AUTHORITY_TIMELINE_REFRESH_TIME = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME', 720)
+
+CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'default')
+CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'graph-tasks')
+
+CELERY_QUEUES = {
+    CELERY_DEFAULT_QUEUE: {
+        'exchange': CELERY_DEFAULT_QUEUE,
+        'binding_key': CELERY_DEFAULT_QUEUE,
+    },
+    CELERY_GRAPH_TASK_QUEUE: {
+        'exchange': CELERY_GRAPH_TASK_QUEUE,
+        'binding_key': CELERY_GRAPH_TASK_QUEUE,
+    }
+}
+CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE

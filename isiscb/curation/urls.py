@@ -44,6 +44,8 @@ urlpatterns = [
     url(r'^(?i)bulk/csv/status$', bulk_change_csv_views.bulk_csv_status, name="bulk-csv-status"),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
 
+    url(r'^(?i)timelines$', bulk_change_csv_views.timeline_tasks, name='timeline_tasks'),
+
     url(r'^(?i)citation/add$', views.create_citation, name="create_citation"),
     url(r'^(?i)authority/add$', views.create_authority, name="create_authority"),
 
