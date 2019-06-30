@@ -281,26 +281,58 @@ def authority_author_timeline(request, authority_id):
 
     if cached_timeline:
         if cached_timeline.complete:
-            years = [year.year for year in cached_timeline.years.all()]
-            book_count = [year.book_count for year in cached_timeline.years.all()]
-            thesis_count = [year.thesis_count for year in cached_timeline.years.all()]
-            chapter_count = [year.chapter_count for year in cached_timeline.years.all()]
-            article_count = [year.article_count for year in cached_timeline.years.all()]
-            review_count = [year.review_count for year in cached_timeline.years.all()]
-            other_count = [year.other_count for year in cached_timeline.years.all()]
+            year_map = { str(year.year) : year for year in cached_timeline.years.all()}
+            years = [year for year in range(1970, now.year+1)]
+            book_count = []
+            thesis_count = []
+            chapter_count = []
+            article_count = []
+            review_count = []
+            other_count = []
 
+            now = datetime.datetime.now()
             titles = {}
-            for year in cached_timeline.years.all():
-                titles.update({
-                    str(year.year): {
-                         'books': [title.title for title in year.titles.filter(citation_type=Citation.BOOK)],
-                         'theses': [title.title for title in year.titles.filter(citation_type=Citation.THESIS)],
-                         'chapters': [title.title for title in year.titles.filter(citation_type=Citation.CHAPTER)],
-                         'articles': [title.title for title in year.titles.filter(citation_type=Citation.ARTICLE)],
-                         'reviews': [title.title for title in year.titles.filter(citation_type__in=[Citation.REVIEW, Citation.ESSAY_REVIEW])],
-                         'others': [title.title for title in year.titles.exclude(citation_type__in=[Citation.BOOK, Citation.THESIS, Citation.CHAPTER, Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW])],
-                    }
-                })
+            # including the current year
+            for running_year in range(1970, now.year+1):
+                running_year_str = str(running_year)
+                if running_year_str in year_map:
+                    print "in map"
+                    year = year_map[running_year_str]
+                    book_count.append(year.book_count)
+                    thesis_count.append(year.thesis_count)
+                    chapter_count.append(year.chapter_count)
+                    article_count.append(year.article_count)
+                    review_count.append(year.review_count)
+                    other_count.append(year.other_count)
+
+                    titles.update({
+                        running_year_str: {
+                             'books': [title.title for title in year.titles.filter(citation_type=Citation.BOOK)],
+                             'theses': [title.title for title in year.titles.filter(citation_type=Citation.THESIS)],
+                             'chapters': [title.title for title in year.titles.filter(citation_type=Citation.CHAPTER)],
+                             'articles': [title.title for title in year.titles.filter(citation_type=Citation.ARTICLE)],
+                             'reviews': [title.title for title in year.titles.filter(citation_type__in=[Citation.REVIEW, Citation.ESSAY_REVIEW])],
+                             'others': [title.title for title in year.titles.exclude(citation_type__in=[Citation.BOOK, Citation.THESIS, Citation.CHAPTER, Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW])],
+                        }
+                    })
+                else:
+                    book_count.append(0)
+                    thesis_count.append(0)
+                    chapter_count.append(0)
+                    article_count.append(0)
+                    review_count.append(0)
+                    other_count.append(0)
+
+                    titles.update({
+                        running_year_str: {
+                             'books': [],
+                             'theses': [],
+                             'chapters': [],
+                             'articles': [],
+                             'reviews': [],
+                             'others': [],
+                        }
+                    })
 
             data.update({
                 'status': 'done',
