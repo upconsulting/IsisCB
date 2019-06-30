@@ -3,9 +3,10 @@
 {% load general_tags %}
 
 {% block content %}
-<h2>Bulk Changes</h2>
-<small>
+<h2>Cached Timelines</h2>
+<p>Below are the last 50 timelines that have been calculated. You can delete a cached timeline to force recalculation of the timeline for that authority.</p>
 
+<small>
 <table class="table table-hover table-curation">
   <tr>
     <th>Task ID</th>
@@ -13,6 +14,7 @@
     <th>Created on</th>
     <th>State</th>
     <th>Years with Citations</th>
+    <th></th>
   </tr>
   {% for timeline in timelines %}
   <tr class="goToTask" data-task-id="{{timeline.id}}" style="cursor: pointer">
@@ -21,6 +23,7 @@
     <td><span class="date">{{ timeline.created_at|get_iso_date_string }}</span></td>
     <td>{% if timeline.complete %}Done {% else %} Incomplete {% endif %}</td>
     <td>{{ timeline.years.count }}</td>
+    <td><a href="{% url 'curation:delete_timeline' timeline.authority_id %}"><i class="fa fa-trash"></i> Delete</a></td>
   </tr>
   {% endfor %}
 </table>

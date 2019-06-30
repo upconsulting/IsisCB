@@ -296,7 +296,6 @@ def authority_author_timeline(request, authority_id):
             for running_year in range(1970, now.year+1):
                 running_year_str = str(running_year)
                 if running_year_str in year_map:
-                    print "in map"
                     year = year_map[running_year_str]
                     book_count.append(year.book_count)
                     thesis_count.append(year.thesis_count)

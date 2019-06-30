@@ -38,6 +38,14 @@ def timeline_tasks(request):
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_delete(request, authority_id):
+    cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+    if cached_timeline:
+        cached_timeline.delete()
+
+    return HttpResponseRedirect(reverse('curation:timeline_tasks',))
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_changes(request):
 
 
