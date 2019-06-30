@@ -5,7 +5,11 @@
 {% block content %}
 <h2>Cached Timelines</h2>
 <p>Below are the last 50 timelines that have been calculated. You can delete a cached timeline to force recalculation of the timeline for that authority.</p>
-
+<p>
+Find cached timelines for authority: <input id="authorityToFind" type="text" class="form-control input-sm" placeholder="Authority ID"></input>
+<button id="findTimelines" style="margin-top: 5px;" class="btn btn-primary btn-sm" type="submit">Search</button>
+<a href="{% url 'curation:timeline_tasks' %}" style="margin-top: 5px;" class="btn btn-default btn-sm">Show All</a>
+</p>
 <small>
 <table class="table table-hover table-curation">
   <tr>
@@ -28,5 +32,21 @@
   {% endfor %}
 </table>
 </small>
+
+<script>
+$(function() {
+  $("#findTimelines").click(function() {
+    var authority = $("#authorityToFind").val();
+    window.location.href = "{% url 'curation:timeline_tasks' %}?find_authority=" + authority;
+  });
+
+  $('#authorityToFind').keypress(function(event) {
+      if (event.keyCode == 13) {
+        var authority = $("#authorityToFind").val();
+        window.location.href = "{% url 'curation:timeline_tasks' %}?find_authority=" + authority;
+      }
+  });
+});
+</script>
 
 {% endblock %}

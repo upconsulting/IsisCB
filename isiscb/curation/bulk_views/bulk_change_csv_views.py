@@ -29,7 +29,10 @@ ACTION_DICT = {
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def timeline_tasks(request):
-    timelines = CachedTimeline.objects.order_by('-created_at')[:50]
+    if request.GET.get('find_authority', None):
+        timelines = CachedTimeline.objects.filter(authority_id=request.GET.get('find_authority', None))[:50]
+    else:
+        timelines = CachedTimeline.objects.order_by('-created_at')[:50]
     context = {
         'curation_section': 'bulk',
         'timelines': timelines,
