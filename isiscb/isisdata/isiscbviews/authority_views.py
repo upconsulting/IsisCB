@@ -266,6 +266,13 @@ def authority_author_timeline(request, authority_id):
 
     cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at')
     cached_timeline = cached_timelines[0] if cached_timelines else None
+    timeline_to_display = cached_timeline
+
+    # let's show an old one if there is one and current calculation hasn't completed yet
+    if cached_timeline and not cached_timeline.complete:
+        if len(cached_timelines) > 1:
+            timeline_to_display = cached_timelines[1]    
+
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
     if not cached_timeline or (cached_timeline and cached_timeline.complete and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)):
@@ -279,9 +286,9 @@ def authority_author_timeline(request, authority_id):
             'status': 'generating',
         })
 
-    if cached_timeline:
-        if cached_timeline.complete:
-            year_map = { str(year.year) : year for year in cached_timeline.years.all()}
+    if timeline_to_display:
+        if timeline_to_display.complete:
+            year_map = { str(year.year) : year for year in timeline_to_display.years.all()}
             years = [year for year in range(1970, now.year+1)]
             book_count = []
             thesis_count = []
