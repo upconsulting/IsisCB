@@ -271,7 +271,7 @@ def authority_author_timeline(request, authority_id):
     # let's show an old one if there is one and current calculation hasn't completed yet
     if cached_timeline and not cached_timeline.complete:
         if len(cached_timelines) > 1:
-            timeline_to_display = cached_timelines[1]    
+            timeline_to_display = cached_timelines[1]
 
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
@@ -342,6 +342,7 @@ def authority_author_timeline(request, authority_id):
 
             data.update({
                 'status': 'done',
+                'generated_on': timeline_to_display.created_at,
                 'years': years,
                 'books': book_count,
                 'theses': thesis_count,

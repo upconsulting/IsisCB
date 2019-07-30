@@ -191,7 +191,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <div><h4>Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i>.</h4></div>
       <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
       <div id="chart"></div>
-      <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+      <div id="timelineGenDate" class="pull-left" style="display: none; padding-top: 15px; font-size: 10px;">Generated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.</div>
+      <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
     </div>
 
     <hr>
@@ -410,6 +411,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
           if (data.status == 'done') {
             $('#spinner').hide();
+            var genDate = new Date(data.generated_on);
+            $("#timelineDate").text(genDate.toLocaleDateString());
+            $("#timelineTime").text(genDate.toLocaleTimeString());
+            $("#timelineGenDate").show();
             titles = data.titles;
             books = ['books'].concat(data.books);
             theses = ['theses'].concat(data.theses);
