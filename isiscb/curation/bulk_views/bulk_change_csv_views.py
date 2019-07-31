@@ -47,9 +47,11 @@ def timeline_tasks(request):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def timeline_delete(request, authority_id):
-    cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
-    if cached_timeline:
-        cached_timeline.delete()
+    if (request.method == 'POST'):
+        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+        if cached_timeline:
+            cached_timeline.recalculate = True
+            cached_timeline.save()
 
     return HttpResponseRedirect(reverse('curation:timeline_tasks',))
 

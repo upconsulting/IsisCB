@@ -204,3 +204,6 @@ def create_timeline(authority_id, timeline_id):
 
     timeline_cache.complete = True
     timeline_cache.save()
+
+    # delete previous timelines
+    cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()

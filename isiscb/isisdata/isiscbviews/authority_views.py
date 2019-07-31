@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
+from django.contrib.admin.views.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.cache import caches
 from django.db.models import Prefetch
@@ -275,7 +276,9 @@ def authority_author_timeline(request, authority_id):
 
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
-    if not cached_timeline or (cached_timeline and cached_timeline.complete and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)):
+
+    timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
+    if not cached_timeline or timeline_is_outdated:
         print "Refreshing timeline for " + authority_id
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
@@ -340,9 +343,13 @@ def authority_author_timeline(request, authority_id):
                         }
                     })
 
+            user_init_refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT
+            can_recalculate = cached_timeline.created_at + datetime.timedelta(hours=user_init_refresh_time) < datetime.datetime.now(tz=pytz.utc)
             data.update({
                 'status': 'done',
                 'generated_on': timeline_to_display.created_at,
+                'timeline_recalculation': 'running' if timeline_to_display.recalculate else 'none',
+                'can_recalculate': can_recalculate,
                 'years': years,
                 'books': book_count,
                 'theses': thesis_count,
@@ -358,3 +365,15 @@ def authority_author_timeline(request, authority_id):
             })
 
     return JsonResponse(data)
+
+@user_passes_test(lambda u: u.is_authenticated)
+def timeline_recalculate(request, authority_id):
+    if (request.method == 'POST'):
+        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+
+        refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT
+        if cached_timeline and cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc):
+            cached_timeline.recalculate = True
+            cached_timeline.save()
+
+    return HttpResponseRedirect(reverse('authority', args=[authority_id]))
