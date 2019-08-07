@@ -10,6 +10,15 @@
 var toggleTab = function(name) {
     $('.nav-tabs a[href="#' + name + '"]').tab('show')
 }
+
+$(function() {
+   $(".reduceIfEmpty").each(function(idx, elem) {
+     var content = $(elem).text();
+     if (content == '' || content == undefined) {
+       $(elem).attr('rows', 1);
+     }
+   });
+});
 </script>
 <style>
 .acrelation.search-result {
@@ -166,44 +175,12 @@ Back to List </a>
                     </div>
                     <div class="col-sm-6">
 
-                        {% for error in form.description.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.description.label }}</label>
-                            {{ form.description|addcss:"form-control" }}
-                        </div>
-
                         {% for error in form.abstract.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
                             <label>{{ form.abstract.label }}</label>
-                            {{ form.abstract|addcss:"form-control" }}
-                        </div>
-
-                        {% for error in form.administrator_notes.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.administrator_notes.label }}</label>
-                            {{ form.administrator_notes|addcss:"form-control" }}
-                        </div>
-
-                        {% for error in form.record_history.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.record_history.label }}</label>
-                            {{ form.record_history|addcss:"form-control" }}
-                        </div>
-
-                        {% for error in form.belongs_to.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.belongs_to.label }}</label>
-                            {{ form.belongs_to|addcss:"form-control" }}
+                            {{ form.abstract|addcss:"form-control reduceIfEmpty" }}
                         </div>
 
                         <label>Language(s)</label>
@@ -227,6 +204,40 @@ Back to List </a>
                             </a>
 
                         </ul>
+
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.description.label }}</label>
+                            {{ form.description|addcss:"form-control reduceIfEmpty" }}
+                        </div>
+
+
+
+                        {% for error in form.administrator_notes.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.administrator_notes.label }}</label>
+                            {{ form.administrator_notes|addcss:"form-control reduceIfEmpty" }}
+                        </div>
+
+                        {% for error in form.belongs_to.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.belongs_to.label }}</label>
+                            {{ form.belongs_to|addcss:"form-control" }}
+                        </div>
+
+                        {% for error in form.record_history.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                            <label>{{ form.record_history.label }}</label>
+                            {{ form.record_history|addcss:"form-control reduceIfEmpty" }}
+                        </div>
 
                     </div>
 
