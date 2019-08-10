@@ -348,7 +348,7 @@ def authority_author_timeline(request, authority_id):
             data.update({
                 'status': 'done',
                 'generated_on': timeline_to_display.created_at,
-                'timeline_recalculation': 'running' if timeline_to_display.recalculate else 'none',
+                'timeline_recalculation': 'running' if timeline_to_display.recalculate or timeline_is_outdated else 'none',
                 'can_recalculate': can_recalculate,
                 'years': years,
                 'books': book_count,
