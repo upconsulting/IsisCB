@@ -29,7 +29,7 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
       {% endif %}
       {{ timeline.id }}
     </td>
-    <td>{{ timeline.authority_id }}</td>
+    <td><a href="{% url 'authority' timeline.authority_id %}" target="_blank">{{ timeline.authority_id }}</a></td>
     <td>{{ authority_names|get_item:timeline.authority_id|truncatechars:40 }}</td>
     <td><span class="date">{{ timeline.created_at|get_iso_date_string }}</span></td>
     <td>{% if timeline.complete %}Done {% else %} Incomplete {% endif %}</td>
@@ -41,7 +41,7 @@ Find cached timelines for authority: <input id="authorityToFind" type="text" cla
           <i class="fa fa-clock-o" aria-hidden="true" ></i> Recalculate
         </button>
       </form>
-      <a href="{% url 'authority' timeline.authority_id %}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+
     </td>
   </tr>
   {% endfor %}
