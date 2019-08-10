@@ -10,6 +10,7 @@ from isisdata.utils import normalize
 import bleach
 import unidecode
 import unicodedata
+import re
 from itertools import groupby
 import time
 from collections import defaultdict
@@ -424,8 +425,22 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_publication_date(self, data):
         attributes = data.get('attributes', None)
 
-        freeform_dates = [attr['attributes__value_freeform'] for attr in attributes
-                if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']]
+        freeform_dates = []
+
+        for attr in attributes:
+            if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']:
+                date = attr['attributes__value_freeform']
+                # IEXP-8: let's handle cases like 2001 - 2002 or 2001-01-02
+                patternYearSpan = re.match("([0-9]{4}).+?([0-9]{4})", date)
+                if patternYearSpan:
+                    for d in patternYearSpan.groups(): freeform_dates.append(d)
+                    continue
+                patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}")
+                if patternFullDate:
+                    for d in patternFullDate.groups(): freeform_dates.append(d)
+                    continue
+
+                freeform_dates.append(date)
 
         if freeform_dates:
             return freeform_dates
