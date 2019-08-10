@@ -111,6 +111,8 @@ def _linked_data(obj, extra, config={}):
 
 def _related_citations(obj, extra, config={}):
     qs = obj.acrelation_set.all()
+    if config.get('export_acrelation_count', False):
+        return str(qs.count())
     return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
 
