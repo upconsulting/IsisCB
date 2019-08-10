@@ -431,6 +431,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']:
                 date = attr['attributes__value_freeform']
                 # IEXP-8: let's handle cases like 2001 - 2002 or 2001-01-02
+                freeform_dates.append(date)
                 patternYearSpan = re.match("([0-9]{4}).+?([0-9]{4})", date)
                 if patternYearSpan:
                     for d in patternYearSpan.groups(): freeform_dates.append(d)
@@ -440,7 +441,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     for d in patternFullDate.groups(): freeform_dates.append(d)
                     continue
 
-                freeform_dates.append(date)
 
         if freeform_dates:
             return freeform_dates
