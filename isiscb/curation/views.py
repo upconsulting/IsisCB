@@ -2912,7 +2912,6 @@ def export_authorities(request):
             tag = slugify(form.cleaned_data.get('export_name', 'export'))
             fields = form.cleaned_data.get('fields')
             export_metadata = form.cleaned_data.get('export_metadata', False)
-            export_acrelation_count = form.cleaned_data.get('export_acrelation_count', False)
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2929,7 +2928,6 @@ def export_authorities(request):
             # configuration for export
             config = {
                 'export_metadata': export_metadata,
-                'export_acrelation_count': export_acrelation_count
             }
 
             # We create the AsyncTask object first, so that we can keep it
