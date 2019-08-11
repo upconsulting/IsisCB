@@ -80,10 +80,8 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'isisdata.middleware.ProfileMiddleware',
     'pagination.middleware.PaginationMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-#INTERNAL_IPS = [ '127.0.0.1']
 AUTHENTICATION_BACKENDS = (
     'social.backends.twitter.TwitterOAuth',
     'social.backends.facebook.FacebookOAuth2',
@@ -203,7 +201,7 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-
+STATIC_ROOT = os.environ.get('STATIC_ROOT', '')
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
@@ -260,3 +258,23 @@ CELERY_REDIS_HOST = os.environ.get('CELERY_REDIS_HOST', 'redis://')
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://')
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
+
+# time till next timeline refresh in hours (720 = 30 days)
+AUTHORITY_TIMELINE_REFRESH_TIME = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME', 720)
+AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT', 0.25)
+TIMELINE_PUBLICATION_DATE_ATTRIBUTE = os.environ.get('TIMELINE_PUBLICATION_DATE_ATTRIBUTE', "PublicationDate")
+
+CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'default')
+CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'graph-tasks')
+
+CELERY_QUEUES = {
+    CELERY_DEFAULT_QUEUE: {
+        'exchange': CELERY_DEFAULT_QUEUE,
+        'binding_key': CELERY_DEFAULT_QUEUE,
+    },
+    CELERY_GRAPH_TASK_QUEUE: {
+        'exchange': CELERY_GRAPH_TASK_QUEUE,
+        'binding_key': CELERY_GRAPH_TASK_QUEUE,
+    }
+}
+CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
