@@ -1,0 +1,67 @@
+{% extends "curation/base.html" %}
+{% load staticfiles %}
+{% load general_tags %}
+
+{% block content %}
+<h2>Cached Timelines</h2>
+<p>Below are the last 50 timelines that have been calculated. You can delete a cached timeline to force recalculation of the timeline for that authority.</p>
+<p>
+Find cached timelines for authority: <input id="authorityToFind" type="text" class="form-control input-sm" placeholder="Authority ID"></input>
+<button id="findTimelines" style="margin-top: 5px;" class="btn btn-primary btn-sm" type="submit">Search</button>
+<a href="{% url 'curation:timeline_tasks' %}" style="margin-top: 5px;" class="btn btn-default btn-sm">Show All</a>
+</p>
+<small>
+<table class="table table-hover table-curation">
+  <tr>
+    <th>Task ID</th>
+    <th>For Authority</th>
+    <th>Authority Name</th>
+    <th>Created on</th>
+    <th>State</th>
+    <th>Years with Citations</th>
+    <th></th>
+  </tr>
+  {% for timeline in timelines %}
+  <tr class="goToTask" data-task-id="{{timeline.id}}" style="cursor: pointer">
+    <td>
+      {% if timeline.recalculate %}
+      <i class="fa fa-clock-o" aria-hidden="true" title="Timeline is marked for recalculation."></i>
+      {% endif %}
+      {{ timeline.id }}
+    </td>
+    <td><a href="{% url 'authority' timeline.authority_id %}" target="_blank">{{ timeline.authority_id }}</a></td>
+    <td>{{ authority_names|get_item:timeline.authority_id|truncatechars:40 }}</td>
+    <td><span class="date">{{ timeline.created_at|get_iso_date_string }}</span></td>
+    <td>{% if timeline.complete %}Done {% else %} Incomplete {% endif %}</td>
+    <td>{{ timeline.years.count }}</td>
+    <td>
+      <form style="display: inline;" method='POST' action="{% url 'curation:delete_timeline' timeline.authority_id %}">
+        {% csrf_token %}
+        <button  style="padding: 0 5px 0 0; font-size: 12px; margin-top: -5px" type="submit" class="btn btn-link">
+          <i class="fa fa-clock-o" aria-hidden="true" ></i> Recalculate
+        </button>
+      </form>
+
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+</small>
+
+<script>
+$(function() {
+  $("#findTimelines").click(function() {
+    var authority = $("#authorityToFind").val();
+    window.location.href = "{% url 'curation:timeline_tasks' %}?find_authority=" + authority;
+  });
+
+  $('#authorityToFind').keypress(function(event) {
+      if (event.keyCode == 13) {
+        var authority = $("#authorityToFind").val();
+        window.location.href = "{% url 'curation:timeline_tasks' %}?find_authority=" + authority;
+      }
+  });
+});
+</script>
+
+{% endblock %}

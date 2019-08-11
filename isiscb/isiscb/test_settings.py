@@ -219,6 +219,20 @@ AWS_HEADERS = {
     'Cache-Control': 'max-age=94608000',
 }
 
+
+CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'default')
+CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'graph-tasks')
+CELERY_QUEUES = {
+    CELERY_DEFAULT_QUEUE: {
+        'exchange': CELERY_DEFAULT_QUEUE,
+        'binding_key': CELERY_DEFAULT_QUEUE,
+    },
+    CELERY_GRAPH_TASK_QUEUE: {
+        'exchange': CELERY_GRAPH_TASK_QUEUE,
+        'binding_key': CELERY_GRAPH_TASK_QUEUE,
+    }
+}
+
 DOMAIN = os.environ.get('DJANGO_DOMAIN', '')
 URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
 EMAIL_USE_TLS = True
