@@ -201,7 +201,7 @@ REST_FRAMEWORK = {
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 
-
+STATIC_ROOT = os.environ.get('STATIC_ROOT', '')
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 

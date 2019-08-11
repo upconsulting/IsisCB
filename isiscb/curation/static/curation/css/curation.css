@@ -12,6 +12,10 @@ a {
     color: #032544;
 }
 
+textarea.form-control {
+  line-height: initial;
+}
+
 .no-gutter {
   margin-left: 0;
   margin-right: 0;
