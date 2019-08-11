@@ -35,7 +35,7 @@ deploy:
     bucket_name: elasticbeanstalk-us-west-2-655333410217
     on:
       repo: upconsulting/IsisCB
-      branch: master
+      branch: develop
   - provider: elasticbeanstalk
     access_key_id: AKIAI3SRBWU3O3X5S7CQ
     secret_access_key:
@@ -46,7 +46,7 @@ deploy:
     bucket_name: elasticbeanstalk-us-west-2-655333410217
     on:
       repo: upconsulting/IsisCB
-      branch: master
+      branch: develop
   - provider: elasticbeanstalk
     access_key_id: AKIAI3SRBWU3O3X5S7CQ
     secret_access_key:
