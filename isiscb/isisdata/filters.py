@@ -228,7 +228,7 @@ class CitationFilter(django_filters.FilterSet):
         return queryset.filter(publication_date__lte=date)
 
     def filter_publication_date_contains(self, queryset, name, value):
-        return queryset.filter(attributes__type_controlled__name='PublicationDate', attributes__value_freeform__icontains=value)
+        return queryset.filter(attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE, attributes__value_freeform__icontains=value)
 
     def filter_created_on_from(self, queryset, name, value):
         try:
