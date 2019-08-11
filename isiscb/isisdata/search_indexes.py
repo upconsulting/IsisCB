@@ -440,6 +440,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 if patternFullDate:
                     for d in patternFullDate.groups(): freeform_dates.append(d)
                     continue
+                # patterns e.g. 1999 (pub. 2000) or 1993-94
+                patternBrackets = re.match("([0-9]{4}).+", date)
+                if patternBrackets:
+                    for d in patternYearSpan.groups(): freeform_dates.append(d)
+                    continue
 
 
         if freeform_dates:

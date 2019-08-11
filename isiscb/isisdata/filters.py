@@ -55,6 +55,8 @@ class CitationFilter(django_filters.FilterSet):
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
     publication_date_to = django_filters.CharFilter(method='filter_publication_date_to')
+    publication_date_contains = django_filters.CharFilter(method='filter_publication_date_contains')
+
     # abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
     abstract = django_filters.CharFilter(method='filter_abstract')
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
@@ -224,6 +226,9 @@ class CitationFilter(django_filters.FilterSet):
         except:
             return queryset
         return queryset.filter(publication_date__lte=date)
+
+    def filter_publication_date_contains(self, queryset, name, value):
+        return queryset.filter(attributes__type_controlled__name='PublicationDate', attributes__value_freeform__icontains=value)
 
     def filter_created_on_from(self, queryset, name, value):
         try:

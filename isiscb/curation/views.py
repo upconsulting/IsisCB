@@ -272,6 +272,7 @@ def get_subject_suggestions(request, citation_id):
     }
     return JsonResponse(response_data)
 
+
 # TODO this method needs to be logged down!
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_create_acrelation(request):
