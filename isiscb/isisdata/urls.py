@@ -6,11 +6,9 @@ from haystack.query import SearchQuerySet
 
 from isisdata.forms import *
 from isisdata.views import IsisSearchView
-from isisdata.isiscbviews import publicsite_views
+from isisdata.isiscbviews import publicsite_views, authority_views
 
 from . import views
-from django.conf import settings
-
 from django.conf import settings
 
 sqs = SearchQuerySet().facet('authors', size=100). \
@@ -50,8 +48,8 @@ urlpatterns = [
     url(r'^(?i)(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^(?i)recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^(?i)recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
-    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', views.authority, name='authority'),
-    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', views.authority_author_timeline, name='authority_author_timeline'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^(?i)user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
@@ -64,6 +62,7 @@ urlpatterns = [
     url(r'^(?i)about', views.about, name='about'),
     url(r'^(?i)statistics', views.statistics, name='statistics'),
     url(r'^(?i)api', views.api_documentation, name='api'),
+    url(r'^(?i)(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
     url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
 
