@@ -437,7 +437,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 if patternYearSpan:
                     for d in patternYearSpan.groups(): freeform_dates.append(d)
                     continue
-                patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}")
+                patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}", date)
                 if patternFullDate:
                     for d in patternFullDate.groups(): freeform_dates.append(d)
                     continue
