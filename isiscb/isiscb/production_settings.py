@@ -128,8 +128,10 @@ DATABASES = {
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
+HAYSTACK_DEFAULT_INDEX = 'default'
+
 HAYSTACK_CONNECTIONS = {
-    'default': {
+    HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,

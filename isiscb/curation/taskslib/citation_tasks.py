@@ -24,7 +24,7 @@ def reindex_citations(user_id, filter_params_raw, task_id=None, object_type='CIT
                 task.current_value = i
                 task.save()
 
-            haystack.connections[settings.CELERY_DEFAULT_QUEUE].get_unified_index().get_index(Citation).update_object(obj)
+            haystack.connections[settings.HAYSTACK_DEFAULT_INDEX].get_unified_index().get_index(Citation).update_object(obj)
 
         task.state = 'SUCCESS'
         task.save()
