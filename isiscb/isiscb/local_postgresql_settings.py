@@ -132,8 +132,9 @@ DATABASES = {
     }
 }
 
+HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
-    'default': {
+    HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
         'INDEX_NAME': 'haystack',
