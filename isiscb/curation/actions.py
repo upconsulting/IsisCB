@@ -10,6 +10,7 @@ from django.http import QueryDict
 
 from isisdata.models import *
 import isisdata.tasks as dtasks
+import curation.taskslib.citation_tasks as ctasks
 from isisdata.filters import CitationFilter
 import json
 # TODO: refactor these actions to use bulk apply methods and then explicitly
@@ -61,7 +62,7 @@ class PrependToRecordHistory(BaseAction):
         else:
             result = bulk_prepend_record_history.delay(user.id, filter_params_raw,
                                                    value, task.id)
-                                                   
+
         # We can use the AsyncResult's UUID to access this task later, e.g.
         #  to check the return value or task state.
         task.async_uuid = result.id
@@ -171,7 +172,6 @@ class SetRecordStatusExplanation(BaseAction):
         task.save()
         return task.id
 
-
 def get_tracking_transition_counts(qs):
     states = zip(*qs.model.TRACKING_CHOICES)[0]
     transitions = dict(zip(states, map(lambda state: qs.filter(tracking_state=state).count(), states)))
@@ -237,6 +237,27 @@ class SetTrackingStatus(BaseAction):
         task.save()
         return task.id
 
+class ReindexCitation(BaseAction):
+    model = Citation
+    label = u'Reindex citations'
 
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Reindex citations',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Reindex citations'}),
+    }
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel]
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = ctasks.reindex_citations.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_citations', value)
+        task.label = 'Reindexing citations: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]
