@@ -180,12 +180,20 @@ Back to List </a>
                           <div class="col-sm-1 text-left">
                             <label class="input-sm">Lang.</label>
                           </div>
+                          <div class="col-sm-3" style="padding-right: 0px;">
+                            <ul style="margin-bottom: 0;" class="list-group">
+                              <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
+                              <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                                  <span class="glyphicon glyphicon-plus"></span> Add
+                              </a>
+                            </ul>
+                          </div>
                           <div class="col-sm-8">
                             <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
                                   {% for language in instance.language.all %}
                                   <li class="list-group-item language clearfix"
                                       id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px;">
-                                      <small style="line-height: 20px;">{{ language }}</small>
+                                      <small style="line-height: 28px;">{{ language }}</small>
                                       <!-- TODO: implement permission check here. -->
                                       <span class="button-group button-group-xs pull-right">
                                           <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
@@ -198,14 +206,6 @@ Back to List </a>
 
 
                               </ul>
-                          </div>
-                          <div style="padding-left: 0px;" class="col-sm-3">
-                            <ul style="margin-bottom: 0;" class="list-group">
-                              <li class="list-group-item" id="create-language-item" style="display: none; padding:0"></li>
-                              <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
-                                  <span class="glyphicon glyphicon-plus"></span> Add
-                              </a>
-                            </ul>
                           </div>
                         </div>
                       </div>
@@ -529,7 +529,7 @@ function selectLanguage(selected) {
     $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
         var new_id = result.language.id;
         var new_elem = '<li style="padding-bottom: 0px; padding-top: 0px;" class="list-group-item clearfix" id="language-' + new_id + '">';
-        new_elem += '<small style="line-height: 20px;">' + result.language.name + '</small>';
+        new_elem += '<small style="line-height: 28px;">' + result.language.name + '</small>';
         new_elem += '<span class="button-group button-group-xs pull-right">';
         new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-language" type="button" language-id="'+ new_id +'" language-name="' + result.language.name + '"></a>';
         new_elem += '</span>';
