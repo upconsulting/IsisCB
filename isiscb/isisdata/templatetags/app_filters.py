@@ -98,8 +98,12 @@ def get_title(citation):
 
 @register.filter
 def get_pub_year(citation):
-    dates = citation.attributes.filter(type_controlled__name='PublicationDate')
+    dates = citation.attributes.filter(type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE)
     if dates:
+        if hasattr(dates[0].value.cvalue(), 'year'):
+            year = dates[0].value.cvalue().year
+        else:
+            year = dates[0].value.cvalue()
         return dates[0].value_freeform if dates[0].value_freeform else dates[0].value.cvalue().year
     return ''
 

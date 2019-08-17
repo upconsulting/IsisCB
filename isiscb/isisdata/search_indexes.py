@@ -3,6 +3,7 @@ from haystack import indexes
 from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
+from django.conf import settings
 from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
 from isisdata.utils import normalize
@@ -10,6 +11,7 @@ from isisdata.utils import normalize
 import bleach
 import unidecode
 import unicodedata
+import re
 from itertools import groupby
 import time
 from collections import defaultdict
@@ -424,8 +426,27 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_publication_date(self, data):
         attributes = data.get('attributes', None)
 
-        freeform_dates = [attr['attributes__value_freeform'] for attr in attributes
-                if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']]
+        freeform_dates = []
+
+        for attr in attributes:
+            if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE and attr['attributes__value_freeform']:
+                date = attr['attributes__value_freeform']
+                # IEXP-8: let's handle cases like 2001 - 2002 or 2001-01-02
+                freeform_dates.append(date)
+                patternYearSpan = re.match("([0-9]{4}).+?([0-9]{4})", date)
+                if patternYearSpan:
+                    for d in patternYearSpan.groups(): freeform_dates.append(d)
+                    continue
+                patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}", date)
+                if patternFullDate:
+                    for d in patternFullDate.groups(): freeform_dates.append(d)
+                    continue
+                # patterns e.g. 1999 (pub. 2000) or 1993-94
+                patternBrackets = re.match("([0-9]{4}).+", date)
+                if patternBrackets:
+                    for d in patternBrackets.groups(): freeform_dates.append(d)
+                    continue
+
 
         if freeform_dates:
             return freeform_dates
@@ -433,7 +454,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         # this is a hack but it works, so :op
         date_id = None
         for attr in attributes:
-            if attr['attributes__type_controlled__name'] == 'PublicationDate':
+            if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
                 return [attr.value.cvalue().year]
 
@@ -449,7 +470,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             return data['publication_date']
 
         for attribute in data['attributes']:
-            if attribute['attributes__type_controlled__name'] == 'PublicationDate':
+            if attribute['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 return attribute['attributes__value_freeform']
         return ''
 

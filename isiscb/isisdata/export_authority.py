@@ -113,6 +113,9 @@ def _related_citations(obj, extra, config={}):
     qs = obj.acrelation_set.all()
     return u' // '.join(map(create_acr_string, qs.values_list(*acr_fields)))
 
+def _related_citations_count(obj, extra, config={}):
+    qs = obj.acrelation_set.all()
+    return str(qs.count())
 
 redirect = export.Column(u'Redirect', _redirect)
 name = export.Column(u'Name', lambda obj, extra, config={}: obj.name)
@@ -125,6 +128,7 @@ name_preferred = export.Column(u"Name Preferred", _name_preferred)
 attributes = export.Column(u"Attributes", _attributes)
 linked_data = export.Column(u"Linked Data", _linked_data)
 related_citations = export.Column(u"Related Citations", _related_citations)
+related_citations_count = export.Column(u"Related Citations Count", _related_citations_count)
 creator = export.Column(u"Creator", lambda obj, extra, config={}: obj.created_by_stored)
 
 
@@ -143,10 +147,12 @@ AUTHORITY_COLUMNS = [
     attributes,
     linked_data,
     related_citations,
+    related_citations_count,
     export.staff_notes,
     export.record_history,
     export.created_on,
     export.modified_on,
     creator,
     export.modifier,
+
 ]
