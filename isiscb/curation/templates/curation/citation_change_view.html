@@ -175,42 +175,67 @@ Back to List </a>
                     </div>
                     <div class="col-sm-6">
 
+                      <div class="form-group">
+                        <div class="row">
+                          <div class="col-sm-1 text-left">
+                            <label class="input-sm">Lang.</label>
+                          </div>
+                          <div class="col-sm-8">
+                            <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
+                                  {% for language in instance.language.all %}
+                                  <li class="list-group-item language clearfix"
+                                      id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px;">
+                                      <small style="line-height: 20px;">{{ language }}</small>
+                                      <!-- TODO: implement permission check here. -->
+                                      <span class="button-group button-group-xs pull-right">
+                                          <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                                              type="button"
+                                              language-id="{{ language.id }}"
+                                              language-name="{{ language }}"></a>
+                                      </span>
+                                  </li>
+                                  {% endfor %}
+
+
+                              </ul>
+                          </div>
+                          <div style="padding-left: 0px;" class="col-sm-3">
+                            <ul style="margin-bottom: 0;" class="list-group">
+                              <li class="list-group-item" id="create-language-item" style="display: none; padding:0"></li>
+                              <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                                  <span class="glyphicon glyphicon-plus"></span> Add
+                              </a>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
                         {% for error in form.abstract.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.abstract.label }}</label>
-                            {{ form.abstract|addcss:"form-control reduceIfEmpty" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Abst.</label>
+                            </div>
+                            <div class="col-sm-11" >
+                            {{ form.abstract|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
-
-                        <label>Language(s)</label>
-                        <ul class="list-group" id="language-list-group">
-                            {% for language in instance.language.all %}
-                            <li class="list-group-item language clearfix"
-                                id="language-{{ language.id }}">
-                                {{ language }}
-                                <!-- TODO: implement permission check here. -->
-                                <span class="button-group button-group-xs pull-right">
-                                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
-                                        type="button"
-                                        language-id="{{ language.id }}"
-                                        language-name="{{ language }}"></a>
-                                </span>
-                            </li>
-                            {% endfor %}
-                            <li class="list-group-item" id="create-language-item" style="display: none;"></li>
-                            <a style="cursor: pointer;" class="list-group-item language text-muted" onclick="addLanguage();">
-                                <span class="glyphicon glyphicon-plus"></span> Add a language
-                            </a>
-
-                        </ul>
 
                         {% for error in form.description.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.description.label }}</label>
-                            {{ form.description|addcss:"form-control reduceIfEmpty" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Desc.</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
 
@@ -219,24 +244,42 @@ Back to List </a>
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.administrator_notes.label }}</label>
-                            {{ form.administrator_notes|addcss:"form-control reduceIfEmpty" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Note</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
                         {% for error in form.belongs_to.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.belongs_to.label }}</label>
-                            {{ form.belongs_to|addcss:"form-control" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Set</label>
+                            </div>
+                            <div class="col-sm-11">
+                              {{ form.belongs_to|addcss:"form-control input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
                         {% for error in form.record_history.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.record_history.label }}</label>
-                            {{ form.record_history|addcss:"form-control reduceIfEmpty" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Hist.</label>
+                            </div>
+                            <div class="col-sm-11">
+                              {{ form.record_history|addcss:"form-control input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
                     </div>
@@ -396,83 +439,111 @@ var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {
     language_creation_container.empty();
-    var form_group = $('<div class="form-group"></div>');
-    form_group.append('<input class="form-control" id="create-language-input" name="create-language-input" type="text" />');
+    var form_group = $('<div style="margin:0px;" class="form-group"></div>');
+    form_group.append('<input class="form-control input-sm" id="create-language-input" name="create-language-input" type="text"  />');
     language_creation_container.append(form_group);
-    language_creation_container.append('<ul class="list-group" id="create-language-results-container"></ul>');
+    language_creation_container.append('<ul style="margin:0; font-size: 10px;" class="list-group" id="create-language-results-container"></ul>');
     language_creation_container.css("display", "block");
 
-    var lastSearch = $.now();
-    var waiting = false;
 
     $('#create-language-input').on('keyup', function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
+        if (e.keyCode === 13) {
+          // let's catch return
+          e.preventDefault();
+          var results_container = $('#create-language-results-container');
+          var children = results_container.children();
+          if (children != undefined && children.first() != undefined) {
+            var lang = children.first().find('.select-language');
+            selectLanguage(lang.first());
+          }
+
+          return;
+        }
 
         var query = $(this).val();
-        $.ajax("{% url "curation:quick_and_dirty_language_search" %}?q=" + query, {
-            failure: function(result) {
-                waiting = false;
-            },
-            success: function(result) {
-                waiting = false;
+        searchLanguage(query);
 
-                var results_container = $('#create-language-results-container');
-                results_container.empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
-                    if (r.public != true) {
-                      choice_elem += ' record-notpublic';
-                    }
-                    choice_elem += '">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-language" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong>';
-
-                    if (r.public != true) {
-                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    }
-
-                    choice_elem += '</li>';
-
-                    results_container.append(choice_elem);
-                });
-
-                $('.select-language').click(function() {
-                    var selected = $(this);
-                    var selected_id = selected.attr('data-id');
-                    var selected_name = selected.attr('data-name');
-                    $('#create-language-results-container').empty();
-                    $('#create-language-input').val(selected_name);
-
-                    var payload = {
-                        'language': selected_id
-                    };
-
-                    $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
-                        var new_id = result.language.id;
-                        var new_elem = '<li class="list-group-item clearfix" id="language-' + new_id + '">';
-                        new_elem += result.language.name;
-                        new_elem += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-language" type="button" language-id="'+ new_id +'" language-name="' + result.language.name + '"></a>';
-                        new_elem += '</span>';
-                        new_elem += '</li>';
-
-                        $('#language-list-group').prepend(new_elem);
-                        language_creation_container.css("display", "none");
-                        language_creation_container.empty();
-
-                        bind_language();
-                    }).fail(function(a) {
-                        console.log(a);
-                      })
-                });
-            }
-        });
     });
+
+    // default is English
+    $("#create-language-input").val("English");
+    $("#create-language-input").keyup();
+    $("#create-language-input").focus();
+    $("#create-language-input").select();
 }
 
+var lastSearch = $.now();
+var waiting = false;
 
+function searchLanguage(query) {
+  if ($.now() - lastSearch < 500 || waiting) return;
+
+  $.ajax("{% url "curation:quick_and_dirty_language_search" %}?q=" + query, {
+      failure: function(result) {
+          waiting = false;
+      },
+      success: function(result) {
+          waiting = false;
+
+          var results_container = $('#create-language-results-container');
+          results_container.empty();
+          result.results.forEach(function(r) {
+              var choice_elem = '<li style="padding:4px" class="list-group-item search-result';
+              if (r.public != true) {
+                choice_elem += ' record-notpublic';
+              }
+              choice_elem += '">';
+              choice_elem += '<span class="button-group button-group-xs">';
+              choice_elem += '<a class="select-language" data-id="' + r.id + '" data-name="' + r.name + '"> <span class="fa fa-check"></span> <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong></a>';
+              choice_elem += '</span>';
+              //choice_elem += ' <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong>';
+
+              if (r.public != true) {
+                choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+              }
+
+              choice_elem += '</li>';
+
+              results_container.append(choice_elem);
+          });
+
+          $('.select-language').click(function() {
+              var selected = $(this);
+              selectLanguage(selected);
+          });
+      }
+  });
+}
+
+function selectLanguage(selected) {
+    //var selected = $(this);
+    var selected_id = selected.attr('data-id');
+    var selected_name = selected.attr('data-name');
+    $('#create-language-results-container').empty();
+    $('#create-language-input').val(selected_name);
+
+    var payload = {
+        'language': selected_id
+    };
+
+    $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
+        var new_id = result.language.id;
+        var new_elem = '<li style="padding-bottom: 0px; padding-top: 0px;" class="list-group-item clearfix" id="language-' + new_id + '">';
+        new_elem += '<small style="line-height: 20px;">' + result.language.name + '</small>';
+        new_elem += '<span class="button-group button-group-xs pull-right">';
+        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-language" type="button" language-id="'+ new_id +'" language-name="' + result.language.name + '"></a>';
+        new_elem += '</span>';
+        new_elem += '</li>';
+
+        $('#language-list-group').prepend(new_elem);
+        language_creation_container.css("display", "none");
+        language_creation_container.empty();
+
+        bind_language();
+    }).fail(function(a) {
+        console.log(a);
+      })
+}
 
 $( document ).ready(function() {
 
