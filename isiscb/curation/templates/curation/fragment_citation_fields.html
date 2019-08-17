@@ -36,7 +36,7 @@
   </div>
 </div>
 
-<div class="row">
+<div class="row" style="padding-top: 10px;">
   <div class="col-sm-2 text-left">
     <label class="input-sm">Publish.
     Distrib.</label>
@@ -44,7 +44,8 @@
   <div class="col-sm-10">
     <small>
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
-        {% if acrelation.type_broad_controlled == 'PR' %}
+
+        {% if acrelation.type_controlled in publisher_distributor_types %}
         [{{ acrelation.get_type_controlled_display }}]  {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
         {% endif %}<br>

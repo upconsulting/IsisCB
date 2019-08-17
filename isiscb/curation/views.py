@@ -1136,6 +1136,7 @@ def citation(request, citation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'type_choices': Citation.TYPE_CHOICES,
+        'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
     }
     start = datetime.datetime.now()
 
