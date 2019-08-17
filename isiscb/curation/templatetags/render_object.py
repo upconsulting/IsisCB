@@ -292,3 +292,8 @@ def cut_characters(string, cut):
     if string and len(string) > cut:
         return string[:cut]
     return string
+
+@register.filter
+def order_by(queryset, args):
+    args = [x.strip() for x in args.split(',')]
+    return queryset.order_by(*args)

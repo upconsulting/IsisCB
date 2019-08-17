@@ -1332,6 +1332,29 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     PERIODICAL = 'PE'
     BOOK_SERIES = 'BS'
     COMMITTEE_MEMBER = 'CM'
+
+    # New types for IEXP-15
+    ORGANIZER = 'OR'
+    INTERVIEWER = 'IV'
+    GUEST = 'GU'
+    CREATOR = 'CR'
+    PRODUCER = 'PR'
+    DIRECTOR = 'DI'
+    WRITER = 'WR'
+    PERFORMER = 'PF'
+    COLLECTOR = 'CL'
+    ARCHIVIST = 'AR'
+    RESEARCHER = 'RE'
+    DEVELOPER = 'DE'
+    COMPILER = 'CP'
+    AWARDEE = 'AW'
+    OFFICER = 'OF'
+    HOST = 'HO'
+    DISTRIBUTOR = 'DS'
+    ARCHIVAL_REPOSITORY = 'AC'
+    MAINTAINING_INSTITUTION = 'MI'
+    PRESENTING_GROUP = 'PG'
+
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
@@ -1347,6 +1370,26 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series'),
         (COMMITTEE_MEMBER, 'Committee Member'),
+        (ORGANIZER, 'Organizer'),
+        (INTERVIEWER, 'Interviewer'),
+        (GUEST, 'Guest'),
+        (CREATOR, 'Creator'),
+        (PRODUCER, 'Producer'),
+        (DIRECTOR, 'Director'),
+        (WRITER, 'Writer'),
+        (PERFORMER, 'Performer'),
+        (COLLECTOR, 'Collector'),
+        (ARCHIVIST, 'Archivist'),
+        (RESEARCHER, 'Researcher'),
+        (DEVELOPER, 'Developer'),
+        (COMPILER, 'Compiler'),
+        (AWARDEE, 'Awardee'),
+        (OFFICER, 'Officer'),
+        (HOST, 'Host'),
+        (DISTRIBUTOR, 'Distributor'),
+        (ARCHIVAL_REPOSITORY, 'Archival Repository'),
+        (MAINTAINING_INSTITUTION, 'Maintaining Institution'),
+        (PRESENTING_GROUP, 'Presenting Group'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1356,10 +1399,14 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object).
     """))
 
-    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, CONTRIBUTOR, TRANSLATOR]
+    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, CONTRIBUTOR, TRANSLATOR,
+        ORGANIZER, INTERVIEWER, GUEST, CREATOR, PRODUCER, DIRECTOR,
+        WRITER, PERFORMER, COLLECTOR, ARCHIVIST, RESEARCHER, DEVELOPER,
+        COMPILER, AWARDEE, OFFICER]
     SUBJECT_CONTENT_TYPES = [SUBJECT, CATEGORY]
     INSTITUTIONAL_HOST_TYPES = [PUBLISHER, SCHOOL, INSTITUTION]
     PUBLICATION_HOST_TYPES = [PERIODICAL, BOOK_SERIES]
+    
 
     PERSONAL_RESPONS = 'PR'
     SUBJECT_CONTENT = 'SC'

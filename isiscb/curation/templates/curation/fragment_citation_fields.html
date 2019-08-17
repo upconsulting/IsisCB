@@ -1,19 +1,64 @@
 {% load addcss %}
 {% load render_object %}
 
-
-<div class="h4">Citation Details</div>
+{% for error in form.title.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+<div class="row">
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">Title</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.title|addcss:"form-control titleInput input-sm" }}
+  </div>
+</div>
+</div>
 
 <div class="row">
-    <div class="col-xs-6">
-        {% for error in form.type_controlled.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.type_controlled.label }}</label>
-            {{ form.type_controlled|addcss:"form-control" }}
-        </div>
-    </div>
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">Respon.</label>
+  </div>
+  <div class="col-sm-10">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_broad_controlled == 'PR' %}
+        [{{ acrelation.get_type_controlled_display }}]  {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
+        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+        {% endif %}<br>
+        {% endif %}
+    {% endfor %}
+    <a class="text-warning input-sm"
+        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+        <span class="gylphicon glyphicon-plus"></span> Add more
+    </a>
+    </small>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">Publish.
+    Distrib.</label>
+  </div>
+  <div class="col-sm-10">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_broad_controlled == 'PR' %}
+        [{{ acrelation.get_type_controlled_display }}]  {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
+        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+        {% endif %}<br>
+        {% endif %}
+    {% endfor %}
+    <a class="text-warning input-sm"
+        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+        <span class="gylphicon glyphicon-plus"></span> Add more
+    </a>
+    </small>
+  </div>
+</div>
+
+<div class="row">
     <div class="col-xs-6">
         <div class="form-group">
             <label>Publication date</label>
@@ -23,14 +68,6 @@
             </div>
         </div>
     </div>
-</div>
-
-{% for error in form.title.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.title.label }}</label>
-    {{ form.title|addcss:"form-control titleInput" }}
 </div>
 
 
