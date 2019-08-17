@@ -35,3 +35,7 @@ def add_popover(field, css_placeholder_text):
 @register.filter(name='field_type')
 def field_type(field):
     return field.field.widget.__class__.__name__
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

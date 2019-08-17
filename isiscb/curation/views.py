@@ -272,6 +272,7 @@ def get_subject_suggestions(request, citation_id):
     }
     return JsonResponse(response_data)
 
+
 # TODO this method needs to be logged down!
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_create_acrelation(request):
@@ -2899,7 +2900,6 @@ def export_authorities(request):
         return HttpResponseRedirect(reverse('curation:authority_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset_authorities(request)
-    print filter_params_raw
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
@@ -2928,7 +2928,7 @@ def export_authorities(request):
 
             # configuration for export
             config = {
-                'export_metadata': export_metadata
+                'export_metadata': export_metadata,
             }
 
             # We create the AsyncTask object first, so that we can keep it

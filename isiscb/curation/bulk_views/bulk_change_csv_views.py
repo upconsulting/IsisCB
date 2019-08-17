@@ -28,6 +28,34 @@ ACTION_DICT = {
 }
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_tasks(request):
+    if request.GET.get('find_authority', None):
+        timelines = CachedTimeline.objects.filter(authority_id=request.GET.get('find_authority', None))[:50]
+    else:
+        timelines = CachedTimeline.objects.order_by('-created_at')[:50]
+
+    authority_ids = [timeline.authority_id for timeline in timelines]
+    authorities = Authority.objects.filter(id__in=authority_ids).values('id', 'name')
+    authority_names = {authority['id'] : authority['name'] for authority in authorities}
+    context = {
+        'curation_section': 'bulk',
+        'timelines': timelines,
+        'authority_names': authority_names,
+    }
+    template = 'curation/bulk/timelines.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_delete(request, authority_id):
+    if (request.method == 'POST'):
+        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+        if cached_timeline:
+            cached_timeline.recalculate = True
+            cached_timeline.save()
+
+    return HttpResponseRedirect(reverse('curation:timeline_tasks',))
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_changes(request):
 
 

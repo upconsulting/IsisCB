@@ -128,8 +128,10 @@ DATABASES = {
 ELASTICSEARCH_HOST = os.environ.get('ELASTICSEARCH_HOST', '')
 ELASTICSEARCH_INDEX = os.environ.get('ELASTICSEARCH_INDEX', '')
 
+HAYSTACK_DEFAULT_INDEX = 'default'
+
 HAYSTACK_CONNECTIONS = {
-    'default': {
+    HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         # 'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': ELASTICSEARCH_HOST,
@@ -297,10 +299,15 @@ BROKER_TRANSPORT_OPTIONS = {
 CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
 CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
 CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'isiscb-staging-messages')
+CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'isiscb-staging-graphs-messages')
 CELERY_QUEUES = {
     CELERY_DEFAULT_QUEUE: {
         'exchange': CELERY_DEFAULT_QUEUE,
         'binding_key': CELERY_DEFAULT_QUEUE,
+    },
+    CELERY_GRAPH_TASK_QUEUE: {
+        'exchange': CELERY_GRAPH_TASK_QUEUE,
+        'binding_key': CELERY_GRAPH_TASK_QUEUE,
     }
 }
 CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
@@ -324,3 +331,9 @@ SOCIAL_AUTH_PIPELINE = (
 )
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
+
+# time till next timeline refresh in hours (720 = 30 days)
+AUTHORITY_TIMELINE_REFRESH_TIME = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME', 720)
+AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT = os.environ.get('AUTHORITY_TIMELINE_REFRESH_TIME_USER_INIT', 0.25)
+
+TIMELINE_PUBLICATION_DATE_ATTRIBUTE = os.environ.get('TIMELINE_PUBLICATION_DATE_ATTRIBUTE', "PublicationDate")

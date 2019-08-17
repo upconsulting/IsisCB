@@ -189,9 +189,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div id="publication_chart">
       <div><h4>Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i>.</h4></div>
-      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Timeline is loading. Please wait...</div>
+      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
       <div id="chart"></div>
-      <div class="checkbox" style="text-align: right; font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+      <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+      <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
+        Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
+        <span id="recalculationSpan"></span>
+      </div>
     </div>
 
     <hr>
@@ -406,18 +410,46 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         });
       }
 
-      $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
-        $('#spinner').hide();
-        titles = data.titles;
-        books = ['books'].concat(data.books);
-        theses = ['theses'].concat(data.theses);
-        chapters = ['chapters'].concat(data.chapters);
-        articles = ['articles'].concat(data.articles);
-        reviews = ['reviews'].concat(data.reviews);
-        others = ['others'].concat(data.others);
-        years = ['Years'].concat(data.years);
-        renderChart();
-      });
+      function pollForTimeline() {
+        $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
+          if (data.status == 'done') {
+            $('#spinner').hide();
+            var genDate = new Date(data.generated_on);
+            $("#timelineDate").text(genDate.toLocaleDateString());
+            $("#timelineTime").text(genDate.toLocaleTimeString());
+
+            if (data.timeline_recalculation == 'running') {
+              $("#recalculationSpan").append('<br><i class="fa fa-clock-o" aria-hidden="true"></i>');
+              $("#recalculationSpan").append(" Timeline is being updated.");
+            }
+            {% if user.is_authenticated %}
+            else if (data.timeline_recalculation == 'none' && data.can_recalculate == true) {
+              var recForm = $("<form method='POST' style='margin-right: -10px;margin-top: -5px;' action='{% url 'recalculate_timeline' authority.id %}'>{% csrf_token %}</form>");
+              recForm.append($('<button type="submit" class="btn btn-link" style="font-size: 10px;"><i class="fa fa-clock-o" aria-hidden="true"></i> Update now</button>'))
+              $("#recalculationSpan").append(recForm);
+            }
+            {% endif %}
+            $("#timelineGenDate").show();
+
+            titles = data.titles;
+            books = ['books'].concat(data.books);
+            theses = ['theses'].concat(data.theses);
+            chapters = ['chapters'].concat(data.chapters);
+            articles = ['articles'].concat(data.articles);
+            reviews = ['reviews'].concat(data.reviews);
+            others = ['others'].concat(data.others);
+            years = ['Years'].concat(data.years);
+            renderChart();
+          } else if (data.status == 'generating') {
+            setTimeout(pollForTimeline, 1000)
+          } else {
+            $('#spinner').hide();
+            $("#chart").append("Timeline could not be loaded. An error occurred.")
+          }
+        });
+      }
+
+      pollForTimeline();
 
       var current_groups;
       function renderChart() {
