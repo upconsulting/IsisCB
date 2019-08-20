@@ -1,5 +1,6 @@
 {% load addcss %}
 {% load render_object %}
+{% load general_tags %}
 
 {% for error in form.title.errors %}
 <div class="alert alert-danger">{{ error }}</div>
@@ -22,10 +23,14 @@
   <div class="col-sm-10">
     <small>
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
-        {% if acrelation.type_broad_controlled == 'PR' %}
-        [{{ acrelation.get_type_controlled_display }}]  {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
-        <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-        {% endif %}<br>
+        {% if acrelation.type_controlled in personal_responsibility_types %}
+        <p style="margin-bottom: 2px;">
+          {{ acrelation.authority.name }}
+          {% if acrelation.name_for_display_in_citation %}
+          <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
+          {% endif %}
+          <span class="label label-success">{{acrelation.get_type_controlled_display}}</span>
+        </p>
         {% endif %}
     {% endfor %}
     <a class="text-warning input-sm"
@@ -44,11 +49,36 @@
   <div class="col-sm-10">
     <small>
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
-
         {% if acrelation.type_controlled in publisher_distributor_types %}
-        [{{ acrelation.get_type_controlled_display }}]  {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
+        <p style="margin-bottom: 2px;">
+        {{ acrelation.authority.name }} {% if acrelation.name_for_display_in_citation %}
         <span class="text-muted">(as "{{ acrelation.name_for_display_in_citation }}")</span>
-        {% endif %}<br>
+        {% endif %}
+        <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
+        </p>
+        {% endif %}
+    {% endfor %}
+    <a class="text-warning input-sm"
+        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+        <span class="gylphicon glyphicon-plus"></span> Add more
+    </a>
+    </small>
+  </div>
+</div>
+
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-2 text-left">
+    <label class="input-sm">Dates</label>
+  </div>
+  <div class="col-sm-10">
+    <small>
+    {% for attribute in instance.attributes.all %}
+        {% if attribute.type_controlled.value_content_type.model_class in date_attribute_types %}
+        <p style="margin-bottom: 2px;">
+        {{ attribute.value.get_child_class }}
+        <span class="text-muted">{{ attribute.value_freeform}}</span>
+        <span class="label label-primary">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+        </p>
         {% endif %}
     {% endfor %}
     <a class="text-warning input-sm"

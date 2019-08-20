@@ -865,6 +865,12 @@ class Citation(ReferencedEntity, CuratedMixin):
     ESSAY_REVIEW = 'ES'
     THESIS = 'TH'
     EVENT = 'EV'
+    WEB_OBJECT = 'WO'
+    MULTIMEDIA_OBJECT = 'MO'
+    ARCHIVE_OBJECT = 'AO'
+    DIGITAL_RESOURCE = 'DR'
+    PERSONAL_RECOGNITION = 'PC'
+
     PRESENTATION = 'PR'
     INTERACTIVE = 'IN'
     WEBSITE = 'WE'
@@ -878,10 +884,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         (ESSAY_REVIEW, 'Essay Review'),
         (THESIS, 'Thesis'),
         (EVENT, 'Event'),
-        (PRESENTATION, 'Presentation'),
-        (INTERACTIVE, 'Interactive Resource'),
-        (WEBSITE, 'Website'),
-        (APPLICATION, 'Application'),
+        (WEB_OBJECT, 'Web Object'),
+        (MULTIMEDIA_OBJECT, 'Multimedia Object'),
+        (ARCHIVE_OBJECT, 'Archive Object'),
+        (DIGITAL_RESOURCE, 'Digital Resource'),
+        (PERSONAL_RECOGNITION, 'Personal Recognition'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',

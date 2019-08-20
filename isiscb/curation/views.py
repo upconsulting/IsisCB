@@ -1137,6 +1137,8 @@ def citation(request, citation_id):
         'curation_subsection': 'citations',
         'type_choices': Citation.TYPE_CHOICES,
         'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
+        'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
+        'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
     }
     start = datetime.datetime.now()
 
