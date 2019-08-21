@@ -104,7 +104,9 @@ def get_pub_year(citation):
             year = dates[0].value.cvalue().year
         else:
             year = dates[0].value.cvalue()
-        return dates[0].value_freeform if dates[0].value_freeform else dates[0].value.cvalue().year
+        if type(year) == list and len(year) > 0:
+            year = year[0]
+        return dates[0].value_freeform if dates[0].value_freeform else year
     return ''
 
 
