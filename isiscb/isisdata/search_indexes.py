@@ -456,6 +456,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         for attr in attributes:
             if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
+                if type(attr.value.cvalue()) == list:
+                    return attr.value.cvalue()
                 return [attr.value.cvalue().year]
 
         return ""
