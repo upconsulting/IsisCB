@@ -646,7 +646,8 @@ function toggleLinkRecordsBtn() {
           <div class="form-group form-group-xs clearable">
               <label class="col-lg-4 control-label" style="padding-left:5px; margin-right:0px;">Pub. date free</label>
               <div class="col-lg-8" style="padding-left: 0px">
-                {{ objects.form.publication_date_contains|addcss:"form-control;Freetext publication date contains" }}
+                {{ objects.form.publication_date_contains|add_popover:"form-control;Freetext publication date contains;Enter 'null' to search for an empty freetext publication date.;bottom" }}
+                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info" style="margin-right: 10px"></a>
               </div>
           </div>
 
