@@ -1,6 +1,6 @@
-# IsisCB [![Build Status](https://travis-ci.org/upconsulting/IsisCB.svg?branch=develop)](https://travis-ci.org/upconsulting/IsisCB)
+# IsisCB 
 
-Current version: [v0.59](https://github.com/upconsulting/IsisCB/releases/tag/v0.59)
+[![Build Status](https://travis-ci.org/upconsulting/IsisCB.svg?branch=develop)](https://travis-ci.org/upconsulting/IsisCB) <img alt="GitHub release" src="https://img.shields.io/github/release/upconsulting/isisCB">
 
 ## License
 

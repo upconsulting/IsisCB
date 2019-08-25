@@ -442,21 +442,23 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     for d in patternFullDate.groups(): freeform_dates.append(d)
                     continue
                 # patterns e.g. 1999 (pub. 2000) or 1993-94
-                patternBrackets = re.match("([0-9]{4}).+", date)
+                patternBrackets = re.match(".*([0-9]{4}).*", date)
                 if patternBrackets:
                     for d in patternBrackets.groups(): freeform_dates.append(d)
                     continue
-
-
-        if freeform_dates:
-            return freeform_dates
 
         # this is a hack but it works, so :op
         date_id = None
         for attr in attributes:
             if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
-                return [attr.value.cvalue().year]
+                if type(attr.value.cvalue()) == list:
+                    freeform_dates += attr.value.cvalue()
+                else:
+                    freeform_dates.append(attr.value.cvalue().year)
+
+        if freeform_dates:
+            return freeform_dates
 
         return ""
 
