@@ -317,6 +317,7 @@ def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
+    is_object = request.GET.get('is_object', 'false')
 
     context = {
         'curation_section': 'datasets',
@@ -328,7 +329,7 @@ def create_ccrelation_for_citation(request, citation_id):
     if request.method == 'GET':
         ccrelation = CCRelation()
         initial={}
-        if citation.type_controlled == Citation.CHAPTER:
+        if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
             ccrelation.object = citation
             ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
             initial['type_controlled'] = CCRelation.INCLUDES_CHAPTER
@@ -1139,6 +1140,7 @@ def citation(request, citation_id):
         'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
         'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
         'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT],
     }
     start = datetime.datetime.now()
 
@@ -1177,22 +1179,18 @@ def citation(request, citation_id):
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
 
-        # Most (but not all) citation types should have a PartDetails entry.
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK,
-                                        Citation.REVIEW, Citation.CHAPTER,
-                                        Citation.THESIS, Citation.ESSAY_REVIEW]:
-            part_details = getattr(citation, 'part_details', None)
-            if not part_details:
-                part_details = PartDetails.objects.create()
-                citation.part_details = part_details
-                citation.save()
+        part_details = getattr(citation, 'part_details', None)
+        if not part_details:
+            part_details = PartDetails.objects.create()
+            citation.part_details = part_details
+            citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id,
-                                               instance=part_details,
-                                               prefix='partdetails')
-            context.update({
-                'partdetails_form': partdetails_form,
-            })
+        partdetails_form = PartDetailsForm(request.user, citation_id,
+                                           instance=part_details,
+                                           prefix='partdetails')
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
         if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):

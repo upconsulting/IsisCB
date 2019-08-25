@@ -1628,6 +1628,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
+    INCLUDES_CITATION_OBJECT = 'ICO'
     REVIEW_OF = 'RO'
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
@@ -1635,6 +1636,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (INCLUDES_CITATION_OBJECT, 'Includes Citation Object'),
         (REVIEW_OF, 'Is Review Of'),
         (RESPONDS_TO, 'Responds To'),
         (ASSOCIATED_WITH, 'Is Associated With'),
