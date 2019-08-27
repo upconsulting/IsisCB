@@ -458,9 +458,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         freeform_dates += attr.value.cvalue()
                     else:
                         freeform_dates.append(attr.value.cvalue().year)
-                except ObjectDoesNotExist:
+                except ObjectDoesNotExist as E:
                     print "Attribute does not exist."
-                    print e
+                    print E
 
         if freeform_dates:
             return freeform_dates
