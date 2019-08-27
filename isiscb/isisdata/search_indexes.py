@@ -4,6 +4,7 @@ from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX
 from django.forms import MultiValueField
 from django.db.models import Prefetch
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
 from isisdata.utils import normalize
@@ -451,11 +452,15 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         date_id = None
         for attr in attributes:
             if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
-                attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
-                if type(attr.value.cvalue()) == list:
-                    freeform_dates += attr.value.cvalue()
-                else:
-                    freeform_dates.append(attr.value.cvalue().year)
+                try:
+                    attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
+                    if type(attr.value.cvalue()) == list:
+                        freeform_dates += attr.value.cvalue()
+                    else:
+                        freeform_dates.append(attr.value.cvalue().year)
+                except ObjectDoesNotExist:
+                    print "Attribute does not exist."
+                    print e
 
         if freeform_dates:
             return freeform_dates
