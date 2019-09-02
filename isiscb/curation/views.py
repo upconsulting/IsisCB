@@ -1193,7 +1193,7 @@ def citation(request, citation_id):
         })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
+        if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()

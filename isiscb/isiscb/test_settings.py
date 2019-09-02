@@ -289,3 +289,4 @@ class DisableMigrations(object):
 MIGRATION_MODULES = DisableMigrations()
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
+RECORD_SUBTYPE_ATTRIBUTE = os.environ.get('RECORD_SUBTYPE_ATTRIBUTE', "RecordSubType")

@@ -170,8 +170,9 @@ Back to List </a>
                 {% block fields_tab %}
                 <div class="row">
                     <div class="col-sm-6">
-                        {% include "curation/fragment_citation_categories.html" %}
-                        {% include "curation/fragment_citation_subjects.html" %}
+                      {% block citation_middle_panel %}
+                        {% include "curation/fragment_citation_categories_subjects.html" %}
+                      {% endblock %}
                     </div>
                     <div class="col-sm-6">
 

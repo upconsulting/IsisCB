@@ -3,6 +3,11 @@
 {% load render_object %}
 {% load permission_tags %}
 
+{% block citation_middle_panel %}
+  {% include "curation/fragment_citation_categories.html" %}
+  {% include "curation/fragment_citation_subjects.html" %}
+{% endblock %}
+
 {% block citation_panel_left %}
 <style>
 .input-shaded {
