@@ -280,13 +280,15 @@ class CitationForm(forms.ModelForm):
     administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
     title = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
+    subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
+
     class Meta:
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to', 'administrator_notes', 'record_history',
+              'belongs_to', 'administrator_notes', 'record_history', 'subtype',
         ]
         labels = {
             'belongs_to': 'Dataset',

@@ -5,10 +5,10 @@
 <div class="form-group">
 <div class="row">
   <div class="col-sm-2 text-left">
-    <label class="input-sm">Subtype</label>
+    <label class="input-xs">Subtype</label>
   </div>
   <div class="col-sm-10">
-
+    {{ form.subtype|addcss:"form-control input-xs" }}
   </div>
 </div>
 </div>
@@ -19,7 +19,7 @@
 <div class="form-group">
 <div class="row">
   <div class="col-sm-2 text-left">
-    <label class="input-sm">Title</label>
+    <label class="input-xs">Title</label>
   </div>
   <div class="col-sm-10">
     {{ form.title|addcss:"form-control titleInput input-xs" }}
@@ -28,10 +28,18 @@
 </div>
 
 <div class="row">
-  <div class="col-sm-2 text-left">
-    <label class="input-sm">Respon.</label>
+  <div class="col-sm-3 text-left">
+    <label class="input-xs" style="height: 20px;">Responsibility</label>
   </div>
-  <div class="col-sm-10">
+  <div class="col-sm-9 text-left">
+    {% for type in responsibility_mapping|get_item:instance.type_controlled %}
+    <a class="text-warning input-xs"
+        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+        <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
+    </a>
+    {% endfor %}
+  </div>
+  <div class="col-sm-12" style="padding-left: 20px;">
     <small>
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
         {% if acrelation.type_controlled in personal_responsibility_types %}
@@ -41,20 +49,19 @@
         </p>
         {% endif %}
     {% endfor %}
-    <a class="text-warning input-sm"
-        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-        <span class="gylphicon glyphicon-plus"></span> Add more
-    </a>
+
     </small>
   </div>
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-2 text-left">
-    <label class="input-sm">Publish.
-    Distrib.</label>
+  <div class="col-sm-4 text-left">
+    <label class="input-xs">Hosting body</label>
   </div>
-  <div class="col-sm-10">
+  <div class="col-sm-8 text-left">
+
+  </div>
+  <div class="col-sm-12" style="padding-left: 20px;">
     <small>
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
         {% if acrelation.type_controlled in publisher_distributor_types %}
@@ -66,7 +73,7 @@
         </p>
         {% endif %}
     {% endfor %}
-    <a class="text-warning input-sm"
+    <a class="text-warning input-xs"
         href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="gylphicon glyphicon-plus"></span> Add more
     </a>
@@ -75,10 +82,13 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-2 text-left">
-    <label class="input-sm">Dates</label>
+  <div class="col-sm-3 text-left">
+    <label class="input-xs">Dates</label>
   </div>
-  <div class="col-sm-10">
+  <div class="col-sm-9 text-left">
+
+  </div>
+  <div class="col-sm-12" style="padding-left: 20px;">
     <small>
     {% for attribute in instance.attributes.all %}
         {% if attribute.type_controlled.value_content_type.model_class in date_attribute_types %}
@@ -89,7 +99,7 @@
         </p>
         {% endif %}
     {% endfor %}
-    <a class="text-warning input-sm"
+    <a class="text-warning input-xs"
         href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="gylphicon glyphicon-plus"></span> Add more
     </a>
@@ -98,47 +108,30 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-2 text-left">
-    <label class="input-sm">Links</label>
+  <div class="col-sm-5 text-left">
+    <label class="input-xs">Containing Citation</label>
   </div>
-  <div class="col-sm-10">
-    <small>
-    {% for ld in instance.linkeddata_entries.all %}
-        <p style="margin-bottom: 2px;">
-        <span>{{ ld.universal_resource_name }}</span>
-        <span class="label label-success">{{ ld.type_controlled.name }}</span>
-        </p>
-    {% endfor %}
-    <a class="text-warning input-sm"
-        href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-        <span class="gylphicon glyphicon-plus"></span> Add more
-    </a>
-    </small>
+  <div class="col-sm-7 text-left">
+  <a class="text-warning input-xs"
+      href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
+      <span class="gylphicon glyphicon-plus"></span> Add link to the containing citation
+  </a>
   </div>
-</div>
-
-<div class="row" style="padding-top: 10px;">
-  <div class="col-sm-12 text-left" style="margin-bottom: -10px;">
-    <label class="input-sm">Citations in which this object is contained</label>
-  </div>
-  <div class="col-sm-11">
+  <div class="col-sm-11" style="padding-left: 20px;">
     <small>
       {% for ccrel in instance.ccrelations.all %}
           {% if ccrel.type_controlled in ccrel_contained_relations %}
           <p style="margin-bottom: 2px;">
-          {{ ccrel.subject.title }}
+          <i class="fa fa-book" aria-hidden="true"></i> {{ ccrel.subject.title }}
           {% if ccrel.subject.publication_date %}
           ({{ ccrel.subject.publication_date }})
           {% endif %}
-          <span class="label label-primary">{{ccrel.object.get_type_controlled_display}}</span>
+          <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
           </p>
           {% endif %}
       {% endfor %}
       <p style="padding-top: 5px;">
-      <a class="text-warning input-sm"
-          href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
-          <span class="gylphicon glyphicon-plus"></span> Add link to the citation containing this object
-      </a>
+
       </p>
     </small>
   </div>

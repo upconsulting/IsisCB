@@ -1141,6 +1141,8 @@ def citation(request, citation_id):
         'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
         'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
         'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT],
+        'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
+        'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
     }
     start = datetime.datetime.now()
 

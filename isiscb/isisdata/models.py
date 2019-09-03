@@ -761,6 +761,8 @@ class Citation(ReferencedEntity, CuratedMixin):
                                     help_text=help_text("""
     The user who created this object."""), related_name="creator_of")
 
+    subtype = models.ForeignKey('CitationSubtype', blank=True, null=True)
+
     def save(self, *args, **kwargs):
         def get_related(obj):
             query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
@@ -1061,6 +1063,33 @@ class Citation(ReferencedEntity, CuratedMixin):
         The absolute URL of a Citation is the citation detail view.
         """
         return core_reverse("citation", args=(self.id,))
+
+class CitationSubtype(models.Model):
+
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Name of the new subtype.
+    """))
+
+    unique_name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Unique name of a subtype, use to reference a subtype.
+    """))
+
+    description = models.TextField(blank=True, null=True,
+                                   help_text=help_text("""
+    A brief description that will be displayed to help identify the authority.
+    Such as, brief bio or a scope note. For classification terms will be text
+    like 'Classification term from the XXX classification schema.'
+    """))
+
+    related_citation_type = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='citation type',
+                                       choices=Citation.TYPE_CHOICES,
+                                       help_text=help_text("""
+    Type of which this object is a subtype, e.g. Review or Chapter.
+    """))
+
+    def __str__(self):
+        return self.name if self.name else 'Subtype'
 
 
 class Authority(ReferencedEntity, CuratedMixin):
@@ -1436,6 +1465,21 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object) more broadly than the relationship
     type.
     """))
+
+    RESPONSIBILITY_MAPPING = {
+        Citation.BOOK: [AUTHOR, EDITOR],
+        Citation.ARTICLE: [AUTHOR],
+        Citation.CHAPTER: [AUTHOR],
+        Citation.REVIEW: [AUTHOR],
+        Citation.ESSAY_REVIEW: [AUTHOR],
+        Citation.THESIS: [AUTHOR, ADVISOR, COMMITTEE_MEMBER],
+        Citation.EVENT: [AUTHOR, ORGANIZER],
+        Citation.WEB_OBJECT: [AUTHOR, INTERVIEWER, GUEST, CREATOR],
+        Citation.MULTIMEDIA_OBJECT: [PRODUCER, DIRECTOR, WRITER, PERFORMER, CREATOR],
+        Citation.ARCHIVE_OBJECT: [COLLECTOR, ARCHIVIST, RESEARCHER, AUTHOR],
+        Citation.DIGITAL_RESOURCE: [DEVELOPER, WRITER, COMPILER, EDITOR],
+        Citation.PERSONAL_RECOGNITION: [AWARDEE, OFFICER],        
+    }
 
     type_free = models.CharField(max_length=255,
                                  blank=True,
