@@ -1478,7 +1478,22 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         Citation.MULTIMEDIA_OBJECT: [PRODUCER, DIRECTOR, WRITER, PERFORMER, CREATOR],
         Citation.ARCHIVE_OBJECT: [COLLECTOR, ARCHIVIST, RESEARCHER, AUTHOR],
         Citation.DIGITAL_RESOURCE: [DEVELOPER, WRITER, COMPILER, EDITOR],
-        Citation.PERSONAL_RECOGNITION: [AWARDEE, OFFICER],        
+        Citation.PERSONAL_RECOGNITION: [AWARDEE, OFFICER],
+    }
+
+    HOST_MAPPING = {
+        Citation.BOOK: [PUBLISHER],
+        Citation.ARTICLE: [PERIODICAL],
+        Citation.CHAPTER: [PUBLISHER],
+        Citation.REVIEW: [PERIODICAL],
+        Citation.ESSAY_REVIEW: [PERIODICAL],
+        Citation.THESIS: [SCHOOL],
+        Citation.EVENT: [HOST],
+        Citation.WEB_OBJECT: [PUBLISHER, DISTRIBUTOR, HOST],
+        Citation.MULTIMEDIA_OBJECT: [PUBLISHER, DISTRIBUTOR],
+        Citation.ARCHIVE_OBJECT: [ARCHIVAL_REPOSITORY],
+        Citation.DIGITAL_RESOURCE: [MAINTAINING_INSTITUTION],
+        Citation.PERSONAL_RECOGNITION: [PRESENTING_GROUP],
     }
 
     type_free = models.CharField(max_length=255,

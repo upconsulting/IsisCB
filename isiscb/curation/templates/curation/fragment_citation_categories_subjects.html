@@ -8,8 +8,8 @@
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
 {% if can_update %}
-<p class="pull-right">
-<a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-primary btn-xs">Categories/Subjects</a>
+<p class="pull-left">
+<a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-primary btn-xs">Cat/sub edit</a>
 </p>
 {% endif %}
 
@@ -20,7 +20,7 @@
   <div class="col-sm-3 text-left">
     <label class="input-xs">Categories</label>
   </div>
-  <div class="col-sm-9 input-xs">
+  <div class="col-sm-9 form-fields-xs">
     {% for acrelation in instance.acrelation_set.all %}
         {% if acrelation.type_controlled == 'CA' %}
               {{ acrelation.authority.name }};
@@ -32,7 +32,7 @@
   <div class="col-sm-3 text-left">
     <label class="input-xs">Subjects</label>
   </div>
-  <div class="col-sm-9 input-xs">
+  <div class="col-sm-9 form-fields-xs">
     {% for acrelation in instance.acrelation_set.all %}
         {% if acrelation.type_controlled == 'SU' %}
               {{ acrelation.authority.name }};
@@ -43,6 +43,7 @@
 </div>
 
 {% endwith %}
+<hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
 
 {% if partdetails_form %}
 <div class="row" style="padding-top: 10px;">
@@ -205,7 +206,7 @@
   <div class="col-sm-2 text-left">
     <label class="input-xs">Links</label>
   </div>
-  <div class="col-sm-10 text-left">
+  <div class="col-sm-10 text-right">
     <a class="text-warning input-xs"
         href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="gylphicon glyphicon-plus"></span> Add more
@@ -216,7 +217,7 @@
     {% for ld in instance.linkeddata_entries.all %}
         <p style="margin-bottom: 2px;">
           <i class="fa fa-link" aria-hidden="true"></i>
- <span>{{ ld.universal_resource_name }}</span>
+          <span>{{ ld.universal_resource_name }}</span>
         <span class="label label-success">{{ ld.type_controlled.name }}</span>
         </p>
     {% endfor %}
@@ -224,11 +225,11 @@
   </div>
 </div>
 
-<div class="row" style="padding-top: 10px;">
+<div class="row" >
   <div class="col-sm-12 text-left" >
-    <label class="input-xs">Other linked citations</label>
+    <label class="input-xs">Citations linked to this record</label>
   </div>
-  <div class="col-sm-13" style="padding-left: 20px;">
+  <div class="col-sm-12 form-fields-indented">
     <small>
       {% for ccrel in instance.ccrelations.all %}
           {% if ccrel.type_controlled not in ccrel_contained_relations %}

@@ -1143,27 +1143,17 @@ def citation(request, citation_id):
         'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT],
         'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
         'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
+        'host_mapping': ACRelation.HOST_MAPPING,
+        'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
+        'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
     }
     start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
     _build_result_set_links(request, context)
 
-    # We use a different template for each citation type.
-    if citation.type_controlled == Citation.BOOK:
-        template = 'curation/citation_change_view_book.html'
-    elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
-        template = 'curation/citation_change_view_review.html'
-    elif citation.type_controlled == Citation.CHAPTER:
-        template = 'curation/citation_change_view_chapter.html'
-    elif citation.type_controlled == Citation.ARTICLE:
-        template = 'curation/citation_change_view_article.html'
-    elif citation.type_controlled == Citation.THESIS:
-        template = 'curation/citation_change_view_thesis.html'
-    elif citation.type_controlled == Citation.WEBSITE:
-        template = 'curation/citation_change_view_website.html'
-    else:
-        template = 'curation/citation_change_view.html'
+    # we now use only one template for all types IEXP-15
+    template = 'curation/citation_change_view.html'
 
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
