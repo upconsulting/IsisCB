@@ -46,6 +46,7 @@
         <p style="margin-bottom: 2px;">
           ({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}
           <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
+          <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -73,6 +74,7 @@
         <p style="margin-bottom: 2px;">
         {{ acrelation.authority.name }}
         <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
+        <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -106,40 +108,34 @@
         {{ attribute.value.get_child_class }}
         <span class="text-muted">{{ attribute.value_freeform}}</span>
         <span class="label label-warning">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+        <a href="{% url 'curation:update_attribute_for_citation' instance.id attribute.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-        <span class="gylphicon glyphicon-plus"></span> Add more
-    </a>
     </small>
   </div>
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-5 text-left">
-    <label class="input-xs">Containing Citation</label>
+  <div class="col-sm-2 text-left">
+    <label class="input-xs">Links</label>
   </div>
-  <div class="col-sm-7 text-right">
-  <a class="text-warning input-xs"
-      href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
-      <span class="gylphicon glyphicon-plus"></span> Add citation link
-  </a>
+  <div class="col-sm-10 text-right">
+    <a class="text-warning input-xs"
+        href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+        <span class="gylphicon glyphicon-plus"></span> Add more
+    </a>
   </div>
-  <div class="col-sm-11 form-fields-indented">
+  <div class="col-sm-12" style="padding-left:20px;">
     <small>
-      {% for ccrel in instance.ccrelations.all %}
-          {% if ccrel.type_controlled in ccrel_contained_relations %}
-          <p style="margin-bottom: 2px;">
-          <i class="fa fa-book" aria-hidden="true"></i> {{ ccrel.subject.title }}
-          {% if ccrel.subject.publication_date %}
-          ({{ ccrel.subject.publication_date }})
-          {% endif %}
-          <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
-          </p>
-          {% endif %}
-      {% endfor %}
+    {% for ld in instance.linkeddata_entries.all %}
+        <p style="margin-bottom: 2px;">
+          <i class="fa fa-link" aria-hidden="true"></i>
+          <span>{{ ld.universal_resource_name }}</span>
+        <span class="label label-success">{{ ld.type_controlled.name }}</span>
+        <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        </p>
+    {% endfor %}
     </small>
   </div>
 </div>
