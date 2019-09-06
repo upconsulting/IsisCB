@@ -28,10 +28,10 @@
 </div>
 
 <div class="row">
-  <div class="col-sm-3 text-left">
+  <div class="col-sm-4 text-left">
     <label class="input-xs" style="height: 20px;">Responsibility</label>
   </div>
-  <div class="col-sm-9 text-right">
+  <div class="col-sm-8 text-left">
     {% for type in responsibility_mapping|get_item:instance.type_controlled %}
     <a class="text-warning input-xs"
         href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
@@ -59,7 +59,7 @@
   <div class="col-sm-4 text-left">
     <label class="input-xs">Hosting body</label>
   </div>
-  <div class="col-sm-8 text-right">
+  <div class="col-sm-8 text-left">
     {% for type in host_mapping|get_item:instance.type_controlled %}
     <a class="text-warning input-xs"
         href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
@@ -83,10 +83,10 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-3 text-left">
+  <div class="col-sm-4 text-left">
     <label class="input-xs">Dates</label>
   </div>
-  <div class="col-sm-9 text-right">
+  <div class="col-sm-8 text-left">
     <a class="text-warning input-xs"
         href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
         <span class="gylphicon glyphicon-plus"></span> Published
@@ -117,10 +117,10 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-2 text-left">
+  <div class="col-sm-4 text-left">
     <label class="input-xs">Links</label>
   </div>
-  <div class="col-sm-10 text-right">
+  <div class="col-sm-8 text-left">
     <a class="text-warning input-xs"
         href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
         <span class="gylphicon glyphicon-plus"></span> Add more

@@ -539,7 +539,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         if form.is_valid():
             form.instance.modified_by = request.user
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1147,6 +1147,7 @@ def citation(request, citation_id):
         'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
         'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
     }
+
     start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)

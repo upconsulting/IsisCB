@@ -251,6 +251,8 @@ class CitationForm(forms.ModelForm):
             if self.instance.type_controlled in [Citation.THESIS]:
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
+            self.fields['subtype'].queryset = CitationSubtype.objects.filter(related_citation_type=self.instance.type_controlled)
+
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
                 if not can_update:

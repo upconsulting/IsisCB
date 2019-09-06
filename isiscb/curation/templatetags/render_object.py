@@ -297,3 +297,9 @@ def cut_characters(string, cut):
 def order_by(queryset, args):
     args = [x.strip() for x in args.split(',')]
     return queryset.order_by(*args)
+
+@register.filter
+def get_other_relation_side(ccrel, elem):
+    if ccrel.subject.id is elem:
+        return ccrel.object
+    return ccrel.subject

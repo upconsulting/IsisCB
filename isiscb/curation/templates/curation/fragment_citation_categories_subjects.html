@@ -7,42 +7,54 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-{% if can_update %}
-<p class="pull-left">
-<a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-primary btn-xs">Cat/sub edit</a>
-</p>
-{% endif %}
+
 
 <div class="clearfix"></div>
 
-<div class="form-group">
-<div class="row" style="background-color: #f9f9f9; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px;">
-  <div class="col-sm-3 text-left">
-    <label class="input-xs">Categories</label>
-  </div>
-  <div class="col-sm-9 form-fields-xs">
-    {% for acrelation in instance.acrelation_set.all %}
-        {% if acrelation.type_controlled == 'CA' %}
-              {{ acrelation.authority.name }};
-        {% endif %}
-    {% endfor %}
-  </div>
-</div>
-<div class="row" style="background-color: #f1f1f1; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px;">
-  <div class="col-sm-3 text-left">
-    <label class="input-xs">Subjects</label>
-  </div>
-  <div class="col-sm-9 form-fields-xs">
-    {% for acrelation in instance.acrelation_set.all %}
-        {% if acrelation.type_controlled == 'SU' %}
-              {{ acrelation.authority.name }};
-        {% endif %}
-    {% endfor %}
-  </div>
-</div>
-</div>
+<div class="form-group row">
+  <div class="col-xs-12">
+    {% if can_update %}
+      <p style="float:left;">
+      <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
+      </p>
+    {% endif %}
 
+
+      <div style="background-color: #f9f9f9; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; margin-left: 20px; padding-left: 10px; padding-right: 10px;">
+        <div class="row">
+          <div class="col-sm-3 text-left">
+            <label class="input-xs">Categories</label>
+          </div>
+          <div class="col-sm-9 form-fields-xs">
+            {% for acrelation in instance.acrelation_set.all %}
+                {% if acrelation.type_controlled == 'CA' %}
+                      {{ acrelation.authority.name }};
+                {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div style="background-color: #f1f1f1; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; margin-left: 20px; padding-left: 10px; padding-right: 10px;">
+        <div class="row">
+          <div class="col-sm-3 text-left">
+            <label class="input-xs">Subjects</label>
+          </div>
+          <div class="col-sm-9 form-fields-xs">
+            {% for acrelation in instance.acrelation_set.all %}
+                {% if acrelation.type_controlled == 'SU' %}
+                      {{ acrelation.authority.name }};
+                {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endwith %}
+
+<div class="clearfix"></div>
+
 <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
 
 <div class="row" style="padding-top: 10px;">
@@ -230,21 +242,35 @@
 {% endif %}
 
 <div class="row" >
-  <div class="col-sm-12 text-left" >
+  <div class="col-sm-6 text-left" >
     <label class="input-xs">Citations linked to this record</label>
+  </div>
+  <div class="col-sm-6 text-left" >
+    {% if instance.type_controlled == 'BO' %}
+    <a class="text-warning input-xs"
+        href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
+        <span class="gylphicon glyphicon-plus"></span> Chapter
+    {% endif %}
+    {% if instance.type_controlled == 'BO' %}
+    <a class="text-warning input-xs"
+        href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
+        <span class="gylphicon glyphicon-plus"></span> Series Article
+    {% endif %}
   </div>
   <div class="col-sm-12 form-fields-indented">
     <small>
       {% for ccrel in instance.ccrelations.all %}
           {% if ccrel.type_controlled not in ccrel_contained_relations %}
+          {% with ccrel|get_other_relation_side:instance as target %}
           <p style="margin-bottom: 2px;">
-            <i class="fa fa-book" aria-hidden="true"></i> {{ ccrel.object.title }}
-          {% if ccrel.object.publication_date %}
-          ({{ ccrel.object.publication_date }})
+            <i class="fa fa-book" aria-hidden="true"></i> {{ target.title_for_display }}
+          {% if target.publication_date %}
+          ({{ target.publication_date }})
           {% endif %}
-          <span class="label label-primary">{{ccrel.object.get_type_controlled_display}}</span>
+          <span class="label label-primary">{{target.get_type_controlled_display}}</span>
           <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
           </p>
+          {% endwith %}
           {% endif %}
       {% endfor %}
     </small>
