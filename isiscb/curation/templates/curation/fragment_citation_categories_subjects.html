@@ -251,7 +251,7 @@
         href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
         <span class="gylphicon glyphicon-plus"></span> Chapter
     {% endif %}
-    {% if instance.type_controlled == 'BO' %}
+    {% if instance.type_controlled == 'AR' %}
     <a class="text-warning input-xs"
         href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
         <span class="gylphicon glyphicon-plus"></span> Series Article
