@@ -7,7 +7,13 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-
+<style>
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+</style>
 
 <div class="clearfix"></div>
 
@@ -58,14 +64,20 @@
 <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-5 text-left">
-    <label class="input-xs">Containing Citation</label>
-  </div>
-  <div class="col-sm-7 text-right">
-  <a class="text-warning input-xs"
-      href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
-      <span class="gylphicon glyphicon-plus"></span> Add citation link
-  </a>
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td >
+          <div class="input-xs">Containing Citation</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Add citation link
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-11 form-fields-indented">
     <small>
@@ -242,20 +254,40 @@
 {% endif %}
 
 <div class="row" >
-  <div class="col-sm-6 text-left" >
-    <label class="input-xs">Citations linked to this record</label>
-  </div>
-  <div class="col-sm-6 text-left" >
-    {% if instance.type_controlled == 'BO' %}
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
-        <span class="gylphicon glyphicon-plus"></span> Chapter
-    {% endif %}
-    {% if instance.type_controlled == 'AR' %}
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
-        <span class="gylphicon glyphicon-plus"></span> Series Article
-    {% endif %}
+  <div class="col-sm-12 text-left" style="padding-bottom: 10px;">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td >
+          <div class="input-xs">Citations linked to this record</div>
+        </td>
+        <td class="text-right">
+          {% if instance.type_controlled == 'BO' %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
+              <span class="gylphicon glyphicon-plus"></span> Chapter
+          </a>
+          {% endif %}
+          {% if instance.type_controlled == 'AR' %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
+              <span class="gylphicon glyphicon-plus"></span> Series Article
+          </a>
+          {% endif %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RE">
+              <span class="gylphicon glyphicon-plus"></span> Responds to
+          </a><br>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=AS">
+              <span class="gylphicon glyphicon-plus"></span> Associated with
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RB">
+              <span class="gylphicon glyphicon-plus"></span> Reviewed by
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-12 form-fields-indented">
     <small>

@@ -28,16 +28,26 @@
 </div>
 
 <div class="row">
-  <div class="col-sm-4 text-left">
-    <label class="input-xs" style="height: 20px;">Responsibility</label>
-  </div>
-  <div class="col-sm-8 text-left">
-    {% for type in responsibility_mapping|get_item:instance.type_controlled %}
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
-        <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
-    </a>
-    {% endfor %}
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs" style="height: 20px;">Responsibility</div>
+        </td>
+        <td class="text-right">
+          {% for type in responsibility_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Other
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-12 form-fields-indented">
     <small>
@@ -56,16 +66,26 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-4 text-left">
-    <label class="input-xs">Hosting body</label>
-  </div>
-  <div class="col-sm-8 text-left">
-    {% for type in host_mapping|get_item:instance.type_controlled %}
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
-        <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
-    </a>
-    {% endfor %}
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Hosting body</div>
+        </td>
+        <td class="text-right">
+          {% for type in host_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Other
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-12 form-fields-indented">
     <small>
@@ -83,22 +103,28 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-4 text-left">
-    <label class="input-xs">Dates</label>
-  </div>
-  <div class="col-sm-8 text-left">
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
-        <span class="gylphicon glyphicon-plus"></span> Published
-    </a>
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{accessed_date_attribute_name}}">
-        <span class="gylphicon glyphicon-plus"></span> Accessed
-    </a>
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-        <span class="gylphicon glyphicon-plus"></span> Other
-    </a>
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Dates</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
+              <span class="gylphicon glyphicon-plus"></span> Published
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{accessed_date_attribute_name}}">
+              <span class="gylphicon glyphicon-plus"></span> Accessed
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Other
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-12 form-fields-indented">
     <small>
@@ -117,14 +143,20 @@
 </div>
 
 <div class="row" style="padding-top: 10px;">
-  <div class="col-sm-4 text-left">
-    <label class="input-xs">Links</label>
-  </div>
-  <div class="col-sm-8 text-left">
-    <a class="text-warning input-xs"
-        href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-        <span class="gylphicon glyphicon-plus"></span> Add more
-    </a>
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Links</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Add more
+          </a>
+        </td>
+      </tr>
+    </table>
   </div>
   <div class="col-sm-12" style="padding-left:20px;">
     <small>

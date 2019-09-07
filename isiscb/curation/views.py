@@ -346,7 +346,7 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -384,7 +384,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -502,7 +502,7 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -910,7 +910,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1032,7 +1032,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)

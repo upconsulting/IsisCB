@@ -265,12 +265,34 @@
 </div><!-- /.modal -->
 
 <script>
-$('#id_language').multiSelect()
-</script>
-
-<script>
 //# sourceURL=ccrel.js
+
+/**
+ * JavaScript Get URL Parameter
+ * source: https://www.kevinleary.net/javascript-get-url-parameters/
+ *
+ * @param String prop The specific URL parameter you want to retreive the value for
+ * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
+ */
+function getUrlParams( prop ) {
+    var params = {};
+    var search = decodeURIComponent( window.location.href.slice( window.location.href.indexOf( '?' ) + 1 ) );
+    var definitions = search.split( '&' );
+
+    definitions.forEach( function( val, key ) {
+        var parts = val.split( '=', 2 );
+        params[ parts[ 0 ] ] = parts[ 1 ];
+    } );
+
+    return ( prop && prop in params ) ? params[ prop ] : params;
+}
+
 $(document).ready(function() {
+    var typeControlled = getUrlParams('type_controlled');
+    if (typeControlled != undefined) {
+      $('#id_ccrelation-type_controlled').val(typeControlled);
+    }
+
     var subject_name = "{% if ccrelation %}{{ ccrelation.subject|get_citation_title|escapejs|safe }}{% endif %}";
     var subject_id = "{% if ccrelation %}{{ ccrelation.subject.id }}{% endif %}";
     var object_name = "{% if ccrelation %}{{ ccrelation.object|get_citation_title|escapejs|safe }}{% endif %}";

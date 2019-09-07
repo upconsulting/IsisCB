@@ -16,6 +16,11 @@ textarea.form-control {
   line-height: initial;
 }
 
+tr.categoryHeader {
+  background-color: #e2e2e2;
+  padding: 2px;
+}
+
 .no-gutter {
   margin-left: 0;
   margin-right: 0;
