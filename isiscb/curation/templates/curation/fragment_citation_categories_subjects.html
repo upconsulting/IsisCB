@@ -270,26 +270,26 @@
           {% if instance.type_controlled == 'BO' %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
-              <span class="gylphicon glyphicon-plus"></span> Chapter
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Chapter</span>
           </a>
           {% endif %}
           {% if instance.type_controlled == 'AR' %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
-              <span class="gylphicon glyphicon-plus"></span> Series Article
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Series Article</span>
           </a>
           {% endif %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RE">
-              <span class="gylphicon glyphicon-plus"></span> Responds to
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Responds to</span>
           </a><br>
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=AS">
-              <span class="gylphicon glyphicon-plus"></span> Associated with
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Associated with</span>
           </a>
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RB">
-              <span class="gylphicon glyphicon-plus"></span> Reviewed by
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Reviewed by</span>
           </a>
         </td>
       </tr>

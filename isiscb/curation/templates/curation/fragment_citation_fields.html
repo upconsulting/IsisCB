@@ -38,12 +38,12 @@
           {% for type in responsibility_mapping|get_item:instance.type_controlled %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
-              <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
           </a>
           {% endfor %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-              <span class="gylphicon glyphicon-plus"></span> Other
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
           </a>
         </td>
       </tr>
@@ -76,12 +76,12 @@
           {% for type in host_mapping|get_item:instance.type_controlled %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
-              <span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
           </a>
           {% endfor %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-              <span class="gylphicon glyphicon-plus"></span> Other
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
           </a>
         </td>
       </tr>
@@ -112,15 +112,15 @@
         <td class="text-right">
           <a class="text-warning input-xs"
               href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
-              <span class="gylphicon glyphicon-plus"></span> Published
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Published</span>
           </a>
           <a class="text-warning input-xs"
               href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{accessed_date_attribute_name}}">
-              <span class="gylphicon glyphicon-plus"></span> Accessed
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Accessed</span>
           </a>
           <a class="text-warning input-xs"
               href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
-              <span class="gylphicon glyphicon-plus"></span> Other
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
           </a>
         </td>
       </tr>
