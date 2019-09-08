@@ -7,14 +7,6 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
-<style>
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-</style>
-
 <div class="clearfix"></div>
 
 <div class="form-group row">
@@ -82,7 +74,7 @@
   <div class="col-sm-11 form-fields-indented">
     <small>
       {% for ccrel in instance.ccrelations.all %}
-          {% if ccrel.type_controlled in ccrel_contained_relations %}
+          {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.subject.id != instance.id %}
           <p style="margin-bottom: 2px;" id="containing_citation_{{ccrel.id}}">
           <i class="fa fa-book" aria-hidden="true"></i> {{ ccrel.subject.title }}
           {% if ccrel.subject.publication_date %}
@@ -298,17 +290,15 @@
   <div class="col-sm-11 form-fields-indented">
     <small>
       {% for ccrel in instance.ccrelations.all %}
-          {% if ccrel.type_controlled not in ccrel_contained_relations %}
-          {% with ccrel|get_other_relation_side:instance as target %}
+          {% if ccrel.object.id != instance.id %}
           <p style="margin-bottom: 2px;" id="other_citations_{{ccrel.id}}">
-            <i class="fa fa-book" aria-hidden="true"></i> {{ target.title_for_display }}
-          {% if target.publication_date %}
-          ({{ target.publication_date }})
+            <i class="fa fa-book" aria-hidden="true"></i> {{ ccrel.object.title_for_display }}
+          {% if ccrel.object.publication_date %}
+          ({{ ccrel.object.publication_date }})
           {% endif %}
-          <span class="label label-primary">{{target.get_type_controlled_display}}</span>
+          <span class="label label-primary">{{ccrel.object.get_type_controlled_display}}</span>
           <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
           </p>
-          {% endwith %}
           {% endif %}
       {% endfor %}
     </small>
