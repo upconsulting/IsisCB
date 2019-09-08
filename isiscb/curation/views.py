@@ -1146,6 +1146,8 @@ def citation(request, citation_id):
         'host_mapping': ACRelation.HOST_MAPPING,
         'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
         'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
+        'doi_linked_date_name': settings.DOI_LINKED_DATA_NAME,
+        'isbn_linked_date_name': settings.ISBN_LINKED_DATA_NAME,
     }
 
     start = datetime.datetime.now()
