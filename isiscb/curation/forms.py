@@ -20,13 +20,14 @@ class CCRelationForm(forms.ModelForm):
 
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
+    INCLUDES_CITATION_OBJECT = "ICO"
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
     ASSOCIATED_WITH = 'AS'
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
-        (RESPONDS_TO, 'Responds To'),
+        (INCLUDES_CITATION_OBJECT, 'Includes'),
         (ASSOCIATED_WITH, 'Is Associated With'),
         (REVIEWED_BY, 'Is Reviewed By')
     )

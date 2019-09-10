@@ -97,9 +97,7 @@ $(function() {
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               {{ form.record_status_value|addcss:"form-control input-sm" }}
-              &nbsp;
-              {{ form.record_status_explanation|addcss:"form-control input-sm" }}
-
+              
               {{ form.type_controlled }}
             </div>
           </div>
@@ -251,6 +249,20 @@ Back to List </a>
                             </div>
                             <div class="col-sm-11">
                             {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
+                        </div>
+
+                        {% for error in form.record_status_explanation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left" style="margin-top: -7px;">
+                              <label class="input-sm">Status Expl.</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
                             </div>
                           </div>
                         </div>

@@ -43,6 +43,7 @@ urlpatterns = [
     url(r'^(?i)bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='general_bulk_change_from_csv'),
     url(r'^(?i)bulk/csv/status$', bulk_change_csv_views.bulk_csv_status, name="bulk-csv-status"),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
+    url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
 
     url(r'^(?i)timelines$', bulk_change_csv_views.timeline_tasks, name='timeline_tasks'),
     url(r'^(?i)timelines/(?P<authority_id>[A-Z0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
@@ -137,7 +138,6 @@ urlpatterns = [
     url(r'^(?i)qdsearch/authority/$', views.quick_and_dirty_authority_search, name='quick_and_dirty_authority_search'),
     url(r'^(?i)qdsearch/citation/$', views.quick_and_dirty_citation_search, name='quick_and_dirty_citation_search'),
     url(r'^(?i)qdsearch/language/$', views.quick_and_dirty_language_search, name='quick_and_dirty_language_search'),
-    url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
 
     url(r'^(?i)users/role/$', views.add_role, name='create_role'),
     url(r'^(?i)users/roles/$', views.roles, name='roles'),

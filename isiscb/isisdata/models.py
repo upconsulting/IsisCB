@@ -1695,7 +1695,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
-        (INCLUDES_CITATION_OBJECT, 'Includes Citation Object'),
+        (INCLUDES_CITATION_OBJECT, 'Includes'),
         (REVIEW_OF, 'Is Review Of'),
         (RESPONDS_TO, 'Responds To'),
         (ASSOCIATED_WITH, 'Is Associated With'),

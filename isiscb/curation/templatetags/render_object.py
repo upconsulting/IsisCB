@@ -300,6 +300,12 @@ def order_by(queryset, args):
 
 @register.filter
 def get_other_relation_side(ccrel, elem):
-    if ccrel.subject.id is elem:
+    if ccrel.subject.id == elem.id:
         return ccrel.object
     return ccrel.subject
+
+@register.filter('startswith')
+def startswith(text, starts):
+    if isinstance(text, basestring):
+        return text.startswith(starts)
+    return False

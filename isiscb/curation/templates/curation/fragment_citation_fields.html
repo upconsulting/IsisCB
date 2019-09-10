@@ -54,9 +54,10 @@
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
         {% if acrelation.type_controlled in personal_responsibility_types %}
         <p class="author_editors" id="author_editors_{{acrelation.id}}" data-responsibility-type="{{ acrelation.type_controlled}}" style="margin-bottom: 2px;">
-          ({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}
-          <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
           <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          <a href="{% url 'curation:curate_authority' acrelation.authority.id %}">({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}</a>
+          <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
+          <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -92,9 +93,10 @@
     {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
         {% if acrelation.type_controlled in publisher_distributor_types %}
         <p style="margin-bottom: 2px;" id="host_{{acrelation.id}}" class="host_type_{{acrelation.type_controlled}}">
-        {{ acrelation.authority.name }}
-        <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
         <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        <a href="{% url 'curation:curate_authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a>
+        <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
+        <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -131,10 +133,10 @@
     {% for attribute in instance.attributes.all %}
         {% if attribute.type_controlled.value_content_type.model_class in date_attribute_types %}
         <p style="margin-bottom: 2px;" class="attributes_dates" data-date-type="{{attribute.type_controlled.name}}" id="attributes_dates_{{attribute.id}}">
+        <a href="{% url 'curation:update_attribute_for_citation' instance.id attribute.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         {{ attribute.value.get_child_class }}
         <span class="text-muted">{{ attribute.value_freeform}}</span>
         <span class="label label-warning">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
-        <a href="{% url 'curation:update_attribute_for_citation' instance.id attribute.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -158,14 +160,17 @@
       </tr>
     </table>
   </div>
-  <div class="col-sm-12" style="padding-left:20px;">
+  <div class="col-sm-12 form-fields-indented" style="padding-left:20px;">
     <small>
     {% for ld in instance.linkeddata_entries.all %}
         <p style="margin-bottom: 2px;" id="links_linked_data_{{ld.id}}" class="linked_data_{{ld.type_controlled.name}}">
-          <i class="fa fa-link" aria-hidden="true"></i>
+          <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          {% if ld.universal_resource_name|startswith:'http' %}
+          <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
+          {% else %}
           <span>{{ ld.universal_resource_name }}</span>
+          {% endif %}
         <span class="label label-success">{{ ld.type_controlled.name }}</span>
-        <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
         </p>
     {% endfor %}
     </small>

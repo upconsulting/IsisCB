@@ -767,7 +767,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -796,7 +796,7 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -1140,7 +1140,8 @@ def citation(request, citation_id):
         'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
         'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
         'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
-        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY],
+        'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
         'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
         'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
         'host_mapping': ACRelation.HOST_MAPPING,
