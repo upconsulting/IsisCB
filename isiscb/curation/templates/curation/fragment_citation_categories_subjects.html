@@ -26,7 +26,7 @@
           <div class="col-sm-9 form-fields-xs">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'CA' %}
-                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
+                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}?search={{ search_key }}&current={{ current_index }}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
                 {% endif %}
             {% endfor %}
           </div>
@@ -41,7 +41,7 @@
           <div class="col-sm-9 form-fields-xs">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'SU' %}
-                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
+                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}?search={{ search_key }}&current={{ current_index }}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
                 {% endif %}
             {% endfor %}
           </div>
@@ -76,13 +76,13 @@
       {% for ccrel in instance.ccrelations.all %}
           {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.subject.id != instance.id %}
           <p style="margin-bottom: 2px;" id="containing_citation_{{ccrel.id}}">
-          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}">{{ ccrel.subject.title }}</a>
+          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}?search={{ search_key }}&current={{ current_index }}">{{ ccrel.subject.title }}</a>
           {% if ccrel.subject.publication_date %}
           ({{ ccrel.subject.publication_date }})
           {% endif %}
           <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
-          <span class="text-mute">[{{ ccrel.get_type_controlled_display }}]</span>
+          <span class="label label-danger">{{ ccrel.get_type_controlled_display }}</span>
           <a href="{% url 'citation' ccrel.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
           </p>
           {% endif %}
@@ -291,9 +291,9 @@
           {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.object.id != instance.id or ccrel.type_controlled in ccrel_related_citations %}
           {% with ccrel|get_other_relation_side:instance as target %}
           <p style="margin-bottom: 2px;" id="other_citations_{{ccrel.id}}">
-            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-            <span class="text-mute">[{{ ccrel.get_type_controlled_display }}]</span>
-            <a href="{% url 'curation:curate_citation' target.id %}">{{ target.title_for_display }}</a>
+            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <span class="label label-danger">{{ ccrel.get_type_controlled_display }}</span>
+            <a href="{% url 'curation:curate_citation' target.id %}?search={{ search_key }}&current={{ current_index }}">{{ target.title_for_display }}</a>
           {% if target.publication_date %}
           ({{ target.publication_date }})
           {% endif %}
