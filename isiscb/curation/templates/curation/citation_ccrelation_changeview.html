@@ -276,7 +276,11 @@
  */
 function getUrlParams( prop ) {
     var params = {};
-    var search = decodeURIComponent( window.location.href.slice( window.location.href.indexOf( '?' ) + 1 ) );
+    var urlParts = window.location.href.split("?");
+    if (urlParts.length == 1) {
+      return '';
+    }
+    var search = urlParts[1];
     var definitions = search.split( '&' );
 
     definitions.forEach( function( val, key ) {
@@ -289,7 +293,7 @@ function getUrlParams( prop ) {
 
 $(document).ready(function() {
     var typeControlled = getUrlParams('type_controlled');
-    if (typeControlled != undefined) {
+    if (typeControlled != undefined && typeControlled != '') {
       $('#id_ccrelation-type_controlled').val(typeControlled);
     }
 

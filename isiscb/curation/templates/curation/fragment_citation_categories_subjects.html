@@ -265,18 +265,14 @@
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
               <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Chapter</span>
-          </a>
+          </a><br>
           {% endif %}
           {% if instance.type_controlled == 'AR' %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
               <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Series Article</span>
-          </a>
-          {% endif %}
-          <a class="text-warning input-xs"
-              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RE">
-              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Responds to</span>
           </a><br>
+          {% endif %}
           <a class="text-warning input-xs"
               href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=AS">
               <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Associated with</span>
