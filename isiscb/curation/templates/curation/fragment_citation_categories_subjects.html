@@ -11,41 +11,61 @@
 
 <div class="form-group row">
   <div class="col-xs-12">
-    {% if can_update %}
-      <p style="float:left;">
-      <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
-      </p>
-    {% endif %}
 
 
-      <div style="background-color: #f9f9f9; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; margin-left: 20px; padding-left: 10px; padding-right: 10px;">
-        <div class="row">
-          <div class="col-sm-3 text-left">
-            <label class="input-xs">Categories</label>
-          </div>
-          <div class="col-sm-9 form-fields-xs">
+      <div style="background-color: #f9f9f9; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; padding-left: 3px; padding-right: 3px;">
+        <table>
+          <tr>
+          <td style="vertical-align: top;" width="40px">
+            <label class="input-xs">
+              Cat.
+              {% if can_update %}
+              <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
+              {% endif %}
+
+            </label>
+          </td>
+          <td class="form-fields-xs phaedra-colors" style="margin-top: 5px;">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'CA' %}
-                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}?search={{ search_key }}&current={{ current_index }}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
+                      <a href="{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}" class="categories_subject_list label label-{{ acrelation.authority|get_label_class }} {% if not acrelation.authority.public %}not_public{% endif %}">
+                        {% if not acrelation.public %}
+                        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                        {% endif %}
+                        {{ acrelation.authority.name }}
+                      </a>
                 {% endif %}
             {% endfor %}
-          </div>
-        </div>
+          </td>
+        </tr>
+        </table>
       </div>
 
-      <div style="background-color: #f1f1f1; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; margin-left: 20px; padding-left: 10px; padding-right: 10px;">
-        <div class="row">
-          <div class="col-sm-3 text-left">
-            <label class="input-xs">Subjects</label>
-          </div>
-          <div class="col-sm-9 form-fields-xs">
+      <div style="background-color: #f1f1f1; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; padding-left: 3px; padding-right: 3px;">
+        <table>
+          <tr>
+          <td style="vertical-align: top;" width="40px">
+            <label class="input-xs">
+              Subj.
+              {% if can_update %}
+              <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
+              {% endif %}
+            </label>
+          </td>
+          <td class="form-fields-xs phaedra-colors" style="margin-top: 5px;">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'SU' %}
-                      <a href="{% url 'curation:curate_authority' acrelation.authority.id %}?search={{ search_key }}&current={{ current_index }}" class="categories_subject_list">{{ acrelation.authority.name }};</a>
+                      <a href="{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}" class="categories_subject_list label label-{{ acrelation.authority|get_label_class }} {% if not acrelation.authority.public %}not_public{% endif %}">
+                        {% if not acrelation.public %}
+                        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                        {% endif %}
+                        {{ acrelation.authority.name }}
+                      </a>
                 {% endif %}
             {% endfor %}
-          </div>
-        </div>
+          </td>
+        </tr>
+        </table>
       </div>
     </div>
   </div>

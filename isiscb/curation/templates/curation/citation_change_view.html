@@ -97,7 +97,7 @@ $(function() {
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               {{ form.record_status_value|addcss:"form-control input-sm" }}
-              
+
               {{ form.type_controlled }}
             </div>
           </div>
@@ -331,50 +331,16 @@ var bind_language = function() {
     $('.delete-language').click(function() {
         var elem = $(this);
         var language_id = elem.attr('language-id');
-        var language_name = elem.attr('language-name');
-        $('#language-id-container').val(language_id);
-        $('#delete-language-target-name').html(language_name);
-        $('#delete-language-modal').modal('show');
+        if (language_id) {
+            $.ajax("{% url "curation:delete_language_for_citation" instance.id %}?language=" + language_id, {
+                'success': function(r) {
+                    $('#language-' + language_id).remove();
+                },
+            });
+        }
     });
 }
-
-var delete_language = function() {
-    $('#delete-language-modal').modal('hide');
-    var language_id = $('#language-id-container').val();
-    if (language_id) {
-        $.ajax("{% url "curation:delete_language_for_citation" instance.id %}?language=" + language_id, {
-            'success': function(r) {
-                $('#language-' + language_id).remove();
-            },
-        });
-    }
-}
 </script>
-
-<!-- Modal -->
-<div class="modal fade" id="delete-language-modal" tabindex="-1" role="dialog" aria-labelledby="delete-language-modal-label">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="delete-language-modal-label">Are you sure?</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    You are about to remove the language <span class="text-warning" id="delete-language-target-name"></span> from this citation. Deletion cannot be undone!
-                </p>
-                <p>
-                    This will not delete the related language record itself, only the association between that language record and this citation.
-                </p>
-                <input type="hidden" id="language-id-container" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
-                <button type="button" class="btn btn-danger" onclick="delete_language();">Delete forever</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
@@ -562,18 +528,17 @@ $( document ).ready(function() {
 
   $('.citation_submit').on( "click", function() {
       $('#data_changed_modal').attr('data-forward-type', '');
-      if (checkRecord()) {
-          $('#citation_form').submit();
-      }
+      // IEXP-15: we are not checking the record any longer
+      $('#citation_form').submit();
+
   });
 
   $('#data_changed_save_confirmed').on('click', function() {
     $('#data_changed_modal').modal('hide');
     $("#input_back_to_list").val("True");
-    if ( checkRecord() ) {
-        $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
-        $('#citation_form').submit();
-    }
+    // IEXP-15: we are not checking the record any longer
+    $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
+    $('#citation_form').submit();
   });
 
   $('#save_confirmed').on('click', function() {
@@ -641,124 +606,6 @@ $( document ).ready(function() {
     $("#change_type_controlled_modal").hide();
   });
 });
-
-function checkRecord() {
-  var citation_type = $('#citation_type').attr("data-type");
-
-  var warnings = [];
-
-  var responsibilities = $(".author_editors");
-  if (responsibilities == undefined || responsibilities.length === 0) {
-    warnings.push("You did not add an author or editor.");
-  }
-
-  if ($("#id_title").val() == '' && citation_type != "RE") {
-    warnings.push("You did not enter a title.");
-  }
-
-  var categorySubjectList = $(".categories_subject_list");
-  if (categorySubjectList.length <= 0 && categorySubjectList.length <= 0) {
-    warnings.push("You did not add any categories or subjects.");
-  }
-
-  var publicationDate = $("p[data-date-type='{{publication_date_attribute_name}}']");
-  if (publicationDate == undefined || publicationDate.length === 0) {
-    warnings.push("You did not add a publication date.");
-  }
-
-  if ($("#id_belongs_to").val() == '') {
-    warnings.push("You did not specify a dataset.");
-  }
-
-  var languageList = $("#language-list-group li");
-  if (languageList.length <= 0) {
-    warnings.push("You did not select a language.");
-  }
-
-  if (citation_type == "RE" || citation_type == "AR" || citation_type == "ES") {
-    var journals = $(".host_type_PE");
-    if (journals === undefined || journals.length === 0) {
-      warnings.push("You did not specify a periodical.");
-    }
-
-    if ($("#id_partdetails-volume_free_text").val() == "") {
-      warnings.push("You did not specify a volumne.");
-    }
-
-    if ($("#id_partdetails-pages_free_text").val() == "") {
-      warnings.push("You did not specify a page range.");
-    }
-
-    var doi = $(".linked_data_{{doi_linked_date_name}}");
-    if (doi === undefined || doi.length === 0) {
-      warnings.push("You did not specify a DOI.");
-    }
-  }
-
-  if (citation_type == "RE" || citation_type == "ES") {
-    var citationsBox = $("#ccrelations");
-
-    //TODO: this is really ugly and nees a better solution!
-    var bookLinks = citationsBox.find("span.label:contains('Book')");
-
-    if (bookLinks.length < 1) {
-      warnings.push("You did not add a link to a book.");
-    }
-  }
-
-  if (citation_type == "BO") {
-    var publisher = $(".host_type_PU");
-    if (publisher == undefined || publisher.length == 0) {
-      warnings.push("You did not specify a publisher.");
-    }
-    if ($('#id_physical_details').val() == "") {
-      warnings.push("You did not enter any physical details.");
-    }
-    var isbn = $(".linked_data_{{isbn_linked_date_name}}");
-    if (isbn == undefined || isbn.length === 0) {
-      warnings.push("You did not add an ISBN number.");
-    }
-  }
-
-  if (citation_type == "TH") {
-    if ($('#id_physical_details').val() == "") {
-      warnings.push("You did not enter any physical details.");
-    }
-    var school = $(".host_type_SC");
-    if (school == undefined || school.length === 0) {
-      warnings.push("You did not specify a school.");
-    }
-  }
-
-  if (citation_type == "CH") {
-    var citationsBox = $("#ccrelations");
-    //TODO: this is really ugly and nees a better solution!
-    var bookLinks = citationsBox.find("span.label:contains('Book')");
-    if (bookLinks.length < 1) {
-      warnings.push("You did not add a CCRelation to a book.");
-    }
-
-    if ($('#id_partdetails-pages_free_text').val() == "") {
-      warnings.push("You did not enter any page information.");
-    }
-  }
-
-  if (warnings.length > 0) {
-    var start = "<p>The following issues were found. Are you sure you want to save this citation?</p>";
-    var list = "<ul>";
-    for (var warn in warnings) {
-      list = list.concat("<li>" + warnings[warn] + "</li>");
-    }
-    list = list.concat("</ul>");
-
-    $('#modal_text').html(start + list);
-
-    $('#save_confirm_modal').modal('show');
-    return false;
-  }
-
-  return true;
-}
 
 </script>
 

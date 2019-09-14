@@ -12,6 +12,75 @@ a {
     color: #032544;
 }
 
+.phaedra-colors .label {
+  color: #444;
+  font-weight: normal;
+  line-height: 200%;
+  margin: 1px;
+}
+.phaedra-colors .label[href]:hover,
+.phaedra-colors .label[href]:focus {
+  color: #444;
+  text-decoration: underline;
+}
+
+.phaedra-colors .label-chronology {
+  background-color: #9BD7FF;
+}
+.phaedra-colors .label-chronology[href]:hover,
+.phaedra-colors .label-chronology[href]:focus {
+  background-color: #9BD7FF;
+}
+
+.phaedra-colors .label-person {
+  background-color: #e3cace;
+}
+.phaedra-colors .label-person[href]:hover,
+.phaedra-colors .label-person[href]:focus {
+  background-color: #e3cace;
+}
+
+.phaedra-colors .label-geography {
+  background-color: #b6cdca;
+}
+.phaedra-colors .label-geography[href]:hover,
+.phaedra-colors .label-geography[href]:focus {
+  background-color: #b6cdca;
+}
+
+.phaedra-colors .label-institution {
+  background-color: #e09d6e;
+}
+.phaedra-colors .label-institution[href]:hover,
+.phaedra-colors .label-institution[href]:focus {
+  background-color: #e09d6e;
+}
+
+.phaedra-colors .label-concept {
+  background-color: #e2b8fc;
+}
+.phaedra-colors .label-concept[href]:hover,
+.phaedra-colors .label-concept[href]:focus {
+  background-color: #e2b8fc;
+}
+
+.phaedra-colors .label-other {
+  background-color: #c8d2f9;
+}
+.phaedra-colors .label-other[href]:hover,
+.phaedra-colors .label-other[href]:focus {
+  background-color: #c8d2f9;
+}
+
+.phaedra-colors .not_public {
+  text-decoration: line-through;
+}
+
+.phaedra-colors .not_public[href]:hover,
+.phaedra-colors .not_public[href]:focus {
+  text-decoration: line-through;
+}
+
 textarea.form-control {
   line-height: initial;
 }

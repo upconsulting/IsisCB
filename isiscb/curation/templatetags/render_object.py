@@ -309,3 +309,15 @@ def startswith(text, starts):
     if isinstance(text, basestring):
         return text.startswith(starts)
     return False
+
+@register.filter
+def get_label_class(authority):
+    label_classes = {
+        Authority.TIME_PERIOD: "chronology",
+        Authority.GEOGRAPHIC_TERM: "geography",
+        Authority.PERSON: "person",
+        Authority.INSTITUTION: "institution",
+        Authority.CONCEPT: "concept",
+    }
+
+    return label_classes.get(authority.type_controlled, "other")
