@@ -148,22 +148,22 @@ Back to List </a>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Fields</a>
             </li>
             <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Attributes ({{ instance.attributes.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Citations ({{ instance.related_citations.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Authorities ({{ instance.related_authorities.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab">Tracking</a>
+                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Tracking</a>
             </li>
         </ul>
         <div class="tab-content">
