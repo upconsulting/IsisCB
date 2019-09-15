@@ -69,7 +69,9 @@ $(function() {
   {% if selected_authority_type %}
   $("#typeDropdownDiv>select").val("{{ selected_authority_type }}");
   {% endif %}
-  actOnType($("#typeDropdownDiv>select").val());
+  var currentType = $("#typeDropdownDiv>select").val();
+  actOnType(currentType);
+  setClassification(currentType);
   setDefaultDataset();
   setPersonName();
   setAttributeFields();
@@ -78,13 +80,7 @@ $(function() {
   $("#typeDropdownDiv>select").change(function() {
     var selectedType = $("#typeDropdownDiv>select").val();
     actOnType(selectedType);
-
-    var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
-    if (properNameTypes.includes(selectedType)) {
-      $("#id_authority-classification_system").val("PN");
-    } else {
-      $("#id_authority-classification_system").val("SPWC");
-    }
+    setClassification(selectedType);
 
     if (selectedType == "PE") {
       setPersonName() ;
@@ -98,6 +94,15 @@ $(function() {
   $("#id_authority-name").change(function() {
     setPersonName() ;
   });
+
+  function setClassification(selectedType) {
+    var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
+    if (properNameTypes.includes(selectedType)) {
+      $("#id_authority-classification_system").val("PN");
+    } else {
+      $("#id_authority-classification_system").val("SPWC");
+    }
+  }
 
   function setPersonName() {
     var selectedType = $("#typeDropdownDiv>select").val();
