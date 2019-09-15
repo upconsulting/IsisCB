@@ -475,6 +475,7 @@ object_id = Column(u'Record ID', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
 citation_author = Column(u'Author', _citation_author, Citation)
 record_type = Column('Record Type', lambda obj, extra, config={}: obj.get_type_controlled_display())
+record_subtype = Column('Subtype', lambda obj, extra, config={}: obj.subtype.name if obj.subtype else '')
 citation_editor = Column(u'Editor', _citation_editor, Citation)
 year_of_publication = Column(u'Year of publication',
                              lambda obj, extra, config={}: obj.publication_date.year)
@@ -529,6 +530,7 @@ CITATION_COLUMNS = [
     citation_title,
     citation_author,
     record_type,
+    record_subtype,
     citation_editor,
     year_of_publication,
     edition_details,
