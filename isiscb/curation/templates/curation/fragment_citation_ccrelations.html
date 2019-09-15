@@ -150,6 +150,8 @@ var delete_ccrelation = function() {
         $.ajax("{% url "curation:create_ccrelation_for_citation" instance.id %}" + ccrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#ccrelation-' + ccrelation_id).remove();
+                $('#containing_citation_' + ccrelation_id).remove();
+                $('#other_citations_' + ccrelation_id).remove();
             },
         });
     }

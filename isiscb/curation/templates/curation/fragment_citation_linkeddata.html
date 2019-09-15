@@ -93,6 +93,7 @@ var delete_linkeddata = function() {
         $.ajax("{% url "curation:curate_citation" instance.id %}linkeddata/" + linkeddata_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#linkeddata-' + linkeddata_id).remove();
+                $('#links_linked_data_' + linkeddata_id).remove();
             }
         });
     }

@@ -292,3 +292,32 @@ def cut_characters(string, cut):
     if string and len(string) > cut:
         return string[:cut]
     return string
+
+@register.filter
+def order_by(queryset, args):
+    args = [x.strip() for x in args.split(',')]
+    return queryset.order_by(*args)
+
+@register.filter
+def get_other_relation_side(ccrel, elem):
+    if ccrel.subject.id == elem.id:
+        return ccrel.object
+    return ccrel.subject
+
+@register.filter('startswith')
+def startswith(text, starts):
+    if isinstance(text, basestring):
+        return text.startswith(starts)
+    return False
+
+@register.filter
+def get_label_class(authority):
+    label_classes = {
+        Authority.TIME_PERIOD: "chronology",
+        Authority.GEOGRAPHIC_TERM: "geography",
+        Authority.PERSON: "person",
+        Authority.INSTITUTION: "institution",
+        Authority.CONCEPT: "concept",
+    }
+
+    return label_classes.get(authority.type_controlled, "other")
