@@ -20,13 +20,14 @@ class CCRelationForm(forms.ModelForm):
 
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
+    INCLUDES_CITATION_OBJECT = "ICO"
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
     ASSOCIATED_WITH = 'AS'
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
-        (RESPONDS_TO, 'Responds To'),
+        (INCLUDES_CITATION_OBJECT, 'Includes'),
         (ASSOCIATED_WITH, 'Is Associated With'),
         (REVIEWED_BY, 'Is Reviewed By')
     )
@@ -68,31 +69,7 @@ class ACRelationForm(forms.ModelForm):
 
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
-    AUTHOR = 'AU'
-    EDITOR = 'ED'
-    ADVISOR = 'AD'
-    CONTRIBUTOR = 'CO'
-    TRANSLATOR = 'TR'
-    SUBJECT = 'SU'
-    CATEGORY = 'CA'
-    PUBLISHER = 'PU'
-    SCHOOL = 'SC'
-    PERIODICAL = 'PE'
-    COMMITTEE_MEMBER = 'CM'
-    TYPE_CHOICES = (
-        (AUTHOR, 'Author'),
-        (EDITOR, 'Editor'),
-        (ADVISOR, 'Advisor'),
-        (CONTRIBUTOR, 'Contributor'),
-        (TRANSLATOR, 'Translator'),
-        (SUBJECT, 'Subject'),
-        (CATEGORY, 'Category'),
-        (PUBLISHER, 'Publisher'),
-        (SCHOOL, 'School'),
-        (PERIODICAL, 'Periodical'),
-        (COMMITTEE_MEMBER, 'Committee Member'),
-    )
-    type_controlled = forms.ChoiceField(choices=TYPE_CHOICES, required=False)
+    type_controlled = forms.ChoiceField(choices=ACRelation.TYPE_CHOICES, required=False)
 
     confidence_measure = forms.TypedChoiceField(**{
         'choices': [
@@ -269,11 +246,12 @@ class CitationForm(forms.ModelForm):
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE, Citation.ESSAY_REVIEW]:
-                self.fields['physical_details'].widget = forms.widgets.HiddenInput()
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.THESIS]:
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
+
+            self.fields['subtype'].queryset = CitationSubtype.objects.filter(related_citation_type=self.instance.type_controlled)
 
             for field in self.fields:
                 can_update = rules.test_rule('can_update_citation_field', user, (field, self.instance.pk))
@@ -304,13 +282,15 @@ class CitationForm(forms.ModelForm):
     administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
     title = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
+    subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
+
     class Meta:
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to', 'administrator_notes', 'record_history',
+              'belongs_to', 'administrator_notes', 'record_history', 'subtype',
         ]
         labels = {
             'belongs_to': 'Dataset',

@@ -761,6 +761,8 @@ class Citation(ReferencedEntity, CuratedMixin):
                                     help_text=help_text("""
     The user who created this object."""), related_name="creator_of")
 
+    subtype = models.ForeignKey('CitationSubtype', blank=True, null=True)
+
     def save(self, *args, **kwargs):
         def get_related(obj):
             query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
@@ -865,6 +867,12 @@ class Citation(ReferencedEntity, CuratedMixin):
     ESSAY_REVIEW = 'ES'
     THESIS = 'TH'
     EVENT = 'EV'
+    WEB_OBJECT = 'WO'
+    MULTIMEDIA_OBJECT = 'MO'
+    ARCHIVE_OBJECT = 'AO'
+    DIGITAL_RESOURCE = 'DR'
+    PERSONAL_RECOGNITION = 'PC'
+
     PRESENTATION = 'PR'
     INTERACTIVE = 'IN'
     WEBSITE = 'WE'
@@ -878,10 +886,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         (ESSAY_REVIEW, 'Essay Review'),
         (THESIS, 'Thesis'),
         (EVENT, 'Event'),
-        (PRESENTATION, 'Presentation'),
-        (INTERACTIVE, 'Interactive Resource'),
-        (WEBSITE, 'Website'),
-        (APPLICATION, 'Application'),
+        (WEB_OBJECT, 'Web Object'),
+        (MULTIMEDIA_OBJECT, 'Multimedia Object'),
+        (ARCHIVE_OBJECT, 'Archive Object'),
+        (DIGITAL_RESOURCE, 'Digital Resource'),
+        (PERSONAL_RECOGNITION, 'Personal Recognition'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',
@@ -1054,6 +1063,33 @@ class Citation(ReferencedEntity, CuratedMixin):
         The absolute URL of a Citation is the citation detail view.
         """
         return core_reverse("citation", args=(self.id,))
+
+class CitationSubtype(models.Model):
+
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Name of the new subtype.
+    """))
+
+    unique_name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Unique name of a subtype, use to reference a subtype.
+    """))
+
+    description = models.TextField(blank=True, null=True,
+                                   help_text=help_text("""
+    A brief description that will be displayed to help identify the authority.
+    Such as, brief bio or a scope note. For classification terms will be text
+    like 'Classification term from the XXX classification schema.'
+    """))
+
+    related_citation_type = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='citation type',
+                                       choices=Citation.TYPE_CHOICES,
+                                       help_text=help_text("""
+    Type of which this object is a subtype, e.g. Review or Chapter.
+    """))
+
+    def __str__(self):
+        return self.name if self.name else 'Subtype'
 
 
 class Authority(ReferencedEntity, CuratedMixin):
@@ -1332,6 +1368,29 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     PERIODICAL = 'PE'
     BOOK_SERIES = 'BS'
     COMMITTEE_MEMBER = 'CM'
+
+    # New types for IEXP-15
+    ORGANIZER = 'OR'
+    INTERVIEWER = 'IV'
+    GUEST = 'GU'
+    CREATOR = 'CR'
+    PRODUCER = 'PR'
+    DIRECTOR = 'DI'
+    WRITER = 'WR'
+    PERFORMER = 'PF'
+    COLLECTOR = 'CL'
+    ARCHIVIST = 'AR'
+    RESEARCHER = 'RE'
+    DEVELOPER = 'DE'
+    COMPILER = 'CP'
+    AWARDEE = 'AW'
+    OFFICER = 'OF'
+    HOST = 'HO'
+    DISTRIBUTOR = 'DS'
+    ARCHIVAL_REPOSITORY = 'AC'
+    MAINTAINING_INSTITUTION = 'MI'
+    PRESENTING_GROUP = 'PG'
+
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
@@ -1347,6 +1406,26 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series'),
         (COMMITTEE_MEMBER, 'Committee Member'),
+        (ORGANIZER, 'Organizer'),
+        (INTERVIEWER, 'Interviewer'),
+        (GUEST, 'Guest'),
+        (CREATOR, 'Creator'),
+        (PRODUCER, 'Producer'),
+        (DIRECTOR, 'Director'),
+        (WRITER, 'Writer'),
+        (PERFORMER, 'Performer'),
+        (COLLECTOR, 'Collector'),
+        (ARCHIVIST, 'Archivist'),
+        (RESEARCHER, 'Researcher'),
+        (DEVELOPER, 'Developer'),
+        (COMPILER, 'Compiler'),
+        (AWARDEE, 'Awardee'),
+        (OFFICER, 'Officer'),
+        (HOST, 'Host'),
+        (DISTRIBUTOR, 'Distributor'),
+        (ARCHIVAL_REPOSITORY, 'Archival Repository'),
+        (MAINTAINING_INSTITUTION, 'Maintaining Institution'),
+        (PRESENTING_GROUP, 'Presenting Group'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1356,10 +1435,16 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object).
     """))
 
-    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, CONTRIBUTOR, TRANSLATOR]
+    TYPE_CATEGORY_PUB_DISTR = [PUBLISHER, SCHOOL, PERIODICAL, HOST, DISTRIBUTOR, ARCHIVAL_REPOSITORY, MAINTAINING_INSTITUTION, PRESENTING_GROUP]
+
+    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, COMMITTEE_MEMBER, CONTRIBUTOR, TRANSLATOR,
+        ORGANIZER, INTERVIEWER, GUEST, CREATOR, PRODUCER, DIRECTOR,
+        WRITER, PERFORMER, COLLECTOR, ARCHIVIST, RESEARCHER, DEVELOPER,
+        COMPILER, AWARDEE, OFFICER]
     SUBJECT_CONTENT_TYPES = [SUBJECT, CATEGORY]
     INSTITUTIONAL_HOST_TYPES = [PUBLISHER, SCHOOL, INSTITUTION]
     PUBLICATION_HOST_TYPES = [PERIODICAL, BOOK_SERIES]
+
 
     PERSONAL_RESPONS = 'PR'
     SUBJECT_CONTENT = 'SC'
@@ -1380,6 +1465,36 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object) more broadly than the relationship
     type.
     """))
+
+    RESPONSIBILITY_MAPPING = {
+        Citation.BOOK: [AUTHOR, EDITOR],
+        Citation.ARTICLE: [AUTHOR],
+        Citation.CHAPTER: [AUTHOR],
+        Citation.REVIEW: [AUTHOR],
+        Citation.ESSAY_REVIEW: [AUTHOR],
+        Citation.THESIS: [AUTHOR, ADVISOR, COMMITTEE_MEMBER],
+        Citation.EVENT: [AUTHOR, ORGANIZER],
+        Citation.WEB_OBJECT: [AUTHOR, INTERVIEWER, GUEST, CREATOR],
+        Citation.MULTIMEDIA_OBJECT: [PRODUCER, DIRECTOR, WRITER, PERFORMER, CREATOR],
+        Citation.ARCHIVE_OBJECT: [COLLECTOR, ARCHIVIST, RESEARCHER, AUTHOR],
+        Citation.DIGITAL_RESOURCE: [DEVELOPER, WRITER, COMPILER, EDITOR],
+        Citation.PERSONAL_RECOGNITION: [AWARDEE, OFFICER],
+    }
+
+    HOST_MAPPING = {
+        Citation.BOOK: [PUBLISHER],
+        Citation.ARTICLE: [PERIODICAL],
+        Citation.CHAPTER: [PUBLISHER],
+        Citation.REVIEW: [PERIODICAL],
+        Citation.ESSAY_REVIEW: [PERIODICAL],
+        Citation.THESIS: [SCHOOL],
+        Citation.EVENT: [HOST],
+        Citation.WEB_OBJECT: [PUBLISHER, DISTRIBUTOR, HOST],
+        Citation.MULTIMEDIA_OBJECT: [PUBLISHER, DISTRIBUTOR],
+        Citation.ARCHIVE_OBJECT: [ARCHIVAL_REPOSITORY],
+        Citation.DIGITAL_RESOURCE: [MAINTAINING_INSTITUTION],
+        Citation.PERSONAL_RECOGNITION: [PRESENTING_GROUP],
+    }
 
     type_free = models.CharField(max_length=255,
                                  blank=True,
@@ -1572,6 +1687,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
+    INCLUDES_CITATION_OBJECT = 'ICO'
     REVIEW_OF = 'RO'
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
@@ -1579,6 +1695,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (INCLUDES_CITATION_OBJECT, 'Includes'),
         (REVIEW_OF, 'Is Review Of'),
         (RESPONDS_TO, 'Responds To'),
         (ASSOCIATED_WITH, 'Is Associated With'),

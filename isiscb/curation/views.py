@@ -317,6 +317,7 @@ def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
+    is_object = request.GET.get('is_object', 'false')
 
     context = {
         'curation_section': 'datasets',
@@ -328,7 +329,7 @@ def create_ccrelation_for_citation(request, citation_id):
     if request.method == 'GET':
         ccrelation = CCRelation()
         initial={}
-        if citation.type_controlled == Citation.CHAPTER:
+        if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
             ccrelation.object = citation
             ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
             initial['type_controlled'] = CCRelation.INCLUDES_CHAPTER
@@ -345,7 +346,7 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -383,7 +384,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -501,7 +502,7 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -538,7 +539,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         if form.is_valid():
             form.instance.modified_by = request.user
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -766,7 +767,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -795,7 +796,7 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -909,7 +910,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1031,7 +1032,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1136,27 +1137,27 @@ def citation(request, citation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'type_choices': Citation.TYPE_CHOICES,
+        'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
+        'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
+        'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY],
+        'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
+        'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
+        'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
+        'host_mapping': ACRelation.HOST_MAPPING,
+        'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
+        'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
+        'doi_linked_date_name': settings.DOI_LINKED_DATA_NAME,
+        'isbn_linked_date_name': settings.ISBN_LINKED_DATA_NAME,
     }
+
     start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
     _build_result_set_links(request, context)
 
-    # We use a different template for each citation type.
-    if citation.type_controlled == Citation.BOOK:
-        template = 'curation/citation_change_view_book.html'
-    elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
-        template = 'curation/citation_change_view_review.html'
-    elif citation.type_controlled == Citation.CHAPTER:
-        template = 'curation/citation_change_view_chapter.html'
-    elif citation.type_controlled == Citation.ARTICLE:
-        template = 'curation/citation_change_view_article.html'
-    elif citation.type_controlled == Citation.THESIS:
-        template = 'curation/citation_change_view_thesis.html'
-    elif citation.type_controlled == Citation.WEBSITE:
-        template = 'curation/citation_change_view_website.html'
-    else:
-        template = 'curation/citation_change_view.html'
+    # we now use only one template for all types IEXP-15
+    template = 'curation/citation_change_view.html'
 
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
@@ -1174,25 +1175,21 @@ def citation(request, citation_id):
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
 
-        # Most (but not all) citation types should have a PartDetails entry.
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK,
-                                        Citation.REVIEW, Citation.CHAPTER,
-                                        Citation.THESIS, Citation.ESSAY_REVIEW]:
-            part_details = getattr(citation, 'part_details', None)
-            if not part_details:
-                part_details = PartDetails.objects.create()
-                citation.part_details = part_details
-                citation.save()
+        part_details = getattr(citation, 'part_details', None)
+        if not part_details:
+            part_details = PartDetails.objects.create()
+            citation.part_details = part_details
+            citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id,
-                                               instance=part_details,
-                                               prefix='partdetails')
-            context.update({
-                'partdetails_form': partdetails_form,
-            })
+        partdetails_form = PartDetailsForm(request.user, citation_id,
+                                           instance=part_details,
+                                           prefix='partdetails')
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
+        if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()

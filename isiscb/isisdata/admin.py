@@ -1134,7 +1134,10 @@ class CitationCollectionAdmin(admin.ModelAdmin):
     def citation_count(self, obj):
         return obj.citations.count()
 
-
+class CitationSubtypeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'unique_name', 'related_citation_type')
+    fields = ['name', 'unique_name', 'description', 'related_citation_type']
+    exlude = ('attributes')
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -1148,6 +1151,7 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
 
     def def_crud_rules(self, obj):
         return CRUDRule.objects.filter(role=obj.pk)
+
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
@@ -1171,3 +1175,5 @@ admin.site.register(CitationCollection, CitationCollectionAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, IsisCBUserAdmin)
+
+admin.site.register(CitationSubtype, CitationSubtypeAdmin)

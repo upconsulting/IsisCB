@@ -12,7 +12,7 @@ def get_uri(entry):
         return settings.URI_PREFIX + "citation/" + entry.id
     return ""
 
-
+@register.filter
 def to_class_name(value):
     return value.__class__.__name__
 

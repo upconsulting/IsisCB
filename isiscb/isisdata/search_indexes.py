@@ -450,12 +450,16 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         # this is a hack but it works, so :op
         date_id = None
         for attr in attributes:
-            if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
-                attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
-                if type(attr.value.cvalue()) == list:
-                    freeform_dates += attr.value.cvalue()
-                else:
-                    freeform_dates.append(attr.value.cvalue().year)
+            try:
+                if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
+                    attr = Attribute.objects.get(pk=attr['attributes__id'])
+                    if type(attr.value.cvalue()) == list:
+                        freeform_dates += attr.value.cvalue()
+                    else:
+                        freeform_dates.append(attr.value.cvalue().year)
+            except Exception as e:
+                print "Could not index attribute"
+                print e
 
         if freeform_dates:
             return freeform_dates
