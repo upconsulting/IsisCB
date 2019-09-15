@@ -157,10 +157,10 @@ Back to List </a>
                 <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Citations ({{ instance.related_citations.count }})</a>
+                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Cit. ({{ instance.all_ccrelations.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Authorities ({{ instance.related_authorities.count }})</a>
+                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Auth. ({{ instance.related_authorities.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
                 <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Tracking</a>
