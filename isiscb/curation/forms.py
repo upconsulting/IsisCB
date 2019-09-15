@@ -246,7 +246,6 @@ class CitationForm(forms.ModelForm):
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE, Citation.ESSAY_REVIEW]:
-                self.fields['physical_details'].widget = forms.widgets.HiddenInput()
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.THESIS]:

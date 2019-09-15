@@ -11,18 +11,24 @@
 
 <div class="form-group row">
   <div class="col-xs-12">
-
-    <div style="background-color: #f9f9f9; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; padding-left: 3px; padding-right: 3px;">
-        <table>
-          <tr>
-          <td style="vertical-align: top;" height="40px" width="40px">
-            <label class="input-xs">
-              Cat.
+    <div class="row" style="padding-top: 10px;">
+      <div class="col-sm-12 text-left">
+        <table width="100%" style="margin-bottom: 3px;">
+          <tr class="categoryHeader">
+            <td >
+              <div class="input-xs">Categories and Subjects</div>
+            </td>
+            <td class="text-right" style="padding-right: 5px;">
               {% if can_update %}
               <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
               {% endif %}
-            </label>
-          </td>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+      <table>
+          <tr>
           <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" ">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'CA' %}
@@ -30,26 +36,17 @@
                         {% if not acrelation.public %}
                         <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                         {% endif %}
-                        {{ acrelation.authority.name }}
-                      </a>
+                        {{ acrelation.authority.name|truncatechars:80 }}
+                      </a><br>
                 {% endif %}
             {% endfor %}
           </td>
         </tr>
         </table>
-      </div>
+        <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
 
-      <div style="background-color: #f1f1f1; border-radius: 6px; margin-bottom: 4px; border: solid #ddd 1px; padding-left: 3px; padding-right: 3px;">
         <table>
           <tr>
-          <td style="vertical-align: top;" height="40px" width="40px">
-            <label class="input-xs">
-              Subj.
-              {% if can_update %}
-              <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
-              {% endif %}
-            </label>
-          </td>
           <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;">
             {% for acrelation in instance.acrelation_set.all %}
                 {% if acrelation.type_controlled == 'SU' %}
@@ -57,14 +54,13 @@
                         {% if not acrelation.public %}
                         <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                         {% endif %}
-                        {{ acrelation.authority.name }}
+                        {{ acrelation.authority.name|truncatechars:30 }}
                       </a>
                 {% endif %}
             {% endfor %}
           </td>
         </tr>
         </table>
-      </div>
     </div>
   </div>
 {% endwith %}
@@ -73,44 +69,8 @@
 
 <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
 
-<div class="row" style="padding-top: 10px;">
-  <div class="col-sm-12 text-left">
-    <table width="100%" style="margin-bottom: 3px;">
-      <tr class="categoryHeader">
-        <td >
-          <div class="input-xs">Containing Citation</div>
-        </td>
-        <td class="text-right">
-          <a class="text-warning input-xs"
-              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
-              <span class="gylphicon glyphicon-plus"></span> Add citation link
-          </a>
-        </td>
-      </tr>
-    </table>
-  </div>
-  <div class="col-sm-11 form-fields-indented">
-    <small>
-      {% for ccrel in instance.ccrelations.all %}
-          {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.subject.id != instance.id %}
-          <p style="margin-bottom: 2px;" id="containing_citation_{{ccrel.id}}">
-          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}?search={{ search_key }}&current={{ current_index }}">{{ ccrel.subject.title }}</a>
-          {% if ccrel.subject.publication_date %}
-          ({{ ccrel.subject.publication_date }})
-          {% endif %}
-          <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
-          <span class="label label-danger">{{ ccrel.get_type_controlled_display }}</span>
-          <a href="{% url 'citation' ccrel.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-          </p>
-          {% endif %}
-      {% endfor %}
-    </small>
-  </div>
-</div>
-
 {% if partdetails_form %}
-<div class="row" style="padding-top: 20px; padding-bottom: 10px;">
+<div class="row" style="padding-bottom: 10px;">
   <table style="margin: 10px;">
   {% for error in partdetails_form.volume_free_text.errors %}
   <tr>
@@ -265,6 +225,22 @@
     </td>
     <td colspan="3">
       {{ partdetails_form.extent_note|addcss:"form-control input-xs" }}
+    </td>
+  </tr>
+
+  {% for error in form.physical_details.errors %}
+  <tr>
+    <td colspan="6">
+    <div class="alert alert-danger">{{ error }}</div>
+    </td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td>
+      <label class="input-xs">Phys. det.</label>
+    </td>
+    <td colspan="6">
+      {{ form.physical_details|addcss:"form-control input-xs oneLine" }}
     </td>
   </tr>
 </table>
