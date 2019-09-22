@@ -720,7 +720,8 @@ def citation(request, citation_id):
     related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True).filter(public=True)
     related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True).filter(public=True)
     related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
-    related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS', object__public=True).filter(public=True)
+    as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
+    related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
