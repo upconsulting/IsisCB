@@ -1028,11 +1028,12 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
 
         if attribute_form.is_valid() and value_form and value_form.is_valid():
             attribute_form.instance.source = citation
-            if not attribute_form.instance.value_freeform:
-                attribute_form.instance.value_freeform = value_form.instance.cvalue()
             attribute_form.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
+            if not attribute_form.instance.value_freeform:
+                attribute_form.instance.value_freeform = value_form.instance.render()
+                attribute_form.instance.save()
 
             target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
