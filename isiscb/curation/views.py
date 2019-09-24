@@ -1031,6 +1031,9 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             attribute_form.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
+            if not attribute_form.instance.value_freeform:
+                attribute_form.instance.value_freeform = value_form.instance.render()
+                attribute_form.instance.save()
 
             target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
