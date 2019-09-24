@@ -81,6 +81,10 @@ a {
   text-decoration: line-through;
 }
 
+.is_not_public {
+  text-decoration: line-through;
+}
+
 textarea.form-control {
   line-height: initial;
 }
