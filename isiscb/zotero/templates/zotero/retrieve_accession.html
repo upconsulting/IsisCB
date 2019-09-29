@@ -127,7 +127,7 @@ But for now the list is stored as string :-p
                         {% for acrelation in all_acrelations %}
                             {% with acrelation.authority as authority %}
                             {% with authority.resolutions.first as authority_resolution %}
-                                <div class="list-group-item clearfix {% if authority_resolution %}disabled{% endif %} {% if not authority_resolution and authority.processed %}list-group-item-danger{% endif %} }"
+                                <div class="list-group-item clearfix {% if authority_resolution %}disabled{% endif %} {% if not authority_resolution and authority.processed %}list-group-item-danger{% endif %}"
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
@@ -258,6 +258,10 @@ But for now the list is stored as string :-p
 
                             </div>
                         </div>
+                        <center>
+                          <i id="searchIndicator" class="fa fa-refresh fa-spin fa-fw" style="display:none;"></i>
+                          <p id="noResultsIndicator" style="display:none;">No results found.</p>
+                        </center>
                         <ul class="list-group" id="results-container" style="max-height: 400px; overflow-y: scroll;"></ul>
                     </div>
 
@@ -277,7 +281,6 @@ var toggleTab = function(name) {
 }
 
 $('#search-tab').on('shown.bs.tab', function(e) {
-    console.log('Show search tab');
     $('#authority-search').focus();
 });
 </script>
@@ -319,41 +322,11 @@ var format_citations = function(related_citations) {
     return _doc;
 }
 
-$('.draftauthority').click(function() {
-
-    toggleTab('search');
-
-    var elem = $(this);
-    // elem.scrollTop();
-    $('body').scrollTop(elem.offset().top - 250);
-    $('.selected').removeClass('selected');
-
-    elem.parent().addClass('selected');
-    var draftauthority_id = elem.attr('data-id');
-
-    selected_authority = draftauthority_id;
-    selected_authority_name = elem.attr('data-name');
-    selected_authority_type = elem.attr('data-type');
-    selected_authority_first_name = elem.attr('data-first-name');
-    selected_authority_last_name = elem.attr('data-last-name');
-
-    bindCreateNew();
-    bindSkip();
-
-    // Reset search.
-    $('#results-container').empty();
-    $('#authority-search').val(selected_authority_name);
-    $('#authority-search-filter-type').val(selected_authority_type);
-
-
-    $('#authority-search').trigger('keyup');
-    $('#matching').css('visibility', 'visible');
-
-});
-
 $(document).ready(function() {
+
     var lastSearch = $.now();
     var waiting = false;
+    var hasSearched = false;
     bindModal();
 
     $('#authority-search-filter-type').change(function(e) {
@@ -361,8 +334,9 @@ $(document).ready(function() {
     });
 
     $('#authority-search').on('keyup', function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
+        if (hasSearched && ($.now() - lastSearch < 500 || waiting)) return;
         lastSearch = $.now();
+        hasSearched = true;
         waiting = true;
 
         var query = $(this).val();
@@ -372,13 +346,21 @@ $(document).ready(function() {
             search_endpoint += "&type=" + filter_type;
         }
 
+        $("#searchIndicator").show();
+        $("#noResultsIndicator").hide();
         $.ajax(search_endpoint, {
             failure: function(result) {
                 waiting = false;
+                $("#searchIndicator").hide();
+                $("#noResultsIndicator").show();
             },
             success: function(result) {
                 waiting = false;
                 $('#results-container').empty();
+
+                if (result.results.length == 0) {
+                  $("#noResultsIndicator").show();
+                }
                 result.results.forEach(function(suggestion) {
                     var description;
                     if (suggestion.description != null) {
@@ -436,13 +418,41 @@ $(document).ready(function() {
                     $('#id_acrelation-authority').val(selected_id);
                 });
                 bindSearchSelect();
+                $("#searchIndicator").hide();
             }
         });
     });
 
-    {% if draft_authority_id and resolved_authority_id %}
-    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}");
-    {% endif %}
+    $('.draftauthority').click(function() {
+        toggleTab('search');
+
+        var elem = $(this);
+        // elem.scrollTop();
+        $('body').scrollTop(elem.offset().top - 250);
+        $('.selected').removeClass('selected');
+
+        elem.parent().addClass('selected');
+        var draftauthority_id = elem.attr('data-id');
+
+        selected_authority = draftauthority_id;
+        selected_authority_name = elem.attr('data-name');
+        selected_authority_type = elem.attr('data-type');
+        selected_authority_first_name = elem.attr('data-first-name');
+        selected_authority_last_name = elem.attr('data-last-name');
+
+        bindCreateNew();
+        bindSkip();
+
+        // Reset search.
+        $('#results-container').empty();
+        $('#authority-search').val(selected_authority_name);
+        $('#authority-search-filter-type').val(selected_authority_type);
+
+
+        $('#authority-search').trigger('keyup');
+        $('#matching').css('visibility', 'visible');
+
+    });
 
     $(".deleteDraftAuthority").click(function(e) {
       e.preventDefault();
@@ -455,6 +465,10 @@ $(document).ready(function() {
         }
       });
     });
+
+    {% if draft_authority_id and resolved_authority_id %}
+    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}");
+    {% endif %}
 });
 
 function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, created_authority_name) {
@@ -471,8 +485,19 @@ function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, cr
   cleanupResolvedAuthority(draftauthority_id, created_authority_id, created_authority_name);
 }
 
-var selectNextAuthority = function() {
-    $('.draftauthority').first().trigger('click');
+var selectNextAuthority = function(draft_authority_id) {
+    if (draft_authority_id != undefined) {
+      var resolved = $("#authority-" + draft_authority_id);
+      var siblings = resolved.nextAll();
+      for (i = 0; i < siblings.length; i++) {
+        if ($(siblings[i]).has(".draftauthority") != undefined) {
+          $(siblings[i]).find('.draftauthority').trigger('click');
+          break;
+        }
+      }
+    } else {
+      $('.draftauthority').first().trigger('click');
+    }
 }
 
 var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name) {
@@ -498,7 +523,7 @@ var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authori
     textSpan.append(textContent);
     span.append(textSpan);
     $("#authority-" + draftauthority_id).append(span);
-    selectNextAuthority();
+    selectNextAuthority(draftauthority_id);
 }
 
 
