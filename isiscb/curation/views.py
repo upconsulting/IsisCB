@@ -1970,9 +1970,10 @@ def quick_and_dirty_authority_search(request):
     limit_clasification_types = request.GET.get('system_types', None)
     classification_system = request.GET.get('system', None)
 
+    force = request.GET.get('force', 'false') == 'true'
     system_blank = request.GET.get('system_blank', 'true') == 'true'
     N = int(request.GET.get('max', 10))
-    if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
+    if not q or (len(q) < 3 and not force):     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
     use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'

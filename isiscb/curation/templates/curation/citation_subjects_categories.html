@@ -163,8 +163,14 @@
         <p>
           <div class="input-group">
             <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
+            </input>
 
             <span class="input-group-btn">
+              <span class="button-checkbox">
+                <button type="button" class="btn btn-default" id="forceSearch" title="Force search" style="height:3.5em" data-color="primary">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+              </span>
               <span class="button-checkbox">
                 <button type="button" class="btn" data-color="primary">C</button>
                 <input id="filterConcepts" type="checkbox" class="hidden" />
@@ -249,14 +255,14 @@ var max_results = INITIAL_MAX_RESULTS;
 var types = [];
 
 var searchTimerSubjects = 0;
-function triggerSearchSubjects(e) {
+function triggerSearchSubjects(force) {
   if (searchTimerSubjects) {
       clearTimeout(searchTimerSubjects);
   }
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
@@ -283,8 +289,17 @@ function triggerSearchSubjects(e) {
             newLi.prepend(addBtn);
           });
 
-          if (result.results.length == 0) {
+          if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
             var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+            resultsContainer.append(msg);
+          } else if (result.results.length == 0 && !force && query.length < 3) {
+            var msg = $('<p>Your query was too short. You could try to </p>');
+            var forceLink = $('<a><i class="fa fa-search" aria-hidden="true"></i> force searching</a>');
+            forceLink.click(function() {
+              triggerSearchSubjects(true);
+            });
+            msg.append(forceLink);
+            msg.append(".");
             resultsContainer.append(msg);
           }
 
@@ -297,7 +312,7 @@ function triggerSearchSubjects(e) {
             resultsContainer.append(load_more);
             $('#load-more-subjects').click(function() {
                 max_results += 10;
-                triggerSearchSubjects();
+                triggerSearchSubjects(force);
             });
           }
         }
@@ -326,9 +341,14 @@ function suggestSubjects(event) {
 }
 
 $(document).ready(function() {
+
+  $("#forceSearch").click(function() {
+    triggerSearchSubjects(true);
+  });
+
   $('#subjectSearchQuery').on('keyup', function() {
     max_results = INITIAL_MAX_RESULTS;
-    triggerSearchSubjects();
+    triggerSearchSubjects(false);
   });
 
   // add checkbox search handlers
@@ -354,7 +374,7 @@ $(document).ready(function() {
       updateDisplay(checkbox);
     });
     types = []
-    triggerSearchSubjects();
+    triggerSearchSubjects(false);
   });
 
   // checkbox styling
@@ -381,9 +401,12 @@ $(document).ready(function() {
 
               updateDisplay($checkbox);
 
-              // Inject the icon if applicable
-              if ($button.find('.state-icon').length == 0) {
-                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+              if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                // Inject the icon if applicable
+                if ($button.find('.state-icon').length == 0) {
+                    $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                }
               }
           }
           init();
@@ -399,10 +422,13 @@ function updateDisplay($checkbox) {
     // Set the button's state
     $button.data('state', (isChecked) ? "on" : "off");
 
-    // Set the button's icon
-    $button.find('.state-icon')
-        .removeClass()
-        .addClass('state-icon ' + settings[$button.data('state')].icon);
+    if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+      // Set the button's icon
+      $button.find('.state-icon')
+          .removeClass()
+          .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+    }
 
     // Update the button's color
     if (isChecked) {
@@ -426,7 +452,7 @@ function filterType(type, element) {
       types.splice(typeIndex, 1);
     }
   }
-  triggerSearchSubjects();
+  triggerSearchSubjects(false);
 }
 
 function addConcept(event) {
