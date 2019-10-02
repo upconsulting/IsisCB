@@ -293,13 +293,13 @@ function triggerSearchSubjects(force) {
             var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
             resultsContainer.append(msg);
           } else if (result.results.length == 0 && !force && query.length < 3) {
-            var msg = $('<p>Your query was too short. You could try to </p>');
-            var forceLink = $('<a><i class="fa fa-search" aria-hidden="true"></i> force searching</a>');
+            var msg = $('<p>Your query was too short. </p>');
+            var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
             forceLink.click(function() {
               triggerSearchSubjects(true);
             });
             msg.append(forceLink);
-            msg.append(".");
+            msg.append(" to force the search.");
             resultsContainer.append(msg);
           }
 
