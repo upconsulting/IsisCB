@@ -285,11 +285,12 @@
           {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.object.id != instance.id or ccrel.type_controlled in ccrel_related_citations %}
           {% with ccrel|get_other_relation_side:instance as target %}
           <p style="margin-bottom: 2px;" id="other_citations_{{ccrel.id}}">
-            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-            <span class="label label-danger">{{ ccrel.get_type_controlled_display }}</span>
-            {% if not ccrel.public %}
+            {% if not ccrel.public or not target.public %}
             <i class="fa fa-eye-slash" title="The linked record is not public."></i>
             {% endif %}
+            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+
             <a href="{% url 'curation:curate_citation' target.id %}?search={{ search_key }}&current={{ current_index }}" {% if not target.public %}class="is_not_public"{% endif %}>{{ target.title_for_display }}</a>
           {% if target.publication_date %}
           ({{ target.publication_date }})
