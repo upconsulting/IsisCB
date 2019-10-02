@@ -485,19 +485,8 @@ function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, cr
   cleanupResolvedAuthority(draftauthority_id, created_authority_id, created_authority_name);
 }
 
-var selectNextAuthority = function(draft_authority_id) {
-    if (draft_authority_id != undefined) {
-      var resolved = $("#authority-" + draft_authority_id);
-      var siblings = resolved.nextAll();
-      for (i = 0; i < siblings.length; i++) {
-        if ($(siblings[i]).has(".draftauthority") != undefined) {
-          $(siblings[i]).find('.draftauthority').trigger('click');
-          break;
-        }
-      }
-    } else {
-      $('.draftauthority').first().trigger('click');
-    }
+var selectNextAuthority = function() {
+    $('.draftauthority').first().trigger('click');
 }
 
 var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name) {
@@ -523,7 +512,7 @@ var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authori
     textSpan.append(textContent);
     span.append(textSpan);
     $("#authority-" + draftauthority_id).append(span);
-    selectNextAuthority(draftauthority_id);
+    selectNextAuthority();
 }
 
 
