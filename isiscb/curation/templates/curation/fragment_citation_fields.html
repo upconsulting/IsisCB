@@ -186,16 +186,20 @@
   </div>
   <div class="col-sm-11 form-fields-indented">
     <small>
-      {% for ccrel in instance.ccrelations.all %}
+      {% for ccrel in instance.all_ccrelations.all %}
           {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.subject.id != instance.id %}
           <p style="margin-bottom: 2px;" id="containing_citation_{{ccrel.id}}">
+            {% if not ccrel.public or not ccrel.subject.public %}
+            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+            {% endif %}
           <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}?search={{ search_key }}&current={{ current_index }}">{{ ccrel.subject.title }}</a>
+
+          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}?search={{ search_key }}&current={{ current_index }}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
           {% if ccrel.subject.publication_date %}
           ({{ ccrel.subject.publication_date }})
           {% endif %}
           <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
-          <span class="label label-danger">{{ ccrel.get_type_controlled_display }}</span>
+          <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
           <a href="{% url 'citation' ccrel.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
           </p>
           {% endif %}

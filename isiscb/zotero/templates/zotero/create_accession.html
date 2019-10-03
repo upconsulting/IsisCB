@@ -19,4 +19,13 @@
 
     <input type="submit" value="Upload" class="btn btn-success" />
 </form>
+
+<script>
+$(function() {
+  $("#id_zotero_rdf").change(function(e) {
+    var fileName = e.target.files[0].name;
+    $("#id_name").val(fileName);
+  });
+});
+</script>
 {% endblock %}
