@@ -1,21 +1,46 @@
 {% load render_object %}
-
+{% load addcss %}
 {% load general_tags %}
 
 <div class="row">
-<div class="col-md-4">
-<div class="h4">
-    <span class="text-warning">{{ instance.id }}</span> | <strong>{{ instance.name|safe }}</strong>
-</div>
-<div class="h5">
-    <span class="text-warning">{{ instance.get_type_controlled_display }}:</span> {{ instance|get_date_attributes }}
-</div>
-<p class="">
-    <span class="label label-primary">IsisCB</span> <a href="{{ instance|get_uri }}">{{ instance|get_uri }}</a>
-</p>
+<div class="col-md-6">
+<div>
+    <div class="row">
+        <div class="col-md-12">
+          <div class="form-group form-inline">
+
+            {{ form.type_controlled|addcss:"form-control input-xs"}}
+            <strong class="text-warning">{{ instance.id }}</strong>
+
+            <a
+                href="{{ instance|get_uri }}"
+                target="_blank">
+                <span class="glyphicon glyphicon-new-window" ></span></a>
+            &nbsp;
+            {{ form.record_status_value|addcss:"form-control input-xs" }}
+
+            <div class="input-group">
+                <input type="text"
+                    class="form-control input-xs"
+                    name="authority-search"
+                    autocomplete="off"
+                    id="authority-search" style="width: 150px; z-index:95;" />
+                    <ul class="list-group" style="position:absolute; z-index:90; margin-top: 21px; width: 350px;" id="results-container"></ul>
+                <span class="input-group-btn">
+                    <span class="btn btn-xs" id="remove_redirect">
+                        <span class="glyphicon glyphicon-remove"
+                            style="color: red;"></span>
+                    </span>
+                </span>
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
 </div>
 
-<div class="col-md-4 text-center">
+
+<div class="col-md-3 text-center">
   {% if previous %}
   <a href="{% url 'curation:curate_authority' previous %}?search={{ search_key }}&current={{ previous_index }}"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
   {% endif %}
@@ -30,7 +55,7 @@
   {% endif %}
 </div>
 
-<div class="col-md-4 text-right">
+<div class="col-md-3 text-right">
     Record {{ index }} of {{ total }}
     <div class="btn-group">
         <input type="submit" value="Save" class="btn btn-success" />

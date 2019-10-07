@@ -38,103 +38,82 @@
 
 {% include "curation/fragment_authority_header.html" %}
 
-
+<style>
+table.fields td {
+  padding: 3px;
+  vertical-align: middle;
+}
+</style>
 <div class="row">
     <div class="col-sm-4">
-        <div class="h4">Authority Details</div>
-        <div class="row">
-            <div class="col-xs-6">
-                {% for error in form.type_controlled.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.type_controlled.label }}</label>
-                    {{ form.type_controlled|addcss:"form-control input-sm"}}
-                </div>
-            </div>
-
-            <div class="col-xs-6">
-                {% for error in form.record_status_value.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ form.record_status_value.label }}</label>
-                    {{ form.record_status_value|addcss:"form-control input-sm"}}
-                </div>
-            </div>
-        </div>
-
-        {{ form.redirect_to }}
-        {% for error in form.redirect_to.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-
-        <div class="form-group">
-            <label>{{ form.redirect_to.label }}</label>
-
-            <div class="input-group">
-                <input type="text"
-                    class="form-control input-sm"
-                    name="authority-search"
-                    autocomplete="off"
-                    id="authority-search" />
-                    <ul class="list-group" id="results-container"></ul>
-                <span class="input-group-btn">
-                    <span class="btn" id="remove_redirect">
-                        <span class="glyphicon glyphicon-remove"
-                            style="color: red;"></span>
-                    </span>
-                </span>
-            </div>
-        </div>
-
         {% for error in form.name.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ form.name.label }}</label>
-            {{ form.name|addcss:"form-control input-sm"}}
-        </div>
+        <table class="fields">
+          <tr>
+            <td>
+              <small>{{ form.name.label }}</small>
+            </td>
+            <td colspan="3" width="100%">
+            {{ form.name|addcss:"form-control input-xs"}}
+            </td>
+          </tr>
+          {% if person_form %}
+          <tr>
+            <td></td>
+            <td colspan="3">
+              {% for error in person_form.personal_name_last.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              {% for error in person_form.personal_name_first.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              {% for error in person_form.personal_name_suffix.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              {{ person_form.personal_name_last|addcss:"form-control input-xs;Last" }}
+            </td>
+            <td>
+              {{ person_form.personal_name_first|addcss:"form-control input-xs;First" }}
+            </td>
+            <td>
+              {{ person_form.personal_name_suffix|addcss:"form-control input-xs;Suffix" }}
+            </td>
+          </tr>
+          {% endif %}
 
-        {% for error in form.description.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.description.label }}</label>
-            {{ form.description|addcss:"form-control input-sm"}}
-        </div>
+          <tr>
+            <td colspan="4">
+              {% for error in form.classification_system.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+          </tr>
+          </tr>
+            <td><small>{{ form.classification_system.label }}</small></td>
+            <td colspan="3">{{ form.classification_system|addcss:"form-control input-xs"}}</td>
+          </tr>
 
-        {% for error in form.classification_system.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_system.label }}</label>
-            {{ form.classification_system|addcss:"form-control input-sm"}}
-        </div>
+          <tr>
+            <td colspan="4">
+              {% for error in form.classification_code.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+          </tr>
+          </tr>
+            <td><small>{{ form.classification_code.label }}</small></td>
+            <td colspan="3">{{ form.classification_code|addcss:"form-control input-xs"}}</td>
+          </tr>
+        </table>
 
-        {% for error in form.classification_code.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.classification_code.label }}</label>
-            {{ form.classification_code|addcss:"form-control input-sm"}}
-        </div>
 
-        {% for error in form.record_status_explanation.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.record_status_explanation.label }}</label>
-            {{ form.record_status_explanation|addcss:"form-control input-sm"}}
-        </div>
 
-        {% for error in form.record_history.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.record_history.label }}</label>
-            {{ form.record_history|addcss:"form-control input-sm"}}
-        </div>
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified curation-tabs" role="tablist">
@@ -185,12 +164,36 @@
                       {{ form.belongs_to|addcss:"form-control input-sm" }}
                   </div>
 
+                  {% for error in form.description.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ form.description.label }}</label>
+                      {{ form.description|addcss:"form-control input-sm"}}
+                  </div>
+
                   {% for error in form.administrator_notes.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
                   <div class="form-group">
                       <label>{{ form.administrator_notes.label }}</label>
                       {{ form.administrator_notes|addcss:"form-control input-sm" }}
+                  </div>
+
+                  {% for error in form.record_status_explanation.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ form.record_status_explanation.label }}</label>
+                      {{ form.record_status_explanation|addcss:"form-control input-sm"}}
+                  </div>
+
+                  {% for error in form.record_history.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ form.record_history.label }}</label>
+                      {{ form.record_history|addcss:"form-control input-sm"}}
                   </div>
                 </div>
             </div>
@@ -235,6 +238,13 @@
             <div role="tabpanel" class="tab-pane{% if tab == 'tracking' %} active{% endif %} panel-body" id="tracking">
                 {% include "curation/fragment_authority_tracking.html" %}
             </div>
+
+            {% for error in form.record_status_value.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            {% for error in form.record_status_explanation.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}'
         </div>
     </div>
 
@@ -275,7 +285,7 @@ $(document).ready(function() {
                     if (r.public != true) {
                       choice_elem += ' record-notpublic';
                     }
-                    choice_elem += '">';
+                    choice_elem += '" style="font-size: 11px;">';
                     choice_elem += '<span class="button-group button-group-xs">';
                     choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-citation" data-id="' + r.id + '" data-name="' + r.id + ': ' + r.name + '"></a>';
                     choice_elem += '<a href="'+ r.url + '" class="btn btn-xs glyphicon glyphicon-pencil" target="_blank"></a>';
