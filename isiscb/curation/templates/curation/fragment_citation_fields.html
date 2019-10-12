@@ -69,14 +69,14 @@
         {% if acrelation.type_controlled in personal_responsibility_types %}
         <p class="author_editors" id="author_editors_{{acrelation.id}}" data-responsibility-type="{{ acrelation.type_controlled}}" style="margin-bottom: 2px;">
           <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-          <a href="{% url 'curation:curate_authority' acrelation.authority.id %}">
+          <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
             ({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}
             {% if acrelation.name_for_display_in_citation %}
             <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
             {% endif %}
           </a>
           <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
-          <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}
@@ -113,14 +113,14 @@
         {% if acrelation.type_controlled in publisher_distributor_types %}
         <p style="margin-bottom: 2px;" id="host_{{acrelation.id}}" class="host_type_{{acrelation.type_controlled}}">
         <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-        <a href="{% url 'curation:curate_authority' acrelation.authority.id %}">
+        <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
           {{ acrelation.authority.name }}
           {% if acrelation.name_for_display_in_citation %}
           <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
           {% endif %}
         </a>
         <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
-        <a href="{% url 'authority' acrelation.authority.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif%}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
         </p>
         {% endif %}
     {% endfor %}

@@ -72,6 +72,14 @@ a {
   background-color: #c8d2f9;
 }
 
+.phaedra-colors .label-none {
+  background-color: #d2d2d2;
+}
+.phaedra-colors .label-none[href]:hover,
+.phaedra-colors .label-none[href]:focus {
+  background-color: #d2d2d2;
+}
+
 .phaedra-colors .not_public {
   text-decoration: line-through;
 }
