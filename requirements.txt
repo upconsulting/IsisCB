@@ -60,7 +60,7 @@ olefile==0.43
 pathspec==0.3.4
 pbr==1.10.0
 pefile==2016.3.28
-Pillow==4.0.0
+Pillow==6.2.0
 psycopg2==2.7
 pycurl==7.43.0
 PyJWT==1.4.2
