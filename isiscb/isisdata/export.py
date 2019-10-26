@@ -9,6 +9,7 @@ since these jobs will be performed asynchronously.
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
+from django.conf import settings
 
 
 def generate_csv(stream, queryset, columns):
@@ -384,7 +385,15 @@ def _journal_link(obj, extra, config={}):
         return u""
     _first = qs.first()
     if _first.authority:
-        return _first.authority.name
+        journal_info = []
+        journal_info.append("AuthorityName " + _first.authority.name)
+        journal_info.append("AuthorityID " + _first.authority.id)
+
+        for attr in _first.authority.attributes.all():
+            if attr.type_controlled.name == settings.JOURNAL_ABBREVIATION_ATTRIBUTE_NAME:
+                journal_info.append("Abbreviation " + attr.value.cvalue())
+
+        return " || ".join(journal_info)
     return u""
 
 
