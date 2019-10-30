@@ -9,6 +9,7 @@ since these jobs will be performed asynchronously.
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
+from django.conf import settings
 
 
 def generate_csv(stream, queryset, columns):
@@ -384,7 +385,24 @@ def _journal_link(obj, extra, config={}):
         return u""
     _first = qs.first()
     if _first.authority:
-        return _first.authority.name
+        journal_info = []
+        journal_info.append("AuthorityName " + str(_first.authority.name))
+        journal_info.append("AuthorityID " + str(_first.authority.id))
+        try:
+            journal_info.append("AuthorityType " + str(_first.authority.get_type_controlled_display()))
+        except:
+            print("Exception with type controlled " + str(_first.authority.type_controlled))
+            journal_info.append("AuthorityType " + str(_first.authority.type_controlled))
+
+        for attr in _first.authority.attributes.all():
+            if attr.type_controlled.name == settings.JOURNAL_ABBREVIATION_ATTRIBUTE_NAME:
+                journal_info.append("Abbreviation " + str(attr.value.cvalue()))
+
+        issn = _first.authority.linkeddata_entries.filter(type_controlled__name__icontains='issn').first()
+        if issn:
+            journal_info.append("ISSN " + issn.universal_resource_name)
+
+        return " || ".join(journal_info)
     return u""
 
 
