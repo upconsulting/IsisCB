@@ -386,7 +386,7 @@ def _journal_link(obj, extra, config={}):
     _first = qs.first()
     if _first.authority:
         journal_info = []
-        journal_info.append("AuthorityName " + str(_first.authority.name))
+        journal_info.append("AuthorityName " + unicode(_first.authority.name))
         journal_info.append("AuthorityID " + str(_first.authority.id))
         try:
             journal_info.append("AuthorityType " + str(_first.authority.get_type_controlled_display()))
