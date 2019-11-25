@@ -389,14 +389,14 @@ def _journal_link(obj, extra, config={}):
         journal_info.append("AuthorityName " + unicode(_first.authority.name))
         journal_info.append("AuthorityID " + str(_first.authority.id))
         try:
-            journal_info.append("AuthorityType " + str(_first.authority.get_type_controlled_display()))
+            journal_info.append("AuthorityType " + unicode(_first.authority.get_type_controlled_display()))
         except:
-            print("Exception with type controlled " + str(_first.authority.type_controlled))
-            journal_info.append("AuthorityType " + str(_first.authority.type_controlled))
+            print("Exception with type controlled " + unicode(_first.authority.type_controlled))
+            journal_info.append("AuthorityType " + unicode(_first.authority.type_controlled))
 
         for attr in _first.authority.attributes.all():
             if attr.type_controlled.name == settings.JOURNAL_ABBREVIATION_ATTRIBUTE_NAME:
-                journal_info.append("Abbreviation " + str(attr.value.cvalue()))
+                journal_info.append("Abbreviation " + unicode(attr.value.cvalue()))
 
         issn = _first.authority.linkeddata_entries.filter(type_controlled__name__icontains='issn').first()
         if issn:
