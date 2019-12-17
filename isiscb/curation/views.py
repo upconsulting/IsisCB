@@ -2847,10 +2847,12 @@ def export_citations(request):
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
             # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
+            #s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+            #                                settings.AWS_SECRET_ACCESS_KEY,
+            #                                settings.AWS_EXPORT_BUCKET_NAME,
+            #                                _out_name)
+            s3_path = '/Users/jdamerow/UpConsulting/exports/' + _out_name
+
             # if _compress:
             #     s3_path += '.gz'
 
@@ -2863,7 +2865,12 @@ def export_citations(request):
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
-            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
+            if form.cleaned_data.get('export_format', 'CSV') == 'EBSCO_CSV':
+                result = data_tasks.export_to_ebsco_csv.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id, "Citation", export_linked_records, config)
+            else:
+                result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)
 
