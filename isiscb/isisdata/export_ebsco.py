@@ -228,16 +228,8 @@ def _place_publisher(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields_authority(config)
-    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
-
-
-def _school(obj, extra, config={}):
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=ACRelation.SCHOOL)
-    qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields_authority(config)
-    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
+    fields = ['authority__name']
+    return u'; '.join(map(lambda x: x[0], qs.values_list(*fields)))
 
 
 def _series(obj, extra, config={}):
@@ -266,85 +258,10 @@ def _isbn(obj, extra, config={}):
         return u''
     return qs.first().universal_resource_name
 
-def _linked_data(obj, extra, config={}):
-    """
-    Get linked data entries
-    """
-    qs = obj.linkeddata_entries.all()
-    if qs.count() == 0:
-        return u''
-
-    additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
-
-    def entry(ld, delimiter=u" "):
-        fields = ['Type ' + (str(ld.type_controlled.name) if ld.type_controlled.name else u''),
-                   'URN ' + (str(ld.universal_resource_name) if ld.universal_resource_name else u'')]
-        if 'export_metadata' in config and config['export_metadata']:
-            fields += [
-                   'CreatedBy ' + (str(ld.created_by) if ld.created_by else u''),
-                   'ModifiedBy ' + (str(ld.modified_by) if ld.modified_by else u''),
-                   'StaffNotes ' + (str(ld.administrator_notes) if ld.administrator_notes else u''),
-                   'RecordHistory ' + (str(ld.record_history) if ld.record_history else u''),
-                   'ModifiedOn ' + (str(ld.modified_on) if ld.modified_on else u''),
-                   'CreatedOn ' + (str(ld.created_on) if ld.created_on else u''),
-                    ]
-        return delimiter.join(fields)
-
-    return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
-
-def _pages(obj, extra, config={}):
-    if not getattr(obj, 'part_details', None):
-        return u""
-    page_start_string = obj.part_details.page_begin
-    page_end_string = obj.part_details.page_end
-    if obj.type_controlled == Citation.CHAPTER:
-        if page_start_string and page_end_string:
-            pre = u"pp."
-        else:
-            pre = u"p."
-    else:
-        pre = u""
-    if page_start_string and page_end_string:
-        return pre + unicode(page_start_string) + "-" + unicode(page_end_string)
-    if page_start_string:
-        return pre + unicode(page_start_string)
-    if page_end_string:
-        return pre + unicode(page_end_string)
-    return ""
-
 def _pages_free_text(obj, extra, config={}):
     if not getattr(obj, 'part_details', None):
         return u""
-    return obj.part_details.pages_free_text + " (From %s // To %s)" % (obj.part_details.page_begin if obj.part_details.page_begin else u'', obj.part_details.page_end if obj.part_details.page_end else u'')
-
-def _tracking(obj, type_controlled):
-    qs = obj.tracking_records.filter(type_controlled=type_controlled)
-    if qs.count() > 0:
-        # format: tracking id: date or tracking info
-        # this is ugly but well:
-        # if there is a creation date (modification date since we never change them again), use the date
-        # otherwise use tracking info
-        return u'//'.join(map(lambda o: "%s: %s"%(o[1], (o[2] if o[2] else (o[0] if o[0] else ""))), list(qs.values_list('tracking_info', 'id', 'modified_on'))))
-    return u""
-
-
-def _link_to_record(obj, extra, config={}):
-    _ltypes = [Citation.CHAPTER, Citation.REVIEW, Citation.ESSAY_REVIEW]
-    if obj.type_controlled not in _ltypes:
-        return u""
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled__in=[CCRelation.REVIEW_OF])
-    qs = obj.ccrelations.filter(_q)
-    extra += map(lambda o: o.object, qs)
-    ids = list(qs.values_list('object__id', flat=True))
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
-                                  CCRelation.INCLUDES_CHAPTER])
-    qs = obj.ccrelations.filter(_q)
-    extra += map(lambda o: o.subject, qs)
-    ids += list(qs.values_list('subject__id', flat=True))
-    return u" // ".join(filter(lambda o: o is not None, ids))
-
+    return obj.part_details.pages_free_text
 
 def _journal_link(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
@@ -354,24 +271,7 @@ def _journal_link(obj, extra, config={}):
         return u""
     _first = qs.first()
     if _first.authority:
-        journal_info = []
-        journal_info.append("AuthorityName " + unicode(_first.authority.name))
-        journal_info.append("AuthorityID " + str(_first.authority.id))
-        try:
-            journal_info.append("AuthorityType " + unicode(_first.authority.get_type_controlled_display()))
-        except:
-            print("Exception with type controlled " + unicode(_first.authority.type_controlled))
-            journal_info.append("AuthorityType " + unicode(_first.authority.type_controlled))
-
-        for attr in _first.authority.attributes.all():
-            if attr.type_controlled.name == settings.JOURNAL_ABBREVIATION_ATTRIBUTE_NAME:
-                journal_info.append("Abbreviation " + unicode(attr.value.cvalue()))
-
-        issn = _first.authority.linkeddata_entries.filter(type_controlled__name__icontains='issn').first()
-        if issn:
-            journal_info.append("ISSN " + issn.universal_resource_name)
-
-        return " || ".join(journal_info)
+        return unicode(_first.authority.name)
     return u""
 
 
@@ -379,83 +279,35 @@ def _journal_volume(obj, extra, config={}):
     if not hasattr(obj, 'part_details') or obj.part_details is None:
         return u""
     # ISISCB-1033
-    return obj.part_details.volume_free_text + u" (From %s // To %s)" % (obj.part_details.volume_begin if obj.part_details.volume_begin else u'', obj.part_details.volume_end if obj.part_details.volume_end else u'')
+    return obj.part_details.volume_free_text if obj.part_details.volume_free_text.strip() else ''
 
-
-def _journal_issue(obj, extra, config={}):
-    if not hasattr(obj, 'part_details') or obj.part_details is None:
-        return u""
-    # ISISCB-1033
-    return obj.part_details.issue_free_text + u" (From %s // To %s)" % (obj.part_details.issue_begin if obj.part_details.issue_begin else u'', obj.part_details.issue_end if obj.part_details.issue_end else u'')
-
-
-def _includes_series_article(obj, extra, config={}):
-    qs = obj.relations_to.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
-    extra += map(lambda o: o.subject, qs)
-    return u" // ".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
-
-def _related_authorities(obj, extra, config={}):
-    qs = obj.acrelation_set.all()
-    fields, additional_fields = _get_metadata_fields_authority(config)
-
-    return u' // '.join(map(functools.partial(create_acr_string,additional_fields=additional_fields,delimiter=_get_fields_delimiter(config)), qs.values_list(*fields)))
-
-def _related_citations(obj, extra, config={}):
-    qs_from = obj.relations_from.all()
-    qs_to = obj.relations_to.all()
-
-    fields_object, additional_fields_object = _get_metadata_fields_citation(config, 'object')
-    fields_subject, additional_fields_subject = _get_metadata_fields_citation(config, 'subject')
-
-    return u' // '.join(map(functools.partial(create_ccr_string,additional_fields=additional_fields_object, delimiter=_get_fields_delimiter(config)), qs_from.values_list(*fields_object)) + map(functools.partial(create_ccr_string,additional_fields=additional_fields_subject,delimiter=_get_fields_delimiter(config)), qs_to.values_list(*fields_subject)))
-
-
-def _extent(obj, extra, config={}):
-    if not hasattr(obj, 'part_details') or obj.part_details is None:
-        return u""
-    return u"%s (Note %s)" % (obj.part_details.extent if obj.part_details.extent else u'', obj.part_details.extent_note if obj.part_details.extent_note else u'')
-
-def _attributes(obj, extra, config={}):
-    qs = obj.attributes.all()
-
-    def entry(attr, delimiter=u" "):
-        fields = ['Type ' + (str(attr.type_controlled.name) if attr.type_controlled.name else u''),
-                   'Value ' + (str(attr.value.cvalue()) if attr.value.cvalue() else u''),
-                   'FreeFormValue ' + (attr.value_freeform if attr.value_freeform else u'')]
-        if 'export_metadata' in config and config['export_metadata']:
-            fields += [
-                   'CreatedBy ' + (str(attr.created_by) if attr.created_by else u''),
-                   'ModifiedBy ' + (str(attr.modified_by) if attr.modified_by else u''),
-                   'StaffNotes ' + (str(attr.administrator_notes) if attr.administrator_notes else u''),
-                   'RecordHistory ' + (str(attr.record_history) if attr.record_history else u''),
-                   'ModifiedOn ' + (str(attr.modified_on) if attr.modified_on else u''),
-                   'CreatedOn ' + (str(attr.created_on) if attr.created_on else u''),
-                    ]
-        return delimiter.join(fields)
-
-    if qs.count() > 0:
-        return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
-
-    return u""
-
-def _record_status(obj, extra, config={}):
-    return u"%s (RecordStatusExplanation %s)"%(obj.get_record_status_value_display(), obj.record_status_explanation if obj.record_status_explanation else u'')
-
-def _dataset(obj, extra, config={}):
-    if not obj.belongs_to:
+def _reviewed_author(obj, extra, config={}):
+    if not obj.type_controlled == Citation.REVIEW:
         return u""
 
-    return obj.belongs_to.name
-
-# metadata columns
-def _created_on(obj, extra, config={}):
-    try:
-        if type(obj) == Citation:
-            return obj.created_native
-        else:
-            return obj.created_on_stored
-    except:
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=CCRelation.REVIEWED_BY) & Q(object=obj)
+    qs = obj.ccrelations.filter(_q)
+    if qs.count() == 0:
         return u""
+    _first = qs.first()
+
+    fields = ['authority__name']
+
+    if not _first.subject:
+        return ""
+
+    author_names = _first.subject.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
+                                   .order_by('data_display_order')\
+                                   .values_list(*fields)
+    authors = u'; '.join(map(lambda x: x[0] + " <responsibility: author>", author_names))
+
+    editor_names = _first.subject.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
+                                   .order_by('data_display_order')\
+                                   .values_list(*fields)
+    editors = u'; '.join(map(lambda x: x[0] + " <responsibility: editor>", editor_names))
+
+    return u"; ".join(filter(None, [authors, editors]))
 
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
@@ -476,7 +328,7 @@ pages_free_text = Column('Pages', _pages_free_text)
 journal_link = Column(u"Journal name", _journal_link)
 journal_volume = Column(u"Volume number", _journal_volume)
 
-# reviewed_author = Column(u"Author or editor of book under review", _reviewed_author)
+reviewed_author = Column(u"Author or editor of book under review", _reviewed_author)
 # reviewed_title = Column(u"Title of book under review", _reviewed_title)
 # chapter_book_editors = Column(u"Editors of book", _chapter_book_editors)
 # chapter_book_title = Column(u"Title of book", _chapter_book_title)
@@ -501,12 +353,12 @@ CITATION_COLUMNS = [
     edition_details,
     year_of_publication,
     series,
-    # physical_details,
-    # place_publisher,
-    # journal_link,
-    # journal_volume,
-    # pages_free_text,
-    # reviewed_author,
+    physical_details,
+    place_publisher,
+    journal_link,
+    journal_volume,
+    pages_free_text,
+    reviewed_author,
     # reviewed_title,
     # chapter_book_editors,
     # chapter_book_title,
