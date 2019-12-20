@@ -247,12 +247,12 @@ def _series(obj, extra, config={}):
     return u''
 
 
-def _isbn(obj, extra, config={}):
+def _isbn_or_issn(obj, extra, config={}):
     """
     Get ISBN from LinkedData.
     """
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled__name__iexact='isbn')
+         & (Q(type_controlled__name__iexact='isbn') | Q(type_controlled__name__iexact='issn'))
     qs = obj.linkeddata_entries.filter(_q)
     if qs.count() == 0:
         return u''
@@ -282,33 +282,114 @@ def _journal_volume(obj, extra, config={}):
     return obj.part_details.volume_free_text if obj.part_details.volume_free_text.strip() else ''
 
 def _reviewed_author(obj, extra, config={}):
-    if not obj.type_controlled == Citation.REVIEW:
+    if not obj.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
         return u""
 
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=CCRelation.REVIEWED_BY) & Q(object=obj)
-    qs = obj.ccrelations.filter(_q)
-    if qs.count() == 0:
-        return u""
-    _first = qs.first()
+    _first = _get_reviewed_publication(obj)
 
     fields = ['authority__name']
 
-    if not _first.subject:
+    if not _first:
         return ""
 
-    author_names = _first.subject.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
+    author_names = _first.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
     authors = u'; '.join(map(lambda x: x[0] + " <responsibility: author>", author_names))
 
-    editor_names = _first.subject.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
+    editor_names = _first.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
     editors = u'; '.join(map(lambda x: x[0] + " <responsibility: editor>", editor_names))
 
     return u"; ".join(filter(None, [authors, editors]))
 
+def _reviewed_title(obj, extra, config={}):
+    if not obj.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
+        return u""
+
+    reviewed_pub = _get_reviewed_publication(obj)
+    if not reviewed_pub:
+        return ""
+
+    return _citation_title(reviewed_pub, extra, config)
+
+def _get_reviewed_publication(obj):
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=CCRelation.REVIEWED_BY) & Q(object=obj)
+    qs = obj.ccrelations.filter(_q)
+    if qs.count() == 0:
+        return u""
+    _first = qs.first()
+    return _first.subject
+
+def _chapter_book_editors(obj, extra, config={}):
+    if not obj.type_controlled in [Citation.CHAPTER]:
+        return u""
+
+    book = _get_book_for_chapter(obj)
+    if not book:
+        return ""
+
+    return _citation_editor(book, extra, config)
+
+def _chapter_book_title(obj, extra, config={}):
+    if not obj.type_controlled in [Citation.CHAPTER]:
+        return u""
+
+    book = _get_book_for_chapter(obj)
+    if not book:
+        return ""
+
+    return _citation_title(book, extra, config)
+
+def _chapter_book_publisher(obj, extra, config={}):
+    if not obj.type_controlled in [Citation.CHAPTER]:
+        return u""
+
+    book = _get_book_for_chapter(obj)
+    if not book:
+        return ""
+
+    return _place_publisher(book, extra, config)
+
+def _get_book_for_chapter(obj):
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=CCRelation.INCLUDES_CHAPTER) & Q(object=obj)
+    qs = obj.ccrelations.filter(_q)
+    if qs.count() == 0:
+        return u""
+    _first = qs.first()
+    return _first.subject
+
+def _contents_list(obj, extra, config={}):
+    if not obj.type_controlled in [Citation.BOOK]:
+        return u""
+
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
+         & Q(type_controlled=CCRelation.INCLUDES_CHAPTER) & Q(subject=obj)
+    qs = obj.ccrelations.filter(_q)
+    if qs.count() == 0:
+        return u""
+
+    chapters = []
+    for chapter in qs.all():
+        chapter_info = []
+        chapter_info.append(chapter.object.id)
+        chapter_info.append(_citation_author(chapter.object, extra, config))
+        chapter_info.append(chapter.object.title)
+        chapter_info.append(_pages_free_text(chapter.object, extra, config))
+
+        chapters.append("<::>".join(chapter_info))
+
+    return " // ".join(chapters)
+
+def _additional_contributors(obj, extra, config={}):
+    fields = ['authority__name']
+    names = obj.acrelation_set.filter(type_controlled__in=ACRelation.PERSONAL_RESPONS_TYPES).exclude(type_controlled__in=[ACRelation.EDITOR, ACRelation.AUTHOR])\
+                                   .order_by('data_display_order')\
+                                   .values_list(*fields)
+    return u'; '.join(map(lambda x: x[0], names))
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
@@ -323,18 +404,18 @@ language = Column(u'Language', _language)
 place_publisher = Column(u'Place: Publisher', _place_publisher)
 physical_details = Column(u'Physical details', lambda obj, extra, config={}: obj.physical_details)
 series = Column(u'Series', _series)
-isbn = Column(u'ISSN or ISBN', _isbn)
+isbn = Column(u'ISSN or ISBN', _isbn_or_issn)
 pages_free_text = Column('Pages', _pages_free_text)
 journal_link = Column(u"Journal name", _journal_link)
 journal_volume = Column(u"Volume number", _journal_volume)
 
 reviewed_author = Column(u"Author or editor of book under review", _reviewed_author)
-# reviewed_title = Column(u"Title of book under review", _reviewed_title)
-# chapter_book_editors = Column(u"Editors of book", _chapter_book_editors)
-# chapter_book_title = Column(u"Title of book", _chapter_book_title)
-# chapter_book_publisher = Column(u"Place: publisher of book", _chapter_book_publisher)
-# contents_list = Column(u"Contents list", _contents_list)
-# additional_contributors = Column(u"Additional contributors", _additional_contributors)
+reviewed_title = Column(u"Title of book under review", _reviewed_title)
+chapter_book_editors = Column(u"Editors of book", _chapter_book_editors)
+chapter_book_title = Column(u"Title of book", _chapter_book_title)
+chapter_book_publisher = Column(u"Place: publisher of book", _chapter_book_publisher)
+contents_list = Column(u"Contents list", _contents_list)
+additional_contributors = Column(u"Additional contributors", _additional_contributors)
 # subject_personal_name = Column(u"Subject-personal name", _subject_personal_name)
 # subject_geographical_name = Column(u"Subjects-geographical name", _subject_geographical_name)
 # subject_coorporate_name = Column(u"Subjects-corporate name", _subject_coorporate_name)
@@ -359,13 +440,13 @@ CITATION_COLUMNS = [
     journal_volume,
     pages_free_text,
     reviewed_author,
-    # reviewed_title,
-    # chapter_book_editors,
-    # chapter_book_title,
-    # chapter_book_publisher,
-    # contents_list,
-    # isbn,
-    # additional_contributors,
+    reviewed_title,
+    chapter_book_editors,
+    chapter_book_title,
+    chapter_book_publisher,
+    contents_list,
+    isbn,
+    additional_contributors,
     # language,
     # description,
     # subject_personal_name,
