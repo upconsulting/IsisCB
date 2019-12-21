@@ -228,7 +228,7 @@ def _place_publisher(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    fields = ['authority__name']
+    fields = ['name_for_display_in_citation']
     return u'; '.join(map(lambda x: x[0], qs.values_list(*fields)))
 
 
@@ -385,11 +385,17 @@ def _contents_list(obj, extra, config={}):
     return " // ".join(chapters)
 
 def _additional_contributors(obj, extra, config={}):
-    fields = ['authority__name']
+    fields = ['authority__name', 'type_controlled']
     names = obj.acrelation_set.filter(type_controlled__in=ACRelation.PERSONAL_RESPONS_TYPES).exclude(type_controlled__in=[ACRelation.EDITOR, ACRelation.AUTHOR])\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    return u'; '.join(map(lambda x: x[0], names))
+    final_names = []
+    for name in names:
+        if name[1] != ACRelation.CONTRIBUTOR:
+            final_names.append(name[0] + " (" + dict(ACRelation.TYPE_CHOICES)[name[1]].lower()  + ")")
+        else:
+            final_names.append(name[0])
+    return u'; '.join(final_names)
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
