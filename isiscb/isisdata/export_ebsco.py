@@ -363,11 +363,12 @@ def _get_book_for_chapter(obj):
     return _first.subject
 
 def _contents_list(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.BOOK]:
+    if not obj.type_controlled in [Citation.BOOK, Citation.ARTICLE]:
         return u""
 
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=CCRelation.INCLUDES_CHAPTER) & Q(subject=obj)
+    _q = Q(record_status_value=CuratedMixin.ACTIVE) & Q(subject=obj) \
+         & Q(type_controlled__in=[CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE])
+
     qs = obj.ccrelations.filter(_q)
     if qs.count() == 0:
         return u""
