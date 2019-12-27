@@ -5,7 +5,7 @@ from django.http import QueryDict
 
 from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
-from isisdata import export    # Oh man, so good.
+from isisdata import export, export_ebsco    # Oh man, so good.
 from isisdata import export_authority
 from isisdata.models import *
 
@@ -109,6 +109,52 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
     else:
         queryset, _ = _get_filtered_authority_queryset(filter_params_raw, user_id)
         columns = filter(lambda o: o.slug in fields, export_authority.AUTHORITY_COLUMNS)
+    if task_id:
+        task = AsyncTask.objects.get(pk=task_id)
+        task.max_value = queryset.count()
+        _inc = max(2, math.floor(task.max_value / 200.))
+        task.save()
+    else:
+        task = None
+
+    try:    # Report all exceptions as a task failure.
+        with smart_open.smart_open(path, 'wb') as f:
+            writer = csv.writer(f)
+
+            writer.writerow(map(lambda c: c.label, columns))
+            extra = []
+            for i, obj in enumerate(queryset):
+                if task and (i % _inc == 0 or i == (task.max_value - 1)):
+                    task.current_value = i
+                    task.save()
+                if obj:
+                    writer.writerow(map(lambda c: c(obj, extra, config), columns))
+
+            if export_extra:
+                for obj in extra:
+                    if obj:
+                        writer.writerow(map(lambda c: c(obj, [], config), columns))
+
+        task.state = 'SUCCESS'
+        task.save()
+        print 'success:: %s' % str(task_id)
+    except Exception as E:
+        print 'export_to_csv failed for %s' % filter_params_raw,
+        print E
+        task.value = str(E)
+        task.state = 'FAILURE'
+        task.save()
+
+@shared_task
+def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
+    print 'export to EBSCO csv:: %s' % str(task_id)
+    if export_type == 'Citation':
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        columns = export_ebsco.CITATION_COLUMNS
+    else:
+        print("Exporting authorities not supported in EBSCO format.")
+        return
+
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
