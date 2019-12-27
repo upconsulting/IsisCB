@@ -221,7 +221,7 @@ def _category_numbers(obj, extra, config={}):
 
 
 def _language(obj, extra, config={}):
-    return u'//'.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
+    return u', '.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
 
 
 def _place_publisher(obj, extra, config={}):
@@ -397,6 +397,33 @@ def _additional_contributors(obj, extra, config={}):
             final_names.append(name[0])
     return u'; '.join(final_names)
 
+def _subject_personal_name(obj, extra, config={}):
+    return _subject_authority_names(obj, [Authority.PERSON])
+
+def _subject_geographical_name(obj, extra, config={}):
+    return _subject_authority_names(obj, [Authority.GEOGRAPHIC_TERM])
+
+def _subject_coorporate_name(obj, extra, config={}):
+    return _subject_authority_names(obj, [Authority.INSTITUTION])
+
+def _subject_topical(obj, extra, config={}):
+    return _subject_authority_names(obj, [Authority.CONCEPT])
+
+def _subject_chronological(obj, extra, config={}):
+    return _subject_authority_names(obj, [Authority.TIME_PERIOD])
+
+def _subject_authority_names(obj, authority_types):
+    fields = ['authority__name']
+    names = obj.acrelation_set.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=authority_types)\
+                                   .values_list(*fields)
+    return u' // '.join(map(lambda x: x[0], names))
+
+def _category(obj, extra, config={}):
+    fields = ['authority__name']
+    names = obj.acrelation_set.filter(type_controlled=ACRelation.CATEGORY)\
+                                   .values_list(*fields)
+    return u' // '.join(map(lambda x: x[0], names))
+
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)
 citation_author = Column(u'Authors', _citation_author, Citation)
@@ -422,12 +449,12 @@ chapter_book_title = Column(u"Title of book", _chapter_book_title)
 chapter_book_publisher = Column(u"Place: publisher of book", _chapter_book_publisher)
 contents_list = Column(u"Contents list", _contents_list)
 additional_contributors = Column(u"Additional contributors", _additional_contributors)
-# subject_personal_name = Column(u"Subject-personal name", _subject_personal_name)
-# subject_geographical_name = Column(u"Subjects-geographical name", _subject_geographical_name)
-# subject_coorporate_name = Column(u"Subjects-corporate name", _subject_coorporate_name)
-# subject_topical = Column(u"Subjects-topical", _subject_topical)
-# subject_chronological = Column(u"Subjects-chronological", _subject_chronological)
-# category = Column(u"Category", _category)
+subject_personal_name = Column(u"Subject-personal name", _subject_personal_name)
+subject_geographical_name = Column(u"Subjects-geographical name", _subject_geographical_name)
+subject_coorporate_name = Column(u"Subjects-corporate name", _subject_coorporate_name)
+subject_topical = Column(u"Subjects-topical", _subject_topical)
+subject_chronological = Column(u"Subjects-chronological", _subject_chronological)
+category = Column(u"Category", _category)
 
 
 
@@ -453,12 +480,12 @@ CITATION_COLUMNS = [
     contents_list,
     isbn,
     additional_contributors,
-    # language,
-    # description,
-    # subject_personal_name,
-    # subject_geographical_name,
-    # subject_coorporate_name,
-    # subject_topical,
-    # subject_chronological,
-    # category
+    language,
+    description,
+    subject_personal_name,
+    subject_geographical_name,
+    subject_coorporate_name,
+    subject_topical,
+    subject_chronological,
+    category
 ]
