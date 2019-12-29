@@ -12,6 +12,20 @@
 </p>
 </div>
 
+<script>
+  //# sourceURL=required.js
+  $().ready(function() {
+    $("#id_fields").prop('required',true);
+    $("#id_export_format").change(function() {
+      var value=$("#id_export_format").val();
+    if (value != undefined && value == 'EBSCO_CSV') {
+      $("#id_fields").prop('required',false);
+    } else {
+      $("#id_fields").prop('required',true);
+    }
+    })
+  })
+</script>
 <form class="form" action="?confirmed=true" method="POST">
     {% csrf_token %}
 
