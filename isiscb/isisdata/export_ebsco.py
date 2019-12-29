@@ -228,8 +228,8 @@ def _place_publisher(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
-    fields = ['name_for_display_in_citation']
-    return u'; '.join(map(lambda x: x[0], qs.values_list(*fields)))
+    fields = ['name_for_display_in_citation', 'authority__name']
+    return u'; '.join(map(lambda x: x[0] if x[0] else x[1], qs.values_list(*fields)))
 
 
 def _series(obj, extra, config={}):
@@ -383,23 +383,61 @@ def _contents_list(obj, extra, config={}):
 
         chapters.append("<::>".join(chapter_info))
 
-    return " // ".join(chapters)
+    return "//".join(chapters)
 
 def _additional_contributors(obj, extra, config={}):
     fields = ['authority__name', 'type_controlled']
     names = obj.acrelation_set.filter(type_controlled__in=ACRelation.PERSONAL_RESPONS_TYPES).exclude(type_controlled__in=[ACRelation.EDITOR, ACRelation.AUTHOR])\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
+
+    chapter_authors = []
+    if obj.type_controlled in [Citation.BOOK, Citation.ARTICLE]:
+        _q = Q(record_status_value=CuratedMixin.ACTIVE) & Q(subject=obj) \
+             & Q(type_controlled__in=[CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE])
+
+        qs = obj.ccrelations.filter(_q)
+
+        if qs.count() > 0:
+            for ccr in qs.all():
+                authors = ccr.object.acrelations.filter(type_controlled=ACRelation.AUTHOR)
+                for author in authors:
+                    chapter_authors.append((author.authority.name, ACRelation.AUTHOR))
+
     final_names = []
     for name in names:
         if name[1] != ACRelation.CONTRIBUTOR:
             final_names.append(name[0] + " (" + dict(ACRelation.TYPE_CHOICES)[name[1]].lower()  + ")")
         else:
             final_names.append(name[0])
+    for name in chapter_authors:
+        final_names.append(name[0] + " (" + dict(ACRelation.TYPE_CHOICES)[name[1]].lower()  + ")")
+
     return u'; '.join(final_names)
 
 def _subject_personal_name(obj, extra, config={}):
-    return _subject_authority_names(obj, [Authority.PERSON])
+    subject_persons = obj.acrelation_set.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON])
+    names = []
+    for prel in subject_persons.all():
+        person = prel.authority
+        name = person.name
+        date = start_date = end_date = ''
+        for attr in person.attributes.all():
+            attr_name = attr.type_controlled.name
+            if attr_name == settings.PERSON_BIRTH_DEATH_DATE_ATTRIBUTE:
+                date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
+            elif attr_name == settings.PERSON_BIRTH_DATE_ATTRIBUTE:
+                start_date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
+            elif attr_name == settings.PERSON_DEATH_DATE_ATTRIBUTE:
+                end_date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
+        if date:
+            name = name + " (%s)"%(date)
+        elif start_date or end_date:
+            name = name + " (%s-%s)"%(start_date, end_date)
+
+        names.append(name)
+
+    return u' // '.join(map(lambda x: x, names))
 
 def _subject_geographical_name(obj, extra, config={}):
     return _subject_authority_names(obj, [Authority.GEOGRAPHIC_TERM])
