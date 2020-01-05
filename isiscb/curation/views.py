@@ -2864,6 +2864,7 @@ def export_citations(request):
             export_tasks = {
                 'EBSCO_CSV': data_tasks.export_to_ebsco_csv,
                 'ITEM_COUNT': data_tasks.export_item_counts,
+                'SWP_ANALYSIS': data_tasks.export_swp_analysis,
             }
 
             # We create the AsyncTask object first, so that we can keep it
