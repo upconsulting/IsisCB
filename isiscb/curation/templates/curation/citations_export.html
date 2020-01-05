@@ -18,11 +18,11 @@
     $("#id_fields").prop('required',true);
     $("#id_export_format").change(function() {
       var value=$("#id_export_format").val();
-    if (value != undefined && value == 'EBSCO_CSV') {
-      $("#id_fields").prop('required',false);
-    } else {
-      $("#id_fields").prop('required',true);
-    }
+      if (value == undefined || value == 'CSV') {
+        $("#id_fields").prop('required',true);
+      } else {
+        $("#id_fields").prop('required',false);
+      }
     })
   })
 </script>

@@ -82,12 +82,17 @@ def _print_status(obj, extra, config={}):
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     category = obj.acrelation_set.filter(_q)
 
-    tracking_records = obj.tracking_records.filter(type_controlled=Tracking.PROOFED)
+    tracking_records_proofed = obj.tracking_records.filter(type_controlled=Tracking.PROOFED)
+    tracking_records_printed = obj.tracking_records.filter(type_controlled=Tracking.PRINTED)
 
-    if obj.record_status_value == CuratedMixin.ACTIVE and obj.tracking_records and category:
+    if tracking_records_printed:
+        return "AlreadyPrinted"
+    if obj.record_status_value == CuratedMixin.ACTIVE and tracking_records_proofed and category:
         return "Print Classified"
+    if obj.record_status_value == CuratedMixin.ACTIVE and tracking_records_proofed and not category:
+        return "Print NotClassified"
 
-    return "TBD"
+    return "NotReady"
 
 def _citation_title(obj, extra, config={}):
     """
@@ -115,66 +120,24 @@ def _citation_title(obj, extra, config={}):
         return u"Review of unknown publication"
     return u'Review of "%s"' % book.title
 
-# adjustment of export according to ISISCB-1033
-def create_acr_string(author, additional_fields = [], delimiter=u" "):
-    fields = ['ACR_ID ' + str(author[0]),
-               'ACRStatus ' + (str(author[1]) if author[1] else u''),
-               'ACRType ' + (dict(ACRelation.TYPE_CHOICES)[author[2]] if author[2] else u''),
-               'ACRDisplayOrder ' + (str(author[3]) if author[3] else u''),
-               'ACRNameForDisplayInCitation ' + (author[4] if author[4] else u''),
-               'AuthorityID ' + (str(author[5]) if author[5] else u''),
-               'AuthorityStatus ' + (str(author[6]) if author[6] else u''),
-               'AuthorityType ' + (dict(Authority.TYPE_CHOICES)[author[7]] if author[7] else u''),
-               'AuthorityName ' + (author[8] if author[8] else u'')
-                ]
-    return delimiter.join(fields + [field_name + ' ' + (str(author[9+idx]) if author[9+idx] else u'') for idx,field_name in enumerate(additional_fields)])
-acr_fields = ['id',
-          'record_status_value',
-          'type_controlled',
-          'data_display_order',
-          'name_for_display_in_citation',
-          'authority__id',
-          'authority__record_status_value',
-          'authority__type_controlled',
-          'authority__name'
-         ]
+def _record_type(obj, extra, config={}):
+    main_type = obj.get_type_controlled_display()
+    if obj.subtype:
+        return "%s || %s"%(main_type, obj.subtype.name)
+    return main_type
 
-def create_ccr_string(ccr, additional_fields = [], delimiter=u" "):
-    fields = ['CCR_ID ' + str(ccr[0]),
-               'CCRStatus  ' + str(ccr[1]),
-               'CCRType  ' + dict(CCRelation.TYPE_CHOICES)[ccr[2]],
-               'CitationID  ' + str(ccr[3]),
-               'CitationStatus  ' + str(ccr[4]),
-               'CitationType  ' + dict(Citation.TYPE_CHOICES)[ccr[5]],
-               'CitationTitle  ' + ccr[6]
-                ]
-    return delimiter.join(fields + [field_name + ' ' + (str(ccr[7+idx]) if ccr[7+idx] else u'') for idx,field_name in enumerate(additional_fields)])
+def _tracking_records(obj, extra, config={}):
+    records = obj.tracking_records.all()
+    return " // ".join([r.get_type_controlled_display() for r in records])
 
-ccr_from_fields = ['id',
-          'record_status_value',
-          'type_controlled',
-          'object__id',
-          'object__record_status_value',
-          'object__type_controlled',
-          'object__title'
-         ]
-ccr_to_fields = ['id',
-          'record_status_value',
-          'type_controlled',
-          'subject__id',
-          'subject__record_status_value',
-          'subject__type_controlled',
-          'subject__title'
-         ]
+def _related_citations(obj, extra, config={}):
+    qs_from = obj.relations_from.all()
+    qs_to = obj.relations_to.all()
 
-def _get_metadata_fields_authority(config):
-    fields = acr_fields
-    additional_fields = []
-    if 'export_metadata' in config and config['export_metadata']:
-        fields = acr_fields + ['authority__created_by_stored__username', 'authority__modified_by__username', 'authority__administrator_notes', 'authority__record_history', 'authority__modified_on', 'authority__created_on_stored']
-        additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
+    fields_object = _get_metadata_fields_citation(config, 'object')
+    fields_subject = _get_metadata_fields_citation(config, 'subject')
 
-    return fields, additional_fields
+    return u' // '.join(map(functools.partial(create_ccr_string), qs_from.values_list(*fields_object)) + map(functools.partial(create_ccr_string), qs_to.values_list(*fields_subject)))
 
 def _get_metadata_fields_citation(config, type):
     ccr_fields = ['id',
@@ -185,347 +148,70 @@ def _get_metadata_fields_citation(config, type):
               type + '__type_controlled',
               type + '__title'
              ]
-    fields = ccr_fields
-    additional_fields = []
-    if 'export_metadata' in config and config['export_metadata']:
-        fields = ccr_fields + [type + '__created_by_native__username', type + '__modified_by__username', type + '__administrator_notes', type + '__record_history', type + '__modified_on', type + '__created_native']
-        additional_fields = ['CreatedBy', 'ModifiedBy', 'StaffNotes', 'RecordHistory', 'ModifiedOn', 'CreatedOn']
-
-    return fields, additional_fields
-
-def _get_fields_delimiter(config):
-    if 'authority_delimiter' in config:
-        return config['authority_delimiter']
-    else:
-        return " "
-
-def _citation_author(obj, extra, config={}):
-    """
-    Get the names of all authors on a citation.
-    """
-    fields = ['authority__name']
-
-    names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
-                                   .order_by('data_display_order')\
-                                   .values_list(*fields)
-    return u'; '.join(map(lambda x: x[0], names))
-
-def _citation_editor(obj, extra, config={}):
-    """
-    Get the names of all editors on a citation.
-    """
-    fields = ['authority__name']
-    names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
-                                   .order_by('data_display_order')\
-                                   .values_list(*fields)
-    return u'; '.join(map(lambda x: x[0], names))
-
-def _category_numbers(obj, extra, config={}):
-    """
-    "Classification code" for the linked Classification Term
-    """
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
-    qs = obj.acrelation_set.filter(_q)
-    fields, additional_fields = _get_metadata_fields_authority(config)
-    additional_fields += ['ClassificationCode']
-    return u' // '.join(map(functools.partial(create_acr_string, additional_fields=additional_fields, delimiter=_get_fields_delimiter(config)), qs.values_list(*(fields+['authority__classification_code']))))
+    return ccr_fields
 
 
-def _language(obj, extra, config={}):
-    return u', '.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
+def create_ccr_string(ccr, delimiter=u" || "):
+    fields = ['CCRType ' + dict(CCRelation.TYPE_CHOICES)[ccr[2]],
+               'CitationType ' + dict(Citation.TYPE_CHOICES)[ccr[5]],
+               'CitationID ' + str(ccr[3]),
+              ]
+    return delimiter.join(fields)
 
-
-def _place_publisher(obj, extra, config={}):
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=ACRelation.PUBLISHER)
-    qs = obj.acrelation_set.filter(_q)
-    fields = ['name_for_display_in_citation', 'authority__name']
-    return u'; '.join(map(lambda x: x[0] if x[0] else x[1], qs.values_list(*fields)))
-
-
-def _series(obj, extra, config={}):
-    """
-    Book Series
-    """
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=ACRelation.BOOK_SERIES)
-    qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u''
-    _first_series = qs.first()
-    if _first_series.authority:
-        return _first_series.authority.name
-    return u''
-
-
-def _isbn_or_issn(obj, extra, config={}):
-    """
-    Get ISBN from LinkedData.
-    """
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & (Q(type_controlled__name__iexact='isbn') | Q(type_controlled__name__iexact='issn'))
-    qs = obj.linkeddata_entries.filter(_q)
-    if qs.count() == 0:
-        return u''
-    return qs.first().universal_resource_name
-
-def _pages_free_text(obj, extra, config={}):
-    if not getattr(obj, 'part_details', None):
-        return u""
-    return obj.part_details.pages_free_text
-
-def _journal_link(obj, extra, config={}):
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=ACRelation.PERIODICAL)
-    qs = obj.acrelation_set.filter(_q)
-    if qs.count() == 0:
-        return u""
-    _first = qs.first()
-    if _first.authority:
-        return unicode(_first.authority.name)
-    return u""
-
-
-def _journal_volume(obj, extra, config={}):
-    if not hasattr(obj, 'part_details') or obj.part_details is None:
-        return u""
-    # ISISCB-1033
-    return obj.part_details.volume_free_text if obj.part_details.volume_free_text.strip() else ''
-
-def _reviewed_author(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
+def _dataset(obj, extra, config={}):
+    if not obj.belongs_to:
         return u""
 
-    _first = _get_reviewed_publication(obj)
+    return obj.belongs_to.name
 
-    fields = ['authority__name']
-
-    if not _first:
-        return ""
-
-    author_names = _first.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
-                                   .order_by('data_display_order')\
-                                   .values_list(*fields)
-    authors = u'; '.join(map(lambda x: x[0] + " <responsibility: author>", author_names))
-
-    editor_names = _first.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
-                                   .order_by('data_display_order')\
-                                   .values_list(*fields)
-    editors = u'; '.join(map(lambda x: x[0] + " <responsibility: editor>", editor_names))
-
-    return u"; ".join(filter(None, [authors, editors]))
-
-def _reviewed_title(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
-        return u""
-
-    reviewed_pub = _get_reviewed_publication(obj)
-    if not reviewed_pub:
-        return ""
-
-    return _citation_title(reviewed_pub, extra, config)
-
-def _get_reviewed_publication(obj):
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=CCRelation.REVIEWED_BY) & Q(object=obj)
-    qs = obj.ccrelations.filter(_q)
-    if qs.count() == 0:
-        return u""
-    _first = qs.first()
-    return _first.subject
-
-def _chapter_book_editors(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.CHAPTER]:
-        return u""
-
-    book = _get_book_for_chapter(obj)
-    if not book:
-        return ""
-
-    return _citation_editor(book, extra, config)
-
-def _chapter_book_title(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.CHAPTER]:
-        return u""
-
-    book = _get_book_for_chapter(obj)
-    if not book:
-        return ""
-
-    return _citation_title(book, extra, config)
-
-def _chapter_book_publisher(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.CHAPTER]:
-        return u""
-
-    book = _get_book_for_chapter(obj)
-    if not book:
-        return ""
-
-    return _place_publisher(book, extra, config)
-
-def _get_book_for_chapter(obj):
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) \
-         & Q(type_controlled=CCRelation.INCLUDES_CHAPTER) & Q(object=obj)
-    qs = obj.ccrelations.filter(_q)
-    if qs.count() == 0:
-        return u""
-    _first = qs.first()
-    return _first.subject
-
-def _contents_list(obj, extra, config={}):
-    if not obj.type_controlled in [Citation.BOOK, Citation.ARTICLE]:
-        return u""
-
-    _q = Q(record_status_value=CuratedMixin.ACTIVE) & Q(subject=obj) \
-         & Q(type_controlled__in=[CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE])
-
-    qs = obj.ccrelations.filter(_q)
-    if qs.count() == 0:
-        return u""
-
-    chapters = []
-    for chapter in qs.all():
-        chapter_info = []
-        chapter_info.append(chapter.object.id)
-        chapter_info.append(_citation_author(chapter.object, extra, config))
-        chapter_info.append(chapter.object.title)
-        chapter_info.append(_pages_free_text(chapter.object, extra, config))
-
-        chapters.append("<::>".join(chapter_info))
-
-    return "//".join(chapters)
-
-def _additional_contributors(obj, extra, config={}):
-    fields = ['authority__name', 'type_controlled']
-    names = obj.acrelation_set.filter(type_controlled__in=ACRelation.PERSONAL_RESPONS_TYPES).exclude(type_controlled__in=[ACRelation.EDITOR, ACRelation.AUTHOR])\
-                                   .order_by('data_display_order')\
-                                   .values_list(*fields)
-
-    chapter_authors = []
-    if obj.type_controlled in [Citation.BOOK, Citation.ARTICLE]:
-        _q = Q(record_status_value=CuratedMixin.ACTIVE) & Q(subject=obj) \
-             & Q(type_controlled__in=[CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE])
-
-        qs = obj.ccrelations.filter(_q)
-
-        if qs.count() > 0:
-            for ccr in qs.all():
-                authors = ccr.object.acrelations.filter(type_controlled=ACRelation.AUTHOR)
-                for author in authors:
-                    chapter_authors.append((author.authority.name, ACRelation.AUTHOR))
-
-    final_names = []
-    for name in names:
-        if name[1] != ACRelation.CONTRIBUTOR:
-            final_names.append(name[0] + " (" + dict(ACRelation.TYPE_CHOICES)[name[1]].lower()  + ")")
+def _created_date(obj, extra, config={}):
+    date = u""
+    try:
+        if type(obj) == Citation:
+            date = obj.created_native if obj.created_native else ""
         else:
-            final_names.append(name[0])
-    for name in chapter_authors:
-        final_names.append(name[0] + " (" + dict(ACRelation.TYPE_CHOICES)[name[1]].lower()  + ")")
+            date = obj.created_on_stored if obj.created_on_stored else ""
+    except:
+        pass
 
-    return u'; '.join(final_names)
+    return unicode(date)[:10] + " || " + (obj.created_by_native.username if obj.created_by_native else "")
 
-def _subject_personal_name(obj, extra, config={}):
-    subject_persons = obj.acrelation_set.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=[Authority.PERSON])
-    names = []
-    for prel in subject_persons.all():
-        person = prel.authority
-        name = person.name
-        date = start_date = end_date = ''
-        for attr in person.attributes.all():
-            attr_name = attr.type_controlled.name
-            if attr_name == settings.PERSON_BIRTH_DEATH_DATE_ATTRIBUTE:
-                date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
-            elif attr_name == settings.PERSON_BIRTH_DATE_ATTRIBUTE:
-                start_date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
-            elif attr_name == settings.PERSON_DEATH_DATE_ATTRIBUTE:
-                end_date = attr.value_freeform if attr.value_freeform else attr.value.cvalue()
-        if date:
-            name = name + " (%s)"%(date)
-        elif start_date or end_date:
-            name = name + " (%s-%s)"%(start_date, end_date)
+def _modified_date(obj, extra, config={}):
+    date = u""
+    try:
+        date = obj._history_date if obj._history_date else ""
+    except:
+        pass
 
-        names.append(name)
-
-    return u' // '.join(map(lambda x: x, names))
-
-def _subject_geographical_name(obj, extra, config={}):
-    return _subject_authority_names(obj, [Authority.GEOGRAPHIC_TERM])
-
-def _subject_coorporate_name(obj, extra, config={}):
-    return _subject_authority_names(obj, [Authority.INSTITUTION])
-
-def _subject_topical(obj, extra, config={}):
-    return _subject_authority_names(obj, [Authority.CONCEPT])
-
-def _subject_chronological(obj, extra, config={}):
-    return _subject_authority_names(obj, [Authority.TIME_PERIOD])
-
-def _subject_authority_names(obj, authority_types):
-    fields = ['authority__name']
-    names = obj.acrelation_set.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=authority_types)\
-                                   .values_list(*fields)
-    return u' // '.join(map(lambda x: x[0], names))
-
-def _category(obj, extra, config={}):
-    fields = ['authority__name']
-    names = obj.acrelation_set.filter(type_controlled=ACRelation.CATEGORY)\
-                                   .values_list(*fields)
-    return u' // '.join(map(lambda x: x[0], names))
+    return unicode(date)[:10] + " || " + (obj.modified_by.username if obj.modified_by else "")
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 print_status = Column(u'Print status', _print_status)
-
+record_status = Column(u'Record Status', lambda obj, extra, config={}: obj.get_record_status_value_display())
 citation_title = Column(u'Title', _citation_title, Citation)
-citation_author = Column(u'Authors', _citation_author, Citation)
-record_type = Column('Record type', lambda obj, extra, config={}: obj.get_type_controlled_display())
-citation_editor = Column(u'Editors', _citation_editor, Citation)
-year_of_publication = Column(u'Year',
-                             lambda obj, extra, config={}: obj.publication_date.year)
-edition_details = Column(u'Edition details', lambda obj, extra, config={}: obj.edition_details)
-description = Column(u'Description', lambda obj, extra, config={}: obj.description)
-language = Column(u'Language', _language)
-place_publisher = Column(u'Place: Publisher', _place_publisher)
-physical_details = Column(u'Physical details', lambda obj, extra, config={}: obj.physical_details)
-series = Column(u'Series', _series)
-isbn = Column(u'ISSN or ISBN', _isbn_or_issn)
-pages_free_text = Column('Pages', _pages_free_text)
-journal_link = Column(u"Journal name", _journal_link)
-journal_volume = Column(u"Volume number", _journal_volume)
-
-reviewed_author = Column(u"Author or editor of book under review", _reviewed_author)
-reviewed_title = Column(u"Title of book under review", _reviewed_title)
-chapter_book_editors = Column(u"Editors of book", _chapter_book_editors)
-chapter_book_title = Column(u"Title of book", _chapter_book_title)
-chapter_book_publisher = Column(u"Place: publisher of book", _chapter_book_publisher)
-contents_list = Column(u"Contents list", _contents_list)
-additional_contributors = Column(u"Additional contributors", _additional_contributors)
-subject_personal_name = Column(u"Subject-personal name", _subject_personal_name)
-subject_geographical_name = Column(u"Subjects-geographical name", _subject_geographical_name)
-subject_coorporate_name = Column(u"Subjects-corporate name", _subject_coorporate_name)
-subject_topical = Column(u"Subjects-topical", _subject_topical)
-subject_chronological = Column(u"Subjects-chronological", _subject_chronological)
-category = Column(u"Category", _category)
-
+record_type = Column('Record Type', _record_type)
+tracking_records = Column('Tracking Records', _tracking_records)
+record_action = Column(u'Record Action', lambda obj, extra, config={}: obj.get_record_action_display())
+related_citations = Column('Related Citations', _related_citations)
+staff_notes = Column(u"Staff Notes", lambda obj, extra, config={}: obj.administrator_notes)
+record_history = Column(u"Record History", lambda obj, extra, config={}: obj.record_history)
+dataset = Column(u"Dataset", _dataset)
+created_date = Column(u"Created Date", _created_date)
+modified_date = Column(u"Modified Date", _modified_date)
 
 
 CITATION_COLUMNS = [
     object_id,
     print_status,
-    # record_status,
-    # title,
-    # record_type,
-    # edition_details,
-    # year_of_publication,
-    # series,
-    # tracking_records,
-    # record_action,
-    # related_citations,
-    # staff_notes,
-    # record_history,
-    # data_set,
-    # created_date,
-    # modified_date,
+    record_status,
+    citation_title,
+    record_type,
+    tracking_records,
+    record_action,
+    related_citations,
+    staff_notes,
+    record_history,
+    dataset,
+    created_date,
+    modified_date,
 ]

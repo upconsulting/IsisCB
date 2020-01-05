@@ -733,7 +733,7 @@ class ExportCitationsForm(forms.Form):
     def clean_fields(self):
         field_data = self.cleaned_data['fields']
         export_type = self.cleaned_data['export_format']
-        if export_type != 'EBSCO_CSV':
+        if export_type == 'CSV':
             if not field_data:
                 raise forms.ValidationError("Please select fields to export.")
 
