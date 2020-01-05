@@ -720,7 +720,7 @@ class SelectAuthorityCollectionForm(forms.Form):
 
 class ExportCitationsForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
-    export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)'), ('EBSCO_CSV', 'Comma-separated values (CSV) in EBSCO format (disregard column selection below)')])
+    export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)'), ('EBSCO_CSV', 'Comma-separated values (CSV) in EBSCO format (disregard column selection below)'), ('ITEM_COUNT', 'Export for Item Counts')])
     export_linked_records = forms.BooleanField(label="Export linked records (make sure that the 'Link to Record' Field is selected in the field list)", required=False)
     export_metadata = forms.BooleanField(label="Export metadata", required=False)
     use_pipe_delimiter = forms.BooleanField(label='Use "||" to separate related authority and citation fields', required=False)
@@ -733,7 +733,7 @@ class ExportCitationsForm(forms.Form):
     def clean_fields(self):
         field_data = self.cleaned_data['fields']
         export_type = self.cleaned_data['export_format']
-        if export_type != 'EBSCO_CSV':
+        if export_type == 'CSV':
             if not field_data:
                 raise forms.ValidationError("Please select fields to export.")
 
