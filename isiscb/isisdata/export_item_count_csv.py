@@ -94,6 +94,12 @@ def _print_status(obj, extra, config={}):
 
     return "NotReady"
 
+def _curation_link(obj, extra, config={}):
+    return settings.URI_PREFIX + 'curation/citation/' + obj.id
+
+def _public_link(obj, extra, config={}):
+    return settings.URI_PREFIX + 'citation/' + obj.id
+
 def _citation_title(obj, extra, config={}):
     """
     Get the production title for a citation.
@@ -188,6 +194,8 @@ def _modified_date(obj, extra, config={}):
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 print_status = Column(u'Print status', _print_status)
 record_status = Column(u'Record Status', lambda obj, extra, config={}: obj.get_record_status_value_display())
+curation_link = Column('Curation Link', _curation_link)
+public_link = Column('Public Link', _public_link)
 citation_title = Column(u'Title', _citation_title, Citation)
 record_type = Column('Record Type', _record_type)
 tracking_records = Column('Tracking Records', _tracking_records)
@@ -204,10 +212,11 @@ CITATION_COLUMNS = [
     object_id,
     print_status,
     record_status,
-    citation_title,
+    curation_link,
+    public_link,
     record_type,
+    citation_title,
     tracking_records,
-    record_action,
     related_citations,
     staff_notes,
     record_history,
