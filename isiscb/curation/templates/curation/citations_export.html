@@ -20,8 +20,10 @@
       var value=$("#id_export_format").val();
       if (value == undefined || value == 'CSV') {
         $("#id_fields").prop('required',true);
+        $(".form-group input[type=checkbox]").prop( "disabled", false );
       } else {
         $("#id_fields").prop('required',false);
+        $(".form-group input[type=checkbox]").prop( "disabled", true );
       }
     })
   })
