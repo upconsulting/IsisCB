@@ -5,7 +5,7 @@ from django.http import QueryDict
 
 from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
-from isisdata import export, export_ebsco    # Oh man, so good.
+from isisdata import export, export_ebsco, export_item_count_csv, export_swp_analysis_csv    # Oh man, so good.
 from isisdata import export_authority
 from isisdata.models import *
 
@@ -155,6 +155,33 @@ def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, 
         print("Exporting authorities not supported in EBSCO format.")
         return
 
+    _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, export_extra)
+
+@shared_task
+def export_item_counts(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
+    print 'export item counts csv:: %s' % str(task_id)
+    if export_type == 'Citation':
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        columns = export_item_count_csv.CITATION_COLUMNS
+    else:
+        print("Exporting authorities not supported for item count.")
+        return
+
+    _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, export_extra)
+
+@shared_task
+def export_swp_analysis(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
+    print 'export item counts csv:: %s' % str(task_id)
+    if export_type == 'Citation':
+        queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
+        columns = export_swp_analysis_csv.CITATION_COLUMNS
+    else:
+        print("Exporting authorities not supported for item count.")
+        return
+
+    _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, export_extra)
+
+def _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, export_extra):
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
