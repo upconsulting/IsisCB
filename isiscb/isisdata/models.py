@@ -562,7 +562,8 @@ class CuratedMixin(models.Model):
                                            max_length=255,
                                            blank=True,
                                            null=True,
-                                           default=ACTIVE)
+                                           default=ACTIVE,
+                                           db_index=True)
 
     record_status_explanation = models.CharField(max_length=255,
                                                  blank=True,

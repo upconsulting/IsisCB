@@ -85,9 +85,14 @@ class CitationFilter(django_filters.FilterSet):
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
-    # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
-    # order = ChoiceMethodFilter(name='order', choices=order_by)
+    READY_FOR_PRINT_CLASS = 'RFPC'
+    READY_FOR_PRINT_NOT_CLASS = 'RFPNC'
+    READY_FOR_PRINT_ALL = 'RFPA'
+    ALREADY_PRINTED = 'ALP'
+    NOT_READY_YET = 'NRFP'
+
+    print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[('', 'All'), (READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint')], method='filter_print_status')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
@@ -297,6 +302,20 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
 
         return queryset.filter(tracking_state=value)
+
+    def filter_print_status(self, queryset, field, value):
+        if value == CitationFilter.READY_FOR_PRINT_CLASS:
+            return queryset.filter(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
+                related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
+                tracking_records__type_controlled=Tracking.PROOFED) \
+                .exclude(tracking_state__in=[Citation.PRINTED, Citation.HSTM_UPLOAD])
+
+        if value == CitationFilter.READY_FOR_PRINT_NOT_CLASS:
+            return queryset.filter(tracking_records__type_controlled=Tracking.PROOFED) \
+                .filter(~Q(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
+                    related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
+                    tracking_state__in=[Citation.PRINTED, Citation.HSTM_UPLOAD]))
+        return queryset
 
     def filter_in_collections(self, queryset, field, value):
         if not value:
