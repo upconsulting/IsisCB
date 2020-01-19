@@ -145,6 +145,40 @@ def _year_check(obj, extra, config={}):
 
     return CHECK_WELL_FORMED
 
+def _vol_check(obj, extra, config={}):
+    vol = _volume(obj, extra, config)
+    if not vol:
+        return CHECK_EMPTY
+
+    if len(vol) > 9:
+        return CHECK_NON_STANDARD
+
+    return CHECK_WELL_FORMED
+
+def _page_check(obj, extra, config={}):
+    pages = _pages_free_text(obj, extra, config)
+    if not pages:
+        return CHECK_EMPTY
+
+    return CHECK_WELL_FORMED
+
+def _lang_check(obj, extra, config={}):
+    lang = _language(obj, extra, config)
+    if not lang:
+        return CHECK_EMPTY
+
+    return CHECK_WELL_FORMED
+
+def _cat_check(obj, extra, config={}):
+    categories = obj.acrelation_set.filter(type_controlled=ACRelation.CATEGORY)
+    if not categories:
+        return CHECK_EMPTY
+
+    if categories.count() > 1 or categories.first().authority.classification_system != Authority.SPWC:
+        return CHECK_NON_STANDARD
+
+    return CHECK_WELL_FORMED
+
 def _check_acrs(acrs, authority_types):
     is_non_standard = False
     for acr in acrs:
@@ -173,7 +207,10 @@ author_check = export_item_count_csv.Column('Auth/Ed Check', _author_check)
 publisher_school_check = export_item_count_csv.Column('Pub/Sch Check', _publisher_school_check)
 journal_check = export_item_count_csv.Column('Jrnl Check', _journal_check)
 year_check = export_item_count_csv.Column('Year Check', _year_check)
-
+vol_check = export_item_count_csv.Column('Vol Check', _vol_check)
+page_check = export_item_count_csv.Column('Page Check', _page_check)
+lang_check = export_item_count_csv.Column('Lang Check', _lang_check)
+cat_check = export_item_count_csv.Column('Cat Check', _cat_check)
 citation_title = export_item_count_csv.Column(u'Title', export_item_count_csv._citation_title, Citation)
 authors_editors_names = export_item_count_csv.Column('Author/Editor Names', _authors_editors_names)
 publisher_school = export_item_count_csv.Column('Publisher/School', _publisher_school)
@@ -205,7 +242,10 @@ CITATION_COLUMNS = [
     publisher_school_check,
     journal_check,
     year_check,
-
+    vol_check,
+    page_check,
+    lang_check,
+    cat_check,
     citation_title,
     authors_editors_names,
     publisher_school,
