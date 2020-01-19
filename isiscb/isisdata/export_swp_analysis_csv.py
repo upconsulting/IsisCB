@@ -256,7 +256,6 @@ CITATION_COLUMNS = [
     category,
     language,
     tracking_records,
-    record_action,
     related_citations,
     staff_notes,
     record_history,
