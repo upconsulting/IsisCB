@@ -78,6 +78,10 @@ class Column(object):
 
 
 def _print_status(obj, extra, config={}):
+    # CuratedMixin.DUPLICATE is called "Delete" on front end
+    if obj.record_status_value == CuratedMixin.DUPLICATE:
+        return "MarkedDelete"
+
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)
     category = obj.acrelation_set.filter(_q)
@@ -88,9 +92,9 @@ def _print_status(obj, extra, config={}):
     if tracking_records_printed:
         return "AlreadyPrinted"
     if obj.record_status_value == CuratedMixin.ACTIVE and tracking_records_proofed and category:
-        return "Print Classified"
+        return "ReadyForPrint Classified"
     if obj.record_status_value == CuratedMixin.ACTIVE and tracking_records_proofed and not category:
-        return "Print NotClassified"
+        return "ReadyForPrint NotClassified"
 
     return "NotReady"
 
@@ -180,7 +184,10 @@ def _created_date(obj, extra, config={}):
     except:
         pass
 
-    return unicode(date)[:10] + " || " + (obj.created_by_native.username if obj.created_by_native else "")
+    return unicode(date)[:10]
+
+def _creator(obj, extra, config={}):
+    return unicode(obj.created_by_native.username if obj.created_by_native else "")
 
 def _modified_date(obj, extra, config={}):
     date = u""
@@ -189,7 +196,10 @@ def _modified_date(obj, extra, config={}):
     except:
         pass
 
-    return unicode(date)[:10] + " || " + (obj.modified_by.username if obj.modified_by else "")
+    return unicode(date)[:10]
+
+def _modifier(obj, extra, config={}):
+    return unicode(obj.modified_by.username if obj.modified_by else "")
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 print_status = Column(u'Print status', _print_status)
@@ -205,7 +215,9 @@ staff_notes = Column(u"Staff Notes", lambda obj, extra, config={}: obj.administr
 record_history = Column(u"Record History", lambda obj, extra, config={}: obj.record_history)
 dataset = Column(u"Dataset", _dataset)
 created_date = Column(u"Created Date", _created_date)
+creator = Column(u"Creator", _creator)
 modified_date = Column(u"Modified Date", _modified_date)
+modifier = Column(u"Modifier", _modifier)
 
 
 CITATION_COLUMNS = [
@@ -222,5 +234,7 @@ CITATION_COLUMNS = [
     record_history,
     dataset,
     created_date,
+    creator,
     modified_date,
+    modifier
 ]
