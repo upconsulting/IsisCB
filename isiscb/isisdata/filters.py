@@ -91,8 +91,9 @@ class CitationFilter(django_filters.FilterSet):
     READY_FOR_PRINT_ALL = 'RFPA'
     ALREADY_PRINTED = 'ALP'
     NOT_READY_YET = 'NRFP'
+    MARKED_DELETE = 'MD'
 
-    print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[('', 'All'), (READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint')], method='filter_print_status')
+    print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[(READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint'), (MARKED_DELETE, 'MarkedDelete')], method='filter_print_status')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
@@ -305,16 +306,29 @@ class CitationFilter(django_filters.FilterSet):
 
     def filter_print_status(self, queryset, field, value):
         if value == CitationFilter.READY_FOR_PRINT_CLASS:
-            return queryset.filter(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
+                .filter(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
                 related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
-                tracking_records__type_controlled=Tracking.PROOFED) \
-                .exclude(tracking_state__in=[Citation.PRINTED, Citation.HSTM_UPLOAD])
+                related_authorities__authority__record_status_value=CuratedMixin.ACTIVE, \
+                tracking_state=Citation.PROOFED)
 
         if value == CitationFilter.READY_FOR_PRINT_NOT_CLASS:
-            return queryset.filter(tracking_records__type_controlled=Tracking.PROOFED) \
-                .filter(~Q(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
-                    related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
-                    tracking_state__in=[Citation.PRINTED, Citation.HSTM_UPLOAD]))
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE)\
+                .filter(tracking_state=Tracking.PROOFED) \
+                .filter(~Q(related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
+                related_authorities__authority__record_status_value__in=[CuratedMixin.ACTIVE], \
+                related_authorities__record_status_value__in=[CuratedMixin.ACTIVE]))
+        if value == CitationFilter.READY_FOR_PRINT_ALL:
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
+                .filter(tracking_state=Tracking.PROOFED)
+        if value == CitationFilter.ALREADY_PRINTED:
+            return queryset.filter(tracking_state=Tracking.PRINTED)
+        if value == CitationFilter.NOT_READY_YET:
+            return queryset.filter(Q(tracking_state__in=[Tracking.NONE, Tracking.FULLY_ENTERED]) \
+                | Q(tracking_state__isnull=True)).filter(record_status_value__in=[CuratedMixin.ACTIVE, CuratedMixin.REDIRECT, CuratedMixin.INACTIVE])
+        if value == CitationFilter.MARKED_DELETE:
+            return queryset.filter(record_status_value=CuratedMixin.DUPLICATE)
+
         return queryset
 
     def filter_in_collections(self, queryset, field, value):

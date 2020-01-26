@@ -916,7 +916,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         (NONE, 'None')
     )
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
-                                      choices=TRACKING_CHOICES)
+                                      choices=TRACKING_CHOICES, db_index=True)
     """The current state of the record."""
 
     abstract = models.TextField(blank=True, null=True, help_text=help_text("""
@@ -1176,6 +1176,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
                                        verbose_name="type",
+                                       db_index=True,
                                        help_text=help_text("""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.
@@ -1197,7 +1198,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (BULK_DATA, 'Bulk Data Update'),
         (NONE, 'No')
     )
-    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+    tracking_state = models.CharField(max_length=2, null=True, blank=True, db_index=True,
                                       choices=TRACKING_CHOICES)
     """The current state of the record."""
 
@@ -1224,6 +1225,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification_system = models.CharField(max_length=4, blank=True,
                                              null=True, default=SPWC,
                                              choices=CLASS_SYSTEM_CHOICES,
+                                             db_index=True,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
     Used to group resources by the Classification system. The system used
