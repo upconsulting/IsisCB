@@ -307,17 +307,19 @@ class CitationFilter(django_filters.FilterSet):
     def filter_print_status(self, queryset, field, value):
         if value == CitationFilter.READY_FOR_PRINT_CLASS:
             return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
-                .filter(related_authorities__record_status_value=CuratedMixin.ACTIVE, \
-                related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
-                related_authorities__authority__record_status_value=CuratedMixin.ACTIVE, \
-                tracking_state=Citation.PROOFED)
+                .filter(tracking_state=Citation.PROOFED) \
+                .filter((Q(acrelation__record_status_value=CuratedMixin.ACTIVE) | Q(acrelation__record_status_value__isnull=True)) & \
+                Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
+                acrelation__authority__record_status_value=CuratedMixin.ACTIVE)).distinct()
 
         if value == CitationFilter.READY_FOR_PRINT_NOT_CLASS:
             return queryset.filter(record_status_value=CuratedMixin.ACTIVE)\
-                .filter(tracking_state=Tracking.PROOFED) \
-                .filter(~Q(related_authorities__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
-                related_authorities__authority__record_status_value__in=[CuratedMixin.ACTIVE], \
-                related_authorities__record_status_value__in=[CuratedMixin.ACTIVE]))
+                .filter(tracking_state=Citation.PROOFED)\
+                .filter(~Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM) | \
+                    (Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM) & \
+                    (Q(acrelation__authority__record_status_value__in=[CuratedMixin.INACTIVE, CuratedMixin.DUPLICATE, CuratedMixin.REDIRECT]) |
+                    Q(acrelation__record_status_value__in=[CuratedMixin.INACTIVE, CuratedMixin.DUPLICATE, CuratedMixin.REDIRECT])))
+                ).distinct()
         if value == CitationFilter.READY_FOR_PRINT_ALL:
             return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
                 .filter(tracking_state=Tracking.PROOFED)
