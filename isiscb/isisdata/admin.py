@@ -1139,6 +1139,9 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     fields = ['name', 'unique_name', 'description', 'related_citation_type']
     exlude = ('attributes')
 
+class DatasetAdmin(admin.ModelAdmin):
+    fields = ['name', 'description', 'editor']
+
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
     readonly_fields = ['users', 'def_dataset_rules', 'def_zotero_rules', 'def_crud_rules']
@@ -1177,3 +1180,4 @@ admin.site.unregister(User)
 admin.site.register(User, IsisCBUserAdmin)
 
 admin.site.register(CitationSubtype, CitationSubtypeAdmin)
+admin.site.register(Dataset, DatasetAdmin)
