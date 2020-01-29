@@ -780,6 +780,16 @@ function toggleLinkRecordsBtn() {
 
               </div>
           </div>
+
+          {% for error in objects.form.print_status.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="col-lg-2 control-label">Print</label>
+              <div class="col-lg-10">
+                {{ objects.form.print_status|addcss:"form-control" }}
+              </div>
+          </div>
         </div>
       </div>
 </form>
