@@ -5,6 +5,7 @@ from django.conf.urls import include, url
 from curation import views
 from curation.bulk_views import bulk_change_csv_views
 from curation.bulk_views import citation_views
+from curation.citation_views import tracking_views
 import rules
 from .rules import *
 
@@ -79,6 +80,7 @@ urlpatterns = [
     url(r'^(?i)authority/select$', views.bulk_select_authority, name='authority-bulk-select'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking$', views.tracking_for_citation, name='tracking-citation'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking/(?P<tracking_id>[A-Z0-9]+)$', tracking_views.delete_tracking_for_citation, name='delete-tracking-citation'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/tracking$', views.tracking_for_authority, name='tracking-authority'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/$', views.create_ccrelation_for_citation, name='create_ccrelation_for_citation'),
