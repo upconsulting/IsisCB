@@ -45,6 +45,7 @@ import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
 import bleach
+import datetime
 
 
 
@@ -792,6 +793,8 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         'current_index': current_index
     }
     if request.GET.get('confirm', False):
+        if not acrelation.modified_on:
+            acrelation.modified_on = datetime.datetime.now()
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
@@ -821,6 +824,8 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
         'current_index': current_index
     }
     if request.GET.get('confirm', False):
+        if not acrelation.modified_on:
+            acrelation.modified_on = datetime.datetime.now()
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
@@ -1130,8 +1135,6 @@ def get_attribute_type_help_text(request, attribute_type_id):
 
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
     return JsonResponse({'help_text': safe_text})
-
-import datetime
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
