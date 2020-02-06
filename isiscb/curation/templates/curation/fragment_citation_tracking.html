@@ -7,21 +7,45 @@
 {% test_rule 'can_update_citation_field' user permTuple as can_update %}
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
+<script>
+  //# sourceURL=tracking.js
+  function createTracking(trackType) {
+    var form = $("<form action='{% url 'curation:tracking-citation' instance.id %}?search={{ search_key }}&current={{ current_index }}' method='POST'></form>")
+    var trackTypeInput = $("<input id='trackType' type='hidden' name='type' value='" + trackType + "'>")
+    form.append(trackTypeInput)
+    form.append("{% csrf_token %}")
+    $("body").append(form)
+    form.submit()
+  }
+</script>
+
 <div class="text-right" style="margin-bottom: 10px;">
-{% if can_update and can_create_fully_entered %}
-  <a href="{% url 'curation:tracking-citation' instance.id %}?type=FU&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Fully Entered</a>
+{% if can_update %}
+  {% if can_create_fully_entered %}
+  <a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-primary btn-xs">Fully Entered</a>
+  {% else %}
+  <a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-default btn-xs">Fully Entered</a>
+  {% endif %}
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Fully Entered</a>
 {% endif %}
 
-{% if can_update and can_create_proofed %}
-<a href="{% url 'curation:tracking-citation' instance.id %}?type=PD&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Proofed</a>
+{% if can_update %}
+  {% if can_create_proofed %}
+  <a onClick="createTracking('PD')" href="#" id="proofed-btn" class="btn btn-primary btn-xs">Proofed</a>
+  {% else %}
+  <a onClick="createTracking('PD')" href="#" id="proofed-btn" class="btn btn-default btn-xs">Proofed</a>
+  {% endif %}
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Proofed</a>
 {% endif %}
 
-{% if can_update and can_create_authorize %}
-<a href="{% url 'curation:tracking-citation' instance.id %}?type=AU&search={{ search_key }}&current={{ current_index }}" class="btn btn-default btn-sm">Authorized</a>
+{% if can_update %}
+  {% if can_create_authorize %}
+  <a onClick="createTracking('AU')" href="#" id="authorized-btn" class="btn btn-primary btn-xs">Authorized</a>
+  {% else %}
+  <a onClick="createTracking('AU')" href="#" id="authorized-btn" class="btn btn-default btn-xs">Authorized</a>
+  {% endif %}
 {% else %}
 <a class="btn btn-default btn-sm" disabled="disabled">Authorized</a>
 {% endif %}
@@ -105,11 +129,35 @@ $(function() {
       $.post("{% url "curation:tracking-citation" instance.id %}/" + tracking_id, function(data) {
           if (data.result == 'success') {
             $('#tracking-' + tracking_id).remove();
+            if (data.state == null) {
+              makePrimary("fully_entered-btn")
+              makeDefault("proofed-btn")
+              makeDefault("authorized-btn")
+            }
+            if (data.state == "FU") {
+              makePrimary("proofed-btn")
+              makeDefault("fully_entered-btn")
+              makeDefault("authorized-btn")
+            }
+            if (data.state == "PD") {
+              makePrimary("authorized-btn")
+              makeDefault("fully_entered-btn")
+              makeDefault("proofed-btn")
+            }
           }
         })
     }
     $('#delete-tracking-modal').modal('hide')
   })
+
+  function makePrimary(btnId) {
+    $("#" + btnId).removeClass('btn-default')
+    $("#" + btnId).addClass('btn-primary')
+  }
+  function makeDefault(btnId) {
+    $("#" + btnId).removeClass('btn-primary')
+    $("#" + btnId).addClass('btn-default')
+  }
 })
 </script>
 

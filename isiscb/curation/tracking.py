@@ -26,3 +26,4 @@ class TrackingWorkflow(object):
 
     def is_workflow_action_allowed(self, action):
         return self.instance.tracking_state in TrackingWorkflow.allowed(action) and action not in self.entries
+    

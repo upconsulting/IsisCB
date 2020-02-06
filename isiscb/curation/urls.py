@@ -81,6 +81,7 @@ urlpatterns = [
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking$', views.tracking_for_citation, name='tracking-citation'),
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking/(?P<tracking_id>[A-Z0-9]+)$', tracking_views.delete_tracking_for_citation, name='delete-tracking-citation'),
+    url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/tracking/proof-activate$', tracking_views.proof_and_set_active, name='proof-set-active'),
     url(r'^(?i)authority/(?P<authority_id>[A-Z0-9]+)/tracking$', views.tracking_for_authority, name='tracking-authority'),
 
     url(r'^(?i)citation/(?P<citation_id>[A-Z0-9]+)/ccrelation/$', views.create_ccrelation_for_citation, name='create_ccrelation_for_citation'),

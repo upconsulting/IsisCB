@@ -21,6 +21,11 @@ $(function() {
    $(".oneLine").each(function(idx, elem) {
      $(elem).attr('rows', 1);
    });
+   $("#proofed_setactive_btn").click(function() {
+     $("#proof-active-form").submit()
+     return false
+   })
+
 });
 </script>
 <style>
@@ -69,6 +74,9 @@ $(function() {
 {% endif %}
 
 {% endwith %}
+<form id="proof-active-form" action="{% url 'curation:proof-set-active' instance.id %}" method="POST">
+  {% csrf_token %}
+</form>
 
 <form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
@@ -102,6 +110,8 @@ $(function() {
               {{ form.record_status_value|addcss:"form-control input-sm" }}
 
               {{ form.type_controlled }}
+
+              <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
             </div>
           </div>
           <div class="col-md-12">

@@ -814,8 +814,37 @@ class Citation(ReferencedEntity, CuratedMixin):
 
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         self.title_for_display = get_display_title(self)
+        self.set_tracking_state()
 
         super(Citation, self).save(*args, **kwargs)
+
+    def set_tracking_state(self):
+        ratings = {
+            Tracking.HSTM_UPLOAD: -1,
+            Tracking.FULLY_ENTERED: 0,
+            Tracking.PROOFED: 1,
+            Tracking.AUTHORIZED: 2,
+            Tracking.PRINTED: 3,
+        }
+
+        entries = [x.type_controlled for x in self.tracking_records.all()]
+        sorted_entries = sorted(entries, key=lambda x: ratings[x] if x else -1, reverse=True)
+        current_state = None
+        if sorted_entries:
+            current_state = sorted_entries[0]
+        is_hstm = (Tracking.HSTM_UPLOAD in entries)
+
+        tracking_mapping = {
+            Citation.HSTM_UPLOAD: Tracking.HSTM_UPLOAD,
+            Citation.PRINTED: Tracking.PRINTED,
+            Citation.AUTHORIZED: Tracking.AUTHORIZED,
+            Citation.PROOFED: Tracking.PROOFED,
+            Citation.FULLY_ENTERED: Tracking.FULLY_ENTERED,
+            None: None
+        }
+
+        self.tracking_state = tracking_mapping[current_state]
+        self.hstm_uploaded = Citation.IS_HSTM_UPLOADED if is_hstm else None
 
     @property
     def normalized_title(self):
@@ -918,6 +947,13 @@ class Citation(ReferencedEntity, CuratedMixin):
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
                                       choices=TRACKING_CHOICES, db_index=True)
     """The current state of the record."""
+
+    IS_HSTM_UPLOADED = "HS"
+    HSTM_UPLOAD_CHOICES = (
+        (IS_HSTM_UPLOADED, "HSTM Upload"),
+    )
+    hstm_uploaded = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=HSTM_UPLOAD_CHOICES)
 
     abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.

@@ -182,7 +182,10 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
 
     idents = list(queryset.values_list('id', flat=True))
     try:
-        queryset.update(tracking_state=target_state, modified_by=user_id, modified_on=timezone.now())
+        if target_state != Citation.HSTM_UPLOAD:
+            queryset.update(tracking_state=target_state, modified_by=user_id, modified_on=timezone.now())
+        else:
+            queryset.update(hstm_uploaded=Citation.IS_HSTM_UPLOADED, modified_by=user_id, modified_on=timezone.now())
         for ident in idents:
             if object_type == 'AUTHORITY':
                 AuthorityTracking.objects.create(authority_id=ident,
