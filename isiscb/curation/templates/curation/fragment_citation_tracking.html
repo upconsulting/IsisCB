@@ -130,16 +130,19 @@ $(function() {
           if (data.result == 'success') {
             $('#tracking-' + tracking_id).remove();
             if (data.state == null) {
+              $("#tracking_tab").text("Tracking: None")
               makePrimary("fully_entered-btn")
               makeDefault("proofed-btn")
               makeDefault("authorized-btn")
             }
             if (data.state == "FU") {
+              $("#tracking_tab").text("Tracking: Entered")
               makePrimary("proofed-btn")
               makeDefault("fully_entered-btn")
               makeDefault("authorized-btn")
             }
             if (data.state == "PD") {
+              $("#tracking_tab").text("Tracking: Authorized")
               makePrimary("authorized-btn")
               makeDefault("fully_entered-btn")
               makeDefault("proofed-btn")
