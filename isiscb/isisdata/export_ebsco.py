@@ -85,7 +85,7 @@ def _citation_title(obj, extra, config={}):
     if not obj.type_controlled == Citation.REVIEW:
         if not obj.title:
             return u"Title missing"
-        return obj.title
+        return _prepare_title(obj.title)
 
     # if citation is a review build title from reviewed citation
     reviewed_books = obj.relations_from.filter(type_controlled=CCRelation.REVIEW_OF)
@@ -101,7 +101,10 @@ def _citation_title(obj, extra, config={}):
 
     if book is None:
         return u"Review of unknown publication"
-    return u'Review of "%s"' % book.title
+    return u'Review of "%s"' % _prepare_title(book.title)
+
+def _prepare_title(title):
+    return unicode(title).replace("\n", " ")
 
 # adjustment of export according to ISISCB-1033
 def create_acr_string(author, additional_fields = [], delimiter=u" "):
@@ -471,7 +474,7 @@ citation_editor = Column(u'Editors', _citation_editor, Citation)
 year_of_publication = Column(u'Year',
                              lambda obj, extra, config={}: obj.publication_date.year)
 edition_details = Column(u'Edition details', lambda obj, extra, config={}: obj.edition_details)
-description = Column(u'Description', lambda obj, extra, config={}: obj.description)
+description = Column(u'Description', lambda obj, extra, config={}: obj.description.replace("\n", " ") if obj.description else "")
 language = Column(u'Language', _language)
 place_publisher = Column(u'Place: Publisher', _place_publisher)
 physical_details = Column(u'Physical details', lambda obj, extra, config={}: obj.physical_details)
