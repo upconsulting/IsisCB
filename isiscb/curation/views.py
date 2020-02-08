@@ -568,9 +568,10 @@ def tracking_for_citation(request, citation_id):
         'current_index': current_index
     }
 
-    trackType = request.GET.get('type', None)
-    workflow = TrackingWorkflow(citation)
-    if workflow.is_workflow_action_allowed(trackType):
+    if request.method == "POST":
+        search_key = request.POST.get('search', request.POST.get('search'))
+        current_index = request.POST.get('current', request.POST.get('current'))
+        trackType = request.POST.get('type', None)
         tracking = Tracking()
         tracking.type_controlled = trackType
         tracking.modified_by = request.user
@@ -578,8 +579,8 @@ def tracking_for_citation(request, citation_id):
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
         tracking.citation = citation
         tracking.save()
-        citation.tracking_state = trackType
         citation.save()
+
     target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking'
     if search_key and current_index:
         target += '&search=%s&current=%s' % (search_key, current_index)
