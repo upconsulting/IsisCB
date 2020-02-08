@@ -10,7 +10,7 @@ from django.conf import settings
 from datetime import datetime
 from unidecode import unidecode
 
-import re
+import re, itertools
 # rdflib complains a lot.
 logging.getLogger("rdflib").setLevel(logging.ERROR)
 
@@ -471,9 +471,12 @@ class ZoteroIngest(object):
         author_data = []
         for s, p, o in self.graph.triples((node, None, None)):
             if isinstance(o, BNode):
-                forename_iter = self.graph.objects(o, FOAF.givenname)
+                # IEXP-139: apparently sometimes the node is called givenName not givenname,
+                # hence this uglyness here
+                forename_iter1 = self.graph.objects(o, FOAF.givenname)
+                forename_iter2 = self.graph.objects(o, FOAF.givenName)
                 surname_iter = self.graph.objects(o, FOAF.surname)
-                forename = u' '.join(map(norm, [n for n in forename_iter]))
+                forename = u' '.join(map(norm, [n for n in itertools.chain(forename_iter1, forename_iter2)]))
                 surname = u' '.join(map(norm, [n for n in surname_iter]))
                 data = {
                     u'name': ' '.join([forename, surname]).strip(),
