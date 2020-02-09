@@ -1013,6 +1013,7 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
+            
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)

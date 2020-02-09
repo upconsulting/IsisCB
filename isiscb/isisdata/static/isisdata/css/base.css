@@ -255,6 +255,12 @@ div.timeline {
   /*margin-bottom: 30px;*/
 }
 
+.details_authority td {
+  min-width: 100px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
 .menu {
   text-align: center;
 }
