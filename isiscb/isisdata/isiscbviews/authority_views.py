@@ -137,7 +137,7 @@ def authority(request, authority_id):
 
     # WordCloud
     sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100)
+                facet('subject_ids', size=100).facet('institution_ids', size=100)
     word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
             .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -147,6 +147,7 @@ def authority(request, authority_id):
 
     subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
+    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -259,6 +260,7 @@ def authority(request, authority_id):
         'query_string': query_string,
         'subject_ids_facet': subject_ids_facet,
         'related_contributors_facet': related_contributors_facet,
+        'related_institutions_facet': related_institutions_facet,
     }
     return render(request, 'isisdata/authority.html', context)
 

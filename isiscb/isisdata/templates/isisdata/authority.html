@@ -80,6 +80,24 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% endif %}
         </div>
       </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading"><strong>Related Institutions ({{related_institutions_facet|length}})</strong></div>
+        <div class="panel-body">
+          {% for facet in related_institutions_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact'%}<br>
+          {% endfor %}
+
+          {% if related_institutions_facet|length > 7 %}
+          <div class="more-facets">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#institutionModal">
+              More...
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
 
@@ -119,6 +137,29 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in subject_ids_facet %}
             <li>
               {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+<!-- institution Modal -->
+<div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Institutions</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_institutions_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact' %}<br>
             </li>
           {% endfor %}
         </ul>
@@ -169,10 +210,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <h3>{{ authority.name }}</h3>
 
     {% if authority.description %}
-    <p><strong>Description:</strong> <span id="desc_snippet">{{ authority.description|truncatewords:15 }}</span>
+    <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
       {% if authority.description|truncatewords:15|length < authority.description|length %}
-        <a href="#" id="desc_more">More</a>
-        <span id="desc_full" style="display:none">
+        <a href="#" id="desc_more" class="hidden-print">More</a>
+        <span id="desc_full" class="visible-print-block" style="display:none">
           {{ authority.description }}
           <a href="#" id="desc_hide">Less</a>
         </span>
