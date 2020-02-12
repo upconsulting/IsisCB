@@ -34,11 +34,125 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 {#% block title %}Authority{% endblock %#}
 
+
+
 {% block content %}
+
+<div class="col-sm-12">
+  <div class="main col-sm-12 col-md-6">
+      <!-- Progress through search results, if arriving from search view. -->
+      {% if search_results|length > 0 and fromsearch and search_current %}
+      <div style="padding-bottom: 5px">
+      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
+      </div>
+      <div class="alert alert-warning hidden-print" style="padding: 7px; margin-bottom: 5px;" >
+          <div class="row">
+              <div class="col-xs-3 text-center">
+                  {% if search_current >= 2 and search_previous %}
+                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
+                      <span aria-hidden="true" class="text-small">&laquo;Previous</span>
+                  </a>
+                  {% endif %}
+              </div>
+              <div class="col-xs-6 text-center">
+                  Showing result {{ search_current }} of {{ search_results|length }}
+              </div>
+              <div class="col-xs-3 text-center">
+                  {% if search_index < search_count and search_next %}
+                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
+                      <span aria-hidden="true" class="text-small">Next&raquo;</span>
+                  </a>
+                  {% endif %}
+              </div>
+          </div>
+      </div>
+      {% endif %}
+
+    <div class="alert alert-success" style="padding: 8px;" role="alert">{{ authority.get_type_controlled_display }}
+        <span class="btn-grp pull-right">
+            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+            <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
+        </span>
+    </div>
+
+    {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+
+    <h3>{{ authority.name }}</h3>
+
+    {% if authority.description %}
+    <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
+      {% if authority.description|truncatewords:15|length < authority.description|length %}
+        <a href="#" id="desc_more" class="hidden-print">More</a>
+        <span id="desc_full" class="visible-print-block" style="display:none">
+          {{ authority.description }}
+          <a href="#" id="desc_hide">Less</a>
+        </span>
+      {% endif %}
+    </p>
+    <script>
+      $(function() {
+        $("#desc_more").click(function() {
+          $("#desc_snippet").hide()
+          $("#desc_more").hide()
+          $("#desc_full").show()
+        })
+
+        $("#desc_hide").click(function() {
+          $("#desc_full").hide()
+          $("#desc_snippet").show()
+          $("#desc_more").show()
+        })
+      })
+    </script>
+    {% endif %}
+
+    {% for attribute in authority.attributes.all %}
+    {% if attribute|is_attribute_visible %}
+    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <div class="main col-sm-12 col-md-3">
+    {% with authority.linkeddata_public as linkeddata_public %}
+      {% if linkeddata_public.count > 0 %}
+      <div class="col-sm-12" style="padding-bottom: 15px">
+        <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+        {% for entry in linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="col-sm-12">
+      Search other databases:<br>
+
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+      <br>
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium</a>
+      <br>
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+      <br>
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+      <br>
+      <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+    </div>
+  </div>
+
+  <div class="main col-sm-12 col-md-3">
+    <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timelineModal">
+      <span class="glyphicon glyphicon-search"></span>
+    </button>
+    <div id="publication_chart_sm">
+      <div id="spinner_sm"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+      <div id="chart_sm"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <div class="row" ng-app="commentsApp">
   <div class="col-sm-12 col-md-2 hidden-print">
     <div class="menu">
-      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+
       &nbsp; &nbsp;
       <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
       &nbsp; &nbsp;
@@ -171,76 +285,33 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 
-<div class="col-sm-12 col-md-10">
-  <div class="main col-sm-12 col-md-5">
-      <!-- Progress through search results, if arriving from search view. -->
-      {% if search_results|length > 0 and fromsearch and search_current %}
-      <div class="alert alert-warning hidden-print" style="padding: 7px; margin-bottom: 5px;" >
-          <div class="row">
-              <div class="col-xs-3 text-center">
-                  {% if search_current >= 2 and search_previous %}
-                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">&laquo;Previous</span>
-                  </a>
-                  {% endif %}
-              </div>
-              <div class="col-xs-6 text-center">
-                  Showing result {{ search_current }} of {{ search_results|length }}
-              </div>
-              <div class="col-xs-3 text-center">
-                  {% if search_index < search_count and search_next %}
-                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">Next&raquo;</span>
-                  </a>
-                  {% endif %}
-              </div>
-          </div>
+<div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i></h4>
       </div>
-      {% endif %}
-
-    <div class="alert alert-success" style="padding: 8px;" role="alert">{{ authority.get_type_controlled_display }}
-        <span class="btn-grp pull-right">
-            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
-        </span>
+      <div class="modal-body">
+        <div id="publication_chart" >
+          <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+          <div id="chart"></div>
+          <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+          <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
+            Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
+            <span id="recalculationSpan"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
     </div>
+  </div>
+</div><!-- /modal -->
 
-    {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+<div class="col-sm-12 col-md-10">
 
-    <h3>{{ authority.name }}</h3>
-
-    {% if authority.description %}
-    <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
-      {% if authority.description|truncatewords:15|length < authority.description|length %}
-        <a href="#" id="desc_more" class="hidden-print">More</a>
-        <span id="desc_full" class="visible-print-block" style="display:none">
-          {{ authority.description }}
-          <a href="#" id="desc_hide">Less</a>
-        </span>
-      {% endif %}
-    </p>
-    <script>
-      $(function() {
-        $("#desc_more").click(function() {
-          $("#desc_snippet").hide()
-          $("#desc_more").hide()
-          $("#desc_full").show()
-        })
-
-        $("#desc_hide").click(function() {
-          $("#desc_full").hide()
-          $("#desc_snippet").show()
-          $("#desc_more").show()
-        })
-      })
-    </script>
-    {% endif %}
-
-    {% for attribute in authority.attributes.all %}
-    {% if attribute|is_attribute_visible %}
-    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
-    {% endif %}
-    {% endfor %}
 
     <table  class="details_authority" style="margin-top: 20px;">
       <tr>
@@ -253,16 +324,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     </div>
     <div class="col-sm-12 col-md-7">
-    <div id="publication_chart" >
-      <div><h4>Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i>.</h4></div>
-      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
-      <div id="chart"></div>
-      <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
-      <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
-        Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
-        <span id="recalculationSpan"></span>
-      </div>
-    </div>
+
     </div>
     <div class="col-md-9" style="padding-top: 15px">
 
@@ -406,28 +468,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div class="col-md-3" style="padding-top: 15px">
 
-      {% with authority.linkeddata_public as linkeddata_public %}
-        {% if linkeddata_public.count > 0 %}
-        <div class="col-sm-12" style="padding-bottom: 15px">
-          <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
-          {% for entry in linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}
-        </div>
-        {% endif %}
-      {% endwith %}
 
-      <div class="col-sm-12">
-        Search other databases:<br>
-
-        <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
-        <br>
-        <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium</a>
-        <br>
-        <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
-        <br>
-        <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
-        <br>
-        <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
-      </div>
 
       <div class="col-sm-12 main" style="padding-top: 15px">
         {% include "isisdata/comments.html" %}
@@ -437,6 +478,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
   </div>
 </div>
+
+
 
   <!-- Load c3.css -->
   <link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
@@ -504,6 +547,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
           if (data.status == 'done') {
             $('#spinner').hide();
+            $("#spinner_sm").hide();
             var genDate = new Date(data.generated_on);
             $("#timelineDate").text(genDate.toLocaleDateString());
             $("#timelineTime").text(genDate.toLocaleTimeString());
@@ -534,7 +578,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             setTimeout(pollForTimeline, 1000)
           } else {
             $('#spinner').hide();
+            $('#spinner_sm').hide()
             $("#chart").append("Timeline could not be loaded. An error occurred.")
+            $("#chart_sm").append("Timeline could not be loaded. An error occurred.")
           }
         });
       }
@@ -585,8 +631,53 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           };
         }
 
+        var chart_sm = c3.generate({
+          bindto: '#chart_sm',
+          size: {
+              height: 200,
+          },
+          data: {
+            x: 'Years',
+            columns: [years].concat(cols),
+            type: 'bar',
+            groups: [
+              current_groups
+            ],
+            colors: colors,
+            names: names,
+            onclick: function (d, element) {
+              return
+            },
+            order: function (t1, t2) {
+              return t1.id < t2.id;
+            },
+            onclick: function (d, element) {
+              var date = d['x']
+              window.location.href = '{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }}) AND publication_date:' + date + '&raw_search=True';
+            },
+          },
+          legend: {
+            show: false
+          },
+          tooltip: {
+            format: {
+              title: function (x, index) { return x; }
+            },
+          },
+          axis : {
+            x: {
+              tick: {
+                  format: (d,i) => '',
+              }
+            },
+          }
+        })
+
         var chart = c3.generate({
           bindto: '#chart',
+          size: {
+              width:810,
+          },
           data: {
             x: 'Years',
             columns: [years].concat(cols),
