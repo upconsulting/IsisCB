@@ -37,82 +37,104 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 
 {% block content %}
-
+<div ng-app="commentsApp">
 <div class="col-sm-12">
-  <div class="main col-sm-12 col-md-6">
+  <div class="col-sm-12 col-md-6">
       <!-- Progress through search results, if arriving from search view. -->
       {% if search_results|length > 0 and fromsearch and search_current %}
       <div style="padding-bottom: 5px">
-      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
-      </div>
-      <div class="alert alert-warning hidden-print" style="padding: 7px; margin-bottom: 5px;" >
-          <div class="row">
-              <div class="col-xs-3 text-center">
-                  {% if search_current >= 2 and search_previous %}
-                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">&laquo;Previous</span>
-                  </a>
-                  {% endif %}
-              </div>
-              <div class="col-xs-6 text-center">
-                  Showing result {{ search_current }} of {{ search_results|length }}
-              </div>
-              <div class="col-xs-3 text-center">
-                  {% if search_index < search_count and search_next %}
-                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">Next&raquo;</span>
-                  </a>
-                  {% endif %}
-              </div>
+
+      <div class=" hidden-print" style="padding: 7px; margin-bottom: 5px;" >
+        <div class="row">
+          <div class="col-xs-4">
+            <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
           </div>
+          <div class="col-xs-2 text-left">
+                {% if search_current >= 2 and search_previous %}
+                <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous">
+                    <span aria-hidden="true" >&laquo;Previous</span>
+                </a>
+                {% endif %}
+          </div>
+          <div class="col-xs-4 text-center">
+              Showing result {{ search_current }} of {{ search_results|length }}
+          </div>
+          <div class="col-xs-2 text-right">
+              {% if search_index < search_count and search_next %}
+              <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" >
+                  <span aria-hidden="true" >Next&raquo;</span>
+              </a>
+              {% endif %}
+          </div>
+        </div>
+      </div>
       </div>
       {% endif %}
 
-    <div class="alert alert-success" style="padding: 8px;" role="alert">{{ authority.get_type_controlled_display }}
-        <span class="btn-grp pull-right">
-            {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
-        </span>
-    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        {{ authority.get_type_controlled_display }}
+          <span class="btn-grp pull-right">
+              {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+              <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
+          </span>
+      </div>
 
-    {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+      <div class="panel-body">
+      {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
 
-    <h3>{{ authority.name }}</h3>
+      <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
 
-    {% if authority.description %}
-    <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
-      {% if authority.description|truncatewords:15|length < authority.description|length %}
-        <a href="#" id="desc_more" class="hidden-print">More</a>
-        <span id="desc_full" class="visible-print-block" style="display:none">
-          {{ authority.description }}
-          <a href="#" id="desc_hide">Less</a>
-        </span>
+      {% if authority.description %}
+      <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
+        {% if authority.description|truncatewords:15|length < authority.description|length %}
+          <a href="#" id="desc_more" class="hidden-print">More</a>
+          <span id="desc_full" class="visible-print-block" style="display:none">
+            {{ authority.description }}
+            <a href="#" id="desc_hide">Less</a>
+          </span>
+        {% endif %}
+      </p>
+      <script>
+        $(function() {
+          $("#desc_more").click(function() {
+            $("#desc_snippet").hide()
+            $("#desc_more").hide()
+            $("#desc_full").show()
+          })
+
+          $("#desc_hide").click(function() {
+            $("#desc_full").hide()
+            $("#desc_snippet").show()
+            $("#desc_more").show()
+          })
+        })
+      </script>
       {% endif %}
-    </p>
-    <script>
-      $(function() {
-        $("#desc_more").click(function() {
-          $("#desc_snippet").hide()
-          $("#desc_more").hide()
-          $("#desc_full").show()
-        })
 
-        $("#desc_hide").click(function() {
-          $("#desc_full").hide()
-          $("#desc_snippet").show()
-          $("#desc_more").show()
-        })
-      })
-    </script>
-    {% endif %}
+      {% for attribute in authority.attributes.all %}
+      {% if attribute|is_attribute_visible %}
+      <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+      {% endif %}
+      {% endfor %}
 
-    {% for attribute in authority.attributes.all %}
-    {% if attribute|is_attribute_visible %}
-    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
-    {% endif %}
-    {% endfor %}
+      <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        See all {{related_citations_count}} citation records for {{authority.name}}.
+      </a>
+
+
+      <table  class="details_authority" style="margin-top: 20px;">
+        <tr>
+          <td>Authority URI:</td>
+          <td>{{ authority | get_uri }}</td>
+        </tr>
+      </table>
+      </div>
+    </div>
   </div>
-  <div class="main col-sm-12 col-md-3">
+
+  <div class="col-sm-12 col-md-3" style="padding-top: 10px;">
     {% with authority.linkeddata_public as linkeddata_public %}
       {% if linkeddata_public.count > 0 %}
       <div class="col-sm-12" style="padding-bottom: 15px">
@@ -137,7 +159,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 
-  <div class="main col-sm-12 col-md-3">
+  <div class="col-sm-12 col-md-3">
     <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timelineModal">
       <span class="glyphicon glyphicon-search"></span>
     </button>
@@ -147,73 +169,123 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 </div>
-</div>
 
-<div class="row" ng-app="commentsApp">
-  <div class="col-sm-12 col-md-2 hidden-print">
-    <div class="menu">
+<div class="col-sm-12">
+<div class="col-sm-12 col-md-4">
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Subjects ({{subject_ids_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in subject_ids_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
+      {% endfor %}
 
-      &nbsp; &nbsp;
-      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
-      <hr>
-    </div>
-    <div>
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Related Subjects ({{subject_ids_facet|length}})</strong></div>
-        <div class="panel-body">
-          {% for facet in subject_ids_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
-          {% endfor %}
-
-          {% if subject_ids_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
-        </div>
+      {% if subject_ids_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
+          More...
+        </button>
       </div>
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Related Authors & Contributors ({{related_contributors_facet|length}})</strong></div>
-        <div class="panel-body">
-          {% for facet in related_contributors_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}<br>
-          {% endfor %}
-
-          {% if related_contributors_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Related Institutions ({{related_institutions_facet|length}})</strong></div>
-        <div class="panel-body">
-          {% for facet in related_institutions_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact'%}<br>
-          {% endfor %}
-
-          {% if related_institutions_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#institutionModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
-        </div>
-      </div>
+      {% endif %}
     </div>
   </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Categories ({{related_categories_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in related_categories_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+      {% endfor %}
+
+      {% if related_categories_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#categoryModal">
+          More...
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div class="col-sm-12 col-md-4">
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Authors & Contributors ({{related_contributors_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in related_contributors_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}<br>
+      {% endfor %}
+
+      {% if related_contributors_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
+          More...
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Time Periods ({{related_timeperiod_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in related_timeperiod_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}<br>
+      {% endfor %}
+
+      {% if related_timeperiod_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#timePeriodModal">
+          More...
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="col-sm-12 col-md-4">
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Places ({{related_geographics_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in related_geographics_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
+      {% endfor %}
+
+      {% if related_geographics_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#placesModal">
+          More...
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>Related Institutions ({{related_institutions_facet|length}})</strong></div>
+    <div class="panel-body">
+      {% for facet in related_institutions_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact'%}<br>
+      {% endfor %}
+
+      {% if related_institutions_facet|length > 7 %}
+      <div class="more-facets">
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#institutionModal">
+          More...
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</div>
 
 <!-- facet modals -->
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
@@ -285,6 +357,78 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_geographics_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- categories Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Categories</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_categories_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- categories Modal -->
+<div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Time Periods</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_timeperiod_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
 <div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -310,176 +454,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 
-<div class="col-sm-12 col-md-10">
-
-
-    <table  class="details_authority" style="margin-top: 20px;">
-      <tr>
-        <td>Authority URI:</td>
-        <td>{{ authority | get_uri }}</td>
-      </tr>
-    </table>
-
-
-
-    </div>
-    <div class="col-sm-12 col-md-7">
-
-    </div>
-    <div class="col-md-9" style="padding-top: 15px">
-
-
-    <h4>All records associated with this authority. <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">See a list of {{related_citations_count}} records.</a></h4>
-    <p>Records related by role:</p>
-
-    {% if related_citations_author %}
-    <p style="padding-top: 12px"><strong>Author</strong> (most recent) <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_author %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-
-    {% endif %}
-
-    {% if related_citations_editor %}
-    <p style="padding-top: 12px"><strong>Editor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_editor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_advisor %}
-    <p style="padding-top: 12px"><strong>Advisor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_advisor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-
-    {% endif %}
-
-    {% if related_citations_contributor %}
-    <p style="padding-top: 12px"><strong>Contributor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} records related in this way.</a></h5>
-
-      {% for rel_citation in related_citations_contributor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_translator %}
-    <p style="padding-top: 12px"><strong>Translator</strong> (most recent) <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_translator %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_subject %}
-    <p style="padding-top: 12px"><strong>Subject</strong> (most recent) <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_subject %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_category %}
-    <p style="padding-top: 12px"><strong>Category</strong> (most recent) <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_category %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_publisher %}
-    <p style="padding-top: 12px"><strong>Publisher</strong> (most recent) <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_publisher %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_school %}
-    <p style="padding-top: 12px"><strong>School</strong> (most recent) <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_school %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_institution %}
-    <p style="padding-top: 12px"><strong>Institution</strong> (most recent) <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_institution %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_meeting %}
-    <p style="padding-top: 12px"><strong>Meeting</strong> (most recent) <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_meeting %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_periodical %}
-    <p style="padding-top: 12px"><strong>Periodical</strong> (most recent) <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_periodical %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_book_series %}
-    <p style="padding-top: 12px"><strong>Book Series</strong> (most recent) <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_book_series %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    </div>
-
-    <div class="col-md-3" style="padding-top: 15px">
-
-
-
+    <div class="col-md-12" style="padding-top: 15px">
       <div class="col-sm-12 main" style="padding-top: 15px">
         {% include "isisdata/comments.html" %}
       </div>
     </div>
 
-
-  </div>
 </div>
-
-
 
   <!-- Load c3.css -->
   <link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
@@ -670,6 +651,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   format: (d,i) => '',
               }
             },
+            y : {
+                tick: {
+                    format: function(x) { return x % 1 === 0 ? x : ''; },
+                }
+            }
           }
         })
 
