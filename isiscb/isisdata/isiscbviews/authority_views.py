@@ -139,7 +139,8 @@ def authority(request, authority_id):
     sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
                 facet('geographic_ids', size=100).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100)
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids')
     word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
             .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -153,6 +154,9 @@ def authority(request, authority_id):
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids']
     related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['time_period_ids']
     related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids']
+    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids']
+    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids']
+    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -269,6 +273,9 @@ def authority(request, authority_id):
         'related_geographics_facet': related_geographics_facet,
         'related_timeperiod_facet': related_timeperiod_facet,
         'related_categories_facet': related_categories_facet,
+        'related_other_person_facet': related_other_person_facet,
+        'related_publisher_facet': related_publisher_facet,
+        'related_journal_facet': related_journal_facet,
     }
     return render(request, 'isisdata/authority.html', context)
 

@@ -315,7 +315,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
             elif a['acrelation__type_broad_controlled'] == ACRelation.SUBJECT_CONTENT:
                 multivalue_data['about_person_ids'].append(ident)
-            elif a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
+
+            if a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
                 multivalue_data['other_person_ids'].append(ident)
 
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
