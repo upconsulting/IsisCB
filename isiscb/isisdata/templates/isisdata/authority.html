@@ -14,7 +14,21 @@ var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
 {% if source_content_type %}
 var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
 </script>
+
+<style>
+.panel-default>.panel-heading-relation {
+  background-color: #e0eef5;
+}
+
+.panel-default>.panel-heading-subjects {
+  background-color: #fff6e0;
+}
+</style>
 
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 
@@ -71,10 +85,28 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       </div>
       {% endif %}
 
+    <script>
+      //# sourceURL=copy.js
+      $(function() {
+        $("#authorityLink").click(function() {
+          var copyTextarea = document.querySelector('#hiddenAuthorityLink');
+          copyTextarea.focus();
+          copyTextarea.select();
+          document.execCommand("copy");
+          $.notify("URL of this record has been copied to your clipboard.", "info", {
+            clickToHide: true,
+            style: 'bootstrap',
+            gap: 5,
+          });
+        })
+      })
+    </script>
     <div class="panel panel-default">
       <div class="panel-heading">
         {{ authority.get_type_controlled_display }}
           <span class="btn-grp pull-right">
+            <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ authority.id }}</span>
+            <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
               {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
               <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
           </span>
@@ -84,6 +116,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
 
       <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
+
+      <p>
+      <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        See all {{related_citations_count}} citation records for {{authority.name}}.
+      </a>
+      </p>
 
       {% if authority.description %}
       <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
@@ -117,11 +156,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
       {% endif %}
       {% endfor %}
-
-      <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
-        <i class="fa fa-bookmark" aria-hidden="true"></i>
-        See all {{related_citations_count}} citation records for {{authority.name}}.
-      </a>
 
 
       <table  class="details_authority" style="margin-top: 20px;">
@@ -176,7 +210,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <div class="col-sm-12">
 <div class="col-sm-12 col-md-3">
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Authors & Contributors ({{related_contributors_facet|length}})</strong></div>
+    <div class="panel-heading-relation panel-heading">
+      <strong>Related Authors & Contributors ({{related_contributors_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows authors, editors, etc. of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
       {% for facet in related_contributors_facet|slice:"7" %}
       {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}<br>
@@ -194,7 +235,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Publisher ({{related_publisher_facet|length}})</strong></div>
+    <div class="panel-heading panel-heading-relation">
+      <strong>Related Publisher ({{related_publisher_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows publishers of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
       {% for facet in related_publisher_facet|slice:"7" %}
       {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids_exact' %}<br>
@@ -211,18 +259,49 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 
+  <div class="panel panel-default">
+      <div class="panel-heading panel-heading-relation">
+        <strong>Related Journals ({{related_journal_facet|length}})</strong>
+        <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+          data-placement="right" data-trigger="focus" tabindex="0" role="button"
+          data-content="This list shows journals of Citation records linked to this Authority record.">
+          <i class="fa fa-question-circle" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div class="panel-body">
+        {% for facet in related_journal_facet|slice:"7" %}
+        {% include 'isisdata/fragment_facet_link.html' with facet_field='other_periodical_ids_exact' %}<br>
+        {% endfor %}
+
+        {% if related_journal_facet|length > 7 %}
+        <div class="more-facets">
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-link" data-toggle="modal" data-target="#journalModal">
+            More...
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
 </div>
 
 <div class="col-sm-12 col-md-3">
 
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Subjects ({{subject_ids_facet|length}})</strong></div>
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related Concepts ({{related_subject_concepts_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
-      {% for facet in subject_ids_facet|slice:"7" %}
-      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
+      {% for facet in related_subject_concepts_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids_exact' %}<br>
       {% endfor %}
 
-      {% if subject_ids_facet|length > 7 %}
+      {% if related_subject_concepts_facet|length > 7 %}
       <div class="more-facets">
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
@@ -234,7 +313,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Categories ({{related_categories_facet|length}})</strong></div>
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related Categories ({{related_categories_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to category terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
       {% for facet in related_categories_facet|slice:"7" %}
       {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
@@ -254,16 +340,23 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 <div class="col-sm-12 col-md-3">
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Journals ({{related_journal_facet|length}})</strong></div>
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related People ({{related_subject_people_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
-      {% for facet in related_journal_facet|slice:"7" %}
-      {% include 'isisdata/fragment_facet_link.html' with facet_field='other_periodical_ids_exact' %}<br>
+      {% for facet in related_subject_people_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact'%}<br>
       {% endfor %}
 
-      {% if related_journal_facet|length > 7 %}
+      {% if related_subject_people_facet|length > 7 %}
       <div class="more-facets">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#journalModal">
+        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#peopleModal">
           More...
         </button>
       </div>
@@ -272,13 +365,20 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 
   <div class="panel panel-default">
-    <div class="panel-heading"><strong>Related Institutions ({{related_institutions_facet|length}})</strong></div>
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related Institutions ({{related_subject_institutions_facet|length}})</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="right" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
     <div class="panel-body">
-      {% for facet in related_institutions_facet|slice:"7" %}
-      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact'%}<br>
+      {% for facet in related_subject_institutions_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact'%}<br>
       {% endfor %}
 
-      {% if related_institutions_facet|length > 7 %}
+      {% if related_subject_institutions_facet|length > 7 %}
       <div class="more-facets">
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-link" data-toggle="modal" data-target="#institutionModal">
@@ -290,9 +390,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div>
 
+
   <div class="col-sm-12 col-md-3">
-    <div class="panel panel-default">
-      <div class="panel-heading"><strong>Related Places ({{related_geographics_facet|length}})</strong></div>
+    <div class="panel-heading-subjects panel panel-default">
+      <div class="panel-heading-subjects panel-heading">
+        <strong>Related Places ({{related_geographics_facet|length}})</strong>
+        <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+          data-placement="left" data-trigger="focus" tabindex="0" role="button"
+          data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+          <i class="fa fa-question-circle" aria-hidden="true"></i>
+        </a>
+      </div>
       <div class="panel-body">
         {% for facet in related_geographics_facet|slice:"7" %}
         {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
@@ -310,7 +418,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
 
     <div class="panel panel-default">
-      <div class="panel-heading"><strong>Related Times ({{related_timeperiod_facet|length}})</strong></div>
+      <div class="panel-heading-subjects panel-heading">
+        <strong>Related Times ({{related_timeperiod_facet|length}})</strong>
+        <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+          data-placement="left" data-trigger="focus" tabindex="0" role="button"
+          data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+          <i class="fa fa-question-circle" aria-hidden="true"></i>
+        </a>
+      </div>
       <div class="panel-body">
         {% for facet in related_timeperiod_facet|slice:"7" %}
         {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}<br>
@@ -358,13 +473,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Subjects</h4>
+        <h4 class="modal-title" id="myModalLabel">Related Concepts</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for facet in subject_ids_facet %}
+          {% for facet in related_subject_concepts_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_exact' %}<br>
             </li>
           {% endfor %}
         </ul>
@@ -376,18 +491,42 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 <!-- institution Modal -->
+<div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related People</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_subject_people_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- institution Modal -->
 <div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Institutions</h4>
+        <h4 class="modal-title" id="myModalLabel">Related People</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for facet in related_institutions_facet %}
+          {% for facet in related_subject_institutions_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institution_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact' %}<br>
             </li>
           {% endfor %}
         </ul>
