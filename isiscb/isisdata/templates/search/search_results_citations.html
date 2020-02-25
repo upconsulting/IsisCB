@@ -54,6 +54,9 @@
             {% if result.book_title %}
               In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
             {% endif %}
+            {% if result.periodicals %}
+              <em>{{ result.periodicals.0 }}</em>{% if not result.page_string %}.{% endif %}
+            {% endif %}
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
 
