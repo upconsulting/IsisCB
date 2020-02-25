@@ -498,7 +498,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
         This is here just so that we can sort chapters in books.
         """
-        if data['type_controlled'] != Citation.CHAPTER:
+        if data['type_controlled'] not in [Citation.CHAPTER, Citation.ARTICLE]:
             return ""
         page_start_string = data['part_details']['page_begin']
         page_end_string = data['part_details']['page_end']
