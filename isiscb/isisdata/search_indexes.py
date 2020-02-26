@@ -328,11 +328,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
                 # Prefer the ACRelation.name_for_display_in_citation, if
                 #  present.
-                aname = a['acrelation__name_for_display_in_citation']
-                if not aname:
-                    aname = name
-                if aname not in multivalue_data['authors']:
-                    multivalue_data['authors'].append(aname)
+                # IEXP-31: only append authors and editors to authors field
+                if a['acrelation__type_controlled'] in [ACRelation.AUTHOR, ACRelation.EDITOR]:
+                    aname = a['acrelation__name_for_display_in_citation']
+                    if not aname:
+                        aname = name
+                    if aname not in multivalue_data['authors']:
+                        multivalue_data['authors'].append(aname)
 
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]

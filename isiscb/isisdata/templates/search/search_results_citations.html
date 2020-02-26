@@ -40,7 +40,7 @@
 
           <br>
             {% if result.authors %}
-               {{ result.authors|joinby:"; " }}
+               {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
             {% else %}
               Author missing
             {% endif %}
