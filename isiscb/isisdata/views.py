@@ -1105,6 +1105,8 @@ class IsisSearchView(FacetedSearchView):
         extra['request'] = self.request
 
         paginator, page = self.build_page()
+        extra['show_publisher_types'] = [dict(Citation.TYPE_CHOICES)[Citation.BOOK], dict(Citation.TYPE_CHOICES)[Citation.CHAPTER]]
+        extra['show_school_types'] = [dict(Citation.TYPE_CHOICES)[Citation.THESIS]]
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')

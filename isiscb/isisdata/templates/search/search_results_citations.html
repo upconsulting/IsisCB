@@ -60,6 +60,15 @@
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
 
+            {% if result.type in show_publisher_types %}
+            {{ result.publishers | joinby:", "}}
+            {% endif %}
+
+            {% if result.type in show_school_types %}
+            {{ result.schools|joinby:", " }}
+            {% endif %}
+
+
             <span class="visible-print-inline">({{ citation_url }})</span>
 
             <!-- Zotero -->
