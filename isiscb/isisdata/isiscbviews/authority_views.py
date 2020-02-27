@@ -137,7 +137,12 @@ def authority(request, authority_id):
 
     # WordCloud
     sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100)
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=100).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100)
     word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
             .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -147,6 +152,16 @@ def authority(request, authority_id):
 
     subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
+    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids']
+    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids']
+    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['time_period_ids']
+    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids']
+    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids']
+    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids']
+    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids']
+    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids']
+    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids']
+    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -154,7 +169,7 @@ def authority(request, authority_id):
     fromsearch = request.GET.get('fromsearch', False)
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
+        search_key = base64.b64encode(last_query)
     else:
         search_key = None
 
@@ -259,6 +274,16 @@ def authority(request, authority_id):
         'query_string': query_string,
         'subject_ids_facet': subject_ids_facet,
         'related_contributors_facet': related_contributors_facet,
+        'related_institutions_facet': related_institutions_facet,
+        'related_geographics_facet': related_geographics_facet,
+        'related_timeperiod_facet': related_timeperiod_facet,
+        'related_categories_facet': related_categories_facet,
+        'related_other_person_facet': related_other_person_facet,
+        'related_publisher_facet': related_publisher_facet,
+        'related_journal_facet': related_journal_facet,
+        'related_subject_concepts_facet': related_subject_concepts_facet,
+        'related_subject_people_facet': related_subject_people_facet,
+        'related_subject_institutions_facet': related_subject_institutions_facet,
     }
     return render(request, 'isisdata/authority.html', context)
 

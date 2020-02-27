@@ -103,6 +103,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     creative_works = indexes.MultiValueField(faceted=True, indexed=False)
     events = indexes.MultiValueField(faceted=True, indexed=False)
 
+    # IEXP-21: for facet boxes on authority page
+    concepts_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    people_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    institutions_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
     data_fields = [
         'id',
         'title',
@@ -262,22 +267,24 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     multivalue_data['geographics'].append(name)
                     multivalue_data['geographic_ids'].append(ident)
                 else:
-
-
                     if a['acrelation__authority__type_controlled'] == Authority.INSTITUTION:
                         multivalue_data['subject_institutions'].append(name)
+                        multivalue_data['institutions_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled'] == Authority.PERSON:
                         multivalue_data['people'].append(name)
+                        multivalue_data['people_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled']  == Authority.SERIAL_PUBLICATION:
                         multivalue_data['serial_publications'].append(name)
                     elif a['acrelation__authority__type_controlled']  == Authority.CLASSIFICATION_TERM:
                         multivalue_data['classification_terms'].append(name)
                     elif a['acrelation__authority__type_controlled']  == Authority.CONCEPT:
                         multivalue_data['concepts'].append(name)
+                        multivalue_data['concepts_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled']  == Authority.CREATIVE_WORK:
                         multivalue_data['creative_works'].append(name)
                     elif a['acrelation__authority__type_controlled']  == Authority.EVENT:
                         multivalue_data['events'].append(name)
+
 
             elif a['acrelation__type_controlled'] == ACRelation.INSTITUTION:
                 multivalue_data['institutions'].append(name)
@@ -319,7 +326,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
             elif a['acrelation__type_broad_controlled'] == ACRelation.SUBJECT_CONTENT:
                 multivalue_data['about_person_ids'].append(ident)
-            elif a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
+
+            if a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
                 multivalue_data['other_person_ids'].append(ident)
 
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:

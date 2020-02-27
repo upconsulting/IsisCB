@@ -8,8 +8,7 @@
             <a id="facebookShare" class="btn btn-social-icon btn-facebook">
                 <i class="fa fa-facebook"></i>
             </a>
-        </div>
-        <div class="col-sm-2">
+        
             <a id="twitterShare" class="btn btn-social-icon btn-twitter">
                 <i class="fa fa-twitter"></i>
             </a>
@@ -17,8 +16,8 @@
     </div>
 </div>
 
-
-<div class="panel panel-success" ng-controller="CommentController">
+<div class="col-md-9">
+<div class="panel panel-default" ng-controller="CommentController">
     <div class="panel-heading">Comments</div>
     <div class="panel-body comment-body">
         {% verbatim %}
@@ -52,7 +51,10 @@
         </div>
 
     </div>
-    <div class="panel-footer hidden-print">
+    </div>
+</div>
+<div class="col-md-3">
+    <div class="hidden-print">
         {% if user.is_authenticated %}
         <form name="form">
             <div class="form-group">
@@ -69,4 +71,5 @@
         <p><a href="{% url 'login' %}?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
         {% endif %}
     </div>
+</div>
 </div>

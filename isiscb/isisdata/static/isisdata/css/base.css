@@ -29,9 +29,13 @@ div.timeline {
   font-size: 18px;
 }
 
+.navbar {
+  margin-bottom: 10px;
+}
+
 /* home page */
 .navbar-home {
-  min-height: 100px
+  min-height: 60px
 }
 
 .navbar-brand>img {
@@ -41,8 +45,8 @@ div.timeline {
 }
 
 .navbar-nav-home>li>a {
-  padding-top: 33px;
-  padding-bottom:33px;
+  /*padding-top: 33px;
+  padding-bottom:33px;*/
   font-size: 10pt;
 }
 
@@ -253,6 +257,12 @@ div.timeline {
 
 .details {
   /*margin-bottom: 30px;*/
+}
+
+.details_authority td {
+  min-width: 100px;
+  padding-top: 3px;
+  padding-bottom: 3px;
 }
 
 .menu {
