@@ -284,6 +284,7 @@ def authority(request, authority_id):
         'related_subject_concepts_facet': related_subject_concepts_facet,
         'related_subject_people_facet': related_subject_people_facet,
         'related_subject_institutions_facet': related_subject_institutions_facet,
+        'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
     }
     return render(request, 'isisdata/authority.html', context)
 
