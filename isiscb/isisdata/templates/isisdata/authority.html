@@ -328,7 +328,7 @@ $(function () {
         <div class="panel-body panel-body-links">
           {% with authority.linkeddata_public as linkeddata_public %}
             {% if linkeddata_public.count > 0 %}
-
+            <div style="padding-bottom: 20px;">
               <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
               {% for entry in linkeddata_public.all %}
               {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
@@ -341,11 +341,11 @@ $(function () {
               ({{ entry.type_controlled }})
               {% endif %}
               <br/> {% endfor %}
-
+            </div>
             {% endif %}
           {% endwith %}
 
-          <span style="padding-top: 20px;" class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
           <br>
           <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
           <br>
