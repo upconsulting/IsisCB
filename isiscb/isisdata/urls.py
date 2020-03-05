@@ -40,7 +40,11 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('subject_ids', size=100). \
         facet('time_period_ids', size=100). \
         facet('geographic_ids', size=100). \
-        facet('institution_ids', size=100)
+        facet('institution_ids', size=100). \
+        facet('publisher_ids', size=100). \
+        facet('periodical_ids', size=100).\
+        facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+        facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100)
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),

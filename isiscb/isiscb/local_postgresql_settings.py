@@ -276,6 +276,11 @@ PERSON_BIRTH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "Bir
 PERSON_DEATH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "Death date")
 PERSON_BIRTH_DEATH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "BirthToDeathDates")
 
+DATASET_ISISCB_NAME_PREFIX = os.environ.get('DATASET_ISISCB_NAME_PREFIX', 'Isis Bibliography of the History of Science')
+DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isis Bibliography of the History of Science')
+DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
+DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
+
 CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'default')
 CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'graph-tasks')
 

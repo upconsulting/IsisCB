@@ -135,20 +135,20 @@ def authority(request, authority_id):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    # WordCloud
-    sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
+    # boxes
+    sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
                 facet('geographic_ids', size=100).facet('time_period_ids', size=100).\
                 facet('category_ids', size=100).facet('other_person_ids', size=100).\
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100)
-    word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
-            .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100)
+    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
-            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
+            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
 
     subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
@@ -162,6 +162,7 @@ def authority(request, authority_id):
     related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids']
     related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids']
     related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids']
+    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -285,6 +286,7 @@ def authority(request, authority_id):
         'related_subject_people_facet': related_subject_people_facet,
         'related_subject_institutions_facet': related_subject_institutions_facet,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
+        'related_dataset_facet': related_dataset_facet,
     }
     return render(request, 'isisdata/authority.html', context)
 

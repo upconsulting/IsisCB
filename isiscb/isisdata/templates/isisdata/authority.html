@@ -100,7 +100,7 @@ $(function () {
         </div>
         <div class="panel-body">
           {% for facet in related_journal_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='other_periodical_ids_exact' %}<br>
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
           {% endfor %}
 
           {% if related_journal_facet|length > 7 %}
@@ -125,7 +125,31 @@ $(function () {
         </div>
         <div class="panel-body">
           {% for facet in related_publisher_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids_exact' %}<br>
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}<br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading panel-heading-relation">
+          <strong>Datasets</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows publishers of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_dataset_facet|slice:"7" %}
+          <i class="fa fa-database" aria-hidden="true"></i> {% with facet.0 as authority_name %}
+
+
+          <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_dataset_typed_names_exact:{{facet.0|urlencode}}">
+             {{authority_name}} ({{facet.1}} citations)
+          </a>
+
+          {% endwith %}
+<br>
           {% endfor %}
         </div>
       </div>
@@ -296,7 +320,7 @@ $(function () {
         </div>
         <div class="panel-body">
           {% for facet in related_subject_people_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact'%}<br>
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids'%}<br>
           {% endfor %}
         </div>
       </div>
@@ -437,7 +461,7 @@ $(function () {
           <ul class="unselected_facets">
             {% for facet in related_subject_concepts_facet %}
               <li>
-                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_exact' %}<br>
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids' %}<br>
               </li>
             {% endfor %}
           </ul>

@@ -300,3 +300,8 @@ JOURNAL_ABBREVIATION_ATTRIBUTE_NAME = os.environ.get('JOURNAL_ABBREVIATION_ATTRI
 PERSON_BIRTH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "Birth date")
 PERSON_DEATH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "Death date")
 PERSON_BIRTH_DEATH_DATE_ATTRIBUTE = os.environ.get('PERSON_BIRTH_DATE_ATTRIBUTE', "BirthToDeathDates")
+
+DATASET_ISISCB_NAME_PREFIX = os.environ.get('DATASET_ISISCB_NAME_PREFIX', 'Isis Bibliography of the History of Science')
+DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isis Bibliography of the History of Science')
+DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
+DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')

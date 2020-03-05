@@ -108,6 +108,14 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     people_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     institutions_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
+    dataset_typed_names = indexes.MultiValueField(faceted=True, indexed=False)
+    dataset_typed_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
+    dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+
+
     data_fields = [
         'id',
         'title',
@@ -118,6 +126,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'abstract',
         'edition_details',
         'physical_details',
+        'belongs_to',
+        'belongs_to__name',
         'attributes__id',
         'attributes__type_controlled__name',
         'attributes__value_freeform',
@@ -224,12 +234,20 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if row['relations_to__id']:
                 data_organized['ccrelations_to'].append(row)
 
+        if data[0]['belongs_to']:
+            self.prepared_data['dataset_ids'] = data[0]['belongs_to']
+        if data[0]['belongs_to__name']:
+            self.prepared_data['dataset_names'] = data[0]['belongs_to__name']
+            if data[0]['belongs_to__name'].startswith(settings.DATASET_ISISCB_NAME_PREFIX):
+                self.prepared_data['dataset_typed_names'] = settings.DATASET_ISISCB_NAME_DISPLAY
+            elif data[0]['belongs_to__name'].startswith(settings.DATASET_SHOT_NAME_PREFIX):
+                self.prepared_data['dataset_typed_names'] = settings.DATASET_SHOT_NAME_DISPLAY
+
         start = time.time()
         for field_name, field in self.fields.items():
             # Use the possibly overridden name, which will default to the
             # variable name of the field.
             # self.prepared_data[field.index_fieldname] = field.prepare(data_organized)
-
             if hasattr(self, "prepare_%s" % field_name):
                 value = getattr(self, "prepare_%s" % field_name)(data_organized)
                 self.prepared_data[field.index_fieldname] = value
@@ -241,6 +259,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         multivalue_data = defaultdict(list)
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
+                continue
+            if not a['acrelation__authority__public']:
                 continue
 
             if a['acrelation__authority__name']:
