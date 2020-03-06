@@ -33,6 +33,10 @@ $(function () {
   background-color: #e4cfe2;
 }
 
+.panel-default>.panel-heading-links a {
+  color: #8533b7;
+}
+
 .panel-default>.panel-body-links a {
   color: #8533b7;
 }
@@ -372,7 +376,7 @@ $(function () {
 
       <div class="panel panel-default facet-box">
         <div class="panel-heading-links panel-heading">
-          <strong>Outside Links</strong>
+          <strong>Outside Links <a data-toggle="modal" data-target="#outsideLinksModal">(Show all)</a></strong>
         </div>
         <div class="panel-body panel-body-links">
           {% with authority.linkeddata_public as linkeddata_public %}
@@ -409,7 +413,6 @@ $(function () {
           <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
         </div>
   </div>
-
 
   <div class="panel-heading-subjects panel panel-default facet-box">
     <div class="panel-heading-subjects panel-heading">
@@ -450,6 +453,55 @@ $(function () {
 </div>
 
   </div>
+
+  <!-- facet modals -->
+  <div class="modal fade" id="outsideLinksModal" tabindex="-1" role="dialog" aria-labelledby="OutsideLinksModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Outside Links</h4>
+        </div>
+        <div class="modal-body">
+          {% with authority.linkeddata_public as linkeddata_public %}
+            {% if linkeddata_public.count > 0 %}
+            <div style="padding-bottom: 20px;">
+              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+              {% for entry in linkeddata_public.all %}
+              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+              {% endif %}
+              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+              {% if entry.type_controlled.name != url_linked_data_name %}
+              ({{ entry.type_controlled }})
+              {% endif %}
+              <br/> {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+          <br>
+          <span  class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
 
   <!-- facet modals -->
   <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
