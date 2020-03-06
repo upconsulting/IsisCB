@@ -224,10 +224,35 @@ $(function () {
       <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
 
       <p>
-      <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
         <i class="fa fa-bookmark" aria-hidden="true"></i>
-        See all {{related_citations_count}} citation records for {{authority.name}}.
-      </a>
+        {% if related_citations_count > 0 %}
+        Show all
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+          {{related_citations_count}} citations
+        </a>
+        to this authority.
+        {% endif %}
+        {% if author_contributor_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{author_contributor_count}} citations
+        </a>
+        as author, etc.
+        {% endif %}
+        {% if publisher_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{publisher_count}} citations
+        </a>
+        as publisher/journal.
+        {% endif %}
+        {% if subject_category_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{subject_category_count}} citations
+        </a>
+        as subject or category.
+        {% endif %}
       </p>
 
       {% if authority.description %}

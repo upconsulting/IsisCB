@@ -128,10 +128,6 @@ def authority(request, authority_id):
                                                        .values('citation_id').distinct('citation_id')\
                                                        .count()
 
-    related_citations_count = acrelation_qs.filter(authority=authority, citation__public=True)\
-                                                       .values('citation_id').distinct('citation_id')\
-                                                       .count()
-
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
@@ -149,6 +145,19 @@ def authority(request, authority_id):
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+
+    related_citations_count = word_cloud_results.count()
+
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
+
+    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
+    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
+
+    # the following count was used before, but it seems to be off
+    #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
+    #                                                   .values('citation_id').distinct('citation_id')\
+    #                                                   .count()
 
     subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
@@ -260,7 +269,10 @@ def authority(request, authority_id):
         'related_citations_periodical_count': related_citations_periodical_count,
         'related_citations_book_series': related_citations_book_series,
         'related_citations_book_series_count': related_citations_book_series_count,
+        'author_contributor_count': author_contributor_count,
+        'publisher_count': publisher_count,
         'source_instance_id': authority_id,
+        'subject_category_count': subject_category_count,
         'source_content_type': ContentType.objects.get(model='authority').id,
         'api_view': api_view,
         'redirect_from': redirect_from,
