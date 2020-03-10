@@ -138,7 +138,8 @@ def authority(request, authority_id):
                 facet('category_ids', size=100).facet('other_person_ids', size=100).\
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100)
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100)
     word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -163,7 +164,7 @@ def authority(request, authority_id):
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
     related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids']
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids']
-    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['time_period_ids']
+    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids']
     related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids']
     related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids']
     related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids']
