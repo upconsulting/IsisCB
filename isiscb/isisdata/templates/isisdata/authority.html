@@ -42,7 +42,12 @@ $(function () {
 }
 
 .facet-box {
-  height: 200px;
+  /*height: 200px;
+  overflow-y:scroll;*/
+}
+
+.panel-body {
+  height: 180px;
   overflow-y:scroll;
 }
 </style>
@@ -106,15 +111,6 @@ $(function () {
           {% for facet in related_journal_facet|slice:"7" %}
           {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
           {% endfor %}
-
-          {% if related_journal_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#journalModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
         </div>
       </div>
 
