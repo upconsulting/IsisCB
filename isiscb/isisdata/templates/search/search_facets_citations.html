@@ -90,34 +90,34 @@
             </div>
           </div>
 
-        {% if facets_citation.fields.all_contributor_ids %}
+        {% if facets_citation.fields.persons_ids %}
 
         <div class="row panel-row">
 
-             {% for author in selected_facets.citation_all_contributor_ids_exact %}
-             {% with author|create_facet_string:'citation_all_contributor_ids_exact' as encoded_author %}
+             {% for author in selected_facets.citation_persons_ids_exact %}
+             {% with author|create_facet_string:'citation_persons_ids_exact' as encoded_author %}
              <div class="col-md-12">
                <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square-o"></i> {{author|get_authority_name}}</a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fa fa-info-circle"></i></a>
              </div>
              {% endwith %}
              {% endfor %}
 
-             {% if selected_facets.citation_all_contributor_ids_exact %}
+             {% if selected_facets.citation_persons_ids_exact %}
              <div class="col-md-12">
                <hr style="margin-top: 4px; margin-bottom: 4px;">
              </div>
              {% endif %}
 
              {# Provide only the top 7 authors #}
-             {% for author in facets_citation.fields.all_contributor_ids|slice:":7" %}
-             {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
+             {% for author in facets_citation.fields.persons_ids|slice:":7" %}
+             {% if "citation_persons_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_persons_ids_exact %}
              <div class="col-md-12">
-               <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a>
+               <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="fa fa-square-o"></i> {{ author.0|get_authority_name }}</a>  ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fa fa-info-circle"></i></a>
              </div>
              {% endif %}
              {% endfor %}
         </div>
-           {% if facets_citation.fields.all_contributor_ids|length > 7 %}
+           {% if facets_citation.fields.persons_ids|length > 7 %}
            <div class="more-facets">
              <!-- Button trigger modal -->
              <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
