@@ -230,3 +230,8 @@ MARKUP_FIELD_TYPES = (
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
 JOURNAL_ABBREVIATION_ATTRIBUTE_NAME = os.environ.get('JOURNAL_ABBREVIATION_ATTRIBUTE_NAME', "JournalAbbr")
+
+DATASET_ISISCB_NAME_PREFIX = os.environ.get('DATASET_ISISCB_NAME_PREFIX', 'Isis Bibliography of the History of Science')
+DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isis Bibliography of the History of Science')
+DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
+DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')

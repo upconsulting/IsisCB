@@ -14,7 +14,43 @@ var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
 {% if source_content_type %}
 var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
 </script>
+
+<style>
+.panel-default>.panel-heading-relation {
+  background-color: #e0eef5;
+}
+
+.panel-default>.panel-heading-subjects {
+  background-color: #eaeaea;
+}
+
+.panel-default>.panel-heading-links {
+  background-color: #e4cfe2;
+}
+
+.panel-default>.panel-heading-links a {
+  color: #8533b7;
+}
+
+.panel-default>.panel-body-links a {
+  color: #8533b7;
+}
+
+.facet-box {
+  /*height: 200px;
+  overflow-y:scroll;*/
+}
+
+.panel-body {
+  height: 180px;
+  overflow-y:scroll;
+}
+</style>
 
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 
@@ -34,69 +70,495 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 {#% block title %}Authority{% endblock %#}
 
-{% block content %}
-<div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2 hidden-print">
-    <div class="menu">
-      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
-      <hr>
-    </div>
-    <div>
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Related Subjects ({{subject_ids_facet|length}})</strong></div>
-        <div class="panel-body">
-          {% for facet in subject_ids_facet|slice:"7" %}
-          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
-          {% endfor %}
 
-          {% if subject_ids_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#subjectModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
-        </div>
+
+{% block content %}
+<div ng-app="commentsApp">
+<div class="col-sm-12 col-md-3">
+    <div  style="padding-top: 10px;">
+      <div style="margin-left: 15px; margin-bottom: 10px;" class="small"><b>Publication dates of IsisCB bibliographic records</b><br>(click to expand)</div>
+      <div id="publication_chart_sm" data-toggle="modal" data-target="#timelineModal">
+        <div style="margin-bottom: 10px;" id="spinner_sm"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+        <div id="chart_sm"></div>
       </div>
-      <div class="panel panel-default">
-        <div class="panel-heading"><strong>Related Authors & Contributors ({{related_contributors_facet|length}})</strong></div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-relation panel-heading">
+          <strong>Related Authors & Contributors {% if related_contributors_facet|length > 7 %}<a data-toggle="modal" data-target="#authorModal">({% if related_contributors_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_contributors_facet|length}})</a>{% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows authors, editors, etc. of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
         <div class="panel-body">
           {% for facet in related_contributors_facet|slice:"7" %}
           {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}<br>
           {% endfor %}
+        </div>
+      </div>
 
-          {% if related_contributors_facet|length > 7 %}
-          <div class="more-facets">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#authorModal">
-              More...
-            </button>
-          </div>
-          {% endif %}
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading panel-heading-relation">
+          <strong>Related Journals {% if related_journal_facet|length > 7 %}<a data-toggle="modal" data-target="#journalModal">({% if related_journal_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_journal_facet|length}})</a>{% else %}({{related_journal_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows journals of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_journal_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading panel-heading-relation">
+          <strong>Related Publisher {% if related_publisher_facet|length > 7 %}<a data-toggle="modal" data-target="#publisherModal">({% if related_publisher_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_publisher_facet|length}})</a>{% else %}({{related_publisher_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows publishers of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_publisher_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}<br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading panel-heading-relation">
+          <strong>Datasets</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows publishers of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_dataset_facet|slice:"7" %}
+          <i class="fa fa-database" aria-hidden="true"></i> {% with facet.0 as authority_name %}
+
+
+          <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_dataset_typed_names_exact:{{facet.0|urlencode}}">
+             {{authority_name}} ({{facet.1}} citations)
+          </a>
+
+          {% endwith %}
+<br>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 
-<!-- facet modals -->
-<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+  <div class="col-sm-12 col-md-6" style="padding-left:0; padding-right:0;">
+    <div class="col-sm-12">
+
+      <!-- Progress through search results, if arriving from search view. -->
+      {% if search_results|length > 0 and fromsearch and search_current %}
+      <div class="panel panel-default" style="margin-bottom: 5px;">
+        <div class="panel-body" style="padding: 7px;">
+        <div class=" hidden-print" >
+          <div class="row">
+            <div class="col-xs-4">
+              <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
+            </div>
+            <div class="col-xs-2 text-left">
+                  {% if search_current >= 2 and search_previous %}
+                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous">
+                      <span aria-hidden="true" >&laquo;Previous</span>
+                  </a>
+                  {% endif %}
+            </div>
+            <div class="col-xs-4 text-center">
+                Showing result {{ search_current }} of {{ search_results|length }}
+            </div>
+            <div class="col-xs-2 text-right">
+                {% if search_index < search_count and search_next %}
+                <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" >
+                    <span aria-hidden="true" >Next&raquo;</span>
+                </a>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+      {% endif %}
+
+    <script>
+      //# sourceURL=copy.js
+      $(function() {
+        $("#authorityLink").click(function() {
+          var copyTextarea = document.querySelector('#hiddenAuthorityLink');
+          copyTextarea.focus();
+          copyTextarea.select();
+          document.execCommand("copy");
+          $.notify("URL of this record has been copied to your clipboard.", "info", {
+            clickToHide: true,
+            style: 'bootstrap',
+            gap: 5,
+          });
+        })
+      })
+    </script>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <strong style="font-size:1.5em">{{ authority.get_type_controlled_display }}</strong>
+          <span class="btn-grp pull-right" style="padding-top:5px">
+            <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ authority.id }}</span>
+            <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
+              {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+              <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
+          </span>
+      </div>
+
+      <div class="panel-body" style="height: 250px; overflow-y:scroll">
+      {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+
+      <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
+
+      <p>
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        {% if related_citations_count > 0 %}
+        Show all
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+          {{related_citations_count}} citations
+        </a>
+        to this authority.
+        {% endif %}
+        {% if author_contributor_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{author_contributor_count}} citations
+        </a>
+        as author, etc.
+        {% endif %}
+        {% if publisher_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{publisher_count}} citations
+        </a>
+        as publisher/journal.
+        {% endif %}
+        {% if subject_category_count > 0 %}
+        Show
+        <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{subject_category_count}} citations
+        </a>
+        as subject or category.
+        {% endif %}
+      </p>
+
+      {% if authority.description %}
+      <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
+        {% if authority.description|truncatewords:15|length < authority.description|length %}
+          <a href="#" id="desc_more" class="hidden-print">More</a>
+          <span id="desc_full" class="visible-print-block" style="display:none">
+            {{ authority.description }}
+            <a href="#" id="desc_hide">Less</a>
+          </span>
+        {% endif %}
+      </p>
+      <script>
+        $(function() {
+          $("#desc_more").click(function() {
+            $("#desc_snippet").hide()
+            $("#desc_more").hide()
+            $("#desc_full").show()
+          })
+
+          $("#desc_hide").click(function() {
+            $("#desc_full").hide()
+            $("#desc_snippet").show()
+            $("#desc_more").show()
+          })
+        })
+      </script>
+      {% endif %}
+
+      {% for attribute in authority.attributes.all %}
+      {% if attribute|is_attribute_visible %}
+      <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+      {% endif %}
+      {% endfor %}
+
+
+      <table  class="details_authority" style="margin-top: 20px;">
+        <tr>
+          <td>Authority URI:</td>
+          <td>{{ authority | get_uri }}</td>
+        </tr>
+      </table>
+      </div>
+    </div>
+    </div>
+    <div class="col-sm-12 col-md-6">
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+          <strong>Related Concepts {% if related_subject_concepts_facet|length > 7 %}<a data-toggle="modal" data-target="#subjectModal">({% if related_subject_concepts_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_subject_concepts_facet|length}})</a>{% else %}({{related_subject_concepts_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_subject_concepts_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids_exact' %}<br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+          <strong>Related Categories {% if related_categories_facet|length > 7 %}<a data-toggle="modal" data-target="#categoryModal">({% if related_categories_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_categories_facet|length}})</a>{% else %}({{related_categories_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows relationships to category terms of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_categories_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-12 col-md-6">
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+          <strong>Related People {% if related_subject_people_facet|length > 7 %}<a data-toggle="modal" data-target="#peopleModal">({% if related_subject_people_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_subject_people_facet|length}})</a>{% else %}({{related_subject_people_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_subject_people_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids'%}<br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-subjects panel-heading">
+          <strong>Related Institutions {% if related_subject_institutions_facet|length > 7 %}<a data-toggle="modal" data-target="#institutionModal">({% if related_subject_institutions_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_subject_institutions_facet|length}})</a>{% else %}({{related_subject_institutions_facet|length}}){% endif %}</strong>
+          <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+            data-placement="right" data-trigger="focus" tabindex="0" role="button"
+            data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="panel-body">
+          {% for facet in related_subject_institutions_facet|slice:"7" %}
+          {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact'%}<br>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-sm-12 col-md-3">
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-links panel-heading">
+          <strong>Outside Links <a data-toggle="modal" data-target="#outsideLinksModal">(Show all)</a></strong>
+        </div>
+        <div class="panel-body panel-body-links">
+          {% with authority.linkeddata_public as linkeddata_public %}
+            {% if linkeddata_public.count > 0 %}
+            <div style="padding-bottom: 20px;">
+              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+              {% for entry in linkeddata_public.all %}
+              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+              {% endif %}
+              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+              {% if entry.type_controlled.name != url_linked_data_name %}
+              ({{ entry.type_controlled }})
+              {% endif %}
+              <br/> {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+          <br>
+          <span  class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+        </div>
+  </div>
+
+  <div class="panel-heading-subjects panel panel-default facet-box">
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related Places {% if related_geographics_facet|length > 7 %}<a data-toggle="modal" data-target="#placesModal">({% if related_geographics_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_geographics_facet|length}})</a>{% else %}({{related_geographics_facet|length}}){% endif %}</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="left" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
+    <div class="panel-body">
+      {% for facet in related_geographics_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel panel-default facet-box">
+    <div class="panel-heading-subjects panel-heading">
+      <strong>Related Times {% if related_timeperiod_facet|length > 7 %}<a data-toggle="modal" data-target="#timePeriodModal">({% if related_timeperiod_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_timeperiod_facet|length}})</a>{% else %}({{related_timeperiod_facet|length}}){% endif %}</strong>
+      <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+        data-placement="left" data-trigger="focus" tabindex="0" role="button"
+        data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+        <i class="fa fa-question-circle" aria-hidden="true"></i>
+      </a>
+    </div>
+    <div class="panel-body">
+      {% for facet in related_timeperiod_facet|slice:"7" %}
+      {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}<br>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<div class="col-sm-12">
+
+</div>
+
+  </div>
+
+  <!-- facet modals -->
+  <div class="modal fade" id="outsideLinksModal" tabindex="-1" role="dialog" aria-labelledby="OutsideLinksModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Outside Links</h4>
+        </div>
+        <div class="modal-body">
+          {% with authority.linkeddata_public as linkeddata_public %}
+            {% if linkeddata_public.count > 0 %}
+            <div style="padding-bottom: 20px;">
+              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+              {% for entry in linkeddata_public.all %}
+              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+              {% endif %}
+              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+              {% if entry.type_controlled.name != url_linked_data_name %}
+              ({{ entry.type_controlled }})
+              {% endif %}
+              <br/> {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+          <br>
+          <span  class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+
+  <!-- facet modals -->
+  <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Related Authors & Contributors</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in related_contributors_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+<!-- subject Modal -->
+  <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Related Concepts</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in related_subject_concepts_facet %}
+              <li>
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids' %}<br>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+<!-- institution Modal -->
+<div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Authors & Contributors</h4>
+        <h4 class="modal-title" id="myModalLabel">Related People</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for facet in related_contributors_facet %}
-          <li>
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}
-          </li>
+          {% for facet in related_subject_people_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact' %}<br>
+            </li>
           {% endfor %}
         </ul>
       </div>
@@ -106,19 +568,116 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 </div><!-- /modal -->
-<!-- subject Modal -->
-<div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+
+<!-- institution Modal -->
+<div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Subjects</h4>
+        <h4 class="modal-title" id="myModalLabel">Related People</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for facet in subject_ids_facet %}
+          {% for facet in related_subject_institutions_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_subject_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_geographics_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- categories Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Categories</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_categories_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- categories Modal -->
+<div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Time Periods</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_timeperiod_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- publisher Modal -->
+<div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Publishers</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_publisher_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids_exact' %}<br>
             </li>
           {% endfor %}
         </ul>
@@ -131,222 +690,62 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div><!-- /modal -->
 
 
-  <div class="main col-sm-5 col-md-7">
-      <!-- Progress through search results, if arriving from search view. -->
-      {% if search_results|length > 0 and fromsearch and search_current %}
-      <div class="alert alert-warning hidden-print">
-          <div class="row">
-              <div class="col-xs-3 text-center">
-                  {% if search_current >= 2 and search_previous %}
-                  <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">&laquo;Previous</span>
-                  </a>
-                  {% endif %}
-              </div>
-              <div class="col-xs-6 text-center">
-                  Showing result {{ search_current }} of {{ search_results|length }}
-              </div>
-              <div class="col-xs-3 text-center">
-                  {% if search_index < search_count and search_next %}
-                  <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
-                      <span aria-hidden="true" class="text-small">Next&raquo;</span>
-                  </a>
-                  {% endif %}
-              </div>
-          </div>
+<!-- publisher Modal -->
+<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Journals</h4>
       </div>
-      {% endif %}
-
-    <div class="alert alert-warning headerbox" role="alert">{{ authority.get_type_controlled_display }}
-        <span class="btn-grp pull-right">
-            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}"></a>{% endif %}
-            <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
-        </span>
-    </div>
-
-    {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
-
-    <h3>{{ authority.name }}</h3>
-
-    {% if authority.description %}<p><strong>Description:</strong> {{ authority.description }}</p>{% endif %}
-
-    {% for attribute in authority.attributes.all %}
-    {% if attribute|is_attribute_visible %}
-    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
-    {% endif %}
-    {% endfor %}
-
-    <table class="details">
-    {% with authority.linkeddata_public as linkeddata_public %}
-    {% if linkeddata_public.count > 0 %}
-      <tr>
-        <td style="vertical-align: top"><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
-        <td>{% for entry in linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
-      </tr>
-    {% endif %}
-    {% endwith %}
-    </table>
-
-    <div id="publication_chart">
-      <div><h4>Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i>.</h4></div>
-      <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
-      <div id="chart"></div>
-      <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
-      <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
-        Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
-        <span id="recalculationSpan"></span>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_journal_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids_exact' %}<br>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
-    </div>
-
-    <hr>
-    <h4>All records associated with this authority. <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">See a list of {{related_citations_count}} records.</a></h4>
-    <p>Records related by role:</p>
-
-    {% if related_citations_author %}
-    <p style="padding-top: 12px"><strong>Author</strong> (most recent) <a href="{% url 'haystack_search' %}?q=author_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_author_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_author %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-
-    {% endif %}
-
-    {% if related_citations_editor %}
-    <p style="padding-top: 12px"><strong>Editor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=editor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_editor_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_editor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_advisor %}
-    <p style="padding-top: 12px"><strong>Advisor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=advisor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_advisor_count }} records related in this way.</a></p>
-
-      {% for rel_citation in related_citations_advisor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-
-    {% endif %}
-
-    {% if related_citations_contributor %}
-    <p style="padding-top: 12px"><strong>Contributor</strong> (most recent) <a href="{% url 'haystack_search' %}?q=contributor_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_contributor_count }} records related in this way.</a></h5>
-
-      {% for rel_citation in related_citations_contributor %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_translator %}
-    <p style="padding-top: 12px"><strong>Translator</strong> (most recent) <a href="{% url 'haystack_search' %}?q=translator_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_translator_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_translator %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_subject %}
-    <p style="padding-top: 12px"><strong>Subject</strong> (most recent) <a href="{% url 'haystack_search' %}?q=subject_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_subject_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_subject %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_category %}
-    <p style="padding-top: 12px"><strong>Category</strong> (most recent) <a href="{% url 'haystack_search' %}?q=category_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_category_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_category %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_publisher %}
-    <p style="padding-top: 12px"><strong>Publisher</strong> (most recent) <a href="{% url 'haystack_search' %}?q=publisher_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_publisher_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_publisher %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_school %}
-    <p style="padding-top: 12px"><strong>School</strong> (most recent) <a href="{% url 'haystack_search' %}?q=school_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_school_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_school %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_institution %}
-    <p style="padding-top: 12px"><strong>Institution</strong> (most recent) <a href="{% url 'haystack_search' %}?q=institution_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_institution_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_institution %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_meeting %}
-    <p style="padding-top: 12px"><strong>Meeting</strong> (most recent) <a href="{% url 'haystack_search' %}?q=meeting_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_meeting_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_meeting %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_periodical %}
-    <p style="padding-top: 12px"><strong>Periodical</strong> (most recent) <a href="{% url 'haystack_search' %}?q=periodical_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_periodical_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_periodical %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    {% if related_citations_book_series %}
-    <p style="padding-top: 12px"><strong>Book Series</strong> (most recent) <a href="{% url 'haystack_search' %}?q=book_series_ids:{{ authority.id }}&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend">See all {{ related_citations_book_series_count }} citations related in this way.</a></p>
-
-      {% for rel_citation in related_citations_book_series %}
-        {% with rel_citation.citation as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-
-    <table  class="details" style="margin-top: 40px;">
-    <tr>
-      <td>Authority URI:</td>
-      <td>{{ authority | get_uri }}</td>
-    </tr>
-  </table>
-
-    </div>
-
-    <div class="col-sm-4 col-md-3 main">
-      {% include "isisdata/comments.html" %}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
     </div>
   </div>
+</div><!-- /modal -->
+
+<div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="timelineModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Publication dates of all IsisCB bibliographic records associated with <i>{{ authority.name }}</i></h4>
+      </div>
+      <div class="modal-body">
+        <div id="publication_chart" >
+          <div id="spinner"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+          <div id="chart"></div>
+          <div class="checkbox text-right" style="font-size: 12px;"><label><input id="showReviewsCheckbox" checked type="checkbox">Show Reviews</input></label></div>
+          <div id="timelineGenDate" class="text-right" style="display: none; font-size: 10px;">
+            Updated on <span class="date" id="timelineDate"></span> at <span class="date" id="timelineTime"></span>.
+            <span id="recalculationSpan"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+    <div class="col-md-12" style="padding-top: 15px">
+      <div class="col-sm-12 main" style="padding-top: 15px">
+        {% include "isisdata/comments.html" %}
+      </div>
+    </div>
+
+</div>
 
   <!-- Load c3.css -->
   <link href="{% static "isisdata/c3/c3.min.css" %}" rel="stylesheet">
@@ -414,6 +813,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         $.get( "{% url 'authority_author_timeline' authority.id %}", function( data ) {
           if (data.status == 'done') {
             $('#spinner').hide();
+            $("#spinner_sm").hide();
             var genDate = new Date(data.generated_on);
             $("#timelineDate").text(genDate.toLocaleDateString());
             $("#timelineTime").text(genDate.toLocaleTimeString());
@@ -444,7 +844,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             setTimeout(pollForTimeline, 1000)
           } else {
             $('#spinner').hide();
+            $('#spinner_sm').hide()
             $("#chart").append("Timeline could not be loaded. An error occurred.")
+            $("#chart_sm").append("Timeline could not be loaded. An error occurred.")
           }
         });
       }
@@ -495,8 +897,59 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           };
         }
 
+        var chart_sm = c3.generate({
+          bindto: '#chart_sm',
+          size: {
+              height: 200,
+          },
+          data: {
+            x: 'Years',
+            columns: [years].concat(cols),
+            type: 'bar',
+            groups: [
+              current_groups
+            ],
+            colors: colors,
+            names: names,
+            onclick: function (d, element) {
+              return
+            },
+            order: function (t1, t2) {
+              return t1.id < t2.id;
+            },
+            onclick: function (d, element) {
+              // do nothing
+            },
+          },
+          legend: {
+            show: false
+          },
+          tooltip: {
+            show: false,
+          },
+          axis : {
+            x: {
+              tick: {
+                  values: years,
+                  format: (d,i) => {if (d==years[1] || d==years[years.length-1]) { return d } },
+              }
+            },
+            y : {
+                tick: {
+                    format: function(x) { return x % 1 === 0 ? x : ''; },
+                }
+            }
+          },
+          padding: {
+              right: 10
+          }
+        })
+
         var chart = c3.generate({
           bindto: '#chart',
+          size: {
+              width:810,
+          },
           data: {
             x: 'Years',
             columns: [years].concat(cols),
@@ -585,5 +1038,4 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     });
   </script>
 
-</div>
 {% endblock %}
