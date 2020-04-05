@@ -3,6 +3,9 @@ Asynchronous functions for bulk changes to the database.
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_to_citation
 
 from django import forms
@@ -41,7 +44,7 @@ def _build_filter_label(filter_params_raw):
     filter_data = {}
     if filter_form.is_valid():
         filter_data = filter_form.cleaned_data
-    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
+    return ', '.join([ '%s: %s' % (key, value) for key, value in list(filter_data.items()) if value ])
 
 class PrependToRecordHistory(BaseAction):
     model = Citation
@@ -174,7 +177,7 @@ class SetRecordStatusExplanation(BaseAction):
 
 def get_tracking_transition_counts(qs):
     states = zip(*qs.model.TRACKING_CHOICES)[0]
-    transitions = dict(zip(states, map(lambda state: qs.filter(tracking_state=state).count(), states)))
+    transitions = dict(list(zip(states, [qs.filter(tracking_state=state).count() for state in states])))
     # bugfix for Zotero imports: tracking_state is None not "NO"
     transitions[qs.model.NONE] += qs.filter(tracking_state=None).count()
     return transitions

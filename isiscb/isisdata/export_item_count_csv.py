@@ -5,7 +5,12 @@ The strategy here is to favor extensibility/flexibility in defining output
 columns, at the expense of performance. The performance hit is probably OK,
 since these jobs will be performed asynchronously.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from builtins import str
+from builtins import map
+from builtins import object
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
@@ -32,15 +37,15 @@ def generate_item_count_csv(stream, queryset, columns):
 
     import unicodecsv as csv
     writer = csv.writer(stream)
-    writer.writerow(map(lambda c: c.label, columns))
+    writer.writerow([c.label for c in columns])
     extra = []
     for obj in queryset:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, extra), columns))
+            writer.writerow([c(obj, extra) for c in columns])
 
     for obj in extra:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, []), columns))
+            writer.writerow([c(obj, []) for c in columns])
 
 
 class Column(object):
@@ -72,8 +77,8 @@ class Column(object):
         except AssertionError as E:    # Let this percolate through.
             raise E
         except Exception as E:
-            print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
-            print E
+            print('Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None)))
+            print(E)
             return u""
 
 
@@ -147,7 +152,7 @@ def _related_citations(obj, extra, config={}):
     fields_object = _get_metadata_fields_citation(config, 'object')
     fields_subject = _get_metadata_fields_citation(config, 'subject')
 
-    return u' // '.join(map(functools.partial(create_ccr_string), qs_from.values_list(*fields_object)) + map(functools.partial(create_ccr_string), qs_to.values_list(*fields_subject)))
+    return u' // '.join(list(map(functools.partial(create_ccr_string), qs_from.values_list(*fields_object))) + list(map(functools.partial(create_ccr_string), qs_to.values_list(*fields_subject))))
 
 def _get_metadata_fields_citation(config, type):
     ccr_fields = ['id',
@@ -184,10 +189,10 @@ def _created_date(obj, extra, config={}):
     except:
         pass
 
-    return unicode(date)[:10]
+    return str(date)[:10]
 
 def _creator(obj, extra, config={}):
-    return unicode(obj.created_by_native.username if obj.created_by_native else "")
+    return str(obj.created_by_native.username if obj.created_by_native else "")
 
 def _modified_date(obj, extra, config={}):
     date = u""
@@ -196,10 +201,10 @@ def _modified_date(obj, extra, config={}):
     except:
         pass
 
-    return unicode(date)[:10]
+    return str(date)[:10]
 
 def _modifier(obj, extra, config={}):
-    return unicode(obj.modified_by.username if obj.modified_by else "")
+    return str(obj.modified_by.username if obj.modified_by else "")
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 print_status = Column(u'Print status', _print_status)

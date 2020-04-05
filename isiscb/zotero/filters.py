@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 import django_filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
@@ -53,7 +55,7 @@ class ImportAccesionFilter(django_filters.FilterSet):
         return queryset
 
 
-    class Meta:
+    class Meta(object):
         model = ImportAccession
         fields = ['id', 'name', 'processed', 'imported_on_or_before',
                   'imported_on_or_after', 'imported_by', 'ingest_to']

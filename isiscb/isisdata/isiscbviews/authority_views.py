@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.contrib.admin.views.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, render, redirect
@@ -320,7 +324,7 @@ def authority_author_timeline(request, authority_id):
 
     timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
     if not cached_timeline or timeline_is_outdated:
-        print "Refreshing timeline for " + authority_id
+        print("Refreshing timeline for " + authority_id)
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
         timeline.save()

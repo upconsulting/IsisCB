@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import autocomplete_light.shortcuts as al
-from models import *
+from .models import *
 
 
 

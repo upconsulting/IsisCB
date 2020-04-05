@@ -5,6 +5,7 @@ to the IsisData app.
 TODO: many of these functions could use refactoring, or at least modularizing
 for easier testing.
 """
+from __future__ import unicode_literals
 
 from django.db.models import Q
 
@@ -127,7 +128,7 @@ def ingest_citation(request, accession, draftcitation):
 
     date = None
     if draftcitation.publication_date:
-        if type(draftcitation.publication_date) in [str, unicode]:
+        if type(draftcitation.publication_date) in [str, str]:
             try:
                 date = iso8601.parse_date(draftcitation.publication_date).date()
             except iso8601.ParseError:
@@ -140,7 +141,7 @@ def ingest_citation(request, accession, draftcitation):
             date = draftcitation.publication_date.date()
 
     if date:
-        if type(date) in [unicode, str]:
+        if type(date) in [str, str]:
             date = iso8601.parse_date(date).date()
         citation.publication_date = date
         pubdatetype, _ = AttributeType.objects.get_or_create(
@@ -150,7 +151,7 @@ def ingest_citation(request, accession, draftcitation):
             })
         if type(date) in [datetime.datetime, datetime.date]:
             value_freeform = date.year
-        elif type(date) in [str, unicode]:
+        elif type(date) in [str, str]:
             value_freeform = date[:4]
         attribute = Attribute.objects.create(
             type_controlled=pubdatetype,

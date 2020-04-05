@@ -5,7 +5,12 @@ The strategy here is to favor extensibility/flexibility in defining output
 columns, at the expense of performance. The performance hit is probably OK,
 since these jobs will be performed asynchronously.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from builtins import map
+from builtins import str
+from builtins import object
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
@@ -32,15 +37,15 @@ def generate_ebsco_csv(stream, queryset, columns):
 
     import unicodecsv as csv
     writer = csv.writer(stream)
-    writer.writerow(map(lambda c: c.label, columns))
+    writer.writerow([c.label for c in columns])
     extra = []
     for obj in queryset:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, extra), columns))
+            writer.writerow([c(obj, extra) for c in columns])
 
     for obj in extra:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, []), columns))
+            writer.writerow([c(obj, []) for c in columns])
 
 
 class Column(object):
@@ -72,8 +77,8 @@ class Column(object):
         except AssertionError as E:    # Let this percolate through.
             raise E
         except Exception as E:
-            print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
-            print E
+            print('Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None)))
+            print(E)
             return u""
 
 
@@ -104,7 +109,7 @@ def _citation_title(obj, extra, config={}):
     return u'Review of "%s"' % _prepare_title(book.title)
 
 def _prepare_title(title):
-    return unicode(title).replace("\n", " ")
+    return str(title).replace("\n", " ")
 
 # adjustment of export according to ISISCB-1033
 def create_acr_string(author, additional_fields = [], delimiter=u" "):
@@ -199,7 +204,7 @@ def _citation_author(obj, extra, config={}):
     names = obj.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    return u'; '.join(map(lambda x: x[0], names))
+    return u'; '.join([x[0] for x in names])
 
 def _citation_editor(obj, extra, config={}):
     """
@@ -209,7 +214,7 @@ def _citation_editor(obj, extra, config={}):
     names = obj.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    return u'; '.join(map(lambda x: x[0], names))
+    return u'; '.join([x[0] for x in names])
 
 def _category_numbers(obj, extra, config={}):
     """
@@ -224,7 +229,7 @@ def _category_numbers(obj, extra, config={}):
 
 
 def _language(obj, extra, config={}):
-    return u', '.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
+    return u', '.join([o for o in list(obj.language.all().values_list('name', flat=True)) if o is not None])
 
 
 def _place_publisher(obj, extra, config={}):
@@ -232,7 +237,7 @@ def _place_publisher(obj, extra, config={}):
          & Q(type_controlled=ACRelation.PUBLISHER)
     qs = obj.acrelation_set.filter(_q)
     fields = ['name_for_display_in_citation', 'authority__name']
-    return u'; '.join(map(lambda x: x[0] if x[0] else x[1], qs.values_list(*fields)))
+    return u'; '.join([x[0] if x[0] else x[1] for x in qs.values_list(*fields)])
 
 
 def _series(obj, extra, config={}):
@@ -274,7 +279,7 @@ def _journal_link(obj, extra, config={}):
         return u""
     _first = qs.first()
     if _first.authority:
-        return unicode(_first.authority.name)
+        return str(_first.authority.name)
     return u""
 
 
@@ -298,14 +303,14 @@ def _reviewed_author(obj, extra, config={}):
     author_names = _first.acrelation_set.filter(type_controlled=ACRelation.AUTHOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    authors = u'; '.join(map(lambda x: x[0] + " <responsibility: author>", author_names))
+    authors = u'; '.join([x[0] + " <responsibility: author>" for x in author_names])
 
     editor_names = _first.acrelation_set.filter(type_controlled=ACRelation.EDITOR)\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    editors = u'; '.join(map(lambda x: x[0] + " <responsibility: editor>", editor_names))
+    editors = u'; '.join([x[0] + " <responsibility: editor>" for x in editor_names])
 
-    return u"; ".join(filter(None, [authors, editors]))
+    return u"; ".join([_f for _f in [authors, editors] if _f])
 
 def _reviewed_title(obj, extra, config={}):
     if not obj.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
@@ -440,7 +445,7 @@ def _subject_personal_name(obj, extra, config={}):
 
         names.append(name)
 
-    return u' // '.join(map(lambda x: x, names))
+    return u' // '.join([x for x in names])
 
 def _subject_geographical_name(obj, extra, config={}):
     return _subject_authority_names(obj, [Authority.GEOGRAPHIC_TERM])
@@ -458,13 +463,13 @@ def _subject_authority_names(obj, authority_types):
     fields = ['authority__name']
     names = obj.acrelation_set.filter(type_controlled=ACRelation.SUBJECT, authority__type_controlled__in=authority_types)\
                                    .values_list(*fields)
-    return u' // '.join(map(lambda x: x[0], names))
+    return u' // '.join([x[0] for x in names])
 
 def _category(obj, extra, config={}):
     fields = ['authority__name']
     names = obj.acrelation_set.filter(type_controlled=ACRelation.CATEGORY)\
                                    .values_list(*fields)
-    return u' // '.join(map(lambda x: x[0], names))
+    return u' // '.join([x[0] for x in names])
 
 object_id = Column(u'Record number', lambda obj, extra, config={}: obj.id)
 citation_title = Column(u'Title', _citation_title, Citation)

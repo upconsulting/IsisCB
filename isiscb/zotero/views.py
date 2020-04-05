@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import map
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
@@ -23,7 +26,7 @@ import json
 
 
 def _field_data(instance):
-    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+    return [(k, v) for k, v in list(instance.__dict__.items()) if not k.startswith('_')]
 
 
 @login_required
@@ -77,7 +80,7 @@ def suggest_authority_json(request, authority_id):
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': map(_format_citation, related_citations),
+            'related_citations': list(map(_format_citation, related_citations)),
         })
         suggestions.append(suggestion)
 
@@ -324,7 +327,7 @@ def skip_authority_for_draft(request):
 
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     accession = get_object_or_404(ImportAccession, pk=accession_id)
-    print 'skip_authority_for_draft', draftauthority.id, accession.id
+    print('skip_authority_for_draft', draftauthority.id, accession.id)
     draftauthority.processed = True
     draftauthority.save()
     return JsonResponse({'data': None})

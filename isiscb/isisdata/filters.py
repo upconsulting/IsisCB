@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 import django_filters
 from django_filters.fields import Lookup
 from django_filters.filterset import STRICTNESS
@@ -153,7 +155,7 @@ class CitationFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = [
             'id', 'title', 'abstract', 'description',
@@ -378,7 +380,7 @@ class AuthorityFilter(django_filters.FilterSet):
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = [
             'id', 'name', 'type_controlled', 'description',

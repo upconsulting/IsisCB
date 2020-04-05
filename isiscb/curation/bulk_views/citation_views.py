@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.http import HttpResponseRedirect, JsonResponse
 

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 from django.contrib import admin
 from django.conf.urls import url, include
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
@@ -45,7 +49,7 @@ class BulkIngestForm(forms.ModelForm):
 
 
 class ImportAccessionForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = ImportAccession
         fields = '__all__'
 
@@ -53,7 +57,7 @@ class ImportAccessionForm(forms.ModelForm):
 class CitationForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
-    class Meta:
+    class Meta(object):
         model = Citation
         exclude = ('uri',
                    'id',   # Prevent unique constraint validation.
@@ -67,7 +71,7 @@ class CitationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CitationForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():    # bootstrappiness.
+        for key in list(self.fields.keys()):    # bootstrappiness.
             if key in ['public']:
                 continue
             if key in ['administrator_notes', 'description', 'record_history']:
@@ -78,7 +82,7 @@ class CitationForm(forms.ModelForm):
 class AuthorityForm(forms.ModelForm):
     id = forms.CharField(required=False, widget=forms.HiddenInput())
 
-    class Meta:
+    class Meta(object):
         model = Authority
         exclude = ('uri',
                    'id',    # Prevent unique constraint validation.
@@ -93,7 +97,7 @@ class AuthorityForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AuthorityForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():    # bootstrappiness.
+        for key in list(self.fields.keys()):    # bootstrappiness.
             if key in ['public']:
                 continue
             if key in ['administrator_notes', 'description', 'record_history']:
@@ -431,7 +435,7 @@ class ImportAccessionAdmin(admin.ModelAdmin):
             'authority_type_options': Authority.TYPE_CHOICES,
             'acrelation_type_options': ACRelation.TYPE_CHOICES,
         })
-        print ACRelation.TYPE_CHOICES
+        print(ACRelation.TYPE_CHOICES)
 
         return TemplateResponse(request, "admin/zotero_accession_detail.html", context)
 
@@ -492,13 +496,13 @@ class ACRelationForm(forms.ModelForm):
     authority = forms.CharField(required=False)
     authority_id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
         fields = ['type_controlled']
 
     def __init__(self, *args, **kwargs):
         super(ACRelationForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():
+        for key in list(self.fields.keys()):
             self.fields[key].required = False
             self.fields[key].widget.attrs['class'] = 'form-control'
             self.fields[key].widget.attrs['disabled'] = 'true'
@@ -509,13 +513,13 @@ class LinkedDataForm(forms.ModelForm):
     subject_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
     subject_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    class Meta:
+    class Meta(object):
         model = LinkedData
         fields = ['type_controlled', 'universal_resource_name']
 
     def __init__(self, *args, **kwargs):
         super(LinkedDataForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():
+        for key in list(self.fields.keys()):
             self.fields[key].required = False
             self.fields[key].widget.attrs['class'] = 'form-control'
 
@@ -526,13 +530,13 @@ class AttributeForm(forms.ModelForm):
     source_content_type = forms.CharField(widget=forms.HiddenInput(), required=False)
     source_instance_id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    class Meta:
+    class Meta(object):
         model = Attribute
         fields = ['type_controlled', 'value_freeform',]
 
     def __init__(self, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
-        for key in self.fields.keys():
+        for key in list(self.fields.keys()):
             self.fields[key].required = False
             self.fields[key].widget.attrs['class'] = 'form-control'
 
@@ -597,7 +601,7 @@ def match(request, draftmodel, choicemodel):
     :meth:`.DraftAuthorityAdmin.match`\.
     """
     chosen = []
-    for field in request.POST.keys():
+    for field in list(request.POST.keys()):
         if not field.startswith('suggestions_for'):
             continue
         suggestion_choice_id = request.POST.get(field, None)
@@ -633,7 +637,7 @@ def resolve_update_related(request, instance_type, linkeddata_formset, attribute
             instance = LinkedData(**datum)
         else:   # Update existing LinkedData instance.
             instance = LinkedData.objects.get(pk=datum['id'])
-            for field, value in datum.iteritems():
+            for field, value in list(datum.items()):
                 setattr(instance, field, value)
         instance.save()
 
@@ -663,7 +667,7 @@ def resolve_update_related(request, instance_type, linkeddata_formset, attribute
 
             # We're trusting that only appropriate fields are left in the
             #  form data at this point.
-            for field, value in datum.iteritems():
+            for field, value in list(datum.items()):
                 setattr(instance, field, value)
             value_instance = instance.value
 
@@ -698,7 +702,7 @@ def resolve_update_citation(request):
         for citation_data in citation_formset.cleaned_data:
             instance = Citation.objects.get(pk=citation_data['id'])
             del citation_data['id']
-            for k, v in citation_data.iteritems():
+            for k, v in list(citation_data.items()):
                 setattr(instance, k, v)
             instance.save()
 
@@ -731,7 +735,7 @@ def resolve_update_authority(request):
         for authority_data in authority_formset.cleaned_data:
             instance = Authority.objects.get(pk=authority_data['id'])
             del authority_data['id']
-            for k, v in authority_data.iteritems():
+            for k, v in list(authority_data.items()):
                 setattr(instance, k, v)
             instance.save()
 
@@ -753,7 +757,7 @@ def resolve(request, draftmodel, choicemodel):
     elif draftmodel is DraftCitation:
         resolve_update_citation(request)
 
-    for field in request.POST.keys():
+    for field in list(request.POST.keys()):
         if not field.startswith('merge'):
             continue
 
@@ -846,7 +850,7 @@ def process_create_instance(draftinstance, form, attributeFormset,
 
 
 class DraftCitationAdmin(admin.ModelAdmin):
-    class Meta:
+    class Meta(object):
         model = DraftCitation
 
     list_display = ('title', 'imported_on', 'processed')
@@ -1014,11 +1018,11 @@ class DraftCitationAdmin(admin.ModelAdmin):
                 #  LinkedData and Attribute formsets. This way we can separate
                 #  all of these bits out according to DraftCitation/Citation
                 #  pairs in the template.
-                chosen = zip(zip(*chosen)[0],
+                chosen = list(zip(zip(*chosen)[0],
                              zip(*chosen)[1],
                              formset,
                              attribute_forms,
-                             linkeddata_forms)
+                             linkeddata_forms))
 
                 context.update({
                     'chosen_suggestions': chosen,
@@ -1164,7 +1168,7 @@ class DraftAuthorityAdmin(admin.ModelAdmin):
                 #  LinkedData and Attribute formsets. This way we can separate
                 #  all of these bits out according to DraftAuthority/Authority
                 #  pairs in the template.
-                chosen = zip(zip(*chosen)[0], zip(*chosen)[1], formset, attribute_forms, linkeddata_forms)
+                chosen = list(zip(zip(*chosen)[0], zip(*chosen)[1], formset, attribute_forms, linkeddata_forms))
 
                 context.update({
                     'chosen_suggestions': chosen,

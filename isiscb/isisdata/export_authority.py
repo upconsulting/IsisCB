@@ -1,7 +1,12 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import map
+from builtins import str
 from isisdata.models import *
 from django.utils.text import slugify
 
-import export
+from . import export
 
 import functools
 
@@ -40,7 +45,7 @@ def _last_name(obj, extra, config={}):
             person = Person.objects.get(pk=obj.id)
             return person.personal_name_last
         except:
-            print "No person record"
+            print("No person record")
             return u""
     return u""
 
@@ -50,7 +55,7 @@ def _first_name(obj, extra, config={}):
             person = Person.objects.get(pk=obj.id)
             return person.personal_name_first
         except:
-            print "No person record"
+            print("No person record")
             return u""
     return u""
 
@@ -60,7 +65,7 @@ def _name_suffix(obj, extra, config={}):
             person = Person.objects.get(pk=obj.id)
             return person.personal_name_suffix
         except:
-            print "No person record"
+            print("No person record")
             return u""
     return u""
 
@@ -70,7 +75,7 @@ def _name_preferred(obj, extra, config={}):
             person = Person.objects.get(pk=obj.id)
             return person.personal_name_preferred
         except:
-            print "No person record"
+            print("No person record")
             return u""
     return u""
 
@@ -95,7 +100,7 @@ def _attributes(obj, extra, config={}):
             'AttributeDescription ' + (x.description if x.description else '')]
 
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: u' || '.join(create_value_list(x)), qs))
+        return u' // '.join([u' || '.join(create_value_list(x)) for x in qs])
 
     return u""
 
@@ -107,7 +112,7 @@ def _linked_data(obj, extra, config={}):
     if qs.count() == 0:
         return u''
 
-    return u' // '.join(map(lambda x: u' || '.join(['LinkedData_ID ' + (x[0] if x[0] else ''), 'Status ' + (x[1] if x[1] else ''), 'Type ' + (x[2] if x[2] else ''), 'URN ' + (x[3] if x[3] else ''), 'ResourceName ' + (x[4] if x[4] else ''), 'URL ' + (x[5] if x[5] else '')]), qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])))
+    return u' // '.join([u' || '.join(['LinkedData_ID ' + (x[0] if x[0] else ''), 'Status ' + (x[1] if x[1] else ''), 'Type ' + (x[2] if x[2] else ''), 'URN ' + (x[3] if x[3] else ''), 'ResourceName ' + (x[4] if x[4] else ''), 'URL ' + (x[5] if x[5] else '')]) for x in qs.values_list(*['id', 'record_status_value', 'type_controlled__name', 'universal_resource_name', 'resource_name', 'url'])])
 
 def _related_citations(obj, extra, config={}):
     qs = obj.acrelation_set.all()

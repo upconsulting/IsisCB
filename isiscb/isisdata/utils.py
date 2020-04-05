@@ -4,12 +4,14 @@ Utility functions that do not depend on other app modules.
 Functions that rely on app modules (e.g. models) should be placed in
 :mod:`isisdata.operations`\.
 """
+from __future__ import unicode_literals
 
+from builtins import str
 import bleach, re, string, unidecode, unicodedata, regex
 
 
 def remove_control_characters(s):
-    s = unicode(s)
+    s = str(s)
     return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from builtins import object
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -76,7 +77,7 @@ class ImportAccession(models.Model):
 
 
 class ImportedData(models.Model):
-    class Meta:
+    class Meta(object):
         abstract = True
 
     imported_on = models.DateTimeField(auto_now_add=True)
@@ -223,7 +224,7 @@ class DraftAuthority(ImportedData):
     def resolved(self):
         return self.resolutions.count() > 0
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'draft authority record'
         verbose_name_plural = 'draft authority records'
 

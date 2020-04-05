@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 from django import template
 from isisdata.models import *
 import logging
@@ -17,8 +19,8 @@ def get_dates(obj):
 def _get_attr_date_value(attr):
     try:
         return attr if attr.value and type(attr.value.get_child_class()) in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue] else None
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return None
 
 @register.filter()
@@ -36,8 +38,8 @@ def get_attributes(obj):
 def _get_attr_non_date_value(attr):
     try:
         return attr if attr.value and type(attr.value.get_child_class()) not in [DateTimeValue, DateValue, ISODateValue, ISODateRangeValue] else None
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return None
 
 @register.filter()

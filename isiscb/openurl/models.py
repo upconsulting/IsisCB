@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -17,7 +19,7 @@ class CuratedMixin(models.Model):
     added_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
 

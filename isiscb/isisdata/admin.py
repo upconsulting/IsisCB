@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.admin import GenericTabularInline, GenericStackedInline
@@ -33,7 +36,7 @@ def as_datetime(x):
 #  autocomplete, or some other widget that loads ``object`` choices dynamically
 #  via AJAX.
 class CCRelationForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = CCRelation
         fields = ('object', )
 
@@ -89,7 +92,7 @@ class AutocompleteField(forms.CharField):
 
 
 class ACRelationForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = ACRelation
         fields = '__all__'
 
@@ -106,7 +109,7 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
     authority = AutocompleteField(widget=forms.HiddenInput(), model=Authority)
     authority_name = forms.CharField(widget=AutocompleteWidget(attrs={'class': 'autocomplete'}, datatarget='authority'))
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
         fields = (
             'authority_name',
@@ -122,7 +125,7 @@ class ACRelationInlineForm(autocomplete_light.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ACRelationInlineForm, self).__init__(*args, **kwargs)
 
-        for key, field in self.fields.iteritems():
+        for key, field in list(self.fields.items()):
             if 'class' not in field.widget.attrs:
                 field.widget.attrs['class'] = ''
             field.widget.attrs['class'] += ' form-control'
@@ -173,7 +176,7 @@ class ValueWidget(widgets.Widget):
     def render(self, name, value, attrs=None):
         assign = "widgets.{0} = $('{1}')[0];";
         assignments = '\n'.join([assign.format(f,v.render(name, value, attrs))
-                                 for f, v in self.widgets.items()])
+                                 for f, v in list(self.widgets.items())])
         if value is None:
             value = ''
         return "<span class='dynamicWidget' value='{0}'>Select an attribute type</span><script>{1}</script>".format(value, assignments)
@@ -184,11 +187,11 @@ class ValueField(forms.Field):
 
 
 class AttributeInlineForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Attribute
         exclude = []
 
-    class Media:
+    class Media(object):
         model = Attribute
 
         # widgetmap.js sets the widget for ``value`` based on the user's
@@ -241,7 +244,7 @@ class AttributeInlineFormSet(BaseGenericInlineFormSet):
 class LinkedDataInlineForm(forms.ModelForm):
     model = LinkedData
 
-    class Media:
+    class Media(object):
         model = LinkedData
         js = ('isisdata/js/widgetmap.js', )
 
@@ -418,7 +421,7 @@ class AdvancedSearchMixin(object):
             return queryset
 
         # Apply filtering from advanced search form.
-        for key, value in self.other_search_fields.iteritems():
+        for key, value in list(self.other_search_fields.items()):
             if key in getattr(self, 'advanced_search_icontains_fields', {}):
                 param = {'%s__icontains' % key : value}
             elif key in getattr(self, 'advanced_search_exact_fields', {}):
@@ -447,7 +450,7 @@ class AdvancedSearchMixin(object):
         # TODO: initial data?
 
         request.GET._mutable=True
-        for key in self.advanced_search_form().fields.keys():
+        for key in list(self.advanced_search_form().fields.keys()):
             try:
                 temp = request.GET.pop(key)
             except KeyError:
@@ -493,11 +496,11 @@ class CitationAdvancedSearchForm(forms.Form):
 
 
 class CitationForm(autocomplete_light.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = '__all__'
 
-    class Media:
+    class Media(object):
         js = ('isisdata/js/jquery-ui.min.js', 'isisdata/js/autocomplete.js',)
         css = {
             'all': ['isisdata/css/autocomplete.css']
@@ -505,7 +508,7 @@ class CitationForm(autocomplete_light.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CitationForm, self).__init__(*args, **kwargs)
-        for key, field in self.fields.iteritems():
+        for key, field in list(self.fields.items()):
             if 'class' not in field.widget.attrs:
                 field.widget.attrs['class'] = ''
             field.widget.attrs['class'] += ' form-control'
@@ -592,7 +595,7 @@ class CitationAdmin(SimpleHistoryAdmin,
         return super(CitationAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def lookup_allowed(self, lookup, *args, **kwargs):
-        if lookup in self.advanced_search_form().fields.keys():
+        if lookup in list(self.advanced_search_form().fields.keys()):
             return True
         return super(CitationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
@@ -622,7 +625,7 @@ class AuthorityAdvancedSearchForm(forms.Form):
 
 
 class AuthorityForm(autocomplete_light.ModelForm):
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = '__all__'
 
@@ -710,7 +713,7 @@ class AuthorityAdmin(SimpleHistoryAdmin,
         return super(AuthorityAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def lookup_allowed(self, lookup, *args, **kwargs):
-        if lookup in self.advanced_search_form().fields.keys():
+        if lookup in list(self.advanced_search_form().fields.keys()):
             return True
         return super(AuthorityAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
@@ -803,7 +806,7 @@ class ACRelationAdmin(SimpleHistoryAdmin,
         return super(ACRelationAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def lookup_allowed(self, lookup, *args, **kwargs):
-        if lookup in self.advanced_search_form().fields.keys():
+        if lookup in list(self.advanced_search_form().fields.keys()):
             return True
         return super(ACRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
@@ -828,7 +831,7 @@ class CCRelationAdvancedSearchForm(forms.Form):
 
 
 class CCRelationForm(autocomplete_light.ModelForm):
-    class Meta:
+    class Meta(object):
         model = CCRelation
         fields = '__all__'
 
@@ -896,13 +899,13 @@ class CCRelationAdmin(SimpleHistoryAdmin,
         return super(CCRelationAdmin, self).changelist_view(request, extra_context=extra_context)
 
     def lookup_allowed(self, lookup, *args, **kwargs):
-        if lookup in self.advanced_search_form().fields.keys():
+        if lookup in list(self.advanced_search_form().fields.keys()):
             return True
         return super(CCRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
 
 class AARelationForm(autocomplete_light.ModelForm):
-    class Meta:
+    class Meta(object):
         model = AARelation
         fields = '__all__'
 
@@ -1084,7 +1087,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 class UserProfileAdmin(admin.ModelAdmin):
-    class Meta:
+    class Meta(object):
         model = UserProfile
 
     readonly_fields = ['authority_record',]
@@ -1105,7 +1108,7 @@ class TrackingAdmin(admin.ModelAdmin):
         'citation',
     )
     readonly_fields = ['citation']
-    class Meta:
+    class Meta(object):
         model = Tracking
 
     def get_citation_id(self, obj):
@@ -1119,7 +1122,7 @@ class AuthorityTrackingAdmin(admin.ModelAdmin):
         'authority',
     )
     readonly_fields = ['authority']
-    class Meta:
+    class Meta(object):
         model = AuthorityTracking
 
     def get_authority_id(self, obj):

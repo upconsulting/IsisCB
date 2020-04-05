@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from haystack.forms import FacetedSearchForm
 from django import forms
 from django.db import models
@@ -209,7 +210,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
                     sqs = sqs.narrow(u'%s:"%s"' % (field, Clean(value)))
 
         # create 'and' query
-        for or_facet in or_facets.keys():
+        for or_facet in list(or_facets.keys()):
             query_str = ' OR '.join(or_facets[or_facet])
             sqs = sqs.narrow(u'%s:%s' % (or_facet, Clean('(' + query_str + ')')))
 

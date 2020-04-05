@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 

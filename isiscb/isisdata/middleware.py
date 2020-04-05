@@ -1,13 +1,17 @@
+from __future__ import unicode_literals
 # Orignal version taken from http://www.djangosnippets.org/snippets/186/
 # Original author: udfalkso
 # Modified by: Shwagroo Team and Gun.io
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import sys
 import os
 import re
 import hotshot, hotshot.stats
 import tempfile
-import StringIO
+import io
 
 from django.conf import settings
 
@@ -47,7 +51,7 @@ class ProfileMiddleware(object):
                 return name[0]
 
     def get_summary(self, results_dict, sum):
-        list = [ (item[1], item[0]) for item in results_dict.items() ]
+        list = [ (item[1], item[0]) for item in list(results_dict.items()) ]
         list.sort( reverse = True )
         list = list[:40]
 
@@ -90,7 +94,7 @@ class ProfileMiddleware(object):
         if (settings.DEBUG or request.user.is_superuser) and 'prof' in request.GET:
             self.prof.close()
 
-            out = StringIO.StringIO()
+            out = io.StringIO()
             old_stdout = sys.stdout
             sys.stdout = out
 

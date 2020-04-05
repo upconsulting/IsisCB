@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import map
+from builtins import object
 from isisdata.models import *
 from zotero.models import *
 from zotero.parse import ZoteroIngest
@@ -75,7 +79,7 @@ class IngestManager(object):
             draft_citation = self.draft_citation_hash.pop(_key, None)
             if draft_citation:
                 updated = False
-                for key, value in data.iteritems():
+                for key, value in list(data.items()):
                     if value and getattr(draft_citation, key, None) != value:
                         setattr(draft_citation, key, value)
                         updated = True
@@ -148,12 +152,12 @@ class IngestManager(object):
             try:    # ISISCB-395: Skip malformed page numbers.
                 page_start, page_end = value
                 # ISISCB-1029: numbers before and after dash should be used as page numbers (throw out everything else)
-                pages_free_text = u'-'.join(map(unicode, list(value)))
+                pages_free_text = u'-'.join(map(str, list(value)))
                 page_start = IngestManager._extract_page_number(page_start)
                 page_end = IngestManager._extract_page_number(page_end)
 
             except ValueError:    # free_text only.
-                print "value error"
+                print("value error")
                 page_start, page_end, pages_free_text = IngestManager._extract_page_number(value[0]), None, value[0]
         return {
             'page_start': page_start,
@@ -325,7 +329,7 @@ class IngestManager(object):
             citation = draft_citation,
             part_of = draft_citation.part_of,
         )
-        return map(_cast, entry.get('linkeddata', []))
+        return list(map(_cast, entry.get('linkeddata', [])))
 
     @staticmethod
     def generate_authority_linkeddata(entry, draft_authority):
@@ -349,7 +353,7 @@ class IngestManager(object):
             authority = draft_authority,
             part_of = draft_authority.part_of,
         )
-        return map(_cast, entry.get('linkeddata', []))
+        return list(map(_cast, entry.get('linkeddata', [])))
 
     def generate_draftcitation(self, entry, accession):
         """
@@ -368,8 +372,7 @@ class IngestManager(object):
         draft_citation_data = {
             'part_of': accession,
         }
-        draft_citation_data.update(dict(map(
-            lambda key: (key, IngestManager._get(entry, key)), CITATION_FIELDS)
+        draft_citation_data.update(dict([(key, IngestManager._get(entry, key)) for key in CITATION_FIELDS]
         ))
 
         draft_citation_data.update(IngestManager._get_pages_data(entry))
@@ -504,7 +507,7 @@ class IngestManager(object):
                 'type_controlled': acrelation_type
             })
             return draft_authority, draft_acrelation
-        return map(_cast, list(set(entry.get('subjects', []))))
+        return list(map(_cast, list(set(entry.get('subjects', [])))))
 
     @staticmethod
     def generate_contributor_acrelations(entry, draft_citation):
@@ -533,7 +536,7 @@ class IngestManager(object):
                 part_of = draft_citation.part_of,
             )
             return draft_authority, draft_acrelation
-        return map(_cast, entry.get('contributors', []))
+        return list(map(_cast, entry.get('contributors', [])))
 
     @staticmethod
     def generate_publisher_acrelations(entry, draft_citation):
@@ -556,7 +559,7 @@ class IngestManager(object):
                 part_of = draft_citation.part_of,
             )
             return draft_authority, draft_acrelation
-        return map(_cast, entry.get('publisher', []))
+        return list(map(_cast, entry.get('publisher', [])))
 
     @staticmethod
     def generate_generic_acrelations(entry, field, draft_citation, authority_type,
@@ -610,7 +613,7 @@ class IngestManager(object):
                 'data_display_order': data_display_order_offset + float(display_order),
             })
             return draft_authority, draft_acrelation
-        return map(_cast, entry.get(field, []))
+        return list(map(_cast, entry.get(field, [])))
 
     def _related_citation(self, datum, draft_citation, ccrelation_type):
         # We used handle_name to process reviewed works, so this looks odd.
@@ -668,7 +671,7 @@ class IngestManager(object):
             #     return None, None
             title = datum.get('title')
             draft_altcitation = None
-            for book in self.draft_citation_map.values():
+            for book in list(self.draft_citation_map.values()):
                 if book.title == title:
                     draft_altcitation = book
 
@@ -852,7 +855,7 @@ class IngestManager(object):
                 for linkeddatum in linkeddata:
                     self.draft_citation_map[linkeddatum.value] = draft_citation
                 self.draft_citations.append((entry, draft_citation))
-            except Exception, e:
+            except Exception as e:
                 errors.append((e, entry))
 
         for entry, draft_citation in self.draft_citations:

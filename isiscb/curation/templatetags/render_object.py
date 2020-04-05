@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import str
+from past.builtins import basestring
 from django import template
 from django.utils.safestring import SafeText
 from django.db.models import Q
@@ -122,7 +125,7 @@ def get_authors_editors_preloaded(citation_id):
     rtypes = [ACRelation.AUTHOR, ACRelation.EDITOR]
     qs = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'type_controlled', 'name_for_display_in_citation')
     rtype_display = dict(ACRelation.TYPE_CHOICES)
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', None) or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or 'missing', rtype_display[obj['type_controlled']]), qs))
+    return ', '.join(['%s (%s)' % (obj.get('authority__name', None) or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or 'missing', rtype_display[obj['type_controlled']]) for obj in qs])
 
 
 @register.filter(name='get_citation_pubdate')
@@ -131,7 +134,7 @@ def get_citation_pubdate(obj):
         if attribute.type_controlled.name == 'PublicationDate':
             try:
                 return attribute.value.get_child_class().__unicode__()
-            except Exception, e:
+            except Exception as e:
                 logger.error("Could not get publication date.")
                 logger.error(e)
                 return ""
@@ -183,10 +186,10 @@ def get_citation_pubdate_fast(obj):
 @register.filter
 def get_reviewed_books(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEW_OF, subject__id=citation.id))
-    citations =  map(lambda x: x.object, ccrelations)
+    citations =  [x.object for x in ccrelations]
 
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEWED_BY, object__id=citation.id))
-    citations = citations + map(lambda x: x.subject, ccrelations)
+    citations = citations + [x.subject for x in ccrelations]
 
     return citations
 
@@ -194,7 +197,7 @@ def get_reviewed_books(citation):
 @register.filter
 def get_including_book(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.INCLUDES_CHAPTER, object__id=citation.id))
-    citations =  map(lambda x: x.subject, ccrelations)
+    citations =  [x.subject for x in ccrelations]
 
     return citations
 
@@ -209,7 +212,7 @@ def get_citation_periodical(citation_id):
     rtypes = [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
     atype_display = dict(Authority.TYPE_CHOICES)
     relations = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled', 'name_for_display_in_citation')
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name') or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or "missing", atype_display.get(obj['authority__type_controlled'], 'none')), relations))
+    return ', '.join(['%s (%s)' % (obj.get('authority__name') or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or "missing", atype_display.get(obj['authority__type_controlled'], 'none')) for obj in relations])
 
 @register.filter
 def get_citation_periodical_relations(citation_id):

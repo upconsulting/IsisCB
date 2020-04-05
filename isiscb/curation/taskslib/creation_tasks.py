@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from celery import shared_task
 
 from isisdata.models import *
@@ -7,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import logging
 import smart_open
-import record_creator
+from . import record_creator
 import unicodecsv as csv
 from datetime import datetime
 from dateutil.tz import tzlocal
@@ -51,7 +53,7 @@ def create_records(file_path, error_path, task_id, user_id, record_type):
             for row in csv.DictReader(f):
                 CREATION_METHODS[record_type](row, user_id, results, task_id, current_time_obj)
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -82,7 +84,7 @@ def _count_rows(f, results):
     try:
         for row in csv.DictReader(f):
             row_count += 1
-    except Exception, e:
+    except Exception as e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
         results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))

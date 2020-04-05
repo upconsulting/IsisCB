@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
@@ -22,10 +29,10 @@ from oauth2_provider.models import AbstractApplication
 
 from isisdata.utils import *
 
-import copy, datetime, iso8601, pickle, uuid, urlparse, re, bleach, unidecode
+import copy, datetime, iso8601, pickle, uuid, urllib.parse, re, bleach, unidecode
 from random import randint
 import string, unicodedata
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 from openurl.models import Institution
 
@@ -96,7 +103,7 @@ class Value(models.Model):
         Override this method in a subclass to control how it is rendered for
         display in views.
         """
-        return unicode(self.value)
+        return str(self.value)
 
     def cvalue(self):
         cclass = self.get_child_class()
@@ -107,7 +114,7 @@ class Value(models.Model):
 
     def __unicode__(self):
         try:
-            return unicode(self.cvalue())
+            return str(self.cvalue())
         except:
             return u''
 
@@ -121,7 +128,7 @@ class TextValue(Value):
     def __unicode__(self):
         return self.value
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'text (long)'
 
 
@@ -140,7 +147,7 @@ class CharValue(Value):
     def __unicode__(self):
         return self.value
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'text (short)'
 
 
@@ -158,9 +165,9 @@ class IntValue(Value):
             raise ValidationError('Must be an integer')
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'integer'
 
 
@@ -182,7 +189,7 @@ class DateTimeValue(Value):
     def __unicode__(self):
         return self.value.isoformat()
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'date and time'
 
 
@@ -218,7 +225,7 @@ class ISODateRangeValue(Value):
     def convert(value):
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
-            for i in xrange(2):
+            for i in range(2):
                 value[i] = ISODateValue.convert(value[i])
         elif type(value) in [tuple, list] and len(value) == 1 and type(value[0]) in [tuple, list]:
             try:
@@ -234,7 +241,7 @@ class ISODateRangeValue(Value):
 
     def __unicode__(self):
         def _coerce(val):
-            val = unicode(val)
+            val = str(val)
             if val.startswith('-') and len(val) < 5:
                 val = val[0] + string.zfill(val[1:], 4)
             elif len(val) == 3:
@@ -248,7 +255,7 @@ class ISODateRangeValue(Value):
     def render(self):
         return self.__unicode__()
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'ISO date range'
 
 
@@ -261,7 +268,7 @@ class DateRangeValue(Value):
     @staticmethod
     def convert(value):
         if type(value) in [tuple, list] and len(value) == 2:
-            for i in xrange(2):
+            for i in range(2):
                 if type(value[i]) is not datetime.date:
                     try:
                         value[i] = iso8601.parse_date(value[i]).date()
@@ -275,7 +282,7 @@ class DateRangeValue(Value):
     def __unicode__(self):
         return u'%s to %s' % tuple([part.isodate() for part in self.value])
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'date range'
 
 
@@ -327,7 +334,7 @@ class ISODateValue(Value):
                 self.attribute.source.publication_date = self.as_date
                 self.attribute.source.save()
             except (ValueError, AttributeError):
-                print 'Error settings publication_date on source'
+                print('Error settings publication_date on source')
 
         super(ISODateValue, self).save(*args, **kwargs)    # Save first.
 
@@ -351,7 +358,7 @@ class ISODateValue(Value):
 
     def __unicode__(self):
         def _coerce(val):
-            val = unicode(val)
+            val = str(val)
             if val.startswith('-') and len(val) < 5:
                 val = val[0] + string.zfill(val[1:], 4)
             elif len(val) == 3:
@@ -381,7 +388,7 @@ class ISODateValue(Value):
 
         if type(value) in [tuple, list]:
             value = list(value)
-        elif type(value) in [str, unicode]:
+        elif type(value) in [str, str]:
 
             pre = u''
             if value.startswith('-'):   # Preserve negative years.
@@ -401,12 +408,12 @@ class ISODateValue(Value):
             raise ValidationError('Not a valid ISO8601 date')
 
         if len(value) > 0:
-            if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
+            if int(value[0]) > 0 and (type(value[0]) in [str, str] and len(value[0]) > 4):
                 raise ValidationError('Not a valid ISO8601 date')
-            elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
+            elif int(value[0]) < 0 and (type(value[0]) in [str, str] and len(value[0]) > 5):
                 raise ValidationError('Not a valid ISO8601 date')
             for v in value[1:]:
-                if type(v) in [str, unicode] and len(v) != 2:
+                if type(v) in [str, str] and len(v) != 2:
                     raise ValidationError('Not a valid ISO8601 date')
         try:
 
@@ -414,7 +421,7 @@ class ISODateValue(Value):
         except NameError:
             raise ValidationError('Not a valid ISO8601 date')
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'isodate'
 
 
@@ -447,7 +454,7 @@ class DateValue(Value):
     def __unicode__(self):
         return self.value.isoformat()
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'date'
 
 
@@ -465,9 +472,9 @@ class FloatValue(Value):
             raise ValidationError('Must be a floating point number')
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'floating point number'
 
 
@@ -480,7 +487,7 @@ class LocationValue(Value):
     def __unicode__(self):
         return self.value.__unicode__
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'location'
 
 class AuthorityValue(Value):
@@ -491,9 +498,9 @@ class AuthorityValue(Value):
     name = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'authority'
 
     @staticmethod
@@ -513,7 +520,7 @@ VALUE_MODELS = [
     (datetime.datetime, DateTimeValue),
     (datetime.date,     ISODateValue),
     (str,               CharValue),
-    (unicode,           CharValue),
+    (str,           CharValue),
     (tuple,             DateRangeValue),
     (list,              DateRangeValue),
 ]
@@ -524,7 +531,7 @@ class CuratedMixin(models.Model):
     Curated objects have an audit history and curatorial notes attached to them.
     """
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     administrator_notes = models.TextField(blank=True, null=True,
@@ -675,7 +682,7 @@ class ReferencedEntity(models.Model):
     TODO: implement an accession field.
     """
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     id = models.CharField(max_length=200, primary_key=True,
@@ -695,7 +702,7 @@ class ReferencedEntity(models.Model):
         Create a new Unique Resource Identifier.
         """
         values = type(self).__name__.lower(), self.id
-        return urlparse.urlunparse(('http', settings.DOMAIN,
+        return urllib.parse.urlunparse(('http', settings.DOMAIN,
                                     'isis/{0}/{1}/'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
@@ -1132,7 +1139,7 @@ class CitationSubtype(models.Model):
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
 
-    class Meta:
+    class Meta(object):
         verbose_name_plural = 'authority records'
         verbose_name = 'authority record'
 
@@ -1375,7 +1382,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'ACR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'authority-citation relationship'
         verbose_name_plural = 'authority-citation relationships'
 
@@ -1643,7 +1650,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'AAR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'authority-authority relationship'
         verbose_name_plural = 'authority-authority relationships'
 
@@ -1715,7 +1722,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'CCR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'citation-citation relationship'
         verbose_name_plural = 'citation-citation relationships'
 
@@ -1791,7 +1798,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
 
 class LinkedDataType(models.Model):
-    class Meta:
+    class Meta(object):
         verbose_name = 'linked data type'
         verbose_name_plural = 'linked data types'
 
@@ -1892,7 +1899,7 @@ class PartDetails(models.Model):
     of larger works.
     """
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'part detail'
         verbose_name_plural = 'part details'
 
@@ -1974,7 +1981,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = "LED"
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'linked data entry'
         verbose_name_plural = 'linked data entries'
 
@@ -2201,7 +2208,7 @@ class Comment(Annotation):
     def linkified(self):
         return linkify(self.text)
 
-    class Meta:
+    class Meta(object):
         get_latest_by = 'created_on'
 
 

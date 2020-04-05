@@ -1,13 +1,17 @@
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from django import template
 from isisdata.models import *
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-from urllib import quote
+from urllib.parse import quote
 import codecs
 import re
-import urlparse
+import urllib.parse
 
 import bleach
 
@@ -208,7 +212,7 @@ def linkeddata_for_display(ldinstance):
         return value
 
     # Make sure that the DOI is not already an URL.
-    if urlparse.urlsplit(value).scheme:
+    if urllib.parse.urlsplit(value).scheme:
         return value
     return URN_PATTERNS[ldinstance.type_controlled.name].format(value)
 

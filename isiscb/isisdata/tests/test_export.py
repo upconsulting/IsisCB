@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import range
+from builtins import object
 import unittest, mock
 from isisdata import export    # Ha!
 from isisdata.models import *
@@ -5,7 +9,7 @@ from isisdata.models import *
 
 class TestExportCSV(unittest.TestCase):
     def test_output(self):
-        for i in xrange(5):
+        for i in range(5):
             Citation.objects.create(title='Citation %i' % i, type_controlled=Citation.ARTICLE)
         columns = [export.object_id, export.citation_title]
 

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.conf.urls import url, include
 from django.views.decorators.cache import cache_page
 from haystack.forms import FacetedSearchForm

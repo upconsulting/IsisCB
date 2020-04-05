@@ -1,5 +1,11 @@
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
 
+from past.builtins import cmp
+from builtins import str
+from past.utils import old_div
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
 from django.core.paginator import EmptyPage
@@ -181,7 +187,7 @@ def create_authority(request):
             'person_form': person_form,
             'attribute_form': attribute_form,
             'linkeddata_form': linkeddata_form,
-            'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+            'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
         })
     elif request.method == 'POST':
         authority = Authority()
@@ -245,7 +251,7 @@ def create_authority(request):
                 'attribute_form': attribute_form if attribute_form else AttributeForm(prefix="attribute"),
                 'linkeddata_form': linkeddata_form if linkeddata_form else LinkedDataForm(prefix='linkeddata'),
                 'value_form': value_form,
-                'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+                'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
             })
     return render(request, template, context)
 
@@ -1051,7 +1057,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
     context.update({
         'attribute_form': attribute_form,
         'value_form': value_form,
-        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+        'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
     })
     return render(request, template, context)
 
@@ -1125,13 +1131,13 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     context.update({
         'attribute_form': attribute_form,
         'value_form': value_form,
-        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+        'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
     })
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def get_attribute_type_help_text(request, attribute_type_id):
-    print attribute_type_id
+    print(attribute_type_id)
     attribute_type = get_object_or_404(AttributeType, pk=attribute_type_id)
 
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
@@ -1262,7 +1268,7 @@ def _build_result_set_links(request, context, model=Citation):
         return
 
     current_index = int(current_index)
-    page_number = int(math.floor(current_index / PAGE_SIZE)) + 1
+    page_number = int(math.floor(old_div(current_index, PAGE_SIZE))) + 1
     relative_index = current_index % PAGE_SIZE
 
     # The "current run" is the series of record IDs on the current page.
@@ -1495,9 +1501,9 @@ def _authorities_get_filter_params(request):
     filter_params = None
     if search_key:
         filter_params = user_session.get('%s_authority_search_params' % search_key)
-        all_params = {k: v for k, v in filter_params.iteritems()}
+        all_params = {k: v for k, v in list(filter_params.items())}
 
-    if len(post_or_get.keys()) <= 1:
+    if len(list(post_or_get.keys())) <= 1:
         if filter_params is None:
             filter_params = user_session.get('authority_filter_params', None)
             all_params = user_session.get('authority_request_params', None)
@@ -1515,7 +1521,7 @@ def _authorities_get_filter_params(request):
         all_params = {}
 
     if search_key is None:
-        if not 'o' in filter_params.keys():
+        if not 'o' in list(filter_params.keys()):
             filter_params['o'] = 'name_for_sort'
         for key in additional_params_names:
             all_params[key] = post_or_get.get(key, '')
@@ -1553,10 +1559,10 @@ def _citations_get_filter_params(request):
     filter_params = None
     if search_key:
         filter_params = user_session.get('%s_citation_search_params' % search_key)
-        all_params = {k: v for k, v in filter_params.iteritems()}
+        all_params = {k: v for k, v in list(filter_params.items())}
 
     # if we don't have any filters set yet, or there is just one parameter 'page'
-    if len(post_or_get.keys()) == 0 or (len(post_or_get.keys()) == 1 and post_or_get.get('page', None)):
+    if len(list(post_or_get.keys())) == 0 or (len(list(post_or_get.keys())) == 1 and post_or_get.get('page', None)):
         if filter_params is None:
             filter_params = user_session.get('citation_filter_params', None)
             all_params = user_session.get('citation_request_params', None)
@@ -1609,7 +1615,7 @@ def citations(request):
         encoded_params = filter_params.urlencode().encode('utf-8')
     else:
         _params = QueryDict(mutable=True)
-        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+        for k, v in [k_v for k_v in list(filter_params.items()) if k_v[1] is not None]:
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
@@ -1630,7 +1636,7 @@ def citations(request):
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')
-    active_filters = [k for k,v in filter_params.iteritems() if v and k not in ['page', 'show_filters', 'o', 'filters']]
+    active_filters = [k for k,v in list(filter_params.items()) if v and k not in ['page', 'show_filters', 'o', 'filters']]
 
     if not active_filters:
         context.update({
@@ -1707,7 +1713,7 @@ def authorities(request):
         encoded_params = filter_params.urlencode().encode('utf-8')
     else:
         _params = QueryDict(mutable=True)
-        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+        for k, v in [k_v1 for k_v1 in list(filter_params.items()) if k_v1[1] is not None]:
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
@@ -1725,7 +1731,7 @@ def authorities(request):
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')
-    active_filters = [k for k,v in filter_params.iteritems() if v and k not in ['page', 'show_filters', 'o', 'filters']]
+    active_filters = [k for k,v in list(filter_params.items()) if v and k not in ['page', 'show_filters', 'o', 'filters']]
 
     if not active_filters:
         context.update({
@@ -1749,7 +1755,7 @@ def authorities(request):
     page = paginator.page(currentPage)
     paginated_objects = list(page)
 
-    filters_active = filter_params or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+    filters_active = filter_params or len([v for k, v in list(request.GET.items()) if len(v) > 0 and k != 'page']) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
@@ -1828,7 +1834,7 @@ def authority(request, authority_id):
 
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}
-        for key, value in get_request.items():
+        for key, value in list(get_request.items()):
             safe_get_request[escape(key)] = escape(value)
         context.update({
             'request_params': request_params,
@@ -1984,21 +1990,21 @@ def quick_and_dirty_authority_search(request):
 
     query = Q()
     if type_controlled:
-        type_array = map(lambda t: t.upper(), type_controlled.split(","))
+        type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
 
     if limit_active_types:
-        type_array = map(lambda t: t.upper(), limit_active_types.split(","))
+        type_array = [t.upper() for t in limit_active_types.split(",")]
         query &= ~(Q(type_controlled__in=type_array) & Q(record_status_value=CuratedMixin.INACTIVE))
 
     if exclude:     # exclude certain types
-        exclude_array = map(lambda t: t.upper(), exclude.split(","))
+        exclude_array = [t.upper() for t in exclude.split(",")]
         query &= ~Q(type_controlled__in=exclude_array)
 
     if classification_system:   # filter by classification system
-        system_array = map(lambda t: t.upper(), classification_system.split(","))
+        system_array = [t.upper() for t in classification_system.split(",")]
         if limit_clasification_types:
-            type_array = map(lambda t: t.upper(), limit_clasification_types.split(","))
+            type_array = [t.upper() for t in limit_clasification_types.split(",")]
             q_part = Q(type_controlled__in=type_array) & ~Q(classification_system__in=system_array)
             if system_blank:
                 q_part &= ~Q(classification_system__isnull=True)
@@ -2115,7 +2121,7 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
-            'related_citations': map(lambda s: s.title(), set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])),
+            'related_citations': [s.title() for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
@@ -2191,7 +2197,7 @@ def search_users(request):
         'id': u.id,
         'label': "%s %s (%s)" % (u.first_name, u.last_name, u.username)
     } for u in queryset[:20]]
-    print results
+    print(results)
     return JsonResponse(results, safe=False)
 
 
@@ -2734,7 +2740,7 @@ def bulk_action(request):
 
     form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
     context = {
-        'extra_data': '\n'.join(form_class.extra_data.values())
+        'extra_data': '\n'.join(list(form_class.extra_data.values()))
     }
 
     if request.method != 'POST':
@@ -2773,7 +2779,7 @@ def bulk_action_status(request):
     template = 'curation/citations_bulk_status.html'
     context = {}
     task_ids = request.GET.getlist('task')
-    tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
+    tasks = [AsyncTask.objects.get(pk=_pk) for _pk in task_ids]
 
     context.update({'tasks': tasks})
     return render(request, template, context)
@@ -2819,7 +2825,7 @@ def _build_filter_label(filter_params_raw, filter_type='CITATION'):
     filter_data = {}
     if filter_form.is_valid():
         filter_data = filter_form.cleaned_data
-    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
+    return ', '.join([ '%s: %s' % (key, value) for key, value in list(filter_data.items()) if value ])
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def export_citations(request):

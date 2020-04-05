@@ -1,7 +1,10 @@
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 from django import template
 from isisdata.models import *
 from isisdata.templatetags.app_filters import *
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import re
 
 register = template.Library()
@@ -31,7 +34,7 @@ def remove_url_part(url, arg):
 
 @register.filter
 def add_selected_facet(url, facet):
-    return (url + "&selected_facets=" + urllib.unquote(facet)).replace("&&", "&")
+    return (url + "&selected_facets=" + urllib.parse.unquote(facet)).replace("&&", "&")
 
 @register.filter
 def add_facet_or_operator(url):
@@ -42,7 +45,7 @@ def add_facet_or_operator(url):
 
 @register.filter
 def add_excluded_citation_type_facet(url, facet):
-    facet_str = 'citation_type:' + urllib.quote(facet)
+    facet_str = 'citation_type:' + urllib.parse.quote(facet)
     if 'selected_facets=' + facet_str in url:
         url = url.replace('selected_facets=' + facet_str, '')
     url = url + '&excluded_facets=' + facet_str

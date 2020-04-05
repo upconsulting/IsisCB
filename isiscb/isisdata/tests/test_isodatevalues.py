@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import str
 import unittest
 
 from django.contrib.contenttypes.models import ContentType
@@ -17,13 +19,13 @@ class TestISODateValue(unittest.TestCase):
         self.attribute = Attribute.objects.create(
             type_controlled=self.attribute_type,
             source_content_type=subject_type,
-            source_instance_id=unicode(self.attribute_type.id)
+            source_instance_id=str(self.attribute_type.id)
         )
 
     def _do_test(self, date, precision):
         value = ISODateValue.objects.create(value=date, attribute=self.attribute)
         self.assertIsInstance(value.value, list)
-        self.assertIsInstance(value.precision, unicode)
+        self.assertIsInstance(value.precision, str)
         self.assertEqual(value.precision, precision)
         return value.value
 
@@ -55,10 +57,10 @@ class TestISODateValue(unittest.TestCase):
         self.assertLess(value[0], 0)
 
     def test_create_datevalue_from_list_full(self):
-        value = self._do_test([1999, 01, 05], 'day')
+        value = self._do_test([1999, 0o1, 0o5], 'day')
 
     def test_create_datevalue_from_tuple_full(self):
-        value = self._do_test((1999, 01, 05), 'day')
+        value = self._do_test((1999, 0o1, 0o5), 'day')
 
     def test_create_datevalue_from_int(self):
         value = self._do_test(1999, 'year')
@@ -80,7 +82,7 @@ class TestISODateRangeValue(unittest.TestCase):
         self.attribute = Attribute.objects.create(
             type_controlled=self.attribute_type,
             source_content_type=subject_type,
-            source_instance_id=unicode(self.attribute_type.id)
+            source_instance_id=str(self.attribute_type.id)
         )
 
     def _do_test(self, date):
@@ -122,11 +124,11 @@ class TestISODateRangeValue(unittest.TestCase):
         self.assertLess(value[0][0], 0)
 
     def test_create_daterangevalue_from_list_full(self):
-        date = [[1999, 01, 05], [1999, 01, 06]]
+        date = [[1999, 0o1, 0o5], [1999, 0o1, 0o6]]
         value = self._do_test(date)
 
     def test_create_daterangevalue_from_tuple_full(self):
-        date = [(1999, 01, 05), (1999, 01, 06)]
+        date = [(1999, 0o1, 0o5), (1999, 0o1, 0o6)]
         value = self._do_test(date)
 
     def test_create_daterangevalue_from_int(self):

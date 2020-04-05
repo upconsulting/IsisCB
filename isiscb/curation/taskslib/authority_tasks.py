@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from celery import shared_task
 
 from isisdata.models import *
@@ -61,7 +62,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     master = Authority.objects.get(pk=master_id)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (master_id))
                     results.append((ERROR, master_id, 'Authority record does not exist.', ""))
                     current_count = _update_count(current_count, task)
@@ -69,7 +70,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     duplicate = Authority.objects.get(pk=duplicate_id)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (duplicate_id))
                     results.append((ERROR, duplicate_id, 'Authority record does not exist.', ""))
                     current_count = _update_count(current_count, task)
@@ -103,7 +104,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
                 results.append((SUCCESS, "Records Merged", "%s and %s were successfully merged. Master is %s."%(master_id, duplicate_id, master_id), ""))
 
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "There was an unexpected error processing the CSV file: " + repr(e), ""))
@@ -227,7 +228,7 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
                 value.save()
 
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -389,7 +390,7 @@ def update_elements(file_path, error_path, task_id, user_id):
 
                 try:
                     type_class = apps.get_model(app_label='isisdata', model_name=elem_type)
-                except Exception, e:
+                except Exception as e:
                     results.append((ERROR, elem_type, element_id, '%s is not a valid type.'%(elem_type), current_time))
                     current_count = _update_count(current_count, task)
                     continue
@@ -447,7 +448,7 @@ def update_elements(file_path, error_path, task_id, user_id):
 
                                 element.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
-                            except Exception, e:
+                            except Exception as e:
                                 logger.error(e)
                                 logger.exception(e)
                                 results.append((ERROR, elem_type, element_id, 'Something went wrong. %s was not changed.'%(field_to_change), current_time))
@@ -483,7 +484,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 setattr(object_to_update_timestamp, 'modified_by_id', user_id)
                                 object_to_update_timestamp.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', object_to_update_timestamp.modified_on))
-                        except Exception, e:
+                        except Exception as e:
                             logger.error(e)
                             logger.exception(e)
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object), current_time))
@@ -492,10 +493,10 @@ def update_elements(file_path, error_path, task_id, user_id):
                     results.append((ERROR, elem_type, element_id, 'Field %s cannot be changed.'%(field_to_change), current_time))
 
                 current_count = _update_count(current_count, task)
-        except KeyError, e:
+        except KeyError as e:
             logger.exception("There was a column error processing the CSV file.")
             results.append((ERROR, "column error", "", "There was a column error processing the CSV file. Have you provided the correct column headers? " + repr(e), current_time))
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e), current_time))
@@ -579,7 +580,7 @@ def _count_rows(f, results):
     try:
         for row in csv.DictReader(f):
             row_count += 1
-    except Exception, e:
+    except Exception as e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
         results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))

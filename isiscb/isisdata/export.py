@@ -5,7 +5,12 @@ The strategy here is to favor extensibility/flexibility in defining output
 columns, at the expense of performance. The performance hit is probably OK,
 since these jobs will be performed asynchronously.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
+from builtins import map
+from builtins import str
+from builtins import object
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
@@ -32,15 +37,15 @@ def generate_csv(stream, queryset, columns):
 
     import unicodecsv as csv
     writer = csv.writer(stream)
-    writer.writerow(map(lambda c: c.label, columns))
+    writer.writerow([c.label for c in columns])
     extra = []
     for obj in queryset:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, extra), columns))
+            writer.writerow([c(obj, extra) for c in columns])
 
     for obj in extra:
         if obj is not None:
-            writer.writerow(map(lambda c: c(obj, []), columns))
+            writer.writerow([c(obj, []) for c in columns])
 
 
 class Column(object):
@@ -72,8 +77,8 @@ class Column(object):
         except AssertionError as E:    # Let this percolate through.
             raise E
         except Exception as E:
-            print 'Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None))
-            print E
+            print('Exception in column %s for object %s' % (self.label, getattr(obj, 'id', None)))
+            print(E)
             return u""
 
 
@@ -252,7 +257,7 @@ def _category_numbers(obj, extra, config={}):
 
 
 def _language(obj, extra, config={}):
-    return u'//'.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
+    return u'//'.join([o for o in list(obj.language.all().values_list('name', flat=True)) if o is not None])
 
 
 def _place_publisher(obj, extra, config={}):
@@ -321,7 +326,7 @@ def _linked_data(obj, extra, config={}):
                     ]
         return delimiter.join(fields)
 
-    return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
+    return u' // '.join([entry(x, delimiter=_get_fields_delimiter(config)) for x in qs])
 
 def _pages(obj, extra, config={}):
     if not getattr(obj, 'part_details', None):
@@ -336,11 +341,11 @@ def _pages(obj, extra, config={}):
     else:
         pre = u""
     if page_start_string and page_end_string:
-        return pre + unicode(page_start_string) + "-" + unicode(page_end_string)
+        return pre + str(page_start_string) + "-" + str(page_end_string)
     if page_start_string:
-        return pre + unicode(page_start_string)
+        return pre + str(page_start_string)
     if page_end_string:
-        return pre + unicode(page_end_string)
+        return pre + str(page_end_string)
     return ""
 
 def _pages_free_text(obj, extra, config={}):
@@ -355,7 +360,7 @@ def _tracking(obj, type_controlled):
         # this is ugly but well:
         # if there is a creation date (modification date since we never change them again), use the date
         # otherwise use tracking info
-        return u'//'.join(map(lambda o: "%s: %s"%(o[1], (o[2] if o[2] else (o[0] if o[0] else ""))), list(qs.values_list('tracking_info', 'id', 'modified_on'))))
+        return u'//'.join(["%s: %s"%(o[1], (o[2] if o[2] else (o[0] if o[0] else ""))) for o in list(qs.values_list('tracking_info', 'id', 'modified_on'))])
     return u""
 
 
@@ -366,15 +371,15 @@ def _link_to_record(obj, extra, config={}):
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEW_OF])
     qs = obj.ccrelations.filter(_q)
-    extra += map(lambda o: o.object, qs)
+    extra += [o.object for o in qs]
     ids = list(qs.values_list('object__id', flat=True))
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(type_controlled__in=[CCRelation.REVIEWED_BY,
                                   CCRelation.INCLUDES_CHAPTER])
     qs = obj.ccrelations.filter(_q)
-    extra += map(lambda o: o.subject, qs)
+    extra += [o.subject for o in qs]
     ids += list(qs.values_list('subject__id', flat=True))
-    return u" // ".join(filter(lambda o: o is not None, ids))
+    return u" // ".join([o for o in ids if o is not None])
 
 
 def _journal_link(obj, extra, config={}):
@@ -386,17 +391,17 @@ def _journal_link(obj, extra, config={}):
     _first = qs.first()
     if _first.authority:
         journal_info = []
-        journal_info.append("AuthorityName " + unicode(_first.authority.name))
+        journal_info.append("AuthorityName " + str(_first.authority.name))
         journal_info.append("AuthorityID " + str(_first.authority.id))
         try:
-            journal_info.append("AuthorityType " + unicode(_first.authority.get_type_controlled_display()))
+            journal_info.append("AuthorityType " + str(_first.authority.get_type_controlled_display()))
         except:
-            print("Exception with type controlled " + unicode(_first.authority.type_controlled))
-            journal_info.append("AuthorityType " + unicode(_first.authority.type_controlled))
+            print("Exception with type controlled " + str(_first.authority.type_controlled))
+            journal_info.append("AuthorityType " + str(_first.authority.type_controlled))
 
         for attr in _first.authority.attributes.all():
             if attr.type_controlled.name == settings.JOURNAL_ABBREVIATION_ATTRIBUTE_NAME:
-                journal_info.append("Abbreviation " + unicode(attr.value.cvalue()))
+                journal_info.append("Abbreviation " + str(attr.value.cvalue()))
 
         issn = _first.authority.linkeddata_entries.filter(type_controlled__name__icontains='issn').first()
         if issn:
@@ -422,8 +427,8 @@ def _journal_issue(obj, extra, config={}):
 
 def _includes_series_article(obj, extra, config={}):
     qs = obj.relations_to.filter(type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE)
-    extra += map(lambda o: o.subject, qs)
-    return u" // ".join(filter(lambda o: o is not None, qs.values_list('subject_id', flat=True)))
+    extra += [o.subject for o in qs]
+    return u" // ".join([o for o in qs.values_list('subject_id', flat=True) if o is not None])
 
 def _related_authorities(obj, extra, config={}):
     qs = obj.acrelation_set.all()
@@ -438,7 +443,7 @@ def _related_citations(obj, extra, config={}):
     fields_object, additional_fields_object = _get_metadata_fields_citation(config, 'object')
     fields_subject, additional_fields_subject = _get_metadata_fields_citation(config, 'subject')
 
-    return u' // '.join(map(functools.partial(create_ccr_string,additional_fields=additional_fields_object, delimiter=_get_fields_delimiter(config)), qs_from.values_list(*fields_object)) + map(functools.partial(create_ccr_string,additional_fields=additional_fields_subject,delimiter=_get_fields_delimiter(config)), qs_to.values_list(*fields_subject)))
+    return u' // '.join(list(map(functools.partial(create_ccr_string,additional_fields=additional_fields_object, delimiter=_get_fields_delimiter(config)), qs_from.values_list(*fields_object))) + list(map(functools.partial(create_ccr_string,additional_fields=additional_fields_subject,delimiter=_get_fields_delimiter(config)), qs_to.values_list(*fields_subject))))
 
 
 def _extent(obj, extra, config={}):
@@ -465,7 +470,7 @@ def _attributes(obj, extra, config={}):
         return delimiter.join(fields)
 
     if qs.count() > 0:
-        return u' // '.join(map(lambda x: entry(x, delimiter=_get_fields_delimiter(config)), qs))
+        return u' // '.join([entry(x, delimiter=_get_fields_delimiter(config)) for x in qs])
 
     return u""
 
