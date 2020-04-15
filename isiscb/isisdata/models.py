@@ -828,7 +828,7 @@ class Citation(ReferencedEntity, CuratedMixin):
         }
 
         entries = [x.type_controlled for x in self.tracking_records.all()]
-        sorted_entries = sorted(entries, key=lambda x: ratings[x] if x else -1, reverse=True)
+        sorted_entries = sorted(entries, key=lambda x: ratings[x] if x and x in ratings else -1, reverse=True)
         current_state = None
         if sorted_entries:
             current_state = sorted_entries[0]
