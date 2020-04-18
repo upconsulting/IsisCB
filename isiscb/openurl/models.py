@@ -15,7 +15,8 @@ def help_text(s):
 
 
 class CuratedMixin(models.Model):
-    added_by = models.ForeignKey(User)
+    # CHECK: Had to add on_delete so chose cascade
+    added_by = models.ForeignKey(User, on_delete=models.CASCADE)
     added_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
@@ -40,7 +41,8 @@ class Resolver(CuratedMixin):
     An OpenURL resolver.
     """
 
-    belongs_to = models.OneToOneField('Institution', related_name='resolver')
+    # CHECK: Had to add on_delete so chose cascade
+    belongs_to = models.OneToOneField('Institution', related_name='resolver', on_delete=models.CASCADE)
     endpoint = models.URLField(max_length=1000, help_text=help_text("""
     The address to which CoINS metadata will be appended to create an OpenURL
     link."""))

@@ -57,7 +57,6 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
-    'pagination',
     'rules.apps.AutodiscoverRulesConfig',
     #'debug_toolbar',
 )

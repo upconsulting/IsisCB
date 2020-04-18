@@ -36,18 +36,23 @@ MIGRATION_MODULES = {
 # Application definition
 
 INSTALLED_APPS = (
-    'autocomplete_light',
+    'dal',
+    'dal_select2',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'social.apps.django_app.default',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
     'rest_framework',
     'simple_history',
-    'social_django',
     'isisdata',
     'storages',
     'haystack',
@@ -58,7 +63,6 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
-    'pagination',
     'rules.apps.AutodiscoverRulesConfig',
     #'debug_toolbar',
 )
@@ -84,15 +88,17 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.twitter.TwitterOAuth',
-    'social.backends.facebook.FacebookOAuth2',
+    # TODO: Remove 
+    #'social.backends.twitter.TwitterOAuth',
+    #'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'social.apps.django_app.context_processors.backends',
-    'social.apps.django_app.context_processors.login_redirect',
-)
+# TEMPLATE_CONTEXT_PROCESSORS = (
+#     'social.apps.django_app.context_processors.backends',
+#     'social.apps.django_app.context_processors.login_redirect',
+# )
 
 
 ROOT_URLCONF = 'isiscb.urls'
@@ -249,6 +255,20 @@ TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
+#production social keys
+
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY','')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
+
+TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
+TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
+FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
+FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
+
 
 
 LICENSE = """This work is licensed under a Creative Commons
@@ -296,3 +316,6 @@ CELERY_QUEUES = {
     }
 }
 CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
+
+
+SITE_ID = 1

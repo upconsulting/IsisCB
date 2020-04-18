@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from isisdata.models import *
 from simple_history.admin import SimpleHistoryAdmin
 
-import autocomplete_light
+from dal import autocomplete
 
 
 def as_datetime(x):

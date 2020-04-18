@@ -15,7 +15,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator,int_list
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse as core_reverse
+from django.urls import reverse as core_reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import jsonpickle
@@ -57,9 +57,10 @@ class Value(models.Model):
     Python object from an alphanumeric input, and raises ValidationError for
     bad data.
     """
+    # CHECK: Had to add on_delete so chose cascade
     attribute = models.OneToOneField('Attribute', related_name='value',
                                      help_text=help_text("""
-    The Attribute to which this Value belongs."""))
+    The Attribute to which this Value belongs."""), on_delete=models.CASCADE)
 
     child_class = models.CharField(max_length=255, help_text=help_text("""
     Name of the child model for this instance."""))
@@ -482,7 +483,8 @@ class LocationValue(Value):
     """
     A location value. Points to an instance of :class:`.Location`\.
     """
-    value = models.ForeignKey('Location')   # TODO: One to One?
+    # CHECK: Had to add on_delete so chose cascade
+    value = models.ForeignKey('Location', on_delete=models.CASCADE)   # TODO: One to One?
 
     def __unicode__(self):
         return self.value.__unicode__
@@ -494,7 +496,8 @@ class AuthorityValue(Value):
     """
     An authority value. Points to an instance of :class:`.Authority`\.
     """
-    value = models.ForeignKey('Authority')
+    # CHECK: Had to add on_delete so chose cascade
+    value = models.ForeignKey('Authority', on_delete=models.CASCADE)
     name = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
@@ -547,10 +550,10 @@ class CuratedMixin(models.Model):
     modified_on = models.DateTimeField(auto_now=True, blank=True, null=True,
                                        help_text=help_text("""
     Date and time at which this object was last updated."""))
-
+    # CHECK: Had to add on_delete so chose cascade
     modified_by = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The most recent user to modify this object."""))
+    The most recent user to modify this object."""), on_delete=models.CASCADE)
 
     public = models.BooleanField(default=True, help_text=help_text("""
     Controls whether this instance can be viewed by end users."""))
@@ -655,8 +658,10 @@ class CuratedMixin(models.Model):
     Value of ModifiedOn from the original FM database."""))
 
     dataset_literal = models.CharField(max_length=255, blank=True, null=True)
-    belongs_to = models.ForeignKey('Dataset', null=True)
-    zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    belongs_to = models.ForeignKey('Dataset', null=True, on_delete=models.CASCADE)
+    # CHECK: Had to add on_delete so chose cascade
+    zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True, on_delete=models.CASCADE)
 
     @property
     def _history_user(self):
@@ -765,11 +770,13 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     created_native = models.DateTimeField(blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
     created_by_native = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The user who created this object."""), related_name="creator_of")
+    The user who created this object."""), related_name="creator_of", on_delete=models.CASCADE)
 
-    subtype = models.ForeignKey('CitationSubtype', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    subtype = models.ForeignKey('CitationSubtype', blank=True, null=True, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         def get_related(obj):
@@ -988,11 +995,13 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     # TODO: This relation should be from PartDetails to Citation, to support
     #  inlines in the Admin.
+
+    # CHECK: Had to add on_delete so chose cascade
     part_details = models.OneToOneField('PartDetails', null=True, blank=True,
                                         help_text=help_text("""
     New field: contains volume, issue, page information for works that are parts
     of larger works.
-    """))
+    """), on_delete=models.CASCADE)
 
     publication_date = models.DateField(blank=True, null=True,
                                         help_text=help_text("""
@@ -1153,9 +1162,10 @@ class Authority(ReferencedEntity, CuratedMixin):
     """ASCII-normalized name."""
 
     created_on_stored = models.DateTimeField(blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
     created_by_stored = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The user who created this object."""), related_name="creator_of_object")
+    The user who created this object."""), related_name="creator_of_object", on_delete=models.CASCADE)
 
 
     def save(self, *args, **kwargs):
@@ -1306,7 +1316,8 @@ class Authority(ReferencedEntity, CuratedMixin):
     record_status = models.CharField(max_length=2, choices=STATUS_CHOICES,
                                      blank=True, null=True)
 
-    redirect_to = models.ForeignKey('Authority', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    redirect_to = models.ForeignKey('Authority', blank=True, null=True, on_delete=models.CASCADE)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
@@ -1388,8 +1399,11 @@ class ACRelation(ReferencedEntity, CuratedMixin):
 
     history = HistoricalRecords()
 
-    citation = models.ForeignKey('Citation', blank=True, null=True)
-    authority = models.ForeignKey('Authority', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    citation = models.ForeignKey('Citation', blank=True, null=True, on_delete=models.CASCADE)
+
+    # CHECK: Had to add on_delete so chose cascade
+    authority = models.ForeignKey('Authority', blank=True, null=True, on_delete=models.CASCADE)
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
@@ -1683,8 +1697,11 @@ class AARelation(ReferencedEntity, CuratedMixin):
     Free text description of the relationship.
     """))
 
-    subject = models.ForeignKey('Authority', related_name='relations_from')
-    object = models.ForeignKey('Authority', related_name='relations_to')
+    # CHECK: Had to add on_delete so chose cascade
+    subject = models.ForeignKey('Authority', related_name='relations_from', on_delete=models.CASCADE)
+
+    # CHECK: Had to add on_delete so chose cascade
+    object = models.ForeignKey('Authority', related_name='relations_to', on_delete=models.CASCADE)
 
     # missing from Stephen's list: objectType, subjectType
 
@@ -1758,8 +1775,11 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     Type of relationship as used in the citation.
     """))
 
-    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True)
-    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True)
+    # CHECK: Had to add on_delete so chose cascade
+    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True, on_delete=models.CASCADE)
+
+    # CHECK: Had to add on_delete so chose cascade
+    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True, on_delete=models.CASCADE)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
@@ -1829,9 +1849,11 @@ class AttributeType(models.Model):
     This field provides the name to be displayed to users.
     """))
 
+    # CHECK: Had to add on_delete so chose cascade
+
     value_content_type = models.ForeignKey(ContentType,
                                            limit_choices_to=VALUETYPES,
-                                           related_name='attribute_value')
+                                           related_name='attribute_value', on_delete=models.CASCADE)
 
     attribute_help_text = models.TextField(default=None, null=True, blank=True, help_text=help_text("""
     The help text the user sees when adding a new attribute of this type.
@@ -1856,18 +1878,20 @@ class Attribute(ReferencedEntity, CuratedMixin):
     Non-normalized value, e.g. an approximate date, or a date range.
     """))
 
+    # CHECK: Had to add on_delete so chose cascade
     # Generic relation.
-    source_content_type = models.ForeignKey(ContentType)
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     source_instance_id = models.CharField(max_length=200)
     source = GenericForeignKey('source_content_type', 'source_instance_id')
 
     # The selected AttributeType determines the type of Value (i.e. Value
     #  subclass) that can be related to this Attribute.
+    # CHECK: Had to add on_delete so chose cascade
     type_controlled = models.ForeignKey('AttributeType', verbose_name='type',
                                         help_text=help_text("""
     The "type" field determines what kinds of values are acceptable for this
     attribute.
-    """))
+    """), on_delete=models.CASCADE)
 
     # TODO: Instead of saving this in the Attribute model, we may want to create
     #  a mechanism for grouping/ranking AttributeTypes.
@@ -1939,8 +1963,10 @@ class Place(models.Model):
     A concept of locality associated with a particular point or region in space.
     """
     name = models.CharField(max_length=255)
-    gis_location = models.ForeignKey('Location', blank=True, null=True)
-    gis_schema = models.ForeignKey('LocationSchema', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    gis_location = models.ForeignKey('Location', blank=True, null=True, on_delete=models.CASCADE)
+    # CHECK: Had to add on_delete so chose cascade
+    gis_schema = models.ForeignKey('LocationSchema', blank=True, null=True, on_delete=models.CASCADE)
 
 
 class LocationSchema(models.Model):
@@ -2006,15 +2032,17 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
-    subject_content_type = models.ForeignKey(ContentType)
+    # CHECK: Had to add on_delete so chose cascade
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
 
+    # CHECK: Had to add on_delete so chose cascade
     type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
                                         help_text="This field is used to"
     " determine what values are acceptable for the URN field, and to choose"
-    " the correct display modality in the public-facing site and metadata")
+    " the correct display modality in the public-facing site and metadata", on_delete=models.CASCADE)
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
@@ -2061,8 +2089,9 @@ class AuthorityTracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
+    # CHECK: Had to add on_delete so chose cascade
     authority = models.ForeignKey(Authority, related_name='tracking_records',
-                                  null=True, blank=True)
+                                  null=True, blank=True, on_delete=models.CASCADE)
 
     notes = models.TextField(blank=True)
 
@@ -2099,8 +2128,9 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
+    # CHECK: Had to add on_delete so chose cascade
     citation = models.ForeignKey(Citation, related_name='tracking_records',
-                                 null=True, blank=True)
+                                 null=True, blank=True, on_delete=models.CASCADE)
 
     notes = models.TextField(blank=True)
 
@@ -2109,7 +2139,8 @@ class Annotation(models.Model):
     """
     User-generated content associated with a specific entity.
     """
-    subject_content_type = models.ForeignKey(ContentType)
+    # CHECK: Had to add on_delete so chose cascade
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
@@ -2120,7 +2151,8 @@ class Annotation(models.Model):
     example, ``title``.
     """))
 
-    created_by = models.ForeignKey(User, related_name='annotations', null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    created_by = models.ForeignKey(User, related_name='annotations', null=True, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
@@ -2150,7 +2182,8 @@ class CitationCollection(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
     citations = models.ManyToManyField('Citation', related_name='in_collections')
-    createdBy = models.ForeignKey(User, related_name='citation_collections')
+    # CHECK: Had to add on_delete so chose cascade
+    createdBy = models.ForeignKey(User, related_name='citation_collections', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
@@ -2164,7 +2197,8 @@ class AuthorityCollection(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
     authorities = models.ManyToManyField('Authority', related_name='in_collections')
-    createdBy = models.ForeignKey(User, related_name='authority_collections')
+    # CHECK: Had to add on_delete so chose cascade
+    createdBy = models.ForeignKey(User, related_name='authority_collections', on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
@@ -2216,7 +2250,8 @@ class TagAppellation(Annotation):
     """
     The appellation of an entity with a :class:`.Tag`\.
     """
-    tag = models.ForeignKey('Tag')
+    # CHECK: Had to add on_delete so chose cascade
+    tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
 
 
 class Tag(models.Model):
@@ -2224,7 +2259,8 @@ class Tag(models.Model):
     An :class:`.Annotation` from a controlled vocabulary
     (:class:`.TaggingSchema`).
     """
-    schema = models.ForeignKey('TaggingSchema', related_name='tags')
+    # CHECK: Had to add on_delete so chose cascade
+    schema = models.ForeignKey('TaggingSchema', related_name='tags', on_delete=models.CASCADE)
     value = models.CharField(max_length=255)
     description = models.TextField()
 
@@ -2238,13 +2274,15 @@ class TaggingSchema(models.Model):
     """
     name = models.CharField(max_length=255)
 
-    created_by = models.ForeignKey(User, related_name='tagging_schemas')
+    # CHECK: Had to add on_delete so chose cascade
+    created_by = models.ForeignKey(User, related_name='tagging_schemas', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
 
 class SearchQuery(models.Model):
-    user = models.ForeignKey(User, related_name='searches')
+    # CHECK: Had to add on_delete so chose cascade
+    user = models.ForeignKey(User, related_name='searches', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     parameters = models.TextField()
     search_models = models.CharField(max_length=500, null=True, blank=True)
@@ -2261,7 +2299,8 @@ class UserProfile(models.Model):
     """
     Supports additional self-curated information about Users.
     """
-    user = models.OneToOneField(User, related_name='profile')
+    # CHECK: Had to add on_delete so chose cascade
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
 
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
@@ -2271,17 +2310,19 @@ class UserProfile(models.Model):
     A user can indicate whether or not their email address should be made
     public."""))
 
+    # CHECK: Had to add on_delete so chose cascade
     resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
                                              related_name='users',
                                              help_text=help_text("""
     A user can select an institution for which OpenURL links should be
-    generated while searching."""))
+    generated while searching."""), on_delete=models.CASCADE)
 
+    # CHECK: Had to add on_delete so chose cascade
     authority_record = models.OneToOneField(Authority, blank=True, null=True,
                                             related_name='associated_user',
                                             help_text=help_text("""
     A user can 'claim' an Authority record, asserting that the record refers to
-    theirself."""))
+    theirself."""), on_delete=models.CASCADE)
 
 
 # --------------------- cache objects -------------------------------
@@ -2301,7 +2342,9 @@ class CachedTimelineYear(models.Model):
     Caches timeline data for one year.
     """
     year = models.IntegerField()
-    timeline_year = models.ForeignKey(CachedTimeline, related_name='years')
+
+    # CHECK: Had to add on_delete so chose cascade
+    timeline_year = models.ForeignKey(CachedTimeline, related_name='years', on_delete=models.CASCADE)
 
     book_count = models.BigIntegerField()
     thesis_count = models.BigIntegerField()
@@ -2317,9 +2360,11 @@ class CachedTimelineTitle(models.Model):
     """
     title = models.TextField()
     authors = models.TextField()
-    citation = models.ForeignKey(Citation, blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    citation = models.ForeignKey(Citation, blank=True, null=True, on_delete=models.CASCADE)
 
-    timeline_year = models.ForeignKey(CachedTimelineYear, related_name='titles')
+    # CHECK: Had to add on_delete so chose cascade
+    timeline_year = models.ForeignKey(CachedTimelineYear, related_name='titles', on_delete=models.CASCADE)
     citation_type = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',
                                        choices=Citation.TYPE_CHOICES)
@@ -2369,8 +2414,9 @@ class AccessRule(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
 
+    # CHECK: Had to add on_delete so chose cascade
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
-                             help_text=help_text("""The role a rules belongs to."""))
+                             help_text=help_text("""The role a rules belongs to."""), on_delete=models.CASCADE)
 
     CITATION = 'citation'
     AUTHORITY = 'authority'
@@ -2464,7 +2510,8 @@ class AsyncTask(models.Model):
     state = models.CharField(max_length=10, blank=True, null=True)
     label = models.TextField(default="")
 
-    created_by = models.ForeignKey(User, related_name='tasks', null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    created_by = models.ForeignKey(User, related_name='tasks', null=True, on_delete=models.CASCADE)
     created_on = models.DateTimeField(null=True)
 
     _value = models.TextField()

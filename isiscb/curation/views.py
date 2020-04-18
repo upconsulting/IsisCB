@@ -12,7 +12,7 @@ from django.core.paginator import EmptyPage
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import caches
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User

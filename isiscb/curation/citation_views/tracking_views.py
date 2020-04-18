@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required, user_pa
 from django.http import HttpResponseRedirect, JsonResponse
 
 from django.shortcuts import get_object_or_404, render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from django.utils.http import urlencode
 

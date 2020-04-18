@@ -15,8 +15,9 @@ def remove_control_characters(s):
     return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 
+# TEST: Orig: re.sub(ur"\p{P}+", u" ", text). This worked in my testing but not sure all use cases. 
 def strip_punctuation(text):
-    return regex.sub(ur"\p{P}+", u" ", text)
+    return re.sub(r'[^\w\s]','',s)
 
 
 def strip_tags(s):

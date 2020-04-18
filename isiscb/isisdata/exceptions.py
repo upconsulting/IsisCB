@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from rest_framework.views import exception_handler
 
 def custom_exception_handler(exc, context):

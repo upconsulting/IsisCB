@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from isisdata.models import Dataset, Citation, Authority, Language
 from isisdata.utils import normalize
@@ -26,9 +26,11 @@ def help_text(s):
 
 class ImportAccession(models.Model):
     imported_on = models.DateTimeField(auto_now_add=True)
-    imported_by = models.ForeignKey(User, blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    imported_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, db_index=True)
-    ingest_to = models.ForeignKey(Dataset, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    ingest_to = models.ForeignKey(Dataset, null=True, on_delete=models.CASCADE)
     processed = models.BooleanField(default=False)
     import_errors = models.TextField(null=True, blank=True)
 
@@ -81,8 +83,10 @@ class ImportedData(models.Model):
         abstract = True
 
     imported_on = models.DateTimeField(auto_now_add=True)
-    imported_by = models.ForeignKey(User, blank=True, null=True)
-    part_of = models.ForeignKey('ImportAccession')
+    # CHECK: Had to add on_delete so chose cascade
+    imported_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    # CHECK: Had to add on_delete so chose cascade
+    part_of = models.ForeignKey('ImportAccession', on_delete=models.CASCADE)
 
     # dataset = models.CharField(max_length=255, blank=True, null=True)
     # editor = models.CharField(max_length=255, blank=True, null=True)
@@ -153,7 +157,8 @@ class DraftCitation(ImportedData):
 
     physical_details = models.CharField(max_length=255, null=True, blank=True)
 
-    language = models.ForeignKey(Language, blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade
+    language = models.ForeignKey(Language, blank=True, null=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return self.title
@@ -267,8 +272,10 @@ class DraftCCRelation(ImportedData):
 
     type_free = models.CharField(max_length=255, blank=True, null=True)
 
-    subject = models.ForeignKey('DraftCitation', related_name='relations_from')
-    object = models.ForeignKey('DraftCitation', related_name='relations_to')
+    # CHECK: Had to add on_delete so chose cascade
+    subject = models.ForeignKey('DraftCitation', related_name='relations_from', on_delete=models.CASCADE)
+    # CHECK: Had to add on_delete so chose cascade
+    object = models.ForeignKey('DraftCitation', related_name='relations_to', on_delete=models.CASCADE)
 
     resolutions = GenericRelation('InstanceResolutionEvent',
                                   related_query_name='ccrelation_resolutions',
@@ -277,10 +284,12 @@ class DraftCCRelation(ImportedData):
 
 
 class DraftACRelation(ImportedData):
+    # CHECK: Had to add on_delete so chose cascade
     citation = models.ForeignKey('DraftCitation',
-                                 related_name='authority_relations')
+                                 related_name='authority_relations', on_delete=models.CASCADE)
+    # CHECK: Had to add on_delete so chose cascade
     authority = models.ForeignKey('DraftAuthority',
-                                  related_name='citation_relations')
+                                  related_name='citation_relations', on_delete=models.CASCADE)
 
     # TODO: implement mechanism in save() to populate type_broad_controlled
     #  based on the value of type_controlled.
@@ -328,35 +337,41 @@ class DraftACRelation(ImportedData):
 
 
 class DraftCitationLinkedData(ImportedData):
-    citation = models.ForeignKey('DraftCitation', related_name='linkeddata')
+    # CHECK: Had to add on_delete so chose cascade
+    citation = models.ForeignKey('DraftCitation', related_name='linkeddata', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.TextField()
 
 
 class DraftAuthorityLinkedData(ImportedData):
-    authority = models.ForeignKey('DraftAuthority', related_name='linkeddata')
+    # CHECK: Had to add on_delete so chose cascade
+    authority = models.ForeignKey('DraftAuthority', related_name='linkeddata', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
 
 class DraftAttribute(ImportedData):
-    citation = models.ForeignKey('DraftCitation', related_name='attributes')
+    # CHECK: Had to add on_delete so chose cascade
+    citation = models.ForeignKey('DraftCitation', related_name='attributes', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
 
 class InstanceResolutionEvent(models.Model):
-    for_model = models.ForeignKey(ContentType, related_name='instanceresolutions_for')
+    # CHECK: Had to add on_delete so chose cascade
+    for_model = models.ForeignKey(ContentType, related_name='instanceresolutions_for', on_delete=models.CASCADE)
     for_instance_id = models.PositiveIntegerField()
     for_instance = GenericForeignKey('for_model', 'for_instance_id')
 
-    to_model =  models.ForeignKey(ContentType, related_name='instanceresolutions_to')
+    # CHECK: Had to add on_delete so chose cascade
+    to_model =  models.ForeignKey(ContentType, related_name='instanceresolutions_to', on_delete=models.CASCADE)
     to_instance_id = models.CharField(max_length=1000)
     to_instance = GenericForeignKey('to_model', 'to_instance_id')
 
 
 class FieldResolutionEvent(models.Model):
-    for_model = models.ForeignKey(ContentType, related_name='fieldresolutions_for')
+    # CHECK: Had to add on_delete so chose cascade
+    for_model = models.ForeignKey(ContentType, related_name='fieldresolutions_for', on_delete=models.CASCADE)
     for_field = models.CharField(max_length=100)
     for_value = models.CharField(max_length=1000)
 
