@@ -2031,8 +2031,8 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
-    # CHECK: Had to add on_delete so chose cascade -> JD: probably not (should also never happen)
-    subject_content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL)
+    # CHECK: Had to add on_delete so chose cascade -> JD: probably fine (should never happen though so far)
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
