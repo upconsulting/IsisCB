@@ -15,37 +15,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='aarelation',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='acrelation',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='attribute',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='authority',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='ccrelation',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='citation',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='dataset',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
@@ -90,11 +90,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='linkeddata',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='tracking',
             name='belongs_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
     ]

@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 from builtins import object
 import django_filters
 from django_filters.fields import Lookup
-from django_filters.filterset import STRICTNESS
 from django.db.models import Q
 from django import forms
 
@@ -20,7 +19,7 @@ import pytz
 from django.conf import settings
 import iso8601, unicodedata
 
-
+# FIXME: Removed strictness may not be necessary to change
 
 filters.LOOKUP_TYPES = [
     ('', '---------'),
@@ -45,8 +44,6 @@ filters.LOOKUP_TYPES = [
 
 
 class CitationFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RETURN_NO_RESULTS
-    # strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
     # id = django_filters.MethodFilter(name='id', lookup_type='exact')
     id = django_filters.CharFilter(method='filter_id')
@@ -344,7 +341,6 @@ class CitationFilter(django_filters.FilterSet):
 
 
 class AuthorityFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()

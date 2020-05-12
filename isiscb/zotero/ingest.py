@@ -234,9 +234,9 @@ class IngestManager(object):
         -------
         list
         """
-
-        extra = [tuple(match.split(':')) for match in re.findall(ur'\{([^\{]+)\}', raw)]
-        value = re.sub(ur'\{([^\{]+)\}', u'', raw)
+        # CHECK
+        extra = [tuple(match.split(':')) for match in re.findall('\{([^\{]+)\}', raw)]
+        value = re.sub('\{([^\{]+)\}', u'', raw)
         return extra, value
 
     @staticmethod

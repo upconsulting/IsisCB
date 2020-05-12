@@ -12,7 +12,7 @@ from isisdata.models import *
 
 from django.conf import settings
 
-import unicodecsv as csv
+import csv
 import math, smart_open
 
 

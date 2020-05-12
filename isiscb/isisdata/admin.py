@@ -103,7 +103,7 @@ class ACRelationForm(forms.ModelForm):
         # }
 
 
-class ACRelationInlineForm(autocomplete_light.ModelForm):
+class ACRelationInlineForm(forms.ModelForm):
     id = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     authority = AutocompleteField(widget=forms.HiddenInput(), model=Authority)
@@ -495,7 +495,7 @@ class CitationAdvancedSearchForm(forms.Form):
     authority_name = forms.CharField(required=False)
 
 
-class CitationForm(autocomplete_light.ModelForm):
+class CitationForm(forms.ModelForm):
     class Meta(object):
         model = Citation
         fields = '__all__'
@@ -624,7 +624,7 @@ class AuthorityAdvancedSearchForm(forms.Form):
     # attribute_value = forms.CharField(required=False)
 
 
-class AuthorityForm(autocomplete_light.ModelForm):
+class AuthorityForm(forms.ModelForm):
     class Meta(object):
         model = Authority
         fields = '__all__'
@@ -830,7 +830,7 @@ class CCRelationAdvancedSearchForm(forms.Form):
     object_title = forms.CharField(required=False)
 
 
-class CCRelationForm(autocomplete_light.ModelForm):
+class CCRelationForm(forms.ModelForm):
     class Meta(object):
         model = CCRelation
         fields = '__all__'
@@ -904,7 +904,7 @@ class CCRelationAdmin(SimpleHistoryAdmin,
         return super(CCRelationAdmin, self).lookup_allowed(lookup, *args, **kwargs)
 
 
-class AARelationForm(autocomplete_light.ModelForm):
+class AARelationForm(forms.ModelForm):
     class Meta(object):
         model = AARelation
         fields = '__all__'

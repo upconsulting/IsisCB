@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 
 import logging
 import smart_open
-import unicodecsv as csv
+import csv
 from datetime import datetime
 from dateutil.tz import tzlocal
 import time

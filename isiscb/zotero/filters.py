@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 from builtins import object
 import django_filters
 from django_filters.fields import Lookup
-from django_filters.filterset import STRICTNESS
 from django.db.models import Q, Count
 
 from zotero.models import *
@@ -31,7 +30,6 @@ from django.core.exceptions import ValidationError
 
 
 class ImportAccesionFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR
     processed = django_filters.BooleanFilter(name='processed')
     name = django_filters.CharFilter(lookup_expr='istartswith')
     imported_on_or_after = django_filters.CharFilter(method='filter_imported_on_or_after')

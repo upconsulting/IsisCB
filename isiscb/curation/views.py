@@ -2024,7 +2024,8 @@ def quick_and_dirty_authority_search(request):
     queryset_with_numbers = Authority.objects.filter(query)    # partial matches, in chunks; with punctuation and numbers.
 
     # letting the database transform queryies using UPPER prohibits using the index, which is slooowwwww
-    query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
+    # CHECK: removed ur
+    query_parts = re.sub('[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
         #queryset = queryset.filter(Q(name__icontains=part) | Q(name_for_sort__icontains=unidecode(part)))
         queryset = queryset.filter(Q(name_for_sort__contains=unidecode(part.lower())))

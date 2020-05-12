@@ -33,7 +33,6 @@ from rest_framework.reverse import reverse
 
 # import rest_framework_filters as filters
 
-from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
 from urllib.parse import quote
 from urllib.request import urlopen
 import codecs, datetime, uuid, base64, zlib, locale

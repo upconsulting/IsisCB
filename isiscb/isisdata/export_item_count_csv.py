@@ -35,7 +35,7 @@ def generate_item_count_csv(stream, queryset, columns):
         Should be a list of :class:`.Column` instances.
     """
 
-    import unicodecsv as csv
+    import csv
     writer = csv.writer(stream)
     writer.writerow([c.label for c in columns])
     extra = []

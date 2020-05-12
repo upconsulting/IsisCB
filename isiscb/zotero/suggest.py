@@ -133,9 +133,9 @@ def suggest_by_field(draftObject, field, targetModel, targetField, scramble=Fals
     hits = []
     value = getattr(draftObject, field)
 
-
+    # double check
     def remove_punctuation(text):
-        return regex.sub(ur"\p{P}+", "", text)
+        return regex.sub("\p{P}+", "", text)
 
     if isinstance(value, str) or isinstance(value, str):
         value = remove_punctuation(value)

@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.decorators.http import require_http_methods
 
 from rest_framework.renderers import JSONRenderer
-from django.utils.six import BytesIO
+from six import BytesIO
 from rest_framework.parsers import JSONParser
 
 from zotero.models import *
@@ -29,6 +29,7 @@ from isisdata.admin import AttributeInlineForm, ValueField, ValueWidget
 
 import tempfile
 import iso8601
+
 
 
 def missing_or_empty(obj, key):

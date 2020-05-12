@@ -23,7 +23,7 @@ MIGRATION_MODULES = {
 
 # Application definition
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -45,20 +45,20 @@ INSTALLED_APPS = (
     'corsheaders',
     'zotero',
     'openurl',
-)
+]
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-)
+]
+
+
 
 CORS_ORIGIN_ALLOW_ALL = True
 

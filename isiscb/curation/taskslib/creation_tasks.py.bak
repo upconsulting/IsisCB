@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 import smart_open
 from . import record_creator
-import unicodecsv as csv
+import csv
 from datetime import datetime
 from dateutil.tz import tzlocal
 

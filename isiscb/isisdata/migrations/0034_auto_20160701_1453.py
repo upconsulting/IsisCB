@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('dataset_literal', models.CharField(max_length=255, null=True, blank=True)),
                 ('name', models.CharField(max_length=255)),
                 ('description', models.TextField()),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'The most recent user to modify this object.', null=True)),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,

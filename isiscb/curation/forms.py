@@ -36,17 +36,6 @@ class CCRelationForm(forms.ModelForm):
     )
     type_controlled = forms.ChoiceField(choices=TYPE_CHOICES)
 
-    class Meta(object):
-        model = CCRelation
-        fields = [
-            'type_controlled', 'data_display_order', 'subject',
-            'object', 'record_status_value', 'record_status_explanation',
-            'administrator_notes', 'record_history',
-        ]
-        labels = {
-            'administrator_notes': 'Staff notes'
-        }
-
     def __init__(self, *args, **kwargs):
         super(CCRelationForm, self).__init__(*args, **kwargs)
         if not self.is_bound:
@@ -62,6 +51,17 @@ class CCRelationForm(forms.ModelForm):
         object_id = self.cleaned_data.get('object', None)
         if object_id:
             self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
+
+    class Meta:
+        model = CCRelation
+        fields = [
+            'type_controlled', 'data_display_order', 'subject',
+            'object', 'record_status_value', 'record_status_explanation',
+            'administrator_notes', 'record_history',
+        ]
+        labels = {
+            'administrator_notes': 'Staff notes'
+        }
 
 
 
