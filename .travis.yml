@@ -23,7 +23,7 @@ script:
 - cd isiscb
 #- git clone http://github.com/ubernostrum/django-registration.git --depth 2
 - python -Wi manage.py test
-- cd ..
+#- cd ..
 deploy:
   - provider: elasticbeanstalk
     access_key_id: AKIAI3SRBWU3O3X5S7CQ
