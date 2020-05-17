@@ -64,6 +64,7 @@ INSTALLED_APPS = (
     'openurl',
     'curation',
     'rules.apps.AutodiscoverRulesConfig',
+    'dj_pagination',
     #'debug_toolbar',
 )
 
@@ -76,15 +77,13 @@ MIDDLEWARE= [
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'isisdata.middleware.ProfileMiddleware',
-    'pagination.middleware.PaginationMiddleware',
+    'dj_pagination.middleware.PaginationMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -114,6 +113,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "django.core.context_processors.i18n",
+                "django.core.context_processors.media",
+                "django.core.context_processors.request",
                 'isisdata.context_processors.social',
             ],
         },
