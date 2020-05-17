@@ -4,6 +4,7 @@ from past.builtins import basestring
 from django import template
 from django.utils.safestring import SafeText
 from django.db.models import Q
+from django.db.utils import ProgrammingError
 
 from isisdata.models import *
 import logging
@@ -16,6 +17,8 @@ try:
     PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
 except AttributeType.DoesNotExist:
     PUBLICATION_DATE = -1
+except ProgrammingError as e:
+    print("Could not get publication dates.", e)
 
 @register.filter(name='render_object')
 def render_object(obj):

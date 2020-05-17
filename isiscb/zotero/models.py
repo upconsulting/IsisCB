@@ -273,9 +273,9 @@ class DraftCCRelation(ImportedData):
     type_free = models.CharField(max_length=255, blank=True, null=True)
 
     # CHECK: Had to add on_delete so chose cascade -> JD: probably want to keep
-    subject = models.ForeignKey('DraftCitation', related_name='relations_from', on_delete=models.SET_NULL)
+    subject = models.ForeignKey('DraftCitation', related_name='relations_from', on_delete=models.SET_NULL, null=True)
     # CHECK: Had to add on_delete so chose cascade -> JD: probably want to keep
-    object = models.ForeignKey('DraftCitation', related_name='relations_to', on_delete=models.SET_NULL)
+    object = models.ForeignKey('DraftCitation', related_name='relations_to', on_delete=models.SET_NULL, null=True)
 
     resolutions = GenericRelation('InstanceResolutionEvent',
                                   related_query_name='ccrelation_resolutions',
@@ -286,10 +286,10 @@ class DraftCCRelation(ImportedData):
 class DraftACRelation(ImportedData):
     # CHECK: Had to add on_delete so chose cascade -> JD: probably want to keep
     citation = models.ForeignKey('DraftCitation',
-                                 related_name='authority_relations', on_delete=models.SET_NULL)
+                                 related_name='authority_relations', on_delete=models.SET_NULL, null=True)
     # CHECK: Had to add on_delete so chose cascade -> JD: probably want to keep
     authority = models.ForeignKey('DraftAuthority',
-                                  related_name='citation_relations', on_delete=models.SET_NULL)
+                                  related_name='citation_relations', on_delete=models.SET_NULL, null=True)
 
     # TODO: implement mechanism in save() to populate type_broad_controlled
     #  based on the value of type_controlled.
@@ -359,19 +359,19 @@ class DraftAttribute(ImportedData):
 
 class InstanceResolutionEvent(models.Model):
     # CHECK: Had to add on_delete so chose cascade -> JD: not sure, better keep
-    for_model = models.ForeignKey(ContentType, related_name='instanceresolutions_for', on_delete=models.SET_NULL)
+    for_model = models.ForeignKey(ContentType, related_name='instanceresolutions_for', on_delete=models.SET_NULL, null=True)
     for_instance_id = models.PositiveIntegerField()
     for_instance = GenericForeignKey('for_model', 'for_instance_id')
 
     # CHECK: Had to add on_delete so chose cascade -> JD: not sure, better keep
-    to_model =  models.ForeignKey(ContentType, related_name='instanceresolutions_to', on_delete=models.SET_NULL)
+    to_model =  models.ForeignKey(ContentType, related_name='instanceresolutions_to', on_delete=models.SET_NULL, null=True)
     to_instance_id = models.CharField(max_length=1000)
     to_instance = GenericForeignKey('to_model', 'to_instance_id')
 
 
 class FieldResolutionEvent(models.Model):
     # CHECK: Had to add on_delete so chose cascade -> JD: not sure, better keep
-    for_model = models.ForeignKey(ContentType, related_name='fieldresolutions_for', on_delete=models.SET_NULL)
+    for_model = models.ForeignKey(ContentType, related_name='fieldresolutions_for', on_delete=models.SET_NULL, null=True)
     for_field = models.CharField(max_length=100)
     for_value = models.CharField(max_length=1000)
 

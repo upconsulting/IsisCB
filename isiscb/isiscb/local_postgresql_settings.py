@@ -88,7 +88,7 @@ MIDDLEWARE= [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    # TODO: Remove 
+    # TODO: Remove
     #'social.backends.twitter.TwitterOAuth',
     #'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',

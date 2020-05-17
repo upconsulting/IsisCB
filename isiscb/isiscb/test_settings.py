@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'isisdata',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.sites',
@@ -48,45 +47,50 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'social.apps.django_app.default',
-    # 'pagination',
+    'django.contrib.humanize',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
     'rest_framework',
-    'markupfield',
     'simple_history',
+    'isisdata',
     'storages',
-    # 'haystack',
-    'captcha',
-    # "elasticstack",     # TODO: Do we need this?
+    'haystack',
+    "elasticstack",
     'oauth2_provider',
-    # 'corsheaders',
+    'captcha',
+    'corsheaders',
     'zotero',
     'openurl',
     'curation',
-    # 'guardian',
+    'rules.apps.AutodiscoverRulesConfig',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-MIDDLEWARE_CLASSES = (
-    # 'django.contrib.sessions.middleware.SessionMiddleware',
+MIDDLEWARE = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    # 'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-    # 'django.contrib.messages.middleware.MessageMiddleware',
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'django.middleware.security.SecurityMiddleware',
-    # 'simple_history.middleware.HistoryRequestMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
-    # 'pagination.middleware.PaginationMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'isisdata.middleware.ProfileMiddleware',
+    'pagination.middleware.PaginationMiddleware',
 )
 
 
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'social.apps.django_app.context_processors.backends',
-    'social.apps.django_app.context_processors.login_redirect',
-)
+#TEMPLATE_CONTEXT_PROCESSORS = (
+#    'social.apps.django_app.context_processors.backends',
+#    'social.apps.django_app.context_processors.login_redirect',
+#)
 
 
 ROOT_URLCONF = 'isiscb.urls'
@@ -100,13 +104,9 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                "django.core.context_processors.i18n",
-                "django.core.context_processors.media",
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'isisdata.context_processors.social',
-                'isisdata.context_processors.google',
-                 'django.template.context_processors.tz'
             ],
         },
     },
@@ -118,7 +118,7 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'isiscb',
+        'NAME': 'isiscb_test',
         'USER': 'postgres',
         'PASSWORD': '',
         'HOST': 'localhost',
@@ -291,7 +291,10 @@ class DisableMigrations(object):
     def __getitem__(self, item):
         return None
 
-MIGRATION_MODULES = DisableMigrations()
+#MIGRATION_MODULES = DisableMigrations()
+#MIGRATION_MODULES = {
+#    'isisdata': 'isisdata.migrations'
+#}
 
 CITATION_CREATION_DEFAULT_DATE = "2000-01-01T00:00:00Z"
 RECORD_SUBTYPE_ATTRIBUTE = os.environ.get('RECORD_SUBTYPE_ATTRIBUTE', "RecordSubType")

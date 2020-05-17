@@ -351,17 +351,27 @@ class AuthorityFilter(django_filters.FilterSet):
     classification_code = django_filters.AllValuesFilter(name='classification_code')
     classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
-    linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
-    linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    try:
+        linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
+        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    except Exception as e:
+        print("Can't set linked data.", e)
 
-    attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
-    attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    try:
+        attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
+        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    except Exception as e:
+        print("Can't get attributes", e)
 
     record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
-    datasets = Dataset.objects.all()
-    dataset_list = [(ds.pk, ds.name) for ds in datasets ]
-    belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    try:
+        datasets = Dataset.objects.all()
+        dataset_list = [(ds.pk, ds.name) for ds in datasets]
+        belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    except Exception as e:
+        print("Cant get datasets.", e)
+
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 

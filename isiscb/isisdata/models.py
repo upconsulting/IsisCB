@@ -1698,10 +1698,10 @@ class AARelation(ReferencedEntity, CuratedMixin):
     """))
 
     # CHECK: Had to add on_delete so chose cascade -> JD: AARel shouldn't be deleted when subject/object are
-    subject = models.ForeignKey('Authority', related_name='relations_from', on_delete=models.SET_NULL)
+    subject = models.ForeignKey('Authority', related_name='relations_from', on_delete=models.SET_NULL, null=True)
 
     # CHECK: Had to add on_delete so chose cascade -> JD: AARel shouldn't be deleted when subject/object are
-    object = models.ForeignKey('Authority', related_name='relations_to', on_delete=models.SET_NULL)
+    object = models.ForeignKey('Authority', related_name='relations_to', on_delete=models.SET_NULL, null=True)
 
     # missing from Stephen's list: objectType, subjectType
 
@@ -1849,10 +1849,10 @@ class AttributeType(models.Model):
     This field provides the name to be displayed to users.
     """))
 
-    # CHECK: Had to add on_delete so chose cascade -> JD: probably not
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     value_content_type = models.ForeignKey(ContentType,
                                            limit_choices_to=VALUETYPES,
-                                           related_name='attribute_value', on_delete=models.SET_NULL)
+                                           related_name='attribute_value', on_delete=models.CASCADE)
 
     attribute_help_text = models.TextField(default=None, null=True, blank=True, help_text=help_text("""
     The help text the user sees when adding a new attribute of this type.
@@ -1877,20 +1877,20 @@ class Attribute(ReferencedEntity, CuratedMixin):
     Non-normalized value, e.g. an approximate date, or a date range.
     """))
 
-    # CHECK: Had to add on_delete so chose cascade -> JD: probably not
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     # Generic relation.
-    source_content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL)
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     source_instance_id = models.CharField(max_length=200)
     source = GenericForeignKey('source_content_type', 'source_instance_id')
 
     # The selected AttributeType determines the type of Value (i.e. Value
     #  subclass) that can be related to this Attribute.
-    # CHECK: Had to add on_delete so chose cascade -> JD: probably not
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     type_controlled = models.ForeignKey('AttributeType', verbose_name='type',
                                         help_text=help_text("""
     The "type" field determines what kinds of values are acceptable for this
     attribute.
-    """), on_delete=models.SET_NULL)
+    """), on_delete=models.CASCADE)
 
     # TODO: Instead of saving this in the Attribute model, we may want to create
     #  a mechanism for grouping/ranking AttributeTypes.
@@ -2041,7 +2041,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
                                         help_text="This field is used to"
     " determine what values are acceptable for the URN field, and to choose"
-    " the correct display modality in the public-facing site and metadata", on_delete=models.SET_NULL)
+    " the correct display modality in the public-facing site and metadata", on_delete=models.SET_NULL, null=True)
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
@@ -2140,8 +2140,8 @@ class Annotation(models.Model):
     """
     User-generated content associated with a specific entity.
     """
-    # CHECK: Had to add on_delete so chose cascade -> JD: I don't think we use this, but better set to null
-    subject_content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL)
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so set it to cascade
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
@@ -2186,7 +2186,7 @@ class CitationCollection(models.Model):
     citations = models.ManyToManyField('Citation', related_name='in_collections')
     # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep it around
     # (right now this is not possible I believe)
-    createdBy = models.ForeignKey(User, related_name='citation_collections', on_delete=models.SET_NULL)
+    createdBy = models.ForeignKey(User, related_name='citation_collections', on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
@@ -2202,7 +2202,7 @@ class AuthorityCollection(models.Model):
     authorities = models.ManyToManyField('Authority', related_name='in_collections')
     # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep it around
     # (right now this is not possible I believe)
-    createdBy = models.ForeignKey(User, related_name='authority_collections', on_delete=models.SET_NULL)
+    createdBy = models.ForeignKey(User, related_name='authority_collections', on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
@@ -2256,7 +2256,7 @@ class TagAppellation(Annotation):
     """
     # CHECK: Had to add on_delete so chose cascade -> JD: I don't think we use this
     # but let's keep it around
-    tag = models.ForeignKey('Tag', on_delete=models.SET_NULL)
+    tag = models.ForeignKey('Tag', on_delete=models.SET_NULL, null=True)
 
 
 class Tag(models.Model):
@@ -2265,7 +2265,7 @@ class Tag(models.Model):
     (:class:`.TaggingSchema`).
     """
     # CHECK: Had to add on_delete so chose cascade -> JD: same as above
-    schema = models.ForeignKey('TaggingSchema', related_name='tags', on_delete=models.SET_NULL)
+    schema = models.ForeignKey('TaggingSchema', related_name='tags', on_delete=models.SET_NULL, null=True)
     value = models.CharField(max_length=255)
     description = models.TextField()
 
@@ -2280,7 +2280,7 @@ class TaggingSchema(models.Model):
     name = models.CharField(max_length=255)
 
     # CHECK: Had to add on_delete so chose cascade -> JD: same as above
-    created_by = models.ForeignKey(User, related_name='tagging_schemas', on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, related_name='tagging_schemas', on_delete=models.SET_NULL, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 

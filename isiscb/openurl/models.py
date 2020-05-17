@@ -16,7 +16,7 @@ def help_text(s):
 
 class CuratedMixin(models.Model):
     # CHECK: Had to add on_delete so chose cascade -> JD: want to keep even if user doesn't exist anymore
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     added_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
