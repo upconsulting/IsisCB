@@ -291,10 +291,10 @@ class Migration(migrations.Migration):
                 ('history_id', models.AutoField(serialize=False, primary_key=True)),
                 ('history_date', models.DateTimeField()),
                 ('history_type', models.CharField(max_length=1, choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')])),
-                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('object', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True, on_delete=models.CASCADE)),
-                ('subject', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True, on_delete=models.CASCADE)),
+                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('object', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True)),
+                ('subject', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True)),
             ],
             options={
                 'ordering': ('-history_date', '-history_id'),
@@ -325,8 +325,8 @@ class Migration(migrations.Migration):
                 ('history_id', models.AutoField(serialize=False, primary_key=True)),
                 ('history_date', models.DateTimeField()),
                 ('history_type', models.CharField(max_length=1, choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')])),
-                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
+                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ('-history_date', '-history_id'),
@@ -354,9 +354,9 @@ class Migration(migrations.Migration):
                 ('history_id', models.AutoField(serialize=False, primary_key=True)),
                 ('history_date', models.DateTimeField()),
                 ('history_type', models.CharField(max_length=1, choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')])),
-                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('subject_content_type', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
+                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('subject_content_type', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='contenttypes.ContentType', null=True)),
             ],
             options={
                 'ordering': ('-history_date', '-history_id'),
@@ -415,9 +415,9 @@ class Migration(migrations.Migration):
                 ('history_id', models.AutoField(serialize=False, primary_key=True)),
                 ('history_date', models.DateTimeField()),
                 ('history_type', models.CharField(max_length=1, choices=[('+', 'Created'), ('~', 'Changed'), ('-', 'Deleted')])),
-                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
-                ('subject_content_type', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
+                ('history_user', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True)),
+                ('modified_by', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('subject_content_type', models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='contenttypes.ContentType', null=True)),
             ],
             options={
                 'ordering': ('-history_date', '-history_id'),
@@ -569,7 +569,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CharValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.CharField(max_length=2000)),
             ],
             options={
@@ -580,7 +580,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation')),
+                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation', on_delete=models.CASCADE)),
                 ('text', models.TextField()),
             ],
             bases=('isisdata.annotation',),
@@ -588,7 +588,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DateTimeValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.DateTimeField()),
             ],
             options={
@@ -599,7 +599,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DateValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.DateField()),
             ],
             options={
@@ -610,7 +610,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FloatValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.FloatField()),
             ],
             options={
@@ -621,7 +621,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='IntValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.IntegerField(default=0)),
             ],
             options={
@@ -632,7 +632,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LocationValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.ForeignKey(to='isisdata.Location', on_delete=models.CASCADE)),
             ],
             options={
@@ -643,7 +643,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Person',
             fields=[
-                ('authority_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Authority')),
+                ('authority_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Authority', on_delete=models.CASCADE)),
                 ('personal_name_last', models.CharField(max_length=255)),
                 ('personal_name_first', models.CharField(max_length=255)),
                 ('personal_name_suffix', models.CharField(max_length=255, blank=True)),
@@ -656,14 +656,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TagAppellation',
             fields=[
-                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation')),
+                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation', on_delete=models.CASCADE)),
             ],
             bases=('isisdata.annotation',),
         ),
         migrations.CreateModel(
             name='TextValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.TextField()),
             ],
             options={
@@ -674,7 +674,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='value',
             name='attribute',
-            field=models.OneToOneField(related_name='value', to='isisdata.Attribute'),
+            field=models.OneToOneField(related_name='value', to='isisdata.Attribute', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='tag',
@@ -689,57 +689,57 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='historicalperson',
             name='authority_ptr',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True),
         ),
         migrations.AddField(
             model_name='historicalperson',
             name='history_user',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='historicalperson',
             name='modified_by',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='historicalperson',
             name='redirect_to',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True),
         ),
         migrations.AddField(
             model_name='historicallinkeddata',
             name='type_controlled',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.LinkedDataType', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.LinkedDataType', null=True),
         ),
         migrations.AddField(
             model_name='historicalcitation',
             name='part_details',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.PartDetails', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.PartDetails', null=True),
         ),
         migrations.AddField(
             model_name='historicalauthority',
             name='redirect_to',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
             name='authority',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Authority', null=True),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
             name='citation',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to='isisdata.Citation', null=True),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
             name='history_user',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
             name='modified_by',
-            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
+            field=models.ForeignKey(related_name='+', on_delete=django.db.models.deletion.DO_NOTHING, db_constraint=False, blank=True, to=settings.AUTH_USER_MODEL, null=True),
         ),
         migrations.AddField(
             model_name='citation',
@@ -754,7 +754,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='citation',
             name='part_details',
-            field=models.OneToOneField(null=True, blank=True, to='isisdata.PartDetails', help_text=b'\n    New field: contains volume, issue, page information for works that are parts\n    of larger works.'),
+            field=models.OneToOneField(null=True, blank=True, to='isisdata.PartDetails', help_text=b'\n    New field: contains volume, issue, page information for works that are parts\n    of larger works.', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='citation',
@@ -769,12 +769,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ccrelation',
             name='object',
-            field=models.ForeignKey(related_name='relations_to', to='isisdata.Citation'),
+            field=models.ForeignKey(related_name='relations_to', to='isisdata.Citation', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='ccrelation',
             name='subject',
-            field=models.ForeignKey(related_name='relations_from', to='isisdata.Citation'),
+            field=models.ForeignKey(related_name='relations_from', to='isisdata.Citation', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='authority',

@@ -120,7 +120,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'isiscb.wsgi.application'
+#WSGI_APPLICATION = 'isiscb.wsgi.application'
 
 
 # Database
