@@ -14,6 +14,8 @@ from django.contrib.auth import views as auth_views
 from rest_framework import routers
 from oauth2_provider import views as oauth_views
 from django.urls import path, re_path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from isisdata import views
 
@@ -35,56 +37,56 @@ router.register('user', views.UserViewSet)
 router.register('comment', views.CommentViewSet)
 
 urlpatterns = [
-    re_path(r'^(?i)rest/', views.api_root, name='rest_root'),
-    re_path(r'^(?i)rest/', include(router.urls)),
-    re_path(r'^(?i)rest/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    re_path(r'^(?i)admin/', admin.site.urls),
-    re_path(r'^(?i)isis/', include('isisdata.urls')),
-    re_path(r'^(?i)zotero/', include('zotero.urls')),
-    re_path(r'^(?i)history/', views.search_history, name='search_history'),
-    re_path(r'^(?i)history/saved/', views.search_saved, name='search_saved'),
+    re_path(r'^rest/', views.api_root, name='rest_root'),
+    re_path(r'^rest/', include(router.urls)),
+    re_path(r'^rest/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^isis/', include('isisdata.urls')),
+    re_path(r'^zotero/', include('zotero.urls')),
+    re_path(r'^history/', views.search_history, name='search_history'),
+    re_path(r'^history/saved/', views.search_saved, name='search_saved'),
     re_path(r'^', views.home, name='home'),
     re_path(r'^robots\.txt', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
     re_path(r'^', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     
-    re_path(r'^(?i)login/',  # TODO: can we simplify this?
+    re_path(r'^login/',  # TODO: can we simplify this?
                 auth_views.LoginView,
                 name='login'),
-    re_path(r'^(?i)logout/',  # TODO: can we simplify this?
+    re_path(r'^logout/',  # TODO: can we simplify this?
                 auth_views.LogoutView,
                 name='logout'),
-    re_path(r'^(?i)password/change/',  # TODO: can we simplify this?
+    re_path(r'^password/change/',  # TODO: can we simplify this?
                 auth_views.PasswordChangeView,
                 name='password_change'),
-    re_path(r'^(?i)password/change/done/',
+    re_path(r'^password/change/done/',
                 auth_views.PasswordChangeDoneView,
                 name='password_change_done'),
-    re_path(r'^(?i)password/reset/',
+    re_path(r'^password/reset/',
                 auth_views.PasswordResetView,
                 {'from_email': settings.SMTP_EMAIL},
                 name='password_reset'),
-    re_path(r'^(?i)password/reset/done/',
+    re_path(r'^password/reset/done/',
                 auth_views.PasswordResetDoneView,
                 name='password_reset_done'),
-    re_path(r'^(?i)password/reset/complete/',
+    re_path(r'^password/reset/complete/',
                 auth_views.PasswordResetCompleteView,
                 name='password_reset_complete'),
-    re_path(r'^(?i)password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/',
+    re_path(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/',
                 auth_views.PasswordResetConfirmView,
                 name='password_reset_confirm'),
-    re_path(r'^(?i)register/', views.UserRegistrationView.as_view()),
+    re_path(r'^register/', views.UserRegistrationView.as_view()),
 
-    # url(r'^(?i)accounts/', include('registration.backends.simple.urls')),
-    re_path(r'^(?i)captcha/', include('captcha.urls')),
+    # url(r'^accounts/', include('registration.backends.simple.urls')),
+    re_path(r'^captcha/', include('captcha.urls')),
 
     # We define the following oauth2 views explicitly to disable insecure
     #  features. See https://github.com/evonove/django-oauth-toolkit/issues/196
-    re_path(r'^(?i)o/authorize/',
+    re_path(r'^o/authorize/',
                 oauth_views.AuthorizationView.as_view(),
                 name="authorize"),
-    re_path(r'^(?i)o/token/', oauth_views.TokenView.as_view(),
+    re_path(r'^o/token/', oauth_views.TokenView.as_view(),
                 name="token"),
-    re_path(r'^(?i)o/revoke_token/',
+    re_path(r'^o/revoke_token/',
                 oauth_views.RevokeTokenView.as_view(),
                 name="revoke-token"),
 
@@ -92,4 +94,4 @@ urlpatterns = [
     # Social authentication views.
     re_path('', include('social_django.urls', namespace='social')),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
