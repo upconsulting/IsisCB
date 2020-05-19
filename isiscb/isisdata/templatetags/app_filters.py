@@ -177,6 +177,8 @@ def bleach_safe(s):
 
 @register.filter
 def strip_tags(s):
+    if not s:
+        return s
     return bleach.clean(s, tags={}, attributes={}, strip=True)
 
 

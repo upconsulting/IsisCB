@@ -753,7 +753,7 @@ def citation(request, citation_id):
 
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(last_query)
+        search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
@@ -969,7 +969,7 @@ class IsisSearchView(FacetedSearchView):
 
         # If the user is logged in, attempt to save the search in their
         #  search history.
-        if log and parameters and self.request.user.id > 0:
+        if log and parameters and self.request.user.id and self.request.user.id > 0:
             searchquery = SearchQuery(
                 user = self.request.user._wrapped,
                 parameters = parameters,
@@ -1019,7 +1019,7 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
-            
+
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
