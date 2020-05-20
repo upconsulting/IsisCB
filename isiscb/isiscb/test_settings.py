@@ -277,8 +277,12 @@ AUTHENTICATION_BACKENDS = (
     # 'social.backends.twitter.TwitterOAuth',
     # 'social.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = 'oauth2_provider.AccessToken'
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = 'oauth2_provider.RefreshToken'
 
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
@@ -291,7 +295,7 @@ class DisableMigrations(object):
     def __getitem__(self, item):
         return None
 
-#MIGRATION_MODULES = DisableMigrations()
+MIGRATION_MODULES = DisableMigrations()
 #MIGRATION_MODULES = {
 #    'isisdata': 'isisdata.migrations'
 #}
