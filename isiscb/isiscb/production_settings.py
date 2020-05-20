@@ -34,47 +34,52 @@ MIGRATION_MODULES = {
 # Application definition
 
 INSTALLED_APPS = (
-    'autocomplete_light',
-    'isisdata',
+    'dal',
+    'dal_select2',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'social_django',
-    'pagination',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
     'rest_framework',
-    'markupfield',
     'simple_history',
+    'isisdata',
     'storages',
     'haystack',
-    'captcha',
-    "elasticstack",     # TODO: Do we need this?
+    "elasticstack",
     'oauth2_provider',
+    'captcha',
     'corsheaders',
     'zotero',
     'openurl',
     'curation',
-    'rules',
-    'django_celery_results',
+    'rules.apps.AutodiscoverRulesConfig',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'pagination.middleware.PaginationMiddleware',
+    #'dj_pagination.middleware.PaginationMiddleware',
 )
 
 
@@ -98,16 +103,12 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.request',
-                'django.template.context_processors.i18n',
+                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
                 'isisdata.context_processors.social',
-                'isisdata.context_processors.google',
-                 'django.template.context_processors.tz',
-                 'isisdata.context_processors.user',
             ],
         },
     },
@@ -191,14 +192,11 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata',
-    'EXCEPTION_HANDLER': 'isisdata.exceptions.custom_exception_handler'
+    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata'
 }
 
 # Static files (CSS, JavaScript, Images)
@@ -268,9 +266,8 @@ MARKUP_FIELD_TYPES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.twitter.TwitterOAuth',
-    'social_core.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
