@@ -1,4 +1,4 @@
-FROM python:2.7-onbuild
+FROM python:3.7-buster
 
 ENV DJANGO_SETTINGS_MODULE=isiscb.production_settings
 
