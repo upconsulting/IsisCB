@@ -64,7 +64,7 @@ INSTALLED_APPS = (
     'openurl',
     'curation',
     'rules.apps.AutodiscoverRulesConfig',
-    'dj_pagination',
+    #'dj_pagination',
     #'debug_toolbar',
 )
 
@@ -83,7 +83,7 @@ MIDDLEWARE= [
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'dj_pagination.middleware.PaginationMiddleware',
+    #'dj_pagination.middleware.PaginationMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = (
