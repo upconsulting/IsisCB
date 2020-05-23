@@ -7,6 +7,7 @@ if [ "$IS_DOCKER" != "true" ]; then
   #source /opt/python/run/venv/bin/activate
   source /var/app/venv/staging-LQM1lest/bin/activate
   cd isiscb
+  pip install -r requirements.txt
   python manage.py migrate auth --noinput
   python manage.py migrate --noinput
 else
