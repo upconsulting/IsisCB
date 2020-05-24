@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
+    'storages',
     'rules.apps.AutodiscoverRulesConfig',
 )
 
