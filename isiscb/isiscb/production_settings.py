@@ -52,7 +52,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'simple_history',
     'isisdata',
-    'storages',
     'haystack',
     "elasticstack",
     'oauth2_provider',
