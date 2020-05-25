@@ -1,4 +1,4 @@
-FROM python:3.7-buster
+FROM python:3.6-buster
 
 ENV DJANGO_SETTINGS_MODULE=isiscb.production_settings
 
