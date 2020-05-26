@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     'rest_framework',
     'simple_history',
     'isisdata',
+    #'storages',
     'haystack',
     "elasticstack",
     'oauth2_provider',
@@ -60,8 +61,8 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
-    #'storages',
     'rules.apps.AutodiscoverRulesConfig',
+    'django_celery_results',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -273,7 +274,7 @@ AUTHENTICATION_BACKENDS = (
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
-CELERY_RESULT_BACKEND = 'django-cache'#'django-cache'
+CELERY_RESULT_BACKEND = 'django-cache'
 
 # If you want to use Redis for Celery message passing, uncomment these options
 #  and comment out the SQS options, below.
