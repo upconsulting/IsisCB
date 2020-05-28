@@ -328,7 +328,7 @@ def authority_author_timeline(request, authority_id):
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
         timeline.save()
-        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE)
+        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
 
         data.update({
             'status': 'generating',
