@@ -295,8 +295,10 @@ BROKER_TRANSPORT_OPTIONS = {
     'region': SQS_REGION,
     'queue_name_prefix': os.environ.get('SQS_QUEUE_PREFIX', 'isiscb-staging-messages') + '-'
 }
-CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
-CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
+#CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
+#CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
+
+CELERY_BROKER_URL = 'sqs://'
 CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'isiscb-staging-messages')
 CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'isiscb-staging-graphs-messages')
 CELERY_QUEUES = {
