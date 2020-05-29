@@ -322,8 +322,9 @@ def authority_author_timeline(request, authority_id):
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
 
+    # FIXME: there seems to be a bug here. for some reason sometimes this is not true when it should
     timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
-    if True: #not cached_timeline or timeline_is_outdated:
+    if not cached_timeline or timeline_is_outdated:
         print("Refreshing timeline for " + authority_id)
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
