@@ -1691,7 +1691,9 @@ def citations(request):
         'result_count': result_count,
         'filter_list': paginated_objects,
         'current_page': currentPage,
-        'current_offset': (currentPage - 1) * PAGE_SIZE
+        'current_offset': (currentPage - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
     })
     return render(request, template, context)
 
@@ -1781,11 +1783,14 @@ def authorities(request):
         'objects': filtered_objects,
         'filters_active': filters_active,
         'filter_params': encoded_params,
+        'filter_list': paginated_objects,
         'search_key': search_key,
         'result_count': result_count,
         'current_page': currentPage,
         'current_offset': (currentPage - 1) * PAGE_SIZE,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
+        'page': page,
+        'paginator': paginator,
     })
     return render(request, template, context)
 

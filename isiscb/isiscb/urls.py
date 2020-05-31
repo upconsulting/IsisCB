@@ -45,13 +45,13 @@ urlpatterns = [
     re_path(r'^zotero/', include('zotero.urls')),
     re_path(r'^history/', views.search_history, name='search_history'),
     re_path(r'^history/saved/', views.search_saved, name='search_saved'),
-    re_path(r'^', views.home, name='home'),
+    re_path(r'^$', views.home, name='home'),
+    re_path(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     re_path(r'^robots\.txt', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
-    re_path(r'^', RedirectView.as_view(url='isis/', permanent=False), name='index'),
-    
-    re_path(r'^login/',  # TODO: can we simplify this?
-                auth_views.LoginView,
-                name='login'),
+
+    #re_path(r'^login/',  # TODO: can we simplify this?
+    #            auth_views.LoginView,
+    #            name='login'),
     re_path(r'^logout/',  # TODO: can we simplify this?
                 auth_views.LogoutView,
                 name='logout'),
@@ -93,5 +93,6 @@ urlpatterns = [
     re_path(r'^curation/', include('curation.urls')),
     # Social authentication views.
     re_path('', include('social_django.urls', namespace='social')),
+    re_path('', include('allauth.urls')),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

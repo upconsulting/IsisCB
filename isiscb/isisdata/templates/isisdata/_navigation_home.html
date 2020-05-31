@@ -44,12 +44,12 @@
                         <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                         <li><a href="{% url 'search_history' %}">My Search History</a></li>
                         <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
-                        <li><a href="{% url 'logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
+                        <li><form action="{% url 'account_logout' %}?next={{ request.get_full_path|urlencode }}">{% csrf_token %}<button class="btn btn-link" type="submit">Log Out</button></form></li>
                     </ul>
                 </li>
                 {% else %}
                 <li>
-                    <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                    <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
                 </li>
 
                 {% endif %}

@@ -1257,7 +1257,7 @@ def home(request):
     start_index = 0
     end_index = 10
     recent_records =[]
-
+    
     # unfortunately, citatations freshly created are public=False so we can't filter on that field when retrieving
     # creation events, we have to test that after we got the real object form the history object
     while len(recent_records) < 10:

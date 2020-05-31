@@ -1,5 +1,5 @@
 {% extends "isisdata/__base.html" %}
-{% load i18n admin_static %}
+{% load i18n %}
 {% load addcss %}
 
 {% block content %}
@@ -18,7 +18,7 @@
 				</a>
 			</div>
 		</div>
-		<form action="{{ app_path }}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
+		<form action="{% url 'account_login' %}" method="post" id="login-form" class="form-horizontal" style="margin-bottom: 0px;">{% csrf_token %}
 
 			<div class="panel-body">
 				{% if form.errors and not form.non_field_errors %}
@@ -43,16 +43,16 @@
 
 				<div id="content-main">
 						<div class="form-group">
-							{% for error in form.username.errors %}
+							{% for error in form.login.errors %}
 							<div class="alert alert-danger" role="alert">
 							  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
 							  <span class="sr-only">Error:</span>
 							  {{ error|escape }}
 							</div>
 							{% endfor %}
-							<label for="username" class="required control-label col-sm-4">{{ form.username.label }}:</label>
+							<label for="login" class="required control-label col-sm-4">{{ form.login.label }}:</label>
 							<div class="col-sm-6">
-								{{ form.username | addcss:"form-control" }}
+								{{ form.login | addcss:"form-control" }}
 							</div>
 						</div>
 						<div class="form-group">

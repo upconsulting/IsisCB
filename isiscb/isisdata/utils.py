@@ -15,9 +15,9 @@ def remove_control_characters(s):
     return u"".join(ch for ch in s if unicodedata.category(ch)[0]!="C")
 
 
-# TEST: Orig: re.sub(ur"\p{P}+", u" ", text). This worked in my testing but not sure all use cases. 
+# TEST: Orig: re.sub(ur"\p{P}+", u" ", text). This worked in my testing but not sure all use cases.
 def strip_punctuation(text):
-    return re.sub(r'[^\w\s]','',s)
+    return re.sub(r'[^\w\s]','',text)
 
 
 def strip_tags(s):
@@ -36,7 +36,7 @@ def normalize(s):
     """
     if not s:
         return ''
-    if type(s) is str:
+    if type(s) is bytes:
         s = s.decode('utf-8')
     return remove_control_characters(strip_punctuation(strip_tags(unidecode.unidecode(s))).lower())
 

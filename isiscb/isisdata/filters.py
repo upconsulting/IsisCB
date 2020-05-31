@@ -76,7 +76,7 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
-    record_status = django_filters.ChoiceFilter(name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
@@ -346,10 +346,10 @@ class AuthorityFilter(django_filters.FilterSet):
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
     type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
-    description = django_filters.CharFilter(name='description', lookup_expr='icontains')
-    classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
-    classification_code = django_filters.AllValuesFilter(name='classification_code')
-    classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
+    description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
+    classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
+    classification_code = django_filters.AllValuesFilter(field_name='classification_code')
+    classification_hierarchy = django_filters.AllValuesFilter(field_name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
     try:
         linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
@@ -363,7 +363,7 @@ class AuthorityFilter(django_filters.FilterSet):
     except Exception as e:
         print("Can't get attributes", e)
 
-    record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
     try:
         datasets = Dataset.objects.all()
