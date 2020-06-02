@@ -49,12 +49,6 @@ urlpatterns = [
     re_path(r'^$', RedirectView.as_view(url='isis/', permanent=False), name='index'),
     re_path(r'^robots\.txt', TemplateView.as_view(template_name='isisdata/robots.txt', content_type='text/plain'), name="robots"),
 
-    #re_path(r'^login/',  # TODO: can we simplify this?
-    #            auth_views.LoginView,
-    #            name='login'),
-    re_path(r'^logout/',  # TODO: can we simplify this?
-                auth_views.LogoutView,
-                name='logout'),
     re_path(r'^password/change/',  # TODO: can we simplify this?
                 auth_views.PasswordChangeView,
                 name='password_change'),
