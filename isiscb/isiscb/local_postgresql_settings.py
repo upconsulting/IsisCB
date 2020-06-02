@@ -94,6 +94,22 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY', '')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
+
+SOCIALACCOUNT_PROVIDERS = {
+    'twitter': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': SOCIAL_AUTH_TWITTER_KEY,
+            'secret': SOCIAL_AUTH_TWITTER_SECRET,
+            'key': ''
+        }
+    }
+}
+
 # TEMPLATE_CONTEXT_PROCESSORS = (
 #     'social.apps.django_app.context_processors.backends',
 #     'social.apps.django_app.context_processors.login_redirect',
@@ -244,25 +260,14 @@ CAPTCHA_FONT_SIZE = 36
 # social
 
 SOCIAL_AUTH_FACEBOOK_KEY = ''#os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-
-SOCIAL_AUTH_TWITTER_KEY = ''#os.environ['SOCIAL_AUTH_TWITTER_KEY']
 SOCIAL_AUTH_FACEBOOK_SECRET = ''#os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
-SOCIAL_AUTH_TWITTER_SECRET = ''#os.environ['SOCIAL_AUTH_TWITTER_SECRET']
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
-#production social keys
-
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-
-SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY','')
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
-SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
 
 TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
 TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET

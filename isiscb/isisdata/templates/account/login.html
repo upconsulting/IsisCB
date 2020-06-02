@@ -1,6 +1,7 @@
 {% extends "isisdata/__base.html" %}
 {% load i18n %}
 {% load addcss %}
+{% load socialaccount %}
 
 {% block content %}
 <div class="row col-sm-4 col-sm-offset-4" style="margin-top:105px;">
@@ -13,7 +14,7 @@
 					<i class="fa fa-facebook"></i>
 				</a>
 
-				<a class="btn btn-social-icon btn-twitter" href="{% url "social:begin" backend="twitter" %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Twitter">
+				<a class="btn btn-social-icon btn-twitter" href="{% provider_login_url 'twitter' %}?next={{ next }}" data-toggle="tooltip" data-placement="top" title="Login via Twitter">
 					<i class="fa fa-twitter"></i>
 				</a>
 			</div>
