@@ -26,11 +26,13 @@ $('body').ready(function() {
         form.attr('action', '{% url "curation:export-citations" %}');
         form.attr('target', '_blank');
         form.submit();
+        e.preventDefault();
     });
-    $('#bulk_change_submit').click(function() {
+    $('#bulk_change_submit').click(function(e) {
       form.attr('action', '{% url "curation:citation-bulk-action" %}');
       form.attr('target', '_blank');
       form.submit();
+      e.preventDefault();
     });
 
     $('.queryset-checkbox').change(function() {
