@@ -2203,7 +2203,6 @@ def search_users(request):
         'id': u.id,
         'label': "%s %s (%s)" % (u.first_name, u.last_name, u.username)
     } for u in queryset[:20]]
-    print(results)
     return JsonResponse(results, safe=False)
 
 
