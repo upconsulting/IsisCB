@@ -40,7 +40,6 @@ def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='
         _qs = Citation.objects.all()
     if user_id:
         _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
-
     if object_type == 'AUTHORITY':
         queryset = AuthorityFilter(filter_params, queryset=_qs).qs
     else:

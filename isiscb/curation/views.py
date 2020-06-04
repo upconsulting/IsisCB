@@ -1573,7 +1573,7 @@ def _citations_get_filter_params(request):
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = post_or_get.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode()#.encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
@@ -1627,7 +1627,7 @@ def citations(request):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
-        'filter_params': encoded_params,
+        'filter_params': filter_params.urlencode(),
         'search_key': search_key,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
         'record_status_redirect': CuratedMixin.REDIRECT,
@@ -2702,8 +2702,7 @@ def _get_filtered_queryset(request, object_type='CITATION'):
         #  in the filter; so we remove ``collection_only``.
         if 'collection_only' in filter_params:
             filter_params.pop('collection_only')
-    filter_params_raw = filter_params.urlencode().encode('utf-8')
-
+    filter_params_raw = filter_params.urlencode()#.encode('utf-8')
     if object_type is 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)

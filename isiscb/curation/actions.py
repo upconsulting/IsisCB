@@ -176,7 +176,7 @@ class SetRecordStatusExplanation(BaseAction):
         return task.id
 
 def get_tracking_transition_counts(qs):
-    states = zip(*qs.model.TRACKING_CHOICES)[0]
+    states = list(zip(*qs.model.TRACKING_CHOICES))[0]
     transitions = dict(list(zip(states, [qs.filter(tracking_state=state).count() for state in states])))
     # bugfix for Zotero imports: tracking_state is None not "NO"
     transitions[qs.model.NONE] += qs.filter(tracking_state=None).count()
