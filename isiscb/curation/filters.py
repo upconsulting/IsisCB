@@ -7,7 +7,7 @@ from unidecode import unidecode
 
 class UserFilter(django_filters.FilterSet):
     username = django_filters.CharFilter(lookup_expr='icontains')
-    roles = django_filters.ModelChoiceFilter(name='isiscbrole', queryset=IsisCBRole.objects.all())
+    roles = django_filters.ModelChoiceFilter(field_name='isiscbrole', queryset=IsisCBRole.objects.all())
 
     class Meta(object):
         model = User

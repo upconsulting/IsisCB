@@ -1,14 +1,42 @@
 {% extends "curation/base.html" %}
 
 {% load addcss %}
-{% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
 {% load rules %}
 
 
 {% block content %}
-{% autopaginate objects 40 as filter_list %}
+
+<div class="text-center">
+  {% if page.has_other_pages %}
+  <ul class="pagination pagination-sm">
+    {% if page.has_previous %}
+      <li><a href="?page=1">&laquo;</a></li>
+      <li><a href="?page={{ page.previous_page_number }}">Prev</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+      <li class="disabled"><span>Prev</span></li>
+    {% endif %}
+    {% for i in page.paginator.page_range %}
+      {% if page.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% elif i > page.number|add:-5 and i < page.number|add:5 %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% elif i == page.number|add:-5 or i == page.number|add:5 %}
+        <li><a href="?page={{ i }}">...</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if page.has_next %}
+      <li><a href="?page={{ page.next_page_number }}">Next</a></li>
+      <li><a href="?page={{ paginator.num_pages }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>Next</span></li>
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+  {% endif %}
+</div>
 
 {% test_rule 'can_update_user_module' user as update_module %}
 

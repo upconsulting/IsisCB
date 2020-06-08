@@ -119,6 +119,12 @@ class Value(models.Model):
         except:
             return u''
 
+    def __str__(self):
+        try:
+            return str(self.cvalue())
+        except:
+            return u''
+
 
 class TextValue(Value):
     """
@@ -1840,6 +1846,9 @@ class LinkedDataType(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class AttributeType(models.Model):
     name = models.CharField(max_length=255)
@@ -1859,6 +1868,9 @@ class AttributeType(models.Model):
     """))
 
     def __unicode__(self):
+        return u'{0} ({1})'.format(self.name, self.value_content_type.model)
+
+    def __str__(self):
         return u'{0} ({1})'.format(self.name, self.value_content_type.model)
 
 
@@ -1909,6 +1921,13 @@ class Attribute(ReferencedEntity, CuratedMixin):
                                       blank=True, null=True)
 
     def __unicode__(self):
+        try:
+            return u'{0}: {1}'.format(self.type_controlled.name,
+                                      self.value.cvalue())
+        except:
+            return u''
+
+    def __str__(self):
         try:
             return u'{0}: {1}'.format(self.type_controlled.name,
                                       self.value.cvalue())
@@ -2050,6 +2069,11 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     access_status_date_verified = models.DateField(blank=True, null=True)
 
     def __unicode__(self):
+        values = (self.type_controlled,
+                  self.universal_resource_name)
+        return u'{0}: {1}'.format(*values)
+
+    def __str__(self):
         values = (self.type_controlled,
                   self.universal_resource_name)
         return u'{0}: {1}'.format(*values)
