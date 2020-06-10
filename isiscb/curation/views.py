@@ -2673,9 +2673,23 @@ def _list_collections(request, collection_filter_class, collection_class, type, 
     collections = collection_class.objects.all().order_by('-created')
 
     filtered_objects = collection_filter_class(request.GET, queryset=collections)
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+
+    raw_params = request.GET.urlencode()
+    filter_params = QueryDict(raw_params, mutable=True)
+    current_page = filter_params.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
+
     context = {
-        'objects': filtered_objects,
+        'filter_list': paginated_objects,
         'type': type,
+        'page': page,
+        'paginator': paginator,
+        'current_page': current_page
     }
     return render(request, template, context)
 
