@@ -2824,11 +2824,11 @@ def users(request, user_id=None):
     filterset = UserFilter(request.GET, queryset=users)
 
     paginator = Paginator(filterset.qs, PAGE_SIZE)
-    currentPage = all_params.get('page', 1)
-    if not currentPage:
-        currentPage = 1
-    currentPage = int(currentPage)
-    page = paginator.page(currentPage)
+    current_page = request.GET.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
     paginated_objects = list(page)
 
     context.update({
@@ -2836,6 +2836,7 @@ def users(request, user_id=None):
         'filterset': filterset,
         'paginator': paginator,
         'page': page,
+        'current_page': current_page,
     })
     return render(request, template, context)
 

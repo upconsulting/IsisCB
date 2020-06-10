@@ -181,10 +181,6 @@ function highlightFilters() {
 
 </script>
 
-<div class="text-center">
-    {% paginate %}
-</div>
-
 <div class="panel">
     <table class="table table-striped table-responsive table-hover table-curation">
       <thead>
@@ -197,7 +193,7 @@ function highlightFilters() {
         </tr>
       </thead>
       <tbody>
-        {% for user in filter_list %}
+        {% for user in objects %}
         <tr>
           <td>
             <a href="{% url 'curation:user' user.pk %}">{{ user.username }}</a>
@@ -226,9 +222,7 @@ function highlightFilters() {
       </tbody>
     </table>
 
-    <div class="panel-footer text-center">
-    {% paginate %}
-    </div>
+
 
 
 </div>
