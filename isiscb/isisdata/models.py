@@ -2528,6 +2528,9 @@ class Dataset(CuratedMixin):
     def __unicode__(self):
         return u'{0}'.format(self.name)
 
+    def __str__(self):
+        return u'{0}'.format(self.name)
+
 
 class AsyncTask(models.Model):
     """

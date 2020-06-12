@@ -30,7 +30,7 @@ from django.core.exceptions import ValidationError
 
 
 class ImportAccesionFilter(django_filters.FilterSet):
-    processed = django_filters.BooleanFilter(name='processed')
+    processed = django_filters.BooleanFilter(field_name='processed')
     name = django_filters.CharFilter(lookup_expr='istartswith')
     imported_on_or_after = django_filters.CharFilter(method='filter_imported_on_or_after')
     imported_on_or_before = django_filters.CharFilter(method='filter_imported_on_or_before')

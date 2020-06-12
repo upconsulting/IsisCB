@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 from isisdata.models import *
 from isisdata.utils import normalize
@@ -24,6 +25,7 @@ from zotero.suggest import suggest_citation, suggest_authority
 import tempfile
 import json
 
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 def _field_data(instance):
     return [(k, v) for k, v in list(instance.__dict__.items()) if not k.startswith('_')]
@@ -132,11 +134,22 @@ def accessions(request):
 
     queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    current_page = request.GET.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
 
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
-        'objects': filtered_objects,
+        'filter_list': paginated_objects,
+        'current_page': current_page,
+        'current_offset': (current_page - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
     }
 
     template = 'zotero/accessions.html'
@@ -237,7 +250,7 @@ def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     for draft_ld in linkeddata:
         ldtype = type_cache.get(draft_ld.name.upper(), None)
         if not ldtype:
-            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper()).first()
             type_cache[draft_ld.name.upper()] = ldtype
         matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
         if matching_ld:

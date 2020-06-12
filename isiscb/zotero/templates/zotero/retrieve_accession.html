@@ -136,8 +136,10 @@ But for now the list is stored as string :-p
                                     data-last-name="{{ authority.name_last }}"
                                     {% endif %}
                                     data-type="{{ authority.type_controlled }}">
+                                    {% if authority %}
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
+                                    {% endif %}
                                     {% if not authority_resolution and not authority.processed %}
                                       <a class="draftauthority"
                                           id="authority-{{ authority.id }}-link"

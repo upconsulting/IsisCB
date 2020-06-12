@@ -521,7 +521,7 @@ class ZoteroIngest(object):
         while next_entry is None:
             try:
                 next_entry = next(self.current_entries)
-            except (StopIteration, AttributeError):
+            except (StopIteration, AttributeError, TypeError):
                 try:
                     self.current_class = self.classes.pop()
                 except IndexError:    # Out of classes.
