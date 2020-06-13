@@ -1257,7 +1257,7 @@ def home(request):
     start_index = 0
     end_index = 10
     recent_records =[]
-    
+
     # unfortunately, citatations freshly created are public=False so we can't filter on that field when retrieving
     # creation events, we have to test that after we got the real object form the history object
     while len(recent_records) < 10:
@@ -1378,6 +1378,13 @@ def user_profile(request, username):
     other related content (shared bookmarks, claimed authority record, etc).
     """
     user = get_object_or_404(User, username=username)
+    try:
+        profile = user.profile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile()
+        profile.user = user
+        profile.save()
+
     edit = request.GET.get('edit')
 
     # Only the owner of the profile can change it. We use a regular Form rather

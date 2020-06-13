@@ -35,6 +35,9 @@ class Institution(CuratedMixin):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Resolver(CuratedMixin):
     """
