@@ -226,7 +226,9 @@ SOCIALACCOUNT_PROVIDERS = {
             'client_id': SOCIAL_AUTH_FACEBOOK_KEY,
             'secret': SOCIAL_AUTH_FACEBOOK_SECRET,
             'key': ''
-        }
+        },
+        'METHOD': 'oauth2',
+        'fields': SOCIAL_AUTH_FACEBOOK_SCOPE
     }
 }
 

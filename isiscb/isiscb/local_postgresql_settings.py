@@ -97,6 +97,15 @@ AUTHENTICATION_BACKENDS = (
 SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY', '')
 SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
 
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+
+FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
+FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
+
+
+
 SOCIALACCOUNT_PROVIDERS = {
     'twitter': {
         # For each OAuth based provider, either add a ``SocialApp``
@@ -113,10 +122,18 @@ SOCIALACCOUNT_PROVIDERS = {
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
         'APP': {
-            'client_id': SOCIAL_AUTH_TWITTER_KEY,
-            'secret': SOCIAL_AUTH_TWITTER_SECRET,
+            'client_id': SOCIAL_AUTH_FACEBOOK_KEY,
+            'secret': SOCIAL_AUTH_FACEBOOK_SECRET,
             'key': ''
-        }
+        },
+        'METHOD': 'oauth2',
+        'fields': [
+            'id',
+            'email',
+            'name',
+            'first_name',
+            'last_name',
+        ]
     }
 }
 
@@ -266,20 +283,6 @@ SMTP_EMAIL = 'info@aplacecalledup.com'
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
-
-# social
-
-SOCIAL_AUTH_FACEBOOK_KEY = ''#os.environ['SOCIAL_AUTH_FACEBOOK_KEY']
-SOCIAL_AUTH_FACEBOOK_SECRET = ''#os.environ['SOCIAL_AUTH_FACEBOOK_SECRET']
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
-
-FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
-FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
-
-FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
-FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
-
-
 
 LICENSE = """This work is licensed under a Creative Commons
              Attribution-NonCommercial 4.0 International License."""
