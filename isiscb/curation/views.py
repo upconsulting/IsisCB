@@ -1784,7 +1784,7 @@ def authorities(request):
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
-        'filter_params': encoded_params,
+        'filter_params': urllibparse.urlencode(filter_params, quote_via=urllibparse.quote_plus),
         'filter_list': paginated_objects,
         'search_key': search_key,
         'result_count': result_count,
@@ -2370,7 +2370,6 @@ def _get_filtered_queryset(request, object_type='CITATION'):
     else:
         _qs = operations.filter_queryset(request.user, Authority.objects.all())
         queryset = AuthorityFilter(filter_params, queryset=_qs)
-
     return queryset, filter_params_raw
 
 def _get_filtered_queryset_authorities(request):

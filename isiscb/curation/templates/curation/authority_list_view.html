@@ -14,7 +14,8 @@
 <script>
 $('body').ready(function() {
     var form = $('#bulk-form');
-    $('#bulk_change_submit').click(function() {
+    $('#bulk_change_submit').click(function(e) {
+      e.preventDefault();
       form.attr('action', '{% url "curation:citation-bulk-action" %}');
       form.attr('target', '_blank');
       form.submit();

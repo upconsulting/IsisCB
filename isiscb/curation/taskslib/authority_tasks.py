@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 from celery import shared_task
 
 from isisdata.models import *
+from isisdata.tasks import _get_filtered_object_queryset
 
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
@@ -13,6 +14,10 @@ import csv
 from datetime import datetime
 from dateutil.tz import tzlocal
 import time
+
+from past.utils import old_div
+import haystack
+import math
 
 COLUMN_NAME_ATTR_SUBJ_ID = 'ATT Subj ID'
 COLUMN_NAME_ATTR_RELATED_NAME = 'Related Record Name'
@@ -27,6 +32,32 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 
 logger = logging.getLogger(__name__)
 
+@shared_task
+def reindex_authorities(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
+
+    queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
+    if task_id:
+        task = AsyncTask.objects.get(pk=task_id)
+        task.max_value = queryset.count()
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
+        task.save()
+    else:
+        task = None
+    try:    # Report all exceptions as a task failure.
+        for i, obj in enumerate(queryset):
+            if task and (i % _inc == 0 or i == (task.max_value - 1)):
+                task.current_value = i
+                task.save()
+
+            haystack.connections[settings.HAYSTACK_DEFAULT_INDEX].get_unified_index().get_index(Authority).update_object(obj)
+
+        task.state = 'SUCCESS'
+        task.save()
+    except Exception as E:
+        print('bulk_update_citations failed for %s' % filter_params_raw, end=' ')
+        print(E)
+        task.state = 'FAILURE'
+        task.save()
 
 @shared_task
 def merge_authorities(file_path, error_path, task_id, user_id):

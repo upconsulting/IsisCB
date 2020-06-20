@@ -14,6 +14,8 @@ from django.http import QueryDict
 from isisdata.models import *
 import isisdata.tasks as dtasks
 import curation.taskslib.citation_tasks as ctasks
+import curation.taskslib.authority_tasks as atasks
+
 from isisdata.filters import CitationFilter
 import json
 # TODO: refactor these actions to use bulk apply methods and then explicitly
@@ -263,4 +265,27 @@ class ReindexCitation(BaseAction):
         task.save()
         return task.id
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]
+class ReindexAuthorities(BaseAction):
+    model = Authority
+    label = u'Reindex authorities'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Reindex authorities',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Reindex authorities'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = atasks.reindex_authorities.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_authorities', value)
+        task.label = 'Reindexing authorities: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation, ReindexAuthorities]
