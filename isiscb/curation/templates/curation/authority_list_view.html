@@ -40,7 +40,7 @@ $('body').ready(function() {
 <form action="" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
 
-    <input type="hidden" name="objectType" value="{{ object_type }}">
+    <input type="hidden" name="object_type" value="{{ object_type }}">
 
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_authority' %}">Create new authority record</a>
 

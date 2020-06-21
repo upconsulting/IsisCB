@@ -288,4 +288,4 @@ class ReindexAuthorities(BaseAction):
         task.save()
         return task.id
 
-AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation, ReindexAuthorities]
+AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]

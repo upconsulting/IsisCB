@@ -2398,7 +2398,7 @@ def bulk_action(request):
     or implicit via the ``filters`` from the list view.
     """
     template = 'curation/bulkaction.html'
-    object_type = request.POST.get('objectType', 'CITATION')
+    object_type = request.POST.get('object_type', 'CITATION')
     queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
     if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
@@ -2421,6 +2421,7 @@ def bulk_action(request):
             tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
             # task_id = form.apply(queryset.qs, request.user)[0]
             return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
+
     else:
         # Prompt to select an action that will be applied to those records.
         form = form_class()
@@ -2430,7 +2431,7 @@ def bulk_action(request):
         # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
     context.update({
         'form': form,
-        'object_type': type,
+        'object_type': object_type,
     })
     return render(request, template, context)
 

@@ -345,7 +345,7 @@ class AuthorityFilter(django_filters.FilterSet):
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
-    type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
+    type_controlled = django_filters.ChoiceFilter(choices=[('ALL', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
     description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
     classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
     classification_code = django_filters.AllValuesFilter(field_name='classification_code')
@@ -546,3 +546,8 @@ class AuthorityFilter(django_filters.FilterSet):
         except:
             return queryset
         return queryset.filter(modified_on__lte=date)
+
+    def filter_type_controlled(self, queryset, name, value):
+        if value != "ALL":
+            return queryset.filter(type_controlled=value)
+        return queryset
