@@ -259,6 +259,19 @@ class ISODateRangeValue(Value):
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
 
+    def __str__(self):
+        def _coerce(val):
+            val = str(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
+
     def render(self):
         return self.__unicode__()
 
@@ -287,6 +300,9 @@ class DateRangeValue(Value):
             raise ValidationError('Must be a 2-tuple or 2-element list')
 
     def __unicode__(self):
+        return u'%s to %s' % tuple([part.isodate() for part in self.value])
+
+    def __str__(self):
         return u'%s to %s' % tuple([part.isodate() for part in self.value])
 
     class Meta(object):
@@ -364,6 +380,19 @@ class ISODateValue(Value):
                 setattr(self, part, value[i])
 
     def __unicode__(self):
+        def _coerce(val):
+            val = str(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + string.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = string.zfill(val, 4)
+            elif len(val) == 1:
+                val = string.zfill(val, 2)
+            return val
+
+        return '-'.join([_coerce(v) for v in self.value])
+
+    def __str__(self):
         def _coerce(val):
             val = str(val)
             if val.startswith('-') and len(val) < 5:
@@ -461,6 +490,9 @@ class DateValue(Value):
     def __unicode__(self):
         return self.value.isoformat()
 
+    def __str__(self):
+        return self.value.isoformat()
+
     class Meta(object):
         verbose_name = 'date'
 
@@ -495,6 +527,9 @@ class LocationValue(Value):
     def __unicode__(self):
         return self.value.__unicode__
 
+    def __str__(self):
+        return self.value.__unicode__
+
     class Meta(object):
         verbose_name = 'location'
 
@@ -507,6 +542,9 @@ class AuthorityValue(Value):
     name = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
+        return str(self.value)
+
+    def __str__(self):
         return str(self.value)
 
     class Meta(object):
@@ -744,6 +782,9 @@ class Language(models.Model):
     name = models.CharField(max_length=255)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 
@@ -1085,6 +1126,9 @@ class Citation(ReferencedEntity, CuratedMixin):
     def __unicode__(self):
         return strip_tags(self.title)
 
+    def __str__(self):
+        return strip_tags(self.title)
+
     @property
     def ccrelations(self):
         """
@@ -1346,6 +1390,9 @@ class Authority(ReferencedEntity, CuratedMixin):
         return LinkedData.objects.filter(subject_instance_id=self.pk).filter(public=True)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     @property
@@ -1640,6 +1687,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         values = (self.citation, self._render_type_controlled(), self.authority)
         return u'{0} - {1} - {2}'.format(*values)
 
+    def __str__(self):
+        values = (self.citation, self._render_type_controlled(), self.authority)
+        return u'{0} - {1} - {2}'.format(*values)
+
     def save(self, *args, **kwargs):
         if self.type_controlled is not None:
             if self.type_controlled in self.PERSONAL_RESPONS_TYPES:
@@ -1734,6 +1785,10 @@ class AARelation(ReferencedEntity, CuratedMixin):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
 
+    def __str__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
+
 
 class CCRelation(ReferencedEntity, CuratedMixin):
     """
@@ -1811,6 +1866,10 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
 
     def __unicode__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
+
+    def __str__(self):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
 
