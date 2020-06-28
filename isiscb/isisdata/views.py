@@ -1354,7 +1354,7 @@ def get_linkresolver_url_by_ip(request, citation):
 def get_linkresolver_url(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     data = None
-    if request.user.id > 0:
+    if request.user.id and request.user.id > 0:
         if request.user.profile.resolver_institution:
             resolver = request.user.profile.resolver_institution.resolver
             data = {

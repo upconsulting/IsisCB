@@ -37,7 +37,7 @@ router.register('user', views.UserViewSet)
 router.register('comment', views.CommentViewSet)
 
 urlpatterns = [
-    re_path(r'^rest/', views.api_root, name='rest_root'),
+    re_path(r'^rest/$', views.api_root, name='rest_root'),
     re_path(r'^rest/', include(router.urls)),
     re_path(r'^rest/auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^admin/', admin.site.urls),
