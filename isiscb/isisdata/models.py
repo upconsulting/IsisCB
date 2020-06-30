@@ -250,11 +250,11 @@ class ISODateRangeValue(Value):
         def _coerce(val):
             val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
             return val
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
@@ -263,11 +263,11 @@ class ISODateRangeValue(Value):
         def _coerce(val):
             val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
             return val
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
@@ -383,11 +383,11 @@ class ISODateValue(Value):
         def _coerce(val):
             val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
             return val
 
         return '-'.join([_coerce(v) for v in self.value])
@@ -396,11 +396,11 @@ class ISODateValue(Value):
         def _coerce(val):
             val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
             return val
 
         return '-'.join([_coerce(v) for v in self.value])
