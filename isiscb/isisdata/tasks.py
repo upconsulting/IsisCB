@@ -235,6 +235,7 @@ def create_timeline(authority_id, timeline_id):
     timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
     cached_years = {}
     for acrel in acrelations:
+        print(acrel.id)
         if acrel.citation.id in counted_citations or not acrel.citation.publication_date:
             continue
 

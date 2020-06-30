@@ -184,7 +184,7 @@ def authority(request, authority_id):
     fromsearch = request.GET.get('fromsearch', False)
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(last_query)
+        search_key = base64.b64encode(query_string)
     else:
         search_key = None
 
