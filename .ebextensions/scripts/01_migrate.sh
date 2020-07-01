@@ -10,6 +10,7 @@ if [ "$IS_DOCKER" != "true" ]; then
   cd isiscb
   python manage.py migrate auth --noinput
   python manage.py migrate --noinput
+  python manage.py createcachetable
 else
   echo 'The script 01_migrate.sh is only executed in non-docker environments.'
 fi

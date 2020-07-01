@@ -176,9 +176,13 @@ ELASTICSEARCH_INDEX_SETTINGS = {
 ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
 CACHES = {
+    #'default': {
+    #    'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #    'LOCATION': 'unique-snowflake',
+    #},
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': "django.core.cache.backends.db.DatabaseCache",
+        'LOCATION': 'db_cache_snowflake',
     },
     'search_results_cache': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
