@@ -55,7 +55,7 @@ from unidecode import unidecode
 import bleach
 import datetime
 
-
+import logging
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -1256,17 +1256,18 @@ def _build_result_set_links(request, context, model=Citation):
     """
     start = datetime.datetime.now()
 
+    logger = logging.getLogger("app_analyzer")
     user_session = request.session
     model_key = model.__name__.lower()
-    print("building prev/next")
+    logger.debug("building prev/next")
     search_key = request.GET.get('search', request.POST.get('search'))
-    print(search_key)
+    logger.debug(search_key)
     current_index = request.GET.get('current', request.POST.get('current'))
-    print(current_index)
+    logger.debug(current_index)
     search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
-    print(search_params)
+    logger.debug(search_params)
     search_count = user_session.get('%s_%s_search_count' % (search_key, model_key))
-    print(search_count)
+    logger.debug(search_count)
 
     # If there is no search, or we arrive at a record without a position in
     #  the search results, there is nothing to do.

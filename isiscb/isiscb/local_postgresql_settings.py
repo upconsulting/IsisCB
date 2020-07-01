@@ -166,6 +166,24 @@ TEMPLATES = [
 
 #WSGI_APPLICATION = 'isiscb.wsgi.application'
 
+LOGGING = {
+	"version": 1,
+	"disable_existing_loggers": False,
+	"formatters": {
+		"verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
+	},
+	"handlers": {
+		"app_analyzer": {
+			"level": "DEBUG",
+			"class": "logging.FileHandler",
+			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
+			"formatter": "verbose",
+		}
+	},
+	"loggers": {
+		"app_analyzer": {"handlers": ["app_analyzer"], "level": "DEBUG", "propagate": True}
+	},
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases

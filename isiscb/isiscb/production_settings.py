@@ -83,7 +83,24 @@ MIDDLEWARE = (
     #'dj_pagination.middleware.PaginationMiddleware',
 )
 
-
+LOGGING = {
+	"version": 1,
+	"disable_existing_loggers": False,
+	"formatters": {
+		"verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
+	},
+	"handlers": {
+		"app_analyzer": {
+			"level": "DEBUG",
+			"class": "logging.FileHandler",
+			"filename": "/var/log/app_analyzer.log",
+			"formatter": "verbose",
+		}
+	},
+	"loggers": {
+		"app_analyzer": {"handlers": ["app_analyzer"], "level": "DEBUG", "propagate": True}
+	},
+}
 
 # TEMPLATE_CONTEXT_PROCESSORS = (
 #     'social.apps.django_app.context_processors.backends',
