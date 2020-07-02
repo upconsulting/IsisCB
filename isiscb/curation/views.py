@@ -1262,7 +1262,7 @@ def _build_result_set_links(request, context, model=Citation):
     current_index = request.GET.get('current', request.POST.get('current'))
     search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
     search_count = user_session.get('%s_%s_search_count' % (search_key, model_key))
-    
+
     # If there is no search, or we arrive at a record without a position in
     #  the search results, there is nothing to do.
     if not search_key or not current_index or not search_params:
@@ -1502,7 +1502,8 @@ def _authorities_get_filter_params(request):
     filter_params = None
     if search_key:
         filter_params = user_session.get('%s_authority_search_params' % search_key)
-        all_params = {k: v for k, v in list(filter_params.items())}
+        if filter_params:
+            all_params = {k: v for k, v in list(filter_params.items())}
 
     if len(list(post_or_get.keys())) <= 1:
         if filter_params is None:

@@ -73,11 +73,12 @@ def _get_recent_records_range(start_index, end_index, days):
     recent_records = []
     while not is_done():
         for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
+            logger.debug("Getting record " + record.id)
             try:
                 record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
             except ObjectDoesNotExist:
                 logger.warn("Record does not exist " + record.id)
-                
+
             if record.public:
                 if record.created_on > lastMonth:
                     recent_records.append(record)

@@ -121,7 +121,7 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
         task = None
 
     try:    # Report all exceptions as a task failure.
-        with smart_open.smart_open(path, 'wb') as f:
+        with smart_open.smart_open(path, 'w') as f:
             writer = csv.writer(f)
 
             writer.writerow([c.label for c in columns])
@@ -194,7 +194,7 @@ def _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, e
         task = None
 
     try:    # Report all exceptions as a task failure.
-        with smart_open.smart_open(path, 'wb') as f:
+        with smart_open.smart_open(path, 'w') as f:
             writer = csv.writer(f)
 
             writer.writerow([c.label for c in columns])
