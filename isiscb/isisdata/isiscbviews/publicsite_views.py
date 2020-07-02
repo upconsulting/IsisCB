@@ -83,7 +83,7 @@ def _get_recent_records_range(start_index, end_index, days):
                 if record.created_on > lastMonth:
                     recent_records.append(record)
                 else:
-                    if type(record) is HistoricalCitation:
+                    if type(record) is Citation:
                         citations_done = True
                     else:
                         authorities_done = True
