@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.core.exceptions import ObjectDoesNotExist
 
 from isisdata.models import *
 
@@ -8,9 +9,11 @@ import datetime
 from django.utils import timezone
 
 from itertools import chain
-
+import logging
 
 NR_OF_RECENT_RECORDS = 20
+
+logger = logging.getLogger("app_analyzer")
 
 def recent_records(request):
     """
@@ -70,7 +73,11 @@ def _get_recent_records_range(start_index, end_index, days):
     recent_records = []
     while not is_done():
         for record in sorted(chain(recent_citations, recent_authorities), key=lambda rec: rec.history_date, reverse=True):
-            record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
+            try:
+                record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
+            except ObjectDoesNotExist:
+                logger.warn("Record does not exist " + record.id)
+                
             if record.public:
                 if record.created_on > lastMonth:
                     recent_records.append(record)

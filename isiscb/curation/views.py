@@ -1256,19 +1256,13 @@ def _build_result_set_links(request, context, model=Citation):
     """
     start = datetime.datetime.now()
 
-    logger = logging.getLogger("app_analyzer")
     user_session = request.session
     model_key = model.__name__.lower()
-    logger.debug("building prev/next")
     search_key = request.GET.get('search', request.POST.get('search'))
-    logger.debug(search_key)
     current_index = request.GET.get('current', request.POST.get('current'))
-    logger.debug(current_index)
     search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
-    logger.debug(search_params)
     search_count = user_session.get('%s_%s_search_count' % (search_key, model_key))
-    logger.debug(search_count)
-
+    
     # If there is no search, or we arrive at a record without a position in
     #  the search results, there is nothing to do.
     if not search_key or not current_index or not search_params:
