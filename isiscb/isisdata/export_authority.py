@@ -126,6 +126,7 @@ redirect = export.Column(u'Redirect', _redirect)
 name = export.Column(u'Name', lambda obj, extra, config={}: obj.name)
 description = export.Column(u'Description', lambda obj, extra, config={}: obj.description)
 classification_system = export.Column(u'Classification System', lambda obj, extra, config={}: obj.get_classification_system_display())
+classification_code = export.Column(u'Classification Code', lambda obj, extra, config={}: obj.classification_code)
 last_name = export.Column(u"Last Name", _last_name)
 first_name = export.Column(u"First Name", _first_name)
 name_suffix = export.Column(u"Name Suffix", _name_suffix)
@@ -145,6 +146,7 @@ AUTHORITY_COLUMNS = [
     name,
     description,
     classification_system,
+    classification_code,
     last_name,
     first_name,
     name_suffix,

@@ -1516,7 +1516,7 @@ def _authorities_get_filter_params(request):
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = post_or_get.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode()#.encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
@@ -2382,7 +2382,7 @@ def _get_filtered_queryset_authorities(request):
     if pks:
         filter_params['id'] = ','.join(pks)
 
-    filter_params_raw = filter_params.urlencode().encode('utf-8')
+    filter_params_raw = filter_params.urlencode()#.encode('utf-8')
 
     _qs = operations.filter_queryset(request.user, Authority.objects.all())
     queryset = AuthorityFilter(filter_params, queryset=_qs)
@@ -2591,6 +2591,7 @@ def export_authorities(request):
         return HttpResponseRedirect(reverse('curation:authority_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset_authorities(request)
+
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
