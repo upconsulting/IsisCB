@@ -354,3 +354,4 @@ CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
 
 
 SITE_ID = 1
+ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}

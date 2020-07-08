@@ -13,6 +13,7 @@ from haystack.utils import get_model_ct
 from haystack.inputs import Clean
 
 from captcha.fields import CaptchaField
+from allauth.account.forms import SignupForm
 
 import time
 from isisdata import helper_methods
@@ -236,7 +237,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sqs
 
-class UserRegistrationForm(forms.Form):
+class UserRegistrationForm(SignupForm):
     username = forms.CharField()
     email = forms.CharField(widget=forms.EmailInput())
     password1 = forms.CharField(widget=forms.PasswordInput(), label='Password')
@@ -252,6 +253,8 @@ class UserRegistrationForm(forms.Form):
             return username
 
         raise forms.ValidationError(u'Username "%s" is already in use.' % username)
+
+
 
 
 class UserProfileForm(forms.Form):

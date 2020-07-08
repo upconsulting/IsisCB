@@ -301,6 +301,8 @@ SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
 
+ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
+
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
