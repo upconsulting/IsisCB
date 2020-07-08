@@ -150,6 +150,7 @@ def accessions(request):
         'current_offset': (current_page - 1) * PAGE_SIZE,
         'page': page,
         'paginator': paginator,
+        'objects': filtered_objects,
     }
 
     template = 'zotero/accessions.html'
