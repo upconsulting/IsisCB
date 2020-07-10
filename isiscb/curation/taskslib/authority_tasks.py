@@ -70,8 +70,8 @@ def merge_authorities(file_path, error_path, task_id, user_id):
     COL_DUPLICATE_AUTH = 'CBA ID Duplicate'
     COL_NOTE = 'Note'
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -155,8 +155,8 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -399,8 +399,8 @@ def update_elements(file_path, error_path, task_id, user_id):
 
     result_file_headers = ('Status', 'Type', 'Element Id', 'Message', 'Modification Date')
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -622,14 +622,14 @@ def _count_rows(f, results):
     return row_count
 
 def _save_csv_file(path, headers, data):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headers)
         for line in data:
             writer.writerow(line)
 
 def _save_results(path, results, headings):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headings)
         for result in results:

@@ -302,6 +302,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
 SMTP_EMAIL = os.environ.get('SMTP_EMAIL', 'info@aplacecalledup.com')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'isiscb@localhost')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
