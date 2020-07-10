@@ -290,8 +290,8 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 DOMAIN = os.environ.get('DJANGO_DOMAIN','')
 URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
 EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
@@ -368,6 +368,8 @@ CELERY_BROKER_CONNECTION_RETRY=False
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
 
+ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
+ACCOUNT_EMAIL_REQUIRED = True
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',

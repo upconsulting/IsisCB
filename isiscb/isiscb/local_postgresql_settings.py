@@ -290,18 +290,18 @@ AWS_IMPORT_BUCKET_NAME = os.environ.get('AWS_IMPORT_BUCKET_NAME')
 
 DOMAIN = 'data.isiscb.org'
 URI_PREFIX = 'http://localhost:8000/isis/'
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
 # try:
 #     from secrets import SMTP_USER, SMTP_PASSWORD
 #     EMAIL_HOST_USER = SMTP_USER
 #     EMAIL_HOST_PASSWORD = SMTP_PASSWORD
 # except ImportError:
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD =''
-EMAIL_HOST = 'email-smtp.us-west-2.amazonaws.com'
-SMTP_EMAIL = 'info@aplacecalledup.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+SMTP_EMAIL = os.environ.get('SMTP_EMAIL', 'info@aplacecalledup.com')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
@@ -355,3 +355,4 @@ CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
 
 SITE_ID = 1
 ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
+ACCOUNT_EMAIL_REQUIRED = True
