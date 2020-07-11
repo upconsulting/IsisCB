@@ -313,7 +313,7 @@ function toggleLinkRecordsBtn() {
 
 <script>
 //# sourceURL=modals.js
-  $(document).ready(function() {
+  $(window).load(function() {
     var sortOrder = $("#id_o").val();
 
     if (sortOrder == "-publication_date") {
@@ -332,22 +332,24 @@ function toggleLinkRecordsBtn() {
       $("#sort_title").attr("title", "Click to sort by title date descending.")
     }
 
-    $("#sort_published").on('click', function() {
+    $("#sort_published").on('click', function(e) {
+      e.preventDefault();
       if (sortOrder == "-publication_date") {
         $("#id_o").val('publication_date');
       } else {
         $("#id_o").val('-publication_date');
       }
-      $('#filter_form').submit();
+      submitSearchForm();
     });
 
-    $("#sort_title").on('click', function() {
+    $("#sort_title").on('click', function(e) {
+      e.preventDefault();
       if (sortOrder == "-title_for_sort") {
         $("#id_o").val('title_for_sort');
       } else {
         $("#id_o").val('-title_for_sort');
       }
-      $('#filter_form').submit();
+      submitSearchForm();
     });
 
     setdate();
