@@ -53,7 +53,7 @@ class AutocompleteWidget(widgets.TextInput):
             return formats.localize_input(value)
         return value
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
         final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
@@ -173,7 +173,7 @@ class ValueWidget(widgets.Widget):
             'locationvalue': widgets.TextInput(), # TODO: custom location widget
         }
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         assign = "widgets.{0} = $('{1}')[0];";
         assignments = '\n'.join([assign.format(f,v.render(name, value, attrs))
                                  for f, v in list(self.widgets.items())])
