@@ -7,6 +7,7 @@ from isisdata.tasks import _get_filtered_object_queryset
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.db import models
 
 import logging
 import smart_open
@@ -468,8 +469,18 @@ def update_elements(file_path, error_path, task_id, user_id):
                                     if field_to_change.startswith(FIND_PREFIX):
                                         field_to_change, new_value = _find_value(field_to_change, new_value, element)
 
-                                    old_value = getattr(element, field_to_change)
-                                    setattr(element, field_to_change, new_value)
+                                    # check if field to change is a ManyToManyField (IEXP-232)
+                                    if isinstance(element.__class__.__dict__[field_to_change], models.fields.related_descriptors.ManyToManyDescriptor):
+                                        # all this is really ugly, but we have to store the old list for the
+                                        # administrator notes
+                                        old_value = element.__getattribute__(field_to_change).all()
+                                        old_value_list = list(old_value)
+                                        element.__getattribute__(field_to_change).add(new_value)
+                                        new_value = list(element.__getattribute__(field_to_change).all())
+                                        old_value = old_value_list
+                                    else:
+                                        old_value = getattr(element, field_to_change)
+                                        setattr(element, field_to_change, new_value)
 
                                     # some fields need special handling
                                     _specific_post_processing(element, field_to_change, new_value, old_value)
@@ -564,9 +575,19 @@ def _find_value(field_to_change, new_value, element):
     if len(field_parts) > 4:
         if field_parts[4] == "multi":
             old_value = getattr(element, field_parts[3])
-            linked_element = list(old_value.all()) + [linked_element]
+            # IEXP-232: looks like we can't just replace the old list, but have to add new element
+            # so we will not return a new list but just the element to add.
+            #linked_element = list(old_value.all()) + [linked_element]
     return field_parts[3], linked_element
 
+def _get_old_multi_value(field_to_change, element):
+    field_parts = field_to_change.split(":")
+    print(field_parts)
+    if len(field_parts) <= 4 or field_parts[4] != "multi":
+        return None
+
+    print(field_parts[3])
+    getattr(element, field_parts[3])
 
 def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_on):
     note = getattr(element, ADMIN_NOTES)

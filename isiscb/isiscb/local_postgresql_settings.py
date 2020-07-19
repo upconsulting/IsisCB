@@ -357,3 +357,19 @@ CELERY_TASK_DEFAULT_QUEUE = CELERY_DEFAULT_QUEUE
 SITE_ID = 1
 ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
 ACCOUNT_EMAIL_REQUIRED = True
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_EXPORT_BUCKET_NAME = os.environ.get('AWS_EXPORT_BUCKET_NAME', '')
+
+S3_UPLOAD_BULK_CHANGE_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+UPLOAD_BULK_CHANGE_PATH = os.environ.get('UPLOAD_BULK_CHANGE_PATH', S3_UPLOAD_BULK_CHANGE_PATH)
+
+S3_BULK_CHANGE_ERROR_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+BULK_CHANGE_ERROR_PATH = os.environ.get('BULK_CHANGE_ERROR_PATH', S3_BULK_CHANGE_ERROR_PATH)

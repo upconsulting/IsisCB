@@ -288,6 +288,19 @@ AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=94608000',
 }
 
+S3_UPLOAD_BULK_CHANGE_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+UPLOAD_BULK_CHANGE_PATH = os.environ.get('UPLOAD_BULK_CHANGE_PATH', S3_UPLOAD_BULK_CHANGE_PATH)
+
+S3_BULK_CHANGE_ERROR_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+BULK_CHANGE_ERROR_PATH = os.environ.get('BULK_CHANGE_ERROR_PATH', S3_BULK_CHANGE_ERROR_PATH)
+
+
 DOMAIN = os.environ.get('DJANGO_DOMAIN','')
 URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
