@@ -34,8 +34,8 @@ logger = logging.getLogger(__name__)
 def create_records(file_path, error_path, task_id, user_id, record_type):
     logging.info('Creating records from %s.' % (file_path))
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.smart_open(file_path, 'r') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -95,7 +95,7 @@ def _count_rows(f, results):
     return row_count
 
 def _save_results(path, results, headings):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.smart_open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headings)
         for result in results:
