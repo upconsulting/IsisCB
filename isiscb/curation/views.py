@@ -2691,9 +2691,12 @@ def _list_collections(request, collection_filter_class, collection_class, type, 
         'type': type,
         'page': page,
         'paginator': paginator,
-        'current_page': current_page
+        'current_offset': (current_page - 1) * PAGE_SIZE,
+        'current_page': current_page,
+        'objects': filtered_objects,
     }
     return render(request, template, context)
+
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
