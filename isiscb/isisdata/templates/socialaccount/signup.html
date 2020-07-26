@@ -1,0 +1,56 @@
+{% extends "isisdata/__base.html" %}
+
+{% load i18n %}
+{% load addcss %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+    <h1>Sign up</h1>
+
+<p>You are about to use your {{provider_name}} account to login to IsisCB Explore. As a final step, please complete the following form:</p>
+
+<form class="signup" id="signup_form" method="post" action="">
+  {% csrf_token %}
+  <div class="clearfix" style="padding-top: 10px; padding-bottom: 10px;">
+  {% for error in form.email.errors %}
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      {{ error|escape }}
+    </div>
+    {% endfor %}
+    <label for="email" class="required control-label col-sm-2">{{ form.email.label }}</label>
+    <div class="col-sm-6">
+      {{ form.email | addcss:"form-control"}}
+    </div>
+    <div class="col-sm-4"><input type="hidden" name="next" value="{{ next }}" />
+    </div>
+  </div>
+
+  <div class="clearfix" style="padding-bottom: 10px;">
+  {% for error in form.username.errors %}
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      {{ error|escape }}
+    </div>
+    {% endfor %}
+    <label for="email" class=" col-sm-2">{{ form.username.label }}</label>
+    <div class="col-sm-6">
+      {{ form.username | addcss:"form-control"}}
+    </div>
+
+    <div class="col-sm-4"><input type="hidden" name="next" value="{{ next }}" /></div>
+  </div>
+
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+  <div class="form-actions" style="padding-left: 10px; padding-top: 10px;">
+  <button class="btn btn-primary"  type="submit">Sign Up</button>
+  </div>
+</form>
+
+
+{% endblock %}
