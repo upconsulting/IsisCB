@@ -137,6 +137,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
 # TEMPLATE_CONTEXT_PROCESSORS = (
 #     'social.apps.django_app.context_processors.backends',
 #     'social.apps.django_app.context_processors.login_redirect',

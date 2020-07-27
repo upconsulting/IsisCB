@@ -253,7 +253,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
