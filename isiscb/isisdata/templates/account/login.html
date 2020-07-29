@@ -4,13 +4,15 @@
 {% load socialaccount %}
 
 {% block content %}
-<div class="row col-sm-4 col-sm-offset-4" style="margin-top:105px;">
+<div class="row col-sm-4 col-sm-offset-4" style="margin-top:85px;">
+
+	<div class="alert alert-warning text-center" role="alert">
+		If you experience issues when logging in through Facebook or Twitter, please contact us for assistance.
+	</div>
 	<div id="login" class="panel panel-default narrow center">
 		<div class="panel-heading clearfix">
 			<span class="h4">Log In</span>
 			<div class="btn-group btn-group-sm pull-right">
-
-
 				<a class="btn btn-social-icon btn-facebook" href="{% provider_login_url 'facebook' %}" data-toggle="tooltip" data-placement="top" title="Login via Facebook">
 					<i class="fa fa-facebook"></i>
 				</a>
@@ -86,6 +88,7 @@
 					</script>
 				</div>
 			</div>
+
 			<div class="panel-footer clearfix">
                 <div class="submit-row btn-group btn-group-sm">
                     <a type="button" class="btn btn-success" href="{% url 'account_signup' %}">{% trans 'Register' %}</a>
@@ -95,6 +98,7 @@
 				</div>
 			</div>
 		</form>
+
 	</div>
 </div>
 {% endblock %}
