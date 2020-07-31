@@ -338,7 +338,7 @@ class TestExtraRecordsAreAddedToTheExport(unittest.TestCase):
         qs = Citation.objects.filter(pk=citation.id)
         export.generate_csv(f, qs, [export.object_id, export.link_to_record])
         self.assertEqual(len(f.data), 3)    # Including the header.
-        self.assertTrue(book.id in zip(*[r.split(',') for r in f.data])[0][1:],
+        self.assertTrue(book.id in list(zip(*[r.split(',') for r in f.data]))[0][1:],
                         "Linked book record should be included in the output.")
 
 

@@ -21,8 +21,8 @@ before_install:
 script:
 - pip install nose
 - cd isiscb
-#- git clone http://github.com/ubernostrum/django-registration.git --depth 2
-#- python -Wi manage.py test
+- git clone http://github.com/ubernostrum/django-registration.git --depth 2
+- python -Wi manage.py test
 - cd ..
 deploy:
   - provider: elasticbeanstalk
