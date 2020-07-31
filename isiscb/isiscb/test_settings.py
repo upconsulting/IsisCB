@@ -175,15 +175,10 @@ LOGGING = {
 		"verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
 	},
 	"handlers": {
-		"app_analyzer": {
-			"level": "DEBUG",
-			"class": "logging.FileHandler",
-			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
-			"formatter": "verbose",
-		}
+
 	},
 	"loggers": {
-		"app_analyzer": {"handlers": ["app_analyzer"], "level": "DEBUG", "propagate": True}
+		
 	},
 }
 
