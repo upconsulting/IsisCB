@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.contrib.admin.views.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, render, redirect
@@ -160,19 +164,19 @@ def authority(request, authority_id):
     #                                                   .values('citation_id').distinct('citation_id')\
     #                                                   .count()
 
-    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
-    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
-    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids']
-    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids']
-    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids']
-    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids']
-    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids']
-    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids']
-    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids']
-    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids']
-    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids']
-    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids']
-    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names']
+    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -180,7 +184,7 @@ def authority(request, authority_id):
     fromsearch = request.GET.get('fromsearch', False)
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(last_query)
+        search_key = base64.b64encode(query_string)
     else:
         search_key = None
 
@@ -318,13 +322,14 @@ def authority_author_timeline(request, authority_id):
     refresh_time = settings.AUTHORITY_TIMELINE_REFRESH_TIME
     data = {}
 
+    # FIXME: there seems to be a bug here. for some reason sometimes this is not true when it should
     timeline_is_outdated = cached_timeline and ((cached_timeline.created_at + datetime.timedelta(hours=refresh_time) < datetime.datetime.now(tz=pytz.utc)) or cached_timeline.recalculate)
     if not cached_timeline or timeline_is_outdated:
-        print "Refreshing timeline for " + authority_id
+        print("Refreshing timeline for " + authority_id)
         timeline = CachedTimeline()
         timeline.authority_id = authority_id
         timeline.save()
-        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE)
+        create_timeline.apply_async(args=[authority_id, timeline.id], queue=settings.CELERY_GRAPH_TASK_QUEUE, routing_key='graph.#')
 
         data.update({
             'status': 'generating',

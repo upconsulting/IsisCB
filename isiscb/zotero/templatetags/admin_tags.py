@@ -1,8 +1,11 @@
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 from django import template
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 register = template.Library()
 
@@ -17,7 +20,7 @@ def build_get_params(draftauthority):
         ('name_suffix', 'name_suffix'),
         ('type_controlled', 'type_controlled'),
     ]
-    parameters = ['{0}={1}'.format(field, urllib2.quote(getattr(draftauthority, attr)))
+    parameters = ['{0}={1}'.format(field, urllib.parse.quote(getattr(draftauthority, attr)))
                   for attr, field in param_fields
                   if getattr(draftauthority, attr)]
     get_string += u'&'.join(parameters)

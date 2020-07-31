@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from functools import wraps
 
 from django.conf import settings
@@ -5,8 +6,7 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ImproperlyConfigured, FieldError
 from django.shortcuts import get_object_or_404, render
-from django.utils import six
-from django.utils.decorators import available_attrs
+from functools import WRAPPER_ASSIGNMENTS
 from django.utils.encoding import force_text
 
 
@@ -42,7 +42,7 @@ def check_rules(perm, fn=None, login_url=None, raise_exception=False, redirect_f
     used.
     """
     def decorator(view_func):
-        @wraps(view_func, assigned=available_attrs(view_func))
+        @wraps(view_func, assigned=WRAPPER_ASSIGNMENTS)
         def _wrapped_view(request, *args, **kwargs):
 
             # Get the object to check permissions against

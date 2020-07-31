@@ -1,8 +1,11 @@
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 from django import template
 from isisdata.models import *
-import base64, urllib
+import base64, urllib.request, urllib.parse, urllib.error
 
-from urllib import quote
+from urllib.parse import quote
 import codecs
 
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
@@ -27,14 +30,14 @@ def get_nr_of_citations(authority):
 def encode_query(query):
     if not query:
         return ''
-    return urllib.quote(query)
+    return urllib.parse.quote(query)
 
 
 @register.filter
 def decode_query(query):
     if not query:
         return ''
-    return urllib.unquote(query)
+    return urllib.parse.unquote(query)
 
 
 @register.filter

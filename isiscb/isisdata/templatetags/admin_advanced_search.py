@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.contrib.admin.views.main import SEARCH_VAR
 
 from django.template import Library

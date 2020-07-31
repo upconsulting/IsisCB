@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
@@ -26,14 +33,13 @@ from rest_framework.reverse import reverse
 
 # import rest_framework_filters as filters
 
-from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
-
-from urllib import quote, urlopen
+from urllib.parse import quote
+from urllib.request import urlopen
 import codecs, datetime, uuid, base64, zlib, locale
 
 from collections import defaultdict
-from helpers.mods_xml import initial_response, generate_mods_xml
-from helpers.linked_data import generate_authority_rdf, generate_citation_rdf
+from .helpers.mods_xml import initial_response, generate_mods_xml
+from .helpers.linked_data import generate_authority_rdf, generate_citation_rdf
 from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
@@ -70,13 +76,13 @@ class ValueSerializer(serializers.HyperlinkedModelSerializer):
     value = serializers.ReadOnlyField(source='cvalue')
     value_type = ReadOnlyLowerField(source='child_class')
 
-    class Meta:
+    class Meta(object):
         model = Value
         fields = ('value', 'value_type')
 
 
 class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = ContentType
         fields = ('url', 'model')
 
@@ -84,7 +90,7 @@ class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
     content_type = ContentTypeSerializer(source='value_content_type')
 
-    class Meta:
+    class Meta(object):
         model = AttributeType
         fields = ('url', 'id', 'name', 'content_type')
 
@@ -94,7 +100,7 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
     source = GenericHyperlink(many=False, read_only=True)
     value = ValueSerializer(many=False, read_only=True)
 
-    class Meta:
+    class Meta(object):
         model = Attribute
         fields = ('uri', 'url', 'id',
                   'type_controlled',
@@ -105,13 +111,13 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LanguageSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = Language
         fields = ('url', 'id', 'name')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = User
         fields = ('url', 'id', 'username', 'date_joined')
 
@@ -125,7 +131,7 @@ class ContentTypeRelatedField(serializers.RelatedField):
         return ContentType.objects.get(pk=data)
 
 class UserRelatedSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = User
         fields = ('id', 'username')
 
@@ -144,7 +150,7 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
     linkified = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
 
-    class Meta:
+    class Meta(object):
         model = Comment
         fields = '__all__'
 
@@ -173,14 +179,14 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LinkedDataTypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = LinkedDataType
         fields = '__all__'
 
 
 class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
     type_controlled = LinkedDataTypeSerializer(many=False)
-    class Meta:
+    class Meta(object):
         model = LinkedData
         fields = ('universal_resource_name', 'description', 'type_controlled')
 
@@ -190,7 +196,7 @@ class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = CCRelation
 
         fields = ('uri', 'url', 'id',
@@ -202,7 +208,7 @@ class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
                   'linked_data')
 
 class CCRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = CCRelation
 
         fields = ('uri', 'url', 'id',
@@ -216,7 +222,7 @@ class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
 
         fields = ('uri', 'url', 'id',
@@ -229,7 +235,7 @@ class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ACRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = ACRelation
 
         fields = ('uri', 'url', 'id',
@@ -243,7 +249,7 @@ class AARelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = AARelation
 
         fields = ('uri', 'url', 'id',
@@ -256,7 +262,7 @@ class AARelationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AARelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = AARelation
 
         fields = ('uri', 'url', 'id',
@@ -274,7 +280,7 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
     related_authorities = AARelationSparseSerializer(read_only=True, many=True,
                                                      source='aarelations')
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = ('id', 'uri', 'url', 'name',
                   'description',
@@ -315,7 +321,7 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
     related_authorities = ACRelationSparseSerializer(read_only=True, many=True,
                                                source='acrelations')
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = ('uri', 'url', 'id',
                   'title',
@@ -332,7 +338,7 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = PartDetails
         fields = '__all__'
 
@@ -747,7 +753,7 @@ def citation(request, citation_id):
 
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(last_query)
+        search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
@@ -963,7 +969,7 @@ class IsisSearchView(FacetedSearchView):
 
         # If the user is logged in, attempt to save the search in their
         #  search history.
-        if log and parameters and self.request.user.id > 0:
+        if log and parameters and self.request.user.id and self.request.user.id > 0:
             searchquery = SearchQuery(
                 user = self.request.user._wrapped,
                 parameters = parameters,
@@ -1013,7 +1019,7 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
-            
+
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
@@ -1263,8 +1269,8 @@ def home(request):
                 record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
                 if record.public:
                     recent_records.append(record)
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
 
     context = {
         'active': 'home',
@@ -1348,7 +1354,7 @@ def get_linkresolver_url_by_ip(request, citation):
 def get_linkresolver_url(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     data = None
-    if request.user.id > 0:
+    if request.user.id and request.user.id > 0:
         if request.user.profile.resolver_institution:
             resolver = request.user.profile.resolver_institution.resolver
             data = {
@@ -1372,6 +1378,13 @@ def user_profile(request, username):
     other related content (shared bookmarks, claimed authority record, etc).
     """
     user = get_object_or_404(User, username=username)
+    try:
+        profile = user.profile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile()
+        profile.user = user
+        profile.save()
+
     edit = request.GET.get('edit')
 
     # Only the owner of the profile can change it. We use a regular Form rather

@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from past.utils import old_div
 from celery import shared_task
 from django.conf import settings
 
@@ -14,7 +18,7 @@ def reindex_citations(user_id, filter_params_raw, task_id=None, object_type='CIT
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
-        _inc = max(2, math.floor(task.max_value / 200.))
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
         task.save()
     else:
         task = None
@@ -29,7 +33,7 @@ def reindex_citations(user_id, filter_params_raw, task_id=None, object_type='CIT
         task.state = 'SUCCESS'
         task.save()
     except Exception as E:
-        print 'bulk_update_citations failed for %s' % filter_params_raw,
-        print E
+        print('bulk_update_citations failed for %s' % filter_params_raw, end=' ')
+        print(E)
         task.state = 'FAILURE'
         task.save()

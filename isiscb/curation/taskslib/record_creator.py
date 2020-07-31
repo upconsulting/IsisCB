@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from isisdata.models import *
 
 from datetime import datetime
@@ -46,7 +47,7 @@ def _create_linkeddata(row, user_id, results, task_id, created_on):
             properties.update({
                 'subject': subject
             })
-        except Exception, e:
+        except Exception as e:
             logger.error('Related record with id %s does not exist. Skipping attribute.' % (subject_id))
             logger.exception(e)
             results.append((ERROR, subject_id, subject_id, 'Related record does not exist.'))
@@ -104,7 +105,7 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
     try:
         Authority.objects.get(pk=authority_id)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(authority_id)))
         return
@@ -120,7 +121,7 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
 
     try:
         Citation.objects.get(pk=citation_id)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(citation_id)))
         return
@@ -161,7 +162,7 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
     subject_id = row[COL_CCR_SUBJECT]
     try:
         Citation.objects.get(pk=subject_id)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(subject_id)))
         return
@@ -173,7 +174,7 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
     object_id = row[COL_CCR_OBJECT]
     try:
         Citation.objects.get(pk=object_id)
-    except Exception, e:
+    except Exception as e:
         logger.error(e)
         results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(object_id)))
         return
@@ -238,7 +239,7 @@ def _create_citation(row, user_id, results, task_id, created_on):
     if language:
         try:
             language_obj = Language.objects.filter(name=language).first()
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             results.append((ERROR, "Language does not exist", "", "There exists no language %s."%(language)))
 
@@ -315,7 +316,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
             properties.update({
                 'redirect_to_id': redirect_to,
             })
-        except Exception, e:
+        except Exception as e:
             logger.error(e)
             results.append((ERROR, "Authority does not exist", "", "There exists not authority with id %s. Skipping."%(redirect_to)))
             return
@@ -364,7 +365,7 @@ def _create_authority(row, user_id, results, task_id, created_on):
 
     class_system = row[COL_CLASS_SYSTEM]
     if class_system:
-        if class_system not in dict(Authority.CLASS_SYSTEM_CHOICES).keys():
+        if class_system not in list(dict(Authority.CLASS_SYSTEM_CHOICES).keys()):
             results.append((WARNING, "Classification System does not exist.", "", "The Classification System %s does not exist."%(class_system)))
         else:
             properties.update({
@@ -401,7 +402,7 @@ def _add_type(row, col_type_heading, obj_type, results, properties):
         results.append((ERROR, "%s type missing"%(obj_type.__name__), "", "There was no %s type provided. Skipping."%(obj_type.__name__)))
         return False
 
-    if auth_type not in dict(obj_type.TYPE_CHOICES).keys():
+    if auth_type not in list(dict(obj_type.TYPE_CHOICES).keys()):
         results.append((ERROR, "%s type does not exist."%(obj_type.__name__), "", "The %s Type %s does not exist. Skipping."%(obj_type.__name__, auth_type)))
         return False
 

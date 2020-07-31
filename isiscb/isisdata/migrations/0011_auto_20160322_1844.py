@@ -14,12 +14,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='userprofile',
             name='authority_record',
-            field=models.OneToOneField(related_name='associated_user', null=True, blank=True, to='isisdata.Authority', help_text=b"A user can 'claim' an Authority record, asserting that the record refers to theirself."),
+            field=models.OneToOneField(related_name='associated_user', null=True, blank=True, to='isisdata.Authority', help_text=b"A user can 'claim' an Authority record, asserting that the record refers to theirself.", on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='userprofile',
             name='resolver_institution',
-            field=models.ForeignKey(related_name='users', blank=True, to='openurl.Institution', help_text=b'A user can select an institution for which OpenURL links should be generated while searching.', null=True),
+            field=models.ForeignKey(related_name='users', blank=True, to='openurl.Institution', help_text=b'A user can select an institution for which OpenURL links should be generated while searching.', null=True, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='userprofile',

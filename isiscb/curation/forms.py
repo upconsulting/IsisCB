@@ -1,5 +1,8 @@
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
+from builtins import str
+from builtins import object
 from django import forms
 from django.http import QueryDict
 
@@ -33,17 +36,6 @@ class CCRelationForm(forms.ModelForm):
     )
     type_controlled = forms.ChoiceField(choices=TYPE_CHOICES)
 
-    class Meta:
-        model = CCRelation
-        fields = [
-            'type_controlled', 'data_display_order', 'subject',
-            'object', 'record_status_value', 'record_status_explanation',
-            'administrator_notes', 'record_history',
-        ]
-        labels = {
-            'administrator_notes': 'Staff notes'
-        }
-
     def __init__(self, *args, **kwargs):
         super(CCRelationForm, self).__init__(*args, **kwargs)
         if not self.is_bound:
@@ -59,6 +51,17 @@ class CCRelationForm(forms.ModelForm):
         object_id = self.cleaned_data.get('object', None)
         if object_id:
             self.cleaned_data['object'] = Citation.objects.get(pk=object_id)
+
+    class Meta:
+        model = CCRelation
+        fields = [
+            'type_controlled', 'data_display_order', 'subject',
+            'object', 'record_status_value', 'record_status_explanation',
+            'administrator_notes', 'record_history',
+        ]
+        labels = {
+            'administrator_notes': 'Staff notes'
+        }
 
 
 
@@ -81,7 +84,7 @@ class ACRelationForm(forms.ModelForm):
         'required': True,
     })
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
         fields = [
             'type_controlled',
@@ -136,7 +139,7 @@ class ISODateValueForm(forms.ModelForm):
         self.instance.value = self.cleaned_data.get('value')
         super(ISODateValueForm, self).save(*args, **kwargs)
 
-    class Meta:
+    class Meta(object):
         model = ISODateValue
         fields = []
 
@@ -167,7 +170,7 @@ class AuthorityValueForm(forms.ModelForm):
         self.instance.value = self.cleaned_data.get('value')
         super(AuthorityValueForm, self).save(*args, **kwargs)
 
-    class Meta:
+    class Meta(object):
         model = AuthorityValue
         fields = ['value']
 
@@ -198,7 +201,7 @@ class PartDetailsForm(forms.ModelForm):
 
             set_field_access(can_update, can_view, self.fields)
 
-    class Meta:
+    class Meta(object):
         model = PartDetails
         exclude =['volume', 'sort_order']
 
@@ -284,7 +287,7 @@ class CitationForm(forms.ModelForm):
 
     subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = [
             'type_controlled', 'title', 'description', 'edition_details',
@@ -312,7 +315,7 @@ class CitationForm(forms.ModelForm):
 
 class LinkedDataForm(forms.ModelForm):
 
-    class Meta:
+    class Meta(object):
         model = LinkedData
         fields = [
             'universal_resource_name', 'resource_name', 'url',
@@ -349,7 +352,7 @@ class AuthorityForm(forms.ModelForm):
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = [
             'type_controlled', 'name', 'description', 'classification_system',
@@ -426,7 +429,7 @@ class CitationTrackingForm(forms.ModelForm):
     type_controlled = forms.ChoiceField(required=True,
                                        choices=TYPE_CHOICES)
 
-    class Meta:
+    class Meta(object):
         model = Tracking
         fields = [
             'tracking_info', 'notes', 'type_controlled'
@@ -453,7 +456,7 @@ class AuthorityTrackingForm(forms.ModelForm):
     type_controlled = forms.ChoiceField(required=True,
                                        choices=TYPE_CHOICES)
 
-    class Meta:
+    class Meta(object):
         model = AuthorityTracking
         fields = [
             'tracking_info', 'notes', 'type_controlled'
@@ -474,7 +477,7 @@ class PersonForm(forms.ModelForm):
 
             set_field_access(can_update, can_view, self.fields)
 
-    class Meta:
+    class Meta(object):
         model = Person
         fields = [
             'personal_name_last', 'personal_name_first', 'personal_name_suffix',
@@ -498,7 +501,7 @@ class PersonForm(forms.ModelForm):
 
 class RoleForm(forms.ModelForm):
 
-    class Meta:
+    class Meta(object):
         model = IsisCBRole
         fields = [
             'name', 'description',
@@ -525,7 +528,7 @@ class DatasetRuleForm(forms.ModelForm):
 
         return data
 
-    class Meta:
+    class Meta(object):
         model = DatasetRule
 
         fields = [
@@ -547,7 +550,7 @@ class AddRoleForm(forms.Form):
 
 class CRUDRuleForm(forms.ModelForm):
 
-    class Meta:
+    class Meta(object):
         model = CRUDRule
         fields = [
             'crud_action'
@@ -571,7 +574,7 @@ class FieldRuleCitationForm(forms.ModelForm):
         self.fields['field_name'].choices = choices
 
 
-    class Meta:
+    class Meta(object):
         model = FieldRule
         fields = [
             'field_action', 'field_name',
@@ -592,7 +595,7 @@ class FieldRuleAuthorityForm(forms.ModelForm):
         authority_choices.sort()
         self.fields['field_name'].choices = authority_choices
 
-    class Meta:
+    class Meta(object):
         model = FieldRule
         fields = [
             'field_action', 'field_name',
@@ -600,7 +603,7 @@ class FieldRuleAuthorityForm(forms.ModelForm):
 
 
 class UserModuleRuleForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = UserModuleRule
         fields = [
             'module_action',
@@ -612,7 +615,7 @@ class AttributeForm(forms.ModelForm):
     type_controlled = forms.ModelChoiceField(queryset=AttributeType.objects.all(), required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES)
 
-    class Meta:
+    class Meta(object):
         model = Attribute
 
         fields = [
@@ -646,7 +649,7 @@ class BulkActionForm(forms.Form):
         for action_name in selected_actions:
             action_value = self.cleaned_data.get(action_name)
             extra_data = {
-                k.split('__')[1]: v for k, v in self.cleaned_data.iteritems()
+                k.split('__')[1]: v for k, v in list(self.cleaned_data.items())
                 if k.startswith(action_name) and not k == action_name and '__' in k
             }
             if extra:
@@ -674,9 +677,8 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
     form_class_attrs = {'Meta': Meta}
     action_choices = []
     extra_data = {}
-
     # hack until we also make tracking status work
-    avail_actions = [actions.StoreCreationDataToModel] if object_type == 'AUTHORITY' else actions.AVAILABLE_ACTIONS
+    avail_actions = [actions.StoreCreationDataToModel, actions.ReindexAuthorities] if object_type == 'AUTHORITY' else actions.AVAILABLE_ACTIONS
     for action_class in avail_actions:
         if hasattr(action_class, 'extra_js'):
             media_attrs['js'] = tuple(list(media_attrs['js']) + [action_class.extra_js])
@@ -699,13 +701,13 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
 
 class CitationCollectionForm(forms.ModelForm):
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
-    class Meta:
+    class Meta(object):
         model = CitationCollection
         exclude = ('created', 'createdBy', 'citations')
 
 class AuthorityCollectionForm(forms.ModelForm):
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
-    class Meta:
+    class Meta(object):
         model = AuthorityCollection
         exclude = ('created', 'createdBy', 'authorities')
 
@@ -724,7 +726,7 @@ class ExportCitationsForm(forms.Form):
     export_linked_records = forms.BooleanField(label="Export linked records (make sure that the 'Link to Record' Field is selected in the field list)", required=False)
     export_metadata = forms.BooleanField(label="Export metadata", required=False)
     use_pipe_delimiter = forms.BooleanField(label='Use "||" to separate related authority and citation fields', required=False)
-    fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export.CITATION_COLUMNS), required=False)
+    fields = forms.MultipleChoiceField(choices=[(c.slug, c.label) for c in export.CITATION_COLUMNS], required=False)
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     # compress_output = forms.BooleanField(required=False, initial=True,
     #                                      help_text="If selected, the output"
@@ -743,7 +745,7 @@ class ExportAuthorityForm(forms.Form):
     export_name = forms.CharField(help_text='This tag will be added to the export filename')
     export_format = forms.ChoiceField(choices=[('CSV', 'Comma-separated values (CSV)')])
     export_metadata = forms.BooleanField(label="Export metadata", required=False)
-    fields = forms.MultipleChoiceField(choices=map(lambda c: (c.slug, c.label), export_authority.AUTHORITY_COLUMNS))
+    fields = forms.MultipleChoiceField(choices=[(c.slug, c.label) for c in export_authority.AUTHORITY_COLUMNS])
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
 class BulkChangeCSVForm(forms.Form):

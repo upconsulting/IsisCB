@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.forms.widgets import Widget
 from django.forms.utils import flatatt
 from django.utils.html import conditional_escape, format_html, html_safe

@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import str
 from xml.dom.minidom import *
 from isisdata.templatetags.app_filters import *
-from mods_helper import *
+from .mods_helper import *
 
 def initial_response(citation_id):
     doc = xml.dom.minidom.Document()

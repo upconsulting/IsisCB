@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from haystack.forms import FacetedSearchForm
 from django import forms
 from django.db import models
@@ -12,6 +13,7 @@ from haystack.utils import get_model_ct
 from haystack.inputs import Clean
 
 from captcha.fields import CaptchaField
+from allauth.account.forms import SignupForm
 
 import time
 from isisdata import helper_methods
@@ -209,7 +211,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
                     sqs = sqs.narrow(u'%s:"%s"' % (field, Clean(value)))
 
         # create 'and' query
-        for or_facet in or_facets.keys():
+        for or_facet in list(or_facets.keys()):
             query_str = ' OR '.join(or_facets[or_facet])
             sqs = sqs.narrow(u'%s:%s' % (or_facet, Clean('(' + query_str + ')')))
 
@@ -235,7 +237,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sqs
 
-class UserRegistrationForm(forms.Form):
+class UserRegistrationForm(SignupForm):
     username = forms.CharField()
     email = forms.CharField(widget=forms.EmailInput())
     password1 = forms.CharField(widget=forms.PasswordInput(), label='Password')
@@ -251,6 +253,8 @@ class UserRegistrationForm(forms.Form):
             return username
 
         raise forms.ValidationError(u'Username "%s" is already in use.' % username)
+
+
 
 
 class UserProfileForm(forms.Form):

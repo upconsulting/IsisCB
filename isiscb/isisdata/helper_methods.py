@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # TODO: this should be combined with isisdata.utils.
 
 import string

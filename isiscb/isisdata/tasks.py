@@ -1,4 +1,8 @@
 from __future__ import absolute_import, unicode_literals
+from __future__ import print_function
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 from celery import shared_task
 
 from django.http import QueryDict
@@ -11,7 +15,7 @@ from isisdata.models import *
 
 from django.conf import settings
 
-import unicodecsv as csv
+import csv
 import math, smart_open
 
 
@@ -36,7 +40,6 @@ def _get_filtered_object_queryset(filter_params_raw, user_id=None, object_type='
         _qs = Citation.objects.all()
     if user_id:
         _qs = filter_queryset(User.objects.get(pk=user_id), _qs, CRUDRule.UPDATE)
-
     if object_type == 'AUTHORITY':
         queryset = AuthorityFilter(filter_params, queryset=_qs).qs
     else:
@@ -71,7 +74,7 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
-        _inc = max(2, math.floor(task.max_value / 200.))
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
         task.save()
     else:
         task = None
@@ -86,16 +89,16 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
         task.state = 'SUCCESS'
         task.save()
     except Exception as E:
-        print 'bulk_update_citations failed for %s' % filter_params_raw,
-        print ':: %s:%s' % (field, value),
-        print E
+        print('bulk_update_citations failed for %s' % filter_params_raw, end=' ')
+        print(':: %s:%s' % (field, value), end=' ')
+        print(E)
         task.state = 'FAILURE'
         task.save()
 
 
 @shared_task
 def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
-    print 'export to csv:: %s' % str(task_id)
+    print('export to csv:: %s' % str(task_id))
     if config['export_metadata']:
         fields.append('creator')
         fields.append('modifier')
@@ -105,49 +108,49 @@ def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export
         fields.append('created-date')
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
-        columns = filter(lambda o: o.slug in fields, export.CITATION_COLUMNS)
+        columns = [o for o in export.CITATION_COLUMNS if o.slug in fields]
     else:
         queryset, _ = _get_filtered_authority_queryset(filter_params_raw, user_id)
-        columns = filter(lambda o: o.slug in fields, export_authority.AUTHORITY_COLUMNS)
+        columns = [o for o in export_authority.AUTHORITY_COLUMNS if o.slug in fields]
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
-        _inc = max(2, math.floor(task.max_value / 200.))
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
         task.save()
     else:
         task = None
 
     try:    # Report all exceptions as a task failure.
-        with smart_open.smart_open(path, 'wb') as f:
+        with smart_open.smart_open(path, 'w') as f:
             writer = csv.writer(f)
 
-            writer.writerow(map(lambda c: c.label, columns))
+            writer.writerow([c.label for c in columns])
             extra = []
             for i, obj in enumerate(queryset):
                 if task and (i % _inc == 0 or i == (task.max_value - 1)):
                     task.current_value = i
                     task.save()
                 if obj:
-                    writer.writerow(map(lambda c: c(obj, extra, config), columns))
+                    writer.writerow([c(obj, extra, config) for c in columns])
 
             if export_extra:
                 for obj in extra:
                     if obj:
-                        writer.writerow(map(lambda c: c(obj, [], config), columns))
+                        writer.writerow([c(obj, [], config) for c in columns])
 
         task.state = 'SUCCESS'
         task.save()
-        print 'success:: %s' % str(task_id)
+        print('success:: %s' % str(task_id))
     except Exception as E:
-        print 'export_to_csv failed for %s' % filter_params_raw,
-        print E
+        print('export_to_csv failed for %s' % filter_params_raw, end=' ')
+        print(E)
         task.value = str(E)
         task.state = 'FAILURE'
         task.save()
 
 @shared_task
 def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
-    print 'export to EBSCO csv:: %s' % str(task_id)
+    print('export to EBSCO csv:: %s' % str(task_id))
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
         columns = export_ebsco.CITATION_COLUMNS
@@ -159,7 +162,7 @@ def export_to_ebsco_csv(user_id, path, fields, filter_params_raw, task_id=None, 
 
 @shared_task
 def export_item_counts(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
-    print 'export item counts csv:: %s' % str(task_id)
+    print('export item counts csv:: %s' % str(task_id))
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
         columns = export_item_count_csv.CITATION_COLUMNS
@@ -171,7 +174,7 @@ def export_item_counts(user_id, path, fields, filter_params_raw, task_id=None, e
 
 @shared_task
 def export_swp_analysis(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
-    print 'export item counts csv:: %s' % str(task_id)
+    print('export item counts csv:: %s' % str(task_id))
     if export_type == 'Citation':
         queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id)
         columns = export_swp_analysis_csv.CITATION_COLUMNS
@@ -185,35 +188,35 @@ def _generate_csv(columns, task_id, queryset, path, filter_params_raw, config, e
     if task_id:
         task = AsyncTask.objects.get(pk=task_id)
         task.max_value = queryset.count()
-        _inc = max(2, math.floor(task.max_value / 200.))
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
         task.save()
     else:
         task = None
 
     try:    # Report all exceptions as a task failure.
-        with smart_open.smart_open(path, 'wb') as f:
+        with smart_open.smart_open(path, 'w') as f:
             writer = csv.writer(f)
 
-            writer.writerow(map(lambda c: c.label, columns))
+            writer.writerow([c.label for c in columns])
             extra = []
             for i, obj in enumerate(queryset):
                 if task and (i % _inc == 0 or i == (task.max_value - 1)):
                     task.current_value = i
                     task.save()
                 if obj:
-                    writer.writerow(map(lambda c: c(obj, extra, config), columns))
+                    writer.writerow([c(obj, extra, config) for c in columns])
 
             if export_extra:
                 for obj in extra:
                     if obj:
-                        writer.writerow(map(lambda c: c(obj, [], config), columns))
+                        writer.writerow([c(obj, [], config) for c in columns])
 
         task.state = 'SUCCESS'
         task.save()
-        print 'success:: %s' % str(task_id)
+        print('success:: %s' % str(task_id))
     except Exception as E:
-        print 'export_to_csv failed for %s' % filter_params_raw,
-        print E
+        print('export_to_csv failed for %s' % filter_params_raw, end=' ')
+        print(E)
         task.value = str(E)
         task.state = 'FAILURE'
         task.save()
@@ -231,6 +234,8 @@ def create_timeline(authority_id, timeline_id):
     counted_citations = []
     timeline_cache = CachedTimeline.objects.get(pk=timeline_id)
     cached_years = {}
+    print("ACrelations: ")
+    print(acrelations.count())
     for acrel in acrelations:
         if acrel.citation.id in counted_citations or not acrel.citation.publication_date:
             continue
