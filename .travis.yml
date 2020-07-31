@@ -3,6 +3,7 @@ python:
 - '3.8'
 services:
 - postgresql
+- elasticsearch
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.test_settings
@@ -13,6 +14,7 @@ env:
     - BOTO_CONFIG=/dev/null
 before_script:
 - psql -c 'create database test_isiscb;' -U postgres
+- sleep 10
 before_install:
 - pip install -U pip
 - pip install -U six
