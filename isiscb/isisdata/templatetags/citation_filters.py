@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import str
 from django import template
 from isisdata.models import *
 from isisdata.templatetags.app_filters import *

@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True)),
                 ('type_controlled', models.CharField(blank=True, max_length=5, null=True, help_text=b'\n    Controlled term specifying the nature of the relationship\n    (the predicate between the subject and object).', choices=[(b'IDTO', b'Is Identical To'), (b'PAOF', b'Is Parent Of'), (b'PRETO', b'Happened Previous To'), (b'OFOF', b'Is Officer Of'), (b'ASWI', b'Is Associated With')])),
                 ('type_free', models.CharField(help_text=b'\n    Free text description of the relationship.', max_length=255, blank=True)),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True)),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'authority-authority relationship',
@@ -92,8 +92,8 @@ class Migration(migrations.Migration):
                 ('source_instance_id', models.CharField(max_length=200)),
                 ('type_controlled_broad', models.CharField(max_length=255, blank=True)),
                 ('type_free', models.CharField(max_length=255, blank=True)),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True)),
-                ('source_content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
+                ('source_content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
-                ('value_content_type', models.ForeignKey(related_name='attribute_value', to='contenttypes.ContentType')),
+                ('value_content_type', models.ForeignKey(related_name='attribute_value', to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -148,7 +148,7 @@ class Migration(migrations.Migration):
                 ('description', models.TextField(blank=True)),
                 ('type_controlled', models.CharField(blank=True, max_length=3, null=True, help_text=b'\n    Type of relationship between two citation records.', choices=[(b'IC', b'Includes Chapter'), (b'ISA', b'Includes Series Article'), (b'RO', b'Is Review Of'), (b'RE', b'Responds To'), (b'AS', b'Is Associated With'), (b'RB', b'Is Reviewed By')])),
                 ('type_free', models.CharField(help_text=b'\n    Type of relationship as used in the citation.', max_length=255, blank=True)),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True)),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'citation-citation relationship',
@@ -449,8 +449,8 @@ class Migration(migrations.Migration):
                 ('subject_instance_id', models.CharField(max_length=200)),
                 ('type_controlled_broad', models.CharField(max_length=255, blank=True)),
                 ('type_free', models.CharField(max_length=255, blank=True)),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True)),
-                ('subject_content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
+                ('subject_content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'linked data entry',
@@ -512,8 +512,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=255)),
-                ('gis_location', models.ForeignKey(blank=True, to='isisdata.Location', null=True)),
-                ('gis_schema', models.ForeignKey(blank=True, to='isisdata.LocationSchema', null=True)),
+                ('gis_location', models.ForeignKey(blank=True, to='isisdata.Location', null=True, on_delete=models.CASCADE)),
+                ('gis_schema', models.ForeignKey(blank=True, to='isisdata.LocationSchema', null=True, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -533,7 +533,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
                 ('modified_on', models.DateTimeField(auto_now=True)),
-                ('created_by', models.ForeignKey(related_name='tagging_schemas', to=settings.AUTH_USER_MODEL)),
+                ('created_by', models.ForeignKey(related_name='tagging_schemas', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -552,8 +552,8 @@ class Migration(migrations.Migration):
                 ('type_controlled', models.CharField(blank=True, max_length=2, null=True, choices=[(b'HS', b'HSTM Upload'), (b'PT', b'Printed'), (b'AU', b'Authorized'), (b'PD', b'Proofed'), (b'FU', b'Fully Entered')])),
                 ('subject_instance_id', models.CharField(max_length=200)),
                 ('notes', models.TextField(blank=True)),
-                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True)),
-                ('subject_content_type', models.ForeignKey(to='contenttypes.ContentType')),
+                ('modified_by', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE)),
+                ('subject_content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -569,7 +569,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CharValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.CharField(max_length=2000)),
             ],
             options={
@@ -580,7 +580,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Comment',
             fields=[
-                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation')),
+                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation', on_delete=models.CASCADE)),
                 ('text', models.TextField()),
             ],
             bases=('isisdata.annotation',),
@@ -588,7 +588,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DateTimeValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.DateTimeField()),
             ],
             options={
@@ -599,7 +599,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DateValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.DateField()),
             ],
             options={
@@ -610,7 +610,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FloatValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.FloatField()),
             ],
             options={
@@ -621,7 +621,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='IntValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.IntegerField(default=0)),
             ],
             options={
@@ -632,8 +632,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='LocationValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
-                ('value', models.ForeignKey(to='isisdata.Location')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
+                ('value', models.ForeignKey(to='isisdata.Location', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'location',
@@ -643,7 +643,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Person',
             fields=[
-                ('authority_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Authority')),
+                ('authority_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Authority', on_delete=models.CASCADE)),
                 ('personal_name_last', models.CharField(max_length=255)),
                 ('personal_name_first', models.CharField(max_length=255)),
                 ('personal_name_suffix', models.CharField(max_length=255, blank=True)),
@@ -656,14 +656,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TagAppellation',
             fields=[
-                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation')),
+                ('annotation_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Annotation', on_delete=models.CASCADE)),
             ],
             bases=('isisdata.annotation',),
         ),
         migrations.CreateModel(
             name='TextValue',
             fields=[
-                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value')),
+                ('value_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.Value', on_delete=models.CASCADE)),
                 ('value', models.TextField()),
             ],
             options={
@@ -674,17 +674,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='value',
             name='attribute',
-            field=models.OneToOneField(related_name='value', to='isisdata.Attribute'),
+            field=models.OneToOneField(related_name='value', to='isisdata.Attribute', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='tag',
             name='schema',
-            field=models.ForeignKey(related_name='tags', to='isisdata.TaggingSchema'),
+            field=models.ForeignKey(related_name='tags', to='isisdata.TaggingSchema', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='linkeddata',
             name='type_controlled',
-            field=models.ForeignKey(verbose_name=b'type', to='isisdata.LinkedDataType', help_text=b'\n    The "type" field determines what kinds of values are acceptable for this\n    linked data entry.'),
+            field=models.ForeignKey(verbose_name=b'type', to='isisdata.LinkedDataType', help_text=b'\n    The "type" field determines what kinds of values are acceptable for this\n    linked data entry.', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='historicalperson',
@@ -749,12 +749,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='citation',
             name='modified_by',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='citation',
             name='part_details',
-            field=models.OneToOneField(null=True, blank=True, to='isisdata.PartDetails', help_text=b'\n    New field: contains volume, issue, page information for works that are parts\n    of larger works.'),
+            field=models.OneToOneField(null=True, blank=True, to='isisdata.PartDetails', help_text=b'\n    New field: contains volume, issue, page information for works that are parts\n    of larger works.', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='citation',
@@ -769,66 +769,66 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ccrelation',
             name='object',
-            field=models.ForeignKey(related_name='relations_to', to='isisdata.Citation'),
+            field=models.ForeignKey(related_name='relations_to', to='isisdata.Citation', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='ccrelation',
             name='subject',
-            field=models.ForeignKey(related_name='relations_from', to='isisdata.Citation'),
+            field=models.ForeignKey(related_name='relations_from', to='isisdata.Citation', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='authority',
             name='modified_by',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='authority',
             name='redirect_to',
-            field=models.ForeignKey(blank=True, to='isisdata.Authority', null=True),
+            field=models.ForeignKey(blank=True, to='isisdata.Authority', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='attribute',
             name='type_controlled',
-            field=models.ForeignKey(verbose_name=b'type', to='isisdata.AttributeType', help_text=b'\n    The "type" field determines what kinds of values are acceptable for this\n    attribute.'),
+            field=models.ForeignKey(verbose_name=b'type', to='isisdata.AttributeType', help_text=b'\n    The "type" field determines what kinds of values are acceptable for this\n    attribute.', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='annotation',
             name='created_by',
-            field=models.ForeignKey(related_name='annotations', to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='annotations', to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='annotation',
             name='subject_content_type',
-            field=models.ForeignKey(to='contenttypes.ContentType'),
+            field=models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='acrelation',
             name='authority',
-            field=models.ForeignKey(to='isisdata.Authority'),
+            field=models.ForeignKey(to='isisdata.Authority', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='acrelation',
             name='citation',
-            field=models.ForeignKey(to='isisdata.Citation'),
+            field=models.ForeignKey(to='isisdata.Citation', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='acrelation',
             name='modified_by',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'\n    The most recent user to modify this object.', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='aarelation',
             name='object',
-            field=models.ForeignKey(related_name='relations_to', to='isisdata.Authority'),
+            field=models.ForeignKey(related_name='relations_to', to='isisdata.Authority', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='aarelation',
             name='subject',
-            field=models.ForeignKey(related_name='relations_from', to='isisdata.Authority'),
+            field=models.ForeignKey(related_name='relations_from', to='isisdata.Authority', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='tagappellation',
             name='tag',
-            field=models.ForeignKey(to='isisdata.Tag'),
+            field=models.ForeignKey(to='isisdata.Tag', on_delete=models.CASCADE),
         ),
     ]

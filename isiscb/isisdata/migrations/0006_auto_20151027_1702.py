@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='value',
             name='attribute',
-            field=models.OneToOneField(related_name='value', to='isisdata.Attribute', help_text=b'\n    The Attribute to which this Value belongs.'),
+            field=models.OneToOneField(related_name='value', to='isisdata.Attribute', help_text=b'\n    The Attribute to which this Value belongs.', on_delete=models.CASCADE),
         ),
     ]

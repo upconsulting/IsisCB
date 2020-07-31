@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 from unittest import TestCase
 from django.test.client import RequestFactory
 from django.contrib.contenttypes.models import ContentType
@@ -8,8 +12,8 @@ from collections import Counter
 
 
 from zotero.models import *
-from suggest import *
-from tasks import *
+from .suggest import *
+from .tasks import *
 from zotero.parse import ZoteroIngest
 from zotero import ingest
 
@@ -643,7 +647,7 @@ class TestIngest(TestCase):
             self.assertEqual(self.accession.ingest_to, prod.belongs_to)
 
         attribute = citation.attributes.first()
-        self.assertIsInstance(attribute.value_freeform, unicode)
+        self.assertIsInstance(attribute.value_freeform, str)
         self.assertEqual(len(attribute.value_freeform), 4,
                          "ISISCB-736: freeform value should be four-digit year")
         self.assertEqual(attribute.type_controlled, self.publicationDateType,
@@ -730,7 +734,7 @@ class TestImportMethods(TestCase):
         extracts field-data  for :prop`.DraftCitation.type_controlled` from a
         parsed entry.
         """
-        for dtype, value in ingest.DOCUMENT_TYPES.iteritems():
+        for dtype, value in list(ingest.DOCUMENT_TYPES.items()):
             entry = {
                 'type_controlled': [dtype],
             }

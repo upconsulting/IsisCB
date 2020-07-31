@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
 
 
+from builtins import str
 def get_type(citation_type):
     type_dict = {}
     type_dict['BO'] = 'book'

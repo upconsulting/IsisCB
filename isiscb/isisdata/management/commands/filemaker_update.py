@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import object
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationError
 from django.contrib.contenttypes.models import ContentType
@@ -17,15 +23,15 @@ from collections import Counter
 def _update_or_create(model, pk, data):
     try:
         instance = model.objects.get(pk=pk)
-        for key, value in data.iteritems():
+        for key, value in list(data.items()):
             if key == 'id':
                 pass
             setattr(instance, key, value)
         instance.save()
     except model.DoesNotExist:
         instance = model.objects.create(**data)
-        for key, value in data.iteritems():
-            print key, value
+        for key, value in list(data.items()):
+            print(key, value)
             if getattr(instance, key) != value:
                 setattr(instance, key, value)
         instance.save()
@@ -476,7 +482,7 @@ class FMPDSOParser(object):
         # A single field/value in FM may map to two or more fields/values in
         #  IsisCB Explore.
         if type(model_field) is tuple and type(value) is tuple:
-            return zip(model_field, value)
+            return list(zip(model_field, value))
         return [(model_field, value)]
 
     def _get_handler(self, model_name):
@@ -635,7 +641,7 @@ class DatabaseHandler(object):
         instance : :class:`django.db.models.Model`
         data : dict
         """
-        for field, value in data.iteritems():
+        for field, value in list(data.items()):
             setattr(instance, field, value)
         instance.save()
 
@@ -655,7 +661,7 @@ class DatabaseHandler(object):
         """
 
         prepped_data = {}
-        for field, value in dict(data).iteritems():
+        for field, value in list(dict(data).items()):
             if field in self.pk_fields:
                 field += '_id'
             prepped_data[field] = value
@@ -673,7 +679,7 @@ class DatabaseHandler(object):
             'volume_begin', 'volume_end'
         ]
         partdetails_data_fixed = {}
-        for key, value in partdetails_data.iteritems():
+        for key, value in list(partdetails_data.items()):
             if key in int_fields and type(value) is not int:
                 prefix = key.split('_')[0]
                 freetext_key = prefix + u'_free_text'
@@ -685,7 +691,7 @@ class DatabaseHandler(object):
         return partdetails_data_fixed
 
     def _handle_dataset(self, literal):
-        if type(literal) in [str, unicode]:
+        if type(literal) in [str, str]:
             match = re.search('([^(]+)[(](.+)[)]', literal)
             if match:
                 datasetname, editorname  = match.groups()
@@ -727,7 +733,7 @@ class DatabaseHandler(object):
                 defaults=citation_data
             )
         except Exception as E:
-            print citation_data, citation_id
+            print(citation_data, citation_id)
             raise E
 
         if language_id:
@@ -744,7 +750,7 @@ class DatabaseHandler(object):
             try:
                 part_details = PartDetails.objects.create(**partdetails_data)
             except Exception as E:
-                print partdetails_data
+                print(partdetails_data)
                 raise E
 
             citation.part_details = part_details
@@ -800,7 +806,7 @@ class DatabaseHandler(object):
                     )
                 except Exception as E:
                     self.errors.append(('authority', E.__repr__(), authority_data['id'], authority_data))
-                    print authority_data
+                    print(authority_data)
                     raise E
         self._tick('authority')
 
@@ -847,7 +853,7 @@ class DatabaseHandler(object):
                 defaults=acrelation_data
             )
         except Exception as E:
-            print E.__repr__(), acrelation_id, acrelation_data
+            print(E.__repr__(), acrelation_id, acrelation_data)
             self.errors.append(('acrelation', E.__repr__(), acrelation_id, acrelation_data))
         self._tick('acrelation')
 
@@ -894,7 +900,7 @@ class DatabaseHandler(object):
         try:
             type_controlled = attribute_data.pop('type_controlled')
         except KeyError as E:
-            print E.__repr__(), attribute_id, attribute_data
+            print(E.__repr__(), attribute_id, attribute_data)
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
             return
 
@@ -916,7 +922,7 @@ class DatabaseHandler(object):
                 }
             )
         except Exception as E:
-            print E.__repr__(), attribute_id, attribute_data
+            print(E.__repr__(), attribute_id, attribute_data)
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
 
         attribute_data.update({
@@ -928,7 +934,7 @@ class DatabaseHandler(object):
                 defaults=attribute_data
             )
         except Exception as E:
-            print E.__repr__(), attribute_id, attribute_data
+            print(E.__repr__(), attribute_id, attribute_data)
             self.errors.append(('attribute', E.__repr__(), attribute_id, attribute_data))
 
         # try:
@@ -939,7 +945,7 @@ class DatabaseHandler(object):
                     attribute=attribute
                 )
             except Exception as E:
-                print E.__repr__(), attribute_id, attribute_data
+                print(E.__repr__(), attribute_id, attribute_data)
                 self.errors.append(('value', E.__repr__(), attribute_id, value_data))
         else:
             child_class = attribute.value.get_child_class()
@@ -951,13 +957,13 @@ class DatabaseHandler(object):
                         attribute=attribute
                     )
                 except Exception as E:
-                    print E.__repr__(), attribute_id, attribute_data
+                    print(E.__repr__(), attribute_id, attribute_data)
                     self.errors.append(('value', E.__repr__(), attribute_id, value_data))
             else:
                 try:
                     self._update_with(attribute.value, {'value': value_data})
                 except Exception as E:
-                    print E.__repr__(), attribute_id, attribute_data
+                    print(E.__repr__(), attribute_id, attribute_data)
                     self.errors.append(('value', E.__repr__(), attribute_id, value_data))
                 value = attribute.value
         # except Exception as E:
@@ -1038,7 +1044,7 @@ class DatabaseHandler(object):
         self._tick('tracking')
 
     def __del__(self):
-        import cPickle as pickle
+        import pickle as pickle
         try:
             with open('/home/ec2-user/ingest_errors.pickle', 'w') as f:
                 pickle.dump(self.errors, f)
@@ -1077,7 +1083,7 @@ class Command(BaseCommand):
             for fname in os.listdir(dirpath):
                 if fname.startswith(table) and fname.endswith('xml'):
                     path = os.path.join(dirpath, fname)
-                    print 'processing %s' % fname
+                    print('processing %s' % fname)
                     parser.parse(table, path, parse_also)
         else:
             path = os.path.join(options['datapath'][0], '%s.xml' % table)

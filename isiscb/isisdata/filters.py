@@ -1,6 +1,7 @@
+from __future__ import unicode_literals
+from builtins import object
 import django_filters
 from django_filters.fields import Lookup
-from django_filters.filterset import STRICTNESS
 from django.db.models import Q
 from django import forms
 
@@ -18,7 +19,7 @@ import pytz
 from django.conf import settings
 import iso8601, unicodedata
 
-
+# FIXME: Removed strictness may not be necessary to change
 
 filters.LOOKUP_TYPES = [
     ('', '---------'),
@@ -43,8 +44,6 @@ filters.LOOKUP_TYPES = [
 
 
 class CitationFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RETURN_NO_RESULTS
-    # strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
     # id = django_filters.MethodFilter(name='id', lookup_type='exact')
     id = django_filters.CharFilter(method='filter_id')
@@ -77,7 +76,7 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
-    record_status = django_filters.ChoiceFilter(name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
@@ -153,7 +152,7 @@ class CitationFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = [
             'id', 'title', 'abstract', 'description',
@@ -342,28 +341,37 @@ class CitationFilter(django_filters.FilterSet):
 
 
 class AuthorityFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
-    type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
-    description = django_filters.CharFilter(name='description', lookup_expr='icontains')
-    classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
-    classification_code = django_filters.AllValuesFilter(name='classification_code')
-    classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
+    type_controlled = django_filters.ChoiceFilter(choices=[('ALL', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
+    description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
+    classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
+    classification_code = django_filters.AllValuesFilter(field_name='classification_code')
+    classification_hierarchy = django_filters.AllValuesFilter(field_name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
-    linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
-    linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    try:
+        linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
+        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    except Exception as e:
+        print("Can't set linked data.", e)
 
-    attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
-    attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    try:
+        attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
+        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    except Exception as e:
+        print("Can't get attributes", e)
 
-    record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
-    datasets = Dataset.objects.all()
-    dataset_list = [(ds.pk, ds.name) for ds in datasets ]
-    belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    try:
+        datasets = Dataset.objects.all()
+        dataset_list = [(ds.pk, ds.name) for ds in datasets]
+        belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    except Exception as e:
+        print("Cant get datasets.", e)
+
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
@@ -378,7 +386,7 @@ class AuthorityFilter(django_filters.FilterSet):
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = [
             'id', 'name', 'type_controlled', 'description',
@@ -538,3 +546,8 @@ class AuthorityFilter(django_filters.FilterSet):
         except:
             return queryset
         return queryset.filter(modified_on__lte=date)
+
+    def filter_type_controlled(self, queryset, name, value):
+        if value != "ALL":
+            return queryset.filter(type_controlled=value)
+        return queryset

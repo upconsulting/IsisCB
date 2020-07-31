@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 {% load app_filters %}
 
 <script>var USER_ID = {{ user|get_user_id }};</script>
@@ -69,7 +69,7 @@
             </div>
         </form>
         {% else %}
-        <p><a href="{% url 'login' %}?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
+        <p><a href="{% url 'account_login' %}?next={{request.path}}">Log in</a> or <a href="/register/?next={{request.path}}">register</a> to comment</p>
         {% endif %}
     </div>
 </div>

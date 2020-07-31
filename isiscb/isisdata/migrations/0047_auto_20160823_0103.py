@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('description', models.TextField()),
                 ('citations', models.ManyToManyField(related_name='in_collections', to='isisdata.Citation')),
-                ('createdBy', models.ForeignKey(related_name='citation_collections', to=settings.AUTH_USER_MODEL)),
+                ('createdBy', models.ForeignKey(related_name='citation_collections', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.AlterField(

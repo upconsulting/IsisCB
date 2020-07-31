@@ -5,11 +5,14 @@ The strategy here is to favor extensibility/flexibility in defining output
 columns, at the expense of performance. The performance hit is probably OK,
 since these jobs will be performed asynchronously.
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
+from builtins import str
 from isisdata.models import *
 from django.utils.text import slugify
 import functools
-import export_item_count_csv
+from . import export_item_count_csv
 from django.conf import settings
 
 
@@ -18,7 +21,7 @@ def _authors_editors_names(obj, extra, config={}):
     names = obj.acrelation_set.filter(type_controlled__in=[ACRelation.EDITOR, ACRelation.AUTHOR])\
                                    .order_by('data_display_order')\
                                    .values_list(*fields)
-    return u' // '.join(map(lambda x: "AuthorityID %s || AuthorityName %s || Role %s"%(x[0], x[1], dict(ACRelation.TYPE_CHOICES)[x[2]]), names))
+    return u' // '.join(["AuthorityID %s || AuthorityName %s || Role %s"%(x[0], x[1], dict(ACRelation.TYPE_CHOICES)[x[2]]) for x in names])
 
 def _publisher_school(obj, extra, config={}):
     if obj.type_controlled in [Citation.BOOK, Citation.CHAPTER]:
@@ -34,7 +37,7 @@ def _publisher_school(obj, extra, config={}):
         names = obj.acrelation_set.filter(type_controlled=ACRelation.PUBLISHER)\
                                        .values_list(*fields)
 
-        return u' // '.join(map(lambda x: "AuthorityID %s || AuthorityName %s"%(x[0], x[1]), names))
+        return u' // '.join(["AuthorityID %s || AuthorityName %s"%(x[0], x[1]) for x in names])
 
     # school
     if obj.type_controlled in [Citation.THESIS]:
@@ -42,7 +45,7 @@ def _publisher_school(obj, extra, config={}):
         names = obj.acrelation_set.filter(type_controlled=ACRelation.SCHOOL)\
                                        .values_list(*fields)
 
-        return u' // '.join(map(lambda x: "AuthorityID %s || AuthorityName %s"%(x[0], x[1]), names))
+        return u' // '.join(["AuthorityID %s || AuthorityName %s"%(x[0], x[1]) for x in names])
 
     return ""
 
@@ -52,7 +55,7 @@ def _journal_name(obj, extra, config={}):
         return u""
     _first = qs.first()
     if _first.authority:
-        return unicode(_first.authority.name)
+        return str(_first.authority.name)
     return u""
 
 def _volume(obj, extra, config={}):
@@ -63,7 +66,7 @@ def _volume(obj, extra, config={}):
         return obj.part_details.volume_free_text.strip()
 
     if obj.part_details.volume_begin or obj.part_details.volume_end:
-        return "-".join(map(lambda x: str(x), filter(None, [obj.part_details.volume_begin, obj.part_details.volume_end])))
+        return "-".join([str(x) for x in [_f for _f in [obj.part_details.volume_begin, obj.part_details.volume_end] if _f]])
 
     return ''
 
@@ -74,7 +77,7 @@ def _pages_free_text(obj, extra, config={}):
         return obj.part_details.pages_free_text.strip()
 
     if obj.part_details.page_begin or obj.part_details.page_end:
-        return "-".join(map(lambda x: str(x), filter(None, [obj.part_details.page_begin, obj.part_details.page_end])))
+        return "-".join([str(x) for x in [_f for _f in [obj.part_details.page_begin, obj.part_details.page_end] if _f]])
 
     return ''
 
@@ -82,10 +85,10 @@ def _category(obj, extra, config={}):
     fields = ['authority__name']
     names = obj.acrelation_set.filter(type_controlled=ACRelation.CATEGORY)\
                                    .values_list(*fields)
-    return u' || '.join(map(lambda x: x[0], names))
+    return u' || '.join([x[0] for x in names])
 
 def _language(obj, extra, config={}):
-    return u' || '.join(filter(lambda o: o is not None, list(obj.language.all().values_list('name', flat=True))))
+    return u' || '.join([o for o in list(obj.language.all().values_list('name', flat=True)) if o is not None])
 
 # check functions
 CHECK_WELL_FORMED = "Well-formed"

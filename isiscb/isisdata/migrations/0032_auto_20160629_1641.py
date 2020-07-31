@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserModuleRule',
             fields=[
-                ('accessrule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.AccessRule')),
+                ('accessrule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.AccessRule', on_delete=models.CASCADE)),
                 ('module_action', models.CharField(max_length=255, choices=[(b'view', b'View'), (b'update', b'Update')])),
             ],
             bases=('isisdata.accessrule',),

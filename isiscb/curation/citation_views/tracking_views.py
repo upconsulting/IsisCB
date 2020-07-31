@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.http import HttpResponseRedirect, JsonResponse
 
 from django.shortcuts import get_object_or_404, render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from django.utils.http import urlencode
 

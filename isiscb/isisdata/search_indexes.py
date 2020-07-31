@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 import datetime
 from haystack import indexes
 from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
@@ -180,7 +183,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def full_prepare(self, obj):
         self.prepared_data = self.prepare(obj)
 
-        for field_name, field in self.fields.items():
+        for field_name, field in list(self.fields.items()):
             # Duplicate data for faceted fields.
             if getattr(field, 'facet_for', None):
                 source_field_name = self.fields[field.facet_for].index_fieldname
@@ -215,7 +218,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         self.prepared_data = {
             ID: identifier,
             DJANGO_CT: 'isisdata.citation',
-            DJANGO_ID: unicode(identifier),
+            DJANGO_ID: str(identifier),
         }
 
         data_organized = {
@@ -251,7 +254,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         self._index_belongs_to(data)
 
         start = time.time()
-        for field_name, field in self.fields.items():
+        for field_name, field in list(self.fields.items()):
             # Use the possibly overridden name, which will default to the
             # variable name of the field.
             # self.prepared_data[field.index_fieldname] = field.prepare(data_organized)
@@ -522,8 +525,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     else:
                         freeform_dates.append(attr.value.cvalue().year)
                 except ObjectDoesNotExist as E:
-                    print "Attribute does not exist."
-                    print E
+                    print("Attribute does not exist.")
+                    print(E)
 
         if freeform_dates:
             return freeform_dates
@@ -616,8 +619,8 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         """
         self.prepared_data = super(AuthorityIndex, self).prepare(obj)
 
-        for k, v in self.prepared_data.iteritems():
-            if type(v) is unicode:
+        for k, v in list(self.prepared_data.items()):
+            if type(v) is str:
                 self.prepared_data[k] = remove_control_characters(v.strip())
         return self.prepared_data
 

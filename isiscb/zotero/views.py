@@ -1,10 +1,14 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import map
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
+from django.core.paginator import Paginator
 
 from isisdata.models import *
 from isisdata.utils import normalize
@@ -21,9 +25,10 @@ from zotero.suggest import suggest_citation, suggest_authority
 import tempfile
 import json
 
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 def _field_data(instance):
-    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+    return [(k, v) for k, v in list(instance.__dict__.items()) if not k.startswith('_')]
 
 
 @login_required
@@ -77,7 +82,7 @@ def suggest_authority_json(request, authority_id):
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': map(_format_citation, related_citations),
+            'related_citations': list(map(_format_citation, related_citations)),
         })
         suggestions.append(suggestion)
 
@@ -129,10 +134,22 @@ def accessions(request):
 
     queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    current_page = request.GET.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
 
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
+        'filter_list': paginated_objects,
+        'current_page': current_page,
+        'current_offset': (current_page - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
         'objects': filtered_objects,
     }
 
@@ -234,7 +251,7 @@ def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     for draft_ld in linkeddata:
         ldtype = type_cache.get(draft_ld.name.upper(), None)
         if not ldtype:
-            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
+            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper()).first()
             type_cache[draft_ld.name.upper()] = ldtype
         matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
         if matching_ld:
@@ -324,7 +341,7 @@ def skip_authority_for_draft(request):
 
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     accession = get_object_or_404(ImportAccession, pk=accession_id)
-    print 'skip_authority_for_draft', draftauthority.id, accession.id
+    print('skip_authority_for_draft', draftauthority.id, accession.id)
     draftauthority.processed = True
     draftauthority.save()
     return JsonResponse({'data': None})

@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='importaccession',
             name='ingest_to',
-            field=models.ForeignKey(to='isisdata.Dataset', null=True),
+            field=models.ForeignKey(to='isisdata.Dataset', null=True, on_delete=models.CASCADE),
         ),
     ]

@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
+from __future__ import unicode_literals
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -33,50 +34,73 @@ MIGRATION_MODULES = {
 # Application definition
 
 INSTALLED_APPS = (
-    'autocomplete_light',
-    'isisdata',
+    'dal',
+    'dal_select2',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    'social_django',
-    'pagination',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.twitter',
     'rest_framework',
-    'markupfield',
     'simple_history',
-    'storages',
+    'isisdata',
+    #'storages',
     'haystack',
-    'captcha',
-    "elasticstack",     # TODO: Do we need this?
+    "elasticstack",
     'oauth2_provider',
+    'captcha',
     'corsheaders',
     'zotero',
     'openurl',
     'curation',
-    'rules',
+    'rules.apps.AutodiscoverRulesConfig',
     'django_celery_results',
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'pagination.middleware.PaginationMiddleware',
+    #'dj_pagination.middleware.PaginationMiddleware',
 )
 
-
+LOGGING = {
+	"version": 1,
+	"disable_existing_loggers": False,
+	"formatters": {
+		"verbose": {"format": "%(asctime)s %(levelname)s %(module)s: %(message)s"}
+	},
+	"handlers": {
+		"app_analyzer": {
+			"level": "DEBUG",
+			"class": "logging.FileHandler",
+			"filename": "/var/log/app_analyzer.log",
+			"formatter": "verbose",
+		}
+	},
+	"loggers": {
+		"app_analyzer": {"handlers": ["app_analyzer"], "level": "DEBUG", "propagate": True}
+	},
+}
 
 # TEMPLATE_CONTEXT_PROCESSORS = (
 #     'social.apps.django_app.context_processors.backends',
@@ -92,21 +116,17 @@ ROOT_URLCONF = 'isiscb.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['isisdata/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.request',
-                'django.template.context_processors.i18n',
+                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
                 'isisdata.context_processors.social',
-                'isisdata.context_processors.google',
-                 'django.template.context_processors.tz',
-                 'isisdata.context_processors.user',
             ],
         },
     },
@@ -156,9 +176,13 @@ ELASTICSEARCH_INDEX_SETTINGS = {
 ELASTICSEARCH_DEFAULT_ANALYZER = 'default'
 
 CACHES = {
+    #'default': {
+    #    'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #    'LOCATION': 'unique-snowflake',
+    #},
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
+        'BACKEND': "django.core.cache.backends.db.DatabaseCache",
+        'LOCATION': 'db_cache_snowflake',
     },
     'search_results_cache': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
@@ -190,15 +214,46 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata',
-    'EXCEPTION_HANDLER': 'isisdata.exceptions.custom_exception_handler'
+    'DEFAULT_METADATA_CLASS': 'isisdata.metadata.CCMetadata'
 }
+
+SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY', '')
+SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
+
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
+
+SOCIALACCOUNT_PROVIDERS = {
+    'twitter': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': SOCIAL_AUTH_TWITTER_KEY,
+            'secret': SOCIAL_AUTH_TWITTER_SECRET,
+            'key': ''
+        }
+    },
+    'facebook': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'APP': {
+            'client_id': SOCIAL_AUTH_FACEBOOK_KEY,
+            'secret': SOCIAL_AUTH_FACEBOOK_SECRET,
+            'key': ''
+        },
+        'METHOD': 'oauth2',
+        'fields': SOCIAL_AUTH_FACEBOOK_SCOPE
+    }
+}
+
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -212,7 +267,7 @@ AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 STATICFILES_DIRS = ['isisdata/static', 'curation/static']
 STATICFILES_LOCATION = ''#% AWS_STORAGE_BUCKET_NAME
 # STATICFILES_STORAGE = 'custom_storages.StaticStorage'
-STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 STATIC_URL = "https://%s.s3.amazonaws.com/%s" % (AWS_STORAGE_BUCKET_NAME, STATICFILES_LOCATION)
 # STATIC_URL ='/static/'
@@ -221,38 +276,47 @@ MEDIA_URL = '/media/'
 
 MEDIAFILES_LOCATION = '%s/media' % AWS_MEDIA_BUCKET_NAME
 MEDIA_URL = "https://%s.s3.amazonaws.com/%s/" % (AWS_MEDIA_BUCKET_NAME, STATICFILES_LOCATION)
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+SITE_ID = 1
 
 AWS_EXPORT_BUCKET_NAME = os.environ.get('AWS_EXPORT_BUCKET_NAME')
 AWS_IMPORT_BUCKET_NAME = os.environ.get('AWS_IMPORT_BUCKET_NAME')
 
-AWS_HEADERS = {
+AWS_S3_OBJECT_PARAMETERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
-    'Cache-Control': 'max-age=94608000',
+    'CacheControl': 'max-age=94608000',
 }
+
+S3_UPLOAD_BULK_CHANGE_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+UPLOAD_BULK_CHANGE_PATH = os.environ.get('UPLOAD_BULK_CHANGE_PATH', S3_UPLOAD_BULK_CHANGE_PATH)
+
+S3_BULK_CHANGE_ERROR_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+
+BULK_CHANGE_ERROR_PATH = os.environ.get('BULK_CHANGE_ERROR_PATH', S3_BULK_CHANGE_ERROR_PATH)
+
 
 DOMAIN = os.environ.get('DJANGO_DOMAIN','')
 URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
 EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
 EMAIL_HOST = os.environ.get('SMTP_HOST', '')
 SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')
+DEFAULT_FROM_EMAIL = os.environ.get('SMTP_EMAIL', '')
 
 CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.math_challenge'
 CAPTCHA_FONT_SIZE = 36
 
-SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('SOCIAL_AUTH_FACEBOOK_KEY', '')
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
 
-SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY','')
-SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('SOCIAL_AUTH_FACEBOOK_SECRET', '')
-SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET', '')
-
-TWITTER_CONSUMER_KEY = SOCIAL_AUTH_TWITTER_KEY
-TWITTER_CONSUMER_SECRET = SOCIAL_AUTH_TWITTER_SECRET
 FACEBOOK_APP_ID = SOCIAL_AUTH_FACEBOOK_KEY
 FACEBOOK_API_SECRET = SOCIAL_AUTH_FACEBOOK_SECRET
 
@@ -267,15 +331,14 @@ MARKUP_FIELD_TYPES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.twitter.TwitterOAuth',
-    'social_core.backends.facebook.FacebookOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
-CELERY_RESULT_BACKEND = 'django-cache'#'django-cache'
+CELERY_RESULT_BACKEND = 'django-cache'
 
 # If you want to use Redis for Celery message passing, uncomment these options
 #  and comment out the SQS options, below.
@@ -290,14 +353,16 @@ CELERY_BROKER_TRANSPORT = 'sqs'
 SQS_REGION = os.environ.get('SQS_REGION', 'sqs.us-west-2')
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'region': SQS_REGION,
-    'queue_name_prefix': os.environ.get('SQS_QUEUE', 'isiscb-staging-messages') + '-'
+    #'queue_name_prefix': os.environ.get('SQS_QUEUE_PREFIX', 'isiscb-staging-messages') + '-'
 }
 BROKER_TRANSPORT_OPTIONS = {
     'region': SQS_REGION,
-    'queue_name_prefix': os.environ.get('SQS_QUEUE', 'isiscb-staging-messages') + '-'
+    #'queue_name_prefix': os.environ.get('SQS_QUEUE_PREFIX', 'isiscb-staging-messages') + '-'
 }
-CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
-CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
+#CELERY_BROKER_USER = AWS_ACCESS_KEY_ID
+#CELERY_BROKER_PASSWORD = AWS_SECRET_ACCESS_KEY
+
+CELERY_BROKER_URL = 'sqs://'
 CELERY_DEFAULT_QUEUE = os.environ.get('SQS_QUEUE', 'isiscb-staging-messages')
 CELERY_GRAPH_TASK_QUEUE = os.environ.get('SQS_QUEUE_GRAPHS', 'isiscb-staging-graphs-messages')
 CELERY_QUEUES = {
@@ -317,6 +382,8 @@ CELERY_BROKER_CONNECTION_RETRY=False
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
 
+ACCOUNT_FORMS = {'signup': 'isisdata.forms.UserRegistrationForm'}
+ACCOUNT_EMAIL_REQUIRED = True
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',

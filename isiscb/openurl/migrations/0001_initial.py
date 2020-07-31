@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('updated_on', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=255)),
                 ('notes', models.TextField(null=True, blank=True)),
-                ('added_by', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('added_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -34,8 +34,8 @@ class Migration(migrations.Migration):
                 ('updated_on', models.DateTimeField(auto_now=True)),
                 ('endpoint', models.URLField(help_text=b'The address to which CoINS metadata will be appended to create an OpenURL link.', max_length=1000)),
                 ('notes', models.TextField(null=True, blank=True)),
-                ('added_by', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('belongs_to', models.OneToOneField(related_name='resolver', to='openurl.Institution')),
+                ('added_by', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
+                ('belongs_to', models.OneToOneField(related_name='resolver', to='openurl.Institution', on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,

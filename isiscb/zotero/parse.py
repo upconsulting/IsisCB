@@ -1,6 +1,11 @@
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 
+from builtins import next
+from builtins import map
+from builtins import str
+from builtins import object
 import os, re, rdflib, zipfile, tempfile, codecs, chardet, unicodedata, iso8601
 import shutil, copy, logging
 import xml.etree.ElementTree as ET
@@ -246,7 +251,7 @@ class ZoteroIngest(object):
 
         # If there is no defined handler, we minimally want to end up with
         #  native Python types. Returning a callable here avoids extra code.
-        generic = lambda *args: map(self._to_python, args)
+        generic = lambda *args: list(map(self._to_python, args))
         return getattr(self, handler_name, generic)
 
     def _to_python(self, obj):
@@ -257,7 +262,7 @@ class ZoteroIngest(object):
         return obj.toPython() if hasattr(obj, 'toPython') else obj
 
     def _relabel_predicate(self, predicate):
-        if type(predicate) is unicode:
+        if type(predicate) is str:
             predicate = URIRef(predicate)
         return FIELD_NAMES.get(predicate, split_uri(predicate)[1])
 
@@ -288,7 +293,7 @@ class ZoteroIngest(object):
 
     def handle_pages(self, predicate, node):
         value = node.toPython()
-        if type(value) is unicode:
+        if type(value) is str:
             value = unidecode(value)
         return predicate, tuple(value.split('-'))
 
@@ -340,7 +345,7 @@ class ZoteroIngest(object):
                 #  type and the identifier itself, eg.
                 #       "DOI 10.1017/S0039484"
                 try:
-                    name, ident_value = tuple(unicode(o).split(' '))
+                    name, ident_value = tuple(str(o).split(' '))
                     if name.upper() in ['ISSN', 'ISBN']:
                         if name.upper() == 'ISBN':
                             ident_value = ident_value.replace('-', '')
@@ -400,7 +405,7 @@ class ZoteroIngest(object):
         # Others simply encode the type and value in the target node itself.
         else:
             try:
-                name, ident_value = tuple(unicode(node).split(' '))
+                name, ident_value = tuple(str(node).split(' '))
                 name = name.upper()
                 if name in ['ISSN', 'ISBN']:
                     if name == 'ISBN':
@@ -493,7 +498,7 @@ class ZoteroIngest(object):
         def set_idx(author):
             lst_pos = author[u'list_position'][author[u'list_position'].rfind("_")+1:]
             author[u'data_display_order'] = lst_pos
-        map(set_idx, author_data)
+        list(map(set_idx, author_data))
 
         return predicate, author_data
 
@@ -506,18 +511,17 @@ class ZoteroIngest(object):
         if entry is None:
             raise RuntimeError('entry must be a specific node')
 
-        map(lambda p_o: self._set_value(*self.handle(*p_o)),
-            self.graph.predicate_objects(entry))
+        list([self._set_value(*self.handle(*p_o)) for p_o in self.graph.predicate_objects(entry)])
 
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         next_entry = None
         while next_entry is None:
             try:
-                next_entry = self.current_entries.next()
-            except (StopIteration, AttributeError):
+                next_entry = next(self.current_entries)
+            except (StopIteration, AttributeError, TypeError):
                 try:
                     self.current_class = self.classes.pop()
                 except IndexError:    # Out of classes.

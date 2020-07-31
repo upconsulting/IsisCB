@@ -13,7 +13,7 @@
     var form = $("<form action='{% url 'curation:tracking-citation' instance.id %}?search={{ search_key }}&current={{ current_index }}' method='POST'></form>")
     var trackTypeInput = $("<input id='trackType' type='hidden' name='type' value='" + trackType + "'>")
     form.append(trackTypeInput)
-    form.append("{% csrf_token %}")
+    form.append('{% csrf_token %}')
     $("body").append(form)
     form.submit()
   }

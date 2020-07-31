@@ -3,6 +3,9 @@ Asynchronous functions for bulk changes to the database.
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 from curation.tasks import update_instance, bulk_change_tracking_state, bulk_prepend_record_history, save_creation_to_citation
 
 from django import forms
@@ -11,6 +14,8 @@ from django.http import QueryDict
 from isisdata.models import *
 import isisdata.tasks as dtasks
 import curation.taskslib.citation_tasks as ctasks
+import curation.taskslib.authority_tasks as atasks
+
 from isisdata.filters import CitationFilter
 import json
 # TODO: refactor these actions to use bulk apply methods and then explicitly
@@ -41,7 +46,7 @@ def _build_filter_label(filter_params_raw):
     filter_data = {}
     if filter_form.is_valid():
         filter_data = filter_form.cleaned_data
-    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
+    return ', '.join([ '%s: %s' % (key, value) for key, value in list(filter_data.items()) if value ])
 
 class PrependToRecordHistory(BaseAction):
     model = Citation
@@ -173,8 +178,8 @@ class SetRecordStatusExplanation(BaseAction):
         return task.id
 
 def get_tracking_transition_counts(qs):
-    states = zip(*qs.model.TRACKING_CHOICES)[0]
-    transitions = dict(zip(states, map(lambda state: qs.filter(tracking_state=state).count(), states)))
+    states = list(zip(*qs.model.TRACKING_CHOICES))[0]
+    transitions = dict(list(zip(states, [qs.filter(tracking_state=state).count() for state in states])))
     # bugfix for Zotero imports: tracking_state is None not "NO"
     transitions[qs.model.NONE] += qs.filter(tracking_state=None).count()
     return transitions
@@ -257,6 +262,29 @@ class ReindexCitation(BaseAction):
         task.async_uuid = result.id
         task.value = ('reindex_citations', value)
         task.label = 'Reindexing citations: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
+class ReindexAuthorities(BaseAction):
+    model = Authority
+    label = u'Reindex authorities'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Reindex authorities',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Reindex authorities'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = atasks.reindex_authorities.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('reindex_authorities', value)
+        task.label = 'Reindexing authorities: ' + _build_filter_label(filter_params_raw)
         task.save()
         return task.id
 

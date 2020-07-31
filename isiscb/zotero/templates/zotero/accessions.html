@@ -1,5 +1,4 @@
 {% extends "curation/list_view.html" %}
-{% load pagination_tags %}
 {% load addcss %}
 
 {% block object_list %}
@@ -11,6 +10,7 @@
 <div style="margin-bottom: 15px; margin-top: 15px;">
     <a href="{% url "create_accession" %}" class="btn btn-md btn-success"><span class="glyphicon glyphicon-plus"></span> Upload RDF</a>
 </div>
+
 <table class="table table-responsive table-hover table-curation">
     <thead>
         <tr>

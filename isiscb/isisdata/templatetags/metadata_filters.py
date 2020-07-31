@@ -1,9 +1,14 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from django import template
 from isisdata.models import *
 
-from app_filters import *
+from .app_filters import *
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from collections import OrderedDict
 
 
@@ -143,7 +148,7 @@ def get_coins_from_result(result):
         kv_pairs['rft.atitle'] = result.title.encode('utf-8')
 
         # Journal title.
-        if result.periodicals > 0:
+        if len(result.periodicals) > 0:
             kv_pairs['rft.jtitle'] = result.periodicals[0].encode('utf-8')
 
         # Start and end pages.
@@ -157,7 +162,7 @@ def get_coins_from_result(result):
         # Title of the work (e.g. book).
         kv_pairs['rft.title'] = result.title.encode('utf-8')
 
-    return urllib.urlencode(kv_pairs)
+    return urllib.parse.urlencode(kv_pairs)
 
 
 @register.filter
@@ -209,4 +214,4 @@ def get_coins_from_citation(citation):
         if citation.part_details.page_end:
             kv_pairs['rft.epage'] = citation.part_details.page_end
 
-    return urllib.urlencode(kv_pairs)
+    return urllib.parse.urlencode(kv_pairs)

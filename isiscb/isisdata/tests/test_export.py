@@ -1,3 +1,7 @@
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import range
+from builtins import object
 import unittest, mock
 from isisdata import export    # Ha!
 from isisdata.models import *
@@ -5,7 +9,7 @@ from isisdata.models import *
 
 class TestExportCSV(unittest.TestCase):
     def test_output(self):
-        for i in xrange(5):
+        for i in range(5):
             Citation.objects.create(title='Citation %i' % i, type_controlled=Citation.ARTICLE)
         columns = [export.object_id, export.citation_title]
 
@@ -334,7 +338,7 @@ class TestExtraRecordsAreAddedToTheExport(unittest.TestCase):
         qs = Citation.objects.filter(pk=citation.id)
         export.generate_csv(f, qs, [export.object_id, export.link_to_record])
         self.assertEqual(len(f.data), 3)    # Including the header.
-        self.assertTrue(book.id in zip(*[r.split(',') for r in f.data])[0][1:],
+        self.assertTrue(book.id in list(zip(*[r.split(',') for r in f.data]))[0][1:],
                         "Linked book record should be included in the output.")
 
 

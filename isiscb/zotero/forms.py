@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from django import forms
 
 from zotero.models import *
@@ -12,12 +14,12 @@ class ImportAccessionForm(forms.ModelForm):
     ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
                                        empty_label='No dataset')
 
-    class Meta:
+    class Meta(object):
         model = ImportAccession
         fields = ['name', 'ingest_to', 'zotero_rdf']
 
 
 class DraftAuthorityForm(forms.ModelForm):
-    class Meta:
+    class Meta(object):
         model = DraftAuthority
         fields = ['name', 'type_controlled']
