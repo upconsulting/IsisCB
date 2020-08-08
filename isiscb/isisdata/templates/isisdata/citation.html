@@ -37,8 +37,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {#% block title %}Citation{% endblock %#}
 
 {% block content %}
-<div class="row" ng-app="commentsApp">
-  <div class="col-sm-3 col-md-2 hidden-print">
+<div class="row">
+  <div class="col-sm-12 col-md-2 hidden-print">
     <div class="menu hidden-print">
       <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
       &nbsp; &nbsp;
@@ -51,7 +51,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% include "isisdata/citation_nav.html" %}
 
   </div>
-  <div class=" main col-sm-5 col-md-7">
+  <div class=" main col-sm-12 col-md-10">
     <!-- Progress through search results, if arriving from search view. -->
     {% if search_results|length > 0 and fromsearch and search_current %}
     <div class="alert alert-warning hidden-print">
@@ -307,14 +307,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% include "isisdata/citation_nav.html" %}
 
   </div>
-
-
-
-    <div class="col-sm-4 col-md-3 main">
-        {% include "isisdata/comments.html" %}
-
-    </div>
   </div>
 
+<div class="row" ng-app="commentsApp">
+  <div class="col-sm-12">
+      {% include "isisdata/comments.html" %}
+
+  </div>
+</div>
 
 {% endblock %}

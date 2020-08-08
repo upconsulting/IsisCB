@@ -259,9 +259,12 @@ $(function () {
       <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
         {% if authority.description|truncatewords:15|length < authority.description|length %}
           <a href="#" id="desc_more" class="hidden-print">More</a>
-          <span id="desc_full" class="visible-print-block" style="display:none">
+          <span id="desc_full" class="hidden-print" style="display:none">
             {{ authority.description }}
             <a href="#" id="desc_hide">Less</a>
+          </span>
+          <span class="visible-print-block">
+            {{ authority.description }}
           </span>
         {% endif %}
       </p>
