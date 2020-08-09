@@ -93,6 +93,7 @@ class CitationFilter(django_filters.FilterSet):
     MARKED_DELETE = 'MD'
 
     print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[(READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint'), (MARKED_DELETE, 'MarkedDelete')], method='filter_print_status')
+    multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
@@ -339,6 +340,32 @@ class CitationFilter(django_filters.FilterSet):
 
         return queryset.filter(Q(in_collections=value))
 
+    def filter_in_multiple_fields(self, queryset, field, value):
+        if not value:
+            return queryset
+
+        value = normalize(unidecode(value))
+
+        q_title = Q()
+        q_description = Q()
+        q_author = Q()
+        q_abstract = Q()
+        for part in value.split():
+            q_title = q_title & Q(title_for_sort__icontains=part)
+            q_author = q_author & Q(acrelation__authority__name__icontains=part,
+                            acrelation__type_controlled__in=[
+                                        ACRelation.AUTHOR])
+
+        q_description = q_description & Q(description__icontains=value)
+        q_abstract = q_abstract & Q(abstract__icontains=value)
+        q_subject = Q(acrelation__authority__name__icontains=value,
+                               acrelation__type_controlled=ACRelation.SUBJECT)
+        q_category = Q(acrelation__authority__name__icontains=value,
+                                   acrelation__type_controlled=ACRelation.CATEGORY)
+
+
+
+        return queryset.filter(q_title | q_description | q_author | q_abstract | q_subject | q_category)
 
 class AuthorityFilter(django_filters.FilterSet):
 

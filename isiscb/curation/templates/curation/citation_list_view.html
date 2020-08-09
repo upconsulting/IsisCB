@@ -539,6 +539,16 @@ function toggleLinkRecordsBtn() {
 <form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
         <div class="col-sm-4">
+            {% for error in objects.form.multi_field_filter.errors %}
+            <div class="alert alert-warning">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group form-group-xs clearable">
+                <label class="col-lg-2 control-label">Combined</label>
+                <div class="col-lg-10">
+                  {{ objects.form.multi_field_filter|addcss:"form-control;Title, Author, Description, Abstract, Subject, Category" }}
+                </div>
+            </div>
+
             {% for error in objects.form.title.errors %}
             <div class="alert alert-warning">{{ error }}</div>
             {% endfor %}
