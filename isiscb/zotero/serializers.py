@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from rest_framework import viewsets, serializers, mixins, permissions
 
 from isisdata.models import Citation, Authority, ACRelation, PartDetails
@@ -5,14 +7,14 @@ from zotero.models import *
 
 
 class InstanceResolutionEventSerializer(serializers.ModelSerializer):
-    class Meta:
+    class Meta(object):
         model = InstanceResolutionEvent
         excude = []
 
 
 class AuthoritySerializer(serializers.ModelSerializer):
     resolutions = InstanceResolutionEventSerializer(many=True, read_only=True)
-    class Meta:
+    class Meta(object):
         model = Authority
         exclude = ('modified_on_fm',
                    'modified_by_fm',
@@ -25,7 +27,7 @@ class AuthoritySerializer(serializers.ModelSerializer):
 class ACRelationSerializer(serializers.ModelSerializer):
     resolutions = InstanceResolutionEventSerializer(many=True, read_only=True)
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
         exclude = ('modified_on_fm',
                    'modified_by_fm',
@@ -37,7 +39,7 @@ class ACRelationSerializer(serializers.ModelSerializer):
         """
         Overwritten to allow related fields.
         """
-        for attr, value in validated_data.items():
+        for attr, value in list(validated_data.items()):
             if attr == 'authority':
                 instance.authority = value
             else:
@@ -47,7 +49,7 @@ class ACRelationSerializer(serializers.ModelSerializer):
 
 
 class PartDetailsSerializer(serializers.ModelSerializer):
-    class Meta:
+    class Meta(object):
         model = PartDetails
         exclude = []
 
@@ -57,7 +59,7 @@ class CitationSerializer(serializers.ModelSerializer):
     acrelation_set = ACRelationSerializer(many=True, read_only=True)
     part_details = PartDetailsSerializer()
 
-    class Meta:
+    class Meta(object):
         model = Citation
         exclude = ('modified_on_fm',
                    'modified_by_fm',
@@ -69,9 +71,9 @@ class CitationSerializer(serializers.ModelSerializer):
         """
         Overwritten to allow related fields.
         """
-        for attr, value in validated_data.items():
+        for attr, value in list(validated_data.items()):
             if attr == 'part_details':
-                for a, v in value.iteritems():
+                for a, v in list(value.items()):
                     setattr(instance.part_details, attr, value)
             else:
                 setattr(instance, attr, value)
@@ -82,7 +84,7 @@ class DraftAuthoritySerializer(serializers.ModelSerializer):
     resolutions = InstanceResolutionEventSerializer(many=True)
     resolved = serializers.BooleanField()
 
-    class Meta:
+    class Meta(object):
         model = DraftAuthority
         exclude = []
 
@@ -90,7 +92,7 @@ class DraftAuthoritySerializer(serializers.ModelSerializer):
 class DraftACRelationSerializer(serializers.ModelSerializer):
     authority = DraftAuthoritySerializer()
 
-    class Meta:
+    class Meta(object):
         model = DraftACRelation
         exclude = []
 
@@ -98,6 +100,6 @@ class DraftACRelationSerializer(serializers.ModelSerializer):
 class DraftCitationSerializer(serializers.ModelSerializer):
     authority_relations = DraftACRelationSerializer(many=True)
 
-    class Meta:
+    class Meta(object):
         model = DraftCitation
         exclude = []

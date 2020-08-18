@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # custom_storages.py
 from django.conf import settings
 from storages.backends.s3boto import S3BotoStorage

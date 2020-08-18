@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=255, null=True, blank=True)),
                 ('object_type', models.CharField(blank=True, max_length=255, null=True, choices=[(b'citation', b'Citation'), (b'authority', b'Authority')])),
-                ('role', models.ForeignKey(blank=True, to='isisdata.IsisCBRole', help_text=b'The role a rules belongs to.', null=True)),
+                ('role', models.ForeignKey(blank=True, to='isisdata.IsisCBRole', help_text=b'The role a rules belongs to.', null=True, on_delete=models.CASCADE)),
             ],
         ),
         migrations.RemoveField(
@@ -76,19 +76,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='crudrule',
             name='accessrule_ptr',
-            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule'),
+            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule', on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='datasetrule',
             name='accessrule_ptr',
-            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule'),
+            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule', on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='fieldrule',
             name='accessrule_ptr',
-            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule'),
+            field=models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, default='0', serialize=False, to='isisdata.AccessRule', on_delete=models.CASCADE),
             preserve_default=False,
         ),
     ]

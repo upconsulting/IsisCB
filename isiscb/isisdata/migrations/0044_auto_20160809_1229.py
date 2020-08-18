@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+from __future__ import print_function
 
+from builtins import range
 from django.db import models, migrations
 from django.db.models import Q
 from django.db import transaction
@@ -36,9 +38,9 @@ def update_title_for_sort(apps, schema_editor):
     qs = Citation.objects.all().order_by('id')
     N = qs.count()
     CHUNK = 500
-    print 'Migrating %i citations' % N
-    for i in xrange(0, N + 1, CHUNK):
-        print '\r', i,
+    print('Migrating %i citations' % N)
+    for i in range(0, N + 1, CHUNK):
+        print('\r', i, end=' ')
         sys.stdout.flush()
         with transaction.atomic():
             # -vv- The database read is here. -vv-

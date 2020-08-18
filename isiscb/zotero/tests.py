@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 from unittest import TestCase
 from django.test.client import RequestFactory
 from django.contrib.contenttypes.models import ContentType
@@ -8,8 +12,8 @@ from collections import Counter
 
 
 from zotero.models import *
-from suggest import *
-from tasks import *
+from .suggest import *
+from .tasks import *
 from zotero.parse import ZoteroIngest
 from zotero import ingest
 
@@ -235,8 +239,9 @@ class TestBookSeries(TestCase):
                 if rel.type_controlled == DraftACRelation.SUBJECT:
                     # We have matched all percent-encoded subject authorities.
                     self.assertFalse(rel.authority.name.startswith('='))
-            if citation.book_series is not None:
-                self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
+            # ISISCB-1163: book series relation are not generate anymore
+            #if citation.book_series is not None:
+            #    self.assertEqual(type_counts[DraftACRelation.BOOK_SERIES], 1)
 
     def tearDown(self):
         clearAll()
@@ -642,7 +647,7 @@ class TestIngest(TestCase):
             self.assertEqual(self.accession.ingest_to, prod.belongs_to)
 
         attribute = citation.attributes.first()
-        self.assertIsInstance(attribute.value_freeform, unicode)
+        self.assertIsInstance(attribute.value_freeform, str)
         self.assertEqual(len(attribute.value_freeform), 4,
                          "ISISCB-736: freeform value should be four-digit year")
         self.assertEqual(attribute.type_controlled, self.publicationDateType,
@@ -729,7 +734,7 @@ class TestImportMethods(TestCase):
         extracts field-data  for :prop`.DraftCitation.type_controlled` from a
         parsed entry.
         """
-        for dtype, value in ingest.DOCUMENT_TYPES.iteritems():
+        for dtype, value in list(ingest.DOCUMENT_TYPES.items()):
             entry = {
                 'type_controlled': [dtype],
             }
@@ -937,7 +942,7 @@ class TestImportMethods(TestCase):
         }
 
         result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
-        self.assertEqual(len(result), 2, "Should yield two records")
+        self.assertEqual(len(result), 1, "Should yield one records")
 
 
     def test_generate_citation_linkeddata(self):
@@ -1302,7 +1307,7 @@ class BookSeriesShouldBeSkippedAutomatically(TestCase):
         }
 
         result = ingest.IngestManager.generate_part_of_relations(data, draftcitation)
-        self.assertEqual(len(result), 2, "Should yield two records")
+        self.assertEqual(len(result), 1, "Should yield one records")
 
         for authority, relation in result:
             if relation.type_controlled == ACRelation.BOOK_SERIES:

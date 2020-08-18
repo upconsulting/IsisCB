@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.http import HttpResponseRedirect
 
 from django.shortcuts import get_object_or_404, render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from django.utils.http import urlencode
 
@@ -26,6 +27,34 @@ ACTION_DICT = {
     BulkChangeCSVForm.CREATE_CITATIONS: (creation_tasks, 'create_records', 'citation'),
     BulkChangeCSVForm.MERGE_AUTHORITIES: (authority_tasks, 'merge_authorities'),
 }
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_tasks(request):
+    if request.GET.get('find_authority', None):
+        timelines = CachedTimeline.objects.filter(authority_id=request.GET.get('find_authority', None))[:50]
+    else:
+        timelines = CachedTimeline.objects.order_by('-created_at')[:50]
+
+    authority_ids = [timeline.authority_id for timeline in timelines]
+    authorities = Authority.objects.filter(id__in=authority_ids).values('id', 'name')
+    authority_names = {authority['id'] : authority['name'] for authority in authorities}
+    context = {
+        'curation_section': 'bulk',
+        'timelines': timelines,
+        'authority_names': authority_names,
+    }
+    template = 'curation/bulk/timelines.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def timeline_delete(request, authority_id):
+    if (request.method == 'POST'):
+        cached_timeline = CachedTimeline.objects.filter(authority_id=authority_id).order_by('-created_at').first()
+        if cached_timeline:
+            cached_timeline.recalculate = True
+            cached_timeline.save()
+
+    return HttpResponseRedirect(reverse('curation:timeline_tasks',))
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def bulk_changes(request):
@@ -59,16 +88,10 @@ def bulk_change_from_csv(request):
             # store file in s3 so we can download when it's being processed
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s' % (_datestamp, uploaded_file.name)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
+            s3_path = settings.UPLOAD_BULK_CHANGE_PATH + _out_name
 
             _results_name = '%s--%s' % (_datestamp, 'results.csv')
-            s3_error_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _results_name)
+            s3_error_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
 
             with smart_open.smart_open(s3_path, 'wb') as f:
                 for chunk in uploaded_file.chunks():

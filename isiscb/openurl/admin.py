@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 from django.contrib import admin
 from openurl.models import *
 
@@ -23,7 +25,7 @@ class ResolverInline(admin.StackedInline):
 
 
 class InstitutionAdmin(CuratedAdminMixin):
-    class Meta:
+    class Meta(object):
         model = Institution
     exclude = ['added_by']
 
@@ -44,7 +46,7 @@ class InstitutionAdmin(CuratedAdminMixin):
 
 
 class ResolverAdmin(CuratedAdminMixin):
-    class Meta:
+    class Meta(object):
         model = Resolver
     exclude = ['added_by']
 

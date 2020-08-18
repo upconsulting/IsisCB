@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django import template
 from isisdata.models import *
 
@@ -12,7 +13,7 @@ def get_uri(entry):
         return settings.URI_PREFIX + "citation/" + entry.id
     return ""
 
-
+@register.filter
 def to_class_name(value):
     return value.__class__.__name__
 
@@ -35,3 +36,7 @@ def add_popover(field, css_placeholder_text):
 @register.filter(name='field_type')
 def field_type(field):
     return field.field.widget.__class__.__name__
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

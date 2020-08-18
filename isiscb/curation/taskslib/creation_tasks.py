@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 from celery import shared_task
 
 from isisdata.models import *
@@ -7,8 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import logging
 import smart_open
-import record_creator
-import unicodecsv as csv
+from . import record_creator
+import csv
 from datetime import datetime
 from dateutil.tz import tzlocal
 
@@ -32,8 +34,8 @@ logger = logging.getLogger(__name__)
 def create_records(file_path, error_path, task_id, user_id, record_type):
     logging.info('Creating records from %s.' % (file_path))
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.smart_open(file_path, 'r') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -51,7 +53,7 @@ def create_records(file_path, error_path, task_id, user_id, record_type):
             for row in csv.DictReader(f):
                 CREATION_METHODS[record_type](row, user_id, results, task_id, current_time_obj)
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -82,7 +84,7 @@ def _count_rows(f, results):
     try:
         for row in csv.DictReader(f):
             row_count += 1
-    except Exception, e:
+    except Exception as e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
         results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -93,7 +95,7 @@ def _count_rows(f, results):
     return row_count
 
 def _save_results(path, results, headings):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.smart_open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headings)
         for result in results:

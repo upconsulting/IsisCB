@@ -1,12 +1,18 @@
 from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
 
+from past.builtins import cmp
+from builtins import str
+from past.utils import old_div
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.contrib import messages
 from django.core.paginator import EmptyPage
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict #, HttpResponseForbidden, Http404, , JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import caches
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
@@ -19,8 +25,9 @@ from django.utils.html import escape
 from django.template.loader import get_template
 from django.db.models import Count
 
+import urllib.parse as urllibparse
+
 from rules.contrib.views import permission_required, objectgetter
-from .rules import is_accessible_by_dataset
 from django.forms import modelform_factory, formset_factory
 
 from isisdata.models import *
@@ -28,6 +35,7 @@ from isisdata.utils import strip_punctuation, normalize
 from isisdata import operations
 from isisdata.filters import *
 from isisdata import tasks as data_tasks
+from curation import p3_port_utils
 
 
 from curation.tracking import TrackingWorkflow
@@ -45,8 +53,9 @@ import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
 import bleach
+import datetime
 
-
+import logging
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -147,6 +156,20 @@ def create_authority(request):
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
     }
+    if request.GET.get('draft_authority_id', None) and request.GET.get('zotero_accession', None):
+        context.update({
+            'authority_name': request.GET.get('name', None),
+            'draft_authority_id': request.GET.get('draft_authority_id', None),
+            'zotero_accession': request.GET.get('zotero_accession', None),
+            'selected_authority_type': request.GET.get('selected_authority_type', None),
+        })
+    if request.POST.get('draft_authority_id', None) and request.POST.get('zotero_accession', None):
+        context.update({
+            'authority_name': request.POST.get('name', None),
+            'draft_authority_id': request.POST.get('draft_authority_id', None),
+            'zotero_accession': request.POST.get('zotero_accession', None),
+            'selected_authority_type': request.POST.get('selected_authority_type', None),
+        })
 
     template = 'curation/authority_create_view.html'
 
@@ -166,7 +189,7 @@ def create_authority(request):
             'person_form': person_form,
             'attribute_form': attribute_form,
             'linkeddata_form': linkeddata_form,
-            'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+            'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
         })
     elif request.method == 'POST':
         authority = Authority()
@@ -217,7 +240,11 @@ def create_authority(request):
 
                 value_form.save()
 
-
+            zotero_accession = request.POST.get('zotero_accession', None)
+            draft_authority_id = request.POST.get('draft_authority_id', None)
+            # if we're in a zotero ingest procedure
+            if zotero_accession:
+                return HttpResponseRedirect("%s?draft_authority_id=%s&resolved_authority_id=%s&resolved_authority_name=%s" % (reverse('retrieve_accession', args=(zotero_accession,)), draft_authority_id, authority.id, authority.name))
             return HttpResponseRedirect(reverse('curation:curate_authority', args=(authority.id,)))
         else:
             context.update({
@@ -226,7 +253,7 @@ def create_authority(request):
                 'attribute_form': attribute_form if attribute_form else AttributeForm(prefix="attribute"),
                 'linkeddata_form': linkeddata_form if linkeddata_form else LinkedDataForm(prefix='linkeddata'),
                 'value_form': value_form,
-                'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+                'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
             })
     return render(request, template, context)
 
@@ -253,6 +280,7 @@ def get_subject_suggestions(request, citation_id):
         'subjects': list(authorities)
     }
     return JsonResponse(response_data)
+
 
 # TODO this method needs to be logged down!
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
@@ -298,6 +326,7 @@ def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
+    is_object = request.GET.get('is_object', 'false')
 
     context = {
         'curation_section': 'datasets',
@@ -309,7 +338,7 @@ def create_ccrelation_for_citation(request, citation_id):
     if request.method == 'GET':
         ccrelation = CCRelation()
         initial={}
-        if citation.type_controlled == Citation.CHAPTER:
+        if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
             ccrelation.object = citation
             ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
             initial['type_controlled'] = CCRelation.INCLUDES_CHAPTER
@@ -326,7 +355,7 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -364,7 +393,7 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
         form = CCRelationForm(request.POST, instance=ccrelation, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -482,7 +511,7 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -519,7 +548,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         if form.is_valid():
             form.instance.modified_by = request.user
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -547,9 +576,10 @@ def tracking_for_citation(request, citation_id):
         'current_index': current_index
     }
 
-    trackType = request.GET.get('type', None)
-    workflow = TrackingWorkflow(citation)
-    if workflow.is_workflow_action_allowed(trackType):
+    if request.method == "POST":
+        search_key = request.POST.get('search', request.POST.get('search'))
+        current_index = request.POST.get('current', request.POST.get('current'))
+        trackType = request.POST.get('type', None)
         tracking = Tracking()
         tracking.type_controlled = trackType
         tracking.modified_by = request.user
@@ -557,8 +587,8 @@ def tracking_for_citation(request, citation_id):
         tracking.tracking_info = date.strftime("%Y/%m/%d") + " {} {}".format(request.user.first_name, request.user.last_name)
         tracking.citation = citation
         tracking.save()
-        citation.tracking_state = trackType
         citation.save()
+
     target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking'
     if search_key and current_index:
         target += '&search=%s&current=%s' % (search_key, current_index)
@@ -747,7 +777,7 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=ccrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -772,11 +802,13 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         'current_index': current_index
     }
     if request.GET.get('confirm', False):
+        if not acrelation.modified_on:
+            acrelation.modified_on = datetime.datetime.now()
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
 
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=acrelations'
+        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)
@@ -801,6 +833,8 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
         'current_index': current_index
     }
     if request.GET.get('confirm', False):
+        if not acrelation.modified_on:
+            acrelation.modified_on = datetime.datetime.now()
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
@@ -890,7 +924,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=linkeddata'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1011,8 +1045,11 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             attribute_form.save()
             value_form.instance.attribute = attribute_form.instance
             value_form.save()
+            if not attribute_form.instance.value_freeform:
+                attribute_form.instance.value_freeform = value_form.instance.render()
+                attribute_form.instance.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?tab=attributes'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1022,7 +1059,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
     context.update({
         'attribute_form': attribute_form,
         'value_form': value_form,
-        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+        'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
     })
     return render(request, template, context)
 
@@ -1099,19 +1136,17 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     context.update({
         'attribute_form': attribute_form,
         'value_form': value_form,
-        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+        'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
     })
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def get_attribute_type_help_text(request, attribute_type_id):
-    print attribute_type_id
+    print(attribute_type_id)
     attribute_type = get_object_or_404(AttributeType, pk=attribute_type_id)
 
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
     return JsonResponse({'help_text': safe_text})
-
-import datetime
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
@@ -1120,27 +1155,27 @@ def citation(request, citation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
         'type_choices': Citation.TYPE_CHOICES,
+        'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
+        'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
+        'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY],
+        'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
+        'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
+        'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
+        'host_mapping': ACRelation.HOST_MAPPING,
+        'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
+        'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
+        'doi_linked_date_name': settings.DOI_LINKED_DATA_NAME,
+        'isbn_linked_date_name': settings.ISBN_LINKED_DATA_NAME,
     }
+
     start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
     _build_result_set_links(request, context)
 
-    # We use a different template for each citation type.
-    if citation.type_controlled == Citation.BOOK:
-        template = 'curation/citation_change_view_book.html'
-    elif citation.type_controlled in (Citation.REVIEW, Citation.ESSAY_REVIEW):
-        template = 'curation/citation_change_view_review.html'
-    elif citation.type_controlled == Citation.CHAPTER:
-        template = 'curation/citation_change_view_chapter.html'
-    elif citation.type_controlled == Citation.ARTICLE:
-        template = 'curation/citation_change_view_article.html'
-    elif citation.type_controlled == Citation.THESIS:
-        template = 'curation/citation_change_view_thesis.html'
-    elif citation.type_controlled == Citation.WEBSITE:
-        template = 'curation/citation_change_view_website.html'
-    else:
-        template = 'curation/citation_change_view.html'
+    # we now use only one template for all types IEXP-15
+    template = 'curation/citation_change_view.html'
 
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
@@ -1158,25 +1193,21 @@ def citation(request, citation_id):
             'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
         })
 
-        # Most (but not all) citation types should have a PartDetails entry.
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK,
-                                        Citation.REVIEW, Citation.CHAPTER,
-                                        Citation.THESIS, Citation.ESSAY_REVIEW]:
-            part_details = getattr(citation, 'part_details', None)
-            if not part_details:
-                part_details = PartDetails.objects.create()
-                citation.part_details = part_details
-                citation.save()
+        part_details = getattr(citation, 'part_details', None)
+        if not part_details:
+            part_details = PartDetails.objects.create()
+            citation.part_details = part_details
+            citation.save()
 
-            partdetails_form = PartDetailsForm(request.user, citation_id,
-                                               instance=part_details,
-                                               prefix='partdetails')
-            context.update({
-                'partdetails_form': partdetails_form,
-            })
+        partdetails_form = PartDetailsForm(request.user, citation_id,
+                                           instance=part_details,
+                                           prefix='partdetails')
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
-        if citation.type_controlled in [Citation.ARTICLE, Citation.BOOK, Citation.REVIEW, Citation.CHAPTER, Citation.THESIS] and hasattr(citation, 'part_details'):
+        if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
             form.save()
@@ -1230,7 +1261,6 @@ def _build_result_set_links(request, context, model=Citation):
 
     user_session = request.session
     model_key = model.__name__.lower()
-
     search_key = request.GET.get('search', request.POST.get('search'))
     current_index = request.GET.get('current', request.POST.get('current'))
     search_params = user_session.get('%s_%s_search_params' % (search_key, model_key))
@@ -1242,7 +1272,7 @@ def _build_result_set_links(request, context, model=Citation):
         return
 
     current_index = int(current_index)
-    page_number = int(math.floor(current_index / PAGE_SIZE)) + 1
+    page_number = int(math.floor(old_div(current_index, PAGE_SIZE))) + 1
     relative_index = current_index % PAGE_SIZE
 
     # The "current run" is the series of record IDs on the current page.
@@ -1475,9 +1505,10 @@ def _authorities_get_filter_params(request):
     filter_params = None
     if search_key:
         filter_params = user_session.get('%s_authority_search_params' % search_key)
-        all_params = {k: v for k, v in filter_params.iteritems()}
+        if filter_params:
+            all_params = {k: v for k, v in list(filter_params.items())}
 
-    if len(post_or_get.keys()) <= 1:
+    if len(list(post_or_get.keys())) <= 1:
         if filter_params is None:
             filter_params = user_session.get('authority_filter_params', None)
             all_params = user_session.get('authority_request_params', None)
@@ -1488,14 +1519,14 @@ def _authorities_get_filter_params(request):
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = post_or_get.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode()#.encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
         all_params = {}
 
     if search_key is None:
-        if not 'o' in filter_params.keys():
+        if not 'o' in list(filter_params.keys()):
             filter_params['o'] = 'name_for_sort'
         for key in additional_params_names:
             all_params[key] = post_or_get.get(key, '')
@@ -1533,10 +1564,11 @@ def _citations_get_filter_params(request):
     filter_params = None
     if search_key:
         filter_params = user_session.get('%s_citation_search_params' % search_key)
-        all_params = {k: v for k, v in filter_params.iteritems()}
+        if filter_params:
+            all_params = {k: v for k, v in list(filter_params.items())}
 
     # if we don't have any filters set yet, or there is just one parameter 'page'
-    if len(post_or_get.keys()) == 0 or (len(post_or_get.keys()) == 1 and post_or_get.get('page', None)):
+    if len(list(post_or_get.keys())) == 0 or (len(list(post_or_get.keys())) == 1 and post_or_get.get('page', None)):
         if filter_params is None:
             filter_params = user_session.get('citation_filter_params', None)
             all_params = user_session.get('citation_request_params', None)
@@ -1547,7 +1579,7 @@ def _citations_get_filter_params(request):
             return filter_params, all_params
 
     if filter_params is None:
-        raw_params = post_or_get.urlencode().encode('utf-8')
+        raw_params = post_or_get.urlencode()#.encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
 
     if not all_params:
@@ -1589,7 +1621,7 @@ def citations(request):
         encoded_params = filter_params.urlencode().encode('utf-8')
     else:
         _params = QueryDict(mutable=True)
-        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+        for k, v in [k_v for k_v in list(filter_params.items()) if k_v[1] is not None]:
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
@@ -1601,15 +1633,16 @@ def citations(request):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
-        'filter_params': encoded_params,
+        'filter_params': urllibparse.urlencode(filter_params, quote_via=urllibparse.quote_plus),
         'search_key': search_key,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
         'record_status_redirect': CuratedMixin.REDIRECT,
+        'ccrelation_choices': [(choice, value) for (choice, value) in CCRelation.TYPE_CHOICES if choice is not CCRelation.REVIEW_OF],
     }
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')
-    active_filters = [k for k,v in filter_params.iteritems() if v and k not in ['page', 'show_filters', 'o', 'filters']]
+    active_filters = [k for k,v in list(filter_params.items()) if v and k not in ['page', 'show_filters', 'o', 'filters']]
 
     if not active_filters:
         context.update({
@@ -1664,7 +1697,9 @@ def citations(request):
         'result_count': result_count,
         'filter_list': paginated_objects,
         'current_page': currentPage,
-        'current_offset': (currentPage - 1) * PAGE_SIZE
+        'current_offset': (currentPage - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
     })
     return render(request, template, context)
 
@@ -1686,7 +1721,7 @@ def authorities(request):
         encoded_params = filter_params.urlencode().encode('utf-8')
     else:
         _params = QueryDict(mutable=True)
-        for k, v in filter(lambda (k, v): v is not None, filter_params.items()):
+        for k, v in [k_v1 for k_v1 in list(filter_params.items()) if k_v1[1] is not None]:
             _params[k] = v
         encoded_params = _params.urlencode().encode('utf-8')
 
@@ -1704,7 +1739,7 @@ def authorities(request):
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')
-    active_filters = [k for k,v in filter_params.iteritems() if v and k not in ['page', 'show_filters', 'o', 'filters']]
+    active_filters = [k for k,v in list(filter_params.items()) if v and k not in ['page', 'show_filters', 'o', 'filters']]
 
     if not active_filters:
         context.update({
@@ -1728,7 +1763,7 @@ def authorities(request):
     page = paginator.page(currentPage)
     paginated_objects = list(page)
 
-    filters_active = filter_params or len([v for k, v in request.GET.iteritems() if len(v) > 0 and k != 'page']) > 0
+    filters_active = filter_params or len([v for k, v in list(request.GET.items()) if len(v) > 0 and k != 'page']) > 0
 
     if filtered_objects.form.is_valid():
         request_params = filtered_objects.form.cleaned_data
@@ -1753,12 +1788,15 @@ def authorities(request):
     context.update({
         'objects': filtered_objects,
         'filters_active': filters_active,
-        'filter_params': encoded_params,
+        'filter_params': urllibparse.urlencode(filter_params, quote_via=urllibparse.quote_plus),
+        'filter_list': paginated_objects,
         'search_key': search_key,
         'result_count': result_count,
         'current_page': currentPage,
         'current_offset': (currentPage - 1) * PAGE_SIZE,
         'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
+        'page': page,
+        'paginator': paginator,
     })
     return render(request, template, context)
 
@@ -1778,7 +1816,7 @@ def authority(request, authority_id):
     person_form = None
     value_forms = view_helpers._create_attribute_value_forms()
     context.update({
-        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.iteritems()],
+        'value_forms': [(i, f(prefix='value')) for i, f in value_forms.items()],
     })
     if request.method == 'GET':
 
@@ -1833,7 +1871,7 @@ def authority(request, authority_id):
 
         # to avoid scripting attacks let's escape the parameters
         safe_get_request = {}
-        for key, value in get_request.items():
+        for key, value in list(get_request.items()):
             safe_get_request[escape(key)] = escape(value)
 
 
@@ -2059,30 +2097,31 @@ def quick_and_dirty_authority_search(request):
     limit_clasification_types = request.GET.get('system_types', None)
     classification_system = request.GET.get('system', None)
 
+    force = request.GET.get('force', 'false') == 'true'
     system_blank = request.GET.get('system_blank', 'true') == 'true'
     N = int(request.GET.get('max', 10))
-    if not q or len(q) < 3:     # TODO: this should be configurable in the GET.
+    if not q or (len(q) < 3 and not force):     # TODO: this should be configurable in the GET.
         return JsonResponse({'results': []})
 
     use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'
 
     query = Q()
     if type_controlled:
-        type_array = map(lambda t: t.upper(), type_controlled.split(","))
+        type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
 
     if limit_active_types:
-        type_array = map(lambda t: t.upper(), limit_active_types.split(","))
+        type_array = [t.upper() for t in limit_active_types.split(",")]
         query &= ~(Q(type_controlled__in=type_array) & Q(record_status_value=CuratedMixin.INACTIVE))
 
     if exclude:     # exclude certain types
-        exclude_array = map(lambda t: t.upper(), exclude.split(","))
+        exclude_array = [t.upper() for t in exclude.split(",")]
         query &= ~Q(type_controlled__in=exclude_array)
 
     if classification_system:   # filter by classification system
-        system_array = map(lambda t: t.upper(), classification_system.split(","))
+        system_array = [t.upper() for t in classification_system.split(",")]
         if limit_clasification_types:
-            type_array = map(lambda t: t.upper(), limit_clasification_types.split(","))
+            type_array = [t.upper() for t in limit_clasification_types.split(",")]
             q_part = Q(type_controlled__in=type_array) & ~Q(classification_system__in=system_array)
             if system_blank:
                 q_part &= ~Q(classification_system__isnull=True)
@@ -2102,7 +2141,8 @@ def quick_and_dirty_authority_search(request):
     queryset_with_numbers = Authority.objects.filter(query)    # partial matches, in chunks; with punctuation and numbers.
 
     # letting the database transform queryies using UPPER prohibits using the index, which is slooowwwww
-    query_parts = re.sub(ur'[0-9]+', u' ', strip_punctuation(q)).split()
+    # CHECK: removed ur
+    query_parts = re.sub('[0-9]+', u' ', strip_punctuation(q)).split()
     for part in query_parts:
         #queryset = queryset.filter(Q(name__icontains=part) | Q(name_for_sort__icontains=unidecode(part)))
         queryset = queryset.filter(Q(name_for_sort__contains=unidecode(part.lower())))
@@ -2168,10 +2208,10 @@ def quick_and_dirty_authority_search(request):
             return a.acrelation_set.count() - b.acrelation_set.count()
 
     if use_custom_cmp:
-        chained = chain(sorted(queryset_exact, cmp=custom_cmp),
-                        sorted(queryset_sw, cmp=custom_cmp),
-                        sorted(queryset_with_numbers, cmp=custom_cmp),
-                        sorted(queryset, cmp=custom_cmp))
+        chained = chain(sorted(queryset_exact, key=p3_port_utils.cmp_to_key(custom_cmp)),
+                        sorted(queryset_sw, key=p3_port_utils.cmp_to_key(custom_cmp)),
+                        sorted(queryset_with_numbers, key=p3_port_utils.cmp_to_key(custom_cmp)),
+                        sorted(queryset, key=p3_port_utils.cmp_to_key(custom_cmp)))
     else:
         chained = chain(queryset_exact.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
                         queryset_sw.annotate(acrel_count=Count('acrelation')).order_by('-acrel_count'),
@@ -2199,7 +2239,7 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
-            'related_citations': map(lambda s: s.title(), set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])),
+            'related_citations': [s.title() for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
@@ -2275,9 +2315,616 @@ def search_users(request):
         'id': u.id,
         'label': "%s %s (%s)" % (u.first_name, u.last_name, u.username)
     } for u in queryset[:20]]
-    print results
     return JsonResponse(results, safe=False)
 
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def quick_and_dirty_citation_search(request):
+    q = request.GET.get('q', None)
+    N = int(request.GET.get('max', 20))
+    if not q or len(q) < 3:
+        return JsonResponse({'results': []})
+
+    # ISISCB-1132: ccr relations do not find titles with hyphens etc
+    q = normalize(q)
+
+    queryset = Citation.objects.all()
+    queryset_exact = Citation.objects.all()
+    queryset_sw = Citation.objects.all()
+    queryset_by_id = Citation.objects.all()
+
+    queryset_exact = queryset_exact.filter(title_for_sort=q)
+    queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)
+    queryset_by_id = queryset_by_id.filter(id=q)
+
+    for part in q.split():
+        queryset = queryset.filter(title_for_sort__icontains=part)
+
+    queryset = queryset.order_by('title_for_sort')
+    queryset_exact = queryset_exact.order_by('title_for_sort')
+    queryset_sw = queryset_sw.order_by('title_for_sort')
+
+    result_ids = []
+    results = []
+    in_publication_types = [ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
+    chapter_types = [CCRelation.INCLUDES_CHAPTER]
+    for i, obj in enumerate(chain(queryset_by_id, queryset_exact, queryset_sw, queryset)):
+        # there are duplicates since everything that starts with a term
+        # also contains the term.
+        if obj.id in result_ids:
+            # make sure we still return 10 results although we're skipping one
+            N += 1
+            continue
+        if i == N:
+            break
+
+        journal = ""
+        if obj.type_controlled == Citation.ARTICLE:
+            journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
+            if journal_obj and journal_obj.first() and journal_obj.first().authority:
+                journal = journal_obj.first().authority.name
+
+        book = ""
+        if obj.type_controlled == Citation.CHAPTER:
+            book_obj = obj.ccrelations.filter(type_controlled__in=chapter_types)
+            if book_obj and book_obj.first():
+                book = book_obj.first().subject.title
+
+        result_ids.append(obj.id)
+        results.append({
+            'id': obj.id,
+            'type': obj.get_type_controlled_display(),
+            'type_id':obj.type_controlled,
+            'title': _get_citation_title(obj),
+            'authors': _get_authors_editors(obj),
+            'datestring': _get_datestring_for_citation(obj),
+            'description': obj.description,
+            'journal': journal,
+            'book': book,
+            'url': reverse("curation:curate_citation", args=(obj.id,)),
+            'public':obj.public,
+        })
+
+    return JsonResponse({'results': results})
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_update_user_module')
+def change_is_staff(request, user_id):
+
+    if request.method == 'POST':
+        user = get_object_or_404(User, pk=user_id)
+
+        is_staff = request.POST.get('is_staff', False)
+        if is_staff == 'True':
+            user.is_staff = True
+        else:
+            user.is_staff = False
+        user.save()
+
+    return redirect('curation:user', user_id=user_id)
+
+
+@check_rules('is_user_superuser')
+def change_is_superuser(request, user_id):
+
+    if request.method == "POST":
+        user = get_object_or_404(User, pk=user_id)
+
+        is_superuser = request.POST.get('is_superuser', False)
+        if is_superuser == 'True':
+            user.is_superuser = True
+            user.save()
+
+        elif is_superuser == 'False':
+            superusers = User.objects.filter(is_superuser=True)
+
+            if len(superusers) > 1:
+                user.is_superuser = False
+                user.save()
+            else:
+                message = "This is the only admin user in the system. There have to be at least two adminstrators to remove administrator permissions from a user. "
+                messages.add_message(request, messages.ERROR, message)
+
+    return redirect('curation:user', user_id=user_id)
+
+
+@check_rules('can_update_user_module')
+def add_zotero_rule(request, role_id):
+    role = get_object_or_404(IsisCBRole, pk=role_id)
+
+    context = {
+        'curation_section': 'users',
+        'role': role,
+    }
+
+    if request.method == 'POST':
+        rule = ZoteroRule.objects.create(role_id=role_id)
+
+    return redirect('curation:role', role_id=role.pk)
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_select_citation(request):
+    template = 'curation/bulk_select_citation.html'
+    context = {}
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_select_authority(request):
+    template = 'curation/bulk_select_authority.html'
+    context = {}
+    return render(request, template, context)
+
+def _get_filtered_queryset(request, object_type='CITATION'):
+    pks = request.POST.getlist('queryset')
+
+    filter_params_raw = request.POST.get('filters')
+    filter_params = QueryDict(filter_params_raw, mutable=True)
+    pks = request.POST.getlist('queryset')
+    if pks:
+        filter_params['id'] = ','.join(pks)
+
+        # The ``collection_only`` parameter is used in the list view to indicate
+        #  that cached parameters should be ignored. That way, when the user
+        #  selects a collection in the collection list view they first see all
+        #  of the records in that collection. But if specific record IDs are
+        #  provided in the POST request, we want to preserve that selection
+        #  in the filter; so we remove ``collection_only``.
+        if 'collection_only' in filter_params:
+            filter_params.pop('collection_only')
+    filter_params_raw = filter_params.urlencode()#.encode('utf-8')
+    if object_type is 'CITATION':
+        _qs = operations.filter_queryset(request.user, Citation.objects.all())
+        queryset = CitationFilter(filter_params, queryset=_qs)
+    else:
+        _qs = operations.filter_queryset(request.user, Authority.objects.all())
+        queryset = AuthorityFilter(filter_params, queryset=_qs)
+    return queryset, filter_params_raw
+
+def _get_filtered_queryset_authorities(request):
+    pks = request.POST.getlist('queryset')
+
+    filter_params_raw = request.POST.get('filters')
+    filter_params = QueryDict(filter_params_raw, mutable=True)
+    pks = request.POST.getlist('queryset')
+    if pks:
+        filter_params['id'] = ','.join(pks)
+
+    filter_params_raw = filter_params.urlencode()#.encode('utf-8')
+
+    _qs = operations.filter_queryset(request.user, Authority.objects.all())
+    queryset = AuthorityFilter(filter_params, queryset=_qs)
+
+    return queryset, filter_params_raw
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_action(request):
+    """
+    User has selected some number of records.
+
+    Selection can be explicit via a list of pks in the ``queryset`` form field,
+    or implicit via the ``filters`` from the list view.
+    """
+    template = 'curation/bulkaction.html'
+    object_type = request.POST.get('object_type', 'CITATION')
+    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
+    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
+    context = {
+        'extra_data': '\n'.join(list(form_class.extra_data.values()))
+    }
+
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:citation_list'))
+
+    context.update({'queryset': queryset, 'filters': filter_params_raw})
+
+    if request.GET.get('confirmed', False):
+        # Perform the selected action.
+        form = form_class(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+        if form.is_valid():
+            tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
+            # task_id = form.apply(queryset.qs, request.user)[0]
+            return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
+
+    else:
+        # Prompt to select an action that will be applied to those records.
+        form = form_class()
+        form.fields['filters'].initial = filter_params_raw
+
+
+        # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
+    context.update({
+        'form': form,
+        'object_type': object_type,
+    })
+    return render(request, template, context)
+
+
+
+
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def bulk_action_status(request):
+    template = 'curation/citations_bulk_status.html'
+    context = {}
+    task_ids = request.GET.getlist('task')
+    tasks = [AsyncTask.objects.get(pk=_pk) for _pk in task_ids]
+
+    context.update({'tasks': tasks})
+    return render(request, template, context)
+
+
+# TODO: refactor around asynchronous tasks.
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_citations_status(request):
+    template = 'curation/export_status.html'
+    context = {
+        'exported_type': 'CITATION'
+    }
+    # target = request.GET.get('target')
+    task_id = request.GET.get('task_id')
+    task = AsyncTask.objects.get(pk=task_id)
+    target = task.value
+
+    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    context.update({'download_target': download_target, 'task': task})
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_authorities_status(request):
+    template = 'curation/export_status.html'
+    context = {
+        'exported_type': 'AUTHORITY'
+    }
+    # target = request.GET.get('target')
+    task_id = request.GET.get('task_id')
+    task = AsyncTask.objects.get(pk=task_id)
+    target = task.value
+
+    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
+    context.update({'download_target': download_target, 'task': task})
+    return render(request, template, context)
+
+def _build_filter_label(filter_params_raw, filter_type='CITATION'):
+    if filter_type == 'AUTHORITY':
+        current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True))
+    else:
+        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
+    filter_form = current_filter.form
+    filter_data = {}
+    if filter_form.is_valid():
+        filter_data = filter_form.cleaned_data
+    return ', '.join([ '%s: %s' % (key, value) for key, value in list(filter_data.items()) if value ])
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_citations(request):
+    # TODO: move some of this stuff out to the export module.
+
+    template = 'curation/citations_export.html'
+    context = {}
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:citation_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset(request)
+    if isinstance(queryset, CitationFilter):
+        queryset = queryset.qs
+
+    if request.GET.get('confirmed', False):
+        # The user has selected the desired configuration settings.
+        form = ExportCitationsForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            # Start the export process.
+            tag = slugify(form.cleaned_data.get('export_name', 'export'))
+            fields = form.cleaned_data.get('fields')
+            export_linked_records = form.cleaned_data.get('export_linked_records')
+            export_metadata = form.cleaned_data.get('export_metadata', False)
+            use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
+
+            # TODO: generalize this, so that we are not tied directly to S3.
+            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            _out_name = '%s--%s.csv' % (_datestamp, tag)
+            # _compress = form.cleaned_data.get('compress_output', False)
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                                            settings.AWS_SECRET_ACCESS_KEY,
+                                            settings.AWS_EXPORT_BUCKET_NAME,
+                                            _out_name)
+
+            # if _compress:
+            #     s3_path += '.gz'
+
+            # configuration for export
+            config = {
+                'authority_delimiter': " || " if use_pipe_delimiter else " ",
+                'export_metadata': export_metadata
+            }
+
+            export_tasks = {
+                'EBSCO_CSV': data_tasks.export_to_ebsco_csv,
+                'ITEM_COUNT': data_tasks.export_item_counts,
+                'SWP_ANALYSIS': data_tasks.export_swp_analysis,
+            }
+
+            # We create the AsyncTask object first, so that we can keep it
+            #  updated while the task is running.
+            task = AsyncTask.objects.create()
+            export_task = export_tasks.get(form.cleaned_data.get('export_format', 'CSV'), None)
+            if export_task:
+                result = export_task.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id, "Citation", export_linked_records, config)
+            else:
+                result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id, "Citation", export_linked_records, config)
+
+            # We can use the AsyncResult's UUID to access this task later, e.g.
+            #  to check the return value or task state.
+            task.async_uuid = result.id
+            task.value = _out_name
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw)
+            task.save()
+
+            # Send the user to a status view, which will show the export
+            #  progress and a link to the finished export.
+            target = reverse('curation:export-citations-status') \
+                     + '?' + urlencode({'task_id': task.id})
+            return HttpResponseRedirect(target)
+
+    else:       # Display the export configuration form.
+        form = ExportCitationsForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+    })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def export_authorities(request):
+    # TODO: move some of this stuff out to the export module.
+
+    template = 'curation/authorities_export.html'
+    context = {}
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:authority_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset_authorities(request)
+
+    if isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    if request.GET.get('confirmed', False):
+        # The user has selected the desired configuration settings.
+        form = ExportAuthorityForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            # Start the export process.
+            tag = slugify(form.cleaned_data.get('export_name', 'export'))
+            fields = form.cleaned_data.get('fields')
+            export_metadata = form.cleaned_data.get('export_metadata', False)
+
+            # TODO: generalize this, so that we are not tied directly to S3.
+            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            _out_name = '%s--%s.csv' % (_datestamp, tag)
+            # _compress = form.cleaned_data.get('compress_output', False)
+            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
+                                            settings.AWS_SECRET_ACCESS_KEY,
+                                            settings.AWS_EXPORT_BUCKET_NAME,
+                                            _out_name)
+
+            # if _compress:
+            #     s3_path += '.gz'
+
+            # configuration for export
+            config = {
+                'export_metadata': export_metadata,
+            }
+
+            # We create the AsyncTask object first, so that we can keep it
+            #  updated while the task is running.
+            task = AsyncTask.objects.create()
+            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
+                                                    fields, filter_params_raw,
+                                                    task.id, 'Authority', config=config)
+
+            # We can use the AsyncResult's UUID to access this task later, e.g.
+            #  to check the return value or task state.
+            task.async_uuid = result.id
+            task.value = _out_name
+            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, 'AUTHORITY')
+            task.save()
+
+            # Send the user to a status view, which will show the export
+            #  progress and a link to the finished export.
+            target = reverse('curation:export-authorities-status') \
+                     + '?' + urlencode({'task_id': task.id})
+            return HttpResponseRedirect(target)
+
+    else:       # Display the export configuration form.
+        form = ExportAuthorityForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+    })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def collections(request):
+    """
+    List :class:`.Collection` instances.
+    """
+    from curation.filters import CitationCollectionFilter
+    return _list_collections(request, CitationCollectionFilter, CitationCollection, 'CITATION', 'curation/collection_list.html')
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def authority_collections(request):
+    """
+    List :class:`.AuthorityCollection` instances.
+    """
+    from curation.filters import AuthorityCollectionFilter
+    return _list_collections(request, AuthorityCollectionFilter, AuthorityCollection, 'AUTHORITY', 'curation/collection_list.html')
+
+def _list_collections(request, collection_filter_class, collection_class, type, template):
+    # ISISCB-1050: reverse sort order of collections (newest first)
+    collections = collection_class.objects.all().order_by('-created')
+
+    filtered_objects = collection_filter_class(request.GET, queryset=collections)
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+
+    raw_params = request.GET.urlencode()
+    filter_params = QueryDict(raw_params, mutable=True)
+    current_page = filter_params.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
+
+    context = {
+        'filter_list': paginated_objects,
+        'type': type,
+        'page': page,
+        'paginator': paginator,
+        'current_offset': (current_page - 1) * PAGE_SIZE,
+        'current_page': current_page,
+        'objects': filtered_objects,
+    }
+    return render(request, template, context)
+
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def create_citation_collection(request):
+    template = 'curation/citation_collection_create.html'
+    context = {}
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = CitationCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.citations.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = CitationCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def create_authority_collection(request):
+    template = 'curation/authority_collection_create.html'
+    context = {}
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = AuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.createdBy = request.user
+                instance.save()
+                instance.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % instance.id)
+        else:
+            form = AuthorityCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def add_citation_collection(request):
+    template = 'curation/citation_collection_add.html'
+    context = {}
+
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request)
+        if isinstance(queryset, CitationFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = SelectCitationCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                collection = form.cleaned_data['collection']
+                collection.citations.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectCitationCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def add_authority_collection(request):
+    template = 'curation/authority_collection_add.html'
+    context = {}
+
+    if request.method == 'POST':
+        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+        if isinstance(queryset, AuthorityFilter):
+            queryset = queryset.qs
+        if request.GET.get('confirmed', False):
+            form = SelectAuthorityCollectionForm(request.POST)
+            form.fields['filters'].initial = filter_params_raw
+            if form.is_valid():
+                collection = form.cleaned_data['collection']
+                collection.authorities.add(*queryset)
+
+                # TODO: add filter paramter to select collection.
+                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % collection.id)
+        else:
+            form = SelectAuthorityCollectionForm()
+            form.fields['filters'].initial = filter_params_raw
+
+        context.update({
+            'form': form,
+            'queryset': queryset,
+        })
+
+    return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_view_user_module')
@@ -2289,9 +2936,21 @@ def users(request, user_id=None):
     template = 'curation/users.html'
     users =  User.objects.all()
     filterset = UserFilter(request.GET, queryset=users)
+
+    paginator = Paginator(filterset.qs, PAGE_SIZE)
+    current_page = request.GET.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
+
     context.update({
-        'objects': filterset.qs,
+        'objects': paginated_objects,
         'filterset': filterset,
+        'paginator': paginator,
+        'page': page,
+        'current_page': current_page,
     })
     return render(request, template, context)
 
@@ -2617,583 +3276,3 @@ def remove_rule(request, role_id, rule_id):
         rule.delete()
 
     return redirect('curation:role', role_id=role.pk)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def quick_and_dirty_citation_search(request):
-    q = request.GET.get('q', None)
-    N = int(request.GET.get('max', 20))
-    if not q or len(q) < 3:
-        return JsonResponse({'results': []})
-
-    # ISISCB-1132: ccr relations do not find titles with hyphens etc
-    q = normalize(q)
-
-    queryset = Citation.objects.all()
-    queryset_exact = Citation.objects.all()
-    queryset_sw = Citation.objects.all()
-    queryset_by_id = Citation.objects.all()
-
-    queryset_exact = queryset_exact.filter(title_for_sort=q)
-    queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)
-    queryset_by_id = queryset_by_id.filter(id=q)
-
-    for part in q.split():
-        queryset = queryset.filter(title_for_sort__icontains=part)
-
-    queryset = queryset.order_by('title_for_sort')
-    queryset_exact = queryset_exact.order_by('title_for_sort')
-    queryset_sw = queryset_sw.order_by('title_for_sort')
-
-    result_ids = []
-    results = []
-    in_publication_types = [ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
-    chapter_types = [CCRelation.INCLUDES_CHAPTER]
-    for i, obj in enumerate(chain(queryset_by_id, queryset_exact, queryset_sw, queryset)):
-        # there are duplicates since everything that starts with a term
-        # also contains the term.
-        if obj.id in result_ids:
-            # make sure we still return 10 results although we're skipping one
-            N += 1
-            continue
-        if i == N:
-            break
-
-        journal = ""
-        if obj.type_controlled == Citation.ARTICLE:
-            journal_obj = obj.acrelation_set.filter(type_controlled__in=in_publication_types)
-            if journal_obj and journal_obj.first() and journal_obj.first().authority:
-                journal = journal_obj.first().authority.name
-
-        book = ""
-        if obj.type_controlled == Citation.CHAPTER:
-            book_obj = obj.ccrelations.filter(type_controlled__in=chapter_types)
-            if book_obj and book_obj.first():
-                book = book_obj.first().subject.title
-
-        result_ids.append(obj.id)
-        results.append({
-            'id': obj.id,
-            'type': obj.get_type_controlled_display(),
-            'type_id':obj.type_controlled,
-            'title': _get_citation_title(obj),
-            'authors': _get_authors_editors(obj),
-            'datestring': _get_datestring_for_citation(obj),
-            'description': obj.description,
-            'journal': journal,
-            'book': book,
-            'url': reverse("curation:curate_citation", args=(obj.id,)),
-            'public':obj.public,
-        })
-
-    return JsonResponse({'results': results})
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_update_user_module')
-def change_is_staff(request, user_id):
-
-    if request.method == 'POST':
-        user = get_object_or_404(User, pk=user_id)
-
-        is_staff = request.POST.get('is_staff', False)
-        if is_staff == 'True':
-            user.is_staff = True
-        else:
-            user.is_staff = False
-        user.save()
-
-    return redirect('curation:user', user_id=user_id)
-
-
-@check_rules('is_user_superuser')
-def change_is_superuser(request, user_id):
-
-    if request.method == "POST":
-        user = get_object_or_404(User, pk=user_id)
-
-        is_superuser = request.POST.get('is_superuser', False)
-        if is_superuser == 'True':
-            user.is_superuser = True
-            user.save()
-
-        elif is_superuser == 'False':
-            superusers = User.objects.filter(is_superuser=True)
-
-            if len(superusers) > 1:
-                user.is_superuser = False
-                user.save()
-            else:
-                message = "This is the only admin user in the system. There have to be at least two adminstrators to remove administrator permissions from a user. "
-                messages.add_message(request, messages.ERROR, message)
-
-    return redirect('curation:user', user_id=user_id)
-
-
-@check_rules('can_update_user_module')
-def add_zotero_rule(request, role_id):
-    role = get_object_or_404(IsisCBRole, pk=role_id)
-
-    context = {
-        'curation_section': 'users',
-        'role': role,
-    }
-
-    if request.method == 'POST':
-        rule = ZoteroRule.objects.create(role_id=role_id)
-
-    return redirect('curation:role', role_id=role.pk)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def bulk_select_citation(request):
-    template = 'curation/bulk_select_citation.html'
-    context = {}
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def bulk_select_authority(request):
-    template = 'curation/bulk_select_authority.html'
-    context = {}
-    return render(request, template, context)
-
-def _get_filtered_queryset(request, object_type='CITATION'):
-    pks = request.POST.getlist('queryset')
-
-    filter_params_raw = request.POST.get('filters')
-    filter_params = QueryDict(filter_params_raw, mutable=True)
-    pks = request.POST.getlist('queryset')
-    if pks:
-        filter_params['id'] = ','.join(pks)
-
-        # The ``collection_only`` parameter is used in the list view to indicate
-        #  that cached parameters should be ignored. That way, when the user
-        #  selects a collection in the collection list view they first see all
-        #  of the records in that collection. But if specific record IDs are
-        #  provided in the POST request, we want to preserve that selection
-        #  in the filter; so we remove ``collection_only``.
-        if 'collection_only' in filter_params:
-            filter_params.pop('collection_only')
-    filter_params_raw = filter_params.urlencode().encode('utf-8')
-
-    if object_type is 'CITATION':
-        _qs = operations.filter_queryset(request.user, Citation.objects.all())
-        queryset = CitationFilter(filter_params, queryset=_qs)
-    else:
-        _qs = operations.filter_queryset(request.user, Authority.objects.all())
-        queryset = AuthorityFilter(filter_params, queryset=_qs)
-
-    return queryset, filter_params_raw
-
-def _get_filtered_queryset_authorities(request):
-    pks = request.POST.getlist('queryset')
-
-    filter_params_raw = request.POST.get('filters')
-    filter_params = QueryDict(filter_params_raw, mutable=True)
-    pks = request.POST.getlist('queryset')
-    if pks:
-        filter_params['id'] = ','.join(pks)
-
-    filter_params_raw = filter_params.urlencode().encode('utf-8')
-
-    _qs = operations.filter_queryset(request.user, Authority.objects.all())
-    queryset = AuthorityFilter(filter_params, queryset=_qs)
-
-    return queryset, filter_params_raw
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def bulk_action(request):
-    """
-    User has selected some number of records.
-
-    Selection can be explicit via a list of pks in the ``queryset`` form field,
-    or implicit via the ``filters`` from the list view.
-    """
-    template = 'curation/bulkaction.html'
-    object_type = request.POST.get('objectType', 'CITATION')
-    queryset, filter_params_raw = _get_filtered_queryset(request, object_type=object_type)
-    if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
-        queryset = queryset.qs
-
-    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
-    context = {
-        'extra_data': '\n'.join(form_class.extra_data.values())
-    }
-
-    if request.method != 'POST':
-        return HttpResponseRedirect(reverse('curation:citation_list'))
-
-    context.update({'queryset': queryset, 'filters': filter_params_raw})
-
-    if request.GET.get('confirmed', False):
-        # Perform the selected action.
-        form = form_class(request.POST)
-        form.fields['filters'].initial = filter_params_raw
-        if form.is_valid():
-            tasks = form.apply(request.user, filter_params_raw, extra={'object_type':object_type})
-            # task_id = form.apply(queryset.qs, request.user)[0]
-            return HttpResponseRedirect(reverse('curation:citation-bulk-action-status') + '?' + '&'.join([urlencode({'task': task}) for task in tasks]))
-    else:
-        # Prompt to select an action that will be applied to those records.
-        form = form_class()
-        form.fields['filters'].initial = filter_params_raw
-
-
-        # form.fields['queryset'].initial = queryset.values_list('id', flat=True)
-    context.update({
-        'form': form,
-        'object_type': type,
-    })
-    return render(request, template, context)
-
-
-
-
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def bulk_action_status(request):
-    template = 'curation/citations_bulk_status.html'
-    context = {}
-    task_ids = request.GET.getlist('task')
-    tasks = map(lambda _pk: AsyncTask.objects.get(pk=_pk), task_ids)
-
-    context.update({'tasks': tasks})
-    return render(request, template, context)
-
-
-# TODO: refactor around asynchronous tasks.
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def export_citations_status(request):
-    template = 'curation/export_status.html'
-    context = {
-        'exported_type': 'CITATION'
-    }
-    # target = request.GET.get('target')
-    task_id = request.GET.get('task_id')
-    task = AsyncTask.objects.get(pk=task_id)
-    target = task.value
-
-    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
-    context.update({'download_target': download_target, 'task': task})
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def export_authorities_status(request):
-    template = 'curation/export_status.html'
-    context = {
-        'exported_type': 'AUTHORITY'
-    }
-    # target = request.GET.get('target')
-    task_id = request.GET.get('task_id')
-    task = AsyncTask.objects.get(pk=task_id)
-    target = task.value
-
-    download_target = 'https://%s.s3.amazonaws.com/%s' % (settings.AWS_EXPORT_BUCKET_NAME, target)
-    context.update({'download_target': download_target, 'task': task})
-    return render(request, template, context)
-
-def _build_filter_label(filter_params_raw, filter_type='CITATION'):
-    if filter_type == 'AUTHORITY':
-        current_filter = AuthorityFilter(QueryDict(filter_params_raw, mutable=True))
-    else:
-        current_filter = CitationFilter(QueryDict(filter_params_raw, mutable=True))
-    filter_form = current_filter.form
-    filter_data = {}
-    if filter_form.is_valid():
-        filter_data = filter_form.cleaned_data
-    return ', '.join([ '%s: %s' % (key, value) for key, value in filter_data.iteritems() if value ])
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def export_citations(request):
-    # TODO: move some of this stuff out to the export module.
-
-    template = 'curation/citations_export.html'
-    context = {}
-    if request.method != 'POST':
-        return HttpResponseRedirect(reverse('curation:citation_list'))
-
-    queryset, filter_params_raw = _get_filtered_queryset(request)
-    if isinstance(queryset, CitationFilter):
-        queryset = queryset.qs
-
-    if request.GET.get('confirmed', False):
-        # The user has selected the desired configuration settings.
-        form = ExportCitationsForm(request.POST)
-        form.fields['filters'].initial = filter_params_raw
-
-        if form.is_valid():
-            # Start the export process.
-            tag = slugify(form.cleaned_data.get('export_name', 'export'))
-            fields = form.cleaned_data.get('fields')
-            export_linked_records = form.cleaned_data.get('export_linked_records')
-            export_metadata = form.cleaned_data.get('export_metadata', False)
-            use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
-
-            # TODO: generalize this, so that we are not tied directly to S3.
-            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            _out_name = '%s--%s.csv' % (_datestamp, tag)
-            # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
-            # if _compress:
-            #     s3_path += '.gz'
-
-            # configuration for export
-            config = {
-                'authority_delimiter': " || " if use_pipe_delimiter else " ",
-                'export_metadata': export_metadata
-            }
-
-            # We create the AsyncTask object first, so that we can keep it
-            #  updated while the task is running.
-            task = AsyncTask.objects.create()
-            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
-                                                    fields, filter_params_raw,
-                                                    task.id, "Citation", export_linked_records, config)
-
-            # We can use the AsyncResult's UUID to access this task later, e.g.
-            #  to check the return value or task state.
-            task.async_uuid = result.id
-            task.value = _out_name
-            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw)
-            task.save()
-
-            # Send the user to a status view, which will show the export
-            #  progress and a link to the finished export.
-            target = reverse('curation:export-citations-status') \
-                     + '?' + urlencode({'task_id': task.id})
-            return HttpResponseRedirect(target)
-
-    else:       # Display the export configuration form.
-        form = ExportCitationsForm()
-        form.fields['filters'].initial = filter_params_raw
-
-    context.update({
-        'form': form,
-        'queryset': queryset,
-    })
-
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def export_authorities(request):
-    # TODO: move some of this stuff out to the export module.
-
-    template = 'curation/authorities_export.html'
-    context = {}
-    if request.method != 'POST':
-        return HttpResponseRedirect(reverse('curation:authority_list'))
-
-    queryset, filter_params_raw = _get_filtered_queryset_authorities(request)
-    print filter_params_raw
-    if isinstance(queryset, AuthorityFilter):
-        queryset = queryset.qs
-
-    if request.GET.get('confirmed', False):
-        # The user has selected the desired configuration settings.
-        form = ExportAuthorityForm(request.POST)
-        form.fields['filters'].initial = filter_params_raw
-
-        if form.is_valid():
-            # Start the export process.
-            tag = slugify(form.cleaned_data.get('export_name', 'export'))
-            fields = form.cleaned_data.get('fields')
-            export_metadata = form.cleaned_data.get('export_metadata', False)
-
-            # TODO: generalize this, so that we are not tied directly to S3.
-            _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            _out_name = '%s--%s.csv' % (_datestamp, tag)
-            # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
-
-            # if _compress:
-            #     s3_path += '.gz'
-
-            # configuration for export
-            config = {
-                'export_metadata': export_metadata
-            }
-
-            # We create the AsyncTask object first, so that we can keep it
-            #  updated while the task is running.
-            task = AsyncTask.objects.create()
-            result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
-                                                    fields, filter_params_raw,
-                                                    task.id, 'Authority', config=config)
-
-            # We can use the AsyncResult's UUID to access this task later, e.g.
-            #  to check the return value or task state.
-            task.async_uuid = result.id
-            task.value = _out_name
-            task.label = "Exporting set with filters: " + _build_filter_label(filter_params_raw, 'AUTHORITY')
-            task.save()
-
-            # Send the user to a status view, which will show the export
-            #  progress and a link to the finished export.
-            target = reverse('curation:export-authorities-status') \
-                     + '?' + urlencode({'task_id': task.id})
-            return HttpResponseRedirect(target)
-
-    else:       # Display the export configuration form.
-        form = ExportAuthorityForm()
-        form.fields['filters'].initial = filter_params_raw
-
-    context.update({
-        'form': form,
-        'queryset': queryset,
-    })
-
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def collections(request):
-    """
-    List :class:`.Collection` instances.
-    """
-    from curation.filters import CitationCollectionFilter
-    return _list_collections(request, CitationCollectionFilter, CitationCollection, 'CITATION', 'curation/collection_list.html')
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def authority_collections(request):
-    """
-    List :class:`.AuthorityCollection` instances.
-    """
-    from curation.filters import AuthorityCollectionFilter
-    return _list_collections(request, AuthorityCollectionFilter, AuthorityCollection, 'AUTHORITY', 'curation/collection_list.html')
-
-def _list_collections(request, collection_filter_class, collection_class, type, template):
-    # ISISCB-1050: reverse sort order of collections (newest first)
-    collections = collection_class.objects.all().order_by('-created')
-
-    filtered_objects = collection_filter_class(request.GET, queryset=collections)
-    context = {
-        'objects': filtered_objects,
-        'type': type,
-    }
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def create_citation_collection(request):
-    template = 'curation/citation_collection_create.html'
-    context = {}
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request)
-        if isinstance(queryset, CitationFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = CitationCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.createdBy = request.user
-                instance.save()
-                instance.citations.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % instance.id)
-        else:
-            form = CitationCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def create_authority_collection(request):
-    template = 'curation/authority_collection_create.html'
-    context = {}
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
-        if isinstance(queryset, AuthorityFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = AuthorityCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.createdBy = request.user
-                instance.save()
-                instance.authorities.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % instance.id)
-        else:
-            form = AuthorityCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def add_citation_collection(request):
-    template = 'curation/citation_collection_add.html'
-    context = {}
-
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request)
-        if isinstance(queryset, CitationFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = SelectCitationCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                collection = form.cleaned_data['collection']
-                collection.citations.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:citation_list') + '?in_collections=%i' % collection.id)
-        else:
-            form = SelectCitationCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def add_authority_collection(request):
-    template = 'curation/authority_collection_add.html'
-    context = {}
-
-    if request.method == 'POST':
-        queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
-        if isinstance(queryset, AuthorityFilter):
-            queryset = queryset.qs
-        if request.GET.get('confirmed', False):
-            form = SelectAuthorityCollectionForm(request.POST)
-            form.fields['filters'].initial = filter_params_raw
-            if form.is_valid():
-                collection = form.cleaned_data['collection']
-                collection.authorities.add(*queryset)
-
-                # TODO: add filter paramter to select collection.
-                return HttpResponseRedirect(reverse('curation:authority_list') + '?in_collections=%i' % collection.id)
-        else:
-            form = SelectAuthorityCollectionForm()
-            form.fields['filters'].initial = filter_params_raw
-
-        context.update({
-            'form': form,
-            'queryset': queryset,
-        })
-
-    return render(request, template, context)

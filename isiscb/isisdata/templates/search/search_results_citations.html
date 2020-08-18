@@ -40,7 +40,7 @@
 
           <br>
             {% if result.authors %}
-               {{ result.authors|joinby:"; " }}
+               {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
             {% else %}
               Author missing
             {% endif %}
@@ -54,8 +54,20 @@
             {% if result.book_title %}
               In: <em>{{ result.book_title }}</em>{% if not result.page_string %}.{% endif %}
             {% endif %}
+            {% if result.periodicals %}
+              <em>{{ result.periodicals.0 }}</em>{% if not result.page_string %}.{% endif %}
+            {% endif %}
 
             {% if result.page_string %}({{ result.page_string }}).{% endif %}
+
+            {% if result.type in show_publisher_types %}
+            {{ result.publishers | joinby:", "}}
+            {% endif %}
+
+            {% if result.type in show_school_types %}
+            {{ result.schools|joinby:", " }}
+            {% endif %}
+
 
             <span class="visible-print-inline">({{ citation_url }})</span>
 

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from django.forms import modelform_factory, formset_factory
 from django.forms.widgets import *
 from isisdata.models import *

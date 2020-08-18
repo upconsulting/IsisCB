@@ -1,6 +1,6 @@
 {% extends "curation/base.html" %}
 {% load addcss %}
-{% load staticfiles %}
+{% load static %}
 {% load zotero_tags %}
 {% load app_filters %}
 {% load render_object %}
@@ -17,6 +17,9 @@
 .fixed-bottom {
     bottom: -10px;
     position: fixed;
+}
+.resolved {
+  font-size: 12px;
 }
 </style>
 
@@ -57,6 +60,8 @@ But for now the list is stored as string :-p
         <div class="col-xs-6" id="left-panel-column">
             {% for citation in draftcitations %}
             {% with citation.authority_relations.all|filter_unresolved_acrelation as acrelations %}
+            {% with citation.authority_relations.all as all_acrelations %}
+            {% with citation.resolutions.first as citation_resolution %}
                 <div class="panel" id="citation-panel-{{ citation.id }}">
                     <div class="panel-body">
                         <span class="pull-right btn-group">
@@ -67,9 +72,9 @@ But for now the list is stored as string :-p
                     <span class="h4">
                         <a href="{{ citation.get_absolute_url }}">{{ citation.title }}</a>
                     </span>
-                    {% if citation.resolutions.count > 0 %}
+                    {% if citation_resolution %}
                     <div class="h5">
-                        Matched to <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+                        Matched to <a class="text-warning" href="{{ citation_resolution.get_absolute_url }}">{{ citation }}</a>
                     </div>
                     {% endif %}
                     {% if citation.abstract %}
@@ -92,15 +97,23 @@ But for now the list is stored as string :-p
                       {% if matching_citations|get_from_dict:citation.id %}
                       {% with matching_citations|get_from_dict:citation.id as matches %}
                         {% for cit, match_types in matches.items %}
-                      <ul>
-                        {% with cit.id|get_periodical_or_book_series as series %}
-                        {% with cit|get_book_if_chapter as book %}
-                        {% with cit|get_publisher as publisher %}
-                        <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
-                      </ul>
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
+                        {% if cit == 'MORE' %}
+                        <ul>
+                          <li>There are {{ match_types }} citation matched by title that are not displayed here. <a href="{% url 'possible_matching_citations' accession.id citation.id %}" target="_blank">Show matches in new window.</a></li>
+                        </ul>
+                        {% else %}
+                        <ul>
+                          {% with cit|get_periodical_or_book_series as series %}
+                          {% with cit|get_book_if_chapter as book %}
+                          {% with cit|get_publisher as publisher %}
+                          {% with cit|get_authors_editors_no_type as authors %}
+                          <li>{% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ authors}}. {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
+                          {% endwith %}
+                          {% endwith %}
+                          {% endwith %}
+                          {% endwith %}
+                        </ul>
+                        {% endif %}
                       {% endfor %}
                       {% endwith %}
                       {% endif %}
@@ -108,12 +121,13 @@ But for now the list is stored as string :-p
                     {% endif %}
 
                     </div>
-                    {% if acrelations.count > 0 %}
+                    {% if all_acrelations.count > 0 %}
                     <ul class="list-group">
 
-                        {% for acrelation in acrelations %}
+                        {% for acrelation in all_acrelations %}
                             {% with acrelation.authority as authority %}
-                                <div class="list-group-item clearfix"
+                            {% with authority.resolutions.first as authority_resolution %}
+                                <div class="list-group-item clearfix {% if authority_resolution %}disabled{% endif %} {% if not authority_resolution and authority.processed %}list-group-item-danger{% endif %}"
                                     id="authority-{{ authority.id }}"
                                     data-id="{{ authority.id }}"
                                     data-name="{{ authority.name }}"
@@ -122,26 +136,51 @@ But for now the list is stored as string :-p
                                     data-last-name="{{ authority.name_last }}"
                                     {% endif %}
                                     data-type="{{ authority.type_controlled }}">
+                                    {% if authority %}
                                     <a class="glyphicon glyphicon-pencil"
                                         href="{% url "change_draftauthority" authority.id %}?next={% url "retrieve_accession" accession.id %}"></a>
-                                    <a class="draftauthority"
-                                        id="authority-{{ authority.id }}-link"
-                                        data-id="{{ authority.id }}"
-                                        data-name="{{ authority.name }}"
-                                        {% if authority.type_controlled == "PE" %}
-                                        data-first-name="{{ authority.name_first }}"
-                                        data-last-name="{{ authority.name_last }}"
-                                        {% endif %}
-                                        data-type="{{ authority.type_controlled }}">
-                                        <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
+                                    {% endif %}
+                                    {% if not authority_resolution and not authority.processed %}
+                                      <a class="draftauthority"
+                                          id="authority-{{ authority.id }}-link"
+                                          data-id="{{ authority.id }}"
+                                          data-name="{{ authority.name }}"
+                                          {% if authority.type_controlled == "PE" %}
+                                          data-first-name="{{ authority.name_first }}"
+                                          data-last-name="{{ authority.name_last }}"
+                                          {% endif %}
+                                          data-type="{{ authority.type_controlled }}">
+                                          <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <strong>{{ authority.name }}</strong>
                                         <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                                    </a>
+                                      </a>
+                                      {% elif authority_resolution and authority.processed%}
+                                      <span class="text-info">
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }} <span class="glyphicon glyphicon-chevron-right"></span>
+                                      {{ authority_resolution.name }} ({{authority_resolution.id}})
+                                      <div class="pull-right">
+                                      <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
+                                      </div>
+                                      </span>
+                                      </span>
+                                      {% else %}
+                                      <span class="text-info">
+                                      <span class="label label-primary">{{acrelation.get_type_controlled_display }} : {{ authority.get_type_controlled_display }}</span> <span class="resolved">{{ authority.name }}
+                                        <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>
+                                      <div class="pull-right">
+                                        <a href="#" class="deleteDraftAuthority" data-draftauthority-id="{{ authority.id }}"><span class="glyphicon glyphicon-trash"></span></a>
+                                      </div>
+                                      </span>
+                                      </span>
+                                      {% endif %}
                                 </div>
+                            {% endwith %}
                             {% endwith %}
                         {% endfor %}
                     </ul>
                     {% endif %}
                 </div>
+            {% endwith %}
+            {% endwith %}
             {% endwith %}
             {% endfor %}
 
@@ -155,7 +194,7 @@ But for now the list is stored as string :-p
                   </span>
                   <div class="h5" style="line-height: 20px;">
                       <span class="label label-warning">Matched to</span>
- <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+ <a class="text-warning" href="{{ citation.resolutions.first.get_absolute_url }}">{{ citation }}</a>
                   </div>
                   <h5>The following citations link to this production citation:</h5>
                   <ul class="list-group">
@@ -221,6 +260,10 @@ But for now the list is stored as string :-p
 
                             </div>
                         </div>
+                        <center>
+                          <i id="searchIndicator" class="fa fa-refresh fa-spin fa-fw" style="display:none;"></i>
+                          <p id="noResultsIndicator" style="display:none;">No results found.</p>
+                        </center>
                         <ul class="list-group" id="results-container" style="max-height: 400px; overflow-y: scroll;"></ul>
                     </div>
 
@@ -240,12 +283,12 @@ var toggleTab = function(name) {
 }
 
 $('#search-tab').on('shown.bs.tab', function(e) {
-    console.log('Show search tab');
     $('#authority-search').focus();
 });
 </script>
 
 <script>
+//# sourceURL=accession.js
 var opts = {
   lines: 13 // The number of lines to draw
 , length: 4 // The length of each line
@@ -281,116 +324,11 @@ var format_citations = function(related_citations) {
     return _doc;
 }
 
-$('.draftauthority').click(function() {
-
-    toggleTab('search');
-
-    var elem = $(this);
-    // elem.scrollTop();
-    $('body').scrollTop(elem.offset().top - 250);
-    $('.selected').removeClass('selected');
-
-    elem.parent().addClass('selected');
-    var draftauthority_id = elem.attr('data-id');
-
-    selected_authority = draftauthority_id;
-    selected_authority_name = elem.attr('data-name');
-    selected_authority_type = elem.attr('data-type');
-    selected_authority_first_name = elem.attr('data-first-name');
-    selected_authority_last_name = elem.attr('data-last-name');
-
-    bindCreateNew();
-    bindSkip();
-
-    // Reset search.
-    $('#results-container').empty();
-    $('#authority-search').val(selected_authority_name);
-    $('#authority-search-filter-type').val(selected_authority_type);
-
-
-    $('#authority-search').trigger('keyup');
-    $('#matching').css('visibility', 'visible');
-
-    // $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + String(max_results) + "&show_inactive=false&q=" + selected_authority_name, {
-    //     beforeSend: function(response) {
-    //         elem.find('.suggestion-status').spin(opts);
-    //     },
-    //     success: function(response) {
-    //         console.log(response);
-    //         $('#matching').css('visibility', 'visible');
-    //
-    //         var target = $('.suggestion-results-list');
-    //         target.empty();
-    //         if (response.results.length == 0) {
-    //             target.append('<div class="alert alert-warning">No matches found</div>');
-    //         } else {
-    //
-    //             response.results.forEach(function(suggestion) {
-    //                 var suggestElem = `
-    //                     <li class="list-group-item">
-    //                         <div class="row">
-    //                             <div class="col-xs-2">
-    //                                 <span class="button-group button-group-md">
-    //                                     <a class="glyphicon glyphicon-ok btn btn-md resolve-with-suggestion"
-    //                                         id="authority-suggestion-` + suggestion.id + `"
-    //                                         data-suggestion="` + suggestion.id + `"
-    //                                         data-authority="` + draftauthority_id + `"
-    //                                         data-name="` + suggestion.name + `">
-    //                                     </a>
-    //                                 </span>
-    //                             </div>
-    //                             <div class="col-xs-10">
-    //                                 <div class="h5">
-    //                                     <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
-    //                                         class="suggested-authority-anchor"
-    //                                         target="_blank"
-    //                                         data-toggle="tooltip"
-    //                                         data-container="body"
-    //                                         data-html="true"
-    //                                         data-placement="left"
-    //                                         data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
-    //                                     <div class="pull-right col-sm-3">
-    //                                         <div class="progress" style="height: 14px;">
-    //                                             <div class="progress-bar"
-    //                                                 role="progressbar"
-    //                                                 aria-valuenow="`+ suggestion.match +`"
-    //                                                 aria-valuemin="0"
-    //                                                 aria-valuemax="1"
-    //                                                 style="width: `+ suggestion.match*100 +`%;">
-    //                                                     <span class="sr-only">`+ suggestion.match +`</span>
-    //                                             </div>
-    //                                         </div>
-    //                                     </div>
-    //                                 </div>
-    //                                 <div>
-    //                                     <span class="h5 text-danger">
-    //                                         ` + suggestion.type_controlled + `
-    //                                     </span>
-    //                                 </div>
-    //
-    //                                 <div class="suggestion-reasons">
-    //                 `;
-    //
-    //                 target.append(suggestElem);
-    //             });
-    //
-    //             $('.suggested-authority-anchor[data-toggle="tooltip"]').tooltip({
-    //                 template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-    //             });
-    //         }
-    //
-    //         $('#input_for_' + elem.attr('id') + '_text').on('change', function() {
-    //             $('#suggestions_for_' + elem.attr('id') + '_radio').val($(this).val());
-    //         });
-    //         bindSuggestions();
-    //
-    //     }
-    // });
-});
-
 $(document).ready(function() {
+
     var lastSearch = $.now();
     var waiting = false;
+    var hasSearched = false;
     bindModal();
 
     $('#authority-search-filter-type').change(function(e) {
@@ -398,8 +336,9 @@ $(document).ready(function() {
     });
 
     $('#authority-search').on('keyup', function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
+        if (hasSearched && ($.now() - lastSearch < 500 || waiting)) return;
         lastSearch = $.now();
+        hasSearched = true;
         waiting = true;
 
         var query = $(this).val();
@@ -409,13 +348,21 @@ $(document).ready(function() {
             search_endpoint += "&type=" + filter_type;
         }
 
+        $("#searchIndicator").show();
+        $("#noResultsIndicator").hide();
         $.ajax(search_endpoint, {
             failure: function(result) {
                 waiting = false;
+                $("#searchIndicator").hide();
+                $("#noResultsIndicator").show();
             },
             success: function(result) {
                 waiting = false;
                 $('#results-container').empty();
+
+                if (result.results.length == 0) {
+                  $("#noResultsIndicator").show();
+                }
                 result.results.forEach(function(suggestion) {
                     var description;
                     if (suggestion.description != null) {
@@ -473,18 +420,100 @@ $(document).ready(function() {
                     $('#id_acrelation-authority').val(selected_id);
                 });
                 bindSearchSelect();
+                $("#searchIndicator").hide();
             }
         });
     });
+
+    $('.draftauthority').click(function() {
+        toggleTab('search');
+
+        var elem = $(this);
+        // elem.scrollTop();
+        $('body').scrollTop(elem.offset().top - 250);
+        $('.selected').removeClass('selected');
+
+        elem.parent().addClass('selected');
+        var draftauthority_id = elem.attr('data-id');
+
+        selected_authority = draftauthority_id;
+        selected_authority_name = elem.attr('data-name');
+        selected_authority_type = elem.attr('data-type');
+        selected_authority_first_name = elem.attr('data-first-name');
+        selected_authority_last_name = elem.attr('data-last-name');
+
+        bindCreateNew();
+        bindSkip();
+
+        // Reset search.
+        $('#results-container').empty();
+        $('#authority-search').val(selected_authority_name);
+        $('#authority-search-filter-type').val(selected_authority_type);
+
+
+        $('#authority-search').trigger('keyup');
+        $('#matching').css('visibility', 'visible');
+
+    });
+
+    $(".deleteDraftAuthority").click(function(e) {
+      e.preventDefault();
+      var authorityId = $(this).data('draftauthority-id');
+      $.ajax({
+        url: '{% url "retrieve_accession" accession.id %}drafts/authority/' + authorityId,
+        type: 'DELETE',
+        success: function(result) {
+            $("#authority-" + authorityId).remove();
+        }
+      });
+    });
+
+    {% if draft_authority_id and resolved_authority_id %}
+    resolveAndCleanupAuthorties("{{ draft_authority_id }}", "{{ resolved_authority_id }}", "{{ resolved_authority_name }}");
+    {% endif %}
 });
+
+function resolveAndCleanupAuthorties(draftauthority_id, created_authority_id, created_authority_name) {
+  triggerResolveAuthority(draftauthority_id, created_authority_id);
+  getSimilarAuthorities(draftauthority_id, function(count, ids) {
+
+      //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
+
+      ids.forEach(function(di) {
+          triggerResolveAuthority(di, created_authority_id);
+      });
+  });
+
+  cleanupResolvedAuthority(draftauthority_id, created_authority_id, created_authority_name);
+}
 
 var selectNextAuthority = function() {
     $('.draftauthority').first().trigger('click');
 }
 
-var cleanupResolvedAuthority = function(draftauthority_id) {
-    $("#authority-" + draftauthority_id).remove();
-    $('#matching').css('visibility', 'hidden');
+var cleanupResolvedAuthority = function(draftauthority_id, authority_id, authority_name) {
+    if (authority_id != null && authority_id != "") {
+      $("#authority-" + draftauthority_id).addClass("disabled");
+    } else {
+      $("#authority-" + draftauthority_id).addClass("list-group-item-danger");
+    }
+    var drafAuthorityName = $("#authority-" + draftauthority_id).data('name');
+    var label = $("#authority-" + draftauthority_id + " span.label-primary");
+    $("#authority-" + draftauthority_id + "-link").remove();
+    $("#authority-" + draftauthority_id + ">.text-info").remove();
+
+    var span = $('<span class="text-info"></span>');
+    span.append(label);
+    var textSpan = $('<span class="resolved"></span>')
+    var textContent = " " + drafAuthorityName;
+    if (authority_id != null && authority_id != "") {
+      textContent += ' <span class="glyphicon glyphicon-chevron-right"></span> ' + authority_name + ' (' + authority_id + ')';
+    } else {
+      textContent += ' <i class="fa fa-chain-broken" aria-hidden="true" title="Draft Authority was skipped."></i>';
+    }
+    textSpan.append(textContent);
+    span.append(textSpan);
+    $("#authority-" + draftauthority_id).append(span);
     selectNextAuthority();
 }
 
@@ -509,7 +538,8 @@ var bindSearchSelect = function() {
         var suggestion_id = suggestElem.attr('data-suggestion'),
             draftauthority_id = suggestElem.attr('data-authority'),
             suggestion_name = suggestElem.attr('data-name');
-        promptResolveModal(draftauthority_id, suggestion_id, suggestElem.attr('data-name'));
+        resolveConfirmedAuthority(draftauthority_id, suggestion_id);
+        //promptResolveModal(draftauthority_id, suggestion_id, suggestElem.attr('data-name'));
     });
 }
 
@@ -549,31 +579,13 @@ var confirmResolveModal = function() {
     $('#bulkapply').val(false);
 }
 
-
-/**
-  *  Execute resolution through creation of a new production authority record.
-  */
-var confirmCreateModal = function() {
-    //console.log('create a new authority:: confirmed');
-    var authority_name = $('#draftauthority_name_edit-create').val();
-    var authority_first_name = $('#draftauthority_first_name_edit-create').val();
-    var authority_last_name = $('#draftauthority_last_name_edit-create').val();
-    $('#prompt-create-modal').modal('hide');
-    var draftauthority_id = $('#draftauthority-id-container-create').val();
-    triggerCreateAuthority(draftauthority_id, authority_name, authority_first_name, authority_last_name, function(created_authority_id) {
-        console.log('create a new authority:: done');
-        getSimilarAuthorities(draftauthority_id, function(count, ids) {
-
-            //console.log('create a new authority:: apply resolution to ' + ids.length + ' other DraftAuthority records');
-
-            ids.forEach(function(di) {
-                triggerResolveAuthority(di, created_authority_id);
-            });
-        });
-
-        cleanupResolvedAuthority(draftauthority_id);
-    });
-
+function resolveConfirmedAuthority(draftauthority_id, suggestion_id) {
+  triggerResolveAuthority(draftauthority_id, suggestion_id);
+  getSimilarAuthorities(draftauthority_id, function(count, ids) {
+      ids.forEach(function(di) {
+          triggerResolveAuthority(di, suggestion_id);
+      });
+  });
 }
 
 var confirmSkipModal = function() {
@@ -583,50 +595,37 @@ var confirmSkipModal = function() {
         getSimilarAuthorities(draftauthority_id, function(count, ids) {
             ids.forEach(function(di) {
                 triggerSkipAuthority(di, function() {
-                    cleanupResolvedAuthority(di)
+                    cleanupResolvedAuthority(di, '', '')
                 });
             });
         });
 
-        cleanupResolvedAuthority(draftauthority_id);
+        cleanupResolvedAuthority(draftauthority_id, '', '');
     });
 
 }
 
 var bindCreateNew = function() {
     $('.resolve-with-create').click(function(e) {
-        var suggestElem = $(this);
-        getSimilarAuthorities(selected_authority, function(count, ids) {
-            $('#draftauthority-id-container-create').val(selected_authority);
-            // $('#authority-id-container-create').val(suggestion_id);
-            $('#similar_authority_count-create').text(count);
-            $('#draftauthority_name-create').text(selected_authority_name);
-            $('#draftauthority_name_edit-create').val(selected_authority_name);
-            if (selected_authority_type == 'PE') {
-              $('#draftauthority_first_name_edit-create').val(selected_authority_first_name);
-              $('#draftauthority_last_name_edit-create').val(selected_authority_last_name);
-              $('#person_info').show();
-            } else {
-              $('#person_info').hide();
-            }
-            // $('#authority_name-create').text(sname);
-            $('#prompt-create-modal').modal('show');
-        });
+      window.location = "{% url 'curation:create_authority' %}?zotero_accession={{ accession.id }}&name=" + selected_authority_name + "&draft_authority_id=" + selected_authority + "&selected_authority_type=" + selected_authority_type;
     });
 }
 
 
 var bindSkip = function() {
     $('.resolve-with-skip').click(function(e) {
-        var suggestElem = $(this);
-        getSimilarAuthorities(selected_authority, function(count, ids) {
-            $('#draftauthority-id-container-skip').val(selected_authority);
-            // $('#authority-id-container-create').val(suggestion_id);
-            $('#similar_authority_count-skip').text(count);
-            $('#draftauthority_name-skip').text(selected_authority_name);
-            // $('#authority_name-create').text(sname);
-            $('#prompt-skip-modal').modal('show');
-        });
+      var draftauthority_id = selected_authority;
+      triggerSkipAuthority(draftauthority_id, function() {
+          getSimilarAuthorities(draftauthority_id, function(count, ids) {
+              ids.forEach(function(di) {
+                  triggerSkipAuthority(di, function() {
+                      cleanupResolvedAuthority(di, '', '')
+                  });
+              });
+          });
+
+          cleanupResolvedAuthority(draftauthority_id, '', '');
+      });
     });
 }
 
@@ -644,7 +643,7 @@ var triggerSkipAuthority = function(draftauthority_id, callback) {
 
 var triggerResolveAuthority = function(draftauthority_id, authority_id) {
     $.get("{% url "resolve_authority" %}?authority=" + authority_id + "&draftauthority=" + draftauthority_id, function(result) {
-        cleanupResolvedAuthority(draftauthority_id);
+        cleanupResolvedAuthority(draftauthority_id,result['data']['authority_id'], result['data']['authority_name']);
     })
 }
 

@@ -1,6 +1,10 @@
+from __future__ import unicode_literals
+from builtins import str
+from past.builtins import basestring
 from django import template
 from django.utils.safestring import SafeText
 from django.db.models import Q
+from django.db.utils import ProgrammingError
 
 from isisdata.models import *
 import logging
@@ -13,6 +17,8 @@ try:
     PUBLICATION_DATE = AttributeType.objects.get(name='PublicationDate').id
 except AttributeType.DoesNotExist:
     PUBLICATION_DATE = -1
+except ProgrammingError as e:
+    print("Could not get publication dates.", e)
 
 @register.filter(name='render_object')
 def render_object(obj):
@@ -72,8 +78,7 @@ def get_citation_title(obj):
 
 @register.filter(name='get_publisher')
 def get_publisher(obj):
-    acrel = obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
-    return acrel
+    return obj.acrelations.filter(type_controlled=ACRelation.PUBLISHER).first()
 
 @register.filter(name='get_isbn')
 def get_isbn(obj):
@@ -85,10 +90,26 @@ def get_doi(obj):
     return obj.linkeddata_entries.filter(type_controlled__name__icontains='doi').first()
 
 
-
 @register.filter(name='get_authors_editors')
 def get_authors_editors(obj):
-    return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
+    author_names = []
+    for relation in obj.acrelations:
+        if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]:
+            name = getattr(relation.authority, 'name', None)
+            if not name:
+                name = getattr(relation, 'name_for_display_in_citation') or "missing"
+            name = name + ' ('+  relation.get_type_controlled_display() + ') '
+            author_names.append(name)
+
+    return ', '.join(author_names)
+
+@register.filter
+def get_authors_editors_relations(obj):
+    return [relation for relation in obj.acrelations if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]]
+
+@register.filter(name='get_authors_editors_no_type')
+def get_authors_editors_no_type(obj):
+    return ', '.join([getattr(relation.authority, 'name', 'missing') for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.EDITOR]])
 
 
@@ -97,13 +118,17 @@ def get_authors_advisors(obj):
     return ', '.join([getattr(relation.authority, 'name', 'missing') + ' ('+  relation.get_type_controlled_display() + ')' for relation in obj.acrelations
                 if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.ADVISOR]])
 
+@register.filter
+def get_authors_advisors_relations(obj):
+    return [relation for relation in obj.acrelations if relation.type_controlled in [ACRelation.AUTHOR, ACRelation.ADVISOR]]
+
 
 @register.filter(name='get_authors_editors_preloaded')
 def get_authors_editors_preloaded(citation_id):
     rtypes = [ACRelation.AUTHOR, ACRelation.EDITOR]
-    qs = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'type_controlled')
+    qs = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'type_controlled', 'name_for_display_in_citation')
     rtype_display = dict(ACRelation.TYPE_CHOICES)
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', 'missing') or 'missing', rtype_display[obj['type_controlled']]), qs))
+    return ', '.join(['%s (%s)' % (obj.get('authority__name', None) or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or 'missing', rtype_display[obj['type_controlled']]) for obj in qs])
 
 
 @register.filter(name='get_citation_pubdate')
@@ -112,7 +137,7 @@ def get_citation_pubdate(obj):
         if attribute.type_controlled.name == 'PublicationDate':
             try:
                 return attribute.value.get_child_class().__unicode__()
-            except Exception, e:
+            except Exception as e:
                 logger.error("Could not get publication date.")
                 logger.error(e)
                 return ""
@@ -164,10 +189,10 @@ def get_citation_pubdate_fast(obj):
 @register.filter
 def get_reviewed_books(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEW_OF, subject__id=citation.id))
-    citations =  map(lambda x: x.object, ccrelations)
+    citations =  [x.object for x in ccrelations]
 
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.REVIEWED_BY, object__id=citation.id))
-    citations = citations + map(lambda x: x.subject, ccrelations)
+    citations = citations + [x.subject for x in ccrelations]
 
     return citations
 
@@ -175,7 +200,7 @@ def get_reviewed_books(citation):
 @register.filter
 def get_including_book(citation):
     ccrelations = citation.ccrelations.filter(Q(type_controlled=CCRelation.INCLUDES_CHAPTER, object__id=citation.id))
-    citations =  map(lambda x: x.subject, ccrelations)
+    citations =  [x.subject for x in ccrelations]
 
     return citations
 
@@ -189,9 +214,13 @@ def get_pub_title_and_year(citation):
 def get_citation_periodical(citation_id):
     rtypes = [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
     atype_display = dict(Authority.TYPE_CHOICES)
-    relations = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled')
-    return ', '.join(map(lambda obj: '%s (%s)' % (obj.get('authority__name', ''), atype_display.get(obj['authority__type_controlled'], 'none')), relations))
+    relations = ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes).values('authority__name', 'authority__type_controlled', 'name_for_display_in_citation')
+    return ', '.join(['%s (%s)' % (obj.get('authority__name') or (obj.get('name_for_display_in_citation') + " [no link]" if obj.get('name_for_display_in_citation') else None) or "missing", atype_display.get(obj['authority__type_controlled'], 'none')) for obj in relations])
 
+@register.filter
+def get_citation_periodical_relations(citation_id):
+    rtypes = [ACRelation.PUBLISHER, ACRelation.PERIODICAL, ACRelation.BOOK_SERIES]
+    return ACRelation.objects.filter(citation_id=citation_id, type_controlled__in=rtypes)
 
 @register.filter(name='get_page_numbers')
 def get_page_numbers(obj):
@@ -269,3 +298,32 @@ def cut_characters(string, cut):
     if string and len(string) > cut:
         return string[:cut]
     return string
+
+@register.filter
+def order_by(queryset, args):
+    args = [x.strip() for x in args.split(',')]
+    return queryset.order_by(*args)
+
+@register.filter
+def get_other_relation_side(ccrel, elem):
+    if ccrel.subject.id == elem.id:
+        return ccrel.object
+    return ccrel.subject
+
+@register.filter('startswith')
+def startswith(text, starts):
+    if isinstance(text, basestring):
+        return text.startswith(starts)
+    return False
+
+@register.filter
+def get_label_class(authority):
+    label_classes = {
+        Authority.TIME_PERIOD: "chronology",
+        Authority.GEOGRAPHIC_TERM: "geography",
+        Authority.PERSON: "person",
+        Authority.INSTITUTION: "institution",
+        Authority.CONCEPT: "concept",
+    }
+
+    return label_classes.get(authority.type_controlled, "other")

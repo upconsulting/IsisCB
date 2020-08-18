@@ -1,3 +1,10 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 from django import forms
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.contenttypes.models import ContentType
@@ -26,14 +33,13 @@ from rest_framework.reverse import reverse
 
 # import rest_framework_filters as filters
 
-from oauth2_provider.ext.rest_framework import TokenHasScope, OAuth2Authentication
-
-from urllib import quote, urlopen
+from urllib.parse import quote
+from urllib.request import urlopen
 import codecs, datetime, uuid, base64, zlib, locale
 
 from collections import defaultdict
-from helpers.mods_xml import initial_response, generate_mods_xml
-from helpers.linked_data import generate_authority_rdf, generate_citation_rdf
+from .helpers.mods_xml import initial_response, generate_mods_xml
+from .helpers.linked_data import generate_authority_rdf, generate_citation_rdf
 from ipware.ip import get_real_ip
 import xml.etree.ElementTree as ET
 
@@ -70,13 +76,13 @@ class ValueSerializer(serializers.HyperlinkedModelSerializer):
     value = serializers.ReadOnlyField(source='cvalue')
     value_type = ReadOnlyLowerField(source='child_class')
 
-    class Meta:
+    class Meta(object):
         model = Value
         fields = ('value', 'value_type')
 
 
 class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = ContentType
         fields = ('url', 'model')
 
@@ -84,7 +90,7 @@ class ContentTypeSerializer(serializers.HyperlinkedModelSerializer):
 class AttributeTypeSerializer(serializers.HyperlinkedModelSerializer):
     content_type = ContentTypeSerializer(source='value_content_type')
 
-    class Meta:
+    class Meta(object):
         model = AttributeType
         fields = ('url', 'id', 'name', 'content_type')
 
@@ -94,7 +100,7 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
     source = GenericHyperlink(many=False, read_only=True)
     value = ValueSerializer(many=False, read_only=True)
 
-    class Meta:
+    class Meta(object):
         model = Attribute
         fields = ('uri', 'url', 'id',
                   'type_controlled',
@@ -105,13 +111,13 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LanguageSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = Language
         fields = ('url', 'id', 'name')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = User
         fields = ('url', 'id', 'username', 'date_joined')
 
@@ -125,7 +131,7 @@ class ContentTypeRelatedField(serializers.RelatedField):
         return ContentType.objects.get(pk=data)
 
 class UserRelatedSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = User
         fields = ('id', 'username')
 
@@ -144,7 +150,7 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
     linkified = serializers.ReadOnlyField()
     id = serializers.ReadOnlyField()
 
-    class Meta:
+    class Meta(object):
         model = Comment
         fields = '__all__'
 
@@ -173,14 +179,14 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LinkedDataTypeSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = LinkedDataType
         fields = '__all__'
 
 
 class LinkedDataSerializer(serializers.HyperlinkedModelSerializer):
     type_controlled = LinkedDataTypeSerializer(many=False)
-    class Meta:
+    class Meta(object):
         model = LinkedData
         fields = ('universal_resource_name', 'description', 'type_controlled')
 
@@ -190,7 +196,7 @@ class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = CCRelation
 
         fields = ('uri', 'url', 'id',
@@ -202,7 +208,7 @@ class CCRelationSerializer(serializers.HyperlinkedModelSerializer):
                   'linked_data')
 
 class CCRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = CCRelation
 
         fields = ('uri', 'url', 'id',
@@ -216,7 +222,7 @@ class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = ACRelation
 
         fields = ('uri', 'url', 'id',
@@ -229,7 +235,7 @@ class ACRelationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class ACRelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = ACRelation
 
         fields = ('uri', 'url', 'id',
@@ -243,7 +249,7 @@ class AARelationSerializer(serializers.HyperlinkedModelSerializer):
     linked_data = LinkedDataSerializer(many=True, read_only=True,
                                        source='linkeddata_entries')
 
-    class Meta:
+    class Meta(object):
         model = AARelation
 
         fields = ('uri', 'url', 'id',
@@ -256,7 +262,7 @@ class AARelationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AARelationSparseSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = AARelation
 
         fields = ('uri', 'url', 'id',
@@ -274,7 +280,7 @@ class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
     related_authorities = AARelationSparseSerializer(read_only=True, many=True,
                                                      source='aarelations')
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = ('id', 'uri', 'url', 'name',
                   'description',
@@ -315,7 +321,7 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
     related_authorities = ACRelationSparseSerializer(read_only=True, many=True,
                                                source='acrelations')
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = ('uri', 'url', 'id',
                   'title',
@@ -332,7 +338,7 @@ class CitationSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class PartDetailsSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
+    class Meta(object):
         model = PartDetails
         fields = '__all__'
 
@@ -570,86 +576,86 @@ def statistics(request):
     # set timeout (in sec) to one day
     cache_timeout = 86400
 
-    cache = caches['default']
-    citations_count = cache.get('statistics_citation')
-    if not citations_count:
-        citations_count = Citation.objects.filter(public=True).count()
-        cache.set('statistics_citation', citations_count, cache_timeout)
+    # cache = caches['default']
+    # citations_count = cache.get('statistics_citation')
+    # if not citations_count:
+    #     citations_count = Citation.objects.filter(public=True).count()
+    #     cache.set('statistics_citation', citations_count, cache_timeout)
 
-    authority_count = cache.get('statistics_authority')
-    if not authority_count:
-        authority_count = Authority.objects.filter(public=True).count()
-        cache.set('statistics_authority', authority_count, cache_timeout)
-
-    acrelation_count = cache.get('statistics_acrelation')
-    if not acrelation_count:
-        acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
-        cache.set('statistics_acrelation', acrelation_count, cache_timeout)
-
-    ccrelation_count = cache.get('statistics_ccrelation')
-    if not ccrelation_count:
-        ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
-
-    aarelation_count = cache.get('statistics_aarelation')
-    if not aarelation_count:
-        aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
-        cache.set('statistics_aarelation', aarelation_count, cache_timeout)
-
-    # by curator
-    curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
-    curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
-    curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
-    curator_moon_count = _get_count_by_dataset('curators_moon',"(Suzanne Moon, ed.)", cache_timeout)
-
-    # by citation type
-    books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
-    articles_count = _get_count_citation_type('statistics_article', "AR", cache_timeout)
-    chapters_count = _get_count_citation_type('statistics_chapter', "CH", cache_timeout)
-    reviews_count = _get_count_citation_type('statistics_review', "RE", cache_timeout)
-    theses_count = _get_count_citation_type('statistics_thesis', "TH", cache_timeout)
-
-    # by authority type
-    persons_count = _get_count_authority_type('statistics_person', "PE", cache_timeout)
-    institutions_count = _get_count_authority_type('statistics_institution', "IN", cache_timeout)
-    time_periods_count = _get_count_authority_type('statistics_time_period', "TI", cache_timeout)
-    geographic_terms_count = _get_count_authority_type('statistics_geographic_term', "GE", cache_timeout)
-    serial_publications_count = _get_count_authority_type('statistics_serial_publication', "SE", cache_timeout)
-    classification_terms_count = _get_count_authority_type('statistics_classification_term', "CT", cache_timeout)
-    concepts_count = _get_count_authority_type('statistics_concepts', "CO", cache_timeout)
-    creative_works_count = _get_count_authority_type('statistics_creative_work', "CW", cache_timeout)
-    events_count = _get_count_authority_type('statistics_event', "EV", cache_timeout)
-    crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
-    publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
+    # authority_count = cache.get('statistics_authority')
+    # if not authority_count:
+    #     authority_count = Authority.objects.filter(public=True).count()
+    #     cache.set('statistics_authority', authority_count, cache_timeout)
+    #
+    # acrelation_count = cache.get('statistics_acrelation')
+    # if not acrelation_count:
+    #     acrelation_count = ACRelation.objects.select_related('citation').select_related('authority').filter(public=True, citation__public=True, authority__public=True).count()
+    #     cache.set('statistics_acrelation', acrelation_count, cache_timeout)
+    #
+    # ccrelation_count = cache.get('statistics_ccrelation')
+    # if not ccrelation_count:
+    #     ccrelation_count = CCRelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+    #     cache.set('statistics_ccrelation', ccrelation_count, cache_timeout)
+    #
+    # aarelation_count = cache.get('statistics_aarelation')
+    # if not aarelation_count:
+    #     aarelation_count = AARelation.objects.select_related('subject').select_related('object').filter(public=True, subject__public=True, object__public=True).count()
+    #     cache.set('statistics_aarelation', aarelation_count, cache_timeout)
+    #
+    # # by curator
+    # curator_neu_count = _get_count_by_dataset('curators_neu',"(John Neu, ed.)", cache_timeout)
+    # curator_harvey_count = _get_count_by_dataset('curators_harvey',"(Joy Harvey, ed.)", cache_timeout)
+    # curator_weldon_count = _get_count_by_dataset('curators_weldon',"(Stephen P. Weldon, ed.)", cache_timeout)
+    # curator_moon_count = _get_count_by_dataset('curators_moon',"(Suzanne Moon, ed.)", cache_timeout)
+    #
+    # # by citation type
+    # books_count = _get_count_citation_type('statistics_book', "BO", cache_timeout)
+    # articles_count = _get_count_citation_type('statistics_article', "AR", cache_timeout)
+    # chapters_count = _get_count_citation_type('statistics_chapter', "CH", cache_timeout)
+    # reviews_count = _get_count_citation_type('statistics_review', "RE", cache_timeout)
+    # theses_count = _get_count_citation_type('statistics_thesis', "TH", cache_timeout)
+    #
+    # # by authority type
+    # persons_count = _get_count_authority_type('statistics_person', "PE", cache_timeout)
+    # institutions_count = _get_count_authority_type('statistics_institution', "IN", cache_timeout)
+    # time_periods_count = _get_count_authority_type('statistics_time_period', "TI", cache_timeout)
+    # geographic_terms_count = _get_count_authority_type('statistics_geographic_term', "GE", cache_timeout)
+    # serial_publications_count = _get_count_authority_type('statistics_serial_publication', "SE", cache_timeout)
+    # classification_terms_count = _get_count_authority_type('statistics_classification_term', "CT", cache_timeout)
+    # concepts_count = _get_count_authority_type('statistics_concepts', "CO", cache_timeout)
+    # creative_works_count = _get_count_authority_type('statistics_creative_work', "CW", cache_timeout)
+    # events_count = _get_count_authority_type('statistics_event', "EV", cache_timeout)
+    # crossreferences_count = _get_count_authority_type('statistics_crossreference', "CR", cache_timeout)
+    # publishers_count = _get_count_authority_type('statistics_publisher', "PU", cache_timeout)
 
     context = {
         'active': 'about',
-        'citations_count': citations_count,
-        'authority_count': authority_count,
-        'relation_count': acrelation_count + ccrelation_count + aarelation_count,
-        # curators
-        'curator_neu_count': curator_neu_count,
-        'curator_harvey_count': curator_harvey_count,
-        'curator_weldon_count': curator_weldon_count,
-        'curator_moon_count': curator_moon_count,
-        # citation types
-        'books_count': books_count,
-        'articles_count': articles_count,
-        'chapters_count': chapters_count,
-        'reviews_count': reviews_count,
-        'theses_count': theses_count,
-        # authority types
-        'persons_count': persons_count,
-        'institutions_count': institutions_count,
-        'time_periods_count': time_periods_count,
-        'geographic_terms_count': geographic_terms_count,
-        'serial_publications_count': serial_publications_count,
-        'classification_terms_count': classification_terms_count,
-        'concepts_count': concepts_count,
-        'creative_works_count': creative_works_count,
-        'events_count': events_count,
-        'crossreferences_count': crossreferences_count,
-        'publishers_count': publishers_count,
+        # 'citations_count': citations_count,
+        # 'authority_count': authority_count,
+        # 'relation_count': acrelation_count + ccrelation_count + aarelation_count,
+        # # curators
+        # 'curator_neu_count': curator_neu_count,
+        # 'curator_harvey_count': curator_harvey_count,
+        # 'curator_weldon_count': curator_weldon_count,
+        # 'curator_moon_count': curator_moon_count,
+        # # citation types
+        # 'books_count': books_count,
+        # 'articles_count': articles_count,
+        # 'chapters_count': chapters_count,
+        # 'reviews_count': reviews_count,
+        # 'theses_count': theses_count,
+        # # authority types
+        # 'persons_count': persons_count,
+        # 'institutions_count': institutions_count,
+        # 'time_periods_count': time_periods_count,
+        # 'geographic_terms_count': geographic_terms_count,
+        # 'serial_publications_count': serial_publications_count,
+        # 'classification_terms_count': classification_terms_count,
+        # 'concepts_count': concepts_count,
+        # 'creative_works_count': creative_works_count,
+        # 'events_count': events_count,
+        # 'crossreferences_count': crossreferences_count,
+        # 'publishers_count': publishers_count,
     }
     return render(request, 'isisdata/statistics.html', context=context)
 
@@ -680,340 +686,6 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
         count = citations_count + authorities_count
         cache.set(cache_name, count, cache_timeout)
     return count
-
-def authority(request, authority_id):
-    """
-    View for individual Authority entries.
-    """
-
-    authority = Authority.objects.get(id=authority_id)
-
-    # Some authority entries are deleted. These should be hidden from public
-    #  view.
-    if authority.record_status == Authority.DELETE or authority.record_status_value == CuratedMixin.INACTIVE:
-        raise Http404("No such Authority")
-
-    # If the user has been redirected from another Authority entry, this should
-    #  be indicated in the view.
-    redirect_from_id = request.GET.get('redirect_from')
-    if redirect_from_id:
-        redirect_from = Authority.objects.get(pk=redirect_from_id)
-    else:
-        redirect_from = None
-
-    # There are several authority entries that redirect to other entries,
-    #  usually because the former is a duplicate of the latter.
-    if (authority.record_status == Authority.REDIRECT or authority.record_status_value == CuratedMixin.REDIRECT) and authority.redirect_to is not None:
-        redirect_kwargs = {'authority_id': authority.redirect_to.id}
-        base_url = reverse('authority', kwargs=redirect_kwargs)
-        redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
-        return HttpResponseRedirect(redirect_url)
-
-    if not authority.public:
-        return HttpResponseForbidden()
-
-    show_nr = 3
-    acrelation_qs = ACRelation.objects.filter(public=True)
-    related_citations_author = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_author_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AU'], citation__public=True)\
-                                                  .distinct('citation_id')\
-                                                  .count()
-
-    related_citations_editor = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
-                                            .order_by('-citation__publication_date')[:show_nr]
-    related_citations_editor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ED'], citation__public=True)\
-                                                  .distinct('citation_id')\
-                                                  .count()
-
-    related_citations_advisor = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_advisor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['AD'], citation__public=True)\
-                                             .distinct('citation_id')\
-                                             .count()
-
-    related_citations_contributor = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_contributor_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CO'], citation__public=True)\
-                                                               .distinct('citation_id')\
-                                                               .count()
-
-    related_citations_translator = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
-                                                .order_by('-citation__publication_date')[:show_nr]
-    related_citations_translator_count = acrelation_qs.filter(authority=authority, type_controlled__in=['TR'], citation__public=True)\
-                                                .distinct('citation_id')\
-                                                .count()
-
-    related_citations_subject = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_subject_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SU'], citation__public=True)\
-                                                   .distinct('citation_id')\
-                                                   .count()
-
-    related_citations_category = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
-                                              .order_by('-citation__publication_date')[:show_nr]
-    related_citations_category_count = acrelation_qs.filter(authority=authority, type_controlled__in=['CA'], citation__public=True)\
-                                                    .distinct('citation_id')\
-                                                    .count()
-
-    related_citations_publisher = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
-                                               .order_by('-citation__publication_date')[:show_nr]
-    related_citations_publisher_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PU'], citation__public=True)\
-                                                     .distinct('citation_id')\
-                                                     .count()
-
-    related_citations_school = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
-                                            .order_by('-citation__publication_date')[:show_nr]
-    related_citations_school_count = acrelation_qs.filter(authority=authority, type_controlled__in=['SC'], citation__public=True)\
-                                                  .distinct('citation_id')\
-                                                  .count()
-
-    related_citations_institution = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_institution_count = acrelation_qs.filter(authority=authority, type_controlled__in=['IN'], citation__public=True)\
-                                                       .distinct('citation_id')\
-                                                       .count()
-
-    related_citations_meeting = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
-                                             .order_by('-citation__publication_date')[:show_nr]
-    related_citations_meeting_count = acrelation_qs.filter(authority=authority, type_controlled__in=['ME'], citation__public=True)\
-                                                   .distinct('citation_id')\
-                                                   .count()
-
-    related_citations_periodical = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
-                                                .order_by('-citation__publication_date')[:show_nr]
-    related_citations_periodical_count = acrelation_qs.filter(authority=authority, type_controlled__in=['PE'], citation__public=True)\
-                                                      .distinct('citation_id')\
-                                                      .count()
-
-    related_citations_book_series = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
-                                                 .order_by('-citation__publication_date')[:show_nr]
-    related_citations_book_series_count = acrelation_qs.filter(authority=authority, type_controlled__in=['BS'], citation__public=True)\
-                                                       .distinct('citation_id')\
-                                                       .count()
-
-    related_citations_count = acrelation_qs.filter(authority=authority, citation__public=True)\
-                                                       .distinct('citation_id')\
-                                                       .count()
-
-    # Location of authority in REST API
-    api_view = reverse('authority-detail', args=[authority.id], request=request)
-
-    # WordCloud
-    sqs =SearchQuerySet().facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100)
-    word_cloud_results = sqs.all().filter_or(author_ids__eq=authority_id).filter_or(contributor_ids__eq=authority_id) \
-            .filter_or(editor_ids__eq=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
-            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
-            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
-            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
-            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
-
-    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids']
-    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids']
-
-    # Provide progression through search results, if present.
-    last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
-    query_string = request.GET.get('query_string', None)
-    fromsearch = request.GET.get('fromsearch', False)
-    if query_string:
-        query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
-    else:
-        search_key = None
-
-    # This is the database cache.
-    user_cache = caches['default']
-    search_results = user_cache.get('search_results_authority_' + str(search_key))
-
-    # make sure we have a session key
-    if hasattr(request, 'session') and not request.session.session_key:
-        request.session.save()
-        request.session.modified = True
-
-    session_id = request.session.session_key
-    page_authority = user_cache.get(session_id + '_page_authority', None)
-
-    if search_results and fromsearch and page_authority:
-        search_count = search_results.count()
-        prev_search_result = None
-        if (page_authority > 1):
-            prev_search_result = search_results[(page_authority - 1)*20 - 1]
-
-        # if we got to the last result of the previous page we need to count down the page number
-        if prev_search_result == 'isisdata.authority.' + authority_id:
-            page_authority = page_authority - 1
-            user_cache.set(session_id + '_page_authority', page_authority)
-
-        search_results_page = search_results[(page_authority - 1)*20:page_authority*20 + 2]
-
-        try:
-            search_index = search_results_page.index('isisdata.authority.' + authority_id) + 1   # +1 for display.
-            if search_index == 21:
-                user_cache.set(session_id + '_page_authority', page_authority+1)
-
-        except (IndexError, ValueError):
-            search_index = None
-        try:
-            search_next = search_results_page[search_index]
-        except (IndexError, ValueError, TypeError):
-            search_next = None
-        try:
-            search_previous = search_results_page[search_index - 2]
-            if search_index - 2 == -1:
-                search_previous = prev_search_result
-
-        # !! Why are we catching all of these errors?
-        except (IndexError, ValueError, AssertionError, TypeError):
-            search_previous = None
-        if search_index:
-            search_current = search_index + (20* (page_authority - 1))
-        else:
-            search_current = None
-    else:
-        search_index = None
-        search_next = None
-        search_previous = None
-        search_current = None
-        search_count = None
-
-
-    context = {
-        'authority_id': authority_id,
-        'authority': authority,
-        'related_citations_count': related_citations_count,
-        'related_citations_author': related_citations_author,
-        'related_citations_author_count': related_citations_author_count,
-        'related_citations_editor': related_citations_editor,
-        'related_citations_editor_count': related_citations_editor_count,
-        'related_citations_advisor': related_citations_advisor,
-        'related_citations_advisor_count': related_citations_advisor_count,
-        'related_citations_contributor': related_citations_contributor,
-        'related_citations_contributor_count': related_citations_contributor_count,
-        'related_citations_translator': related_citations_translator,
-        'related_citations_translator_count': related_citations_translator_count,
-        'related_citations_subject': related_citations_subject,
-        'related_citations_subject_count': related_citations_subject_count,
-        'related_citations_category': related_citations_category,
-        'related_citations_category_count': related_citations_category_count,
-        'related_citations_publisher': related_citations_publisher,
-        'related_citations_publisher_count': related_citations_publisher_count,
-        'related_citations_school': related_citations_school,
-        'related_citations_school_count': related_citations_school_count,
-        'related_citations_institution': related_citations_institution,
-        'related_citations_institution_count': related_citations_institution_count,
-        'related_citations_meeting': related_citations_meeting,
-        'related_citations_meeting_count': related_citations_meeting_count,
-        'related_citations_periodical': related_citations_periodical,
-        'related_citations_periodical_count': related_citations_periodical_count,
-        'related_citations_book_series': related_citations_book_series,
-        'related_citations_book_series_count': related_citations_book_series_count,
-        'source_instance_id': authority_id,
-        'source_content_type': ContentType.objects.get(model='authority').id,
-        'api_view': api_view,
-        'redirect_from': redirect_from,
-        'search_results': search_results,
-        'search_index': search_index,
-        'search_next': search_next,
-        'search_previous': search_previous,
-        'search_current': search_current,
-        'search_count': search_count,
-        'fromsearch': fromsearch,
-        'last_query': last_query,
-        'query_string': query_string,
-        'subject_ids_facet': subject_ids_facet,
-        'related_contributors_facet': related_contributors_facet,
-    }
-    return render(request, 'isisdata/authority.html', context)
-
-def authority_author_timeline(request, authority_id):
-    now = datetime.datetime.now()
-
-    cache = caches['default']
-    cache_data = cache.get(authority_id + '_count_data', {})
-
-    if cache_data:
-        return JsonResponse(cache_data)
-
-    acrelations = ACRelation.objects.all().prefetch_related(Prefetch('citation')).filter(
-        authority__id=authority_id, public=True, citation__public=True,
-        citation__attributes__type_controlled__name="PublicationDate").order_by('-citation__publication_date')
-    books = {}
-    theses = {}
-    chapters = {}
-    articles = {}
-    reviews = {}
-    others = {}
-    years = []
-
-    counted_citations = []
-    def update_stats(dictionary, acrel):
-        if acrel.citation.id in counted_citations:
-            return
-        counted_citations.append(acrel.citation.id)
-        record = dictionary.get(acrel.citation.publication_date.year, (0, []))
-        title = acrel.citation.title_for_display if acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW] else acrel.citation.title
-        dictionary[acrel.citation.publication_date.year] = (record[0] + 1, record[1] + [title])
-
-    for acrel in acrelations:
-        if acrel.citation.type_controlled == Citation.BOOK:
-            update_stats(books, acrel)
-        elif acrel.citation.type_controlled == Citation.THESIS:
-            update_stats(theses, acrel)
-        elif acrel.citation.type_controlled == Citation.CHAPTER:
-            update_stats(chapters, acrel)
-        elif acrel.citation.type_controlled == Citation.ARTICLE:
-            update_stats(articles, acrel)
-        elif acrel.citation.type_controlled in [Citation.REVIEW, Citation.ESSAY_REVIEW]:
-            update_stats(reviews, acrel)
-        else:
-            update_stats(others, acrel)
-
-    book_count = []
-    thesis_count = []
-    article_count = []
-    chapter_count = []
-    review_count = []
-    other_count = []
-
-    SHOWN_TITLES_COUNT = 3
-    titles = {}
-
-    # including the current year
-    for year in range(1970, now.year+1):
-        years.append(str(year))
-        book_count.append(books.get(year, (0, []))[0])
-        thesis_count.append(theses.get(year, (0, []))[0])
-        article_count.append(articles.get(year, (0, []))[0])
-        chapter_count.append(chapters.get(year, (0, []))[0])
-        review_count.append(reviews.get(year, (0, []))[0])
-        other_count.append(others.get(year, (0, []))[0])
-
-        titles.update({
-                 str(year): {
-                     'books': [r for r in books.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                     'theses': [r for r in theses.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                     'chapters': [r for r in chapters.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                     'articles': [r for r in articles.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                     'reviews': [r for r in reviews.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                     'others': [r for r in others.get(year, (0, []))[1]][:SHOWN_TITLES_COUNT],
-                 }
-             })
-
-    data = {
-        'years': years,
-        'books': book_count,
-        'theses': thesis_count,
-        'chapters': chapter_count,
-        'articles': article_count,
-        'reviews': review_count,
-        'others': other_count,
-        'titles': titles
-    }
-
-    cache.set(authority_id + '_count_data', data)
-
-    return JsonResponse(data)
 
 def citation(request, citation_id):
     """
@@ -1054,7 +726,8 @@ def citation(request, citation_id):
     related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True).filter(public=True)
     related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True).filter(public=True)
     related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
-    related_citations_as = CCRelation.objects.filter(subject_id=citation_id, type_controlled='AS', object__public=True).filter(public=True)
+    as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
+    related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
@@ -1080,7 +753,7 @@ def citation(request, citation_id):
 
     if query_string:
         query_string = query_string.encode('ascii','ignore')
-        search_key = base64.b64encode(last_query)
+        search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
         search_key = None
@@ -1296,7 +969,7 @@ class IsisSearchView(FacetedSearchView):
 
         # If the user is logged in, attempt to save the search in their
         #  search history.
-        if log and parameters and self.request.user.id > 0:
+        if log and parameters and self.request.user.id and self.request.user.id > 0:
             searchquery = SearchQuery(
                 user = self.request.user._wrapped,
                 parameters = parameters,
@@ -1346,6 +1019,7 @@ class IsisSearchView(FacetedSearchView):
             user_cache.set(session_id + '_search_key', search_key)
             user_cache.set(session_id + '_page_citation', int(page_citation))
             user_cache.set(session_id + '_page_authority', int(page_authority))
+
 
             user_cache.set('search_results_authority_' + str(search_key), self.queryset['authority'].values_list('id', flat=True), 3600)
             user_cache.set('search_results_citation_' + str(search_key), self.queryset['citation'].values_list('id', flat=True), 3600)
@@ -1438,6 +1112,8 @@ class IsisSearchView(FacetedSearchView):
         extra['request'] = self.request
 
         paginator, page = self.build_page()
+        extra['show_publisher_types'] = [dict(Citation.TYPE_CHOICES)[Citation.BOOK], dict(Citation.TYPE_CHOICES)[Citation.CHAPTER]]
+        extra['show_school_types'] = [dict(Citation.TYPE_CHOICES)[Citation.THESIS]]
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')
@@ -1593,8 +1269,8 @@ def home(request):
                 record = Citation.objects.get(pk=record.id) if type(record) is HistoricalCitation else Authority.objects.get(pk=record.id)
                 if record.public:
                     recent_records.append(record)
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
 
     context = {
         'active': 'home',
@@ -1678,7 +1354,7 @@ def get_linkresolver_url_by_ip(request, citation):
 def get_linkresolver_url(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     data = None
-    if request.user.id > 0:
+    if request.user.id and request.user.id > 0:
         if request.user.profile.resolver_institution:
             resolver = request.user.profile.resolver_institution.resolver
             data = {
@@ -1702,6 +1378,13 @@ def user_profile(request, username):
     other related content (shared bookmarks, claimed authority record, etc).
     """
     user = get_object_or_404(User, username=username)
+    try:
+        profile = user.profile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile()
+        profile.user = user
+        profile.save()
+
     edit = request.GET.get('edit')
 
     # Only the owner of the profile can change it. We use a regular Form rather

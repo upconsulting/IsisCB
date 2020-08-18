@@ -1,3 +1,8 @@
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 
@@ -13,7 +18,7 @@ import regex
 
 def argsort(seq):
     seq = list(seq)
-    return sorted(range(len(seq)), key=seq.__getitem__)
+    return sorted(list(range(len(seq))), key=seq.__getitem__)
 
 
 def aggregate_hits(hits):
@@ -26,14 +31,14 @@ def aggregate_hits(hits):
         uniqueHits[hit] += match
         uniqueReasons[hit].append((basis, value))
 
-    for key, value in uniqueHits.iteritems():
-        uniqueHits[key] = value/float(len(uniqueReasons[key]))
+    for key, value in list(uniqueHits.items()):
+        uniqueHits[key] = old_div(value,float(len(uniqueReasons[key])))
 
     return [{
-                'id': uniqueHits.keys()[k],
-                'match': uniqueHits[uniqueHits.keys()[k]],
-                'reasons': uniqueReasons[uniqueHits.keys()[k]]
-            } for k in argsort(uniqueHits.values())[::-1]]
+                'id': list(uniqueHits.keys())[k],
+                'match': uniqueHits[list(uniqueHits.keys())[k]],
+                'reasons': uniqueReasons[list(uniqueHits.keys())[k]]
+            } for k in argsort(list(uniqueHits.values()))[::-1]]
 
 
 def suggest_by_attributes(draftObject):
@@ -81,17 +86,17 @@ def suggest_authority_by_resolutions(draftAuthority):
     if len(resolutions) == 0:
         return []
 
-    N = sum([len(instances) for instances in resolutions.values()])
+    N = sum([len(instances) for instances in list(resolutions.values())])
     N_matches = {}
     scores = {}
-    for resolution_target, instances in resolutions.iteritems():
+    for resolution_target, instances in list(resolutions.items()):
         N_instances = float(len(instances))
         N_matches[resolution_target] = N_instances
-        scores[resolution_target] = sum(zip(*instances)[1])/N_instances
+        scores[resolution_target] = old_div(sum(zip(*instances)[1]),N_instances)
 
     max_matches = max(N_matches.values())
 
-    for resolution_target, score in scores.iteritems():
+    for resolution_target, score in list(scores.items()):
         score_normed = score * N_matches[resolution_target]/max_matches
         hits.append((resolution_target, 'Resolution', 'name', score_normed))
 
@@ -128,11 +133,11 @@ def suggest_by_field(draftObject, field, targetModel, targetField, scramble=Fals
     hits = []
     value = getattr(draftObject, field)
 
-
+    # double check
     def remove_punctuation(text):
-        return regex.sub(ur"\p{P}+", "", text)
+        return regex.sub("\p{P}+", "", text)
 
-    if isinstance(value, str) or isinstance(value, unicode):
+    if isinstance(value, str) or isinstance(value, str):
         value = remove_punctuation(value)
 
     q = Q()

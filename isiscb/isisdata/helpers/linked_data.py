@@ -1,8 +1,12 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 from rdflib import Graph, URIRef, BNode, Literal
 from rdflib.namespace import RDF, FOAF, DC, Namespace, SKOS, DCTERMS, RDFS, OWL, NamespaceManager
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from isisdata.templatetags.app_filters import *
-from mods_helper import *
+from .mods_helper import *
 
 isisns = Namespace('http://data.isiscb.org/vocab#')
 isisns_props = Namespace('http://data.isiscb.org/properties#')

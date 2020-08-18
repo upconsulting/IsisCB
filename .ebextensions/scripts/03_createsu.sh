@@ -4,7 +4,8 @@ echo 'This is a docker environment: $IS_DOCKER'
 
 if [ "$IS_DOCKER" != "true" ]; then
   echo 'Creating superuser...'
-  source /opt/python/run/venv/bin/activate
+  #source /opt/python/run/venv/bin/activate
+  source /var/app/venv/staging-LQM1lest/bin/activate
   cd isiscb
   python manage.py createsu
 else

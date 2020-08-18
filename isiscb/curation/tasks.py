@@ -2,6 +2,8 @@
 """
 
 from __future__ import absolute_import, unicode_literals
+from __future__ import print_function
+from builtins import str
 from celery import shared_task
 from django.http import QueryDict
 from django.db.models import Q
@@ -152,10 +154,10 @@ def bulk_prepend_record_history(user_id, filter_params_raw, prepend_value, task_
             task = AsyncTask.objects.get(pk=task_id)
             task.state = 'SUCCESS'
             task.save()
-            print 'success:: %s' % str(task_id)
+            print('success:: %s' % str(task_id))
     except Exception as E:
-        print 'bulk_prepend_record_history failed for %s:: %s' % (filter_params_raw, prepend_value),
-        print E
+        print('bulk_prepend_record_history failed for %s:: %s' % (filter_params_raw, prepend_value), end=' ')
+        print(E)
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)
             task.value = str(E)
@@ -182,7 +184,10 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
 
     idents = list(queryset.values_list('id', flat=True))
     try:
-        queryset.update(tracking_state=target_state, modified_by=user_id, modified_on=timezone.now())
+        if target_state != Citation.HSTM_UPLOAD:
+            queryset.update(tracking_state=target_state, modified_by=user_id, modified_on=timezone.now())
+        else:
+            queryset.update(hstm_uploaded=Citation.IS_HSTM_UPLOADED, modified_by=user_id, modified_on=timezone.now())
         for ident in idents:
             if object_type == 'AUTHORITY':
                 AuthorityTracking.objects.create(authority_id=ident,
@@ -201,7 +206,7 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
             task = AsyncTask.objects.get(pk=task_id)
             task.state = 'SUCCESS'
             task.save()
-            print 'success:: %s' % str(task_id)
+            print('success:: %s' % str(task_id))
     except Exception as E:
         logger.error('bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state))
         logger.error(E)

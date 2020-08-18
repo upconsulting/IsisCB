@@ -12,6 +12,96 @@ a {
     color: #032544;
 }
 
+.phaedra-colors .label {
+  color: #444;
+  font-weight: normal;
+  line-height: 200%;
+  margin: 1px;
+}
+.phaedra-colors .label[href]:hover,
+.phaedra-colors .label[href]:focus {
+  color: #444;
+  text-decoration: underline;
+}
+
+.phaedra-colors .label-chronology {
+  background-color: #9BD7FF;
+}
+.phaedra-colors .label-chronology[href]:hover,
+.phaedra-colors .label-chronology[href]:focus {
+  background-color: #9BD7FF;
+}
+
+.phaedra-colors .label-person {
+  background-color: #e3cace;
+}
+.phaedra-colors .label-person[href]:hover,
+.phaedra-colors .label-person[href]:focus {
+  background-color: #e3cace;
+}
+
+.phaedra-colors .label-geography {
+  background-color: #b6cdca;
+}
+.phaedra-colors .label-geography[href]:hover,
+.phaedra-colors .label-geography[href]:focus {
+  background-color: #b6cdca;
+}
+
+.phaedra-colors .label-institution {
+  background-color: #e09d6e;
+}
+.phaedra-colors .label-institution[href]:hover,
+.phaedra-colors .label-institution[href]:focus {
+  background-color: #e09d6e;
+}
+
+.phaedra-colors .label-concept {
+  background-color: #e2b8fc;
+}
+.phaedra-colors .label-concept[href]:hover,
+.phaedra-colors .label-concept[href]:focus {
+  background-color: #e2b8fc;
+}
+
+.phaedra-colors .label-other {
+  background-color: #c8d2f9;
+}
+.phaedra-colors .label-other[href]:hover,
+.phaedra-colors .label-other[href]:focus {
+  background-color: #c8d2f9;
+}
+
+.phaedra-colors .label-none {
+  background-color: #d2d2d2;
+}
+.phaedra-colors .label-none[href]:hover,
+.phaedra-colors .label-none[href]:focus {
+  background-color: #d2d2d2;
+}
+
+.phaedra-colors .not_public {
+  text-decoration: line-through;
+}
+
+.phaedra-colors .not_public[href]:hover,
+.phaedra-colors .not_public[href]:focus {
+  text-decoration: line-through;
+}
+
+.is_not_public {
+  text-decoration: line-through;
+}
+
+textarea.form-control {
+  line-height: initial;
+}
+
+tr.categoryHeader {
+  background-color: #e2e2e2;
+  padding: 2px;
+}
+
 .no-gutter {
   margin-left: 0;
   margin-right: 0;
@@ -48,6 +138,17 @@ select.high_input {
   font-size: 12px;
   line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
   border-radius: 3px;
+}
+
+.form-fields-xs {
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1.5; /* If Placeholder of the input is moved up, rem/modify this. */
+  border-radius: 3px;
+}
+
+.form-fields-indented {
+  margin-left: 30px;
 }
 
 .form-group-xs .form-control, .form-group-xs .control-label {

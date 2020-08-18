@@ -1,13 +1,17 @@
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from django import template
 from isisdata.models import *
 
 from django.conf import settings
 from django.utils.safestring import mark_safe
 
-from urllib import quote
+from urllib.parse import quote
 import codecs
 import re
-import urlparse
+import urllib.parse
 
 import bleach
 
@@ -98,9 +102,15 @@ def get_title(citation):
 
 @register.filter
 def get_pub_year(citation):
-    dates = citation.attributes.filter(type_controlled__name='PublicationDate')
+    dates = citation.attributes.filter(type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE)
     if dates:
-        return dates[0].value_freeform if dates[0].value_freeform else dates[0].value.cvalue().year
+        if hasattr(dates[0].value.cvalue(), 'year'):
+            year = dates[0].value.cvalue().year
+        else:
+            year = dates[0].value.cvalue()
+        if type(year) == list and len(year) > 0:
+            year = year[0]
+        return dates[0].value_freeform if dates[0].value_freeform else year
     return ''
 
 
@@ -167,6 +177,8 @@ def bleach_safe(s):
 
 @register.filter
 def strip_tags(s):
+    if not s:
+        return s
     return bleach.clean(s, tags={}, attributes={}, strip=True)
 
 
@@ -202,7 +214,7 @@ def linkeddata_for_display(ldinstance):
         return value
 
     # Make sure that the DOI is not already an URL.
-    if urlparse.urlsplit(value).scheme:
+    if urllib.parse.urlsplit(value).scheme:
         return value
     return URN_PATTERNS[ldinstance.type_controlled.name].format(value)
 

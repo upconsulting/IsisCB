@@ -1,8 +1,13 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 import datetime
 from haystack import indexes
 from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from isisdata.models import Citation, Authority
 from isisdata.templatetags.app_filters import *
 from isisdata.utils import normalize
@@ -10,6 +15,7 @@ from isisdata.utils import normalize
 import bleach
 import unidecode
 import unicodedata
+import re
 from itertools import groupby
 import time
 from collections import defaultdict
@@ -39,6 +45,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
+    persons_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
     editors = indexes.MultiValueField(faceted=True, indexed=False)
     editor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
@@ -87,8 +94,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     time_periods = indexes.MultiValueField(faceted=True, indexed=False)
     time_period_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
+    events = indexes.MultiValueField(faceted=True, indexed=False)
+    event_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    events_timeperiods = indexes.MultiValueField(faceted=True, indexed=False)
+    events_timeperiods_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
     geographics = indexes.MultiValueField(faceted=True, indexed=False)
     geographic_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    cross_references = indexes.MultiValueField(faceted=True, indexed=False)
+    cross_references_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
     people = indexes.MultiValueField(faceted=True, indexed=False)
     about_person_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
@@ -97,8 +113,25 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     serial_publications = indexes.MultiValueField(faceted=True, indexed=False)
     classification_terms = indexes.MultiValueField(faceted=True, indexed=False)
     concepts = indexes.MultiValueField(faceted=True, indexed=False)
+    concepts_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     creative_works = indexes.MultiValueField(faceted=True, indexed=False)
-    events = indexes.MultiValueField(faceted=True, indexed=False)
+    creative_works_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+
+    # IEXP-21: for facet boxes on authority page
+    concepts_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    people_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    institutions_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    # IEXP-163
+    concepts_only_by_subject_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    dataset_typed_names = indexes.MultiValueField(faceted=True, indexed=False)
+    dataset_typed_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+    dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
+    dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+
+
 
     data_fields = [
         'id',
@@ -110,6 +143,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'abstract',
         'edition_details',
         'physical_details',
+        'belongs_to',
+        'belongs_to__name',
         'attributes__id',
         'attributes__type_controlled__name',
         'attributes__value_freeform',
@@ -148,7 +183,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def full_prepare(self, obj):
         self.prepared_data = self.prepare(obj)
 
-        for field_name, field in self.fields.items():
+        for field_name, field in list(self.fields.items()):
             # Duplicate data for faceted fields.
             if getattr(field, 'facet_for', None):
                 source_field_name = self.fields[field.facet_for].index_fieldname
@@ -183,7 +218,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         self.prepared_data = {
             ID: identifier,
             DJANGO_CT: 'isisdata.citation',
-            DJANGO_ID: unicode(identifier),
+            DJANGO_ID: str(identifier),
         }
 
         data_organized = {
@@ -216,12 +251,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if row['relations_to__id']:
                 data_organized['ccrelations_to'].append(row)
 
+        self._index_belongs_to(data)
+
         start = time.time()
-        for field_name, field in self.fields.items():
+        for field_name, field in list(self.fields.items()):
             # Use the possibly overridden name, which will default to the
             # variable name of the field.
             # self.prepared_data[field.index_fieldname] = field.prepare(data_organized)
-
             if hasattr(self, "prepare_%s" % field_name):
                 value = getattr(self, "prepare_%s" % field_name)(data_organized)
                 self.prepared_data[field.index_fieldname] = value
@@ -233,6 +269,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         multivalue_data = defaultdict(list)
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
+                continue
+            if not a['acrelation__authority__public']:
                 continue
 
             if a['acrelation__authority__name']:
@@ -255,26 +293,39 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 if a['acrelation__authority__type_controlled'] == Authority.TIME_PERIOD:
                     multivalue_data['time_periods'].append(name)
                     multivalue_data['time_period_ids'].append(ident)
+                    multivalue_data['events_timeperiods'].append(name)
+                    multivalue_data['events_timeperiods_ids'].append(ident)
                 elif a['acrelation__authority__type_controlled'] == Authority.GEOGRAPHIC_TERM:
                     multivalue_data['geographics'].append(name)
                     multivalue_data['geographic_ids'].append(ident)
                 else:
-
-
                     if a['acrelation__authority__type_controlled'] == Authority.INSTITUTION:
                         multivalue_data['subject_institutions'].append(name)
+                        multivalue_data['institutions_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled'] == Authority.PERSON:
                         multivalue_data['people'].append(name)
+                        multivalue_data['people_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled']  == Authority.SERIAL_PUBLICATION:
                         multivalue_data['serial_publications'].append(name)
                     elif a['acrelation__authority__type_controlled']  == Authority.CLASSIFICATION_TERM:
                         multivalue_data['classification_terms'].append(name)
                     elif a['acrelation__authority__type_controlled']  == Authority.CONCEPT:
                         multivalue_data['concepts'].append(name)
+                        multivalue_data['concepts_by_subject_ids'].append(ident)
+                        multivalue_data['concepts_only_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled']  == Authority.CREATIVE_WORK:
                         multivalue_data['creative_works'].append(name)
+                        multivalue_data['concepts'].append(name)
+                        multivalue_data['creative_works_ids'].append(ident)
+                        multivalue_data['concepts_by_subject_ids'].append(ident)
                     elif a['acrelation__authority__type_controlled']  == Authority.EVENT:
                         multivalue_data['events'].append(name)
+                        multivalue_data['events_ids'].append(ident)
+                        multivalue_data['events_timeperiods'].append(name)
+                        multivalue_data['events_timeperiods_ids'].append(ident)
+                    elif a['acrelation__authority__type_controlled']  == Authority.CROSSREFERENCE:
+                        multivalue_data['cross_references'].append(name)
+                        multivalue_data['cross_references_ids'].append(ident)
 
             elif a['acrelation__type_controlled'] == ACRelation.INSTITUTION:
                 multivalue_data['institutions'].append(name)
@@ -289,11 +340,15 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 multivalue_data['translators'].append(name)
                 multivalue_data['translator_ids'].append(ident)
             elif a['acrelation__type_controlled'] == ACRelation.PUBLISHER:
-                multivalue_data['publishers'].append(name)
-                multivalue_data['publisher_ids'].append(ident)
+                if name not in multivalue_data['publishers']:
+                    multivalue_data['publishers'].append(name)
+                if ident not in multivalue_data['publisher_ids']:
+                    multivalue_data['publisher_ids'].append(ident)
             elif a['acrelation__type_controlled'] == ACRelation.SCHOOL:
-                multivalue_data['schools'].append(name)
-                multivalue_data['school_ids'].append(ident)
+                if name not in multivalue_data['schools']:
+                    multivalue_data['schools'].append(name)
+                if ident not in multivalue_data['school_ids']:
+                    multivalue_data['school_ids'].append(ident)
             elif a['acrelation__type_controlled'] == ACRelation.MEETING:
                 multivalue_data['meetings'].append(name)
                 multivalue_data['meeting_ids'].append(ident)
@@ -312,11 +367,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
             elif a['acrelation__type_broad_controlled'] == ACRelation.SUBJECT_CONTENT:
                 multivalue_data['about_person_ids'].append(ident)
-            elif a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
+
+            if a['acrelation__type_broad_controlled'] in [ACRelation.INSTITUTIONAL_HOST, ACRelation.PUBLICATION_HOST, ACRelation.PERSONAL_RESPONS] and a['acrelation__type_controlled'] not in [ACRelation.AUTHOR, ACRelation.CONTRIBUTOR]:
                 multivalue_data['other_person_ids'].append(ident)
 
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
                 multivalue_data['persons'].append(name)
+                multivalue_data['persons_ids'].append(ident)
                 if int(a['acrelation__data_display_order']) < 30:
                     multivalue_data['all_contributor_ids'].append(ident)
 
@@ -325,11 +382,13 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
                 # Prefer the ACRelation.name_for_display_in_citation, if
                 #  present.
-                aname = a['acrelation__name_for_display_in_citation']
-                if not aname:
-                    aname = name
-                if aname not in multivalue_data['authors']:
-                    multivalue_data['authors'].append(aname)
+                # IEXP-31: only append authors and editors to authors field
+                if a['acrelation__type_controlled'] in [ACRelation.AUTHOR, ACRelation.EDITOR]:
+                    aname = a['acrelation__name_for_display_in_citation']
+                    if not aname:
+                        aname = name
+                    if aname not in multivalue_data['authors']:
+                        multivalue_data['authors'].append(aname)
 
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
@@ -338,6 +397,16 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         self.prepared_data.update(multivalue_data)
 
         return self.prepared_data
+
+    def _index_belongs_to(self, data):
+        if data[0]['belongs_to']:
+            self.prepared_data['dataset_ids'] = data[0]['belongs_to']
+        if data[0]['belongs_to__name']:
+            self.prepared_data['dataset_names'] = data[0]['belongs_to__name']
+            if data[0]['belongs_to__name'].startswith(settings.DATASET_ISISCB_NAME_PREFIX):
+                self.prepared_data['dataset_typed_names'] = settings.DATASET_ISISCB_NAME_DISPLAY
+            elif data[0]['belongs_to__name'].startswith(settings.DATASET_SHOT_NAME_PREFIX):
+                self.prepared_data['dataset_typed_names'] = settings.DATASET_SHOT_NAME_DISPLAY
 
     def _get_reviewed_book(self, data):
         """
@@ -424,18 +493,43 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_publication_date(self, data):
         attributes = data.get('attributes', None)
 
-        freeform_dates = [attr['attributes__value_freeform'] for attr in attributes
-                if attr['attributes__type_controlled__name'] == 'PublicationDate' and attr['attributes__value_freeform']]
+        freeform_dates = []
 
-        if freeform_dates:
-            return freeform_dates
+        for attr in attributes:
+            if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE and attr['attributes__value_freeform']:
+                date = attr['attributes__value_freeform']
+                # IEXP-8: let's handle cases like 2001 - 2002 or 2001-01-02
+                freeform_dates.append(date)
+                patternYearSpan = re.match("([0-9]{4}).+?([0-9]{4})", date)
+                if patternYearSpan:
+                    for d in patternYearSpan.groups(): freeform_dates.append(d)
+                    continue
+                patternFullDate = re.match("([0-9]{4})-[0-9]{2}-[0-9]{2}", date)
+                if patternFullDate:
+                    for d in patternFullDate.groups(): freeform_dates.append(d)
+                    continue
+                # patterns e.g. 1999 (pub. 2000) or 1993-94
+                patternBrackets = re.match(".*([0-9]{4}).*", date)
+                if patternBrackets:
+                    for d in patternBrackets.groups(): freeform_dates.append(d)
+                    continue
 
         # this is a hack but it works, so :op
         date_id = None
         for attr in attributes:
-            if attr['attributes__type_controlled__name'] == 'PublicationDate':
-                attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
-                return [attr.value.cvalue().year]
+            if attr['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
+                try:
+                    attr = Attribute.objects.get(pk=attr['attributes__value__attribute_id'])
+                    if type(attr.value.cvalue()) == list:
+                        freeform_dates += attr.value.cvalue()
+                    else:
+                        freeform_dates.append(attr.value.cvalue().year)
+                except ObjectDoesNotExist as E:
+                    print("Attribute does not exist.")
+                    print(E)
+
+        if freeform_dates:
+            return freeform_dates
 
         return ""
 
@@ -449,7 +543,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             return data['publication_date']
 
         for attribute in data['attributes']:
-            if attribute['attributes__type_controlled__name'] == 'PublicationDate':
+            if attribute['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 return attribute['attributes__value_freeform']
         return ''
 
@@ -470,7 +564,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
         This is here just so that we can sort chapters in books.
         """
-        if data['type_controlled'] != Citation.CHAPTER:
+        if data['type_controlled'] not in [Citation.CHAPTER, Citation.ARTICLE]:
             return ""
         page_start_string = data['part_details']['page_begin']
         page_end_string = data['part_details']['page_end']
@@ -525,8 +619,8 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         """
         self.prepared_data = super(AuthorityIndex, self).prepare(obj)
 
-        for k, v in self.prepared_data.iteritems():
-            if type(v) is unicode:
+        for k, v in list(self.prepared_data.items()):
+            if type(v) is str:
                 self.prepared_data[k] = remove_control_characters(v.strip())
         return self.prepared_data
 

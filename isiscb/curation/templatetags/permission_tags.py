@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import map
+from past.utils import old_div
 from django import template
 from isisdata.models import *
 
@@ -50,7 +55,7 @@ def get_warnings_column_count_citation(instance):
 
     if nr_of_warnings == 0:
         return 12
-    return 12/nr_of_warnings
+    return old_div(12,nr_of_warnings)
 
 
 @register.filter
@@ -89,10 +94,10 @@ def get_warnings_column_count_authority(instance):
         nr_of_warnings += 1
     if is_public_inconsistent(instance):
         nr_of_warnings += 1
-    print nr_of_warnings
+    print(nr_of_warnings)
     if nr_of_warnings == 0:
         return 0
-    return 12/nr_of_warnings
+    return old_div(12,nr_of_warnings)
 
 
 @register.filter

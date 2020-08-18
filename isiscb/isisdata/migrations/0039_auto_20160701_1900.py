@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ZoteroRule',
             fields=[
-                ('accessrule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.AccessRule')),
+                ('accessrule_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='isisdata.AccessRule', on_delete=models.CASCADE)),
             ],
             bases=('isisdata.accessrule',),
         ),

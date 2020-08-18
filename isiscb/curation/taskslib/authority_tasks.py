@@ -1,17 +1,24 @@
+from __future__ import unicode_literals
 from celery import shared_task
 
 from isisdata.models import *
+from isisdata.tasks import _get_filtered_object_queryset
 
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.db import models
 
 import logging
 import smart_open
-import unicodecsv as csv
+import csv
 from datetime import datetime
 from dateutil.tz import tzlocal
 import time
+
+from past.utils import old_div
+import haystack
+import math
 
 COLUMN_NAME_ATTR_SUBJ_ID = 'ATT Subj ID'
 COLUMN_NAME_ATTR_RELATED_NAME = 'Related Record Name'
@@ -26,6 +33,32 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 
 logger = logging.getLogger(__name__)
 
+@shared_task
+def reindex_authorities(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
+
+    queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
+    if task_id:
+        task = AsyncTask.objects.get(pk=task_id)
+        task.max_value = queryset.count()
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
+        task.save()
+    else:
+        task = None
+    try:    # Report all exceptions as a task failure.
+        for i, obj in enumerate(queryset):
+            if task and (i % _inc == 0 or i == (task.max_value - 1)):
+                task.current_value = i
+                task.save()
+
+            haystack.connections[settings.HAYSTACK_DEFAULT_INDEX].get_unified_index().get_index(Authority).update_object(obj)
+
+        task.state = 'SUCCESS'
+        task.save()
+    except Exception as E:
+        print('bulk_update_citations failed for %s' % filter_params_raw, end=' ')
+        print(E)
+        task.state = 'FAILURE'
+        task.save()
 
 @shared_task
 def merge_authorities(file_path, error_path, task_id, user_id):
@@ -38,8 +71,8 @@ def merge_authorities(file_path, error_path, task_id, user_id):
     COL_DUPLICATE_AUTH = 'CBA ID Duplicate'
     COL_NOTE = 'Note'
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -61,7 +94,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     master = Authority.objects.get(pk=master_id)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (master_id))
                     results.append((ERROR, master_id, 'Authority record does not exist.', ""))
                     current_count = _update_count(current_count, task)
@@ -69,7 +102,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     duplicate = Authority.objects.get(pk=duplicate_id)
-                except Exception, e:
+                except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (duplicate_id))
                     results.append((ERROR, duplicate_id, 'Authority record does not exist.', ""))
                     current_count = _update_count(current_count, task)
@@ -103,7 +136,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
                 results.append((SUCCESS, "Records Merged", "%s and %s were successfully merged. Master is %s."%(master_id, duplicate_id, master_id), ""))
 
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "There was an unexpected error processing the CSV file: " + repr(e), ""))
@@ -123,8 +156,8 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -227,7 +260,7 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
                 value.save()
 
                 current_count = _update_count(current_count, task)
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -367,8 +400,8 @@ def update_elements(file_path, error_path, task_id, user_id):
 
     result_file_headers = ('Status', 'Type', 'Element Id', 'Message', 'Modification Date')
 
-    with smart_open.smart_open(file_path, 'rb') as f:
-        reader = csv.reader(f, encoding='utf-8')
+    with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
+        reader = csv.reader(f)
         task = AsyncTask.objects.get(pk=task_id)
 
         results = []
@@ -389,7 +422,7 @@ def update_elements(file_path, error_path, task_id, user_id):
 
                 try:
                     type_class = apps.get_model(app_label='isisdata', model_name=elem_type)
-                except Exception, e:
+                except Exception as e:
                     results.append((ERROR, elem_type, element_id, '%s is not a valid type.'%(elem_type), current_time))
                     current_count = _update_count(current_count, task)
                     continue
@@ -436,8 +469,18 @@ def update_elements(file_path, error_path, task_id, user_id):
                                     if field_to_change.startswith(FIND_PREFIX):
                                         field_to_change, new_value = _find_value(field_to_change, new_value, element)
 
-                                    old_value = getattr(element, field_to_change)
-                                    setattr(element, field_to_change, new_value)
+                                    # check if field to change is a ManyToManyField (IEXP-232)
+                                    if isinstance(element.__class__.__dict__[field_to_change], models.fields.related_descriptors.ManyToManyDescriptor):
+                                        # all this is really ugly, but we have to store the old list for the
+                                        # administrator notes
+                                        old_value = element.__getattribute__(field_to_change).all()
+                                        old_value_list = list(old_value)
+                                        element.__getattribute__(field_to_change).add(new_value)
+                                        new_value = list(element.__getattribute__(field_to_change).all())
+                                        old_value = old_value_list
+                                    else:
+                                        old_value = getattr(element, field_to_change)
+                                        setattr(element, field_to_change, new_value)
 
                                     # some fields need special handling
                                     _specific_post_processing(element, field_to_change, new_value, old_value)
@@ -447,7 +490,7 @@ def update_elements(file_path, error_path, task_id, user_id):
 
                                 element.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', element.modified_on))
-                            except Exception, e:
+                            except Exception as e:
                                 logger.error(e)
                                 logger.exception(e)
                                 results.append((ERROR, elem_type, element_id, 'Something went wrong. %s was not changed.'%(field_to_change), current_time))
@@ -483,7 +526,7 @@ def update_elements(file_path, error_path, task_id, user_id):
                                 setattr(object_to_update_timestamp, 'modified_by_id', user_id)
                                 object_to_update_timestamp.save()
                                 results.append((SUCCESS, element_id, field_in_csv, 'Successfully updated', object_to_update_timestamp.modified_on))
-                        except Exception, e:
+                        except Exception as e:
                             logger.error(e)
                             logger.exception(e)
                             results.append((ERROR, type, element_id, 'Field %s cannot be changed. %s does not exist.'%(field_to_change, object), current_time))
@@ -492,10 +535,10 @@ def update_elements(file_path, error_path, task_id, user_id):
                     results.append((ERROR, elem_type, element_id, 'Field %s cannot be changed.'%(field_to_change), current_time))
 
                 current_count = _update_count(current_count, task)
-        except KeyError, e:
+        except KeyError as e:
             logger.exception("There was a column error processing the CSV file.")
             results.append((ERROR, "column error", "", "There was a column error processing the CSV file. Have you provided the correct column headers? " + repr(e), current_time))
-        except Exception, e:
+        except Exception as e:
             logger.error("There was an unexpected error processing the CSV file.")
             logger.exception(e)
             results.append((ERROR, "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e), current_time))
@@ -532,9 +575,19 @@ def _find_value(field_to_change, new_value, element):
     if len(field_parts) > 4:
         if field_parts[4] == "multi":
             old_value = getattr(element, field_parts[3])
-            linked_element = list(old_value.all()) + [linked_element]
+            # IEXP-232: looks like we can't just replace the old list, but have to add new element
+            # so we will not return a new list but just the element to add.
+            #linked_element = list(old_value.all()) + [linked_element]
     return field_parts[3], linked_element
 
+def _get_old_multi_value(field_to_change, element):
+    field_parts = field_to_change.split(":")
+    print(field_parts)
+    if len(field_parts) <= 4 or field_parts[4] != "multi":
+        return None
+
+    print(field_parts[3])
+    getattr(element, field_parts[3])
 
 def _add_to_administrator_notes(element, value, task_nr,  modified_by, modified_on):
     note = getattr(element, ADMIN_NOTES)
@@ -579,7 +632,7 @@ def _count_rows(f, results):
     try:
         for row in csv.DictReader(f):
             row_count += 1
-    except Exception, e:
+    except Exception as e:
         logger.error("There was an unexpected error processing the CSV file.")
         logger.exception(e)
         results.append(('ERROR', "unexpected error", "", "There was an unexpected error processing the CSV file: " + repr(e)))
@@ -590,14 +643,14 @@ def _count_rows(f, results):
     return row_count
 
 def _save_csv_file(path, headers, data):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headers)
         for line in data:
             writer.writerow(line)
 
 def _save_results(path, results, headings):
-    with smart_open.smart_open(path, 'wb') as f:
+    with smart_open.open(path, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(headings)
         for result in results:

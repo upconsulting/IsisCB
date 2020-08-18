@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import str
 from django import template
 from isisdata.models import *
 from isisdata.templatetags.app_filters import *
@@ -68,7 +70,7 @@ def get_journal_title(citation):
     if citation.type_controlled in [Citation.ARTICLE, Citation.REVIEW, Citation.ESSAY_REVIEW]:
         parent_relation = ACRelation.objects.filter(citation=citation.id, type_controlled=ACRelation.PERIODICAL)
         # we assume there is just one
-        if parent_relation:
+        if parent_relation and len(parent_relation) > 0 and parent_relation[0].authority:
             return parent_relation[0].authority.name
 
     return ""

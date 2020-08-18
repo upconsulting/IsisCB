@@ -1,212 +1,242 @@
 {% load addcss %}
 {% load render_object %}
+{% load general_tags %}
 
-
-<div class="h4">Citation Details</div>
-
+<div class="form-group">
 <div class="row">
-    <div class="col-xs-6">
-        {% for error in form.type_controlled.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ form.type_controlled.label }}</label>
-            {{ form.type_controlled|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-6">
-        <div class="form-group">
-            <label>Publication date</label>
-            <div class="h5">
-                <a onclick="toggleTab('attributes')" style="cursor: pointer;">{{ instance|get_citation_pubdate }}</a>
-
-            </div>
-        </div>
-    </div>
+  <div class="col-sm-2 text-left">
+    <label class="input-xs">Subtype</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.subtype|addcss:"form-control input-xs" }}
+  </div>
+</div>
 </div>
 
 {% for error in form.title.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
 <div class="form-group">
-    <label>{{ form.title.label }}</label>
-    {{ form.title|addcss:"form-control titleInput" }}
+<div class="row">
+  <div class="col-sm-2 text-left">
+    <label class="input-xs">Title</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.title|addcss:"form-control titleInput input-xs" }}
+  </div>
 </div>
-
-
-{% include "curation/fragment_citation_authors.html" %}
-<!-- <div class="form-group">
-    <label>Authors & Editors</label>
-    <ul class="list-group" id="authors-editors-list-group">
-
-        <a class="h5 list-group-item" href="?tab=acrelations">{{ instance|get_authors_editors }}</a>
-
-    </ul>
-</div> -->
+</div>
 
 {% for error in form.edition_details.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
 <div class="form-group">
-    <label>{{ form.edition_details.label }}</label>
-    {{ form.edition_details|addcss:"form-control" }}
-</div>
-
-{% if partdetails_form %}
 <div class="row">
-    <div class="col-xs-4">
-        {% for error in partdetails_form.volume_free_text.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>Volume</label>
-            {{ partdetails_form.volume_free_text|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.volume_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.volume_begin.label }}</label>
-            {{ partdetails_form.volume_begin|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.volume_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.volume_end.label }}</label>
-            {{ partdetails_form.volume_end|addcss:"form-control" }}
-        </div>
-    </div>
+  <div class="col-sm-2 text-left" style="padding-right: 5px;">
+    <label class="input-xs">Ed. det.</label>
+  </div>
+  <div class="col-sm-10">
+    {{ form.edition_details|addcss:"form-control oneLine input-xs" }}
+  </div>
+</div>
 </div>
 
 <div class="row">
-    <div class="col-xs-4">
-        {% for error in partdetails_form.issue_free_text.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>Issue</label>
-            {{ partdetails_form.issue_free_text|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.issue_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.issue_begin.label }}</label>
-            {{ partdetails_form.issue_begin|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.issue_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.issue_end.label }}</label>
-            {{ partdetails_form.issue_end|addcss:"form-control" }}
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-xs-4">
-        {% for error in partdetails_form.pages_free_text.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>Pages</label>
-            {{ partdetails_form.pages_free_text|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.page_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.page_begin.label }}</label>
-            {{ partdetails_form.page_begin|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.page_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.page_end.label }}</label>
-            {{ partdetails_form.page_end|addcss:"form-control" }}
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-xs-4">
-        {% for error in partdetails_form.sort_order.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>Sort order</label>
-            {{ partdetails_form.sort_order|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.extent.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.extent.label }}</label>
-            {{ partdetails_form.extent|addcss:"form-control" }}
-        </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.extent_note.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.extent_note.label }}</label>
-            {{ partdetails_form.extent_note|addcss:"form-control" }}
-        </div>
-    </div>
-</div>
-{% endif %}
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs" style="height: 20px;">Responsibility</div>
+        </td>
+        <td class="text-right">
+          {% for type in responsibility_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_controlled in personal_responsibility_types %}
+        <p class="author_editors" id="author_editors_{{acrelation.id}}" data-responsibility-type="{{ acrelation.type_controlled}}" style="margin-bottom: 2px;">
+          <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
+            ({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}
+            {% if acrelation.name_for_display_in_citation %}
+            <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
+            {% endif %}
+          </a>
+          <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
+          <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        </p>
+        {% endif %}
+    {% endfor %}
 
-<div class="form-group">
-    <label>Periodical</label>
-    <div class="h5">
-        <a href="?tab=acrelations&search={{ search_key }}&current={{ current_index }}">{{ instance|get_citation_periodical }}</a>
-    </div>
+    </small>
+  </div>
 </div>
 
-{% for error in form.book_series.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.book_series.label }}</label>
-    {{ form.book_series|addcss:"form-control" }}
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Hosting body</div>
+        </td>
+        <td class="text-right">
+          {% for type in host_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_controlled in publisher_distributor_types %}
+        <p style="margin-bottom: 2px;" id="host_{{acrelation.id}}" class="host_type_{{acrelation.type_controlled}}">
+        <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
+          {{ acrelation.authority.name }}
+          {% if acrelation.name_for_display_in_citation %}
+          <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
+          {% endif %}
+        </a>
+        <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
+        <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif%}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        </p>
+        {% endif %}
+    {% endfor %}
+    </small>
+  </div>
 </div>
 
-{% for error in form.additional_titles.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.additional_titles.label }}</label>
-    {{ form.additional_titles|addcss:"form-control" }}
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Dates</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Published</span>
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{accessed_date_attribute_name}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Accessed</span>
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for attribute in instance.attributes.all %}
+        {% if attribute.type_controlled.value_content_type.model_class in date_attribute_types %}
+        <p style="margin-bottom: 2px;" class="attributes_dates" data-date-type="{{attribute.type_controlled.name}}" id="attributes_dates_{{attribute.id}}">
+        <a href="{% url 'curation:update_attribute_for_citation' instance.id attribute.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        {{ attribute.value.get_child_class }}
+        <span class="text-muted">{{ attribute.value_freeform}}</span>
+        <span class="label label-warning">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+        </p>
+        {% endif %}
+    {% endfor %}
+    </small>
+  </div>
 </div>
 
-{% for error in form.record_history.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.record_history.label }}</label>
-    {{ form.record_history|addcss:"form-control" }}
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td >
+          <div class="input-xs">Containing Citation</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Add citation link
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-11 form-fields-indented">
+    <small>
+      {% for ccrel in instance.all_ccrelations.all %}
+          {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.subject.id != instance.id %}
+          <p style="margin-bottom: 2px;" id="containing_citation_{{ccrel.id}}">
+            {% if not ccrel.public or not ccrel.subject.public %}
+            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+            {% endif %}
+          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+
+          <a href="{% url 'curation:curate_citation' ccrel.subject.id %}?search={{ search_key }}&current={{ current_index }}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
+          {% if ccrel.subject.publication_date %}
+          ({{ ccrel.subject.publication_date }})
+          {% endif %}
+          <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
+          <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+          <a href="{% url 'citation' ccrel.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          </p>
+          {% endif %}
+      {% endfor %}
+    </small>
+  </div>
 </div>
 
-{% for error in form.administrator_notes.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.administrator_notes.label }}</label>
-    {{ form.administrator_notes|addcss:"form-control" }}
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Links</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Add more
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented" style="padding-left:20px;">
+    <small>
+    {% for ld in instance.linkeddata_entries.all %}
+        <p style="margin-bottom: 2px;" id="links_linked_data_{{ld.id}}" class="linked_data_{{ld.type_controlled.name}}">
+          <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          {% if ld.universal_resource_name|startswith:'http' %}
+          <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
+          {% else %}
+          <span>{{ ld.universal_resource_name }}</span>
+          {% endif %}
+        <span class="label label-success">{{ ld.type_controlled.name }}</span>
+        </p>
+    {% endfor %}
+    </small>
+  </div>
 </div>

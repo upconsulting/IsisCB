@@ -1,5 +1,5 @@
 {% extends "curation/base.html" %}
-{% load staticfiles %}
+{% load static %}
 {% load addcss %}
 {% load general_tags %}
 
@@ -12,6 +12,22 @@
 </p>
 </div>
 
+<script>
+  //# sourceURL=required.js
+  $().ready(function() {
+    $("#id_fields").prop('required',true);
+    $("#id_export_format").change(function() {
+      var value=$("#id_export_format").val();
+      if (value == undefined || value == 'CSV') {
+        $("#id_fields").prop('required',true);
+        $(".form-group input[type=checkbox]").prop( "disabled", false );
+      } else {
+        $("#id_fields").prop('required',false);
+        $(".form-group input[type=checkbox]").prop( "disabled", true );
+      }
+    })
+  })
+</script>
 <form class="form" action="?confirmed=true" method="POST">
     {% csrf_token %}
 

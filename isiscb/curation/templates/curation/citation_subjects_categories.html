@@ -128,7 +128,12 @@
       <h5><b>Subjects</b></h5>
       <ul id="subject-list-group" class="list-group">
         {% for acrel in instance|get_subjects %}
-           <li id="subject-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
+             {% if acrel.authority %}
+             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+             {% else %}
+             <span class="text-muted">{{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">
                  <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -158,8 +163,14 @@
         <p>
           <div class="input-group">
             <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
+            </input>
 
             <span class="input-group-btn">
+              <span class="button-checkbox">
+                <button type="button" class="btn btn-default" id="forceSearch" title="Force search" style="height:3.5em" data-color="primary">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+              </span>
               <span class="button-checkbox">
                 <button type="button" class="btn" data-color="primary">C</button>
                 <input id="filterConcepts" type="checkbox" class="hidden" />
@@ -215,32 +226,6 @@
 
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="delete-category-modal" tabindex="-1" role="dialog" aria-labelledby="delete-category-modal-label">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="delete-category-modal-label">Are you sure?</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    You are about to remove a category relation with <span class="text-warning" id="delete-category-target-name"></span>. Deletion cannot be undone!
-                </p>
-                <p>
-                    This will not delete the related authority record itself, only the association between that record and this citation.
-                </p>
-                <input type="hidden" id="category-id-container" />
-                <input type="hidden" id="entry-type-container" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
-                <button type="button" class="btn btn-danger" onclick="delete_category();">Delete forever</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 $('#subjectsTab a').click(function (e) {
   e.preventDefault()
@@ -255,18 +240,7 @@ $(document).ready(function() {
 var delete_handler = function() {
     var elem = $(this);
     var acrelation_id = elem.attr('acrelation-id');
-    var acrelation_title = elem.attr('acrelation-title');
     var acrelation_type = elem.attr('data-acrelation-type')
-    $('#category-id-container').val(acrelation_id);
-    $('#delete-category-target-name').html(acrelation_title);
-    $('#entry-type-container').val(acrelation_type);
-    $('#delete-category-modal').modal('show');
-}
-
-var delete_category = function() {
-    $('#delete-category-modal').modal('hide');
-    var acrelation_id = $('#category-id-container').val();
-    var acrelation_type = $('#entry-type-container').val();
     if (acrelation_id) {
         $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
             'success': function(r) {
@@ -281,14 +255,14 @@ var max_results = INITIAL_MAX_RESULTS;
 var types = [];
 
 var searchTimerSubjects = 0;
-function triggerSearchSubjects(e) {
+function triggerSearchSubjects(force) {
   if (searchTimerSubjects) {
       clearTimeout(searchTimerSubjects);
   }
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&q=" + $('#subjectSearchQuery').val(), {
+    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
         success: function(result) {
           var resultsContainer = $('#subjectSearchResultsContainer');
           resultsContainer.empty();
@@ -315,8 +289,17 @@ function triggerSearchSubjects(e) {
             newLi.prepend(addBtn);
           });
 
-          if (result.results.length == 0) {
+          if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
             var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+            resultsContainer.append(msg);
+          } else if (result.results.length == 0 && !force && query.length < 3) {
+            var msg = $('<p>Your query was too short. </p>');
+            var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
+            forceLink.click(function() {
+              triggerSearchSubjects(true);
+            });
+            msg.append(forceLink);
+            msg.append(" to force the search.");
             resultsContainer.append(msg);
           }
 
@@ -329,7 +312,7 @@ function triggerSearchSubjects(e) {
             resultsContainer.append(load_more);
             $('#load-more-subjects').click(function() {
                 max_results += 10;
-                triggerSearchSubjects();
+                triggerSearchSubjects(force);
             });
           }
         }
@@ -358,9 +341,14 @@ function suggestSubjects(event) {
 }
 
 $(document).ready(function() {
+
+  $("#forceSearch").click(function() {
+    triggerSearchSubjects(true);
+  });
+
   $('#subjectSearchQuery').on('keyup', function() {
     max_results = INITIAL_MAX_RESULTS;
-    triggerSearchSubjects();
+    triggerSearchSubjects(false);
   });
 
   // add checkbox search handlers
@@ -386,7 +374,7 @@ $(document).ready(function() {
       updateDisplay(checkbox);
     });
     types = []
-    triggerSearchSubjects();
+    triggerSearchSubjects(false);
   });
 
   // checkbox styling
@@ -413,9 +401,12 @@ $(document).ready(function() {
 
               updateDisplay($checkbox);
 
-              // Inject the icon if applicable
-              if ($button.find('.state-icon').length == 0) {
-                  $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+              if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                // Inject the icon if applicable
+                if ($button.find('.state-icon').length == 0) {
+                    $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                }
               }
           }
           init();
@@ -431,10 +422,13 @@ function updateDisplay($checkbox) {
     // Set the button's state
     $button.data('state', (isChecked) ? "on" : "off");
 
-    // Set the button's icon
-    $button.find('.state-icon')
-        .removeClass()
-        .addClass('state-icon ' + settings[$button.data('state')].icon);
+    if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+      // Set the button's icon
+      $button.find('.state-icon')
+          .removeClass()
+          .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+    }
 
     // Update the button's color
     if (isChecked) {
@@ -458,7 +452,7 @@ function filterType(type, element) {
       types.splice(typeIndex, 1);
     }
   }
-  triggerSearchSubjects();
+  triggerSearchSubjects(false);
 }
 
 function addConcept(event) {

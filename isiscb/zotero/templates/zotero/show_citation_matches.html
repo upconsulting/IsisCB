@@ -1,0 +1,56 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load static %}
+{% load zotero_tags %}
+{% load app_filters %}
+{% load render_object %}
+
+{% block content %}
+
+<div class="panel" id="citation-panel-{{ citation.id }}">
+    <div class="panel-body">
+        <span class="h4">
+            <a href="{{ citation.get_absolute_url }}">{{ citation.title }}</a>
+        </span>
+
+        {% if citation.resolutions.count > 0 %}
+        <div class="h5">
+            Matched to <a class="text-warning" href="{{ citation.resolutions.first.to_instance.get_absolute_url }}">{{ citation }}</a>
+        </div>
+        {% endif %}
+        {% if citation.abstract %}
+        <p>
+            {{ citation.abstract|truncatechars:200 }}
+        </p>
+        {% endif %}
+        {% if citation.extra %}
+        <p class="strong">Extra</p>
+        <p>
+
+            {{ citation.extra|truncatechars:200 }}
+        </p>
+        {% endif %}
+        {% if matching_citations %}
+        <div>
+          <hr>
+          <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i>
+It looks like this citation might already be in the database:
+          {% for cit, match_types in matching_citations.items %}
+            <ul>
+              {% with cit|get_periodical_or_book_series as series %}
+              {% with cit|get_book_if_chapter as book %}
+              {% with cit|get_publisher as publisher %}
+              {% with cit|get_authors_editors as authors %}
+              <li><small class="text-info">[{{ match_types|join:', ' }}]</small> {% if not cit.public %}<i class="fa fa-eye-slash" aria-hidden="true"></i> {% endif %} <a href="{% url 'curation:curate_citation' cit.id %}" target="_blank">[{{cit.get_type_controlled_display}}] {{ authors }} {{ cit.title }}</a>{% if series %}. In: {{ series }}{% endif %}{% if book %}. In: {{ book }}{% endif %}{% if publisher %}. {{ publisher }}{% endif %} ({{ cit|get_pub_year }}) </li>
+              {% endwith %}
+              {% endwith %}
+              {% endwith %}
+              {% endwith %}
+            </ul>
+          {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

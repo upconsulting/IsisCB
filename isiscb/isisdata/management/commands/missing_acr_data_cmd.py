@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 from django.core.management.base import BaseCommand, CommandError
 import csv
 from isisdata.models import *
@@ -31,4 +33,4 @@ class Command(BaseCommand):
                         acrelation.data_display_order = order
                     acrelation.save()
                 except ObjectDoesNotExist:
-                    print "Could not find object with id " + acr_id
+                    print("Could not find object with id " + acr_id)

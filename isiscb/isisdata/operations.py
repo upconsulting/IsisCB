@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import filter
 from django.db.models import Q
 
 from isisdata.models import *
@@ -30,8 +32,8 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
     exclude_isnull = '' in exclude or None in exclude
 
     # We can't use null values when filtering, below.
-    include = filter(_not_null, include)
-    exclude = filter(_not_null, exclude)
+    include = list(filter(_not_null, include))
+    exclude = list(filter(_not_null, exclude))
 
     if exclude or exclude_isnull:
         query = Q(belongs_to__in=exclude)

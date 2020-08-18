@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('location', models.CharField(max_length=255, null=True, blank=True)),
                 ('bio', models.TextField(null=True, blank=True)),
                 ('share_email', models.BooleanField(default=False)),
-                ('resolver_institution', models.ForeignKey(related_name='users', blank=True, to='openurl.Institution', null=True)),
-                ('user', models.OneToOneField(related_name='profile', to=settings.AUTH_USER_MODEL)),
+                ('resolver_institution', models.ForeignKey(related_name='users', blank=True, to='openurl.Institution', null=True, on_delete=models.CASCADE)),
+                ('user', models.OneToOneField(related_name='profile', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]

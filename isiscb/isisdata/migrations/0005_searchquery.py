@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('selected_facets', models.CharField(max_length=500, null=True, blank=True)),
                 ('name', models.CharField(help_text=b'\n    Provide a memorable name so that you can find this search later.', max_length=255, null=True, blank=True)),
                 ('saved', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(related_name='searches', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(related_name='searches', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]

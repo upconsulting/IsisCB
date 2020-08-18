@@ -1,9 +1,14 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from django import template
 from isisdata.models import *
 
-from app_filters import *
+from .app_filters import *
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from collections import OrderedDict
 
 
@@ -31,7 +36,8 @@ def get_coins_dict(citation):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
     metadata_dict['rft.au'] = []
     for author in authors:
-        metadata_dict['rft.au'].append(author.authority.name)
+        if (author.authority):
+            metadata_dict['rft.au'].append(author.authority.name)
 
     metadata_dict['rft.date'] = [get_pub_year(citation)]
     return metadata_dict
@@ -52,27 +58,31 @@ def get_metatag_fields(citation):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
     metadata_dict['citation_author'] = []
     for author in authors:
-        metadata_dict['citation_author'].append(author.authority.name)
+        if author.authority:
+            metadata_dict['citation_author'].append(author.authority.name)
     metadata_dict['citation_publication_date'] = [get_pub_year(citation)]
     metadata_dict['citation_abstract'] = [bleach_safe(citation.abstract)]
 
     publisher = citation.acrelation_set.filter(type_controlled__in=['PU'])
     metadata_dict['citation_publisher'] = []
     for pub in publisher:
-        metadata_dict['citation_publisher'].append(pub.authority.name)
+        if pub.authority:
+            metadata_dict['citation_publisher'].append(pub.authority.name)
     metadata_dict['dc.type'] = [citation.get_type_controlled_display]
 
     periodicals = citation.acrelation_set.filter(type_controlled__in=['PE'])
     metadata_dict['citation_journal_title'] = []
     if periodicals:
         for peri in periodicals:
-            metadata_dict['citation_journal_title'].append(peri.authority.name)
+            if peri.authority:
+                metadata_dict['citation_journal_title'].append(peri.authority.name)
 
     schools = citation.acrelation_set.filter(type_controlled__in=['SC'])
     metadata_dict['citation_dissertation_institution'] = []
     if schools:
         for school in schools:
-            metadata_dict['citation_dissertation_institution'] = [school.authority.name]
+            if school.authority:
+                metadata_dict['citation_dissertation_institution'] = [school.authority.name]
 
     if citation.part_details.volume:
         metadata_dict['citation_volume'] = [citation.part_details.volume]
@@ -138,7 +148,7 @@ def get_coins_from_result(result):
         kv_pairs['rft.atitle'] = result.title.encode('utf-8')
 
         # Journal title.
-        if result.periodicals > 0:
+        if len(result.periodicals) > 0:
             kv_pairs['rft.jtitle'] = result.periodicals[0].encode('utf-8')
 
         # Start and end pages.
@@ -152,7 +162,7 @@ def get_coins_from_result(result):
         # Title of the work (e.g. book).
         kv_pairs['rft.title'] = result.title.encode('utf-8')
 
-    return urllib.urlencode(kv_pairs)
+    return urllib.parse.urlencode(kv_pairs)
 
 
 @register.filter
@@ -181,7 +191,8 @@ def get_coins_from_citation(citation):
     if citation.type_controlled in ['RE', 'AR']:
         journal = citation.acrelations.filter(type_controlled='PE')
         if journal.count() > 0:
-            kv_pairs['rft.jtitle'] = journal[0].authority.name.encode('utf-8')
+            if journal[0].authority:
+                kv_pairs['rft.jtitle'] = journal[0].authority.name.encode('utf-8')
         kv_pairs['rft.atitle'] = citation.title.encode('utf-8')
 
     else:   # Otherwise, we use title for the work itself.
@@ -189,7 +200,8 @@ def get_coins_from_citation(citation):
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
     if authors.count() > 0:
-        kv_pairs['rft.au'] = authors[0].authority.name.encode('utf-8')
+        if authors[0].authority:
+            kv_pairs['rft.au'] = authors[0].authority.name.encode('utf-8')
     kv_pairs['rft.date'] = get_pub_year(citation)
 
     if citation.part_details:
@@ -202,4 +214,4 @@ def get_coins_from_citation(citation):
         if citation.part_details.page_end:
             kv_pairs['rft.epage'] = citation.part_details.page_end
 
-    return urllib.urlencode(kv_pairs)
+    return urllib.parse.urlencode(kv_pairs)

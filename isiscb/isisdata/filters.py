@@ -1,6 +1,7 @@
+from __future__ import unicode_literals
+from builtins import object
 import django_filters
 from django_filters.fields import Lookup
-from django_filters.filterset import STRICTNESS
 from django.db.models import Q
 from django import forms
 
@@ -18,7 +19,7 @@ import pytz
 from django.conf import settings
 import iso8601, unicodedata
 
-
+# FIXME: Removed strictness may not be necessary to change
 
 filters.LOOKUP_TYPES = [
     ('', '---------'),
@@ -43,8 +44,6 @@ filters.LOOKUP_TYPES = [
 
 
 class CitationFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RETURN_NO_RESULTS
-    # strict = STRICTNESS.RAISE_VALIDATION_ERROR
 
     # id = django_filters.MethodFilter(name='id', lookup_type='exact')
     id = django_filters.CharFilter(method='filter_id')
@@ -55,6 +54,8 @@ class CitationFilter(django_filters.FilterSet):
     publication_date_from = django_filters.CharFilter(method='filter_publication_date_from')
     # publication_date_to = django_filters.MethodFilter()
     publication_date_to = django_filters.CharFilter(method='filter_publication_date_to')
+    publication_date_contains = django_filters.CharFilter(method='filter_publication_date_contains')
+
     # abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
     abstract = django_filters.CharFilter(method='filter_abstract')
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
@@ -75,7 +76,7 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
-    record_status = django_filters.ChoiceFilter(name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
@@ -83,9 +84,16 @@ class CitationFilter(django_filters.FilterSet):
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
-    # language = django_filters.ModelChoiceFilter(name='language', queryset=Language.objects.all())
 
-    # order = ChoiceMethodFilter(name='order', choices=order_by)
+    READY_FOR_PRINT_CLASS = 'RFPC'
+    READY_FOR_PRINT_NOT_CLASS = 'RFPNC'
+    READY_FOR_PRINT_ALL = 'RFPA'
+    ALREADY_PRINTED = 'ALP'
+    NOT_READY_YET = 'NRFP'
+    MARKED_DELETE = 'MD'
+
+    print_status = django_filters.ChoiceFilter(empty_label="Print Status (select one)",choices=[(READY_FOR_PRINT_CLASS, 'ReadyForPrint Classified'), (READY_FOR_PRINT_NOT_CLASS, 'ReadyForPrint NotClassified'), (READY_FOR_PRINT_ALL, 'ReadyForPrint All'), (ALREADY_PRINTED, 'Already Printed'), (NOT_READY_YET, 'NotReadyForPrint'), (MARKED_DELETE, 'MarkedDelete')], method='filter_print_status')
+    multi_field_filter = django_filters.CharFilter(method='filter_in_multiple_fields')
 
     def __init__(self, params, **kwargs):
         if 'in_collections' in params and params.get('collection_only', False):
@@ -145,7 +153,7 @@ class CitationFilter(django_filters.FilterSet):
             except User.DoesNotExist:
                 self.modifier_last_name = "User does not exist."
 
-    class Meta:
+    class Meta(object):
         model = Citation
         fields = [
             'id', 'title', 'abstract', 'description',
@@ -225,6 +233,11 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
         return queryset.filter(publication_date__lte=date)
 
+    def filter_publication_date_contains(self, queryset, name, value):
+        if value == 'null':
+            return queryset.filter(attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE, attributes__value_freeform__exact='')
+        return queryset.filter(attributes__type_controlled__name=settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE, attributes__value_freeform__icontains=value)
+
     def filter_created_on_from(self, queryset, name, value):
         try:
             date = iso8601.parse_date(value)
@@ -291,6 +304,35 @@ class CitationFilter(django_filters.FilterSet):
 
         return queryset.filter(tracking_state=value)
 
+    def filter_print_status(self, queryset, field, value):
+        if value == CitationFilter.READY_FOR_PRINT_CLASS:
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
+                .filter(tracking_state=Citation.PROOFED) \
+                .filter((Q(acrelation__record_status_value=CuratedMixin.ACTIVE) | Q(acrelation__record_status_value__isnull=True)) & \
+                Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM, \
+                acrelation__authority__record_status_value=CuratedMixin.ACTIVE)).distinct()
+
+        if value == CitationFilter.READY_FOR_PRINT_NOT_CLASS:
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE)\
+                .filter(tracking_state=Citation.PROOFED)\
+                .filter(~Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM) | \
+                    (Q(acrelation__authority__type_controlled=Authority.CLASSIFICATION_TERM) & \
+                    (Q(acrelation__authority__record_status_value__in=[CuratedMixin.INACTIVE, CuratedMixin.DUPLICATE, CuratedMixin.REDIRECT]) |
+                    Q(acrelation__record_status_value__in=[CuratedMixin.INACTIVE, CuratedMixin.DUPLICATE, CuratedMixin.REDIRECT])))
+                ).distinct()
+        if value == CitationFilter.READY_FOR_PRINT_ALL:
+            return queryset.filter(record_status_value=CuratedMixin.ACTIVE) \
+                .filter(tracking_state=Tracking.PROOFED)
+        if value == CitationFilter.ALREADY_PRINTED:
+            return queryset.filter(tracking_state=Tracking.PRINTED)
+        if value == CitationFilter.NOT_READY_YET:
+            return queryset.filter(Q(tracking_state__in=[Tracking.NONE, Tracking.FULLY_ENTERED]) \
+                | Q(tracking_state__isnull=True)).filter(record_status_value__in=[CuratedMixin.ACTIVE, CuratedMixin.REDIRECT, CuratedMixin.INACTIVE])
+        if value == CitationFilter.MARKED_DELETE:
+            return queryset.filter(record_status_value=CuratedMixin.DUPLICATE)
+
+        return queryset
+
     def filter_in_collections(self, queryset, field, value):
         if not value:
             return queryset
@@ -298,30 +340,65 @@ class CitationFilter(django_filters.FilterSet):
 
         return queryset.filter(Q(in_collections=value))
 
+    def filter_in_multiple_fields(self, queryset, field, value):
+        if not value:
+            return queryset
+
+        value = normalize(unidecode(value))
+
+        q_title = Q()
+        q_description = Q()
+        q_author = Q()
+        q_abstract = Q()
+        for part in value.split():
+            q_title = q_title & Q(title_for_sort__icontains=part)
+            q_author = q_author & Q(acrelation__authority__name__icontains=part,
+                            acrelation__type_controlled__in=[
+                                        ACRelation.AUTHOR])
+
+        q_description = q_description & Q(description__icontains=value)
+        q_abstract = q_abstract & Q(abstract__icontains=value)
+        q_subject = Q(acrelation__authority__name__icontains=value,
+                               acrelation__type_controlled=ACRelation.SUBJECT)
+        q_category = Q(acrelation__authority__name__icontains=value,
+                                   acrelation__type_controlled=ACRelation.CATEGORY)
+
+
+
+        return queryset.filter(q_title | q_description | q_author | q_abstract | q_subject | q_category)
 
 class AuthorityFilter(django_filters.FilterSet):
-    strict = STRICTNESS.RAISE_VALIDATION_ERROR # RETURN_NO_RESULTS
 
     id = django_filters.CharFilter(method="filter_id")
     # name = django_filters.MethodFilter()
     name = django_filters.CharFilter(method='filter_name')
-    type_controlled = django_filters.ChoiceFilter(choices=[('', 'All')] + list(Authority.TYPE_CHOICES))
-    description = django_filters.CharFilter(name='description', lookup_expr='icontains')
-    classification_system = django_filters.ChoiceFilter(name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
-    classification_code = django_filters.AllValuesFilter(name='classification_code')
-    classification_hierarchy = django_filters.AllValuesFilter(name='classification_hierarchy')
+    type_controlled = django_filters.ChoiceFilter(choices=[('ALL', 'All')] + list(Authority.TYPE_CHOICES), method='filter_type_controlled')
+    description = django_filters.CharFilter(field_name='description', lookup_expr='icontains')
+    classification_system = django_filters.ChoiceFilter(field_name='classification_system', choices=[('', 'All')] + list(Authority.CLASS_SYSTEM_CHOICES))
+    classification_code = django_filters.AllValuesFilter(field_name='classification_code')
+    classification_hierarchy = django_filters.AllValuesFilter(field_name='classification_hierarchy')
     # linked_data = django_filters.MethodFilter()
-    linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
-    linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    try:
+        linked_data_types = [(ldt.pk, ldt.name) for ldt in LinkedDataType.objects.all()]
+        linked_data = django_filters.ChoiceFilter(method='filter_linked_data', choices=[('', 'All')] + linked_data_types)
+    except Exception as e:
+        print("Can't set linked data.", e)
 
-    attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
-    attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    try:
+        attribute_types = [(at.pk, at.name) for at in AttributeType.objects.all()]
+        attribute_type = django_filters.ChoiceFilter(method='filter_attribute_type', choices=[('', 'All')] + attribute_types)
+    except Exception as e:
+        print("Can't get attributes", e)
 
-    record_status_value = django_filters.ChoiceFilter(name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
+    record_status_value = django_filters.ChoiceFilter(field_name='record_status_value', choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
 
-    datasets = Dataset.objects.all()
-    dataset_list = [(ds.pk, ds.name) for ds in datasets ]
-    belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    try:
+        datasets = Dataset.objects.all()
+        dataset_list = [(ds.pk, ds.name) for ds in datasets]
+        belongs_to = django_filters.ChoiceFilter(choices=[('', 'All')] + dataset_list)
+    except Exception as e:
+        print("Cant get datasets.", e)
+
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
 
@@ -336,7 +413,7 @@ class AuthorityFilter(django_filters.FilterSet):
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
 
-    class Meta:
+    class Meta(object):
         model = Authority
         fields = [
             'id', 'name', 'type_controlled', 'description',
@@ -496,3 +573,8 @@ class AuthorityFilter(django_filters.FilterSet):
         except:
             return queryset
         return queryset.filter(modified_on__lte=date)
+
+    def filter_type_controlled(self, queryset, name, value):
+        if value != "ALL":
+            return queryset.filter(type_controlled=value)
+        return queryset

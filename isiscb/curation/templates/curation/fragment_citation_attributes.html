@@ -80,6 +80,7 @@ var delete_attribute = function() {
         $.ajax("{% url "curation:create_attribute_for_citation" instance.id %}" + attribute_id + '/delete.json?confirm=true', {
             'success': function(r) {
                 $('#attribute-' + attribute_id).remove();
+                $("#attributes_dates_" + attribute_id).remove();
             },
         });
     }

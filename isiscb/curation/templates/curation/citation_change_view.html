@@ -10,6 +10,23 @@
 var toggleTab = function(name) {
     $('.nav-tabs a[href="#' + name + '"]').tab('show')
 }
+
+$(function() {
+   $(".reduceIfEmpty").each(function(idx, elem) {
+     var content = $(elem).text();
+     if (content == '' || content == undefined) {
+       $(elem).attr('rows', 1);
+     }
+   });
+   $(".oneLine").each(function(idx, elem) {
+     $(elem).attr('rows', 1);
+   });
+   $("#proofed_setactive_btn").click(function() {
+     $("#proof-active-form").submit()
+     return false
+   })
+
+});
 </script>
 <style>
 .acrelation.search-result {
@@ -57,6 +74,9 @@ var toggleTab = function(name) {
 {% endif %}
 
 {% endwith %}
+<form id="proof-active-form" action="{% url 'curation:proof-set-active' instance.id %}" method="POST">
+  {% csrf_token %}
+</form>
 
 <form id="citation_form" class="form" action="." method="POST">
     {% csrf_token %}
@@ -88,10 +108,10 @@ var toggleTab = function(name) {
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               {{ form.record_status_value|addcss:"form-control input-sm" }}
-              &nbsp;
-              {{ form.record_status_explanation|addcss:"form-control input-sm" }}
 
               {{ form.type_controlled }}
+
+              <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
             </div>
           </div>
           <div class="col-md-12">
@@ -138,22 +158,22 @@ Back to List </a>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Fields</a>
             </li>
             <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Attributes ({{ instance.attributes.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab">Related Citations</a>
+                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Cit. ({{ instance.all_ccrelations.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Authorities</a>
+                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Auth. ({{ instance.related_authorities.count }})</a>
             </li>
             <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab">Tracking</a>
+                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;" id="tracking_tab">Tracking: {% if instance.tracking_state == "FU" %}Entered{% elif instance.tracking_state == "HS" %}HSTM{% else %}{{ instance.get_tracking_state_display }}{% endif %}</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -161,72 +181,132 @@ Back to List </a>
                 {% block fields_tab %}
                 <div class="row">
                     <div class="col-sm-6">
-                        {% include "curation/fragment_citation_categories.html" %}
-                        {% include "curation/fragment_citation_subjects.html" %}
+                      {% block citation_middle_panel %}
+                        {% include "curation/fragment_citation_categories_subjects.html" %}
+                      {% endblock %}
                     </div>
                     <div class="col-sm-6">
 
-                        {% for error in form.description.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <label>{{ form.description.label }}</label>
-                            {{ form.description|addcss:"form-control" }}
+                      <div class="form-group">
+                        <div class="row">
+                          <div class="col-sm-1 text-left">
+                            <label class="input-sm">Lang.</label>
+                          </div>
+                          <div class="col-sm-3" style="padding-right: 0px;">
+                            <ul style="margin-bottom: 0;" class="list-group">
+                              <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
+                              <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                                  <span class="glyphicon glyphicon-plus"></span> Add
+                              </a>
+                            </ul>
+                          </div>
+                          <div class="col-sm-8">
+                            <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
+                                  {% for language in instance.language.all %}
+                                  <li class="list-group-item language clearfix"
+                                      id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px;">
+                                      <small style="line-height: 28px;">{{ language }}</small>
+                                      <!-- TODO: implement permission check here. -->
+                                      <span class="button-group button-group-xs pull-right">
+                                          <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                                              type="button"
+                                              language-id="{{ language.id }}"
+                                              language-name="{{ language }}"></a>
+                                      </span>
+                                  </li>
+                                  {% endfor %}
+
+
+                              </ul>
+                          </div>
                         </div>
+                      </div>
 
                         {% for error in form.abstract.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.abstract.label }}</label>
-                            {{ form.abstract|addcss:"form-control" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Abst.</label>
+                            </div>
+                            <div class="col-sm-11" >
+                            {{ form.abstract|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
+
+                        {% for error in form.description.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Desc.</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
+                        </div>
+
+
 
                         {% for error in form.administrator_notes.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.administrator_notes.label }}</label>
-                            {{ form.administrator_notes|addcss:"form-control" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Note</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
-                        {% for error in form.record_history.errors %}
+                        {% for error in form.record_status_explanation.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.record_history.label }}</label>
-                            {{ form.record_history|addcss:"form-control" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left" style="margin-top: -7px;">
+                              <label class="input-sm">Status Expl.</label>
+                            </div>
+                            <div class="col-sm-11">
+                            {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
                         {% for error in form.belongs_to.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
                         <div class="form-group">
-                            <label>{{ form.belongs_to.label }}</label>
-                            {{ form.belongs_to|addcss:"form-control" }}
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Set</label>
+                            </div>
+                            <div class="col-sm-11">
+                              {{ form.belongs_to|addcss:"form-control input-sm" }}
+                            </div>
+                          </div>
                         </div>
 
-                        <label>Language(s)</label>
-                        <ul class="list-group" id="language-list-group">
-                            {% for language in instance.language.all %}
-                            <li class="list-group-item language clearfix"
-                                id="language-{{ language.id }}">
-                                {{ language }}
-                                <!-- TODO: implement permission check here. -->
-                                <span class="button-group button-group-xs pull-right">
-                                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
-                                        type="button"
-                                        language-id="{{ language.id }}"
-                                        language-name="{{ language }}"></a>
-                                </span>
-                            </li>
-                            {% endfor %}
-                            <li class="list-group-item" id="create-language-item" style="display: none;"></li>
-                            <a style="cursor: pointer;" class="list-group-item language text-muted" onclick="addLanguage();">
-                                <span class="glyphicon glyphicon-plus"></span> Add a language
-                            </a>
-
-                        </ul>
+                        {% for error in form.record_history.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Hist.</label>
+                            </div>
+                            <div class="col-sm-11">
+                              {{ form.record_history|addcss:"form-control input-sm" }}
+                            </div>
+                          </div>
+                        </div>
 
                     </div>
 
@@ -264,50 +344,16 @@ var bind_language = function() {
     $('.delete-language').click(function() {
         var elem = $(this);
         var language_id = elem.attr('language-id');
-        var language_name = elem.attr('language-name');
-        $('#language-id-container').val(language_id);
-        $('#delete-language-target-name').html(language_name);
-        $('#delete-language-modal').modal('show');
+        if (language_id) {
+            $.ajax("{% url "curation:delete_language_for_citation" instance.id %}?language=" + language_id, {
+                'success': function(r) {
+                    $('#language-' + language_id).remove();
+                },
+            });
+        }
     });
 }
-
-var delete_language = function() {
-    $('#delete-language-modal').modal('hide');
-    var language_id = $('#language-id-container').val();
-    if (language_id) {
-        $.ajax("{% url "curation:delete_language_for_citation" instance.id %}?language=" + language_id, {
-            'success': function(r) {
-                $('#language-' + language_id).remove();
-            },
-        });
-    }
-}
 </script>
-
-<!-- Modal -->
-<div class="modal fade" id="delete-language-modal" tabindex="-1" role="dialog" aria-labelledby="delete-language-modal-label">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="delete-language-modal-label">Are you sure?</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    You are about to remove the language <span class="text-warning" id="delete-language-target-name"></span> from this citation. Deletion cannot be undone!
-                </p>
-                <p>
-                    This will not delete the related language record itself, only the association between that language record and this citation.
-                </p>
-                <input type="hidden" id="language-id-container" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
-                <button type="button" class="btn btn-danger" onclick="delete_language();">Delete forever</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
@@ -385,100 +431,127 @@ var language_creation_container = $('#create-language-item');
 
 var addLanguage = function() {
     language_creation_container.empty();
-    var form_group = $('<div class="form-group"></div>');
-    form_group.append('<input class="form-control" id="create-language-input" name="create-language-input" type="text" />');
+    var form_group = $('<div style="margin:0px;" class="form-group"></div>');
+    form_group.append('<input class="form-control input-sm" id="create-language-input" name="create-language-input" type="text"  />');
     language_creation_container.append(form_group);
-    language_creation_container.append('<ul class="list-group" id="create-language-results-container"></ul>');
+    language_creation_container.append('<ul style="margin:0; font-size: 10px;" class="list-group" id="create-language-results-container"></ul>');
     language_creation_container.css("display", "block");
 
-    var lastSearch = $.now();
-    var waiting = false;
 
     $('#create-language-input').on('keyup', function(e) {
-        if ($.now() - lastSearch < 500 || waiting) return;
+        if (e.keyCode === 13) {
+          // let's catch return
+          e.preventDefault();
+          var results_container = $('#create-language-results-container');
+          var children = results_container.children();
+          if (children != undefined && children.first() != undefined) {
+            var lang = children.first().find('.select-language');
+            selectLanguage(lang.first());
+          }
+
+          return;
+        }
 
         var query = $(this).val();
-        $.ajax("{% url "curation:quick_and_dirty_language_search" %}?q=" + query, {
-            failure: function(result) {
-                waiting = false;
-            },
-            success: function(result) {
-                waiting = false;
+        searchLanguage(query);
 
-                var results_container = $('#create-language-results-container');
-                results_container.empty();
-                result.results.forEach(function(r) {
-                    var choice_elem = '<li class="list-group-item search-result';
-                    if (r.public != true) {
-                      choice_elem += ' record-notpublic';
-                    }
-                    choice_elem += '">';
-                    choice_elem += '<span class="button-group button-group-xs">';
-                    choice_elem += '<a class="glyphicon glyphicon-ok btn btn-xs select-language" data-id="' + r.id + '" data-name="' + r.name + '"></a>';
-                    choice_elem += '</span>';
-                    choice_elem += ' <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong>';
-
-                    if (r.public != true) {
-                      choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
-                    }
-
-                    choice_elem += '</li>';
-
-                    results_container.append(choice_elem);
-                });
-
-                $('.select-language').click(function() {
-                    var selected = $(this);
-                    var selected_id = selected.attr('data-id');
-                    var selected_name = selected.attr('data-name');
-                    $('#create-language-results-container').empty();
-                    $('#create-language-input').val(selected_name);
-
-                    var payload = {
-                        'language': selected_id
-                    };
-
-                    $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
-                        var new_id = result.language.id;
-                        var new_elem = '<li class="list-group-item clearfix" id="language-' + new_id + '">';
-                        new_elem += result.language.name;
-                        new_elem += '<span class="button-group button-group-xs pull-right">';
-                        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-language" type="button" language-id="'+ new_id +'" language-name="' + result.language.name + '"></a>';
-                        new_elem += '</span>';
-                        new_elem += '</li>';
-
-                        $('#language-list-group').prepend(new_elem);
-                        language_creation_container.css("display", "none");
-                        language_creation_container.empty();
-
-                        bind_language();
-                    }).fail(function(a) {
-                        console.log(a);
-                      })
-                });
-            }
-        });
     });
+
+    // default is English
+    $("#create-language-input").val("English");
+    $("#create-language-input").keyup();
+    $("#create-language-input").focus();
+    $("#create-language-input").select();
 }
 
+var lastSearch = $.now();
+var waiting = false;
 
+function searchLanguage(query) {
+  if ($.now() - lastSearch < 500 || waiting) return;
+
+  $.ajax("{% url "curation:quick_and_dirty_language_search" %}?q=" + query, {
+      failure: function(result) {
+          waiting = false;
+      },
+      success: function(result) {
+          waiting = false;
+
+          var results_container = $('#create-language-results-container');
+          results_container.empty();
+          result.results.forEach(function(r) {
+              var choice_elem = '<li style="padding:4px" class="list-group-item search-result';
+              if (r.public != true) {
+                choice_elem += ' record-notpublic';
+              }
+              choice_elem += '">';
+              choice_elem += '<span class="button-group button-group-xs">';
+              choice_elem += '<a class="select-language" data-id="' + r.id + '" data-name="' + r.name + '"> <span class="fa fa-check"></span> <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong></a>';
+              choice_elem += '</span>';
+              //choice_elem += ' <span class="label label-success">' + r.id + '</span> <strong>' + r.name + '</strong>';
+
+              if (r.public != true) {
+                choice_elem += ' <i class="fa fa-eye-slash" title="The linked record is not public."></i>';
+              }
+
+              choice_elem += '</li>';
+
+              results_container.append(choice_elem);
+          });
+
+          $('.select-language').click(function() {
+              var selected = $(this);
+              selectLanguage(selected);
+          });
+      }
+  });
+}
+
+function selectLanguage(selected) {
+    //var selected = $(this);
+    var selected_id = selected.attr('data-id');
+    var selected_name = selected.attr('data-name');
+    $('#create-language-results-container').empty();
+    $('#create-language-input').val(selected_name);
+
+    var payload = {
+        'language': selected_id
+    };
+
+    $.post("{% url "curation:add_language_for_citation" instance.id %}", payload, function(result) {
+        var new_id = result.language.id;
+        var new_elem = '<li style="padding-bottom: 0px; padding-top: 0px;" class="list-group-item clearfix" id="language-' + new_id + '">';
+        new_elem += '<small style="line-height: 28px;">' + result.language.name + '</small>';
+        new_elem += '<span class="button-group button-group-xs pull-right">';
+        new_elem += '<a class="btn btn-xs glyphicon glyphicon-remove delete delete-language" type="button" language-id="'+ new_id +'" language-name="' + result.language.name + '"></a>';
+        new_elem += '</span>';
+        new_elem += '</li>';
+
+        $('#language-list-group').prepend(new_elem);
+        language_creation_container.css("display", "none");
+        language_creation_container.empty();
+
+        bind_language();
+    }).fail(function(a) {
+        console.log(a);
+      })
+}
 
 $( document ).ready(function() {
 
   $('.citation_submit').on( "click", function() {
       $('#data_changed_modal').attr('data-forward-type', '');
-      if (checkRecord()) {
-          $('#citation_form').submit();
-      }
+      // IEXP-15: we are not checking the record any longer
+      $('#citation_form').submit();
+
   });
 
   $('#data_changed_save_confirmed').on('click', function() {
     $('#data_changed_modal').modal('hide');
     $("#input_back_to_list").val("True");
-    if ( checkRecord() ) {
-        $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
-        $('#citation_form').submit();
-    }
+    // IEXP-15: we are not checking the record any longer
+    $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
+    $('#citation_form').submit();
   });
 
   $('#save_confirmed').on('click', function() {
@@ -546,118 +619,6 @@ $( document ).ready(function() {
     $("#change_type_controlled_modal").hide();
   });
 });
-
-function checkRecord() {
-  var citation_type = $('#citation_type').attr("data-type");
-
-  var warnings = [];
-
-  if ($("#author_editors") == undefined || $("#author_editors").text() == '') {
-    warnings.push("You did not add an author or editor.");
-  }
-
-  if ($("#id_title").val() == '' && citation_type != "RE") {
-    warnings.push("You did not enter a title.");
-  }
-
-  var categoryList = $("#category-list-group li");
-  var subjectList = $("#subject-list-group li");
-  if (categoryList.length <= 1 && subjectList.length <= 1) {
-    warnings.push("You did not add any categories or subjects.");
-  }
-
-  if ($("#publication_date") == undefined || $("#publication_date").text() == '' || $("#publication_date").text() == 'missing') {
-    warnings.push("You did not add a publication date.");
-  }
-
-  if ($("#id_belongs_to").val() == '') {
-    warnings.push("You did not specify a dataset.");
-  }
-
-  var languageList = $("#language-list-group li");
-  if (languageList.length <= 1) {
-    warnings.push("You did not select a language.");
-  }
-
-  if (citation_type == "RE" || citation_type == "AR" || citation_type == "ES") {
-    if ($("#journal") == undefined || $("#journal").text() == '') {
-      warnings.push("You did not specify a periodical.");
-    }
-
-    if ($("#id_partdetails-volume_free_text").val() == "") {
-      warnings.push("You did not specify a volumne.");
-    }
-
-    if ($("#id_partdetails-pages_free_text").val() == "") {
-      warnings.push("You did not specify a page range.");
-    }
-
-    if ($("#doi") == undefined || $("#doi").text() == "") {
-      warnings.push("You did not specify a DOI.");
-    }
-  }
-
-  if (citation_type == "RE" || citation_type == "ES") {
-    var citationsBox = $("#ccrelations");
-
-    //TODO: this is really ugly and nees a better solution!
-    var bookLinks = citationsBox.find("span.label:contains('Book')");
-
-    if (bookLinks.length < 1) {
-      warnings.push("You did not add a link to a book.");
-    }
-  }
-
-  if (citation_type == "BO") {
-    if ($("#publisher") == undefined || $("#publisher").text() == '') {
-      warnings.push("You did not specify a publisher.");
-    }
-    if ($('#id_physical_details').val() == "") {
-      warnings.push("You did not enter any physical details.");
-    }
-    if ($("#isbn") == undefined || $("#isbn").text() == '') {
-      warnings.push("You did not add an ISBN number.");
-    }
-  }
-
-  if (citation_type == "TH") {
-    if ($('#id_physical_details').val() == "") {
-      warnings.push("You did not enter any physical details.");
-    }
-    if ($("#school") == undefined || $("#school").text() == '') {
-      warnings.push("You did not specify a school.");
-    }
-  }
-
-  if (citation_type == "CH") {
-    var citationsBox = $("#ccrelations");
-    //TODO: this is really ugly and nees a better solution!
-    var bookLinks = citationsBox.find("span.label:contains('Book')");
-    if (bookLinks.length < 1) {
-      warnings.push("You did not add a CCRelation to a book.");
-    }
-
-    if ($('#id_partdetails-pages_free_text').val() == "") {
-      warnings.push("You did not enter any page information.");
-    }
-  }
-
-  if (warnings.length > 0) {
-    var start = "<p>The following issues were found. Are you sure you want to save this citation?</p>";
-    var list = "<ul>";
-    for (var warn in warnings) {
-      list = list.concat("<li>" + warnings[warn] + "</li>");
-    }
-    list = list.concat("</ul>");
-
-    $('#modal_text').html(start + list);
-
-    $('#save_confirm_modal').modal('show');
-    return false;
-  }
-
-  return true;
-}
 
 </script>
 

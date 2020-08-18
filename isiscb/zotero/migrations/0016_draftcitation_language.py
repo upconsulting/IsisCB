@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='draftcitation',
             name='language',
-            field=models.ForeignKey(blank=True, to='isisdata.Language', null=True),
+            field=models.ForeignKey(blank=True, to='isisdata.Language', null=True, on_delete=models.CASCADE),
         ),
     ]

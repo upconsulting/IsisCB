@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist, FieldError, ValidationError
 from django.contrib.contenttypes.models import ContentType
@@ -356,34 +358,34 @@ class Command(BaseCommand):
                 methodname = 'handle_{0}'.format(table)
                 if hasattr(self, methodname):
                     method = getattr(self, methodname)
-                    print 'Running', methodname,
+                    print('Running', methodname, end=' ')
                     method(datapath)
-                    print '...done.'
+                    print('...done.')
         else:
-            print 'Loading citations...',
+            print('Loading citations...', end=' ')
             self.handle_citations(datapath)
-            print 'done'
-            print 'Loading authorities...',
+            print('done')
+            print('Loading authorities...', end=' ')
             self.handle_authorities(datapath)
-            print 'done'
-            print 'Loading AC relations...',
+            print('done')
+            print('Loading AC relations...', end=' ')
             self.handle_ac_relations(datapath)
-            print 'done'
-            print 'Loading CC relations...',
+            print('done')
+            print('Loading CC relations...', end=' ')
             self.handle_cc_relations(datapath)
-            print 'done'
-            print 'Loading attributes...',
+            print('done')
+            print('Loading attributes...', end=' ')
             self.handle_attributes(datapath)
-            print 'done'
-            print 'Loading linkeddata...',
+            print('done')
+            print('Loading linkeddata...', end=' ')
             self.handle_linkeddata(datapath)
-            print 'done'
-            print 'Loading tracking...',
+            print('done')
+            print('Loading tracking...', end=' ')
             self.handle_tracking(datapath)
-            print 'done'
+            print('done')
             #
-            print 'The following data could not be inserted:'
-            print self.failed
+            print('The following data could not be inserted:')
+            print(self.failed)
 
     def handle_citations(self, datapath):
         citationspath = os.path.join(datapath, 'citation.xml')
@@ -406,7 +408,7 @@ class Command(BaseCommand):
                         except KeyError as E:
                             value = ''
                             if dj_field == 'status_of_record':
-                                for k, v in statusOfRecordTypes.iteritems():
+                                for k, v in list(statusOfRecordTypes.items()):
                                     if k.lower() in value.lower():
                                         value = v
                             pass    # TODO: need better handling of bad data.
@@ -434,7 +436,7 @@ class Command(BaseCommand):
                 try:
                     language_instance = Language.objects.get(name=language)
                 except ObjectDoesNotExist:
-                    print "couldn't find language {0}".format(language)
+                    print("couldn't find language {0}".format(language))
                     pass
 
             try:

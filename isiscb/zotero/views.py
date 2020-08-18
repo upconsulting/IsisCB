@@ -1,12 +1,18 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import map
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
+from django.core.paginator import Paginator
 
 from isisdata.models import *
+from isisdata.utils import normalize
+from unidecode import unidecode
 
 from curation.contrib.views import check_rules
 
@@ -17,10 +23,12 @@ from zotero import tasks, parse, ingest
 from zotero.suggest import suggest_citation, suggest_authority
 
 import tempfile
+import json
 
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 def _field_data(instance):
-    return [(k, v) for k, v in instance.__dict__.items() if not k.startswith('_')]
+    return [(k, v) for k, v in list(instance.__dict__.items()) if not k.startswith('_')]
 
 
 @login_required
@@ -74,7 +82,7 @@ def suggest_authority_json(request, authority_id):
             'name': instance.name,
             'citation_count': instance.acrelation_set.count(),
             'type_controlled': instance.get_type_controlled_display(),
-            'related_citations': map(_format_citation, related_citations),
+            'related_citations': list(map(_format_citation, related_citations)),
         })
         suggestions.append(suggestion)
 
@@ -126,10 +134,22 @@ def accessions(request):
 
     queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    current_page = request.GET.get('page', 1)
+    if not current_page:
+        current_page = 1
+    current_page = int(current_page)
+    page = paginator.page(current_page)
+    paginated_objects = list(page)
 
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
+        'filter_list': paginated_objects,
+        'current_page': current_page,
+        'current_offset': (current_page - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
         'objects': filtered_objects,
     }
 
@@ -193,23 +213,9 @@ def retrieve_accession(request, accession_id):
 
     # ISISCB-1043: show warning if a citation might already be in the db
     matching_citations = {}
+    ldtype_cache = {}
     for dcitation in draftcitations:
-        matches = []
-        linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
-        for draft_ld in linkeddata:
-            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper())
-            matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
-            if matching_ld:
-                matches = [match.subject for match in matching_ld]
-                break
-
-        if matches:
-            matching_citations[dcitation.id] = { match: ["Linked Data"] for match in matches }
-
-        possible_matches = Citation.objects.filter(title=dcitation.title)
-        if possible_matches:
-            existing_matches = matching_citations.setdefault(dcitation.id, {})
-            [existing_matches.setdefault(match, []).append("Title") for match in possible_matches]
+        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, type_cache=ldtype_cache)
 
     context = {
         'curation_section': 'zotero',
@@ -218,9 +224,59 @@ def retrieve_accession(request, accession_id):
         'draftcitations': draftcitations,
         'resolved_draftcitations': accession.draftcitation_set.filter(processed=True),
         'matching_citations': matching_citations,
+        'draft_authority_id': request.GET.get('draft_authority_id', None),
+        'resolved_authority_id': request.GET.get('resolved_authority_id', None),
     }
     return render(request, template, context)
 
+@check_rules('has_zotero_access')
+@staff_member_required
+def possible_matching_citations(request, accession_id, draftcitation_id):
+    template = 'zotero/show_citation_matches.html'
+    accession = get_object_or_404(ImportAccession, pk=accession_id)
+    draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
+    matches = _find_citation_matches(draftcitation, False)
+    context = {
+        'curation_section': 'zotero',
+        'curation_subsection': 'accessions',
+        'accession': accession,
+        'citation': draftcitation,
+        'matching_citations': matches,
+    }
+    return render(request, template, context)
+
+def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
+    matches = []
+    linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
+    for draft_ld in linkeddata:
+        ldtype = type_cache.get(draft_ld.name.upper(), None)
+        if not ldtype:
+            ldtype = LinkedDataType.objects.filter(name=draft_ld.name.upper()).first()
+            type_cache[draft_ld.name.upper()] = ldtype
+        matching_ld = LinkedData.objects.filter(type_controlled=ldtype, universal_resource_name=draft_ld.value) if ldtype else None
+        if matching_ld:
+            matches = [match.subject for match in matching_ld]
+            break
+
+    matched_by = {}
+    if matches:
+        matched_by = { match: ["Linked Data"] for match in matches }
+
+    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title)), type_controlled=dcitation.type_controlled)
+    possible_matches = possible_matches.prefetch_related('related_authorities')
+    if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
+        series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
+        if series and len(series) > 0:
+            possible_matches = possible_matches.filter(acrelation__type_controlled=ACRelation.PERIODICAL)
+            possible_matches = possible_matches.filter(acrelation__authority__name=series[0].authority.name)
+
+    possible_matches_count = possible_matches.count()
+    if possible_matches_count < 3 or not limit_matches:
+        [matched_by.setdefault(match, []).append("Title") for match in possible_matches]
+    else:
+        matched_by['MORE'] = possible_matches_count
+
+    return matched_by
 
 @check_rules('has_zotero_access')
 @staff_member_required
@@ -235,6 +291,7 @@ def similar_authorities(request):
                         name=draftauthority.name,
                         processed=False,
                         type_controlled=draftauthority.type_controlled)
+
     queryset = queryset.exclude(pk=draftauthority_id)
     response_data = {
         'count': queryset.count(),
@@ -253,12 +310,28 @@ def resolve_authority(request):
     authority = get_object_or_404(Authority, pk=authority_id)
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
 
-    resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
-    draftauthority.processed = True
-    draftauthority.save()
+    if not draftauthority.processed:
+        resolution = InstanceResolutionEvent.objects.create(for_instance=draftauthority, to_instance=authority)
+        draftauthority.processed = True
+        draftauthority.save()
+    else:
+        resolution = InstanceResolutionEvent.objects.get(for_instance_id=draftauthority.id, to_instance_id=authority.id)
 
-    return JsonResponse({'data': resolution.id})
+    return JsonResponse({'data': {
+        'authority_id': authority.id,
+        'authority_name': authority.name,
+    }})
 
+@check_rules('has_zotero_access')
+@staff_member_required
+def draft_authority(request, accession_id, draftauthority_id):
+    if request.method == 'DELETE':
+        draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
+        draftauthority.delete()
+
+        return JsonResponse({'data': 'Success'})
+
+    return JsonResponse({'data': 'Method not supported.'})
 
 @check_rules('has_zotero_access')
 @staff_member_required
@@ -268,7 +341,7 @@ def skip_authority_for_draft(request):
 
     draftauthority = get_object_or_404(DraftAuthority, pk=draftauthority_id)
     accession = get_object_or_404(ImportAccession, pk=accession_id)
-    print 'skip_authority_for_draft', draftauthority.id, accession.id
+    print('skip_authority_for_draft', draftauthority.id, accession.id)
     draftauthority.processed = True
     draftauthority.save()
     return JsonResponse({'data': None})
@@ -428,7 +501,7 @@ def ingest_accession(request, accession_id):
     if confirmed:
         ingested = tasks.ingest_accession(request, accession)
         context.update({'ingested': ingested})
-        template = 'zotero/ingest_accession_success.html'
+        return HttpResponseRedirect("%s?zotero_accession=%s&belongs_to=%s&o=start_page" % (reverse('curation:citation_list'), accession_id, accession.ingest_to.id))
     else:
         template = 'zotero/ingest_accession_prompt.html'
 

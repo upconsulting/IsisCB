@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 from isisdata.models import *
 
 
@@ -22,7 +25,7 @@ class TrackingWorkflow(object):
 
     @classmethod
     def allowed(cls, action):
-        return zip(*filter(lambda (start, end): end == action, cls.transitions))[0]
+        return list(zip(*[start_end for start_end in cls.transitions if start_end[1] == action]))[0]
 
     def is_workflow_action_allowed(self, action):
         return self.instance.tracking_state in TrackingWorkflow.allowed(action) and action not in self.entries

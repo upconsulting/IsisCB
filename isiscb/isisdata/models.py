@@ -1,14 +1,21 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator,int_list_validator
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse as core_reverse
+from django.urls import reverse as core_reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import jsonpickle
@@ -22,10 +29,10 @@ from oauth2_provider.models import AbstractApplication
 
 from isisdata.utils import *
 
-import copy, datetime, iso8601, pickle, uuid, urlparse, re, bleach, unidecode
+import copy, datetime, iso8601, pickle, uuid, urllib.parse, re, bleach, unidecode
 from random import randint
 import string, unicodedata
-from urlparse import urlsplit
+from urllib.parse import urlsplit
 
 from openurl.models import Institution
 
@@ -50,9 +57,10 @@ class Value(models.Model):
     Python object from an alphanumeric input, and raises ValidationError for
     bad data.
     """
+    # CHECK: Had to add on_delete so chose cascade -> JD: I believe this makes sense
     attribute = models.OneToOneField('Attribute', related_name='value',
                                      help_text=help_text("""
-    The Attribute to which this Value belongs."""))
+    The Attribute to which this Value belongs."""), on_delete=models.CASCADE)
 
     child_class = models.CharField(max_length=255, help_text=help_text("""
     Name of the child model for this instance."""))
@@ -96,7 +104,7 @@ class Value(models.Model):
         Override this method in a subclass to control how it is rendered for
         display in views.
         """
-        return unicode(self.value)
+        return str(self.value)
 
     def cvalue(self):
         cclass = self.get_child_class()
@@ -107,7 +115,13 @@ class Value(models.Model):
 
     def __unicode__(self):
         try:
-            return unicode(self.cvalue())
+            return str(self.cvalue())
+        except:
+            return u''
+
+    def __str__(self):
+        try:
+            return str(self.cvalue())
         except:
             return u''
 
@@ -121,7 +135,7 @@ class TextValue(Value):
     def __unicode__(self):
         return self.value
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'text (long)'
 
 
@@ -140,7 +154,7 @@ class CharValue(Value):
     def __unicode__(self):
         return self.value
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'text (short)'
 
 
@@ -158,9 +172,9 @@ class IntValue(Value):
             raise ValidationError('Must be an integer')
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'integer'
 
 
@@ -182,7 +196,7 @@ class DateTimeValue(Value):
     def __unicode__(self):
         return self.value.isoformat()
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'date and time'
 
 
@@ -218,7 +232,7 @@ class ISODateRangeValue(Value):
     def convert(value):
         if type(value) in [tuple, list] and len(value) == 2:
             value = list(value)
-            for i in xrange(2):
+            for i in range(2):
                 value[i] = ISODateValue.convert(value[i])
         elif type(value) in [tuple, list] and len(value) == 1 and type(value[0]) in [tuple, list]:
             try:
@@ -234,13 +248,26 @@ class ISODateRangeValue(Value):
 
     def __unicode__(self):
         def _coerce(val):
-            val = unicode(val)
+            val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
+            return val
+
+        return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
+
+    def __str__(self):
+        def _coerce(val):
+            val = str(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + str.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = str.zfill(val, 4)
+            elif len(val) == 1:
+                val = str.zfill(val, 2)
             return val
 
         return u'%s to %s' % tuple(['-'.join([_coerce(v) for v in getattr(self, part) if v != 0]) for part in self.PARTS])
@@ -248,7 +275,7 @@ class ISODateRangeValue(Value):
     def render(self):
         return self.__unicode__()
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'ISO date range'
 
 
@@ -261,7 +288,7 @@ class DateRangeValue(Value):
     @staticmethod
     def convert(value):
         if type(value) in [tuple, list] and len(value) == 2:
-            for i in xrange(2):
+            for i in range(2):
                 if type(value[i]) is not datetime.date:
                     try:
                         value[i] = iso8601.parse_date(value[i]).date()
@@ -275,7 +302,10 @@ class DateRangeValue(Value):
     def __unicode__(self):
         return u'%s to %s' % tuple([part.isodate() for part in self.value])
 
-    class Meta:
+    def __str__(self):
+        return u'%s to %s' % tuple([part.isodate() for part in self.value])
+
+    class Meta(object):
         verbose_name = 'date range'
 
 
@@ -327,7 +357,7 @@ class ISODateValue(Value):
                 self.attribute.source.publication_date = self.as_date
                 self.attribute.source.save()
             except (ValueError, AttributeError):
-                print 'Error settings publication_date on source'
+                print('Error settings publication_date on source')
 
         super(ISODateValue, self).save(*args, **kwargs)    # Save first.
 
@@ -351,13 +381,26 @@ class ISODateValue(Value):
 
     def __unicode__(self):
         def _coerce(val):
-            val = unicode(val)
+            val = str(val)
             if val.startswith('-') and len(val) < 5:
-                val = val[0] + string.zfill(val[1:], 4)
+                val = val[0] + str.zfill(val[1:], 4)
             elif len(val) == 3:
-                val = string.zfill(val, 4)
+                val = str.zfill(val, 4)
             elif len(val) == 1:
-                val = string.zfill(val, 2)
+                val = str.zfill(val, 2)
+            return val
+
+        return '-'.join([_coerce(v) for v in self.value])
+
+    def __str__(self):
+        def _coerce(val):
+            val = str(val)
+            if val.startswith('-') and len(val) < 5:
+                val = val[0] + str.zfill(val[1:], 4)
+            elif len(val) == 3:
+                val = str.zfill(val, 4)
+            elif len(val) == 1:
+                val = str.zfill(val, 2)
             return val
 
         return '-'.join([_coerce(v) for v in self.value])
@@ -381,7 +424,7 @@ class ISODateValue(Value):
 
         if type(value) in [tuple, list]:
             value = list(value)
-        elif type(value) in [str, unicode]:
+        elif type(value) in [str, str]:
 
             pre = u''
             if value.startswith('-'):   # Preserve negative years.
@@ -401,12 +444,12 @@ class ISODateValue(Value):
             raise ValidationError('Not a valid ISO8601 date')
 
         if len(value) > 0:
-            if int(value[0]) > 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 4):
+            if int(value[0]) > 0 and (type(value[0]) in [str, str] and len(value[0]) > 4):
                 raise ValidationError('Not a valid ISO8601 date')
-            elif int(value[0]) < 0 and (type(value[0]) in [str, unicode] and len(value[0]) > 5):
+            elif int(value[0]) < 0 and (type(value[0]) in [str, str] and len(value[0]) > 5):
                 raise ValidationError('Not a valid ISO8601 date')
             for v in value[1:]:
-                if type(v) in [str, unicode] and len(v) != 2:
+                if type(v) in [str, str] and len(v) != 2:
                     raise ValidationError('Not a valid ISO8601 date')
         try:
 
@@ -414,7 +457,7 @@ class ISODateValue(Value):
         except NameError:
             raise ValidationError('Not a valid ISO8601 date')
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'isodate'
 
 
@@ -447,7 +490,10 @@ class DateValue(Value):
     def __unicode__(self):
         return self.value.isoformat()
 
-    class Meta:
+    def __str__(self):
+        return self.value.isoformat()
+
+    class Meta(object):
         verbose_name = 'date'
 
 
@@ -465,9 +511,9 @@ class FloatValue(Value):
             raise ValidationError('Must be a floating point number')
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'floating point number'
 
 
@@ -475,25 +521,33 @@ class LocationValue(Value):
     """
     A location value. Points to an instance of :class:`.Location`\.
     """
-    value = models.ForeignKey('Location')   # TODO: One to One?
+    # CHECK: Had to add on_delete so chose cascade -> JD: cascade should be fine
+    value = models.ForeignKey('Location', on_delete=models.CASCADE)   # TODO: One to One? JD: yes I believe so
 
     def __unicode__(self):
         return self.value.__unicode__
 
-    class Meta:
+    def __str__(self):
+        return self.value.__unicode__
+
+    class Meta(object):
         verbose_name = 'location'
 
 class AuthorityValue(Value):
     """
     An authority value. Points to an instance of :class:`.Authority`\.
     """
-    value = models.ForeignKey('Authority')
+    # CHECK: Had to add on_delete so chose cascade -> JD: since we don't delete Authorities at the moment, this is probably fine
+    value = models.ForeignKey('Authority', on_delete=models.CASCADE)
     name = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return unicode(self.value)
+        return str(self.value)
 
-    class Meta:
+    def __str__(self):
+        return str(self.value)
+
+    class Meta(object):
         verbose_name = 'authority'
 
     @staticmethod
@@ -513,7 +567,7 @@ VALUE_MODELS = [
     (datetime.datetime, DateTimeValue),
     (datetime.date,     ISODateValue),
     (str,               CharValue),
-    (unicode,           CharValue),
+    (str,           CharValue),
     (tuple,             DateRangeValue),
     (list,              DateRangeValue),
 ]
@@ -524,7 +578,7 @@ class CuratedMixin(models.Model):
     Curated objects have an audit history and curatorial notes attached to them.
     """
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     administrator_notes = models.TextField(blank=True, null=True,
@@ -540,10 +594,10 @@ class CuratedMixin(models.Model):
     modified_on = models.DateTimeField(auto_now=True, blank=True, null=True,
                                        help_text=help_text("""
     Date and time at which this object was last updated."""))
-
+    # CHECK: Had to add on_delete so chose cascade ->  JD: superclass for many, if user is delete, objects should not all be deleted
     modified_by = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The most recent user to modify this object."""))
+    The most recent user to modify this object."""), on_delete=models.SET_NULL)
 
     public = models.BooleanField(default=True, help_text=help_text("""
     Controls whether this instance can be viewed by end users."""))
@@ -562,7 +616,8 @@ class CuratedMixin(models.Model):
                                            max_length=255,
                                            blank=True,
                                            null=True,
-                                           default=ACTIVE)
+                                           default=ACTIVE,
+                                           db_index=True)
 
     record_status_explanation = models.CharField(max_length=255,
                                                  blank=True,
@@ -647,8 +702,10 @@ class CuratedMixin(models.Model):
     Value of ModifiedOn from the original FM database."""))
 
     dataset_literal = models.CharField(max_length=255, blank=True, null=True)
-    belongs_to = models.ForeignKey('Dataset', null=True)
-    zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: deleting of a datasets should not delete the object
+    belongs_to = models.ForeignKey('Dataset', null=True, on_delete=models.SET_NULL)
+    # CHECK: Had to add on_delete so chose cascade -> JD: same as above
+    zotero_accession = models.ForeignKey('zotero.ImportAccession', blank=True, null=True, on_delete=models.SET_NULL)
 
     @property
     def _history_user(self):
@@ -674,7 +731,7 @@ class ReferencedEntity(models.Model):
     TODO: implement an accession field.
     """
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
     id = models.CharField(max_length=200, primary_key=True,
@@ -694,7 +751,7 @@ class ReferencedEntity(models.Model):
         Create a new Unique Resource Identifier.
         """
         values = type(self).__name__.lower(), self.id
-        return urlparse.urlunparse(('http', settings.DOMAIN,
+        return urllib.parse.urlunparse(('http', settings.DOMAIN,
                                     'isis/{0}/{1}/'.format(*values), '', '', ''))
 
     def save(self, *args, **kwargs):
@@ -727,6 +784,9 @@ class Language(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Citation(ReferencedEntity, CuratedMixin):
     """
@@ -757,9 +817,13 @@ class Citation(ReferencedEntity, CuratedMixin):
                                    " other works in a series.")
 
     created_native = models.DateTimeField(blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: deleting user shouldn't delete citation
     created_by_native = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The user who created this object."""), related_name="creator_of")
+    The user who created this object."""), related_name="creator_of", on_delete=models.SET_NULL)
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: deleting subtype shouldn't delete citation
+    subtype = models.ForeignKey('CitationSubtype', blank=True, null=True, on_delete=models.SET_NULL)
 
     def save(self, *args, **kwargs):
         def get_related(obj):
@@ -811,8 +875,37 @@ class Citation(ReferencedEntity, CuratedMixin):
 
         self.title_for_sort = normalize(unidecode.unidecode(get_title(self)))
         self.title_for_display = get_display_title(self)
+        self.set_tracking_state()
 
         super(Citation, self).save(*args, **kwargs)
+
+    def set_tracking_state(self):
+        ratings = {
+            Tracking.HSTM_UPLOAD: -1,
+            Tracking.FULLY_ENTERED: 0,
+            Tracking.PROOFED: 1,
+            Tracking.AUTHORIZED: 2,
+            Tracking.PRINTED: 3,
+        }
+
+        entries = [x.type_controlled for x in self.tracking_records.all()]
+        sorted_entries = sorted(entries, key=lambda x: ratings[x] if x and x in ratings else -1, reverse=True)
+        current_state = None
+        if sorted_entries:
+            current_state = sorted_entries[0]
+        is_hstm = (Tracking.HSTM_UPLOAD in entries)
+
+        tracking_mapping = {
+            Citation.HSTM_UPLOAD: Tracking.HSTM_UPLOAD,
+            Citation.PRINTED: Tracking.PRINTED,
+            Citation.AUTHORIZED: Tracking.AUTHORIZED,
+            Citation.PROOFED: Tracking.PROOFED,
+            Citation.FULLY_ENTERED: Tracking.FULLY_ENTERED,
+            None: None
+        }
+
+        self.tracking_state = tracking_mapping[current_state]
+        self.hstm_uploaded = Citation.IS_HSTM_UPLOADED if is_hstm else None
 
     @property
     def normalized_title(self):
@@ -865,6 +958,12 @@ class Citation(ReferencedEntity, CuratedMixin):
     ESSAY_REVIEW = 'ES'
     THESIS = 'TH'
     EVENT = 'EV'
+    WEB_OBJECT = 'WO'
+    MULTIMEDIA_OBJECT = 'MO'
+    ARCHIVE_OBJECT = 'AO'
+    DIGITAL_RESOURCE = 'DR'
+    PERSONAL_RECOGNITION = 'PC'
+
     PRESENTATION = 'PR'
     INTERACTIVE = 'IN'
     WEBSITE = 'WE'
@@ -878,10 +977,11 @@ class Citation(ReferencedEntity, CuratedMixin):
         (ESSAY_REVIEW, 'Essay Review'),
         (THESIS, 'Thesis'),
         (EVENT, 'Event'),
-        (PRESENTATION, 'Presentation'),
-        (INTERACTIVE, 'Interactive Resource'),
-        (WEBSITE, 'Website'),
-        (APPLICATION, 'Application'),
+        (WEB_OBJECT, 'Web Object'),
+        (MULTIMEDIA_OBJECT, 'Multimedia Object'),
+        (ARCHIVE_OBJECT, 'Archive Object'),
+        (DIGITAL_RESOURCE, 'Digital Resource'),
+        (PERSONAL_RECOGNITION, 'Personal Recognition'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        verbose_name='type',
@@ -906,8 +1006,15 @@ class Citation(ReferencedEntity, CuratedMixin):
         (NONE, 'None')
     )
     tracking_state = models.CharField(max_length=2, null=True, blank=True,
-                                      choices=TRACKING_CHOICES)
+                                      choices=TRACKING_CHOICES, db_index=True)
     """The current state of the record."""
+
+    IS_HSTM_UPLOADED = "HS"
+    HSTM_UPLOAD_CHOICES = (
+        (IS_HSTM_UPLOADED, "HSTM Upload"),
+    )
+    hstm_uploaded = models.CharField(max_length=2, null=True, blank=True,
+                                      choices=HSTM_UPLOAD_CHOICES)
 
     abstract = models.TextField(blank=True, null=True, help_text=help_text("""
     Abstract or detailed summaries of a work.
@@ -935,11 +1042,13 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     # TODO: This relation should be from PartDetails to Citation, to support
     #  inlines in the Admin.
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: deleting partdetails shouldn't delete citation
     part_details = models.OneToOneField('PartDetails', null=True, blank=True,
                                         help_text=help_text("""
     New field: contains volume, issue, page information for works that are parts
     of larger works.
-    """))
+    """), on_delete=models.SET_NULL)
 
     publication_date = models.DateField(blank=True, null=True,
                                         help_text=help_text("""
@@ -1017,6 +1126,9 @@ class Citation(ReferencedEntity, CuratedMixin):
     def __unicode__(self):
         return strip_tags(self.title)
 
+    def __str__(self):
+        return strip_tags(self.title)
+
     @property
     def ccrelations(self):
         """
@@ -1055,11 +1167,38 @@ class Citation(ReferencedEntity, CuratedMixin):
         """
         return core_reverse("citation", args=(self.id,))
 
+class CitationSubtype(models.Model):
+
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Name of the new subtype.
+    """))
+
+    unique_name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Unique name of a subtype, use to reference a subtype.
+    """))
+
+    description = models.TextField(blank=True, null=True,
+                                   help_text=help_text("""
+    A brief description that will be displayed to help identify the authority.
+    Such as, brief bio or a scope note. For classification terms will be text
+    like 'Classification term from the XXX classification schema.'
+    """))
+
+    related_citation_type = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='citation type',
+                                       choices=Citation.TYPE_CHOICES,
+                                       help_text=help_text("""
+    Type of which this object is a subtype, e.g. Review or Chapter.
+    """))
+
+    def __str__(self):
+        return self.name if self.name else 'Subtype'
+
 
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
 
-    class Meta:
+    class Meta(object):
         verbose_name_plural = 'authority records'
         verbose_name = 'authority record'
 
@@ -1073,9 +1212,10 @@ class Authority(ReferencedEntity, CuratedMixin):
     """ASCII-normalized name."""
 
     created_on_stored = models.DateTimeField(blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: deleting users shoulnd't delete authority
     created_by_stored = models.ForeignKey(User, null=True, blank=True,
                                     help_text=help_text("""
-    The user who created this object."""), related_name="creator_of_object")
+    The user who created this object."""), related_name="creator_of_object", on_delete=models.SET_NULL)
 
 
     def save(self, *args, **kwargs):
@@ -1139,6 +1279,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
                                        verbose_name="type",
+                                       db_index=True,
                                        help_text=help_text("""
     Specifies authority type. Each authority thema has its own list of
     controlled type vocabulary.
@@ -1160,7 +1301,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (BULK_DATA, 'Bulk Data Update'),
         (NONE, 'No')
     )
-    tracking_state = models.CharField(max_length=2, null=True, blank=True,
+    tracking_state = models.CharField(max_length=2, null=True, blank=True, db_index=True,
                                       choices=TRACKING_CHOICES)
     """The current state of the record."""
 
@@ -1187,6 +1328,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification_system = models.CharField(max_length=4, blank=True,
                                              null=True, default=SPWC,
                                              choices=CLASS_SYSTEM_CHOICES,
+                                             db_index=True,
                                              help_text=help_text("""
     Specifies the classification system that is the source of the authority.
     Used to group resources by the Classification system. The system used
@@ -1224,7 +1366,8 @@ class Authority(ReferencedEntity, CuratedMixin):
     record_status = models.CharField(max_length=2, choices=STATUS_CHOICES,
                                      blank=True, null=True)
 
-    redirect_to = models.ForeignKey('Authority', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: if redirected authority is delete this shouldn't be deleted
+    redirect_to = models.ForeignKey('Authority', blank=True, null=True, on_delete=models.SET_NULL)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
@@ -1247,6 +1390,9 @@ class Authority(ReferencedEntity, CuratedMixin):
         return LinkedData.objects.filter(subject_instance_id=self.pk).filter(public=True)
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     @property
@@ -1300,14 +1446,17 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'ACR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'authority-citation relationship'
         verbose_name_plural = 'authority-citation relationships'
 
     history = HistoricalRecords()
 
-    citation = models.ForeignKey('Citation', blank=True, null=True)
-    authority = models.ForeignKey('Authority', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: ACRelations shouldn't be deleted when citations/authorities are
+    citation = models.ForeignKey('Citation', blank=True, null=True, on_delete=models.SET_NULL)
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: ACRelations shouldn't be deleted when citations/authorities are
+    authority = models.ForeignKey('Authority', blank=True, null=True, on_delete=models.SET_NULL)
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
@@ -1332,6 +1481,29 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     PERIODICAL = 'PE'
     BOOK_SERIES = 'BS'
     COMMITTEE_MEMBER = 'CM'
+
+    # New types for IEXP-15
+    ORGANIZER = 'OR'
+    INTERVIEWER = 'IV'
+    GUEST = 'GU'
+    CREATOR = 'CR'
+    PRODUCER = 'PR'
+    DIRECTOR = 'DI'
+    WRITER = 'WR'
+    PERFORMER = 'PF'
+    COLLECTOR = 'CL'
+    ARCHIVIST = 'AR'
+    RESEARCHER = 'RE'
+    DEVELOPER = 'DE'
+    COMPILER = 'CP'
+    AWARDEE = 'AW'
+    OFFICER = 'OF'
+    HOST = 'HO'
+    DISTRIBUTOR = 'DS'
+    ARCHIVAL_REPOSITORY = 'AC'
+    MAINTAINING_INSTITUTION = 'MI'
+    PRESENTING_GROUP = 'PG'
+
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
@@ -1347,6 +1519,26 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         (PERIODICAL, 'Periodical'),
         (BOOK_SERIES, 'Book Series'),
         (COMMITTEE_MEMBER, 'Committee Member'),
+        (ORGANIZER, 'Organizer'),
+        (INTERVIEWER, 'Interviewer'),
+        (GUEST, 'Guest'),
+        (CREATOR, 'Creator'),
+        (PRODUCER, 'Producer'),
+        (DIRECTOR, 'Director'),
+        (WRITER, 'Writer'),
+        (PERFORMER, 'Performer'),
+        (COLLECTOR, 'Collector'),
+        (ARCHIVIST, 'Archivist'),
+        (RESEARCHER, 'Researcher'),
+        (DEVELOPER, 'Developer'),
+        (COMPILER, 'Compiler'),
+        (AWARDEE, 'Awardee'),
+        (OFFICER, 'Officer'),
+        (HOST, 'Host'),
+        (DISTRIBUTOR, 'Distributor'),
+        (ARCHIVAL_REPOSITORY, 'Archival Repository'),
+        (MAINTAINING_INSTITUTION, 'Maintaining Institution'),
+        (PRESENTING_GROUP, 'Presenting Group'),
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1356,10 +1548,16 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object).
     """))
 
-    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, CONTRIBUTOR, TRANSLATOR]
+    TYPE_CATEGORY_PUB_DISTR = [PUBLISHER, SCHOOL, PERIODICAL, HOST, DISTRIBUTOR, ARCHIVAL_REPOSITORY, MAINTAINING_INSTITUTION, PRESENTING_GROUP]
+
+    PERSONAL_RESPONS_TYPES = [AUTHOR, EDITOR, ADVISOR, COMMITTEE_MEMBER, CONTRIBUTOR, TRANSLATOR,
+        ORGANIZER, INTERVIEWER, GUEST, CREATOR, PRODUCER, DIRECTOR,
+        WRITER, PERFORMER, COLLECTOR, ARCHIVIST, RESEARCHER, DEVELOPER,
+        COMPILER, AWARDEE, OFFICER]
     SUBJECT_CONTENT_TYPES = [SUBJECT, CATEGORY]
     INSTITUTIONAL_HOST_TYPES = [PUBLISHER, SCHOOL, INSTITUTION]
     PUBLICATION_HOST_TYPES = [PERIODICAL, BOOK_SERIES]
+
 
     PERSONAL_RESPONS = 'PR'
     SUBJECT_CONTENT = 'SC'
@@ -1380,6 +1578,36 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     subject) and the citation (as the object) more broadly than the relationship
     type.
     """))
+
+    RESPONSIBILITY_MAPPING = {
+        Citation.BOOK: [AUTHOR, EDITOR],
+        Citation.ARTICLE: [AUTHOR],
+        Citation.CHAPTER: [AUTHOR],
+        Citation.REVIEW: [AUTHOR],
+        Citation.ESSAY_REVIEW: [AUTHOR],
+        Citation.THESIS: [AUTHOR, ADVISOR, COMMITTEE_MEMBER],
+        Citation.EVENT: [AUTHOR, ORGANIZER],
+        Citation.WEB_OBJECT: [AUTHOR, INTERVIEWER, GUEST, CREATOR],
+        Citation.MULTIMEDIA_OBJECT: [PRODUCER, DIRECTOR, WRITER, PERFORMER, CREATOR],
+        Citation.ARCHIVE_OBJECT: [COLLECTOR, ARCHIVIST, RESEARCHER, AUTHOR],
+        Citation.DIGITAL_RESOURCE: [DEVELOPER, WRITER, COMPILER, EDITOR],
+        Citation.PERSONAL_RECOGNITION: [AWARDEE, OFFICER],
+    }
+
+    HOST_MAPPING = {
+        Citation.BOOK: [PUBLISHER],
+        Citation.ARTICLE: [PERIODICAL],
+        Citation.CHAPTER: [PUBLISHER],
+        Citation.REVIEW: [PERIODICAL],
+        Citation.ESSAY_REVIEW: [PERIODICAL],
+        Citation.THESIS: [SCHOOL],
+        Citation.EVENT: [HOST],
+        Citation.WEB_OBJECT: [PUBLISHER, DISTRIBUTOR, HOST],
+        Citation.MULTIMEDIA_OBJECT: [PUBLISHER, DISTRIBUTOR],
+        Citation.ARCHIVE_OBJECT: [ARCHIVAL_REPOSITORY],
+        Citation.DIGITAL_RESOURCE: [MAINTAINING_INSTITUTION],
+        Citation.PERSONAL_RECOGNITION: [PRESENTING_GROUP],
+    }
 
     type_free = models.CharField(max_length=255,
                                  blank=True,
@@ -1459,6 +1687,10 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         values = (self.citation, self._render_type_controlled(), self.authority)
         return u'{0} - {1} - {2}'.format(*values)
 
+    def __str__(self):
+        values = (self.citation, self._render_type_controlled(), self.authority)
+        return u'{0} - {1} - {2}'.format(*values)
+
     def save(self, *args, **kwargs):
         if self.type_controlled is not None:
             if self.type_controlled in self.PERSONAL_RESPONS_TYPES:
@@ -1489,7 +1721,7 @@ class AARelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'AAR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'authority-authority relationship'
         verbose_name_plural = 'authority-authority relationships'
 
@@ -1522,8 +1754,11 @@ class AARelation(ReferencedEntity, CuratedMixin):
     Free text description of the relationship.
     """))
 
-    subject = models.ForeignKey('Authority', related_name='relations_from')
-    object = models.ForeignKey('Authority', related_name='relations_to')
+    # CHECK: Had to add on_delete so chose cascade -> JD: AARel shouldn't be deleted when subject/object are
+    subject = models.ForeignKey('Authority', related_name='relations_from', on_delete=models.SET_NULL, null=True)
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: AARel shouldn't be deleted when subject/object are
+    object = models.ForeignKey('Authority', related_name='relations_to', on_delete=models.SET_NULL, null=True)
 
     # missing from Stephen's list: objectType, subjectType
 
@@ -1550,6 +1785,10 @@ class AARelation(ReferencedEntity, CuratedMixin):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
 
+    def __str__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
+
 
 class CCRelation(ReferencedEntity, CuratedMixin):
     """
@@ -1561,7 +1800,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = 'CCR'
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'citation-citation relationship'
         verbose_name_plural = 'citation-citation relationships'
 
@@ -1572,6 +1811,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
     INCLUDES_CHAPTER = 'IC'
     INCLUDES_SERIES_ARTICLE = 'ISA'
+    INCLUDES_CITATION_OBJECT = 'ICO'
     REVIEW_OF = 'RO'
     REVIEWED_BY = 'RB'
     RESPONDS_TO = 'RE'
@@ -1579,6 +1819,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (INCLUDES_CHAPTER, 'Includes Chapter'),
         (INCLUDES_SERIES_ARTICLE, 'Includes Series Article'),
+        (INCLUDES_CITATION_OBJECT, 'Includes'),
         (REVIEW_OF, 'Is Review Of'),
         (RESPONDS_TO, 'Responds To'),
         (ASSOCIATED_WITH, 'Is Associated With'),
@@ -1595,8 +1836,11 @@ class CCRelation(ReferencedEntity, CuratedMixin):
     Type of relationship as used in the citation.
     """))
 
-    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True)
-    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: CCREL shouldn't be deleted when citations are
+    subject = models.ForeignKey('Citation', related_name='relations_from', null=True, blank=True, on_delete=models.SET_NULL)
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: CCREL shouldn't be deleted when citations are
+    object = models.ForeignKey('Citation', related_name='relations_to', null=True, blank=True, on_delete=models.SET_NULL)
 
     # Generic reverse relations. These do not create new fields on the model.
     #  Instead, they provide an API for lookups back onto their respective
@@ -1625,6 +1869,10 @@ class CCRelation(ReferencedEntity, CuratedMixin):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
 
+    def __str__(self):
+        values = (self.subject, self._render_type_controlled(), self.object)
+        return u'{0} - {1} - {2}'.format(*values)
+
     def save(self, *args, **kwargs):
         super(CCRelation, self).save(*args, **kwargs)
         # Trigger indexing of Authority and Citation instances.
@@ -1635,7 +1883,7 @@ class CCRelation(ReferencedEntity, CuratedMixin):
 
 
 class LinkedDataType(models.Model):
-    class Meta:
+    class Meta(object):
         verbose_name = 'linked data type'
         verbose_name_plural = 'linked data types'
 
@@ -1657,6 +1905,9 @@ class LinkedDataType(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class AttributeType(models.Model):
     name = models.CharField(max_length=255)
@@ -1666,15 +1917,19 @@ class AttributeType(models.Model):
     This field provides the name to be displayed to users.
     """))
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     value_content_type = models.ForeignKey(ContentType,
                                            limit_choices_to=VALUETYPES,
-                                           related_name='attribute_value')
+                                           related_name='attribute_value', on_delete=models.CASCADE)
 
     attribute_help_text = models.TextField(default=None, null=True, blank=True, help_text=help_text("""
     The help text the user sees when adding a new attribute of this type.
     """))
 
     def __unicode__(self):
+        return u'{0} ({1})'.format(self.name, self.value_content_type.model)
+
+    def __str__(self):
         return u'{0} ({1})'.format(self.name, self.value_content_type.model)
 
 
@@ -1693,18 +1948,20 @@ class Attribute(ReferencedEntity, CuratedMixin):
     Non-normalized value, e.g. an approximate date, or a date range.
     """))
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     # Generic relation.
-    source_content_type = models.ForeignKey(ContentType)
+    source_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     source_instance_id = models.CharField(max_length=200)
     source = GenericForeignKey('source_content_type', 'source_instance_id')
 
     # The selected AttributeType determines the type of Value (i.e. Value
     #  subclass) that can be related to this Attribute.
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so cascade
     type_controlled = models.ForeignKey('AttributeType', verbose_name='type',
                                         help_text=help_text("""
     The "type" field determines what kinds of values are acceptable for this
     attribute.
-    """))
+    """), on_delete=models.CASCADE)
 
     # TODO: Instead of saving this in the Attribute model, we may want to create
     #  a mechanism for grouping/ranking AttributeTypes.
@@ -1729,6 +1986,13 @@ class Attribute(ReferencedEntity, CuratedMixin):
         except:
             return u''
 
+    def __str__(self):
+        try:
+            return u'{0}: {1}'.format(self.type_controlled.name,
+                                      self.value.cvalue())
+        except:
+            return u''
+
 
 class PartDetails(models.Model):
     """
@@ -1736,7 +2000,7 @@ class PartDetails(models.Model):
     of larger works.
     """
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'part detail'
         verbose_name_plural = 'part details'
 
@@ -1776,8 +2040,10 @@ class Place(models.Model):
     A concept of locality associated with a particular point or region in space.
     """
     name = models.CharField(max_length=255)
-    gis_location = models.ForeignKey('Location', blank=True, null=True)
-    gis_schema = models.ForeignKey('LocationSchema', blank=True, null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: probably not (I don't think we use this at the moment)
+    gis_location = models.ForeignKey('Location', blank=True, null=True, on_delete=models.SET_NULL)
+    # CHECK: Had to add on_delete so chose cascade -> JD: probably not (I don't think we use this at the moment)
+    gis_schema = models.ForeignKey('LocationSchema', blank=True, null=True, on_delete=models.SET_NULL)
 
 
 class LocationSchema(models.Model):
@@ -1818,7 +2084,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     """
     ID_PREFIX = "LED"
 
-    class Meta:
+    class Meta(object):
         verbose_name = 'linked data entry'
         verbose_name_plural = 'linked data entries'
 
@@ -1830,7 +2096,7 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     " identifier (the actual DOI link or the value of the ISBN, etc). Will be a"
     " URN, URI, URL, or other unique identifier for a work, used as needed to"
     " provide information about how to find the digital object on the web or"
-    " to identify the physical object uniquely.")
+    " to identify the physical object uniquely.", db_index=True)
 
     resource_name = models.CharField(max_length=255, blank=True, null=True,
                                      help_text="Title of the resource that the"
@@ -1843,15 +2109,17 @@ class LinkedData(ReferencedEntity, CuratedMixin):
 
     # In the Admin, we should limit the queryset to Authority and Citation
     #  instances only.
-    subject_content_type = models.ForeignKey(ContentType)
+    # CHECK: Had to add on_delete so chose cascade -> JD: probably fine (should never happen though so far)
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: probably not (should also never happen)
     type_controlled = models.ForeignKey('LinkedDataType', verbose_name='type',
                                         help_text="This field is used to"
     " determine what values are acceptable for the URN field, and to choose"
-    " the correct display modality in the public-facing site and metadata")
+    " the correct display modality in the public-facing site and metadata", on_delete=models.SET_NULL, null=True)
 
     type_controlled_broad = models.CharField(max_length=255, blank=True)
     type_free = models.CharField(max_length=255, blank=True)
@@ -1860,6 +2128,11 @@ class LinkedData(ReferencedEntity, CuratedMixin):
     access_status_date_verified = models.DateField(blank=True, null=True)
 
     def __unicode__(self):
+        values = (self.type_controlled,
+                  self.universal_resource_name)
+        return u'{0}: {1}'.format(*values)
+
+    def __str__(self):
         values = (self.type_controlled,
                   self.universal_resource_name)
         return u'{0}: {1}'.format(*values)
@@ -1898,8 +2171,10 @@ class AuthorityTracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes, that makes sense,
+    # if the authority no longer exists, tracking record doesn't need to either
     authority = models.ForeignKey(Authority, related_name='tracking_records',
-                                  null=True, blank=True)
+                                  null=True, blank=True, on_delete=models.CASCADE)
 
     notes = models.TextField(blank=True)
 
@@ -1936,8 +2211,10 @@ class Tracking(ReferencedEntity, CuratedMixin):
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES, db_index=True)
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes that makes sense.
+    # if citation doesn't exist anymore, tracking record doesn't need to either
     citation = models.ForeignKey(Citation, related_name='tracking_records',
-                                 null=True, blank=True)
+                                 null=True, blank=True, on_delete=models.CASCADE)
 
     notes = models.TextField(blank=True)
 
@@ -1946,7 +2223,8 @@ class Annotation(models.Model):
     """
     User-generated content associated with a specific entity.
     """
-    subject_content_type = models.ForeignKey(ContentType)
+    # CHECK: Had to add on_delete so chose cascade -> JD: can't be null, so set it to cascade
+    subject_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     subject_instance_id = models.CharField(max_length=200)
     subject = GenericForeignKey('subject_content_type',
                                 'subject_instance_id')
@@ -1957,7 +2235,9 @@ class Annotation(models.Model):
     example, ``title``.
     """))
 
-    created_by = models.ForeignKey(User, related_name='annotations', null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: I don't think we use this,
+    # but if so, we probalby want to keep it when user is deleted.
+    created_by = models.ForeignKey(User, related_name='annotations', null=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
@@ -1987,11 +2267,16 @@ class CitationCollection(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
     citations = models.ManyToManyField('Citation', related_name='in_collections')
-    createdBy = models.ForeignKey(User, related_name='citation_collections')
+    # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep it around
+    # (right now this is not possible I believe)
+    createdBy = models.ForeignKey(User, related_name='citation_collections', on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
+        return '%s (%s)' % (self.name, self.createdBy.username)
+
+    def __str__(self):
         return '%s (%s)' % (self.name, self.createdBy.username)
 
 class AuthorityCollection(models.Model):
@@ -2001,11 +2286,16 @@ class AuthorityCollection(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
     authorities = models.ManyToManyField('Authority', related_name='in_collections')
-    createdBy = models.ForeignKey(User, related_name='authority_collections')
+    # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep it around
+    # (right now this is not possible I believe)
+    createdBy = models.ForeignKey(User, related_name='authority_collections', on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
     def __unicode__(self):
+        return '%s (%s)' % (self.name, self.createdBy.username)
+
+    def __str__(self):
         return '%s (%s)' % (self.name, self.createdBy.username)
 
 
@@ -2045,7 +2335,7 @@ class Comment(Annotation):
     def linkified(self):
         return linkify(self.text)
 
-    class Meta:
+    class Meta(object):
         get_latest_by = 'created_on'
 
 
@@ -2053,7 +2343,9 @@ class TagAppellation(Annotation):
     """
     The appellation of an entity with a :class:`.Tag`\.
     """
-    tag = models.ForeignKey('Tag')
+    # CHECK: Had to add on_delete so chose cascade -> JD: I don't think we use this
+    # but let's keep it around
+    tag = models.ForeignKey('Tag', on_delete=models.SET_NULL, null=True)
 
 
 class Tag(models.Model):
@@ -2061,7 +2353,8 @@ class Tag(models.Model):
     An :class:`.Annotation` from a controlled vocabulary
     (:class:`.TaggingSchema`).
     """
-    schema = models.ForeignKey('TaggingSchema', related_name='tags')
+    # CHECK: Had to add on_delete so chose cascade -> JD: same as above
+    schema = models.ForeignKey('TaggingSchema', related_name='tags', on_delete=models.SET_NULL, null=True)
     value = models.CharField(max_length=255)
     description = models.TextField()
 
@@ -2075,13 +2368,15 @@ class TaggingSchema(models.Model):
     """
     name = models.CharField(max_length=255)
 
-    created_by = models.ForeignKey(User, related_name='tagging_schemas')
+    # CHECK: Had to add on_delete so chose cascade -> JD: same as above
+    created_by = models.ForeignKey(User, related_name='tagging_schemas', on_delete=models.SET_NULL, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
 
 class SearchQuery(models.Model):
-    user = models.ForeignKey(User, related_name='searches')
+    # CHECK: Had to add on_delete so chose cascade -> JD: that should be fine
+    user = models.ForeignKey(User, related_name='searches', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     parameters = models.TextField()
     search_models = models.CharField(max_length=500, null=True, blank=True)
@@ -2098,7 +2393,8 @@ class UserProfile(models.Model):
     """
     Supports additional self-curated information about Users.
     """
-    user = models.OneToOneField(User, related_name='profile')
+    # CHECK: Had to add on_delete so chose cascade -> JD: that should be fine
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
 
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
@@ -2108,18 +2404,66 @@ class UserProfile(models.Model):
     A user can indicate whether or not their email address should be made
     public."""))
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: we want to keep the user profile
+    # when the resolver has been deleted.
     resolver_institution = models.ForeignKey(Institution, blank=True, null=True,
                                              related_name='users',
                                              help_text=help_text("""
     A user can select an institution for which OpenURL links should be
-    generated while searching."""))
+    generated while searching."""), on_delete=models.SET_NULL)
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: user profile should be kept
     authority_record = models.OneToOneField(Authority, blank=True, null=True,
                                             related_name='associated_user',
                                             help_text=help_text("""
     A user can 'claim' an Authority record, asserting that the record refers to
-    theirself."""))
+    theirself."""), on_delete=models.SET_NULL)
 
+
+# --------------------- cache objects -------------------------------
+
+class CachedTimeline(models.Model):
+    """
+    Caches timeline data generated for authorities.
+    """
+    created_at = models.DateTimeField(auto_now_add=True)
+    authority_id = models.CharField(max_length=255, blank=True, null=True)
+    complete = models.BooleanField(default=False)
+    recalculate = models.BooleanField(default=False)
+
+
+class CachedTimelineYear(models.Model):
+    """
+    Caches timeline data for one year.
+    """
+    year = models.IntegerField()
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes that makes sense
+    timeline_year = models.ForeignKey(CachedTimeline, related_name='years', on_delete=models.CASCADE)
+
+    book_count = models.BigIntegerField()
+    thesis_count = models.BigIntegerField()
+    chapter_count = models.BigIntegerField()
+    article_count = models.BigIntegerField()
+    review_count = models.BigIntegerField()
+    other_count = models.BigIntegerField()
+
+
+class CachedTimelineTitle(models.Model):
+    """
+    Caches timeline data for one title.
+    """
+    title = models.TextField()
+    authors = models.TextField()
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes that makes sense, but Citations
+    # can't be deleted at the moment
+    citation = models.ForeignKey(Citation, blank=True, null=True, on_delete=models.CASCADE)
+
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes, that makes sense
+    timeline_year = models.ForeignKey(CachedTimelineYear, related_name='titles', on_delete=models.CASCADE)
+    citation_type = models.CharField(max_length=2, null=True, blank=True,
+                                       verbose_name='type',
+                                       choices=Citation.TYPE_CHOICES)
 
 # ---------------------- Curation models ----------------------------
 
@@ -2156,6 +2500,9 @@ class IsisCBRole(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class AccessRule(models.Model):
     """
@@ -2166,8 +2513,9 @@ class AccessRule(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True)
 
+    # CHECK: Had to add on_delete so chose cascade -> JD: yes, I believe this makese sense
     role = models.ForeignKey(IsisCBRole, null=True, blank=True,
-                             help_text=help_text("""The role a rules belongs to."""))
+                             help_text=help_text("""The role a rules belongs to."""), on_delete=models.CASCADE)
 
     CITATION = 'citation'
     AUTHORITY = 'authority'
@@ -2248,6 +2596,9 @@ class Dataset(CuratedMixin):
     def __unicode__(self):
         return u'{0}'.format(self.name)
 
+    def __str__(self):
+        return u'{0}'.format(self.name)
+
 
 class AsyncTask(models.Model):
     """
@@ -2261,7 +2612,8 @@ class AsyncTask(models.Model):
     state = models.CharField(max_length=10, blank=True, null=True)
     label = models.TextField(default="")
 
-    created_by = models.ForeignKey(User, related_name='tasks', null=True)
+    # CHECK: Had to add on_delete so chose cascade -> JD: we probably want to keep this around
+    created_by = models.ForeignKey(User, related_name='tasks', null=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(null=True)
 
     _value = models.TextField()

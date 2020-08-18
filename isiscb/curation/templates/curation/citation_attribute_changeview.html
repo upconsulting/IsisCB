@@ -164,6 +164,14 @@ $(document).ready(function() {
       }
     });
   });
+
+  let requestParams = new URLSearchParams(window.location.search)
+  if (requestParams.has('typeName')) {
+    var typeControlled = requestParams.get('typeName');
+    $('#id_attribute-type_controlled option:selected').attr("selected", null);
+    var type = $('#id_attribute-type_controlled option').filter(function () { return $(this).html().startsWith(typeControlled + " ("); }).attr('selected','');
+    $("#id_attribute-type_controlled").trigger('change')
+  }
 });
 </script>
 

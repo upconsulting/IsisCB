@@ -1,9 +1,9 @@
-{% load staticfiles %}
+{% load static %}
 
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
         <div class="navbar-header col-md-3">
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="padding-top:16px; max-width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="padding-top:1px; max-width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -18,8 +18,8 @@
                 <li class="{% if active == 'about' %}active{% endif %}" class="dropdown">
                     <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url "about" %}">About IsisCB Explore</a></li>
-                      <li><a href="{% url "statistics" %}">Statistics </a></li>
+                      <li><a href="{% url 'about' %}">About IsisCB Explore</a></li>
+                      <li><a href="{% url 'statistics' %}">Statistics </a></li>
                     </ul>
                 </li>
                 <li><a href="http://isiscb.org">Blog</a></li>
@@ -41,15 +41,15 @@
                     <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
                         <!-- <li><a href="/profile/">Dashboard</a></li> -->
                         <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
-                        <li><a href="{% url 'password_change' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                        <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                         <li><a href="{% url 'search_history' %}">My Search History</a></li>
                         <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
-                        <li><a href="{% url 'logout' %}?next={{ request.get_full_path|urlencode }}">Log Out</a></li>
+                        <li><a id="logout" href="{% url 'account_logout' %}">Logout</a></li>
                     </ul>
                 </li>
                 {% else %}
                 <li>
-                    <a href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                    <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
                 </li>
 
                 {% endif %}

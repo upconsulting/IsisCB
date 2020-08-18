@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from haystack.backends.elasticsearch_backend import ElasticsearchSearchBackend, ElasticsearchSearchEngine, ElasticsearchSearchQuery
 import six
 

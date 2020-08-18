@@ -1,10 +1,9 @@
 {% extends "curation/list_view.html" %}
 {% load addcss %}
-{% load pagination_tags %}
 {% load render_object %}
 {% load permission_tags %}
 {% load attribute_tags %}
-{% load staticfiles %}
+{% load static %}
 {% load general_tags %}
 
 {% block extrahead %}
@@ -15,7 +14,8 @@
 <script>
 $('body').ready(function() {
     var form = $('#bulk-form');
-    $('#bulk_change_submit').click(function() {
+    $('#bulk_change_submit').click(function(e) {
+      e.preventDefault();
       form.attr('action', '{% url "curation:citation-bulk-action" %}');
       form.attr('target', '_blank');
       form.submit();
@@ -40,7 +40,7 @@ $('body').ready(function() {
 <form action="" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
 
-    <input type="hidden" name="objectType" value="{{ object_type }}">
+    <input type="hidden" name="object_type" value="{{ object_type }}">
 
     <a class="btn btn-primary btn-xs" href="{% url 'curation:create_authority' %}">Create new authority record</a>
 

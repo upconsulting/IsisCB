@@ -16,37 +16,37 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='aarelation',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='acrelation',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='attribute',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='authority',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='ccrelation',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='citation',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='dataset',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='historicalacrelation',
@@ -91,11 +91,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='linkeddata',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='tracking',
             name='zotero_accession',
-            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True),
+            field=models.ForeignKey(blank=True, to='zotero.ImportAccession', null=True, on_delete=models.CASCADE),
         ),
     ]
