@@ -26,6 +26,7 @@ SECRET_KEY = '4z1u)a6b5l%#uf3qi$$$^s^3_*%cruf9pfk$jdgm&n2%ov11%m'
 DEBUG = True
 
 ALLOWED_HOSTS = []
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
 
 #INTERNAL_IPS = ['127.0.0.1']
 
@@ -161,6 +162,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
+                'isisdata.context_processors.google',
             ],
         },
     },
