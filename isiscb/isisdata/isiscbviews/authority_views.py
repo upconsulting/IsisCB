@@ -27,10 +27,9 @@ def authority(request, authority_id):
     """
 
     authority = Authority.objects.get(id=authority_id)
-
     # Some authority entries are deleted. These should be hidden from public
     #  view.
-    if authority.record_status == Authority.DELETE or authority.record_status_value == CuratedMixin.INACTIVE:
+    if authority.record_status_value == CuratedMixin.INACTIVE or (authority.record_status == Authority.DELETE and not authority.record_status_value):
         raise Http404("No such Authority")
 
     # If the user has been redirected from another Authority entry, this should
