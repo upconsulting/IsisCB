@@ -41,152 +41,176 @@
 
 <div class="row">
     <div class="col-sm-4">
-        <div class="h4">Authority Details</div>
-        <div class="row">
-            <div class="col-xs-6">
-                {% for error in form.type_controlled.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-xs-3">{{ form.type_controlled.label }}</label>
-                    <div class="col-xs-9">{{ form.type_controlled|addcss:"form-control input-xs"}}</div>
-                </div>
-            </div>
-
-            <div class="col-xs-6">
-                {% for error in form.record_status_value.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-xs-3">Status</label>
-                    <div class="col-xs-9">{{ form.record_status_value|addcss:"form-control input-xs"}}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row ">
-          {% for error in form.name.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-            <label class="col-xs-2">{{ form.name.label }}</label>
-            <div class="col-xs-10">{{ form.name|addcss:"form-control input-xs"}}</div>
-        </div>
-
-        {% if person_form %}
-        <div class="row " style="padding-top: 10px;">
-          {% for error in person_form.personal_name_last.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-          {% for error in person_form.personal_name_first.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-          {% for error in person_form.personal_name_suffix.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-          <label class="col-xs-1">Last</label>
-          <div class="col-xs-4">{{ person_form.personal_name_last|addcss:"form-control input-xs"}}</div>
-
-          <label class="col-xs-1" style="padding-left: 0px;">First</label>
-          <div class="col-xs-3">{{ person_form.personal_name_first|addcss:"form-control input-xs"}}</div>
-
-          <label class="col-xs-1" style="padding-left: 0px;">Suffix</label>
-          <div class="col-xs-2">{{ person_form.personal_name_suffix|addcss:"form-control input-xs"}}</div>
-        </div>
-        {% endif %}
-
-        <div class="row">
-        {% for error in form.description.errors %}
+      <div class="h4">Authority Details</div>
+      <div style="margin-left:-20px;">
+        {% for error in form.type_controlled.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="col-xs-12">
-            <label class="control-label">{{ form.description.label }}</label>
-            <div>{{ form.description|addcss:"form-control input-xs"}}</div>
+        <div class="col-md-2 text-left">
+          <label class="input-xs">
+            {{ form.type_controlled.label }}
+          </label>
         </div>
+        <div class="col-md-4">
+          {{ form.type_controlled|addcss:"form-control input-xs"}}
         </div>
 
-        <div class="row" style="padding-top: 10px;">
-        {% for error in form.classification_system.errors %}
+        {% for error in form.record_status_value.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div>
-            <label class="col-xs-3">{{ form.classification_system.label }}</label>
-            <div class="col-xs-9">{{ form.classification_system|addcss:"form-control input-xs"}}</div>
+        <div class="col-md-1 text-left">
+          <label class="input-xs" style="margin-left: -15px;">
+              Status
+            </label>
         </div>
+        <div class="col-md-5">
+          {{ form.record_status_value|addcss:"form-control input-xs"}}
         </div>
 
-        <div class="row">
-        {% for error in form.classification_code.errors %}
+        <div class="clearfix"></div>
+        {% for error in form.name.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div>
-            <label class="col-xs-3">{{ form.classification_code.label }}</label>
-            <div class="col-xs-9">{{ form.classification_code|addcss:"form-control input-xs"}}</div>
+        <div class="col-md-2 text-left">
+          <label class="input-xs">{{ form.name.label }}</label>
         </div>
-        </div>
+        <div class="col-md-10">{{ form.name|addcss:"form-control input-xs"}}</div>
 
-        <div class="row">
+
+      {% if person_form %}
+      <div class="clearfix"></div>
+      <div>
+        {% for error in person_form.personal_name_last.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        {% for error in person_form.personal_name_first.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        {% for error in person_form.personal_name_suffix.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="col-md-2 text-left">
+          <label class="input-xs">Last</label>
+        </div>
+        <div class="col-xs-5">{{ person_form.personal_name_last|addcss:"form-control input-xs"}}</div>
+
+        <div class="col-md-1 text-left">
+          <label class="input-xs" style="margin-left: -15px;">First</label>
+        </div>
+        <div class="col-xs-4">{{ person_form.personal_name_first|addcss:"form-control input-xs"}}</div>
+
+        <div class="clearfix"></div>
+        <div class="col-md-2 text-left">
+          <label class="input-xs" >Suffix</label>
+        </div>
+        <div class="col-xs-4">{{ person_form.personal_name_suffix|addcss:"form-control input-xs"}}</div>
+      </div>
+      {% endif %}
+
+      <div class="clearfix"></div>
+      {% for error in form.description.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endfor %}
+
+      <div class="col-md-2 text-left">
+        <label class="input-xs">{{ form.description.label }}</label>
+      </div>
+      <div class="col-xs-12">{{ form.description|addcss:"form-control input-xs"}}</div>
+
+      <div class="clearfix"></div>
+      {% for error in form.classification_system.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endfor %}
+      <div style="margin-top: 10px;">
+        <div class="col-md-3 text-left" >
+          <label class="input-xs" style="margin-right: -5px;">Class. Sys.</label>
+        </div>
+        <div class="col-xs-9">{{ form.classification_system|addcss:"form-control input-xs"}}</div>
+      </div>
+
+      <div class="clearfix"></div>
+      {% for error in form.classification_code.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endfor %}
+      <div>
+        <div class="col-md-3 text-left">
+          <label class="input-xs">Class. Code</label>
+        </div>
+        <div class="col-xs-9">{{ form.classification_code|addcss:"form-control input-xs"}}</div>
+      </div>
+
+      <div class="clearfix"></div>
+
         {% for error in form.belongs_to.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         <div>
-            <label class="col-xs-3">{{ form.belongs_to.label }}</label>
-            <div class="col-xs-9">{{ form.belongs_to|addcss:"form-control input-xs" }}</div>
-        </div>
+          <div class="col-md-3 text-left">
+            <label class="input-xs">{{ form.belongs_to.label }}</label>
+          </div>
+          <div class="col-xs-9">{{ form.belongs_to|addcss:"form-control input-xs" }}</div>
         </div>
 
-        <div class="row">
-          {% for error in form.administrator_notes.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-          {% endfor %}
-          <div class="col-xs-12">
-              <label>{{ form.administrator_notes.label }}</label>
-              {{ form.administrator_notes|addcss:"form-control input-xs" }}
-          </div>
+        <div class="clearfix"></div>
+        {% for error in form.administrator_notes.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="col-md-12 text-left">
+          <label class="input-xs">{{ form.administrator_notes.label }}</label>
         </div>
+        <div class="col-xs-12">{{ form.administrator_notes|addcss:"form-control input-xs" }}</div>
+      </div>
     </div>
+
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified curation-tabs" role="tablist">
             <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab">Fields</a>
+                <a href="#fields" aria-controls="fields" role="tab" data-toggle="tab" class="fields-tabs">Fields</a>
             </li>
             <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab">Attributes</a>
+                <a href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab" class="fields-tabs">Attributes</a>
             </li>
             <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab">Linked Data</a>
+                <a href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" class="fields-tabs">Linked Data</a>
             </li>
             <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab">Related Citations</a>
+                <a href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab" class="fields-tabs">Related Citations</a>
             </li>
             <li role="presentation"{% if tab == 'aarelations' %} class="active"{% endif %}>
-                <a href="#aarelations" aria-controls="aarelations" role="tab" data-toggle="tab">Related Authorities</a>
+                <a href="#aarelations" aria-controls="aarelations" role="tab" data-toggle="tab" class="fields-tabs">Related Authorities</a>
             </li>
-            <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
-                <a href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab">Tracking</a>
+            <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %} >
+                <a href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab" class="fields-tabs">Tracking</a>
             </li>
         </ul>
 
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
+            <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields" style="padding-left:0px;">
 
                 <!-- 2nd column -->
                 <div class="col-sm-6">
-                  <div class="row">
-                  <h5 style="margin-top: 0px;">Attributes</h5>
-                  </div>
+
+                    <table width="100%" style="margin-bottom: 3px;">
+                      <tr class="categoryHeader">
+                        <td>
+                          <div class="input-xs" style="height: 20px;">Attributes</div>
+                        </td>
+                      </tr>
+                    </table>
                   {% for attr_forms in attribute_forms %}
-                  <div class="row" style="padding-right: 20px;">
+                  <div>
                     {{ attr_forms.0.id }}
                     <input type="hidden" name="{{attr_forms.0.prefix}}-record_status_value" id="id_{{attr_forms.0.prefix}}-record_status_value" value="{{attr_forms.0.record_status_value.value}}" />
                     {% for error in attr_forms.0.type_controlled.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="no-gutter">
-                        <label class="col-md-1">Type</label>
+                        <label class="col-md-1 input-xs">Type</label>
                         <div class="col-md-4" data-form-prefix="{{attr_forms.0.prefix}}">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs attributeDropDown"}}</div>
-                        <label class="col-md-2">Freeform</label>
+                        <label class="col-md-2 input-xs" style="padding-left: 5px;">Freeform</label>
                         <div class="col-md-5">{{ attr_forms.0.value_freeform|addcss:"form-control input-xs"}}</div>
                     </div>
+                    <div class="clearfix"></div>
                   </div>
 
                     <div id="{{attr_forms.0.prefix}}_attribute_value_form_container" data-form-prefix="{{ attr_forms.1.prefix }}">
@@ -195,7 +219,7 @@
                       <div class="row" style="padding-right: 20px;">
                         <div class="no-gutter">
                           <div class="col-md-5"></div>
-                          <label class="col-md-2">
+                          <label class="col-md-2 input-xs">
                             {{ field.label}}
                           </label>
                           <div class="col-md-5"">{{ field|addcss:"form-control input-xs"}}</div>
@@ -229,12 +253,18 @@
                     </div>
                   {% endif %}
 
-                  <div class="row">
-                  <h5 style="margin-top: 20px;">Linked Data</h5>
-                  </div>
+
+                  <div class="clearfix" style="margin-top: 20px;"></div>
+                  <table width="100%" style="margin-bottom: 3px; margin-right: 10px;">
+                    <tr class="categoryHeader">
+                      <td>
+                        <div class="input-xs" style="height: 20px;">Linked Data</div>
+                      </td>
+                    </tr>
+                  </table>
 
                   {% for linkeddata_form in linkeddata_forms %}
-                  <div class="row" style="padding-right: 20px;">
+                  <div >
                     {{ linkeddata_form.id }}
                     <input type="hidden" name="{{linkeddata_form.prefix}}-record_status_value" id="id_{{linkeddata_form.prefix}}-record_status_value" value="{{linkeddata_form.record_status_value.value}}" />
                     {% for error in linkeddata_form.type_controlled.errors %}
@@ -246,6 +276,7 @@
                         <div class="col-md-4">{{ linkeddata_form.resource_name|addcss:"onelineTextarea form-control input-xs linkeddata_resource_name;Resource Name"}}</div>
                         <div class="col-md-1"><i style="padding-left:3px; padding-top: 3px;" class="fa fa-thumbs-o-up linkCheck" aria-hidden="true"></i></div>
                     </div>
+
                   </div>
                   {% endfor %}
 
@@ -258,63 +289,70 @@
                 </div>
 
                 <!-- 3rd column -->
-                <div class="col-sm-6">
-                  <div class="row">
+                <div class="col-sm-6" style="padding-left: 0px;">
+
                     {{ form.redirect_to }}
                     {% for error in form.redirect_to.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
-
-                        <label class="col-xs-3" style="padding-left: 0px;">{{ form.redirect_to.label }}</label>
-
-                        <div class="input-group col-xs-9">
-                            <input type="text"
-                                class="form-control input-xs"
-                                name="authority-search"
-                                autocomplete="off"
-                                id="authority-search" />
-                                <ul class="list-group" id="results-container"></ul>
-                            <span class="input-group-btn" style="padding-top: 0px;">
-                                <span class="btn" style="padding-top: 2px; padding-left: 3px;" id="remove_redirect">
-                                    <span class="glyphicon glyphicon-remove"
-                                        style="color: red;"></span>
-                                </span>
+                    <div class="col-md-3 text-left">
+                        <label class="input-xs">{{ form.redirect_to.label }}</label>
+                    </div>
+                    <div class="input-group col-xs-9">
+                        <input type="text"
+                            class="form-control input-xs"
+                            name="authority-search"
+                            autocomplete="off"
+                            id="authority-search" />
+                            <ul class="list-group" id="results-container"></ul>
+                        <span class="input-group-btn" >
+                            <span class="btn" style="padding-top: 2px; padding-left: 3px;" id="remove_redirect">
+                                <span class="glyphicon glyphicon-remove"
+                                    style="color: red;"></span>
                             </span>
-                        </div>
+                        </span>
                     </div>
 
-                  <div class="row">
+                    <div class="clearfix"></div>
                     {% for error in form.record_status_explanation.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
-                    <div class="form-group form-group-xs">
-                        <label class="col-xs-3">Status Explanation</label>
-                        <div class="col-xs-9">{{ form.record_status_explanation|addcss:"form-control input-xs"}}</div>
+                    <div class="col-md-3 text-left" style="padding-right: 0px;">
+                      <label class="input-xs" >Status Expl.</label>
                     </div>
-                  </div>
+                    <div class="col-xs-9" style="padding-left:0px;">{{ form.record_status_explanation|addcss:"form-control input-xs"}}</div>
 
-                  <div class="row">
+
+                    <div class="clearfix"></div>
                     {% for error in form.record_history.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
-                    <div class="form-group">
-                        <label class="col-xs-12">{{ form.record_history.label }}</label>
-                        <div class="col-xs-12">{{ form.record_history|addcss:"form-control input-xs"}}</div>
+                    <div class="col-md-12 text-left">
+                        <label class="input-xs">{{ form.record_history.label }}</label>
                     </div>
-                  </div>
+                    <div class="col-xs-12">{{ form.record_history|addcss:"form-control input-xs"}}</div>
+                    <div class="clearfix"></div>
 
                   {% if person_form %}
-                  <div class="row">
-                  <h5>Unused fields</h5>
+                  <div class="clearfix" style="margin-top: 20px;"></div>
+                  <div class="col-sm-12">
+                  <table width="100%" style="margin-bottom: 3px; margin-right: 10px;">
+                    <tr class="categoryHeader">
+                      <td>
+                        <div class="input-xs" style="height: 20px;">Unused fields</div>
+                      </td>
+                    </tr>
+                  </table>
+                  </div>
+
 
                   {% for error in person_form.personal_name_preferred.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
-                  <div class="form-group">
-                    <label class="col-xs-3">Preferred name</label>
-                    <div class="col-xs-9">{{ person_form.personal_name_preferred|addcss:"form-control input-xs"}}</div>
+                  <div class="col-md-3 text-left">
+                    <label class="input-xs">Pref. name</label>
                   </div>
-                  </div>
+                  <div class="col-xs-9">{{ person_form.personal_name_preferred|addcss:"form-control input-xs"}}</div>
                   {% endif %}
 
                 </div>
@@ -374,15 +412,17 @@
     <div id="form_for_{{id}}" >
         {% with nr_of_fields=form.fields|length %}
         {% for field in form %}
-        <div class="row" style="padding-right: 20px;">
-          <div class="no-gutter">
-            <div class="col-md-5"></div>
-            <label class="col-md-2">
-              {{ field.label}}
-            </label>
-            <div class="col-md-5">{{ field|addcss:"form-control input-xs"}}</div>
+
+        <div class="no-gutter">
+          <div class="col-md-5"></div>
+          <div class="col-md-2">
+          <label class="input-xs">
+            {{ field.label}}
+          </label>
           </div>
+          <div class="col-md-5">{{ field|addcss:"form-control input-xs"}}</div>
         </div>
+        <div class="clearfix"></div>
 
         {% if field.errors %}
         <script>

@@ -31,7 +31,7 @@
 <div class="col-md-6 text-right">
     Record {{ index }} of {{ total }}
     <div class="btn-group">
-        <input type="submit" value="Save" class="btn btn-success" />
+        <input type="submit" value="Save" class="btn btn-sm btn-success" />
     </div>
 
 </div>
@@ -39,13 +39,13 @@
 <div class="row col-md-8" style="padding-top: 10px;">
   <div class="button-group text-right col-md-12">
     <div class="row">
-        <input type="text" id="searchAuthorityExternal" style="width: 300px" class="pull-left form-control input-xs" placeholder="Enter text to search using buttons on the right."/>
-        <button id="searchExplorePublic" class="btn btn-primary btn-xs">Explore, Authority Search</button>
-        <button id="searchExploreCuration" class="btn btn-primary btn-xs">Explore, Curation Authority Search</button>
-        <button id="searchWikipedia" class="btn btn-primary btn-xs">Wikipedia</button>
-        <button id="searchGoogle" class="btn btn-primary btn-xs">Google</button>
-        <button id="searchViaf" class="btn btn-primary btn-xs">Viaf</button>
-        <button id="searchLCCN" class="btn btn-primary btn-xs">LCCN</button>
+        <button id="searchExploreCuration" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">Curation Authority</button>
+        <button id="searchExplorePublic" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">Public Authority</button>
+        <button id="searchLCCN" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">LCCN</button>
+        <button id="searchViaf" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">Viaf</button>
+        <button id="searchGoogle" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">Google</button>
+        <button id="searchWikipedia" class="pull-right btn btn-primary btn-xs" style="margin-right: 3px;">Wikipedia</button>
+        <input type="text" id="searchAuthorityExternal" style="width: 300px; margin-right: 3px;" class="pull-right form-control input-xs" placeholder="Enter text to search using buttons on the right." value="{{ instance.name }}"/>
 
     </div>
   </div>

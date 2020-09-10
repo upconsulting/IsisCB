@@ -12,6 +12,11 @@ a {
     color: #032544;
 }
 
+.nav>li>a.fields-tabs {
+  padding:3px;
+  font-size: 13px;
+}
+
 .phaedra-colors .label {
   color: #444;
   font-weight: normal;
