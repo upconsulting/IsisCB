@@ -2,6 +2,7 @@
 {% load addcss %}
 {% load render_object %}
 {% load permission_tags %}
+{% load static %}
 
 {% block content %}
 
@@ -198,7 +199,7 @@
                       </tr>
                     </table>
                   {% for attr_forms in attribute_forms %}
-                  <div>
+                  <div class="main_attribute_div">
                     {{ attr_forms.0.id }}
                     <input type="hidden" name="{{attr_forms.0.prefix}}-record_status_value" id="id_{{attr_forms.0.prefix}}-record_status_value" value="{{attr_forms.0.record_status_value.value}}" />
                     {% for error in attr_forms.0.type_controlled.errors %}
@@ -206,9 +207,9 @@
                     {% endfor %}
                     <div class="no-gutter">
                         <label class="col-md-1 input-xs">Type</label>
-                        <div class="col-md-4" data-form-prefix="{{attr_forms.0.prefix}}">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs attributeDropDown"}}</div>
+                        <div class="col-md-4 attribute_dropdown" data-form-prefix="{{attr_forms.0.prefix}}">{{ attr_forms.0.type_controlled|addcss:"form-control input-xs attributeDropDown"}}</div>
                         <label class="col-md-2 input-xs" style="padding-left: 5px;">Freeform</label>
-                        <div class="col-md-5">{{ attr_forms.0.value_freeform|addcss:"form-control input-xs"}}</div>
+                        <div class="col-md-5">{{ attr_forms.0.value_freeform|addcss:"form-control input-xs attribute_freetext"}}</div>
                     </div>
                     <div class="clearfix"></div>
                   </div>
@@ -216,15 +217,17 @@
                     <div id="{{attr_forms.0.prefix}}_attribute_value_form_container" data-form-prefix="{{ attr_forms.1.prefix }}">
                       {% if attr_forms.1 %}
                       {% for field in attr_forms.1 %}
-                      <div class="row" style="padding-right: 20px;">
+
                         <div class="no-gutter">
                           <div class="col-md-5"></div>
-                          <label class="col-md-2 input-xs">
+                          <div class="col-md-2">
+                          <label class="input-xs">
                             {{ field.label}}
                           </label>
+                          </div>
                           <div class="col-md-5"">{{ field|addcss:"form-control input-xs"}}</div>
                         </div>
-                      </div>
+                        <div class="clearfix"></div>
                       {% if field.errors %}
                       <script>
                         var errorMsg = "";
@@ -617,6 +620,41 @@ $(document).ready(function() {
     var urn = $(this).closest(".no-gutter").find(".linkeddata_urn");
     console.log($(urn.get(0)).text());
   });
+
+  $(".attribute_freetext").change(function() {
+    var regex = /id_attribute([0-9]+)\-value_freeform/;
+    var counter = $(this).attr("id").match(regex)[1];
+    var selectedType = $("#id_attribute"+counter+"-type_controlled option:selected").text();
+    if (selectedType.includes("(isodaterangevalue)")) {
+      var start = "";
+      var end = "";
+      var freetext = $(this).val();
+      if (freetext.includes("-")) {
+        start = freetext.slice(0, freetext.indexOf("-")).trim();
+        end = freetext.slice(freetext.indexOf("-") + 1).trim();
+      } else {
+        start = freetext.trim();
+        end = '0';
+      }
+      $("#id_value"+counter+"-start").val(start);
+      $("#id_value"+counter+"-end").val(end);
+    } else if (selectedType.includes("(isodatevalue)")) {
+      var freetext = $(this).val();
+      // if we have only year, let's do it with regex, since moment.js does weird things
+      var yearRegex = /^[1-9]{4}$/;
+      var matches = freetext.match(yearRegex);
+      if (matches != null) {
+        $("#id_value"+counter+"-value").val(freetext + "-01-01");
+        return;
+      }
+      var m = moment(freetext);
+      $("#value"+counter+"-value").val(m.format("YYYY-MM-DD"));
+    }
+  });
 });
 </script>
+{% endblock %}
+
+{% block extrahead %}
+<script src="{% static "curation/js/moment.js" %}" type="text/javascript"></script>
 {% endblock %}
