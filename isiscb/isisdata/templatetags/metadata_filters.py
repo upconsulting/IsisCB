@@ -148,7 +148,7 @@ def get_coins_from_result(result):
         kv_pairs['rft.atitle'] = result.title.encode('utf-8')
 
         # Journal title.
-        if len(result.periodicals) > 0:
+        if result.periodicals and len(result.periodicals) > 0:
             kv_pairs['rft.jtitle'] = result.periodicals[0].encode('utf-8')
 
         # Start and end pages.
@@ -199,7 +199,7 @@ def get_coins_from_citation(citation):
         kv_pairs['rft.title'] = bleach_safe(get_title(citation)).encode('utf-8')
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU'])
-    if authors.count() > 0:
+    if authors and authors.count() > 0:
         if authors[0].authority:
             kv_pairs['rft.au'] = authors[0].authority.name.encode('utf-8')
     kv_pairs['rft.date'] = get_pub_year(citation)
