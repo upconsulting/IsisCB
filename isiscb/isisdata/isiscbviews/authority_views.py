@@ -242,6 +242,7 @@ def authority(request, authority_id):
         search_current = None
         search_count = None
 
+    country_map_data = authority_places_map(related_geographics_facet, word_cloud_results)
 
     context = {
         'authority_id': authority_id,
@@ -303,8 +304,26 @@ def authority(request, authority_id):
         'related_subject_institutions_facet': related_subject_institutions_facet,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
         'related_dataset_facet': related_dataset_facet,
+        'country_map_data': country_map_data,
+        'country_map_countries': list(country_map_data.keys()),
+        'country_map_counts': list(country_map_data.values()),
     }
+    print(list(country_map_data.keys()))
     return render(request, 'isisdata/authority.html', context)
+
+def authority_places_map(facet, all_results):
+    country_map = {}
+    for f in facet:
+        authority = Authority.objects.get(pk=f[0])
+        if authority.attributes:
+            for attr in authority.attributes.all():
+                if attr.type_controlled.name=='CountryCode':
+                    if attr.value.display in country_map:
+                        country_map[attr.value.display] = country_map[attr.value.display] + f[1]
+                    else:
+                        country_map[attr.value.display] = f[1]
+    return country_map
+
 
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
