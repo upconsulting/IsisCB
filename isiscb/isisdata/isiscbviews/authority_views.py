@@ -7,6 +7,7 @@ from django.contrib.admin.views.decorators import user_passes_test
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.cache import caches
 from django.db.models import Prefetch
+from django.contrib.staticfiles import finders
 
 from django.conf import settings
 
@@ -20,6 +21,8 @@ from isisdata.tasks import *
 import datetime
 import pytz
 import base64
+import csv
+import os
 
 def authority(request, authority_id):
     """
@@ -242,7 +245,7 @@ def authority(request, authority_id):
         search_current = None
         search_count = None
 
-    country_map_data = authority_places_map(related_geographics_facet, word_cloud_results)
+    country_map_data, country_name_map = authority_places_map(related_geographics_facet, word_cloud_results)
 
     context = {
         'authority_id': authority_id,
@@ -307,22 +310,37 @@ def authority(request, authority_id):
         'country_map_data': country_map_data,
         'country_map_countries': list(country_map_data.keys()),
         'country_map_counts': list(country_map_data.values()),
+        'country_name_map': country_name_map,
     }
-    print(list(country_map_data.keys()))
+
     return render(request, 'isisdata/authority.html', context)
 
 def authority_places_map(facet, all_results):
+    country_code_map = {}
+    name_map = {}
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../countryCode.csv'), newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            country_code_map[row['code2']] = row['code3']
+            name_map[row['code2']] = row['Name']
+
     country_map = {}
+    country_name_map = {}
     for f in facet:
         authority = Authority.objects.get(pk=f[0])
         if authority.attributes:
             for attr in authority.attributes.all():
                 if attr.type_controlled.name=='CountryCode':
+                    if not attr.value.display in country_code_map:
+                        continue
+                    country_name_map[country_code_map[attr.value.display]] = name_map[attr.value.display]
                     if attr.value.display in country_map:
-                        country_map[attr.value.display] = country_map[attr.value.display] + f[1]
+                        country_map[country_code_map[attr.value.display]] = country_map[country_code_map[attr.value.display]] + f[1]
                     else:
-                        country_map[attr.value.display] = f[1]
-    return country_map
+                        country_map[country_code_map[attr.value.display]] = f[1]
+
+
+    return country_map, country_name_map
 
 
 def authority_author_timeline(request, authority_id):

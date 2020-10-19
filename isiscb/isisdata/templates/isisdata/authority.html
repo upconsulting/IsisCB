@@ -423,7 +423,7 @@ $(function () {
         <i class="fa fa-question-circle" aria-hidden="true"></i>
       </a>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" style="height: 220px;">
       <script>
         $(function() {
           var data = [{
@@ -460,6 +460,7 @@ $(function () {
                 pad: 0
               },
               height:300,
+              width: 250,
               modebar: {
                 orientation: 'v',
               },
@@ -475,13 +476,36 @@ $(function () {
               }
           };
           Plotly.newPlot("placesMap", data, layout, {showLink: false});
+
+          $("#showListLink").click(function(e) {
+            $("#placesMap").hide();
+            $("#showListLink").hide();
+            $("#placesFacetsDiv").show();
+            $("#showMapLink").show();
+            e.preventDefault();
+          })
+
+          $("#showMapLink").click(function(e) {
+            $("#placesMap").show();
+            $("#showListLink").show();
+            $("#placesFacetsDiv").hide();
+            $("#showMapLink").hide();
+            e.preventDefault();
+          })
+
+          $("#placesMap").on('plotly_click', function(data, edata) {
+            console.log(edata['points'])
+          })
         })
 
       </script>
-      <div style="width: 100%" id="placesMap"></div>
+      <div class="text-right" style="padding-bottom: 10px;"><a id="showListLink" href="#">Show list</a><a id="showMapLink" style="display: none;" href="#">Show map</a></div>
+      <div id="placesMap"></div>
+      <div style="display: none;" id="placesFacetsDiv">
       {% for facet in related_geographics_facet|slice:"7" %}
       {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
       {% endfor %}
+      </div>
     </div>
   </div>
 
