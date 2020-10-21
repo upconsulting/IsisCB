@@ -24,6 +24,18 @@ import base64
 import csv
 import os
 
+# The following code initializes two maps:
+#  - one that maps two letter country codes (e.g. DE, US) to three letter country codes (e.g. DEU, USA)
+#  - and one that maps three letter country codes to country names
+# this is needed for the map on authority pages (IEXP-255)
+country_code_map = {}
+name_map = {}
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../countryCode.csv'), newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        country_code_map[row['code2']] = row['code3']
+        name_map[row['code2']] = row['Name']
+
 def authority(request, authority_id):
     """
     View for individual Authority entries.
@@ -245,7 +257,7 @@ def authority(request, authority_id):
         search_current = None
         search_count = None
 
-    country_map_data, country_name_map = authority_places_map(related_geographics_facet, word_cloud_results)
+    country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
 
     context = {
         'authority_id': authority_id,
@@ -315,30 +327,25 @@ def authority(request, authority_id):
 
     return render(request, 'isisdata/authority.html', context)
 
-def authority_places_map(facet, all_results):
-    country_code_map = {}
-    name_map = {}
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../countryCode.csv'), newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            country_code_map[row['code2']] = row['code3']
-            name_map[row['code2']] = row['Name']
-
+def _get_authority_places_map_data(facets):
     country_map = {}
     country_name_map = {}
-    for f in facet:
-        authority = Authority.objects.get(pk=f[0])
-        if authority.attributes:
-            for attr in authority.attributes.all():
-                if attr.type_controlled.name=='CountryCode':
-                    if not attr.value.display in country_code_map:
-                        continue
-                    country_name_map[country_code_map[attr.value.display]] = name_map[attr.value.display]
-                    if attr.value.display in country_map:
-                        country_map[country_code_map[attr.value.display]] = country_map[country_code_map[attr.value.display]] + f[1]
-                    else:
-                        country_map[country_code_map[attr.value.display]] = f[1]
 
+    ids = [f[0] for f in facets]
+    facets_dict = dict(facets)
+    authority_ids = Authority.objects.filter(pk__in=ids, attributes__type_controlled__name='CountryCode').values_list('id')
+    for id in authority_ids:
+        attr = Attribute.objects.filter(source_instance_id=id[0], type_controlled__name='CountryCode').first()
+        if not attr.value.display in country_code_map:
+            continue
+
+        code_two_letters = attr.value.display
+        code_three_letters = country_code_map[code_two_letters]
+        country_name_map[code_three_letters] = name_map[code_two_letters]
+        if code_three_letters in country_map:
+            country_map[code_three_letters] = country_map[code_three_letters] + facets_dict[id[0]]
+        else:
+            country_map[code_three_letters] = facets_dict[id[0]]
 
     return country_map, country_name_map
 
