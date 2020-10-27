@@ -19,7 +19,7 @@ chardet==3.0.4
 colorama==0.4.3
 colorclass==2.2.0
 confusable-homoglyphs==3.2.0
-cryptography==2.9
+cryptography==3.2
 defusedxml==0.6.0
 Django==3.0.7
 django-allauth==0.41.0
