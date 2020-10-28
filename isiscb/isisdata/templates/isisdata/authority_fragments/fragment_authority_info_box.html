@@ -1,0 +1,148 @@
+{% load app_filters %}
+{% load static %}
+{% load search_filters %}
+{% load authority_filters %}
+{% load facet_filters %}
+
+
+<!-- Progress through search results, if arriving from search view. -->
+{% if search_results|length > 0 and fromsearch and search_current %}
+<div class="panel panel-default" style="margin-bottom: 5px;">
+  <div class="panel-body" style="padding: 7px; height: 34px;">
+  <div class=" hidden-print" >
+    <div class="row" style="margin-right: 0px; margin-left: 0px;">
+      <div class="col-xs-4">
+        <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span> Back to search results</a>
+      </div>
+      <div class="col-xs-2 text-left">
+            {% if search_current >= 2 and search_previous %}
+            <a href="{% url 'authority' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous">
+                <span aria-hidden="true" >&laquo;Previous</span>
+            </a>
+            {% endif %}
+      </div>
+      <div class="col-xs-4 text-center">
+          Showing result {{ search_current }} of {{ search_results|length }}
+      </div>
+      <div class="col-xs-2 text-right">
+          {% if search_index < search_count and search_next %}
+          <a href="{% url 'authority' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" >
+              <span aria-hidden="true" >Next&raquo;</span>
+          </a>
+          {% endif %}
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  //# sourceURL=copy.js
+  $(function() {
+    $("#authorityLink").click(function() {
+      var copyTextarea = document.querySelector('#hiddenAuthorityLink');
+      copyTextarea.focus();
+      copyTextarea.select();
+      document.execCommand("copy");
+      $.notify("URL of this record has been copied to your clipboard.", "info", {
+        clickToHide: true,
+        style: 'bootstrap',
+        gap: 5,
+      });
+    })
+  })
+</script>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <strong style="font-size:1.5em">{{ authority.get_type_controlled_display }}</strong>
+      <span class="btn-grp pull-right" style="padding-top:5px">
+        <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ authority.id }}</span>
+        <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
+          {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
+          <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
+      </span>
+  </div>
+
+  <div class="panel-body" style="height: 210px; overflow-y:scroll">
+  {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
+
+  <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
+
+  <p>
+    <i class="fa fa-bookmark" aria-hidden="true"></i>
+    {% if related_citations_count > 0 %}
+    Show all
+    <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+      {{related_citations_count}} citations
+    </a>
+    to this authority.
+    {% endif %}
+    {% if author_contributor_count > 0 %}
+    Show
+    <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{author_contributor_count}} citations
+    </a>
+    as author, etc.
+    {% endif %}
+    {% if publisher_count > 0 %}
+    Show
+    <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{publisher_count}} citations
+    </a>
+    as publisher/journal.
+    {% endif %}
+    {% if subject_category_count > 0 %}
+    Show
+    <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+    {{subject_category_count}} citations
+    </a>
+    as subject or category.
+    {% endif %}
+  </p>
+
+  {% if authority.description %}
+  <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
+    {% if authority.description|truncatewords:15|length < authority.description|length %}
+      <a href="#" id="desc_more" class="hidden-print">More</a>
+      <span id="desc_full" class="hidden-print" style="display:none">
+        {{ authority.description }}
+        <a href="#" id="desc_hide">Less</a>
+      </span>
+      <span class="visible-print-block">
+        {{ authority.description }}
+      </span>
+    {% endif %}
+  </p>
+  <script>
+    $(function() {
+      $("#desc_more").click(function() {
+        $("#desc_snippet").hide()
+        $("#desc_more").hide()
+        $("#desc_full").show()
+      })
+
+      $("#desc_hide").click(function() {
+        $("#desc_full").hide()
+        $("#desc_snippet").show()
+        $("#desc_more").show()
+      })
+    })
+  </script>
+  {% endif %}
+
+  {% for attribute in authority.attributes.all %}
+  {% if attribute|is_attribute_visible %}
+  <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+  {% endif %}
+  {% endfor %}
+
+
+  <table  class="details_authority" style="margin-top: 20px;">
+    <tr>
+      <td>Authority URI:</td>
+      <td>{{ authority | get_uri }}</td>
+    </tr>
+  </table>
+  </div>
+</div>

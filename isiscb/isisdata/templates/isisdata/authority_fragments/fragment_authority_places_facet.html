@@ -1,0 +1,109 @@
+
+<div class="panel-heading-subjects panel panel-default facet-box">
+  <div class="panel-heading-subjects panel-heading">
+    <strong>Related Places {% if related_geographics_facet|length > 7 %}<a data-toggle="modal" data-target="#placesModal">({% if related_geographics_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_geographics_facet|length}})</a>{% else %}({{related_geographics_facet|length}}){% endif %}</strong>
+    <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
+      data-placement="left" data-trigger="focus" tabindex="0" role="button"
+      data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+      <i class="fa fa-question-circle" aria-hidden="true"></i>
+    </a>
+    <a style="padding-right: 10px;" class="pull-right" id="showListLink" href="#">Show list</a><a class="pull-right" id="showMapLink" style="padding-right: 10px; display: none;" href="#">Show map</a>
+  </div>
+  <div class="panel-body" style="height: 220px;">
+    <div style="width: 100%; height: 100%; text-align: center;" id="map-spinner">
+    <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
+    </div>
+    <script>
+      $(function() {
+        $.ajax({
+          url: "{% url 'authority_map_data' authority.id %}",
+          success: function(jsonData) {
+            var data = [{
+                type: 'choropleth',
+                locations: jsonData['countries'],
+                z: jsonData['map_data'],
+                text: jsonData['name_map'],
+                colorscale: [
+                    [0,'rgb(28, 69, 105)'],[0.35,'rgb(34, 85, 130)'],
+                    [0.5,'rgb(40, 102, 156)'], [0.6,'rgb(45, 116, 179)'],
+                    [0.7,'rgb(50, 129, 199)'],[0.85,'rgb(54, 139, 214)'],
+                    [1, 'rgb(58, 150, 232)']],
+                autocolorscale: false,
+                reversescale: true,
+                marker: {
+                    line: {
+                        color: 'rgb(180,180,180)',
+                        width: 0.5
+                    }
+                },
+                tick0: 0,
+                zmin: 0,
+                colorbar: {},
+                showscale: false,
+            }];
+
+            var layout = {
+                showlegend: false,
+                title: false,
+                margin: {
+                  l: 0,
+                  t: 0,
+                  r: 0,
+                  b: 0,
+                  pad: 5
+                },
+                height:200,
+                modebar: {
+                  orientation: 'v',
+                },
+                  mapbox: {
+                  style: 'dark',
+                },
+                geo:{
+                    showframe: true,
+                    framecolor: '#3281c7',
+                    showcoastlines: true,
+                    coastlinecolor: '#5d5f73',
+                    framecolor: '#5d5f73',
+                    projection:{
+                        type: 'winkel tripel'
+                    }
+                }
+            };
+            Plotly.newPlot("placesMap", data, layout, {showLink: false, responsive: true});
+            $("#map-spinner").hide();
+            
+          }
+        });
+
+
+        $("#showListLink").click(function(e) {
+          $("#placesMap").hide();
+          $("#showListLink").hide();
+          $("#placesFacetsDiv").show();
+          $("#showMapLink").show();
+          e.preventDefault();
+        })
+
+        $("#showMapLink").click(function(e) {
+          $("#placesMap").show();
+          $("#showListLink").show();
+          $("#placesFacetsDiv").hide();
+          $("#showMapLink").hide();
+          e.preventDefault();
+        })
+
+        $("#placesMap").on('plotly_click', function(data, edata) {
+          console.log(edata['points'])
+        })
+      })
+
+    </script>
+    <div id="placesMap"></div>
+    <div style="display: none;" id="placesFacetsDiv">
+    {% for facet in related_geographics_facet|slice:"7" %}
+    {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
+    {% endfor %}
+    </div>
+  </div>
+</div>

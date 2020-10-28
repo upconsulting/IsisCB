@@ -57,6 +57,7 @@ urlpatterns = [
     url(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),

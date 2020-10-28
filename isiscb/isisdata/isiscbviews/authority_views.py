@@ -257,8 +257,6 @@ def authority(request, authority_id):
         search_current = None
         search_count = None
 
-    country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
-
     context = {
         'authority_id': authority_id,
         'authority': authority,
@@ -319,13 +317,23 @@ def authority(request, authority_id):
         'related_subject_institutions_facet': related_subject_institutions_facet,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
         'related_dataset_facet': related_dataset_facet,
-        'country_map_data': country_map_data,
-        'country_map_countries': list(country_map_data.keys()),
-        'country_map_counts': list(country_map_data.values()),
-        'country_name_map': country_name_map,
     }
 
     return render(request, 'isisdata/authority.html', context)
+
+def get_place_map_data(request, authority_id):
+    sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=100)
+    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
+            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
+            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
+            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
+            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+
+    country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
+
+    return JsonResponse({ 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'name_map': list(country_name_map.values()) })
 
 def _get_authority_places_map_data(facets):
     country_map = {}
