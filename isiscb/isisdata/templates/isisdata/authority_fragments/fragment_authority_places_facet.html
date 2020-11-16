@@ -7,7 +7,6 @@
       data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
       <i class="fa fa-question-circle" aria-hidden="true"></i>
     </a>
-    <a style="padding-right: 10px;" class="pull-right" id="showListLink" href="#">Show list</a><a class="pull-right" id="showMapLink" style="padding-right: 10px; display: none;" href="#">Show map</a>
   </div>
   <div class="panel-body" style="height: 220px;">
     <div style="width: 100%; height: 100%; text-align: center;" id="map-spinner">
@@ -22,7 +21,8 @@
                 type: 'choropleth',
                 locations: jsonData['countries'],
                 z: jsonData['map_data'],
-                text: jsonData['name_map'],
+                hovertemplate: "%{text}",
+                text: jsonData['labels'],
                 colorscale: [
                     [0,'rgb(28, 69, 105)'],[0.35,'rgb(34, 85, 130)'],
                     [0.5,'rgb(40, 102, 156)'], [0.6,'rgb(45, 116, 179)'],
@@ -70,11 +70,15 @@
                     }
                 }
             };
-            Plotly.newPlot("placesMap", data, layout, {showLink: false, responsive: true});
+
+            let modeBarButtons = [[ "zoomInGeo", "zoomOutGeo", "resetGeo", "pan2d", "toImage", "lasso2d", "resetViewMapbox" ]];
+
+            Plotly.newPlot("placesMap", data, layout, {showLink: false, responsive: true, modeBarButtons: modeBarButtons});
             $("#map-spinner").hide();
-            
+
           }
         });
+
 
 
         $("#showListLink").click(function(e) {

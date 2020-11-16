@@ -157,7 +157,7 @@ def authority(request, authority_id):
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100)
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=150)
     word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -322,7 +322,7 @@ def authority(request, authority_id):
     return render(request, 'isisdata/authority.html', context)
 
 def get_place_map_data(request, authority_id):
-    sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=100)
+    sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=100).facet('geocodes', size=150)
     word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -331,9 +331,20 @@ def get_place_map_data(request, authority_id):
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
 
+    geocodes = word_cloud_results.facet_counts()['fields']['geocodes'] if 'fields' in word_cloud_results.facet_counts() else []
+    citation_count = _get_citation_count_per_country(geocodes)
     country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
 
-    return JsonResponse({ 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'name_map': list(country_name_map.values()) })
+    labels = ["<b>{}</b><br>Citations: {}<br>Hits: {}<extra></extra>".format(country_name_map.get(code, ''), citation_count.get(code,''), country_map_data.get(code, '')) for code in country_name_map.keys()]
+
+    return JsonResponse({ 'citation_count_countries': list(citation_count.keys()), 'citation_count': list(citation_count.values()), 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'labels': labels, 'name_map': list(country_name_map.values()) })
+
+def _get_citation_count_per_country(facets):
+    country_map = {}
+    for facet in facets:
+        if facet[0] in country_code_map:
+            country_map[country_code_map[facet[0]]] = facet[1]
+    return country_map
 
 def _get_authority_places_map_data(facets):
     country_map = {}
@@ -341,19 +352,23 @@ def _get_authority_places_map_data(facets):
 
     ids = [f[0] for f in facets]
     facets_dict = dict(facets)
-    authority_ids = Authority.objects.filter(pk__in=ids, attributes__type_controlled__name='CountryCode').values_list('id')
+    authority_ids = Authority.objects.filter(pk__in=ids, attributes__type_controlled__name=settings.COUNTRY_CODE_ATTRIBUTE).values_list('id').distinct()
     for id in authority_ids:
-        attr = Attribute.objects.filter(source_instance_id=id[0], type_controlled__name='CountryCode').first()
-        if not attr.value.display in country_code_map:
-            continue
+        country_attrs = Attribute.objects.filter(source_instance_id=id[0], type_controlled__name=settings.COUNTRY_CODE_ATTRIBUTE)
+        for attr in country_attrs:
+            attr_value = attr.value.display
+            attr_value_list = attr_value.split(",")
+            for code_two_letters in attr_value_list:
+                if not code_two_letters in country_code_map:
+                    continue
 
-        code_two_letters = attr.value.display
-        code_three_letters = country_code_map[code_two_letters]
-        country_name_map[code_three_letters] = name_map[code_two_letters]
-        if code_three_letters in country_map:
-            country_map[code_three_letters] = country_map[code_three_letters] + facets_dict[id[0]]
-        else:
-            country_map[code_three_letters] = facets_dict[id[0]]
+                code_two_letters = code_two_letters.strip()
+                code_three_letters = country_code_map[code_two_letters]
+                country_name_map[code_three_letters] = name_map[code_two_letters]
+                if code_three_letters in country_map:
+                    country_map[code_three_letters] = country_map[code_three_letters] + facets_dict[id[0]]
+                else:
+                    country_map[code_three_letters] = facets_dict[id[0]]
 
     return country_map, country_name_map
 
