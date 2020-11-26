@@ -470,7 +470,9 @@ def update_elements(file_path, error_path, task_id, user_id):
                                         field_to_change, new_value = _find_value(field_to_change, new_value, element)
 
                                     # check if field to change is a ManyToManyField (IEXP-232)
-                                    if isinstance(element.__class__.__dict__[field_to_change], models.fields.related_descriptors.ManyToManyDescriptor):
+                                    # if class is a subclass, this won't work, but we only have Person so far that Subclasses
+                                    # Authority, which doesn't have any many to many relationships
+                                    if field_to_change in element.__class__.__dict__ and isinstance(element.__class__.__dict__[field_to_change], models.fields.related_descriptors.ManyToManyDescriptor):
                                         # all this is really ugly, but we have to store the old list for the
                                         # administrator notes
                                         old_value = element.__getattribute__(field_to_change).all()
