@@ -678,7 +678,7 @@ $(function () {
         <ul class="unselected_facets">
           {% for facet in related_publisher_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}<br>
             </li>
           {% endfor %}
         </ul>
@@ -703,7 +703,7 @@ $(function () {
         <ul class="unselected_facets">
           {% for facet in related_journal_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
             </li>
           {% endfor %}
         </ul>
