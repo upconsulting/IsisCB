@@ -16,4 +16,4 @@ The main application should be run from ``isiscb.wsgi``.
 
 Worker processes should be run from ``isiscb.celery``.
 
-The following variables must be set in your environment:
+

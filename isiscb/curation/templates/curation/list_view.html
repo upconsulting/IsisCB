@@ -131,8 +131,8 @@ function highlightFilters() {
   {% if page.has_other_pages %}
   <ul class="pagination pagination-sm">
     {% if page.has_previous %}
-      <li><a href="?page=1">&laquo;</a></li>
-      <li><a href="?page={{ page.previous_page_number }}">Prev</a></li>
+      <li><a href="?page=1&search={{search_key}}">&laquo;</a></li>
+      <li><a href="?page={{ page.previous_page_number }}&search={{search_key}}">Prev</a></li>
     {% else %}
       <li class="disabled"><span>&laquo;</span></li>
       <li class="disabled"><span>Prev</span></li>
@@ -141,14 +141,14 @@ function highlightFilters() {
       {% if page.number == i %}
         <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
       {% elif i > page.number|add:-5 and i < page.number|add:5 %}
-        <li><a href="?page={{ i }}">{{ i }}</a></li>
+        <li><a href="?page={{ i }}&search={{search_key}}">{{ i }}</a></li>
       {% elif i == page.number|add:-5 or i == page.number|add:5 %}
-        <li><a href="?page={{ i }}">...</a></li>
+        <li><a href="?page={{ i }}&search={{search_key}}">...</a></li>
       {% endif %}
     {% endfor %}
     {% if page.has_next %}
-      <li><a href="?page={{ page.next_page_number }}">Next</a></li>
-      <li><a href="?page={{ paginator.num_pages }}">&raquo;</a></li>
+      <li><a href="?page={{ page.next_page_number }}&search={{search_key}}">Next</a></li>
+      <li><a href="?page={{ paginator.num_pages }}&search={{search_key}}">&raquo;</a></li>
     {% else %}
       <li class="disabled"><span>Next</span></li>
       <li class="disabled"><span>&raquo;</span></li>
