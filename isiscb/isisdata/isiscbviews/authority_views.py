@@ -335,9 +335,11 @@ def get_place_map_data(request, authority_id):
     citation_count = _get_citation_count_per_country(geocodes)
     country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
 
-    labels = ["<b>{}</b><br>Citations: {}<br>Hits: {}<extra></extra>".format(country_name_map.get(code, ''), citation_count.get(code,''), country_map_data.get(code, '')) for code in country_name_map.keys()]
-
-    return JsonResponse({ 'citation_count_countries': list(citation_count.keys()), 'citation_count': list(citation_count.values()), 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'labels': labels, 'name_map': list(country_name_map.values()) })
+    labels = ['<b>{}</b><br>Citations: {}<br>Hits: {}<extra></extra>'.format(country_name_map.get(code, ''), citation_count.get(code,''), country_map_data.get(code, '')) for code in country_name_map.keys()]
+    # we need a map in the front end that maps three to two letter codes (USA to US for example)
+    # as the map needs three letter codes, but we have two letter codes indexed
+    two_letter_codes = { k : list(country_code_map.keys())[list(country_code_map.values()).index(k)] for k in list(country_map_data.keys())}
+    return JsonResponse({ 'citation_count_countries': list(citation_count.keys()), 'citation_count': list(citation_count.values()), 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'labels': labels, 'name_map': list(country_name_map.values()), 'two_letter_codes': two_letter_codes })
 
 def _get_citation_count_per_country(facets):
     country_map = {}

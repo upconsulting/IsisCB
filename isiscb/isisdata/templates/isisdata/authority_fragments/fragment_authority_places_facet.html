@@ -1,7 +1,7 @@
 
 <div class="panel-heading-subjects panel panel-default facet-box">
   <div class="panel-heading-subjects panel-heading">
-    <strong>Related Places {% if related_geographics_facet|length > 7 %}<a data-toggle="modal" data-target="#placesModal">({% if related_geographics_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_geographics_facet|length}})</a>{% else %}({{related_geographics_facet|length}}){% endif %}</strong>
+    <strong>Related Places {% if related_geographics_facet|length > 0 %}<a data-toggle="modal" data-target="#placesModal">({% if related_geographics_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_geographics_facet|length}})</a>{% else %}({{related_geographics_facet|length}}){% endif %}</strong>
     <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
       data-placement="left" data-trigger="focus" tabindex="0" role="button"
       data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
@@ -13,6 +13,8 @@
     <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
     </div>
     <script>
+      //# sourceURL=map.js
+
       $(function() {
         $.ajax({
           url: "{% url 'authority_map_data' authority.id %}",
@@ -24,9 +26,10 @@
                 hovertemplate: "%{text}",
                 text: jsonData['labels'],
                 colorscale: [
-                    [0,'rgb(28, 69, 105)'],[0.35,'rgb(34, 85, 130)'],
-                    [0.5,'rgb(40, 102, 156)'], [0.6,'rgb(45, 116, 179)'],
-                    [0.7,'rgb(50, 129, 199)'],[0.85,'rgb(54, 139, 214)'],
+                    [0,'rgb(28, 69, 105)'], [0.15,'rgb(30, 78, 115)'],
+                    [0.35,'rgb(34, 85, 130)'], [0.47,'rgb(37, 95, 144)'],
+                    [0.54,'rgb(40, 102, 156)'], [0.65,'rgb(45, 116, 179)'],
+                    [0.72,'rgb(50, 129, 199)'],[0.88,'rgb(54, 139, 214)'],
                     [1, 'rgb(58, 150, 232)']],
                 autocolorscale: false,
                 reversescale: true,
@@ -41,6 +44,8 @@
                 colorbar: {},
                 showscale: false,
             }];
+
+            var two_letter_codes = jsonData['two_letter_codes']
 
             var layout = {
                 showlegend: false,
@@ -72,10 +77,15 @@
             };
 
             let modeBarButtons = [[ "zoomInGeo", "zoomOutGeo", "resetGeo", "pan2d", "toImage", "lasso2d", "resetViewMapbox" ]];
-
+            var myPlot = document.getElementById('placesMap')
             Plotly.newPlot("placesMap", data, layout, {showLink: false, responsive: true, modeBarButtons: modeBarButtons});
             $("#map-spinner").hide();
 
+            myPlot.on('plotly_click', function(data){
+                three_letter_country_code = data['points'][0]['location']
+                var link = "{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geocodes:" + two_letter_codes[three_letter_country_code]
+                window.location = link
+            });
           }
         });
 
