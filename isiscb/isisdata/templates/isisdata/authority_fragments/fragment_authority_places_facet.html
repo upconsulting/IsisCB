@@ -25,12 +25,13 @@
                 z: jsonData['map_data'],
                 hovertemplate: "%{text}",
                 text: jsonData['labels'],
-                colorscale: [
+                /*colorscale: [
                     [0,'rgb(28, 69, 105)'], [0.15,'rgb(30, 78, 115)'],
                     [0.35,'rgb(34, 85, 130)'], [0.47,'rgb(37, 95, 144)'],
                     [0.54,'rgb(40, 102, 156)'], [0.65,'rgb(45, 116, 179)'],
                     [0.72,'rgb(50, 129, 199)'],[0.88,'rgb(54, 139, 214)'],
-                    [1, 'rgb(58, 150, 232)']],
+                    [1, 'rgb(58, 150, 232)']],*/
+                colorscale: 'Blues',
                 autocolorscale: false,
                 reversescale: true,
                 marker: {
@@ -76,9 +77,9 @@
                 }
             };
 
-            let modeBarButtons = [[ "zoomInGeo", "zoomOutGeo", "resetGeo", "pan2d", "toImage", "lasso2d", "resetViewMapbox" ]];
+            let modeBarButtons = [[ "zoomInGeo", "zoomOutGeo", "toImage" ]];
             var myPlot = document.getElementById('placesMap')
-            Plotly.newPlot("placesMap", data, layout, {showLink: false, responsive: true, modeBarButtons: modeBarButtons});
+            Plotly.newPlot("placesMap", data, layout, {displaylogo: false, showLink: false, responsive: true, modeBarButtons: modeBarButtons});
             $("#map-spinner").hide();
 
             myPlot.on('plotly_click', function(data){
