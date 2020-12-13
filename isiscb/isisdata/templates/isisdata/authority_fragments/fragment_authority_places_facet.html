@@ -1,3 +1,4 @@
+{% load facet_filters %}
 
 <div class="panel-heading-subjects panel panel-default facet-box">
   <div class="panel-heading-subjects panel-heading">
@@ -7,10 +8,13 @@
       data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
       <i class="fa fa-question-circle" aria-hidden="true"></i>
     </a>
+    <div title="Expand map" class="pull-right" style="margin-right: 10px;cursor:pointer" data-toggle="modal" data-target="#mapModal">
+    <i class="fa fa-expand" aria-hidden="true"></i>
+    </div>
   </div>
   <div class="panel-body" style="height: 220px;">
     <div style="width: 100%; height: 100%; text-align: center;" id="map-spinner">
-    <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
+      <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
     </div>
     <script>
       //# sourceURL=map.js
@@ -25,12 +29,6 @@
                 z: jsonData['map_data'],
                 hovertemplate: "%{text}",
                 text: jsonData['labels'],
-                /*colorscale: [
-                    [0,'rgb(28, 69, 105)'], [0.15,'rgb(30, 78, 115)'],
-                    [0.35,'rgb(34, 85, 130)'], [0.47,'rgb(37, 95, 144)'],
-                    [0.54,'rgb(40, 102, 156)'], [0.65,'rgb(45, 116, 179)'],
-                    [0.72,'rgb(50, 129, 199)'],[0.88,'rgb(54, 139, 214)'],
-                    [1, 'rgb(58, 150, 232)']],*/
                 colorscale: 'Blues',
                 autocolorscale: false,
                 reversescale: true,
@@ -48,6 +46,14 @@
 
             var two_letter_codes = jsonData['two_letter_codes']
 
+            var mapped_places = jsonData['is_mapped_map']
+            $(".isMapped").each(function(idx, elem) {
+              var facetId = $(elem).attr("data-facet-id");
+              if (mapped_places[facetId] != true) {
+                $(elem).append('<i class="fa fa-exclamation-triangle" title="This place has not been mapped." aria-hidden="true"></i>');
+              }
+            });
+
             var layout = {
                 showlegend: false,
                 title: false,
@@ -58,7 +64,7 @@
                   b: 0,
                   pad: 5
                 },
-                height:200,
+                height:195,
                 modebar: {
                   orientation: 'v',
                 },
@@ -77,20 +83,59 @@
                 }
             };
 
+            // small map
             let modeBarButtons = [[ "zoomInGeo", "zoomOutGeo", "toImage" ]];
-            var myPlot = document.getElementById('placesMap')
+            var mapPlot = document.getElementById('placesMap')
             Plotly.newPlot("placesMap", data, layout, {displaylogo: false, showLink: false, responsive: true, modeBarButtons: modeBarButtons});
             $("#map-spinner").hide();
 
-            myPlot.on('plotly_click', function(data){
+            mapPlot.on('plotly_click', function(data){
+                three_letter_country_code = data['points'][0]['location']
+                var link = "{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geocodes:" + two_letter_codes[three_letter_country_code]
+                window.location = link
+            });
+
+            // modal map
+            var modalLayout = {
+                showlegend: false,
+                title: false,
+                margin: {
+                  l: 0,
+                  t: 0,
+                  r: 0,
+                  b: 0,
+                  pad: 5
+                },
+                height:400,
+                modebar: {
+                  orientation: 'v',
+                },
+                  mapbox: {
+                  style: 'dark',
+                },
+                geo:{
+                    showframe: true,
+                    framecolor: '#3281c7',
+                    showcoastlines: true,
+                    coastlinecolor: '#5d5f73',
+                    framecolor: '#5d5f73',
+                    projection:{
+                        type: 'winkel tripel'
+                    }
+                }
+            };
+
+            var modalMapPlot = document.getElementById('placesMapModal')
+            Plotly.newPlot("placesMapModal", data, modalLayout, {displaylogo: false, showLink: false, responsive: true, modeBarButtons: modeBarButtons});
+            $("#map-spinner-modal").hide();
+
+            modalMapPlot.on('plotly_click', function(data){
                 three_letter_country_code = data['points'][0]['location']
                 var link = "{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geocodes:" + two_letter_codes[three_letter_country_code]
                 window.location = link
             });
           }
         });
-
-
 
         $("#showListLink").click(function(e) {
           $("#placesMap").hide();
@@ -107,18 +152,67 @@
           $("#showMapLink").hide();
           e.preventDefault();
         })
-
-        $("#placesMap").on('plotly_click', function(data, edata) {
-          console.log(edata['points'])
-        })
       })
-
     </script>
     <div id="placesMap"></div>
-    <div style="display: none;" id="placesFacetsDiv">
-    {% for facet in related_geographics_facet|slice:"7" %}
-    {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}<br>
-    {% endfor %}
-    </div>
   </div>
 </div>
+
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Related Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_geographics_facet %}
+            <li>
+              {% with facet.0|get_authority_name as authority_name %}
+              <a style="color:black" title="Go to authority record for {{authority_name}}" href="{% url 'authority' facet.0 %}?">
+                <i class="fa fa-info-circle"></i>
+                {{authority_name}}
+              </a>
+              <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.0|urlencode }}">
+                 ({{facet.1}} citations)
+              </a>
+
+              <span class="isMapped" data-facet-id="{{facet.0}}"></span>
+
+              {% endwith %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="mapModalTitle">Related Places</h4>
+      </div>
+      <div class="modal-body">
+        <center>
+          <div>
+            <div style="width: 100%; height: 100%; text-align: center;" id="map-spinner-modal">
+            <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
+          </div>
+          <div id="placesMapModal"></div>
+        </div>
+        </center>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->

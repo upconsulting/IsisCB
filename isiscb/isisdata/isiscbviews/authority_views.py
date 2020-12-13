@@ -333,13 +333,22 @@ def get_place_map_data(request, authority_id):
 
     geocodes = word_cloud_results.facet_counts()['fields']['geocodes'] if 'fields' in word_cloud_results.facet_counts() else []
     citation_count = _get_citation_count_per_country(geocodes)
-    country_map_data, country_name_map = _get_authority_places_map_data(related_geographics_facet)
+    country_map_data, country_name_map, is_mapped_map = _get_authority_places_map_data(related_geographics_facet)
 
     labels = ['<b>{}</b><br>Citations: {}<br>Hits: {}<extra></extra>'.format(country_name_map.get(code, ''), citation_count.get(code,''), country_map_data.get(code, '')) for code in country_name_map.keys()]
     # we need a map in the front end that maps three to two letter codes (USA to US for example)
     # as the map needs three letter codes, but we have two letter codes indexed
     two_letter_codes = { k : list(country_code_map.keys())[list(country_code_map.values()).index(k)] for k in list(country_map_data.keys())}
-    return JsonResponse({ 'citation_count_countries': list(citation_count.keys()), 'citation_count': list(citation_count.values()), 'countries': list(country_map_data.keys()), 'map_data': list(country_map_data.values()), 'labels': labels, 'name_map': list(country_name_map.values()), 'two_letter_codes': two_letter_codes })
+    return JsonResponse({
+        'citation_count_countries': list(citation_count.keys()),
+        'citation_count': list(citation_count.values()),
+        'countries': list(country_map_data.keys()),
+        'map_data': list(country_map_data.values()),
+        'labels': labels,
+        'name_map': list(country_name_map.values()),
+        'two_letter_codes': two_letter_codes,
+        'is_mapped_map': is_mapped_map
+    })
 
 def _get_citation_count_per_country(facets):
     country_map = {}
@@ -353,10 +362,12 @@ def _get_authority_places_map_data(facets):
     country_name_map = {}
 
     ids = [f[0] for f in facets]
+    is_mapped_map = {}
     facets_dict = dict(facets)
     authority_ids = Authority.objects.filter(pk__in=ids, attributes__type_controlled__name=settings.COUNTRY_CODE_ATTRIBUTE).values_list('id').distinct()
     for id in authority_ids:
         country_attrs = Attribute.objects.filter(source_instance_id=id[0], type_controlled__name=settings.COUNTRY_CODE_ATTRIBUTE)
+        is_mapped_map[id[0]] = True if country_attrs else False
         for attr in country_attrs:
             attr_value = attr.value.display
             attr_value_list = attr_value.split(",")
@@ -372,7 +383,7 @@ def _get_authority_places_map_data(facets):
                 else:
                     country_map[code_three_letters] = facets_dict[id[0]]
 
-    return country_map, country_name_map
+    return country_map, country_name_map, is_mapped_map
 
 
 def authority_author_timeline(request, authority_id):

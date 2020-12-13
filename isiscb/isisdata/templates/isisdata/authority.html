@@ -6,7 +6,6 @@
 {% load facet_filters %}
 
 {% block extra_head %}
-<script src="{% static "isisdata/js/plotly-latest.min.js" %}" type="text/javascript" />
 <script>
 {% if source_instance_id %}
 var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
@@ -15,11 +14,10 @@ var SUBJECT_INSTANCE_ID = "{{ source_instance_id }}";
 {% if source_content_type %}
 var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
-
-$(function () {
-  $('[data-toggle="popover"]').popover()
-})
 </script>
+<script src="{% static "isisdata/js/comments.js" %}"></script>
+
+<script src="{% static "isisdata/js/plotly-latest.min.js" %}" type="text/javascript" />
 
 <style>
 .panel-default>.panel-heading-relation {
@@ -55,7 +53,6 @@ $(function () {
 
 <link rel="unapi-server" type="application/xml" title="unAPI" href="http://{{ request.get_host }}/isis/unapi">
 
-<script src="{% static "isisdata/js/comments.js" %}"></script>
 
 <meta property="og:url"                content="{{ request.build_absolute_uri }}" />
 <meta property="og:site_name"          content="Isis Current Bibliography" />
@@ -446,30 +443,6 @@ $(function () {
   </div>
 </div><!-- /modal -->
 
-<!-- places Modal -->
-<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Places</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for facet in related_geographics_facet %}
-            <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact' %}<br>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div><!-- /modal -->
-
 <!-- categories Modal -->
 <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-labelledby="categoryModalLabel">
   <div class="modal-dialog" role="document">
@@ -576,5 +549,10 @@ $(function () {
 
 </div>
 
+<script>
+  $(function () {
+    $('[data-toggle="popover"]').popover()
+  })
+</script>
 
 {% endblock %}
