@@ -2,17 +2,12 @@
 
 <div class="panel-heading-subjects panel panel-default facet-box">
   <div class="panel-heading-subjects panel-heading">
-    <strong>Related Places {% if related_geographics_facet|length > 0 %}<a data-toggle="modal" data-target="#placesModal">({% if related_geographics_facet|length == 100 %}See the top {% else %}See all {% endif %}{{related_geographics_facet|length}})</a>{% else %}({{related_geographics_facet|length}}){% endif %}</strong>
-    <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
-      data-placement="left" data-trigger="focus" tabindex="0" role="button"
-      data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
+    <strong>Related places (geographic subject terms) {% if related_geographics_facet|length > 0 %}<a class="mapView" id="showListLink" style="cursor:pointer">(List view)</a><a class="listView" id="showMapLink" style="display:none; cursor:pointer">(Map view)</a>{% endif %}</strong>
+    <a class="pull-right" style="color:black; cursor:pointer" data-toggle="modal" data-target="#mapHelpModal">
       <i class="fa fa-question-circle" aria-hidden="true"></i>
     </a>
-    <div title="Expand map" class="pull-right" style="margin-right: 10px;cursor:pointer" data-toggle="modal" data-target="#mapModal">
-    <i class="fa fa-expand" aria-hidden="true"></i>
-    </div>
   </div>
-  <div class="panel-body" style="height: 220px;">
+  <div class="panel-body" style="height: 220px; overflow:scroll;">
     <div style="width: 100%; height: 100%; text-align: center;" id="map-spinner">
       <i style="position: absolute; top: 50%; font-size: 1.4em" class="fa fa-spinner fa-spin"></i>
     </div>
@@ -50,7 +45,7 @@
             $(".isMapped").each(function(idx, elem) {
               var facetId = $(elem).attr("data-facet-id");
               if (mapped_places[facetId] != true) {
-                $(elem).append('<i class="fa fa-exclamation-triangle" title="This place has not been mapped." aria-hidden="true"></i>');
+                $(elem).append('(not mapped)');
               }
             });
 
@@ -134,64 +129,49 @@
                 var link = "{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geocodes:" + two_letter_codes[three_letter_country_code]
                 window.location = link
             });
+
+            $("#showMapModal").show();
           }
         });
 
         $("#showListLink").click(function(e) {
-          $("#placesMap").hide();
-          $("#showListLink").hide();
-          $("#placesFacetsDiv").show();
-          $("#showMapLink").show();
+          $(".mapView").hide();
+          $(".listView").show();
           e.preventDefault();
         })
 
         $("#showMapLink").click(function(e) {
-          $("#placesMap").show();
-          $("#showListLink").show();
-          $("#placesFacetsDiv").hide();
-          $("#showMapLink").hide();
+          $(".mapView").show();
+          $(".listView").hide();
           e.preventDefault();
         })
       })
     </script>
-    <div id="placesMap"></div>
-  </div>
-</div>
+    <div id="showMapModal" title="Expand map" class="mapView" style="display:none; position:absolute; float:left; z-index:99;cursor:pointer" data-toggle="modal" data-target="#mapModal">
+      <i class="fa fa-expand" aria-hidden="true"></i>
+    </div>
+    <div id="placesMap" class="mapView">
+    </div>
+    <div id="placesList" class="listView" style="display:none">
+      {% for facet in related_geographics_facet %}
+      <div>
+          {% with facet.0|get_authority_name as authority_name %}
+          <a style="color:black" title="Go to authority record for {{authority_name}}" href="{% url 'authority' facet.0 %}?">
+            <i class="fa fa-info-circle"></i>
+            {{authority_name}}
+          </a>
+          <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.0|urlencode }}">
+             ({{facet.1}} citations)
+          </a>
 
-<!-- places Modal -->
-<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Related Places</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for facet in related_geographics_facet %}
-            <li>
-              {% with facet.0|get_authority_name as authority_name %}
-              <a style="color:black" title="Go to authority record for {{authority_name}}" href="{% url 'authority' facet.0 %}?">
-                <i class="fa fa-info-circle"></i>
-                {{authority_name}}
-              </a>
-              <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.0|urlencode }}">
-                 ({{facet.1}} citations)
-              </a>
+          <span class="isMapped" data-facet-id="{{facet.0}}"></span>
 
-              <span class="isMapped" data-facet-id="{{facet.0}}"></span>
-
-              {% endwith %}
-            </li>
-          {% endfor %}
-        </ul>
+          {% endwith %}
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
+      {% endfor %}
     </div>
   </div>
-</div><!-- /modal -->
+</div>
 
 <div class="modal fade" id="mapModal" tabindex="-1" role="dialog" aria-labelledby="mapModalLabel">
   <div class="modal-dialog modal-lg" role="document">
@@ -216,3 +196,38 @@
     </div>
   </div>
 </div><!-- /modal -->
+
+<div class="modal fade" id="mapHelpModal" tabindex="-1" role="dialog" aria-labelledby="mapHelpModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="mapModalTitle">Related Places Help</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <h4>Usage:</h4>
+          <ul>
+            <li>Pan by clicking and dragging any point on the map.</li>
+            <li>Zoom by clicking on + or - in the upper right.</li>
+            <li>Open the map in a larger window by clicking on the expand arrows in the upper right.</li>
+            <li>Click on the camera to save the image to your computer.</li>
+            <li>Hover over a country to see the number of citations and hits.</li>
+            <li>Click on the list view to see unmappable terms.</li>
+          </ul>
+
+          <h4>How the map is generated:</h4>
+          <ul>
+            <li>Shading is generated based on current (not historical) country boundaries.</li>
+            <li>The map shows the distribution of geographical subjects that have been manually tagged for each citation.</li>
+            <li>The hit count (not the citation count) is used to calculate the darkness of the shade for each country.</li>
+            <li>Sometimes a single citation adds multiple hits to a country. For example, Paris, France, and Europe each count as one hit for France. (The subject Europe provides one hit to each European country.)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
