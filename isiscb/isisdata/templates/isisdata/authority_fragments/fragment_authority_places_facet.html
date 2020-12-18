@@ -24,7 +24,15 @@
                 z: jsonData['map_data'],
                 hovertemplate: "%{text}",
                 text: jsonData['labels'],
-                colorscale: 'Blues',
+                // colorscale: 'Blues',
+                colorscale: [
+                  [0, 'rgb(4,90,141)'],
+                  [0.25, 'rgb(43,140,190)'],
+                  [0.5, 'rgb(116,169,207)'],
+                  [0.75,' rgb(189,201,225)'],
+                  [1, 'rgb(241,238,246)']
+
+                ],
                 autocolorscale: false,
                 reversescale: true,
                 marker: {
