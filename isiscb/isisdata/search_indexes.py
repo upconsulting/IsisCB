@@ -102,6 +102,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     geographics = indexes.MultiValueField(faceted=True, indexed=False)
     geographic_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    geocodes = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
     cross_references = indexes.MultiValueField(faceted=True, indexed=False)
     cross_references_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
@@ -298,6 +299,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 elif a['acrelation__authority__type_controlled'] == Authority.GEOGRAPHIC_TERM:
                     multivalue_data['geographics'].append(name)
                     multivalue_data['geographic_ids'].append(ident)
+                    authority = Authority.objects.get(pk=ident)
+                    for attr in authority.attributes.all():
+                        if attr.type_controlled.name == settings.COUNTRY_CODE_ATTRIBUTE:
+                            country_codes = attr.value.display.split(",")
+                            for code in country_codes:
+                                multivalue_data['geocodes'].append(code.strip())
                 else:
                     if a['acrelation__authority__type_controlled'] == Authority.INSTITUTION:
                         multivalue_data['subject_institutions'].append(name)
