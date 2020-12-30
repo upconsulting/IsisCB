@@ -41,13 +41,14 @@ sqs = SearchQuerySet().facet('authors', size=100). \
         facet('all_contributor_ids', size=100).\
         facet('subject_ids', size=100). \
         facet('time_period_ids', size=100). \
-        facet('geographic_ids', size=100). \
+        facet('geographic_ids'). \
         facet('institution_ids', size=100). \
         facet('publisher_ids', size=100). \
         facet('periodical_ids', size=100).\
         facet('dataset_ids', size=100).\
         facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-        facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100)
+        facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+        facet('geocodes')
 
 urlpatterns = [
     #url(r'^$', views.index, name='index'),
@@ -57,6 +58,7 @@ urlpatterns = [
     url(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
     url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
     url(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
