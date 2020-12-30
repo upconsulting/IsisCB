@@ -201,7 +201,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
             if value and field.startswith(type_string):
                 field = field[len(type_string):]
 
-
                 # if facets should be connected with and just narrow query
                 # otherwise save value for combined query later
                 if operators.get(field, 'and') == 'or':
