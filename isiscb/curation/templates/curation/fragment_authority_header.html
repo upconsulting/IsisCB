@@ -31,9 +31,13 @@
 </div>
 
 <div class="col-md-4 text-right">
+  <span style="padding-right: 20px;">
+    <a href="{% url 'curation:citation_list' %}?authority={{ instance.id }}"><i class="fa fa-link" aria-hidden="true"></i> Linked citations</a>
+  </span>
     Record {{ index }} of {{ total }}
     <div class="btn-group">
-        <input type="submit" value="Save" class="btn btn-success" />
+        <input type="submit" value="Save" class="btn btn-sm btn-success" />
     </div>
+
 </div>
 </div>
