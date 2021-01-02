@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<form class="form" action="." method="POST">
+<form class="form" id="attributeForm" action="." method="POST">
     {% csrf_token %}
     <input type="hidden" name="search" value="{{ search_key }}">
     <input type="hidden" name="current" value="{{ current_index }}">
@@ -39,13 +39,15 @@
         <div class="col-md-4">
             <div class="btn-group pull-right">
                 <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
-                <input type="submit" value="Save" class="btn btn-sm btn-success" />
+                <a type="submit" class="btn btn-sm btn-success saveBtn" >Save</a>
+                {% if attribute %}
                 <a href="#"
                   class="btn btn-danger btn-sm delete-attribute"
                   attribute-id="{{ attribute.id }}"
                   attribute-title="{{ attribute.type_controlled.name }}">
                   Delete
                 </a>
+                {% endif %}
             </div>
         </div>
       </div>
@@ -124,7 +126,7 @@
         </div>
         <div class="clearfix">
             <div class="button-group pull-right">
-                <input type="submit" value="Save" class="btn btn-success" />
+                <a type="submit" class="btn btn-sm btn-success saveBtn" >Save</a>
                 {% if attribute %}
                 <a href="#"
                     class="btn btn-danger delete-attribute"
@@ -159,6 +161,7 @@
     {% endfor %}
 </div>
 <script>
+  //# sourceURL=script.js
 $('#id_language').multiSelect()
 
 $(document).ready(function() {
@@ -187,8 +190,43 @@ $(document).ready(function() {
       }
     });
   });
+
+  $(".saveBtn").click(function() {
+    var attrType = $("#id_attribute-type_controlled option:selected").text();
+    // so ugly, but there is not really another option
+    if (attrType.startsWith("{{country_code_attribute}}" + " ")) {
+      $("#geocode-attr-warning").modal('show');
+    } else {
+      $("#attributeForm").submit();
+    }
+  })
+
+  $("#geocodeWarningOk").click(function() {
+      $("#geocode-attr-warning").modal('hide');
+      $("#attributeForm").submit();
+  })
 });
 </script>
+
+<div class="modal fade" id="geocode-attr-warning" tabindex="-1" role="dialog" aria-labelledby="delete-attribute-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-attribute-modal-label">Citation Reindexing</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    This attribute is a country code. You might need to reindex related citations to make sure your changes are reflected on the public site.
+                </p>
+                <input type="hidden" id="attribute-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="geocodeWarningOk" >Got it!</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% if attribute %}
 <script>
@@ -226,6 +264,11 @@ var delete_attribute = function() {
                 <p>
                     You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
                 </p>
+                {% if attribute.type_controlled.name == country_code_attribute %}
+                <p style="color: #8a6d3b"> 
+                  This attribute is a country code. You might need to reindex related citations to make sure your changes are reflected on the public site.
+                </p>
+                {% endif %}
                 <input type="hidden" id="attribute-id-container" />
             </div>
             <div class="modal-footer">

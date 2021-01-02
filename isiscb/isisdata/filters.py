@@ -76,6 +76,8 @@ class CitationFilter(django_filters.FilterSet):
     # subject = django_filters.MethodFilter()
     subject = django_filters.CharFilter(method='filter_subject')
 
+    authority = django_filters.CharFilter(method='filter_authority', widget=forms.HiddenInput())
+
     record_status = django_filters.ChoiceFilter(field_name='record_status_value', empty_label="Rec. Status (select one)", choices=[('', 'All')] + list(CuratedMixin.STATUS_CHOICES))
     in_collections = django_filters.CharFilter(method='filter_in_collections', widget=forms.HiddenInput())
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
@@ -297,6 +299,11 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
         return queryset.filter(acrelation__authority__name__icontains=value,
                                acrelation__type_controlled=ACRelation.SUBJECT)
+
+    def filter_authority(self, queryset, field, value):
+        if not value:
+            return queryset
+        return queryset.filter(acrelation__authority__id=value)
 
     def filter_tracking_state(self, queryset, field, value):
         if not value:

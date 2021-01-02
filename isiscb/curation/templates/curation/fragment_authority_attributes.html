@@ -73,6 +73,11 @@ $(document).ready(function() {
         var attribute_title = elem.attr('attribute-title');
         $('#attribute-id-container').val(attribute_id);
         $('#delete-attribute-target-name').html(attribute_title);
+        if (attribute_title == "{{ country_code_attribute }}") {
+          $("#geoCodeWarning").show();
+        } else {
+          $("#geoCodeWarning").hide();
+        }
         $('#delete-attribute-modal').modal('show');
     });
 
@@ -103,6 +108,9 @@ var delete_attribute = function() {
             <div class="modal-body">
                 <p>
                     You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p id="geoCodeWarning" style="display: none; color: #8a6d3b">
+                  This attribute is a country code. You might need to reindex related citations to make sure your changes are reflected on the public site.
                 </p>
                 <input type="hidden" id="attribute-id-container" />
             </div>
