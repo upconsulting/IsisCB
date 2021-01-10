@@ -1068,6 +1068,8 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
 def attribute_for_authority(request, authority_id, attribute_id=None):
 
+    country_code_attribute = settings.COUNTRY_CODE_ATTRIBUTE
+
     template = 'curation/authority_attribute_changeview.html'
     authority = get_object_or_404(Authority, pk=authority_id)
     attribute, value, value_form, value_form_class = None, None, None, None
@@ -1087,6 +1089,7 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
         'curation_subsection': 'authorities',
         'instance': authority,
         'attribute': attribute,
+        'country_code_attribute': country_code_attribute,
         'value': value,
         'search_key': search_key,
         'current_index': current_index
@@ -1804,6 +1807,7 @@ def authority(request, authority_id):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
+        'country_code_attribute': settings.COUNTRY_CODE_ATTRIBUTE,
     }
 
     context.update({'tab': request.GET.get('tab', None)})
