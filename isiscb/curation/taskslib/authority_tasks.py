@@ -34,6 +34,14 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 logger = logging.getLogger(__name__)
 
 @shared_task
+def delete_duplicate_attributes(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
+    queryset, task = _get_task(filter_params_raw, user_id, task_id, object_type)
+
+    for i, obj in enumerate(queryset):
+        for attribute in obj.attributes.all():
+            print(attribute)
+
+@shared_task
 def reindex_authorities(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
 
     queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
@@ -269,6 +277,18 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _get_task(filter_params_raw, user_id, task_id, object_type):
+    queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
+    if task_id:
+        task = AsyncTask.objects.get(pk=task_id)
+        task.max_value = queryset.count()
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
+        task.save()
+    else:
+        task = None
+
+    return queryset, task
 
 def _add_creation_note(properties, task_id, user_id, created_on):
     user = User.objects.get(pk=user_id)
