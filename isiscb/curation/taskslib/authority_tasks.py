@@ -36,10 +36,19 @@ logger = logging.getLogger(__name__)
 @shared_task
 def delete_duplicate_attributes(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
     queryset, task = _get_task(filter_params_raw, user_id, task_id, object_type)
-
+    current_count = 0
     for i, obj in enumerate(queryset):
+        existing_attributes = []
         for attribute in obj.attributes.all():
-            print(attribute)
+            attr_type = attribute.type_controlled
+            key = attr_type.name + "_" + str(attribute.value.cvalue()) + str(attribute.value_freeform)
+            if key not in existing_attributes:
+                existing_attributes.append(key)
+            else:
+                # attribute with same values already exist, so remove it
+                print("Deleting attribute " + attribute.pk + " on object " + obj.pk)
+                attribute.delete()
+        current_count = _update_count(current_count, task)
 
 @shared_task
 def reindex_authorities(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
