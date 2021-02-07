@@ -280,9 +280,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% if related_citations_as %}
     <h4>Associated with</h4>
       {% for cc_rel in related_citations_as %}
+        {% if cc_rel.subject.id == citation.id %}
         {% with cc_rel.object as citation_object %}
           {% include "isisdata/citation_entry.html" %}
         {% endwith %}
+        {% else %}
+        {% with cc_rel.subject as citation_object %}
+          {% include "isisdata/citation_entry.html" %}
+        {% endwith %}
+        {% endif %}
       {% endfor %}
     {% endif %}
 
