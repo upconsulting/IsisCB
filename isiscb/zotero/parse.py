@@ -365,6 +365,14 @@ class ZoteroIngest(object):
         return predicate, dict(parent_document)
 
     def handle_subjects(self, predicate, node):
+        # IEXP-24: somtimes/potentially always, the subject node contains an
+        # anonymous node that will display its idea if we don't traverse further
+        # e.g
+        # <dc:subject>
+        #   <z:AutomaticTag><rdf:value>Australia</rdf:value></z:AutomaticTag>
+        # </dc:subject>
+        if type(node) == BNode:
+            node = self.graph.value(subject=node, predicate=RDF.value)
         match = re.match('([^\[]+)\[([A-Z0-9\w]+)\]', node.toPython())
         if match:
             name, identifier = match.groups()
