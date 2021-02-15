@@ -288,4 +288,28 @@ class ReindexAuthorities(BaseAction):
         task.save()
         return task.id
 
+class DeleteDuplicateAttributes(BaseAction):
+    model = Authority
+    label = u'Delete Duplicate Attributes'
+
+    default_value_field = forms.CharField
+    default_value_field_kwargs = {
+        'label': 'Delete Duplicate Attributes',
+        'widget': forms.widgets.Textarea(attrs={'class': 'action-value', 'readonly': True, 'initial': 'Delete Duplicate Attributes'}),
+    }
+
+    def apply(self, user, filter_params_raw, value, **extra):
+        task = AsyncTask.objects.create()
+
+        result = atasks.delete_duplicate_attributes.delay(user.id, filter_params_raw, task.id)
+
+        # We can use the AsyncResult's UUID to access this task later, e.g.
+        #  to check the return value or task state.
+        task.async_uuid = result.id
+        task.value = ('delete_duplicate_attributes', value)
+        task.label = 'Deleting Duplicate Attributes: ' + _build_filter_label(filter_params_raw)
+        task.save()
+        return task.id
+
 AVAILABLE_ACTIONS = [SetRecordStatus, SetRecordStatusExplanation, SetTrackingStatus, PrependToRecordHistory, StoreCreationDataToModel, ReindexCitation]
+AVAILABLE_ACTIONS_AUTHORITY = [StoreCreationDataToModel, ReindexAuthorities, DeleteDuplicateAttributes]

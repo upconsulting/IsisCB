@@ -34,6 +34,23 @@ COLUMN_NAME_ATTR_NOTES = 'ATT Notes'
 logger = logging.getLogger(__name__)
 
 @shared_task
+def delete_duplicate_attributes(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
+    queryset, task = _get_task(filter_params_raw, user_id, task_id, object_type)
+    current_count = 0
+    for i, obj in enumerate(queryset):
+        existing_attributes = []
+        for attribute in obj.attributes.all():
+            attr_type = attribute.type_controlled
+            key = attr_type.name + "_" + str(attribute.value.cvalue()) + str(attribute.value_freeform)
+            if key not in existing_attributes:
+                existing_attributes.append(key)
+            else:
+                # attribute with same values already exist, so remove it
+                print("Deleting attribute " + attribute.pk + " on object " + obj.pk)
+                attribute.delete()
+        current_count = _update_count(current_count, task)
+
+@shared_task
 def reindex_authorities(user_id, filter_params_raw, task_id=None, object_type='AUTHORITY'):
 
     queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
@@ -269,6 +286,18 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
 
         task.state = 'SUCCESS'
         task.save()
+
+def _get_task(filter_params_raw, user_id, task_id, object_type):
+    queryset, _ = _get_filtered_object_queryset(filter_params_raw, user_id, object_type)
+    if task_id:
+        task = AsyncTask.objects.get(pk=task_id)
+        task.max_value = queryset.count()
+        _inc = max(2, math.floor(old_div(task.max_value, 200.)))
+        task.save()
+    else:
+        task = None
+
+    return queryset, task
 
 def _add_creation_note(properties, task_id, user_id, created_on):
     user = User.objects.get(pk=user_id)
