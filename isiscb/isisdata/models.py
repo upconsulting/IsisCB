@@ -1738,8 +1738,8 @@ class AARelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (IDENTICAL_TO, 'Is Identical To'),
         (PARENT_OF, 'Is Parent Of'),
-        (PREVIOUS_TO, 'Happened Previous To'),
-        (OFFICER_OF, 'Is Officer Of'),
+        #(PREVIOUS_TO, 'Happened Previous To'),
+        #(OFFICER_OF, 'Is Officer Of'),
         (ASSOCIATED_WITH, 'Is Associated With')
     )
     type_controlled = models.CharField(max_length=5, choices=TYPE_CHOICES,

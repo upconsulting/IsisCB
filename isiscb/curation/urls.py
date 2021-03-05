@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from curation import views
 from curation.bulk_views import bulk_change_csv_views
 from curation.bulk_views import citation_views
+from curation.authority_views import relation_views as authority_relation_views
 from curation.citation_views import tracking_views
 import rules
 from .rules import *
@@ -97,8 +98,10 @@ urlpatterns = [
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_citation, name='update_acrelation_for_citation'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_citation, name='delete_acrelation_for_citation'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_citation, name='delete_acrelation_for_citation_format'),
-    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/$', views.create_acrelation_for_authority, name='create_acrelation_for_authority'),
-    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_authority, name='update_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/$', authority_relation_views.create_acrelation_for_authority, name='create_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/$', authority_relation_views.create_aarelation_for_authority, name='create_aarelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', authority_relation_views.acrelation_for_authority, name='update_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/$', authority_relation_views.aarelation_for_authority, name='update_aarelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority_format'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelations/$', views.authority_acrelations, name='authority_acrelations'),
