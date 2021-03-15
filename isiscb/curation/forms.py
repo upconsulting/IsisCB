@@ -133,7 +133,7 @@ class AARelationForm(forms.ModelForm):
             (0.0, 'Unsure'),
         ],
         'coerce': float,
-        'required': True,
+        'required': False,
     })
 
     class Meta(object):
@@ -150,6 +150,8 @@ class AARelationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AARelationForm, self).__init__(*args, **kwargs)
+        self.fields['subject'].required=False
+        self.fields['object'].required=False
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
@@ -158,16 +160,17 @@ class AARelationForm(forms.ModelForm):
 
     def clean(self):
         super(AARelationForm, self).clean()
+        print(self.cleaned_data)
         authority_subject_id = self.cleaned_data.get('authority_subject', None)
         if authority_subject_id:
-            self.cleaned_data['authority_subject'] = Authority.objects.get(pk=authority_subject_id)
+            self.cleaned_data['subject'] = Authority.objects.get(pk=authority_subject_id)
         else:
-            self.cleaned_data['authority_subject'] = None
+            self.cleaned_data['subject'] = None
         authority_object_id = self.cleaned_data.get('authority_object', None)
         if authority_object_id:
-            self.cleaned_data['authority_object'] = Authority.objects.get(pk=authority_object_id)
+            self.cleaned_data['object'] = Authority.objects.get(pk=authority_object_id)
         else:
-            self.cleaned_data['authority_object'] = None
+            self.cleaned_data['object'] = None
 
 
 class ISODateValueForm(forms.ModelForm):

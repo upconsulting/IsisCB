@@ -8,24 +8,34 @@
 {% test_rule 'can_view_authority_field' user permTuple as can_view %}
 
 {% for aarelation in aarelations %}
-<li class="list-group-item aarelation aarelation-type-{{ aarelation.type_controlled }} {% if not aarelation.public %}notpublic{% endif %} {% if not aarelation.citation.public %}record-notpublic{% endif %}" id="aarelation-{{ aarelation.id }}">
+<li class="list-group-item aarelation aarelation-type-{{ aarelation.type_controlled }} {% if not aarelation.public %}notpublic{% endif %} {% if not aarelation.subject.public or not aarelation.object.public %}record-notpublic{% endif %}" id="aarelation-{{ aarelation.id }}">
   <div class="row">
 
   {% if can_update %}
   <a href="{% url "curation:update_aarelation_for_authority" instance.id aarelation.id %}?search={{ search_key }}&current={{ current_index }}" class="list_entry_link">
   {% endif %}
   <span class="col-sm-11">
+    {% if aarelation.subject.id != instance.id %}
+    {{ aarelation.object }}
+
+    {% if not aarelation.object.public %}
+    <i class="fa fa-eye-slash" title="The linked authority is not public."></i>
+    {% endif %}
+
+    {% endif %}
+
     <span class="label label-primary">{{ aarelation.get_type_controlled_display }}</span>
     {% if aarelation.type_broad_controlled %}
     <span class="label label-success">{{ aarelation.get_type_broad_controlled_display }}</span>
     {% endif %}
-    {{ aarelation.citation|get_citation_title|safe }}
-    {% if aarelation.name_for_display_in_citation %}
-    <span class="text-muted">(as "{{ aarelation.name_for_display_in_citation }}")</span>
+
+    {% if aarelation.object.id != instance.id %}
+    {{ aarelation.object }}
+
+    {% if not aarelation.object.public %}
+    <i class="fa fa-eye-slash" title="The linked citation is not public."></i>
     {% endif %}
 
-    {% if not aarelation.citation.public %}
-    <i class="fa fa-eye-slash" title="The linked citation is not public."></i>
     {% endif %}
     {% if not aarelation.public %}
     <i class="fa fa-minus-square" aria-hidden="true" title="This aarelation is not public."></i>

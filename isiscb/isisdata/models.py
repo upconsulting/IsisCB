@@ -1404,6 +1404,14 @@ class Authority(ReferencedEntity, CuratedMixin):
         return AARelation.objects.filter(public=True).filter(query)
 
     @property
+    def aarelations_all(self):
+        """
+        Provides access to related :class:`.AARelation` instances directly.
+        """
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return AARelation.objects.filter(query)
+
+    @property
     def acrelations(self):
         """
         Provides access to related :class:`.ACRelation` instances directly.

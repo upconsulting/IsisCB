@@ -49,7 +49,8 @@ $('.search-authority-anchor[data-toggle="tooltip"]').tooltip({
     template: '<div class="tooltip related-citations-tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
 });
 
-$('.select-subject').click(function() {
+/*
+$('.select-authority').click(function() {
     var selected = $(this);
     var selected_id = selected.attr('data-id');
     var selected_name = selected.attr('data-name');
@@ -58,13 +59,14 @@ $('.select-subject').click(function() {
 
     $('#results-container').empty();
     subject_search_input.val(selected_name);
-    $('#id_aarelation-subject').val(selected_id);
+    id_result_container.val(selected_id);
     $('#subject_type_full').text(selected_type);
     $('#subject_type_full').attr('data-type-code', selected_type_code);
     $('#subject_name').text(selected_name);
 
     subject_search_input.attr('disabled', true);
 });
+
 
 function format_citations(related_citations) {
     var _doc = '';
@@ -73,3 +75,4 @@ function format_citations(related_citations) {
     })
     return _doc;
 }
+*/

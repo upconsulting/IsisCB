@@ -131,7 +131,7 @@
                                 class="form-control authority-search"
                                 name="authority-search"
                                 results-target="#subject-results-container"
-                                selected-result-target="#id_aarelation-authority-subject">
+                                selected-result-target="#id_aarelation-authority_subject">
                             <span class="input-group-btn">
                                 <a
                                     class="btn glyphicon glyphicon-pencil enable-search-input"
@@ -189,7 +189,7 @@
                                 name="authority-search"
                                 results-target="#object-results-container"
                                 autocomplete="off"
-                                selected-result-target="#id_aarelation-authority-object">
+                                selected-result-target="#id_aarelation-authority_object">
                             <span class="input-group-btn">
                                 <a
                                     class="btn glyphicon glyphicon-pencil enable-search-input"
@@ -303,6 +303,9 @@ $(document).ready(function() {
         }
         $('#id_aarelation-authority_subject').val(object_id);
         $('#id_aarelation-authority_object').val(subject_id);
+
+        // FIXME: this needs fixing. it swaps the whole element so that subject and object
+        // are wrong for javascript calls after
 
         $("#subject_info_container").append($("#object_info"));
         $("#object_info_container").append($("#subject_info"));
