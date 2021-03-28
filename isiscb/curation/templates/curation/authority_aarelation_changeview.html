@@ -113,16 +113,16 @@
                 <div id="subject_info_container">
                   <div id="subject_info" class="authority_info">
                     <strong>Authority record: </strong>
-                    {% if form.instance.subject %}
-                    <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                      <a class="link_to_citation" href="{% url 'curation:curate_authority' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+
+                    <strong class="text-warning"><span id="subject_shown_id" class="show_id">{% if form.instance.subject %}{{ form.instance.subject.id }}{% endif %}</span> &nbsp;&nbsp;
+                      <a id="subject_link" class="link_to_citation" href="{% if form.instance.subject %}{% url 'curation:curate_authority' form.instance.subject.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
                     </strong>
                     <p>
-                      <em class="show_title">{{ form.instance.subject.name }}</em>
+                      <em id="subject_title" class="show_title">{{ form.instance.subject.name }}</em>
                     <br>
-                      <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                      <span id="subject_type" {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
                     </p>
-                    {% endif %}
+
                     <div class="form-group">
                       <div class="col-sm-12">
                         <div class="input-group">
@@ -168,23 +168,22 @@
                   <div id="object_info" class="authority_info">
                     <strong>Authority record: </strong>
 
-                    <strong class="text-warning"><span class="show_id">{% if form.instance.authority_object %}{{ form.instance.authority_object.id }}{% endif %}</span> &nbsp;&nbsp;
-                      {% if form.instance.object %}<a class="link_to_citation" href="{% url 'curation:curate_authority' form.instance.object.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>{% endif %}
-                      {% if not form.instance.object %}
-                        <a class="hidden link_to_citation" href=""><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                      {% endif %}
+                    <strong class="text-warning"><span id="object_shown_id" class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
+                      <a id="object_link" class="link_to_citation" href="{% if form.instance.object %}{% url 'curation:curate_authority' form.instance.object.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+
+
                     </strong>
 
                     <p>
-                      <em class="show_title">   {% if form.instance.object %}{{ form.instance.object.name }} {% endif %}</em>
+                      <em id="object_title" class="show_title">   {% if form.instance.object %}{{ form.instance.object.name }} {% endif %}</em>
                       <br>
-                      <span {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
+                      <span id="object_type" {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
                     </p>
                     <div class="form-group">
                         <div class="col-sm-12">
                           <div class="input-group">
                             <input type="text"
-                                id="authorityon-search-object"
+                                id="authority-search-object"
                                 class="form-control authority-search"
                                 name="authority-search"
                                 results-target="#object-results-container"
@@ -277,47 +276,44 @@ $(document).ready(function() {
         object_search_input.attr('disabled', true);
     }
 
+
     /**
       * Swap the subject and the object of the relation.
       */
     var swapSubjectObject = function() {
-        subject_name = subject_search_input.val();
-        object_name = object_search_input.val();
-        subject_id = $('#id_aarelation-authority_subject').val();
-        object_id = $('#id_aarelation-authority_object').val();
-        var subject_disabled = subject_search_input.attr('disabled');
-        var object_disabled = object_search_input.attr('disabled');
+        var subject_id = $("#subject_shown_id").text()
+        var subject_name = $("#subject_title").text()
+        var subject_link = $("#subject_link").attr("href")
+        var subject_type = $("#subject_type").text()
+        var subject_type_id = $("#subject_type").attr("data-type_id")
+        var subject_search_input = $('#authority-search-subject').val()
+        var subject_disabled = $('#authority-search-subject').attr('disabled')
 
-        subject_search_input.val(object_name);
-        object_search_input.val(subject_name);
-        if (object_disabled) {
-            subject_search_input.attr('disabled', true);
-        } else {
-            subject_search_input.removeAttr('disabled');
-        }
+        var object_id = $("#object_shown_id").text()
+        var object_name = $("#object_title").text()
+        var object_link = $("#object_link").attr("href")
+        var object_type = $("#object_type").text()
+        var object_type_id = $("#object_type").attr("data-type_id")
+        var object_search_input = $('#authority-search-object').val()
+        var object_disabled = $('#authority-search-object').attr('disabled');
 
-        if (subject_disabled) {
-            object_search_input.attr('disabled', true);
-        } else {
-            object_search_input.removeAttr('disabled');
-        }
+        $("#subject_shown_id").text(object_id)
+        $("#subject_title").text(object_name)
+        $("#subject_link").attr("href", object_link)
+        $("#subject_type").text(object_type)
+        $("#subject_type").attr("data-type_id", object_type_id)
+        $('#authority-search-subject').val(object_search_input)
+        $('#authority-search-subject').attr('disabled', object_disabled)
         $('#id_aarelation-authority_subject').val(object_id);
+
+        $("#object_shown_id").text(subject_id)
+        $("#object_title").text(subject_name)
+        $("#object_link").attr("href", subject_link)
+        $("#object_type").text(subject_type)
+        $("#object_type").attr("data-type_id", subject_type_id)
+        $('#authority-search-object').val(subject_search_input)
+        $('#authority-search-object').attr('disabled', subject_disabled)
         $('#id_aarelation-authority_object').val(subject_id);
-
-        // FIXME: this needs fixing. it swaps the whole element so that subject and object
-        // are wrong for javascript calls after
-
-        $("#subject_info_container").append($("#object_info"));
-        $("#object_info_container").append($("#subject_info"));
-
-        $("#object_info").attr("id", "temp_id");
-        $("#subject_info").attr("id", "object_info");
-        $("#temp_id").attr("id", "subject_info");
-
-
-        $('.authority-search').each(function(i, elem) {
-            $($(elem).attr('results-target')).empty();
-        });
     }
 
     var unlockSearchInput = function(e) {

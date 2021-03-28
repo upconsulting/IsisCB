@@ -12,18 +12,9 @@
     <label>Filter by relation type</label>
     <select class="form-control" id="aarelation-filter-type" name="aarelation-filter-type">
         <option value="" selected="selected">---------</option>
-        <option value="AU,ED,CO">Author, Editor, or Contributor</option>
-        <option value="AD">Advisor</option>
-        <option value="TR">Translator</option>
-        <option value="SU">Subject</option>
-        <option value="CA">Category</option>
-        <option value="PU">Publisher</option>
-        <option value="SC">School</option>
-        <option value="IN">Institution</option>
-        <option value="ME">Meeting</option>
-        <option value="PE">Periodical</option>
-        <option value="BS">Book Series</option>
-        <option value="CM">Committee Member</option>
+        <option value="IDTO">Is Identical To</option>
+        <option value="PAOF">Is Parent Of</option>
+        <option value="ASWI">Is Associated With</option>
     </select>
 </div>
 <script>
@@ -80,6 +71,7 @@ Total number of AARelations: {{ total_aarelations }}
 {% endwith %}
 
 <script>
+  //# sourceURL=deleteaa.js
 $(document).ready(function() {
     $('.delete-aarelation').click(function() {
         var elem = $(this);
@@ -96,9 +88,15 @@ var delete_aarelation = function() {
     $('#delete-aarelation-modal').modal('hide');
     var aarelation_id = $('#aarelation-id-container').val();
     if (aarelation_id) {
-        $.ajax("{% url "curation:create_aarelation_for_authority" instance.id %}" + aarelation_id + '/delete.json?confirm=true', {
-            'success': function(r) {
-                $('#aarelation-' + aarelation_id).remove();
+        $.ajax("{% url "curation:create_aarelation_for_authority" instance.id %}" + aarelation_id + '/delete.json?', {
+            'method': "POST",
+            'data': {
+              'confirm': 'true',
+            },
+            'success': function(data) {
+                if (data['result'] == true) {
+                  $('#aarelation-' + aarelation_id).remove();
+                }
             },
         });
     }

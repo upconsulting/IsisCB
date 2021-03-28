@@ -152,15 +152,15 @@ def aarelation_for_authority(request, authority_id, aarelation_id):
         'curation_section': 'datasets',
         'curation_subsection': 'authorities',
         'instance': authority,
-        'aarelation': acrelation,
+        'aarelation': aarelation,
         'search_key': search_key,
         'current_index': current_index
     }
     if request.method == 'GET':
-        form = ACRelationForm(instance=aarelation, prefix='aarelation')
+        form = AARelationForm(instance=aarelation, prefix='aarelation')
 
     elif request.method == 'POST':
-        form = ACRelationForm(request.POST, instance=acrelation, prefix='aarelation')
+        form = AARelationForm(request.POST, instance=aarelation, prefix='aarelation')
         if form.is_valid():
             form.save()
             target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=aarelations'
@@ -172,4 +172,39 @@ def aarelation_for_authority(request, authority_id, aarelation_id):
         'form': form,
     })
     template = 'curation/authority_aarelation_changeview.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
+def delete_aarelation_for_authority(request, authority_id, aarelation_id, format=None):
+    authority = get_object_or_404(Authority, pk=authority_id)
+    aarelation = get_object_or_404(AARelation, pk=aarelation_id)
+    search_key = request.GET.get('search', request.POST.get('search'))
+    current_index = request.GET.get('current', request.POST.get('current'))
+
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'authorities',
+        'instance': authority,
+        'aarelation': aarelation,
+        'search_key': search_key,
+        'current_index': current_index
+    }
+
+    if request.POST.get('confirm', False) == 'true':
+        if not aarelation.modified_on:
+            aarelation.modified_on = datetime.datetime.now()
+        aarelation.delete()
+        if format == 'json':
+            return JsonResponse({'result': True})
+
+        target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=aarelations'
+        if search_key and current_index:
+            target += '&search=%s&current=%s' % (search_key, current_index)
+        return HttpResponseRedirect(target)
+
+    if format == 'json':
+        return JsonResponse({'result': False})
+
+    template = 'curation/authority_aarelation_delete.html'
     return render(request, template, context)

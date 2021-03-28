@@ -155,8 +155,10 @@ class AARelationForm(forms.ModelForm):
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
-            if not self.fields['authority_subject'].initial:
+            if not self.fields['authority_subject'].initial and self.instance.subject:
                 self.fields['authority_subject'].initial = self.instance.subject.id
+            if not self.fields['authority_object'].initial and self.instance.object:
+                self.fields['authority_object'].initial = self.instance.object.id
 
     def clean(self):
         super(AARelationForm, self).clean()

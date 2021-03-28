@@ -103,7 +103,9 @@ urlpatterns = [
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', authority_relation_views.acrelation_for_authority, name='update_acrelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/$', authority_relation_views.aarelation_for_authority, name='update_aarelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/delete/$', authority_relation_views.delete_aarelation_for_authority, name='delete_aarelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority_format'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', authority_relation_views.delete_aarelation_for_authority, name='delete_aarelation_for_authority_format'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelations/$', views.authority_acrelations, name='authority_acrelations'),
 
     re_path(r'^authority/$', views.authorities, name='authority_list'),

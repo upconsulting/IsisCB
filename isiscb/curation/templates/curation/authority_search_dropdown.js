@@ -15,13 +15,13 @@ result.results.forEach(function(suggestion) {
                 </div>
                 <div class="col-xs-10">
                     <div class="h5">
-                        <a href="/curation/authority/` + suggestion.id + `/?tab=acrelations"
+                        <a href="/curation/authority/` + suggestion.id + `/?tab=aarelations"
                             class="search-authority-anchor"
                             target="_blank"
                             data-toggle="tooltip"
                             data-html="true"
                             data-placement="left"
-                            data-title="` + format_citations(suggestion.related_citations) + `">` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
+                            >` + suggestion.name + ` (` + suggestion.citation_count + `)</a>
                     </div>
                     <span class="label label-danger"
                         style="margin-left: 5px;">

@@ -16,12 +16,14 @@
   {% endif %}
   <span class="col-sm-11">
     {% if aarelation.subject.id != instance.id %}
-    {{ aarelation.object }}
+    {{ aarelation.subject }}
 
-    {% if not aarelation.object.public %}
+    {% if not aarelation.subject.public %}
     <i class="fa fa-eye-slash" title="The linked authority is not public."></i>
     {% endif %}
 
+    {% else %}
+    This <span class="label label-warning">Authority</span>
     {% endif %}
 
     <span class="label label-primary">{{ aarelation.get_type_controlled_display }}</span>
@@ -35,6 +37,9 @@
     {% if not aarelation.object.public %}
     <i class="fa fa-eye-slash" title="The linked citation is not public."></i>
     {% endif %}
+
+    {% else %}
+    this <span class="label label-warning">Authority</span>
 
     {% endif %}
     {% if not aarelation.public %}
