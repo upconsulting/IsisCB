@@ -1404,6 +1404,14 @@ class Authority(ReferencedEntity, CuratedMixin):
         return AARelation.objects.filter(public=True).filter(query)
 
     @property
+    def aarelations_all(self):
+        """
+        Provides access to related :class:`.AARelation` instances directly.
+        """
+        query = Q(subject_id=self.id) | Q(object_id=self.id)
+        return AARelation.objects.filter(query)
+
+    @property
     def acrelations(self):
         """
         Provides access to related :class:`.ACRelation` instances directly.
@@ -1738,8 +1746,8 @@ class AARelation(ReferencedEntity, CuratedMixin):
     TYPE_CHOICES = (
         (IDENTICAL_TO, 'Is Identical To'),
         (PARENT_OF, 'Is Parent Of'),
-        (PREVIOUS_TO, 'Happened Previous To'),
-        (OFFICER_OF, 'Is Officer Of'),
+        #(PREVIOUS_TO, 'Happened Previous To'),
+        #(OFFICER_OF, 'Is Officer Of'),
         (ASSOCIATED_WITH, 'Is Associated With')
     )
     type_controlled = models.CharField(max_length=5, choices=TYPE_CHOICES,

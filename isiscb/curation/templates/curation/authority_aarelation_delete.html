@@ -1,0 +1,31 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="h3">Are you sure that you want to delete this relation?</div>
+
+    <dl>
+        <dt>Type</dt>
+        <dd>{{ aarelation.get_type_controlled_display }}</dd>
+        <dt>Subject</dt>
+        <dd>{{ aarelation.subject.name }}</dd>
+        <dt>Object</dt>
+        <dd>{{ aarelation.object.name }}</dd>
+    </dl>
+
+
+    <form method="POST" action="{% url "curation:delete_aarelation_for_authority" instance.id aarelation.id %}">
+      {% csrf_token %}
+      <div class="clearfix">
+          <div class="button-group pull-right">
+              <input type="hidden" name="confirm" value="true" />
+              <button type="submit" class="btn btn-danger">Delete</button>
+          </div>
+      </div>
+    </form>
+</div>
+
+{% endblock %}

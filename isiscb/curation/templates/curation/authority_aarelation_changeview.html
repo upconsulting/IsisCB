@@ -1,0 +1,453 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+{% load render_object %}
+
+{% block content %}
+
+{% if not form.instance.public %}
+<div class="alert alert-danger" role="alert">
+<i class="fa fa-eye-slash" aria-hidden="true"></i> This AARelation is not public.
+</div>
+{% endif %}
+
+<form id="aarelation_form" class="form" action="." method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="search" value="{{ search_key }}">
+    <input type="hidden" name="current" value="{{ current_index }}">
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-md-5">
+          <div class="row">
+              <div class="col-md-12">
+                <div class="form-group form-inline">
+                  <strong class="text-warning">
+                    {% if form.instance.id %}{{ form.instance.id }}{% else %}New{% endif %}</strong> | <strong>AAR record</strong>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  {{ form.record_status_value|addcss:"form-control input-sm" }}
+                  &nbsp;
+                  {{ form.record_status_explanation|addcss:"form-control input-sm" }}
+                </div>
+                <div class="col-md-12">
+                    {% for error in form.record_status_value.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    {% for error in form.record_status_explanation.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        <div class="col-md-3">
+          <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+     Back to Authority</a>
+        </div>
+        <div class="col-md-4">
+            <div class="btn-group pull-right">
+                <a href="{% url 'curation:curate_authority' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+                <a href="#" class="btn btn-sm btn-success save-aarelation" >Save</a>
+                {% if aarelation.id %}
+                <a href="#"
+                  class="btn btn-danger btn-sm delete-aarelation"
+                  aarelation-id="{{ aarelation.id }}"
+                  aarelation-title="{{ aarelation.authority_subject.name|safe }}">
+                  Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+      </div>
+
+    <div class="container-fluid form-horizontal">
+        <div class="row">
+            <div class="col-sm-6">
+                {% for error in form.type_controlled.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-4">{{ form.type_controlled.label }}</label>
+                    <div class="col-md-8">
+                      {{ form.type_controlled|addcss:"form-control" }}
+                    </div>
+                </div>
+
+                {% for error in form.administrator_notes.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-12">{{ form.administrator_notes.label }}</label>
+                    <div class="col-md-12">
+                      {{ form.administrator_notes|addcss:"form-control" }}
+                    </div>
+                </div>
+
+                {% for error in form.record_history.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    <label class="col-md-12">{{ form.record_history.label }}</label>
+                    <div class="col-md-12">
+                      {{ form.record_history|addcss:"form-control" }}
+                    </div>
+                </div>
+                <div class="form-group">
+                  <label class="col-md-12">Last updated on <span class="date">{{ form.instance.modified_on|get_iso_date }}</span> by {{ form.instance.modified_by }}.</label>
+                </div>
+                {{ form.authority_subject }}
+                {{ form.authority_object }}
+            </div>
+            <div class="col-sm-6">
+
+              <div class="text-right">
+                <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+              </div>
+
+                {% for error in form.authority_subject.errors %}
+                <div class="col-md-12">
+                  <div class="alert alert-danger">
+                  {{ error }}
+                  </div>
+                </div>
+                {% endfor %}
+
+                <div id="subject_info_container">
+                  <div id="subject_info" class="authority_info">
+                    <strong>Authority record: </strong>
+
+                    <strong class="text-warning"><span id="subject_shown_id" class="show_id">{% if form.instance.subject %}{{ form.instance.subject.id }}{% endif %}</span> &nbsp;&nbsp;
+                      <a id="subject_link" class="link_to_citation" href="{% if form.instance.subject %}{% url 'curation:curate_authority' form.instance.subject.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    </strong>
+                    <p>
+                      <em id="subject_title" class="show_title">{{ form.instance.subject.name }}</em>
+                    <br>
+                      <span id="subject_type" {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
+                    </p>
+
+                    <div class="form-group">
+                      <div class="col-sm-12">
+                        <div class="input-group">
+                            <input type="text"
+                                id="authority-search-subject"
+                                class="form-control authority-search"
+                                name="authority-search"
+                                results-target="#subject-results-container"
+                                selected-result-target="#id_aarelation-authority_subject">
+                            <span class="input-group-btn">
+                                <a
+                                    class="btn glyphicon glyphicon-pencil enable-search-input"
+                                    data-target="#authority-search-subject">
+                                </a>
+                            </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <ul class="list-group" id="subject-results-container"></ul>
+
+                </div>
+                </div>
+
+
+
+                <div class="text-center">
+                    <div class="button-group">
+                        <span class="btn btn-lg glyphicon glyphicon-refresh"
+                            id="swap-subject-object"></span>
+                    </div>
+                </div>
+
+                {% for error in form.authority_object.errors %}
+                <div class="col-md-12">
+                  <div class="alert alert-danger">
+                  {{ error }}
+                  </div>
+                </div>
+                {% endfor %}
+
+                <div id="object_info_container">
+                  <div id="object_info" class="authority_info">
+                    <strong>Authority record: </strong>
+
+                    <strong class="text-warning"><span id="object_shown_id" class="show_id">{% if form.instance.object %}{{ form.instance.object.id }}{% endif %}</span> &nbsp;&nbsp;
+                      <a id="object_link" class="link_to_citation" href="{% if form.instance.object %}{% url 'curation:curate_authority' form.instance.object.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+
+
+                    </strong>
+
+                    <p>
+                      <em id="object_title" class="show_title">   {% if form.instance.object %}{{ form.instance.object.name }} {% endif %}</em>
+                      <br>
+                      <span id="object_type" {% if form.instance.object %}data-type_id="{{ form.instance.object.type_controlled }}"{% endif %} class="text-success show_type_controlled">{% if form.instance.object %}{{ form.instance.object.get_type_controlled_display }}{% endif %}</span>
+                    </p>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                          <div class="input-group">
+                            <input type="text"
+                                id="authority-search-object"
+                                class="form-control authority-search"
+                                name="authority-search"
+                                results-target="#object-results-container"
+                                autocomplete="off"
+                                selected-result-target="#id_aarelation-authority_object">
+                            <span class="input-group-btn">
+                                <a
+                                    class="btn glyphicon glyphicon-pencil enable-search-input"
+                                    data-target="#authority-search-object">
+                                </a>
+                            </span>
+                        </div>
+                      </div>
+                    </div>
+                    <ul class="list-group" id="object-results-container"></ul>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<div class="modal fade" id="save_confirm_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i style="color:#e8a603" class="fa fa-exclamation-triangle" aria-hidden="true"></i> aarelation Incomplete</h4>
+      </div>
+      <div class="modal-body">
+        <p id="modal_text"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel Save</button>
+        <button id="save_confirmed" type="button" class="btn btn-default">Yes, Save!</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script>
+//# sourceURL=ccrel.js
+
+/**
+ * JavaScript Get URL Parameter
+ * source: https://www.kevinleary.net/javascript-get-url-parameters/
+ *
+ * @param String prop The specific URL parameter you want to retreive the value for
+ * @return String|Object If prop is provided a string value is returned, otherwise an object of all properties is returned
+ */
+function getUrlParams( prop ) {
+    var params = {};
+    var urlParts = window.location.href.split("?");
+    if (urlParts.length == 1) {
+      return '';
+    }
+    var search = urlParts[1];
+    var definitions = search.split( '&' );
+
+    definitions.forEach( function( val, key ) {
+        var parts = val.split( '=', 2 );
+        params[ parts[ 0 ] ] = parts[ 1 ];
+    } );
+
+    return ( prop && prop in params ) ? params[ prop ] : "";
+}
+
+$(document).ready(function() {
+    var typeControlled = getUrlParams('type_controlled');
+    if (typeControlled != undefined && typeControlled != '') {
+      $('#id_aarelation-type_controlled').val(typeControlled);
+    }
+
+    var subject_name = "{% if aarelation %}{{ aarelation.authority_subject.name|escapejs|safe }}{% endif %}";
+    var subject_id = "{% if aarelation %}{{ aarelation.authority_subject.id }}{% endif %}";
+    var object_name = "{% if aarelation %}{{ aarelation.authority_object.name|escapejs|safe }}{% endif %}";
+    var object_id = "{% if aarelation %}{{ aarelation.authority_object.id }}{% endif %}";
+
+    var subject_search_input = $('#authority-search-subject');
+    var object_search_input = $('#authority-search-object');
+
+    if (subject_id.length > 0) {
+        subject_search_input.val(subject_name);
+        subject_search_input.attr('disabled', true);
+    }
+
+    if (object_id.length > 0) {
+        object_search_input.val(object_name);
+        object_search_input.attr('disabled', true);
+    }
+
+
+    /**
+      * Swap the subject and the object of the relation.
+      */
+    var swapSubjectObject = function() {
+        var subject_id = $("#subject_shown_id").text()
+        var subject_name = $("#subject_title").text()
+        var subject_link = $("#subject_link").attr("href")
+        var subject_type = $("#subject_type").text()
+        var subject_type_id = $("#subject_type").attr("data-type_id")
+        var subject_search_input = $('#authority-search-subject').val()
+        var subject_disabled = $('#authority-search-subject').attr('disabled')
+
+        var object_id = $("#object_shown_id").text()
+        var object_name = $("#object_title").text()
+        var object_link = $("#object_link").attr("href")
+        var object_type = $("#object_type").text()
+        var object_type_id = $("#object_type").attr("data-type_id")
+        var object_search_input = $('#authority-search-object').val()
+        var object_disabled = $('#authority-search-object').attr('disabled');
+
+        $("#subject_shown_id").text(object_id)
+        $("#subject_title").text(object_name)
+        $("#subject_link").attr("href", object_link)
+        $("#subject_type").text(object_type)
+        $("#subject_type").attr("data-type_id", object_type_id)
+        $('#authority-search-subject').val(object_search_input)
+        $('#authority-search-subject').attr('disabled', object_disabled)
+        $('#id_aarelation-authority_subject').val(object_id);
+
+        $("#object_shown_id").text(subject_id)
+        $("#object_title").text(subject_name)
+        $("#object_link").attr("href", subject_link)
+        $("#object_type").text(subject_type)
+        $("#object_type").attr("data-type_id", subject_type_id)
+        $('#authority-search-object').val(subject_search_input)
+        $('#authority-search-object').attr('disabled', subject_disabled)
+        $('#id_aarelation-authority_object').val(subject_id);
+    }
+
+    var unlockSearchInput = function(e) {
+        var search_input = $($(this).attr('data-target'));
+        search_input.removeAttr('disabled');
+        search_input.trigger('keyup');
+    }
+
+    var INITIAL_MAX_RESULT = 20;
+    var max_results = INITIAL_MAX_RESULT;
+    var search_input;
+
+    /**
+      * Performs a citation search based on the content of the search input.
+      */
+    var searchTimer = 0;
+    var triggerSearch = function(e) {
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
+
+        var query = search_input.val();
+        var results_container = $(search_input.attr('results-target'));
+        var id_result_container = $(search_input.attr('selected-result-target'));
+
+        searchTimer = setTimeout(function() {
+          $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?max=" + max_results + "&q=" + query, {
+              failure: function(result) {
+                  // do nothing
+              },
+              success: function(result) {
+                  {% include 'curation/authority_search_dropdown.js' %}
+
+                  $('.select-authority').click(function() {
+                      var selected = $(this);
+                      var selected_id = selected.attr('data-id');
+                      var selected_name = selected.attr('data-name');
+                      var selected_type = selected.attr('data-type');
+                      var selected_type_id = selected.attr('data-type_id');
+                      var link = "{% url 'curation:authority_list' %}" + selected_id;
+
+                      results_container.empty();
+                      search_input.val(selected_name);
+                      search_input.attr('disabled', true);
+                      id_result_container.val(selected_id);
+
+                      console.log(results_container.parent())
+                      var parentCont = results_container.closest(".authority_info");
+                      // this is butt-ugly, but so what, too tired to do something better
+                      //if (search_input.attr("id") == "authority-search-object") {
+                      //  parentCont = $("#object_info");
+                      //}
+
+                      parentCont.find(".show_id").html(selected_id);
+                      parentCont.find(".show_title").html(selected_name);
+                      parentCont.find(".show_type_controlled").html(selected_type);
+                      parentCont.find(".show_type_controlled").attr("data-type_id", selected_type_id);
+                      parentCont.find(".link_to_citation").attr("href", link).removeClass("hidden");
+                  });
+              }
+          });
+        }, 500);
+    }
+
+    $('#aarelation_form').on('keyup keypress', function(e) {
+      var keyCode = e.keyCode || e.which;
+      if (keyCode === 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    $('.save-aarelation').click(function() {
+      $('#aarelation_form').submit();
+    });
+
+    $('#save_confirmed').click(function() {
+      $('#aarelation_form').submit();
+    });
+
+    $('#swap-subject-object').click(swapSubjectObject);
+    $('.authority-search').on('keyup', function() {
+      max_results = INITIAL_MAX_RESULT;
+      search_input = $(this);
+      triggerSearch();
+    });
+    $('.enable-search-input').click(unlockSearchInput);
+});
+</script>
+
+{% if aarelation.id %}
+<script>
+$(document).ready(function() {
+    $('.delete-aarelation').click(function() {
+        var elem = $(this);
+        var aarelation_id = elem.attr('aarelation-id');
+        var aarelation_title = elem.attr('aarelation-title');
+        $('#aarelation-id-container').val(aarelation_id);
+        $('#delete-aarelation-target-name').html(aarelation_title);
+        $('#delete-aarelation-modal').modal('show');
+    });
+});
+
+var delete_aarelation = function() {
+    $('#delete-aarelation-modal').modal('hide');
+    var aarelation_id = $('#aarelation-id-container').val();
+    if (aarelation_id) {
+        window.location.replace("{% url "curation:delete_aarelation_for_authority" instance.id aarelation.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-aarelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-aarelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-aarelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                You are about to delete an authority-authority relation with <span class="text-warning" id="delete-aarelation-target-name"></span>. Deletion cannot be undone!
+                <p>
+                    This will not delete the related authority itself, only the relation between that authority and this one.
+                </p>
+                <input type="hidden" id="aarelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_aarelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

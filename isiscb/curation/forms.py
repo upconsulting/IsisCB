@@ -117,6 +117,64 @@ class ACRelationForm(forms.ModelForm):
             self.cleaned_data['citation'] = None
 
 
+class AARelationForm(forms.ModelForm):
+    authority_subject = forms.CharField(widget=forms.HiddenInput(), required=False)
+    authority_object = forms.CharField(widget=forms.HiddenInput(), required=False)
+    """We will set these dynamically in the rendered form."""
+
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
+
+    type_controlled = forms.ChoiceField(choices=AARelation.TYPE_CHOICES, required=False)
+
+    confidence_measure = forms.TypedChoiceField(**{
+        'choices': [
+            (1.0, 'Certain/very likely'),
+            (0.5, 'Likely'),
+            (0.0, 'Unsure'),
+        ],
+        'coerce': float,
+        'required': False,
+    })
+
+    class Meta(object):
+        model = AARelation
+        fields = [
+            'type_controlled',
+            'confidence_measure', 'subject', 'object',
+            'record_status_value', 'record_status_explanation',
+            'administrator_notes', 'record_history'
+        ]
+        labels = {
+            'administrator_notes': 'Staff notes',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(AARelationForm, self).__init__(*args, **kwargs)
+        self.fields['subject'].required=False
+        self.fields['object'].required=False
+        if not self.is_bound:
+            if not self.fields['record_status_value'].initial:
+                self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+            if not self.fields['authority_subject'].initial and self.instance.subject:
+                self.fields['authority_subject'].initial = self.instance.subject.id
+            if not self.fields['authority_object'].initial and self.instance.object:
+                self.fields['authority_object'].initial = self.instance.object.id
+
+    def clean(self):
+        super(AARelationForm, self).clean()
+        print(self.cleaned_data)
+        authority_subject_id = self.cleaned_data.get('authority_subject', None)
+        if authority_subject_id:
+            self.cleaned_data['subject'] = Authority.objects.get(pk=authority_subject_id)
+        else:
+            self.cleaned_data['subject'] = None
+        authority_object_id = self.cleaned_data.get('authority_object', None)
+        if authority_object_id:
+            self.cleaned_data['object'] = Authority.objects.get(pk=authority_object_id)
+        else:
+            self.cleaned_data['object'] = None
+
+
 class ISODateValueForm(forms.ModelForm):
     value = forms.CharField()
 
