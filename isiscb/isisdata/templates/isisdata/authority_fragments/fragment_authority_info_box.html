@@ -141,9 +141,9 @@
   <div>
   <i class="fa fa-link" aria-hidden="true"></i>
   {% if aar.subject != authority %}
-  <a href="{% url 'authority' aar.subject.id %}">  <i class="fa fa-info-circle"></i> {{ aar.subject.name }}</a> {{ aar.get_type_controlled_display }} this authority.
+  <a href="{% url 'authority' aar.subject.id %}">  <i class="fa fa-info-circle"></i> {{ aar.subject.name }}</a> <span class="text-warning">{{ aar.get_type_controlled_display }}</span> this authority.
   {% else %}
-  This authority {{ aar.get_type_controlled_display }} <a href="{% url 'authority' aar.object.id %}">  <i class="fa fa-info-circle"></i> {{ aar.object.name }}</a>.
+  This authority <span class="text-warning">{{ aar.get_type_controlled_display }}</span> <a href="{% url 'authority' aar.object.id %}">  <i class="fa fa-info-circle"></i> {{ aar.object.name }}</a>.
   {% endif %}
   </div>
   {% endfor %}
