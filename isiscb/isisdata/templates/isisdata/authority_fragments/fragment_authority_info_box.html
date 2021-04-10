@@ -137,6 +137,16 @@
   {% endif %}
   {% endfor %}
 
+  {% for aar in authority.aarelations %}
+  <div>
+  <i class="fa fa-link" aria-hidden="true"></i>
+  {% if aar.subject != authority %}
+  <a href="{% url 'authority' aar.subject.id %}">  <i class="fa fa-info-circle"></i> {{ aar.subject.name }}</a> {{ aar.get_type_controlled_display }} this authority.
+  {% else %}
+  This authority {{ aar.get_type_controlled_display }} <a href="{% url 'authority' aar.object.id %}">  <i class="fa fa-info-circle"></i> {{ aar.object.name }}</a>.
+  {% endif %}
+  </div>
+  {% endfor %}
 
   <table  class="details_authority" style="margin-top: 20px;">
     <tr>
