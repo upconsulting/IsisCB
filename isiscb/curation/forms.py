@@ -813,6 +813,7 @@ class BulkChangeCSVForm(forms.Form):
     UPDATE_ATTR = 'UPATT'
     CREATE_LINKED_DATA = 'CRLD'
     CREATE_ACRELATIONS = 'CRACR'
+    CREATE_AARELATIONS = 'CRAAR'
     CREATE_CCRELATIONS = 'CRCCR'
     CREATE_AUTHORITIES = 'CRAUTH'
     CREATE_CITATIONS = 'CRCIT'
@@ -823,6 +824,7 @@ class BulkChangeCSVForm(forms.Form):
         (UPDATE_ATTR, 'Update Elements'),
         (CREATE_LINKED_DATA, 'Create Linked Data'),
         (CREATE_ACRELATIONS, 'Create ACRelations'),
+        (CREATE_AARELATIONS, 'Create AARelations'),
         (CREATE_CCRELATIONS, 'Create CCRelations'),
         (CREATE_AUTHORITIES, 'Create Authorities'),
         (CREATE_CITATIONS, 'Create Citations'),

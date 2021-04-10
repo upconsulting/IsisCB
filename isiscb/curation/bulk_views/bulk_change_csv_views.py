@@ -22,6 +22,7 @@ ACTION_DICT = {
     BulkChangeCSVForm.UPDATE_ATTR: (authority_tasks, 'update_elements'),
     BulkChangeCSVForm.CREATE_LINKED_DATA: (creation_tasks, 'create_records', 'linkeddata'),
     BulkChangeCSVForm.CREATE_ACRELATIONS: (creation_tasks, 'create_records', 'acrelation'),
+    BulkChangeCSVForm.CREATE_AARELATIONS: (creation_tasks, 'create_records', 'aarelation'),
     BulkChangeCSVForm.CREATE_CCRELATIONS: (creation_tasks, 'create_records', 'ccrelation'),
     BulkChangeCSVForm.CREATE_AUTHORITIES: (creation_tasks, 'create_records', 'authority'),
     BulkChangeCSVForm.CREATE_CITATIONS: (creation_tasks, 'create_records', 'citation'),

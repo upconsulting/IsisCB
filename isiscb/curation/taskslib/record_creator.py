@@ -144,6 +144,51 @@ def _create_acrelation(row, user_id, results, task_id, created_on):
     acr_relation = ACRelation(**properties)
     _create_record(acr_relation, user_id, results)
 
+def _create_aarelation(row, user_id, results, task_id, created_on):
+    COL_AAR_TYPE = 'AAR Type'
+    COL_AAR_OBJECT = 'AAR ID Cit Obj'
+    COL_AAR_SUBJECT = 'AAR ID Cit Subj'
+    COL_AAR_NOTES = 'AAR Notes'
+    COL_AAR_STATUS = 'AAR Status'
+    COL_AAR_EXPLANATION = 'AAR RecordStatusExplanation'
+
+    properties = {}
+
+    if not _add_type(row, COL_AAR_TYPE, AARelation, results, properties):
+        return
+
+    subject_id = row[COL_AAR_SUBJECT]
+    try:
+        Authority.objects.get(pk=subject_id)
+    except Exception as e:
+        logger.error(e)
+        results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(subject_id)))
+        return
+
+    properties.update({
+        'subject_id': subject_id
+    })
+
+    object_id = row[COL_AAR_OBJECT]
+    try:
+        Authority.objects.get(pk=object_id)
+    except Exception as e:
+        logger.error(e)
+        results.append((ERROR, "Authority does not exist", "", "There exists no authority with id %s. Skipping."%(object_id)))
+        return
+
+    properties.update({
+        'object_id': object_id
+    })
+
+    _add_optional_simple_property(row, COL_AAR_NOTES, properties, 'administrator_notes')
+    _add_status(row, COL_AAR_STATUS, properties, results)
+    _add_optional_simple_property(row, COL_AAR_EXPLANATION, properties, 'record_status_explanation')
+
+    _add_creation_note(properties, task_id, user_id, created_on)
+
+    aar_relation = AARelation(**properties)
+    _create_record(aar_relation, user_id, results)
 
 def _create_ccrelation(row, user_id, results, task_id, created_on):
     COL_CCR_TYPE = 'CCR Type'
@@ -164,7 +209,7 @@ def _create_ccrelation(row, user_id, results, task_id, created_on):
         Citation.objects.get(pk=subject_id)
     except Exception as e:
         logger.error(e)
-        results.append((ERROR, "Citation does not exist", "", "There exists not citation with id %s. Skipping."%(subject_id)))
+        results.append((ERROR, "Citation does not exist", "", "There exists no citation with id %s. Skipping."%(subject_id)))
         return
 
     properties.update({
