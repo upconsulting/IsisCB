@@ -212,7 +212,7 @@ def are_related_objects_for_authority_public(authority):
     for aarel in authority.aarelations:
         if not aarel.public:
             return False
-        if not aarel.object.public:
+        if aarel.object and not aarel.object.public:
             return False
 
     for attr in authority.attributes.all():
