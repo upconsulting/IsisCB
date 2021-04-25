@@ -769,6 +769,10 @@ class AuthorityCollectionForm(forms.ModelForm):
         model = AuthorityCollection
         exclude = ('created', 'createdBy', 'authorities')
 
+class AARSetForm(forms.ModelForm):
+    class Meta(object):
+        model = AARSet
+        fields = ['name', 'description']
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
