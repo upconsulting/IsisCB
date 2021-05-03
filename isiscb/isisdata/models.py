@@ -1721,6 +1721,8 @@ class ACRelation(ReferencedEntity, CuratedMixin):
 
 class AARSet(ReferencedEntity, CuratedMixin):
 
+    ID_PREFIX = 'AARSET'
+
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
 

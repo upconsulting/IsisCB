@@ -5,6 +5,28 @@
 
 <h1>AARelation Sets</h1>
 
-<a href="{% url 'curation:create_aarset' %}" class="btn btn-sm btn-primary">Create new set</a>
+<div class="row">
+  <div class="col-sm-12">
+    <p>
+    <a href="{% url 'curation:create_aarset' %}" class="btn btn-sm btn-primary">Create new set</a>
+    </p>
+    <table class="table table-striped">
+      <tr>
+        <th width="30%">Name</th>
+        <th>Description</th>
+        <th width="10%"></th>
+      </tr>
+      {% for set in sets %}
+      <tr>
+        <td>{{ set.name }}</td>
+        <td>{{ set.description }}</td>
+        <td><a href="{% url 'curation:edit_aarset' set.id %}"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i>
+</a></td>
+      </tr>
+
+      {% endfor %}
+    </table>
+  </div>
+</div>
 
 {% endblock %}
