@@ -63,3 +63,34 @@ def change_aarset(request, aarset_id=None):
     }
     template = 'curation/aarelationset_change.html'
     return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def delete_aarset(request, aarset_id):
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'aarsets',
+    }
+
+    aarset = None
+    if aarset_id:
+        aarset = AARSet.objects.filter(pk=aarset_id).first()
+
+    msgs = {
+        'type': '',
+        'msg': ''
+    }
+    if not aarset:
+        msgs.update({
+            'type': "error",
+            'msg': 'AARSet with ID does not exist.'
+        })
+
+    if request.method == "POST":
+        aarset.delete()
+        msgs.update({
+            'type': "success",
+            'msg': 'AARSet successfully deleted.'
+        })
+
+    target = reverse('curation:aarsets') + '?type=' + msgs['type'] + "&msg=" + msgs['msg']
+    return HttpResponseRedirect(target)

@@ -5,6 +5,14 @@
 
 <h1>AARelation Sets</h1>
 
+{% if request.GET.type == 'success' %}
+<div class="alert alert-success" role="alert">{{request.GET.msg}}</div>
+{% endif %}
+
+{% if request.GET.type == 'error' %}
+<div class="alert alert-danger" role="alert">{{request.GET.msg}}</div>
+{% endif %}
+
 <div class="row">
   <div class="col-sm-12">
     <p>
@@ -20,8 +28,13 @@
       <tr>
         <td>{{ set.name }}</td>
         <td>{{ set.description }}</td>
-        <td><a href="{% url 'curation:edit_aarset' set.id %}"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i>
-</a></td>
+        <td>
+          <a style="padding-top:0px;" class="btn btn-link" href="{% url 'curation:edit_aarset' set.id %}"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i></a>
+          <form style="display: inline;" action="{% url 'curation:delete_aarset' set.id %}" method="POST">
+            {% csrf_token %}
+            <button style="padding-top:0px;" class="btn btn-link" type="submit"><i class="fa fa-trash-o" title="Delete" aria-hidden="true"></i></button>
+          </form>
+        </td>
       </tr>
 
       {% endfor %}
