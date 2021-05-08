@@ -1737,6 +1737,9 @@ class AARelationType(ReferencedEntity, CuratedMixin):
 
     aarset = models.ForeignKey(AARSet, related_name='relation_types', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
+        
     TYPE_STRUCTURAL = "TSTR"
     TYPE_ONTOLOGICAL = "TONT"
     TYPE_TEMPORAL = "TTEM"

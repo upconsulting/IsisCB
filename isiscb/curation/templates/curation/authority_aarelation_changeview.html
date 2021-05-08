@@ -61,13 +61,13 @@
     <div class="container-fluid form-horizontal">
         <div class="row">
             <div class="col-sm-6">
-                {% for error in form.type_controlled.errors %}
+                {% for error in form.aar_type.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ form.type_controlled.label }}</label>
+                    <label class="col-md-4">{{ form.aar_type.label }}</label>
                     <div class="col-md-8">
-                      {{ form.type_controlled|addcss:"form-control" }}
+                      {{ form.aar_type|addcss:"form-control" }}
                     </div>
                 </div>
 

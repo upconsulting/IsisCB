@@ -139,7 +139,7 @@ class AARelationForm(forms.ModelForm):
     class Meta(object):
         model = AARelation
         fields = [
-            'type_controlled',
+            'type_controlled', 'aar_type',
             'confidence_measure', 'subject', 'object',
             'record_status_value', 'record_status_explanation',
             'administrator_notes', 'record_history'
@@ -162,7 +162,9 @@ class AARelationForm(forms.ModelForm):
 
     def clean(self):
         super(AARelationForm, self).clean()
-        print(self.cleaned_data)
+
+        if self.cleaned_data.get('aar_type', None):
+            self.cleaned_data['type_controlled'] +  self.cleaned_data.get('aar_type').base_type
         authority_subject_id = self.cleaned_data.get('authority_subject', None)
         if authority_subject_id:
             self.cleaned_data['subject'] = Authority.objects.get(pk=authority_subject_id)
