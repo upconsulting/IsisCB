@@ -26,7 +26,7 @@
       </tr>
       {% for set in sets %}
       <tr>
-        <td>{{ set.name }}</td>
+        <td><a href="{% url 'curation:view_aarset' set.id %}">{{ set.name }}</a></td>
         <td>{{ set.description }}</td>
         <td>
           <a style="padding-top:0px;" class="btn btn-link" href="{% url 'curation:edit_aarset' set.id %}"><i class="fa fa-pencil-square-o" title="Edit" aria-hidden="true"></i></a>

@@ -774,6 +774,11 @@ class AARSetForm(forms.ModelForm):
         model = AARSet
         fields = ['name', 'description']
 
+class AARelationTypeForm(forms.ModelForm):
+    class Meta(object):
+        model = AARelationType
+        fields = ['name', 'description', 'relation_type_controlled', 'base_type', 'aarset']
+
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
     filters = forms.CharField(widget=forms.widgets.HiddenInput())

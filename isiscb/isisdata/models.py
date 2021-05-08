@@ -1726,7 +1726,11 @@ class AARSet(ReferencedEntity, CuratedMixin):
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
+
 class AARelationType(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'AARTYPE'
 
     name = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)

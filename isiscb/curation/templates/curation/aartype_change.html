@@ -1,0 +1,70 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+
+<h1>AARelation Type</h1>
+
+<div class="row">
+  <div class="col-sm-12">
+  <form id="aartype_form" class="form" action="{% if instance %}{% url 'curation:edit_aartype' instance.aarset.id instance.id %}{% else %}{% url 'curation:create_aartype' aarset.id %}{% endif %}" method="POST">
+    {% csrf_token %}
+    {{ form.pk }}
+    <div class="form-group">
+        {% for error in form.name.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.name.label }}</label>
+        <div class="col-md-8">
+          {{ form.name|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {% for error in form.description.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.description.label }}</label>
+        <div class="col-md-8">
+          {{ form.description|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {% for error in form.relation_type_controlled.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.relation_type_controlled.label }}</label>
+        <div class="col-md-8">
+          {{ form.relation_type_controlled|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {% for error in form.base_type.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.base_type.label }}</label>
+        <div class="col-md-8">
+          {{ form.base_type|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {% for error in form.aarset.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.aarset.label }}</label>
+        <div class="col-md-8">
+          {{ form.aarset|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+    <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

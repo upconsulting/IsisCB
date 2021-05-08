@@ -143,8 +143,11 @@ urlpatterns = [
 
     re_path(r'^aarsets/$', aarset_views.aarsets, name='aarsets'),
     re_path(r'^aarsets/aarset/$', aarset_views.change_aarset, name='create_aarset'),
-    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)$', aarset_views.change_aarset, name='edit_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/edit$', aarset_views.change_aarset, name='edit_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)$', aarset_views.view_aarset, name='view_aarset'),
     re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/delete$', aarset_views.delete_aarset, name='delete_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type$', aarset_views.change_aartype, name='create_aartype'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type/(?P<aartype_id>[A-Z0-9]+)$', aarset_views.change_aartype, name='edit_aartype'),
 
     re_path(r'^users/$', views.users, name='user_list'),
     re_path(r'^users/(?P<user_id>[0-9]+)$', views.user, name='user'),

@@ -38,6 +38,23 @@ def aarsets(request):
     return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def view_aarset(request, aarset_id=None):
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'aarsets',
+    }
+
+    aarset = None
+    if aarset_id:
+        aarset = AARSet.objects.filter(pk=aarset_id).first()
+
+    context = {
+        'instance': aarset,
+    }
+    template = 'curation/aarelationset_view.html'
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def change_aarset(request, aarset_id=None):
     context = {
         'curation_section': 'datasets',
@@ -94,3 +111,33 @@ def delete_aarset(request, aarset_id):
 
     target = reverse('curation:aarsets') + '?type=' + msgs['type'] + "&msg=" + msgs['msg']
     return HttpResponseRedirect(target)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def change_aartype(request, aarset_id, aartype_id=None):
+    aarset = get_object_or_404(AARSet, pk=aarset_id)
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'aarsets',
+        'aarset': aarset
+    }
+
+    aartype = None
+    if aartype_id:
+        aartype = AARelationType.objects.filter(pk=aartype_id).first()
+
+    if request.method == "POST":
+        form = AARelationTypeForm(request.POST, prefix='aartype', instance=aartype)
+        if form.is_valid():
+            form.save()
+
+            target = reverse('curation:view_aarset', args=[form.instance.aarset.id])
+            return HttpResponseRedirect(target)
+
+
+    context.update({
+        'form': AARelationTypeForm(prefix='aartype', instance=aartype, initial={'aarset': aarset}),
+        'instance': aartype,
+    })
+
+    template = 'curation/aartype_change.html'
+    return render(request, template, context)
