@@ -154,7 +154,18 @@ def _create_aarelation(row, user_id, results, task_id, created_on):
 
     properties = {}
 
-    if not _add_type(row, COL_AAR_TYPE, AARelation, results, properties):
+    aartype_id = row[COL_AAR_TYPE]
+    if not aartype_id:
+        return
+
+    try:
+        aartype = AARelationType.objects.get(pk=aartype_id)
+        properties.update({
+            'aar_type': aartype
+        })
+    except Exception as e:
+        logger.error(e)
+        results.append((ERROR, "AARelationType does not exist", "", "There exists no aar type with id %s. Skipping."%(aartype_id)))
         return
 
     subject_id = row[COL_AAR_SUBJECT]
