@@ -1264,6 +1264,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
     CROSSREFERENCE = 'CR'
+    BIBLIOGRAPHIC_LIST = 'BL'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -1275,6 +1276,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
         (CROSSREFERENCE, 'Cross-reference'),
+        (BIBLIOGRAPHIC_LIST, 'Bibliographic List')
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1739,7 +1741,7 @@ class AARelationType(ReferencedEntity, CuratedMixin):
 
     def __str__(self):
         return self.name
-        
+
     TYPE_STRUCTURAL = "TSTR"
     TYPE_ONTOLOGICAL = "TONT"
     TYPE_TEMPORAL = "TTEM"
