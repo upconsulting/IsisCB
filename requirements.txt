@@ -21,7 +21,7 @@ colorclass==2.2.0
 confusable-homoglyphs==3.2.0
 cryptography==2.9
 defusedxml==0.6.0
-Django==3.0.7
+Django==3.1.9
 django-allauth==0.41.0
 django-autocomplete-light==3.5.1
 django-braces==1.14.0
