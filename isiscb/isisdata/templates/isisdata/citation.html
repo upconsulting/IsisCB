@@ -37,6 +37,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {#% block title %}Citation{% endblock %#}
 
 {% block content %}
+<script>
+  $(function () {
+  $('[data-toggle="popover"]').popover()
+})
+</script>
 <div class="row">
   <div class="col-sm-12 col-md-2 hidden-print">
     <div class="menu hidden-print">
@@ -93,8 +98,26 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         </span>
 
         {% with citation|get_pub_year as pub_year %}
-        <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
+        {% with citation|get_title as citation_title %}
+        {% if citation_title and citation_title != "Title missing" %}
+        <h3>{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
+        {% if citation.complete_citation %}
+        <p>
+        {{ citation.complete_citation }}
+        </p>
+        {% endif %}
+        {% else %}
+        {% if citation.complete_citation%}
+        <h3>
+          {{ citation.complete_citation }}
+          <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This is a stub record. Information might be incomplete." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
+        </h3>
+        {% endif %}
+        {% endif %}
         {% endwith %}
+        {% endwith %}
+
+
 
         <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
 
@@ -148,6 +171,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% if citation.abstract %}
         <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
         {% endif %}
+
         {% if citation.description %}
         <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
         {% endif %}

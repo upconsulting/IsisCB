@@ -39,6 +39,12 @@
           [{{ result.type }}]
 
           <br>
+          {% url 'citation' result.id|get_pk as citation_url %}
+          {% if result.title == 'Title missing' and result.complete_citation %}
+          <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+            {{result.complete_citation}}
+          </a>
+          {% else %}
             {% if result.authors %}
                {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
             {% else %}
@@ -47,8 +53,9 @@
             {% if result.publication_date.0 %}
               ({{ result.publication_date.0 }})
             {% endif %}
-            {% url 'citation' result.id|get_pk as citation_url %}
-            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              {{ result.title|bleach_safe }}.
+            </a>
 
             <!-- book title and page numbers -->
             {% if result.book_title %}
@@ -67,6 +74,7 @@
             {% if result.type in show_school_types %}
             {{ result.schools|joinby:", " }}
             {% endif %}
+          {% endif %}
 
 
             <span class="visible-print-inline">({{ citation_url }})</span>

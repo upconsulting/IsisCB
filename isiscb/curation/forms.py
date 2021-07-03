@@ -330,6 +330,7 @@ class CitationForm(forms.ModelForm):
                     self.fields[field].widget.attrs['disabled'] = True
 
     abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
+    complete_citation = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
 
@@ -354,10 +355,12 @@ class CitationForm(forms.ModelForm):
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to', 'administrator_notes', 'record_history', 'subtype',
+              'complete_citation', 'stub_record_status',
         ]
         labels = {
             'belongs_to': 'Dataset',
-            'administrator_notes': 'Staff notes'
+            'administrator_notes': 'Staff notes',
+            'complete_citation': 'Stub text'
         }
 
     def _get_validation_exclusions(self):

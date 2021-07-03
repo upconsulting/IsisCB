@@ -236,6 +236,34 @@ Back to List </a>
                           </div>
                         </div>
 
+                        {% for error in form.complete_citation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Stub</label>
+                            </div>
+                            <div class="col-sm-11" >
+                            {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
+                        </div>
+
+                        {% for error in form.stub_record_status.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left" style="margin-top: -7px;">
+                              <label class="input-sm">Stub Stat.</label>
+                            </div>
+                            <div class="col-sm-11" >
+                            {{ form.stub_record_status|addcss:"form-control input-sm" }}
+                            </div>
+                          </div>
+                        </div>
+
                         {% for error in form.description.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}

@@ -825,6 +825,18 @@ class Citation(ReferencedEntity, CuratedMixin):
     # CHECK: Had to add on_delete so chose cascade -> JD: deleting subtype shouldn't delete citation
     subtype = models.ForeignKey('CitationSubtype', blank=True, null=True, on_delete=models.SET_NULL)
 
+    complete_citation =  models.TextField(blank=True, null=True,
+                                         help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
+
+    STUB_RECORD = 'SR'
+    REGULAR_RECORD = 'RR'
+    RECORD_STATUS_CHOICES = (
+        (STUB_RECORD, 'Stub Record'),
+        (REGULAR_RECORD, 'Regular Record')
+    )
+    stub_record_status = models.CharField(max_length=3, null=True, blank=True,
+                                       choices=RECORD_STATUS_CHOICES)
+
     def save(self, *args, **kwargs):
         def get_related(obj):
             query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
