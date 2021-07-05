@@ -570,7 +570,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return remove_control_characters(data['complete_citation'])
 
     def prepare_stub_record_status(self, data):
-        return dict(Citation.RECORD_STATUS_CHOICES).get(data['stub_record_status'])
+        return data['stub_record_status']
 
     def prepare_edition_details(self, data):
         return remove_control_characters(data['edition_details'])

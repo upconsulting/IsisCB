@@ -64,7 +64,7 @@
               {% if request.get_full_path|are_stubs_excluded %}
               <input type="checkbox" name="exclude_reviews" >
 
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
               {% endif %}
               {% if not request.get_full_path|are_stubs_excluded %}
               <input type="checkbox" name="exclude_reviews" checked>
