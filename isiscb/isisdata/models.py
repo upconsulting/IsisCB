@@ -871,6 +871,11 @@ class Citation(ReferencedEntity, CuratedMixin):
                     return u'Review: %s' % relation['subject__title'] if relation['subject_id'] != obj.id else relation['object__title']
                 else:
                     return u'(no title)'
+
+            # IEXP-300: if there is no title but complete citation, show it instead
+            if obj.complete_citation:
+                return obj.complete_citation
+
             return u'Untitled review'
 
         if self.created_native is None:
