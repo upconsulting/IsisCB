@@ -623,6 +623,16 @@ function toggleLinkRecordsBtn() {
               </div>
           </div>
 
+          {% for error in objects.form.complete_citation.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="col-lg-2 control-label" style="padding-left:5px;">Stub</label>
+              <div class="col-lg-10">
+                {{ objects.form.complete_citation|addcss:"form-control;Complete Citation/Stub text" }}
+              </div>
+          </div>
+
           {% for error in objects.form.abstract.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
@@ -664,12 +674,7 @@ function toggleLinkRecordsBtn() {
               </div>
           </div>
 
-          <div class="pull-right">
-            <div class="btn-group">
-              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
-              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-            </div>
-          </div>
+
         </div>
 
         <div class="col-sm-2">
@@ -728,6 +733,13 @@ function toggleLinkRecordsBtn() {
               <div class="col-lg-5" style="padding-left:2px">
                 {{ objects.form.modified_on_to|add_popover:"form-control date-input;before" }}
               </div>
+          </div>
+
+          <div class="pull-left">
+            <div class="btn-group">
+              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+            </div>
           </div>
         </div>
 
