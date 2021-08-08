@@ -104,9 +104,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This is a stub record. Information might be incomplete." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
           {% endif %}
         </h3>
-        {% if citation.complete_citation and not citation.stub_record_status == 'SR' %}
+        {% if citation|has_title %}
         <p>
-        {{ citation.complete_citation }}
+        <strong>Full citation:</strong> {{ citation.complete_citation }}
         </p>
         {% endif %}
         {% endwith %}

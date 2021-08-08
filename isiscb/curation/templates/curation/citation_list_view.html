@@ -155,7 +155,7 @@ function toggleLinkRecordsBtn() {
             {% with object.all_ccrelations as ccrelations %}
             {% with object|get_citations:ccrelations as related_citations %}
             {% with object.attributes as attributes %}
-            <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %}">
+            <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %} {% if object.stub_record_status == 'SR'%}stubrecord{%endif%}">
                 <td>
                     <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" data-citation-type="{{object.type_controlled}}"/>
                 </td>
@@ -176,6 +176,9 @@ function toggleLinkRecordsBtn() {
                     {% endif %}
                     {% if object.record_status_value == record_status_redirect %}
                     <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
+                    {% endif %}
+                    {% if object.stub_record_status == 'SR' %}
+                    <i style="color: #d0254c" class="fa fa-flag" aria-hidden="true" title="This record is a stub record."></i>
                     {% endif %}
                 </td>
                 <td><span title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}</span></td>

@@ -99,6 +99,16 @@ def get_title(citation):
 
     return 'Review of "' + book.title + '"'
 
+@register.filter
+def has_title(citation):
+    # if citation is not a review simply return title
+    if not citation.type_controlled == 'RE':
+        if not citation.title:
+            return False
+        return True
+
+    return True
+
 
 @register.filter
 def get_pub_year(citation):
