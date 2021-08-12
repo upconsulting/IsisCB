@@ -1582,7 +1582,7 @@ def citations(request):
               'part_details__pages_free_text', 'part_details__volume_free_text',
               'part_details__issue_free_text', 'created_on_fm',
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
-              'modified_by__first_name', 'modified_by__last_name', 'modified_by' )
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
@@ -2451,12 +2451,10 @@ def export_citations(request):
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
-            # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
 
+            s3_path = settings.UPLOAD_IMPORT_PATH + _out_name
+
+            # _compress = form.cleaned_data.get('compress_output', False)
             # if _compress:
             #     s3_path += '.gz'
 
