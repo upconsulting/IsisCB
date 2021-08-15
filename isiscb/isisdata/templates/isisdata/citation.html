@@ -101,7 +101,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% with citation|get_title as citation_title %}
         <h3>{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
           {% if citation.stub_record_status == 'SR' %}
-          <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This is a stub record. Information might be incomplete." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
+          <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
           {% endif %}
         </h3>
         {% if citation|has_title %}
