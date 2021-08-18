@@ -278,7 +278,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
                 continue
-            if not a['acrelation__authority__public']:
+            if a['acrelation__authority__id'] and not a['acrelation__authority__public']:
                 continue
 
             if a['acrelation__authority__name']:
