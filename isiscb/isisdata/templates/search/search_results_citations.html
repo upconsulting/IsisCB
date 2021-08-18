@@ -48,12 +48,18 @@
             {% if result.authors %}
                {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
             {% endif %}
-            {% if result.publication_date.0 %}
+            {% if result.publication_date.0 and result.authors %}
               ({{ result.publication_date.0 }})
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{ result.title|bleach_safe }}.
+              </a>
             {% endif %}
-            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-              {{ result.title|bleach_safe }}.
-            </a>
+            {% if result.publication_date.0 and not result.authors %}
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{ result.title|bleach_safe }}
+              </a>
+              ({{ result.publication_date.0 }}).
+            {% endif %}
 
             <!-- book title and page numbers -->
             {% if result.book_title %}
