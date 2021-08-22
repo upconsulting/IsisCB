@@ -112,10 +112,6 @@ def bulk_change_from_csv(request):
             finally:
                 os.remove(path)
 
-            #with smart_open.smart_open(s3_path, 'wb') as f:
-            #    for chunk in uploaded_file.chunks():
-            #        f.write(chunk)
-
             task = AsyncTask.objects.create()
             task.value = _results_name
             task.created_by = request.user
