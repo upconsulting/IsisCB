@@ -14,7 +14,7 @@ from curation.forms import *
 
 from curation.taskslib import authority_tasks, creation_tasks
 
-import smart_open, tempfile, os, codecs
+import smart_open, tempfile, os
 import operator
 
 ACTION_DICT = {
@@ -95,7 +95,6 @@ def bulk_change_from_csv(request):
             s3_error_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
 
             tempFile, path = tempfile.mkstemp()
-            print(tempFile, path)
             try:
                 # we'll write the file first to disk so we can then open it with
                 # the correct encoding
@@ -107,7 +106,6 @@ def bulk_change_from_csv(request):
                 with open(path, 'r', encoding='utf-8-sig') as tmp:
                     with smart_open.smart_open(s3_path, 'w') as f:
                         for line in tmp:
-                            print(line)
                             f.write(line)
             finally:
                 os.remove(path)
