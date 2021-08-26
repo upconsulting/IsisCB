@@ -234,6 +234,37 @@ class AuthorityValueForm(forms.ModelForm):
         model = AuthorityValue
         fields = ['value']
 
+class CitationValueForm(forms.ModelForm):
+    value = forms.CharField(label="Citation ID")
+    citation_name = forms.CharField(label='Name of stored citation')
+
+    def __init__(self, *args, **kwargs):
+        super(CitationValueForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+
+        if instance and not self.is_bound:
+            self.fields['value'].initial = instance.pk
+            self.fields['citation_name'].initial = instance.value.title_for_display
+            self.fields['citation_name'].widget.attrs['readonly'] = True
+
+    def clean_value(self):
+        value = self.cleaned_data['value']
+
+        try:
+            value = Citation.objects.get(id=value)
+        except:
+            raise forms.ValidationError('Citation record does not exist.')
+
+        return value
+
+    def save(self, *args, **kwargs):
+        self.instance.value = self.cleaned_data.get('value')
+        super(CitationValueForm, self).save(*args, **kwargs)
+
+    class Meta(object):
+        model = CitationValue
+        fields = ['value']
+
 class PartDetailsForm(forms.ModelForm):
     extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
 
