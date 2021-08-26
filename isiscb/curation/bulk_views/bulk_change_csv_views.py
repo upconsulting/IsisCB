@@ -14,7 +14,7 @@ from curation.forms import *
 
 from curation.taskslib import authority_tasks, creation_tasks
 
-import smart_open
+import smart_open, tempfile, os
 import operator
 
 ACTION_DICT = {
@@ -94,9 +94,21 @@ def bulk_change_from_csv(request):
             _results_name = '%s--%s' % (_datestamp, 'results.csv')
             s3_error_path = settings.BULK_CHANGE_ERROR_PATH + _results_name
 
-            with smart_open.smart_open(s3_path, 'wb') as f:
-                for chunk in uploaded_file.chunks():
-                    f.write(chunk)
+            tempFile, path = tempfile.mkstemp()
+            try:
+                # we'll write the file first to disk so we can then open it with
+                # the correct encoding
+                with open(path, 'wb+') as tmp:
+                    for chunk in uploaded_file.chunks():
+                        tmp.write(chunk)
+
+                # 'utf-8-sig' will open bom or no bom files
+                with open(path, 'r', encoding='utf-8-sig') as tmp:
+                    with smart_open.smart_open(s3_path, 'w') as f:
+                        for line in tmp:
+                            f.write(line)
+            finally:
+                os.remove(path)
 
             task = AsyncTask.objects.create()
             task.value = _results_name
