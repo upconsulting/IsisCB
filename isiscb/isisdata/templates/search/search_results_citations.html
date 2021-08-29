@@ -53,12 +53,15 @@
               <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
                 {{ result.title|bleach_safe }}.
               </a>
-            {% endif %}
-            {% if result.publication_date.0 and not result.authors %}
+            {% elif result.publication_date.0 and not result.authors %}
               <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
                 {{ result.title|bleach_safe }}
               </a>
               ({{ result.publication_date.0 }}).
+            {% else %}
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              {{ result.title|bleach_safe }}
+            </a>
             {% endif %}
 
             <!-- book title and page numbers -->

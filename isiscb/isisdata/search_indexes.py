@@ -442,12 +442,18 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return None
 
     def prepare_text(self, data):
+        acrelation_names = []
+        for a in data['acrelations']:
+            if a['acrelation__authority__name']:
+                acrelation_names.append(normalize(a['acrelation__authority__name']))
+            elif a['acrelation__name_for_display_in_citation']:
+                acrelation_names.append(normalize(a['acrelation__name_for_display_in_citation']))
         document = u' '.join([
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
-        ] + [a['acrelation__authority__name'] for a in data['acrelations']
-             if a['acrelation__authority__name']])  # Exclude blank names.
+        ] + acrelation_names)
+
         if data['complete_citation']:
             document += ' ' + normalize(data['complete_citation'])
         return document
