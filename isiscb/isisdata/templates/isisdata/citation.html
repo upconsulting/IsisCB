@@ -104,7 +104,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
           {% endif %}
         </h3>
-        {% if citation|has_title %}
+        {% if citation|has_title and citation.complete_citation %}
         <p>
         <strong>Full citation:</strong> {{ citation.complete_citation }}
         </p>
