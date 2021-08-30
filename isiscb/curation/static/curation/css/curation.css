@@ -3,8 +3,12 @@ body, p, div, table, input {
   font-color: #000;
 }
 
-body, table {
+body {
   background-color: #f3f5f7;
+}
+
+table {
+  background-color: inherit;
 }
 
 a {
@@ -276,6 +280,10 @@ a:hover.delete {
 
 .notpublic {
   background-color: #e6e4d9;
+}
+
+.stubrecord{
+  background-color: #fdedf8;
 }
 
 .record-notpublic {

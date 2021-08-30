@@ -139,7 +139,7 @@ class AARelationForm(forms.ModelForm):
     class Meta(object):
         model = AARelation
         fields = [
-            'type_controlled',
+            'type_controlled', 'aar_type',
             'confidence_measure', 'subject', 'object',
             'record_status_value', 'record_status_explanation',
             'administrator_notes', 'record_history'
@@ -162,7 +162,9 @@ class AARelationForm(forms.ModelForm):
 
     def clean(self):
         super(AARelationForm, self).clean()
-        print(self.cleaned_data)
+
+        if self.cleaned_data.get('aar_type', None):
+            self.cleaned_data['type_controlled'] +  self.cleaned_data.get('aar_type').base_type
         authority_subject_id = self.cleaned_data.get('authority_subject', None)
         if authority_subject_id:
             self.cleaned_data['subject'] = Authority.objects.get(pk=authority_subject_id)
@@ -287,8 +289,47 @@ def set_field_access(can_update, can_view, fields):
             fields[field] = forms.CharField(widget=NoViewInput())
             fields[field].widget.attrs['readonly'] = True
 
+class StubCheckboxInput(forms.widgets.CheckboxInput):
+
+    def __init__(self, attrs=None, check_test=None):
+        super().__init__(attrs, lambda v: v == Citation.STUB_RECORD)
 
 class CitationForm(forms.ModelForm):
+
+    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
+    complete_citation = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
+    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+
+    additional_titles = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
+    edition_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
+    physical_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
+
+    language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
+
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
+
+    administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
+    title = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+
+    subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
+    stub_record_status = forms.BooleanField(label='Stub', widget=StubCheckboxInput(), required=False)
+
+    class Meta(object):
+        model = Citation
+        fields = [
+            'type_controlled', 'title', 'description', 'edition_details',
+              'physical_details', 'abstract', 'additional_titles',
+              'book_series', 'record_status_value', 'record_status_explanation',
+              'belongs_to', 'administrator_notes', 'record_history', 'subtype',
+              'complete_citation', 'stub_record_status'
+        ]
+        labels = {
+            'belongs_to': 'Dataset',
+            'administrator_notes': 'Staff notes',
+            'complete_citation': 'Stub text'
+        }
 
     def __init__(self, user, *args, **kwargs):
         super(CitationForm, self).__init__( *args, **kwargs)
@@ -300,9 +341,6 @@ class CitationForm(forms.ModelForm):
 
         # disable fields user doesn't have access to
         if self.instance.pk:
-            # Don't let the user change type_controlled.
-            #self.fields['type_controlled'].widget.attrs['readonly'] = True
-            #self.fields['type_controlled'].widget.attrs['disabled'] = True
             self.fields['title'].widget.attrs['placeholder'] = "No title"
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
@@ -327,36 +365,14 @@ class CitationForm(forms.ModelForm):
                     self.fields[field].widget.attrs['readonly'] = True
                     self.fields[field].widget.attrs['disabled'] = True
 
-    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
-    description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
+    def clean(self):
+        super(CitationForm, self).clean()
 
-    additional_titles = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
-    edition_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
-    physical_details = forms.CharField(widget=forms.widgets.Textarea({'rows': '2'}), required=False)
-
-    language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
-
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
-    record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
-
-    administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
-    title = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-
-    subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
-
-    class Meta(object):
-        model = Citation
-        fields = [
-            'type_controlled', 'title', 'description', 'edition_details',
-              'physical_details', 'abstract', 'additional_titles',
-              'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to', 'administrator_notes', 'record_history', 'subtype',
-        ]
-        labels = {
-            'belongs_to': 'Dataset',
-            'administrator_notes': 'Staff notes'
-        }
+        stub_record_status = self.cleaned_data.get('stub_record_status', False)
+        if stub_record_status:
+            self.cleaned_data['stub_record_status'] = Citation.STUB_RECORD
+        else:
+            self.cleaned_data['stub_record_status'] = None
 
     def _get_validation_exclusions(self):
         exclude = super(CitationForm, self)._get_validation_exclusions()
@@ -769,6 +785,15 @@ class AuthorityCollectionForm(forms.ModelForm):
         model = AuthorityCollection
         exclude = ('created', 'createdBy', 'authorities')
 
+class AARSetForm(forms.ModelForm):
+    class Meta(object):
+        model = AARSet
+        fields = ['name', 'description']
+
+class AARelationTypeForm(forms.ModelForm):
+    class Meta(object):
+        model = AARelationType
+        fields = ['name', 'description', 'relation_type_controlled', 'base_type', 'aarset']
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
@@ -813,6 +838,7 @@ class BulkChangeCSVForm(forms.Form):
     UPDATE_ATTR = 'UPATT'
     CREATE_LINKED_DATA = 'CRLD'
     CREATE_ACRELATIONS = 'CRACR'
+    CREATE_AARELATIONS = 'CRAAR'
     CREATE_CCRELATIONS = 'CRCCR'
     CREATE_AUTHORITIES = 'CRAUTH'
     CREATE_CITATIONS = 'CRCIT'
@@ -823,6 +849,7 @@ class BulkChangeCSVForm(forms.Form):
         (UPDATE_ATTR, 'Update Elements'),
         (CREATE_LINKED_DATA, 'Create Linked Data'),
         (CREATE_ACRELATIONS, 'Create ACRelations'),
+        (CREATE_AARELATIONS, 'Create AARelations'),
         (CREATE_CCRELATIONS, 'Create CCRelations'),
         (CREATE_AUTHORITIES, 'Create Authorities'),
         (CREATE_CITATIONS, 'Create Citations'),

@@ -80,6 +80,7 @@
                 <ul class="dropdown-menu">
                     <li{% if curation_subsection == "citations" %} class="active"{% endif %}><a href="{% url "curation:citation_list" %}?filters=true">Citations</a></li>
                     <li{% if curation_subsection == "authorities" %} class="active"{% endif %}><a href="{% url "curation:authority_list" %}?filters=true">Authorities</a></li>
+                    <li{% if curation_subsection == "aarsets" %} class="active"{% endif %}><a href="{% url "curation:aarsets" %}">AARelation Sets</a></li>
                 </ul>
               </li>
 

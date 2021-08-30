@@ -55,6 +55,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     page_string = indexes.CharField(null=True, stored=True)
 
+    complete_citation = indexes.CharField(null=True, indexed=True)
+    stub_record_status = indexes.CharField(indexed=False, null=True, faceted=True)
+
     # # Fields for COinS metadata.
     # # TODO: Populate these fields with values.
     # volume = indexes.CharField(null=True, stored=True)
@@ -146,6 +149,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'physical_details',
         'belongs_to',
         'belongs_to__name',
+        'complete_citation',
+        'stub_record_status',
         'attributes__id',
         'attributes__type_controlled__name',
         'attributes__value_freeform',
@@ -230,6 +235,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'type_controlled': data[0]['type_controlled'],
             'publication_date': data[0]['publication_date'],
             'abstract': data[0]['abstract'],
+            'complete_citation': data[0]['complete_citation'],
+            'stub_record_status': data[0]['stub_record_status'],
             'edition_details': data[0]['edition_details'],
             'physical_details': data[0]['physical_details'],
             'part_details': {
@@ -271,7 +278,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
                 continue
-            if not a['acrelation__authority__public']:
+            if a['acrelation__authority__id'] and not a['acrelation__authority__public']:
                 continue
 
             if a['acrelation__authority__name']:
@@ -435,12 +442,20 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return None
 
     def prepare_text(self, data):
+        acrelation_names = []
+        for a in data['acrelations']:
+            if a['acrelation__authority__name']:
+                acrelation_names.append(normalize(a['acrelation__authority__name']))
+            elif a['acrelation__name_for_display_in_citation']:
+                acrelation_names.append(normalize(a['acrelation__name_for_display_in_citation']))
         document = u' '.join([
             normalize(self.prepare_title(data)),
             normalize(data['description']),
             normalize(data['abstract'])
-        ] + [a['acrelation__authority__name'] for a in data['acrelations']
-             if a['acrelation__authority__name']])  # Exclude blank names.
+        ] + acrelation_names)
+
+        if data['complete_citation']:
+            document += ' ' + normalize(data['complete_citation'])
         return document
 
     def prepare_title(self, data):
@@ -556,6 +571,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
+
+    def prepare_complete_citation(self, data):
+        return remove_control_characters(data['complete_citation'])
+
+    def prepare_stub_record_status(self, data):
+        return data['stub_record_status']
 
     def prepare_edition_details(self, data):
         return remove_control_characters(data['edition_details'])

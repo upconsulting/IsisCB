@@ -59,6 +59,19 @@
               {% endif %}
             </small>
             </div>
+            <div class="col-md-12" style="padding-top: 10px;">
+              <small>
+              {% if request.get_full_path|are_stubs_excluded %}
+              <input type="checkbox" name="exclude_reviews" >
+
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+              {% endif %}
+              {% if not request.get_full_path|are_stubs_excluded %}
+              <input type="checkbox" name="exclude_reviews" checked>
+              <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
+              {% endif %}
+            </small>
+            </div>
         {% else %}
         <div class="row panel-row">
           <div class="col-md-12 panel-cell">

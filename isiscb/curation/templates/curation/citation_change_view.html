@@ -12,6 +12,10 @@ var toggleTab = function(name) {
 }
 
 $(function() {
+    {% if instance.stub_record_status == 'SR' %}
+    $("body").addClass("stubrecord");
+    {% endif %}
+
    $(".reduceIfEmpty").each(function(idx, elem) {
      var content = $(elem).text();
      if (content == '' || content == undefined) {
@@ -140,10 +144,14 @@ Back to List </a>
     </div>
     <div class="col-md-3 text-right">
         {% if index %}Record {{ index }} of {{ total }}{% endif %}
+
         <div class="btn-group ">
+            <div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>
+
             <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
             <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
+
 
         </div>
     </div>
@@ -232,6 +240,20 @@ Back to List </a>
                             </div>
                             <div class="col-sm-11" >
                             {{ form.abstract|addcss:"form-control reduceIfEmpty input-sm" }}
+                            </div>
+                          </div>
+                        </div>
+
+                        {% for error in form.complete_citation.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-group">
+                          <div class="row">
+                            <div class="col-sm-1 text-left">
+                              <label class="input-sm">Full Cit.</label>
+                            </div>
+                            <div class="col-sm-11" >
+                            {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
                             </div>
                           </div>
                         </div>
