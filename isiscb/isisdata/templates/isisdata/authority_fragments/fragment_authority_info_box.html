@@ -133,6 +133,7 @@
 
   {% with authority|get_bibliographic_essay as bib_essay %}
   {% if bib_essay %}
+  <p>
     <strong>Bibliographic Essay (<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.id}}</a>):</strong>
     <!-- todo: list all and link link -->
     {% if bib_essay.value.cvalue|get_urls %}
@@ -140,6 +141,7 @@
     <br><strong>Link:</strong> {{ url.resource_name }}
     {% endfor %}
     {% endif %}
+  </p>
   {% endif %}
   {% endwith %}
 

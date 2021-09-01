@@ -235,8 +235,8 @@ class AuthorityValueForm(forms.ModelForm):
         fields = ['value']
 
 class CitationValueForm(forms.ModelForm):
-    value = forms.CharField(label="Citation ID")
-    citation_name = forms.CharField(label='Name of stored citation')
+    value = forms.CharField(label="Citation ID", widget=forms.TextInput(attrs={'data-type':'citation_id'}))
+    citation_name = forms.CharField(label='Name of stored citation', widget=forms.TextInput(attrs={'readonly': True}))
 
     def __init__(self, *args, **kwargs):
         super(CitationValueForm, self).__init__(*args, **kwargs)
@@ -245,8 +245,7 @@ class CitationValueForm(forms.ModelForm):
         if instance and not self.is_bound:
             self.fields['value'].initial = instance.pk
             self.fields['citation_name'].initial = instance.value.title_for_display
-            self.fields['citation_name'].widget.attrs['readonly'] = True
-
+            
     def clean_value(self):
         value = self.cleaned_data['value']
 
