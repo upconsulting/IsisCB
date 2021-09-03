@@ -1,5 +1,5 @@
 amqp==2.5.2
-asgiref==3.2.7
+#asgiref==3.2.7
 attrs==19.3.0
 awsebcli==3.18.2
 backports.ssl-match-hostname==3.7.0.1
@@ -28,7 +28,7 @@ django-braces==1.14.0
 django-celery-results==1.2.1
 django-cors-headers==3.2.1
 django-extensions==2.2.9
-django-filter==2.2.0
+django-filter==2.4.0
 django-guardian==2.2.0
 django-haystack==3.0b1
 django-ipware==2.1.0
@@ -76,7 +76,7 @@ paramiko==2.7.1
 pathspec==0.5.9
 pbr==5.4.4
 pefile==2019.4.18
-Pillow==7.1.1
+Pillow==8.3.2
 pip-upgrader==1.4.15
 protobuf==3.11.3
 psycopg2-binary==2.8.5
