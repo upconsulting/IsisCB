@@ -379,3 +379,8 @@ S3_BULK_CHANGE_ERROR_PATH = 's3://{}:{}@{}/'.format(AWS_ACCESS_KEY_ID,
                                 AWS_EXPORT_BUCKET_NAME)
 
 BULK_CHANGE_ERROR_PATH = os.environ.get('BULK_CHANGE_ERROR_PATH', S3_BULK_CHANGE_ERROR_PATH)
+
+S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
+                                AWS_SECRET_ACCESS_KEY,
+                                AWS_EXPORT_BUCKET_NAME)
+UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
