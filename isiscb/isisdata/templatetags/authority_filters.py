@@ -21,8 +21,8 @@ def is_bibliographic_essay(attribute):
     return attribute.type_controlled.name==settings.BIBLIOGRAPHIC_ESSAY_ATTRIBUTE_NAME
 
 @register.filter
-def get_bibliographic_essay(authority):
-    return authority.attributes.filter(type_controlled__name=settings.BIBLIOGRAPHIC_ESSAY_ATTRIBUTE_NAME).first()
+def get_bibliographic_essays(authority):
+    return authority.attributes.filter(type_controlled__name=settings.BIBLIOGRAPHIC_ESSAY_ATTRIBUTE_NAME)
 
 @register.filter
 def get_urls(citation):

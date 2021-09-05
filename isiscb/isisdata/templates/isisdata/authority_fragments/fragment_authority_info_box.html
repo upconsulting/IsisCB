@@ -2,6 +2,7 @@
 {% load static %}
 {% load search_filters %}
 {% load authority_filters %}
+{% load citation_filters %}
 {% load facet_filters %}
 
 
@@ -131,10 +132,11 @@
   </script>
   {% endif %}
 
-  {% with authority|get_bibliographic_essay as bib_essay %}
-  {% if bib_essay %}
+  {% with authority|get_bibliographic_essays as bib_essays %}
+  {% if bib_essays %}
+  {% for bib_essay in bib_essays %}
   <p>
-    <strong>Bibliographic Essay (<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.id}}</a>):</strong>
+    <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
     <!-- todo: list all and link link -->
     {% if bib_essay.value.cvalue|get_urls %}
     {% for url in bib_essay.value.cvalue|get_urls %}
@@ -142,6 +144,7 @@
     {% endfor %}
     {% endif %}
   </p>
+  {% endfor %}
   {% endif %}
   {% endwith %}
 
