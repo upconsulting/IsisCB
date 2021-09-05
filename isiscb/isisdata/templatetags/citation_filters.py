@@ -49,7 +49,7 @@ def get_editors(citation):
 @register.filter
 def get_authors(citation):
     if citation:
-        return citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True).order_by('data_display_order')
+        return citation.acrelation_set.filter(type_controlled__in=['AU'], citation__public=True, public=True).order_by('data_display_order')
     return citation
 
 
