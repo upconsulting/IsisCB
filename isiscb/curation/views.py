@@ -2136,6 +2136,19 @@ def search_users(request):
     } for u in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_citation_by_id(request):
+    id = request.GET.get('id', None)
+    if not id:
+        return JsonResponse({'citation': None})
+
+    citation = Citation.objects.filter(id=id).first()
+    if not citation:
+        return JsonResponse({}, status=404)
+    return JsonResponse({
+        'id': citation.id,
+        'title': citation.title_for_display,
+    })
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_citation_search(request):
@@ -2293,7 +2306,7 @@ def _get_filtered_queryset(request, object_type='CITATION'):
         if 'collection_only' in filter_params:
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode()#.encode('utf-8')
-    if object_type is 'CITATION':
+    if object_type == 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)
     else:
