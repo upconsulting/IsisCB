@@ -43,7 +43,8 @@ from openurl.models import Institution
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue') \
-            | Q(model='isodatevalue') | Q(model='isodaterangevalue') | Q(model='authorityvalue')
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue') \
+            | Q(model='authorityvalue') | Q(model='citationvalue')
 
 
 class Value(models.Model):
@@ -532,6 +533,34 @@ class LocationValue(Value):
 
     class Meta(object):
         verbose_name = 'location'
+
+class CitationValue(Value):
+    """
+    A citation value. Points to an instance of :class:`.Citation`\.
+    """
+    # CHECK: Had to add on_delete so chose cascade -> JD: since we don't delete Authorities at the moment, this is probably fine
+    value = models.ForeignKey('Citation', on_delete=models.CASCADE)
+    name = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return str(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
+    class Meta(object):
+        verbose_name = 'citation'
+
+    @staticmethod
+    def convert(value):
+        if type(value) is Citation:
+            return value
+
+        try:
+            return Citation.objects.get(pk=value)
+        except ValueError:
+            raise ValidationError('Must be the id of an existing citation.')
+
 
 class AuthorityValue(Value):
     """
