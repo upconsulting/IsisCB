@@ -159,8 +159,9 @@ def get_coins_from_result(result):
             if getattr(result, field) is not None:
                 kv_pairs['rft.' + field] = getattr(result, field)
     else:
-        # Title of the work (e.g. book).
-        kv_pairs['rft.title'] = result.title.encode('utf-8')
+        if result.title:
+            # Title of the work (e.g. book).
+            kv_pairs['rft.title'] = result.title.encode('utf-8')
 
     return urllib.parse.urlencode(kv_pairs)
 

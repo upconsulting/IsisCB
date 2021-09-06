@@ -3,7 +3,6 @@
 {% load citation_filters %}
 {% load search_filters %}
 
-{% if query %}
 <div class="row">
   <div class="col-md-8">
     <h3><span class="visible-print-inline">Citations </span>Search Results</h3>
@@ -44,7 +43,7 @@
           <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
             {{result.complete_citation}}
           </a>
-          {% else %}
+          {% elif result.title %}
             {% if result.authors %}
                {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
             {% endif %}
@@ -127,6 +126,15 @@
         <li class="disabled"><a>Go to page:</a></li>
           {% if page.citation.has_previous %}
           <li>
+            {% with pagenr=1|stringformat:"s" %}
+            {% with ppage="page_citation:"|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="First">
+              <span aria-hidden="true">First</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
             {% with ppage="page_citation:"|add:pagenr %}
             <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
@@ -137,9 +145,18 @@
           </li>
           {% else %}
           <li class="disabled">
+            {% with pagenr=1|stringformat:"s"  %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a aria-label="First">
+              <span aria-hidden="true">First</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s"  %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
+            <a aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -147,8 +164,8 @@
           </li>
           {% endif %}
           {% if page.citation.has_previous or page.citation.has_next %}
-          {% for p in page.citation.paginator.page_range %}
-          {% with pagenr=forloop.counter|stringformat:"s" %}
+          {% for p in page.citation.paginator|get_page_range:page.citation.number %}
+          {% with pagenr=p|stringformat:"s" %}
           {% with ppage='page_citation:'|add:pagenr %}
               <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
           {% endwith %}
@@ -165,12 +182,30 @@
             {% endwith %}
             {% endwith %}
           </li>
+          <li>
+            {% with pagenr=page.citation.paginator.num_pages|stringformat:"s" %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Last">
+              <span aria-hidden="true">Last</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
           {% else %}
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
+            <a aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li class="disabled">
+            {% with pagenr=page.citation.paginator.num_pages|stringformat:"s" %}
+            {% with ppage='page_citation:'|add:pagenr %}
+            <a aria-label="Last">
+              <span aria-hidden="true">Last</span>
             </a>
             {% endwith %}
             {% endwith %}
@@ -179,6 +214,3 @@
         </ul>
       </nav>
       {% endif %}
-{% else %}
-    {# Show some example queries to run, maybe query syntax, something else? #}
-{% endif %}

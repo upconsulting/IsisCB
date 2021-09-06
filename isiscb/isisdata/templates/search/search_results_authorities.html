@@ -2,7 +2,6 @@
 {% load metadata_filters %}
 {% load search_filters %}
 
-{% if query %}
 <div class="row">
   <div class="col-md-8">
     <h3><span class="visible-print-inline">Authority </span>Search Results</h3>
@@ -48,6 +47,15 @@
 
           {% if page.authority.has_previous %}
           <li>
+            {% with pagenr=1|stringformat:"s" %}
+            {% with ppage="page_authority:"|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="First">
+              <span aria-hidden="true">First</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li>
             {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
             {% with ppage='page_authority:'|add:pagenr %}
             <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
@@ -58,9 +66,18 @@
           </li>
           {% else %}
           <li class="disabled">
+            {% with pagenr=1|stringformat:"s"  %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a aria-label="First">
+              <span aria-hidden="true">First</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li class="disabled">
             {% with pagenr=page.authority.number|stringformat:"s"  %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+            <a aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
@@ -68,8 +85,8 @@
           </li>
           {% endif %}
           {% if page.authority.has_previous or page.authority.has_next %}
-          {% for p in page.authority.paginator.page_range %}
-          {% with pagenr=forloop.counter|stringformat:"s" %}
+          {% for p in page.authority.paginator|get_page_range:page.authority.number %}
+          {% with pagenr=p|stringformat:"s" %}
           {% with ppage='page_authority:'|add:pagenr %}
               <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
           {% endwith %}
@@ -86,12 +103,30 @@
             {% endwith %}
             {% endwith %}
           </li>
+          <li>
+            {% with pagenr=page.authority.paginator.num_pages|stringformat:"s" %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Last">
+              <span aria-hidden="true">Last</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
           {% else %}
           <li class="disabled">
             {% with pagenr=page.authority.number|stringformat:"s" %}
             {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+            <a aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
+            </a>
+            {% endwith %}
+            {% endwith %}
+          </li>
+          <li class="disabled">
+            {% with pagenr=page.authority.paginator.num_pages|stringformat:"s" %}
+            {% with ppage='page_authority:'|add:pagenr %}
+            <a aria-label="Last">
+              <span aria-hidden="true">Last</span>
             </a>
             {% endwith %}
             {% endwith %}
@@ -100,6 +135,3 @@
         </ul>
       </nav>
       {% endif %}
-{% else %}
-    {# Show some example queries to run, maybe query syntax, something else? #}
-{% endif %}

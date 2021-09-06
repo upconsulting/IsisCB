@@ -48,3 +48,9 @@ def include_facet(url, arg):
 @register.filter
 def create_exclude_facet_string(facet, field):
     return 'excluded_facets=' + field + ':' + quote(codecs.encode(facet,'utf-8'))
+
+@register.filter
+def get_page_range(paginator, current_page):
+    start_page = current_page - 5 if current_page - 5 > 1 else 1
+    end_page = current_page + 5 if paginator.num_pages > current_page + 5 else paginator.num_pages + 1
+    return range(start_page, end_page)

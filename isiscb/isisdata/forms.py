@@ -51,7 +51,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         if self.is_valid():
             search_models.append(apps.get_model(*'isisdata.authority'.split('.')))
-            # search_models.append(models.get_model(*'isisdata.authority'.split('.')))
 
         return search_models
 
@@ -71,8 +70,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
             sort_order = self.cleaned_data.get('sort_order_citation', 'publication_date_for_sort')
             if not sort_order:
                 sort_order = 'publication_date_for_sort'
-            #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
-            #    sort_order = 'name'
 
         return sort_order
 
@@ -128,15 +125,24 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return (query_string[len(query_parameters[0]) + 1:], query_parameters[0])
 
     def search(self):
+
+        sort_order_citation = self.get_sort_order_citation()
+        sort_order_authority = self.get_sort_order_authority()
+        sort_order_dir_citation = self.get_sort_order_direction_citation()
+        sort_order_dir_authority = self.get_sort_order_direction_authority()
+
+        if sort_order_dir_citation == 'descend':
+            sort_order_citation = "-" + sort_order_citation
+        if sort_order_dir_authority == 'descend':
+            sort_order_authority = "-" + sort_order_authority
+
         if not self.is_valid():
-            #return self.no_query_found()
-            return {'authority' : self.no_query_found(),
-                    'citation': self.no_query_found()}
+            return {'authority' : self.no_query_found("authority", sort_order_authority),
+                    'citation': self.no_query_found("citation", sort_order_citation)}
 
         if not self.cleaned_data.get('q'):
-            #return self.no_query_found()
-            return {'authority' : self.no_query_found(),
-                    'citation': self.no_query_found()}
+            return {'authority' : self.no_query_found("authority", sort_order_authority),
+                    'citation': self.no_query_found("citation", sort_order_citation)}
 
         is_raw_search = self.cleaned_data['raw_search']
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
@@ -166,21 +172,22 @@ class MyFacetedSearchForm(FacetedSearchForm):
         sqs_citation = self.exclude_facets(self.excluded_facets, sqs_citation, "citation_")
         sqs_authority = self.exclude_facets(self.excluded_facets, sqs_authority, "authority_")
 
-        sort_order_citation = self.get_sort_order_citation()
-        sort_order_authority = self.get_sort_order_authority()
-        sort_order_dir_citation = self.get_sort_order_direction_citation()
-        sort_order_dir_authority = self.get_sort_order_direction_authority()
-
-        if sort_order_dir_citation == 'descend':
-            sort_order_citation = "-" + sort_order_citation
-        if sort_order_dir_authority == 'descend':
-            sort_order_authority = "-" + sort_order_authority
-
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 
         return {'authority' : results_authority,
                 'citation': results_citation}
+
+    def no_query_found(self, type, sort_order):
+        """
+        Determines the behavior when no query was found.
+        By default, no results are returned (``EmptySearchQuerySet``).
+        This method overrides the default method and returns everything.
+        """
+        if type == "authority":
+            return self.searchqueryset.models(*self.get_authority_model()).filter(public=True).order_by(sort_order).all()
+        else:
+            return self.searchqueryset.models(*self.get_citation_model()).filter(public=True).order_by(sort_order).all()
 
     def set_facets(self, selected_facets, sqs, type_string, facet_operators):
         operators = {}
