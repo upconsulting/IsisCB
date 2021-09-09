@@ -1,0 +1,40 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+
+<h1>AAR Set</h1>
+
+<div class="row">
+  <div class="col-sm-12">
+  <form id="aarset_form" class="form" action="{% if instance %}{% url 'curation:edit_aarset' instance.id %}{% else %}.{% endif %}" method="POST">
+    {% csrf_token %}
+    {{ form.pk }}
+    <div class="form-group">
+        {% for error in form.name.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.name.label }}</label>
+        <div class="col-md-8">
+          {{ form.name|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {% for error in form.description.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label class="col-md-4">{{ form.description.label }}</label>
+        <div class="col-md-8">
+          {{ form.description|addcss:"form-control" }}
+        </div>
+    </div>
+
+    <div class="form-group">
+    <button class="btn btn-primary" type="submit">Submit</button>
+    </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}

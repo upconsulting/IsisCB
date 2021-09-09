@@ -8,7 +8,7 @@
 {% test_rule 'can_view_authority_field' user permTuple as can_view %}
 
 {% for aarelation in aarelations %}
-<li class="list-group-item aarelation aarelation-type-{{ aarelation.type_controlled }} {% if not aarelation.public %}notpublic{% endif %} {% if not aarelation.subject.public or not aarelation.object.public %}record-notpublic{% endif %}" id="aarelation-{{ aarelation.id }}">
+<li class="list-group-item aarelation aarelation-type-{{ aarelation.aar_type.base_type }} {% if not aarelation.public %}notpublic{% endif %} {% if not aarelation.subject.public or not aarelation.object.public %}record-notpublic{% endif %}" id="aarelation-{{ aarelation.id }}">
   <div class="row">
 
   {% if can_update %}
@@ -26,10 +26,7 @@
     This <span class="label label-warning">Authority</span>
     {% endif %}
 
-    <span class="label label-primary">{{ aarelation.get_type_controlled_display }}</span>
-    {% if aarelation.type_broad_controlled %}
-    <span class="label label-success">{{ aarelation.get_type_broad_controlled_display }}</span>
-    {% endif %}
+    <span class="label label-primary">{{ aarelation.aar_type.name }} ({{ aarelation.aar_type.get_base_type_display }})</span>
 
     {% if aarelation.object.id != instance.id %}
     {{ aarelation.object }}

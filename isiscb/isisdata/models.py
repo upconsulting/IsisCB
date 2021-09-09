@@ -1264,6 +1264,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
     CROSSREFERENCE = 'CR'
+    BIBLIOGRAPHIC_LIST = 'BL'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -1275,6 +1276,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
         (CROSSREFERENCE, 'Cross-reference'),
+        (BIBLIOGRAPHIC_LIST, 'Bibliographic List')
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1719,6 +1721,61 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         if self.citation:
             self.citation.save()
 
+class AARSet(ReferencedEntity, CuratedMixin):
+
+    ID_PREFIX = 'AARSET'
+
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+class AARelationType(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'AARTYPE'
+
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+    aarset = models.ForeignKey(AARSet, related_name='relation_types', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    TYPE_STRUCTURAL = "TSTR"
+    TYPE_ONTOLOGICAL = "TONT"
+    TYPE_TEMPORAL = "TTEM"
+    TYPE_GEOGRAPHICAL = "TGEO"
+
+    RELATION_TYPE_CHOICES =  (
+        (TYPE_STRUCTURAL, "Structural"),
+        (TYPE_ONTOLOGICAL, "Ontological"),
+        (TYPE_TEMPORAL, "Temporal"),
+        (TYPE_GEOGRAPHICAL, "Geographical")
+    )
+    relation_type_controlled = models.CharField(max_length=4, choices=RELATION_TYPE_CHOICES,
+                                       null=True, blank=True,
+                                       help_text=help_text("""
+    The type of the relationship.
+    """))
+
+    IDENTICAL_TO = 'IDTO'
+    PARENT_OF = 'PAOF'
+    #PREVIOUS_TO = 'PRETO'
+    #OFFICER_OF = 'OFOF'
+    ASSOCIATED_WITH = 'ASWI'
+    TYPE_CHOICES = (
+        (IDENTICAL_TO, 'Is Identical To'),
+        (PARENT_OF, 'Is Parent Of'),
+        #(PREVIOUS_TO, 'Happened Previous To'),
+        #(OFFICER_OF, 'Is Officer Of'),
+        (ASSOCIATED_WITH, 'Is Associated With')
+    )
+    base_type = models.CharField(max_length=5, choices=TYPE_CHOICES,
+                                       null=True, blank=True,
+                                       help_text=help_text("""
+    The base type the new relationship type can be mapped to.
+    """))
 
 class AARelation(ReferencedEntity, CuratedMixin):
     """
@@ -1756,6 +1813,8 @@ class AARelation(ReferencedEntity, CuratedMixin):
     Controlled term specifying the nature of the relationship
     (the predicate between the subject and object).
     """))
+
+    aar_type = models.ForeignKey(AARelationType, null=True, on_delete=models.SET_NULL)
 
     type_free = models.CharField(max_length=255, blank=True,
                                  help_text=help_text("""
@@ -1796,7 +1855,6 @@ class AARelation(ReferencedEntity, CuratedMixin):
     def __str__(self):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
-
 
 class CCRelation(ReferencedEntity, CuratedMixin):
     """

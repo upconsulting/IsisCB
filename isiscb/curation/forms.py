@@ -139,7 +139,7 @@ class AARelationForm(forms.ModelForm):
     class Meta(object):
         model = AARelation
         fields = [
-            'type_controlled',
+            'type_controlled', 'aar_type',
             'confidence_measure', 'subject', 'object',
             'record_status_value', 'record_status_explanation',
             'administrator_notes', 'record_history'
@@ -162,7 +162,9 @@ class AARelationForm(forms.ModelForm):
 
     def clean(self):
         super(AARelationForm, self).clean()
-        print(self.cleaned_data)
+
+        if self.cleaned_data.get('aar_type', None):
+            self.cleaned_data['type_controlled'] +  self.cleaned_data.get('aar_type').base_type
         authority_subject_id = self.cleaned_data.get('authority_subject', None)
         if authority_subject_id:
             self.cleaned_data['subject'] = Authority.objects.get(pk=authority_subject_id)
@@ -769,6 +771,15 @@ class AuthorityCollectionForm(forms.ModelForm):
         model = AuthorityCollection
         exclude = ('created', 'createdBy', 'authorities')
 
+class AARSetForm(forms.ModelForm):
+    class Meta(object):
+        model = AARSet
+        fields = ['name', 'description']
+
+class AARelationTypeForm(forms.ModelForm):
+    class Meta(object):
+        model = AARelationType
+        fields = ['name', 'description', 'relation_type_controlled', 'base_type', 'aarset']
 
 class SelectCitationCollectionForm(forms.Form):
     collection = forms.ModelChoiceField(queryset=CitationCollection.objects.all())
@@ -813,6 +824,7 @@ class BulkChangeCSVForm(forms.Form):
     UPDATE_ATTR = 'UPATT'
     CREATE_LINKED_DATA = 'CRLD'
     CREATE_ACRELATIONS = 'CRACR'
+    CREATE_AARELATIONS = 'CRAAR'
     CREATE_CCRELATIONS = 'CRCCR'
     CREATE_AUTHORITIES = 'CRAUTH'
     CREATE_CITATIONS = 'CRCIT'
@@ -823,6 +835,7 @@ class BulkChangeCSVForm(forms.Form):
         (UPDATE_ATTR, 'Update Elements'),
         (CREATE_LINKED_DATA, 'Create Linked Data'),
         (CREATE_ACRELATIONS, 'Create ACRelations'),
+        (CREATE_AARELATIONS, 'Create AARelations'),
         (CREATE_CCRELATIONS, 'Create CCRelations'),
         (CREATE_AUTHORITIES, 'Create Authorities'),
         (CREATE_CITATIONS, 'Create Citations'),

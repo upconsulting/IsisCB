@@ -65,6 +65,7 @@ def create_records(file_path, error_path, task_id, user_id, record_type):
 
 CREATION_METHODS =  {
     'acrelation': record_creator._create_acrelation,
+    'aarelation': record_creator._create_aarelation,
     'ccrelation': record_creator._create_ccrelation,
     'linkeddata': record_creator._create_linkeddata,
     'authority': record_creator._create_authority,
