@@ -54,3 +54,7 @@ def get_page_range(paginator, current_page):
     start_page = current_page - 5 if current_page - 5 > 1 else 1
     end_page = current_page + 5 if paginator.num_pages > current_page + 5 else paginator.num_pages + 1
     return range(start_page, end_page)
+
+@register.filter
+def get_review_parts(review_string):
+    return review_string.split("##")

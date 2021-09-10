@@ -117,6 +117,18 @@
             </span>
 
         </p>
+        {% if result.reviews_data %}
+        <div style="margin-left: 30px; margin-top: -10px;">
+        Reviewed by:
+        <ul style="list-style-type: circle;">
+          {% for review in result.reviews_data %}
+          {% with review|get_review_parts as review_parts %}
+          <li>{{ review_parts.1 }} ({{ review_parts.3 }}) <a href="{% url 'citation' review_parts.0 %}">{{review_parts.2}}</a>.</li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+        </div>
+        {% endif %}
     {% empty %}
         <p>No results found.</p>
     {% endfor %}

@@ -28,6 +28,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     title_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     description = indexes.CharField(indexed=False, null=True)
     public = indexes.BooleanField(faceted=True, indexed=False)
+    reviews_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    reviews_data = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    has_reviews = indexes.BooleanField(faceted=True, indexed=False)
 
     type = indexes.CharField(indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True, indexed=False,)
@@ -275,6 +278,16 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data[exact_field] = getattr(self, exact_field)(data_organized)
 
         multivalue_data = defaultdict(list)
+        for ccrel in data_organized['ccrelations_from']:
+            if ccrel['relations_from__type_controlled'] == CCRelation.REVIEWED_BY:
+                if ccrel['relations_from__id'] not in multivalue_data['reviews_ids']:
+                    multivalue_data['reviews_ids'].append(ccrel['relations_from__id'])
+                    ccrelation = CCRelation.objects.filter(pk=ccrel['relations_from__id']).first()
+                    if ccrelation:
+                        multivalue_data['reviews_data'] = "##".join([ccrelation.object.id, ccrelation.object.get_authors_string, ccrelation.object.title_for_display, str(ccrelation.object.publication_date.year)])
+        if len(multivalue_data['review_ids']) > 0:
+            multivalue_data['has_reviews'] = True
+
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
                 continue
