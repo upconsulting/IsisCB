@@ -27,6 +27,9 @@
         <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
         <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
       </ul>
+      <div class="clearfix">
+        filter
+      </div>
     </div>
     <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
   </div>
@@ -122,8 +125,20 @@
         Reviewed by:
         <ul style="list-style-type: circle;">
           {% for review in result.reviews_data %}
-          {% with review|get_review_parts as review_parts %}
+          {% with review|get_data_parts as review_parts %}
           <li>{{ review_parts.1 }} ({{ review_parts.3 }}) <a href="{% url 'citation' review_parts.0 %}">{{review_parts.2}}</a>.</li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+        </div>
+        {% endif %}
+        {% if result.personal_recognition_data %}
+        <div style="margin-left: 30px; margin-top: -10px;">
+        Awards:
+        <ul style="list-style-type: circle;">
+          {% for personal_rec in result.personal_recognition_data %}
+          {% with personal_rec|get_data_parts as personal_rec_parts %}
+            <li><a href="{% url 'citation' {{personal_rec_parts.0}} }">{{personal_rec_parts.2}}</a> by {{ personal_rec_parts.1 }}</li>
           {% endwith %}
           {% endfor %}
         </ul>

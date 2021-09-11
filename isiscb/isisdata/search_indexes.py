@@ -31,6 +31,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     reviews_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     reviews_data = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     has_reviews = indexes.BooleanField(faceted=True, indexed=False)
+    personal_recognition_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    personal_recognition_data = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    has_personal_recognition = indexes.BooleanField(faceted=True, indexed=False)
 
     type = indexes.CharField(indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True, indexed=False,)
@@ -278,15 +281,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data[exact_field] = getattr(self, exact_field)(data_organized)
 
         multivalue_data = defaultdict(list)
-        for ccrel in data_organized['ccrelations_from']:
-            if ccrel['relations_from__type_controlled'] == CCRelation.REVIEWED_BY:
-                if ccrel['relations_from__id'] not in multivalue_data['reviews_ids']:
-                    multivalue_data['reviews_ids'].append(ccrel['relations_from__id'])
-                    ccrelation = CCRelation.objects.filter(pk=ccrel['relations_from__id']).first()
-                    if ccrelation:
-                        multivalue_data['reviews_data'] = "##".join([ccrelation.object.id, ccrelation.object.get_authors_string, ccrelation.object.title_for_display, str(ccrelation.object.publication_date.year)])
-        if len(multivalue_data['review_ids']) > 0:
-            multivalue_data['has_reviews'] = True
+        self._index_reviews(data_organized, multivalue_data)
+        self._index_personal_recognition(data_organized, multivalue_data)
 
         for a in sorted(data_organized['acrelations'], key=lambda a: a['acrelation__data_display_order']):
             if not a['acrelation__public']:
@@ -423,7 +419,55 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             self.prepared_data['author_for_sort'] = u""
         self.prepared_data.update(multivalue_data)
 
+        print(self.prepared_data)
         return self.prepared_data
+
+    def _index_reviews(self, data_organized, multivalue_data):
+        def _build_data_string(citation):
+            return "##".join([citation.id, citation.get_authors_string, citation.title_for_display, str(citation.publication_date.year) if citation.publication_date else ""])
+
+        # all reviewed by relations
+        for ccrel in data_organized['ccrelations_from']:
+            if ccrel['relations_from__type_controlled'] == CCRelation.REVIEWED_BY:
+                if ccrel['relations_from__id'] not in multivalue_data['reviews_ids']:
+                    multivalue_data['reviews_ids'].append(ccrel['relations_from__id'])
+                    ccrelation = CCRelation.objects.filter(pk=ccrel['relations_from__id']).first()
+                    if ccrelation:
+                        multivalue_data['reviews_data'] = _build_data_string(ccrelation.object)
+        # all review of relations
+        for ccrel in data_organized['ccrelations_to']:
+            if ccrel['relations_to__type_controlled'] == CCRelation.REVIEW_OF:
+                if ccrel['relations_to__id'] not in multivalue_data['reviews_ids']:
+                    multivalue_data['reviews_ids'].append(ccrel['relations_to__id'])
+                    ccrelation = CCRelation.objects.filter(pk=ccrel['relations_to__id']).first()
+                    if ccrelation:
+                        multivalue_data['reviews_data'] = _build_data_string(ccrelation.subject)
+        if len(multivalue_data['reviews_ids']) > 0:
+            multivalue_data['has_reviews'] = True
+
+    def _index_personal_recognition(self, data_organized, multivalue_data):
+        def _build_data_string(citation):
+            presenting_group = ACRelation.objects.filter(type_controlled=ACRelation.PRESENTING_GROUP, citation__id=citation.id).first()
+            if presenting_group:
+                return "##".join([citation.id, presenting_group.authority.name, citation.title_for_display, str(citation.publication_date.year) if citation.publication_date else ""])
+            return ""
+
+        def _fill_data(type_controlled, get_citation, id):
+            if type_controlled == CCRelation.ASSOCIATED_WITH:
+                ccrelation = CCRelation.objects.filter(pk=id).first()
+                if get_citation(ccrelation).type_controlled == Citation.PERSONAL_RECOGNITION and id not in multivalue_data['personal_recognition_ids']:
+                    multivalue_data['personal_recognition_ids'].append(id)
+                    if ccrelation:
+                        multivalue_data['personal_recognition_data'] = _build_data_string(get_citation(ccrelation))
+
+        for ccrel in data_organized['ccrelations_from']:
+            _fill_data(ccrel['relations_from__type_controlled'], lambda ccr: ccr.object, ccrel['relations_from__id'])
+
+        for ccrel in data_organized['ccrelations_to']:
+            _fill_data(ccrel['relations_to__type_controlled'], lambda ccr: ccr.subject, ccrel['relations_to__id'])
+
+        if len(multivalue_data['personal_recognition_ids']) > 0:
+            multivalue_data['has_personal_recognition'] = True
 
     def _index_belongs_to(self, data):
         if data[0]['belongs_to']:

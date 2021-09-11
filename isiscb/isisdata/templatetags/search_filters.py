@@ -56,5 +56,5 @@ def get_page_range(paginator, current_page):
     return range(start_page, end_page)
 
 @register.filter
-def get_review_parts(review_string):
+def get_data_parts(review_string):
     return review_string.split("##")
