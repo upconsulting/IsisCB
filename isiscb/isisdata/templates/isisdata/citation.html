@@ -79,7 +79,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
     <div class="panel panel-default">
       <div class="panel-heading">
-      <strong style="font-size:1.5em">{{ citation.get_type_controlled_display }}</strong>
+      <strong>{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}: {{ citation.subtype.name }}{% endif %}
         <span class="btn-grp pull-right" style="padding-bottom:10px">
           <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ citation.id }}</span>
           <textarea style="position: absolute;left: -9999px;" id="hiddenCitationLink">{{ citation | get_uri }}</textarea>
