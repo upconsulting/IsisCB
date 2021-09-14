@@ -5,13 +5,15 @@
 {% load facet_filters %}
 {% load static %}
 
+{% block extra_head %}
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+{% endblock %}
+
 {% if query %}
 <div class="row">
-  <div class="col-md-6">
-      <h3><span class="visible-print-inline">Citations </span>Search Results</h3>
-    <div class="results-info">Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results.</div>
-  </div>
-  <div class="col-md-6 menuContainer">
+  <div class="col-md-12 menuContainer">
     <div class="panel-group hidden-print" id="type_panel">
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -24,7 +26,7 @@
         </div>
         <div id="collapseTypes" class="panel-collapse collapse">
           <div class="facet_panel panel-body">
-            <div class="row panel-row">
+            <div class="row panel-row" style="margin-bottom:10px;">
               <div class="col-md-12 panel-cell" style="padding-top:4px">
                 <div class="dropdown hidden-print">
                   {% if sort_order_dir_citation == 'descend' %}
@@ -47,15 +49,17 @@
                 <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
               </div>
             </div>
+            <hr style="margin-top: 4px; margin-bottom: 4px;">
+
             <div class="row panel-row">
-              <div class="col-md-12 panel-cell">
+              <div class="col-md-4 panel-cell">
                 <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
               </div>
             </div>
 
-            {% if facets_citation.fields.type %}
             <div class="row panel-row ">
-
+              {% if facets_citation.fields.type %}
+                <div class="col-md-4">
                   {% for type in selected_facets.citation_type %}
                   {% with type|create_facet_string:'citation_type' as encoded_type %}
                   <div class="col-md-12">
@@ -89,12 +93,13 @@
                 </small>
                 </div>
             {% else %}
-            <div class="row panel-row">
-              <div class="col-md-12 panel-cell">
-                <p>No type facets.</p>
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <p>No type facets.</p>
+                </div>
               </div>
-            </div>
             {% endif %}
+            </div>
           </div>
         </div>
       </div>
@@ -112,6 +117,8 @@
             <i class="fa fa-graduation-cap"></i>
           {% elif result.type == "Multimedia object" %}
             <i class="fa fa-photo-video"></i>
+          {% elif result.type == "Chapter" %}
+            <i class="fa fa-book-open"></i>
           {% endif %}
 
           [{{ result.type }}]
@@ -185,11 +192,13 @@
 
         </p>
     {% empty %}
-        <p>No results found.</p>
+        <h3>No results found . . . <i class="fas fa-child"></i></h3>
     {% endfor %}
+
     {% if page.citation.has_previous or page.citation.has_next %}
     <nav class="hidden-print">
       <ul class="pagination">
+
         <li class="disabled"><a>Go to page:</a></li>
           {% if page.citation.has_previous %}
           <li>
@@ -212,15 +221,29 @@
             {% endwith %}
           </li>
           {% endif %}
+
           {% if page.citation.has_previous or page.citation.has_next %}
           {% for p in page.citation.paginator.page_range %}
           {% with pagenr=forloop.counter|stringformat:"s" %}
           {% with ppage='page_citation:'|add:pagenr %}
+          {% with page.citation.paginator.page_range|last as last %}
+          {% with page.citation.paginator.page_range|first as first %}
+            {% if page.citation.number >= 4 and p == first %}
+              <li {% if page.citation.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ first }}</a></li>
+              <li class="disabled"><span>...</span></li>
+            {% elif page.citation.number <= p|add:"2" and page.citation.number >= p|add:"-5" %}
               <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
+            {% elif p == last %}
+              <li class="disabled"><span>...</span></li>
+              <li {% if page.citation.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ last }}</a></li>
+            {% endif %}
+          {% endwith %}
+          {% endwith %}
           {% endwith %}
           {% endwith %}
           {% endfor %}
           {% endif %}
+
           {% if page.citation.has_next %}
           <li>
             {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
@@ -248,3 +271,39 @@
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}
+
+{{ facets_citation.fields.publication_date|json_script:"publicationDateData" }}
+
+<script type="text/javascript">
+  let publicationDates = JSON.parse(document.getElementById('publicationDateData').textContent);
+
+  let publicationDateRange = [];
+
+  publicationDates.map(date => {
+    publicationDateRange.push(Number(date[0]));
+  })
+
+  publicationDateRange = publicationDateRange.filter(date => {
+    return !isNaN(date) && date.toString().length == 4;
+  })
+
+  let minDate = Math.min.apply(null, publicationDateRange);
+
+  let maxDate = Math.max.apply(null, publicationDateRange);
+
+  console.log(publicationDateRange);
+
+  $( function() {
+    $( "#slider-range" ).slider({
+      range: true,
+      min: minDate,
+      max: maxDate,
+      values: [ minDate, maxDate ],
+      slide: function( event, ui ) {
+        $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+      }
+    });
+    $( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) +
+      " - " + $( "#slider-range" ).slider( "values", 1 ) );
+  } );
+  </script>
