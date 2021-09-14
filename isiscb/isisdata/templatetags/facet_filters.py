@@ -82,3 +82,11 @@ def add_excluded_stub_record_status_facet(url, facet):
         url = url.replace('selected_facets=' + facet_str, '')
     url = url + '&excluded_facets=' + facet_str
     return url.replace('&&', '&')
+
+@register.filter
+def is_has_reviews(url):
+    return 'selected_facets=citation_has_reviews:true' in url
+
+@register.filter
+def is_has_personal_recognition(url):
+    return 'selected_facets=citation_has_personal_recognition:true' in url

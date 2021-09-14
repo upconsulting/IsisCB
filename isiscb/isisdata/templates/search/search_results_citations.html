@@ -2,6 +2,7 @@
 {% load metadata_filters %}
 {% load citation_filters %}
 {% load search_filters %}
+{% load facet_filters %}
 
 <div class="row">
   <div class="col-md-8">
@@ -27,8 +28,23 @@
         <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
         <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
       </ul>
+      <div class="clearfix" style="padding-top: 10px">
+        {% if request.get_full_path|is_has_reviews %}
+        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-on" aria-hidden="true"></i>
+ Showing only citations with reviews</a>
+        {% else %}
+        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-off" aria-hidden="true"></i>
+ Show only citations with reviews</a>
+        {% endif %}
+      </div>
       <div class="clearfix">
-        filter
+        {% if request.get_full_path|is_has_personal_recognition %}
+        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-on" aria-hidden="true"></i>
+ Showing only citations with awards</a>
+        {% else %}
+        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-off" aria-hidden="true"></i>
+ Show only citations with awards</a>
+        {% endif %}
       </div>
     </div>
     <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
