@@ -37,6 +37,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {#% block title %}Citation{% endblock %#}
 
 {% block content %}
+<script>
+  $(function () {
+  $('[data-toggle="popover"]').popover()
+})
+</script>
 <div class="row">
   <div class="col-sm-12 col-md-2 hidden-print">
     <div class="menu hidden-print">
@@ -93,8 +98,21 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         </span>
 
         {% with citation|get_pub_year as pub_year %}
-        <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
+        {% with citation|get_title as citation_title %}
+        <h3>{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
+          {% if citation.stub_record_status == 'SR' %}
+          <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
+          {% endif %}
+        </h3>
+        {% if citation|has_title and citation.complete_citation %}
+        <p>
+        <strong>Full citation:</strong> {{ citation.complete_citation }}
+        </p>
+        {% endif %}
         {% endwith %}
+        {% endwith %}
+
+
 
         <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
 
@@ -148,6 +166,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% if citation.abstract %}
         <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
         {% endif %}
+
         {% if citation.description %}
         <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
         {% endif %}

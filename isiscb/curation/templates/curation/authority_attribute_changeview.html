@@ -122,6 +122,7 @@
                       {{ attribute_form.value_freeform|addcss:"form-control" }}
                     </div>
                 </div>
+                <div id="ajax_errors"></div>
             </div>
         </div>
         <div class="clearfix">
@@ -170,7 +171,7 @@ $(document).ready(function() {
     var value = $(this).val();
     var container = $('#value_form_container');
     container.empty();
-    var form = $('#form_for_' + value).clone();
+    var form = $('#form_for_' + value).clone(withDataAndEvents=true);
     container.append(form);
 
     // update help text
@@ -205,6 +206,19 @@ $(document).ready(function() {
       $("#geocode-attr-warning").modal('hide');
       $("#attributeForm").submit();
   })
+
+  $("[data-type='citation_id']").change(function() {
+    $.ajax({
+      url: "{% url 'curation:api_citation' %}" + "?id=" + $("[data-type='citation_id']").val(),
+      success: function(data) {
+        $("#ajax_errors").text("")
+        $("#id_value-citation_name").val(data['title'])
+      },
+      error: function(data) {
+        $("#ajax_errors").html('<i class="fa fa-warning" aria-hidden="true"></i> Citation with provided id could not be found.')
+      }
+    });
+  });
 });
 </script>
 
@@ -265,7 +279,7 @@ var delete_attribute = function() {
                     You are about to delete an attribute of type <span class="text-warning" id="delete-attribute-target-name"></span>. Deletion cannot be undone!
                 </p>
                 {% if attribute.type_controlled.name == country_code_attribute %}
-                <p style="color: #8a6d3b"> 
+                <p style="color: #8a6d3b">
                   This attribute is a country code. You might need to reindex related citations to make sure your changes are reflected on the public site.
                 </p>
                 {% endif %}

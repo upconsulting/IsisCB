@@ -542,6 +542,9 @@ abstract = Column(u"Abstract", lambda obj, extra, config={}: obj.abstract)
 staff_notes = Column(u"Staff Notes", lambda obj, extra, config={}: obj.administrator_notes)
 record_history = Column(u"Record History", lambda obj, extra, config={}: obj.record_history)
 dataset = Column(u"Dataset", _dataset)
+complete_citation = Column(u"Complete Citation", lambda obj, extra, config={}: obj.complete_citation)
+stub_record_status = Column(u"Stub Record Status", lambda obj, extra, config={}: obj.get_stub_record_status_display())
+
 # metadata columns
 created_on = Column(u"Created Date", _created_on)
 modified_on = Column(u"Modified Date", lambda obj, extra, config={}: obj._history_date)
@@ -590,6 +593,8 @@ CITATION_COLUMNS = [
     staff_notes,
     record_history,
     dataset,
+    complete_citation,
+    stub_record_status,
     created_on,
     modified_on,
     creator,

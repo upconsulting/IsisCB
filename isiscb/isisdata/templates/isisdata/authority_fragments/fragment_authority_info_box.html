@@ -2,6 +2,7 @@
 {% load static %}
 {% load search_filters %}
 {% load authority_filters %}
+{% load citation_filters %}
 {% load facet_filters %}
 
 
@@ -131,8 +132,24 @@
   </script>
   {% endif %}
 
+  {% with authority|get_bibliographic_essays as bib_essays %}
+  {% if bib_essays %}
+  {% for bib_essay in bib_essays %}
+  <p>
+    <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
+    <!-- todo: list all and link link -->
+    {% if bib_essay.value.cvalue|get_urls %}
+    {% for url in bib_essay.value.cvalue|get_urls %}
+    <br><strong>Link:</strong> {{ url.resource_name }}
+    {% endfor %}
+    {% endif %}
+  </p>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
   {% for attribute in authority.attributes.all %}
-  {% if attribute|is_attribute_visible %}
+  {% if attribute|is_attribute_visible and not attribute|is_bibliographic_essay %}
   <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
   {% endif %}
   {% endfor %}

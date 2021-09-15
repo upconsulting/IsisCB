@@ -276,6 +276,8 @@ def _create_citation(row, user_id, results, task_id, created_on):
     COL_NOTES = 'CBB Notes'
     COL_STATUS = 'CBB Status'
     COL_EXPLANATION = 'CBB RecordStatusExplanation'
+    COL_COMPLETE_CITATION = 'CBB CompleteCitation'
+    COL_STUB_RECORD_STATUS = 'CBB StubRecordStatus'
 
     properties = {}
 
@@ -287,6 +289,8 @@ def _create_citation(row, user_id, results, task_id, created_on):
     _add_optional_simple_property(row, COL_DESCRIPTION, properties, 'description')
     _add_optional_simple_property(row, COL_ED_DETAILS, properties, 'edition_details')
     _add_optional_simple_property(row, COL_PHYS_DETAILS, properties, 'physical_details')
+    _add_optional_simple_property(row, COL_COMPLETE_CITATION, properties, 'complete_citation')
+    _add_optional_simple_property(row, COL_STUB_RECORD_STATUS, properties, 'stub_record_status')
 
     _add_dataset(row, COL_DATASET, properties, results)
 

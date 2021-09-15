@@ -92,6 +92,20 @@
                   {% endif %}
                 </small>
                 </div>
+
+                <div class="col-md-12" style="padding-top: 10px;">
+                  <small>
+                  {% if request.get_full_path|are_stubs_excluded %}
+                  <input type="checkbox" name="exclude_reviews" >
+
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+                  {% endif %}
+                  {% if not request.get_full_path|are_stubs_excluded %}
+                  <input type="checkbox" name="exclude_reviews" checked>
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
+                  {% endif %}
+                </small>
+                </div>
             {% else %}
               <div class="row panel-row">
                 <div class="col-md-12 panel-cell">
@@ -123,20 +137,31 @@
 
           [{{ result.type }}]
 
-
+          <br>
+          {% url 'citation' result.id|get_pk as citation_url %}
+          {% if result.title == 'Title missing' and result.complete_citation %}
+          <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+            {{result.complete_citation}}
+          </a>
+          {% else %}
             {% if result.authors %}
                {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
-            {% else %}
-              Author missing
             {% endif %}
-            {% if result.publication_date.0 %}
+            {% if result.publication_date.0 and result.authors %}
               ({{ result.publication_date.0 }})
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{ result.title|bleach_safe }}.
+              </a>
+            {% elif result.publication_date.0 and not result.authors %}
+              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                {{ result.title|bleach_safe }}
+              </a>
+              ({{ result.publication_date.0 }}).
+            {% else %}
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              {{ result.title|bleach_safe }}
+            </a>
             {% endif %}
-            {% url 'citation' result.id|get_pk as citation_url %}
-
-            <br>
-
-            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.title|bleach_safe }}.</a>
 
             <!-- book title and page numbers -->
             {% if result.book_title %}
@@ -155,6 +180,7 @@
             {% if result.type in show_school_types %}
             {{ result.schools|joinby:", " }}
             {% endif %}
+          {% endif %}
 
 
             <span class="visible-print-inline">({{ citation_url }})</span>
