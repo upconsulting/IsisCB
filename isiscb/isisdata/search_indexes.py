@@ -38,6 +38,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     type = indexes.CharField(indexed=False, null=True)
     publication_date = indexes.MultiValueField(faceted=True, indexed=False,)
     publication_date_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
+    publication_date_date_field = indexes.DateField(faceted=True, indexed=False)
 
     abstract = indexes.CharField(null=True, indexed=False)
     edition_details = indexes.CharField(null=True, indexed=False)
@@ -419,7 +420,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             self.prepared_data['author_for_sort'] = u""
         self.prepared_data.update(multivalue_data)
 
-        print(self.prepared_data)
         return self.prepared_data
 
     def _index_reviews(self, data_organized, multivalue_data):
@@ -625,6 +625,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if attribute['attributes__type_controlled__name'] == settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE:
                 return attribute['attributes__value_freeform']
         return ''
+
+    def prepare_publication_date_date_field(self, data):
+        print(data['publication_date'])
+        if data['publication_date']:
+            return data['publication_date']
+        return None
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])

@@ -39,6 +39,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
+    range_filters = forms.CharField(required=False, widget=forms.HiddenInput, initial='')
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
@@ -161,6 +162,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         else:
             sqs = self.searchqueryset.raw_search(self.cleaned_data['q'])
 
+
         sqs_citation = sqs.load_all()
         sqs_authority = sqs_citation
 
@@ -171,6 +173,27 @@ class MyFacetedSearchForm(FacetedSearchForm):
         # exclude facets
         sqs_citation = self.exclude_facets(self.excluded_facets, sqs_citation, "citation_")
         sqs_authority = self.exclude_facets(self.excluded_facets, sqs_authority, "authority_")
+
+        # apply range filters
+        range_filters = self.cleaned_data.get('range_filters', None)
+        range_filters_split_citation = {}
+        range_filters_split_authority = {}
+        if range_filters:
+            for entry in range_filters.split(","):
+                key_value = entry.split(":")
+                if len(key_value) > 1:
+                    print(key_value)
+                    if key_value[0].startswith("citation_"):
+                        range_filters_split_citation[key_value[0][len("citation_"):]] = key_value[1]
+                    elif key_value[0].startswith("authority_"):
+                        range_filters_split_authority[key_value[0][len("authority_"):]] = key_value[1]
+
+            if range_filters_split_citation:
+                for field in range_filters_split_citation:
+                    sqs_citation = sqs_citation.filter(**{field + "__range": range_filters_split_citation[field].split("-")})
+            if range_filters_split_authority:
+                for field in range_filters_split_authority:
+                    results_authority = results_authority.filter(**{field + "__range": range_filters_split_authority[field].split("-")})
 
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
