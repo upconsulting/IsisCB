@@ -37,6 +37,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {#% block title %}Citation{% endblock %#}
 
 {% block content %}
+<script>
+  $(function () {
+  $('[data-toggle="popover"]').popover()
+})
+</script>
 <div class="row">
   <div class="col-sm-12 col-md-2 hidden-print">
     <div class="menu hidden-print">
@@ -77,225 +82,318 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
     {% endif %}
 
-    <div class="alert alert-info headerbox" role="alert"><strong>{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}: {{ citation.subtype.name }}{% endif %}
-        <span class="btn-grp pull-right">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+      <strong style="font-size:1.5em">{{ citation.get_type_controlled_display }}</strong>
+        <span class="btn-grp pull-right" style="padding-bottom:10px">
+          <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ citation.id }}</span>
+          <textarea style="position: absolute;left: -9999px;" id="hiddenCitationLink">{{ citation | get_uri }}</textarea>
             {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
             <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
         </span>
+      </div>
+      <div class="panel-body">
+        <span style="display:none;">
+           <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
+        </span>
+
+        {% with citation|get_pub_year as pub_year %}
+        {% with citation|get_title as citation_title %}
+        <h3>{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
+          {% if citation.stub_record_status == 'SR' %}
+          <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
+          {% endif %}
+        </h3>
+        {% if citation|has_title and citation.complete_citation %}
+        <p>
+        <strong>Full citation:</strong> {{ citation.complete_citation }}
+        </p>
+        {% endif %}
+        {% endwith %}
+        {% endwith %}
+
+
+
+        <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
+
+        <!-- This tag displays an icon/link that points to the users' institution's
+             link resolver. -->
+        <span id="linkresolver" class="hidden-print">
+            <script>
+            $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
+                {
+                    success: function(result) {
+                            if (result.url.length > 0) {
+                                var linkElem = '<a href="'+ result.url +'" class="text-warnging">';
+                                // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
+                                if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
+                                linkElem += '</a>';
+                                $('#linkresolver').append(linkElem);
+                            } else {
+                                // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                            }
+                    },
+                    error: function() {
+                        // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                        $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                    },
+                });
+            </script>
+        </span>
+
+        <script>
+          //# sourceURL=copy.js
+          $(function() {
+            $("#authorityLink").click(function() {
+              var copyTextarea = document.querySelector('#hiddenCitationLink');
+              copyTextarea.focus();
+              copyTextarea.select();
+              document.execCommand("copy");
+              $.notify("URL of this record has been copied to your clipboard.", "info", {
+                clickToHide: true,
+                style: 'bootstrap',
+                gap: 5,
+              });
+            })
+          })
+        </script>
+
+        {% if authors|length > 0 %}
+        <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }};{% if acrelation.authority %}<i class="fa fa-info-circle"></i></a>{% endif %} {% endfor %}
+        {% endif %}
+
+        {% if citation.abstract %}
+        <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
+        {% endif %}
+
+        {% if citation.description %}
+        <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
+        {% endif %}
+
+        {% for attribute in citation.attributes.all %}
+        <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+        {% endfor %}
+        {% if citation.subtype %}
+        <p><Strong>Genre:</strong> {{ citation.subtype.name }}
+        {% endif %}
+
+        {% if citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language.all|length > 0  %}
+        <table class="details">
+          {% if citation.edition_details|length > 0 %}
+          <tr>
+            <td>Edition Details:</td><td>{{ citation.edition_details|bleach_safe }}</td>
+          </tr>
+          {% endif %}
+          {% if citation.physical_details|length > 0 %}
+          <tr>
+            <td>Physical Details:</td><td>{{ citation.physical_details|bleach_safe }}</td>
+          </tr>
+          {% endif %}
+          {% if citation.language.all|length > 0 %}
+          <tr>
+            <td>Languages:</td><td>{% for language in citation.language.all %}{{ language.name }}{% endfor %}</td>
+          </tr>
+          {% endif %}
+        </table>
+        {% endif %}
+
+        <table class="details">
+          {% for prop in properties_map %}
+
+
+          <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }} <i class="fa fa-info-circle"></i></a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}</td></tr>
+
+
+          {% endfor %}
+          {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+          <tr>
+            <td>Volume:</td><td>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</td>
+          </tr>
+          {% endif %}
+          {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+          <tr>
+            <td>Issue:</td><td>{% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</td>
+          </tr>
+          {% endif %}
+          {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+          <tr>
+            <td>Pages:</td><td>{{ citation|get_public_page_string }}</td>
+          </tr>
+          {% endif %}
+        </table>
+
+        <table class="details">
+          {% if citation.linkeddata_public.all|length > 0 %}
+          <tr>
+            <td  style="vertical-align: top"><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
+            <td>{% for entry in citation.linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
+          </tr>
+          {% endif %}
+        </table>
+      </div>
     </div>
 
-    <span style="display:none;">
-       <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
-    </span>
-
-    {% with citation|get_pub_year as pub_year %}
-    <h3>{{ citation|get_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}</h3>
-    {% endwith %}
-
-    <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
-
-    <!-- This tag displays an icon/link that points to the users' institution's
-         link resolver. -->
-    <span id="linkresolver" class="hidden-print">
-        <script>
-        $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
-            {
-                success: function(result) {
-                        if (result.url.length > 0) {
-                            var linkElem = '<a href="'+ result.url +'" class="text-warnging">';
-                            // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
-                            if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
-                            linkElem += '</a>';
-                            $('#linkresolver').append(linkElem);
-                        } else {
-                            // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                            $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
-                        }
-                },
-                error: function() {
-                    // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                    $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
-                },
-            });
-        </script>
-    </span>
-
-    {% if authors|length > 0 %}
-    <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }};{% if acrelation.authority %}<i class="fa fa-info-circle"></i></a>{% endif %} {% endfor %}
-    {% endif %}
-
-    {% if citation.abstract %}
-    <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
-    {% endif %}
-    {% if citation.description %}
-    <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
-    {% endif %}
-
-    {% for attribute in citation.attributes.all %}
-    <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
-    {% endfor %}
-    {% if citation.subtype %}
-    <p><Strong>Genre:</strong> {{ citation.subtype.name }}
-    {% endif %}
-
-    {% if citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language.all|length > 0  %}
-    <table class="details">
-      {% if citation.edition_details|length > 0 %}
-      <tr>
-        <td>Edition Details:</td><td>{{ citation.edition_details|bleach_safe }}</td>
-      </tr>
-      {% endif %}
-      {% if citation.physical_details|length > 0 %}
-      <tr>
-        <td>Physical Details:</td><td>{{ citation.physical_details|bleach_safe }}</td>
-      </tr>
-      {% endif %}
-      {% if citation.language.all|length > 0 %}
-      <tr>
-        <td>Languages:</td><td>{% for language in citation.language.all %}{{ language.name }}{% endfor %}</td>
-      </tr>
-      {% endif %}
-    </table>
-    {% endif %}
-
-    <table class="details">
-      {% for prop in properties_map %}
-
-
-      <tr><td>{{ prop.get_type_controlled_display }}:</td><td> {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }} <i class="fa fa-info-circle"></i></a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}</td></tr>
-
-
-      {% endfor %}
-      {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
-      <tr>
-        <td>Volume:</td><td>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</td>
-      </tr>
-      {% endif %}
-      {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
-      <tr>
-        <td>Issue:</td><td>{% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</td>
-      </tr>
-      {% endif %}
-      {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
-      <tr>
-        <td>Pages:</td><td>{{ citation|get_public_page_string }}</td>
-      </tr>
-      {% endif %}
-    </table>
-
-    <table class="details">
-      {% if citation.linkeddata_public.all|length > 0 %}
-      <tr>
-        <td  style="vertical-align: top"><span class="glyphicon glyphicon-globe"></span> Linked Data:</td>
-        <td>{% for entry in citation.linkeddata_public.all %}<a href="{{ entry|linkeddata_for_display }}" taget="_blank">{{ entry.universal_resource_name }}</a> ({{ entry.type_controlled }})<br/> {% endfor %}</td>
-      </tr>
-      {% endif %}
-    </table>
-
-    <!-- <div></div> -->
+        <!-- <div></div> -->
     {% if related_citations_rb %}
-    <h4>Reviewed By</h4>
-      {% for cc_rel in related_citations_rb %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
-
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Reviewed By</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_rb %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     <!-- Review of -->
     {% if related_citations_ro or related_citations_inv_rb %}
-    <h4>Review Of</h4>
-      {% for cc_rel in related_citations_ro %}
-      {% if cc_rel.subject.id == citation_id %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% else %}
-        {% with cc_rel.subject as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endif %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Review Of</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_ro %}
+          {% if cc_rel.subject.id == citation_id %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% else %}
+            {% with cc_rel.subject as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endif %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
-<!-- Includes Chapter -->
+    <!-- Includes Chapter -->
     {% if related_citations_ic %}
-    <h4>Includes Chapters</h4>
-      {% for cc_rel in related_citations_ic %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Includes Chapters</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_ic %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     {% if related_citations_inv_ic %}
-    <h4>Included in</h4>
-      {% for cc_rel in related_citations_inv_ic %}
-      {% with cc_rel.subject as citation_object %}
-        {% include "isisdata/citation_entry.html" %}
-      {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Included in</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_inv_ic %}
+          {% with cc_rel.subject as citation_object %}
+            {% include "isisdata/citation_entry.html" %}
+          {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
-<!-- Includes Series Article -->
+    <!-- Includes Series Article -->
     {% if related_citations_isa %}
-    <h4>Includes Series Articles</h4>
-      {% for cc_rel in related_citations_isa %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Includes Series Articles</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_isa %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     {% if related_citations_inv_isa %}
-    <h4>Included in</h4>
-      {% for cc_rel in related_citations_inv_isa %}
-        {% with cc_rel.subject as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Included in</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_inv_isa %}
+            {% with cc_rel.subject as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
-<!-- Response to -->
+    <!-- Response to -->
     {% if related_citations_re %}
-    <h4>Response to</h4>
-      {% for cc_rel in related_citations_re %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Response to</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_re %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     {% if related_citations_inv_re %}
-    <h4>Has Response</h4>
-      {% for cc_rel in related_citations_inv_re %}
-        {% with cc_rel.subject as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Has Response</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_inv_re %}
+            {% with cc_rel.subject as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
-  <!-- Associated with -->
+    <!-- Associated with -->
     {% if related_citations_as %}
-    <h4>Associated with</h4>
-      {% for cc_rel in related_citations_as %}
-        {% if cc_rel.subject.id == citation.id %}
-        {% with cc_rel.object as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-        {% else %}
-        {% with cc_rel.subject as citation_object %}
-          {% include "isisdata/citation_entry.html" %}
-        {% endwith %}
-        {% endif %}
-      {% endfor %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4>Associated with</h4>
+      </div>
+      <div class="panel-body">
+          {% for cc_rel in related_citations_as %}
+            {% if cc_rel.subject.id == citation.id %}
+            {% with cc_rel.object as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+            {% else %}
+            {% with cc_rel.subject as citation_object %}
+              {% include "isisdata/citation_entry.html" %}
+            {% endwith %}
+            {% endif %}
+          {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
-
-    <div style="max-width: 100%; overflow-x: scroll;">
-        <p><strong>Citation URI</strong><br />
-        {{ citation.generate_uri }}</p>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div style="max-width: 100%; overflow-x: scroll;">
+            <p><strong>Citation URI</strong><br />
+            {{ citation.generate_uri }}</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -313,8 +411,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     {% include "isisdata/citation_nav.html" %}
 
   </div>
-  </div>
-
+</div>
 <div class="row" ng-app="commentsApp">
   <div class="col-sm-12">
       {% include "isisdata/comments.html" %}

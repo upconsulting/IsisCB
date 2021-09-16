@@ -56,6 +56,8 @@ class CitationFilter(django_filters.FilterSet):
     publication_date_to = django_filters.CharFilter(method='filter_publication_date_to')
     publication_date_contains = django_filters.CharFilter(method='filter_publication_date_contains')
 
+    complete_citation = django_filters.CharFilter(method='filter_complete_citation')
+
     # abstract = django_filters.MethodFilter(name='abstract', lookup_type='icontains')
     abstract = django_filters.CharFilter(method='filter_abstract')
     # description = django_filters.MethodFilter(name='description', lookup_type='icontains')
@@ -212,6 +214,13 @@ class CitationFilter(django_filters.FilterSet):
             return queryset
         for part in value.split():
             queryset = queryset.filter(abstract__icontains=part)
+        return queryset
+
+    def filter_complete_citation(self, queryset, name, value):
+        if not value:
+            return queryset
+        for part in value.split():
+            queryset = queryset.filter(complete_citation__icontains=part)
         return queryset
 
     def filter_description(self, queryset, name, value):

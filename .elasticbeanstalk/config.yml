@@ -4,7 +4,8 @@ branch-defaults:
   develop:
     environment: isiscb-develop
 global:
-  application_name: IsisCB
+  application_name: IsisCB Staging Python 3
+  #application_name: IsisCB Celery Staging Python 3 (non worker)
   default_ec2_keyname: isiscb-eb
   default_platform: 64bit Amazon Linux 2015.03 v2.0.1 running Python 2.7
   default_region: us-west-2

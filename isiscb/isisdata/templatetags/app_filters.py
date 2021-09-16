@@ -78,9 +78,9 @@ def get_uri(entry):
 def get_title(citation):
     # if citation is not a review simply return title
     if not citation.type_controlled == 'RE':
-        if not citation.title:
+        if not citation.title_for_display:
             return "Title missing"
-        return citation.title
+        return citation.title_for_display
 
     # if citation is a review build title from reviewed citation
     reviewed_books = CCRelation.objects.filter(subject_id=citation.id, type_controlled='RO')
@@ -98,6 +98,16 @@ def get_title(citation):
         return "Review of unknown publication"
 
     return 'Review of "' + book.title + '"'
+
+@register.filter
+def has_title(citation):
+    # if citation is not a review simply return title
+    if not citation.type_controlled == 'RE':
+        if not citation.title:
+            return False
+        return True
+
+    return True
 
 
 @register.filter

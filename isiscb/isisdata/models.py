@@ -43,7 +43,8 @@ from openurl.models import Institution
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
             | Q(model='floatvalue') | Q(model='locationvalue') \
-            | Q(model='isodatevalue') | Q(model='isodaterangevalue') | Q(model='authorityvalue')
+            | Q(model='isodatevalue') | Q(model='isodaterangevalue') \
+            | Q(model='authorityvalue') | Q(model='citationvalue')
 
 
 class Value(models.Model):
@@ -533,6 +534,34 @@ class LocationValue(Value):
     class Meta(object):
         verbose_name = 'location'
 
+class CitationValue(Value):
+    """
+    A citation value. Points to an instance of :class:`.Citation`\.
+    """
+    # CHECK: Had to add on_delete so chose cascade -> JD: since we don't delete Authorities at the moment, this is probably fine
+    value = models.ForeignKey('Citation', on_delete=models.CASCADE)
+    name = models.TextField(blank=True, null=True)
+
+    def __unicode__(self):
+        return str(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
+    class Meta(object):
+        verbose_name = 'citation'
+
+    @staticmethod
+    def convert(value):
+        if type(value) is Citation:
+            return value
+
+        try:
+            return Citation.objects.get(pk=value)
+        except ValueError:
+            raise ValidationError('Must be the id of an existing citation.')
+
+
 class AuthorityValue(Value):
     """
     An authority value. Points to an instance of :class:`.Authority`\.
@@ -825,6 +854,18 @@ class Citation(ReferencedEntity, CuratedMixin):
     # CHECK: Had to add on_delete so chose cascade -> JD: deleting subtype shouldn't delete citation
     subtype = models.ForeignKey('CitationSubtype', blank=True, null=True, on_delete=models.SET_NULL)
 
+    complete_citation =  models.TextField(blank=True, null=True,
+                                         help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
+
+    STUB_RECORD = 'SR'
+    REGULAR_RECORD = 'RR'
+    RECORD_STATUS_CHOICES = (
+        (STUB_RECORD, 'Stub Record'),
+        (REGULAR_RECORD, 'Regular Record')
+    )
+    stub_record_status = models.CharField(max_length=3, null=True, blank=True,
+                                       choices=RECORD_STATUS_CHOICES)
+
     def save(self, *args, **kwargs):
         def get_related(obj):
             query = Q(subject_id=obj.id) | Q(object_id=obj.id) & (Q(type_controlled='RO') | Q(type_controlled='RB'))
@@ -859,6 +900,11 @@ class Citation(ReferencedEntity, CuratedMixin):
                     return u'Review: %s' % relation['subject__title'] if relation['subject_id'] != obj.id else relation['object__title']
                 else:
                     return u'(no title)'
+
+            # IEXP-300: if there is no title but complete citation, show it instead
+            if obj.complete_citation:
+                return obj.complete_citation
+
             return u'Untitled review'
 
         if self.created_native is None:
@@ -1264,6 +1310,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     CREATIVE_WORK = 'CW'
     EVENT = 'EV'
     CROSSREFERENCE = 'CR'
+    BIBLIOGRAPHIC_LIST = 'BL'
     TYPE_CHOICES = (
         (PERSON, 'Person'),
         (INSTITUTION, 'Institution'),
@@ -1275,6 +1322,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
         (CROSSREFERENCE, 'Cross-reference'),
+        (BIBLIOGRAPHIC_LIST, 'Bibliographic List')
     )
     type_controlled = models.CharField(max_length=2, null=True, blank=True,
                                        choices=TYPE_CHOICES,
@@ -1719,6 +1767,61 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         if self.citation:
             self.citation.save()
 
+class AARSet(ReferencedEntity, CuratedMixin):
+
+    ID_PREFIX = 'AARSET'
+
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+class AARelationType(ReferencedEntity, CuratedMixin):
+    ID_PREFIX = 'AARTYPE'
+
+    name = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
+
+    aarset = models.ForeignKey(AARSet, related_name='relation_types', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    TYPE_STRUCTURAL = "TSTR"
+    TYPE_ONTOLOGICAL = "TONT"
+    TYPE_TEMPORAL = "TTEM"
+    TYPE_GEOGRAPHICAL = "TGEO"
+
+    RELATION_TYPE_CHOICES =  (
+        (TYPE_STRUCTURAL, "Structural"),
+        (TYPE_ONTOLOGICAL, "Ontological"),
+        (TYPE_TEMPORAL, "Temporal"),
+        (TYPE_GEOGRAPHICAL, "Geographical")
+    )
+    relation_type_controlled = models.CharField(max_length=4, choices=RELATION_TYPE_CHOICES,
+                                       null=True, blank=True,
+                                       help_text=help_text("""
+    The type of the relationship.
+    """))
+
+    IDENTICAL_TO = 'IDTO'
+    PARENT_OF = 'PAOF'
+    #PREVIOUS_TO = 'PRETO'
+    #OFFICER_OF = 'OFOF'
+    ASSOCIATED_WITH = 'ASWI'
+    TYPE_CHOICES = (
+        (IDENTICAL_TO, 'Is Identical To'),
+        (PARENT_OF, 'Is Parent Of'),
+        #(PREVIOUS_TO, 'Happened Previous To'),
+        #(OFFICER_OF, 'Is Officer Of'),
+        (ASSOCIATED_WITH, 'Is Associated With')
+    )
+    base_type = models.CharField(max_length=5, choices=TYPE_CHOICES,
+                                       null=True, blank=True,
+                                       help_text=help_text("""
+    The base type the new relationship type can be mapped to.
+    """))
 
 class AARelation(ReferencedEntity, CuratedMixin):
     """
@@ -1756,6 +1859,8 @@ class AARelation(ReferencedEntity, CuratedMixin):
     Controlled term specifying the nature of the relationship
     (the predicate between the subject and object).
     """))
+
+    aar_type = models.ForeignKey(AARelationType, null=True, on_delete=models.SET_NULL)
 
     type_free = models.CharField(max_length=255, blank=True,
                                  help_text=help_text("""
@@ -1796,7 +1901,6 @@ class AARelation(ReferencedEntity, CuratedMixin):
     def __str__(self):
         values = (self.subject, self._render_type_controlled(), self.object)
         return u'{0} - {1} - {2}'.format(*values)
-
 
 class CCRelation(ReferencedEntity, CuratedMixin):
     """

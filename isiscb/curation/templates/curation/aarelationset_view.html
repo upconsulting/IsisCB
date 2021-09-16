@@ -1,0 +1,26 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+
+<h1>AARelation Set: {{ instance.name }}</h1>
+
+<p>
+  <a href="{% url 'curation:create_aartype' instance.id %}" class="btn btn-sm btn-primary">Create new AARelationType</a>
+</p>
+<p>
+<ul class="list-group">
+{% for aartype in instance.relation_types.all %}
+  <li class="list-group-item">
+    <a href="{% url 'curation:edit_aartype' instance.id aartype.id %}">{{ aartype.name }}</a>
+    {% if aartype.description %}<span class="text-muted">({{ aartype.description }})</span>{% endif %}
+    <span class="label label-primary">{{ aartype.get_relation_type_controlled_display }}</span>
+    <span class="label label-default">{{ aartype.get_base_type_display }}</span>
+
+    <span class="pull-right">ID for bulk import: {{ aartype.id }}</span>
+  </li>
+{% endfor %}
+</ul>
+</p>
+
+{% endblock %}

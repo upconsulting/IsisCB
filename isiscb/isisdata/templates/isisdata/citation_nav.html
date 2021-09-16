@@ -1,82 +1,105 @@
 <!-- Topics list -->
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 {% if subjects %}
-<h4 class="panel-title">
-  Topics
-</h4>
-<!-- CSS class not being applied, hence this uglyness -->
-<ul class="topics_list">
-    {% for subject in subjects %}
-    {% if subject.authority %}
-    <li>
-        <a href="{% url 'authority' subject.authority.id %}">
-        {{ subject.authority.name }} <i class="fa fa-info-circle"></i>
-        </a>
-    </li>
-    {% endif %}
-    {% endfor %}
-</ul>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      Topics
+    </h4>
+  </div>
+  <div class="panel-body" style="padding: 5px;">
+    <!-- CSS class not being applied, hence this uglyness -->
+    <ul class="topics_list">
+        {% for subject in subjects %}
+        {% if subject.authority %}
+        <li>
+            <a href="{% url 'authority' subject.authority.id %}">
+            {{ subject.authority.name }} <i class="fa fa-info-circle"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endif %}
 <!-- End Topics list -->
 
 <!-- Time Periods list -->
 {% if time_periods %}
-<h4 class="panel-title">
-  Time Periods
-</h4>
-<!-- CSS class not being applied, hence this uglyness -->
-<ul class="topics_list">
-    {% for time in time_periods %}
-    {% if time.authority %}
-    <li>
-        <a href="{% url 'authority' time.authority.id %}">
-        {{ time.authority.name }} <i class="fa fa-info-circle"></i>
-        </a>
-    </li>
-    {% endif %}
-    {% endfor %}
-</ul>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      Time Periods
+    </h4>
+  </div>
+  <div class="panel-body" id="collapseTimePeriods" style="padding: 5px;">
+    <!-- CSS class not being applied, hence this uglyness -->
+    <ul class="topics_list">
+        {% for time in time_periods %}
+        {% if time.authority %}
+        <li>
+            <a href="{% url 'authority' time.authority.id %}">
+            {{ time.authority.name }} <i class="fa fa-info-circle"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endif %}
 <!-- End Time Periods list -->
 
 <!-- Places list -->
 {% if places %}
-<h4 class="panel-title">
-    Places
-</h4>
-<!-- CSS class not being applied, hence this uglyness -->
-<ul class="topics_list">
-    {% for place in places %}
-    {% if place.authority %}
-    <li>
-        <a href="{% url 'authority' place.authority.id %}">
-        {{ place.authority.name }} <i class="fa fa-info-circle"></i>
-        </a>
-    </li>
-    {% endif %}
-    {% endfor %}
-</ul>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      Places
+    </h4>
+  </div>
+  <div class="panel-body" id="collapsePlaces" style="padding: 5px;">
+    <!-- CSS class not being applied, hence this uglyness -->
+    <ul class="topics_list">
+        {% for place in places %}
+        {% if place.authority %}
+        <li>
+            <a href="{% url 'authority' place.authority.id %}">
+            {{ place.authority.name }} <i class="fa fa-info-circle"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endif %}
 <!-- End Places list -->
 
 <!-- Categories list -->
 {% if categories %}
-<h4 class="panel-title">
-  <a data-toggle="collapse" data-parent="#accordion"
-    href="#collapseCategories">
-    Categories
-  </a>
-</h4>
-<!-- CSS class not being applied, hence this uglyness -->
-<ul class="topics_list">
-  {% for category in categories %}
-    {% if category.authority %}
-    <li>
-        <a href="{% url 'authority' category.authority.id %}">
-        {{ category.authority.name }} <i class="fa fa-info-circle"></i>
-        </a>
-    </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      Categories
+    </h4>
+  </div>
+  <div class="panel-body" id="collapseCategories" style="padding: 5px;">
+    <!-- CSS class not being applied, hence this uglyness -->
+    <ul class="topics_list">
+      {% for category in categories %}
+        {% if category.authority %}
+        <li>
+            <a href="{% url 'authority' category.authority.id %}">
+            {{ category.authority.name }} <i class="fa fa-info-circle"></i>
+            </a>
+        </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endif %}
+</div>
 <!-- End Categories list -->

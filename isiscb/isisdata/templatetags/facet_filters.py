@@ -70,3 +70,15 @@ def create_facet_with_field(facet, field):
 @register.filter
 def are_reviews_excluded(url):
     return 'excluded_facets=citation_type:Review' in url
+
+@register.filter
+def are_stubs_excluded(url):
+    return 'excluded_facets=citation_stub_record_status:SR' in url
+
+@register.filter
+def add_excluded_stub_record_status_facet(url, facet):
+    facet_str = 'citation_stub_record_status:' + urllib.parse.quote(facet)
+    if 'selected_facets=' + facet_str in url:
+        url = url.replace('selected_facets=' + facet_str, '')
+    url = url + '&excluded_facets=' + facet_str
+    return url.replace('&&', '&')
