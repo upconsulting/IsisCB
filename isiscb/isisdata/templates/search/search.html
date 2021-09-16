@@ -1,6 +1,7 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
 {% load metadata_filters %}
+{% load facet_filters %}
 {% block title %}Search{% endblock %}
 
 {% block meta_tags %}
@@ -14,10 +15,14 @@
 //# sourceURL=dynamicScript.js
 $(document).ready(function() {
   if ('{{models.0}}' == 'isisdata.citation') {
-    $('#search_tabs li:eq(0) a').tab('show')
+    $('a[href="#citations"]').tab('show')
+    $('#authorities-tab').removeClass("active")
+    $('#citations-tab').addClass("active")
   }
   if ('{{models.0}}' == 'isisdata.authority') {
-    $('#search_tabs li:eq(1) a').tab('show')
+    $('a[href="#authorities"]').tab('show')
+    $('#citations-tab').removeClass("active")
+    $('#authorities-tab').addClass("active")
   }
 });
 </script>
@@ -29,26 +34,73 @@ $(document).ready(function() {
     <div class="row">
 
         <div class="col-sm-12 col-md-12">
-            <ul id="search_tabs" class="nav nav-tabs space-top hidden-print" role="tablist">
-                <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
-                <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
-                <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
-                <li class="no-tab pull-right">
-                    <div class="topnav text-center">
-                        {% include "isisdata/navbuttons.html" %}
-                    </div>
-                </lu>
-            </ul>
+            <div class="row search-header">
+              <div class="col-sm-3 col-md-3">
+                <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist">
+                   <a id="citations-tab" href="#citations" class="btn btn-default active" role="tab" data-toggle="tab">
+                     <input type="radio" />Citations ({{ count_citation }})
+                   </a>
+                   <a id="authorities-tab" href="#authorities" class="btn btn-default" role="tab" data-toggle="tab">
+                     <input type="radio" />Authorities ({{ count_authority }})
+                   </a>
+                </div>
+              </div>
+            </div>
 
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="citations">
 
                     <div class="row space-top">
-                        <div class="col-sm-4 col-md-3 ">
+                      <div class="col-sm-12 col-md-12">
+                          <ol class="breadcrumb">
+                                  <li>Results for: <b><i>"{{ query }}"</i></b></li>
+
+                            {% if selected_facets.citation_persons_ids %}
+                              {% for author in selected_facets.citation_persons_ids %}
+                                  <li class="search-breadcrumb-item">{{author|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                            {% if selected_facets.citation_concepts_by_subject_ids_exact %}
+                              {% for concept in selected_facets.citation_concepts_by_subject_ids_exact %}
+                                  <li class="search-breadcrumb-item">{{concept|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                            {% if selected_facets.citation_time_period_ids_exact %}
+                              {% for time in selected_facets.citation_time_period_ids_exact %}
+                                  <li class="search-breadcrumb-item">{{time|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                            {% if selected_facets.citation_geographic_ids_exact %}
+                              {% for place in selected_facets.citation_geographic_ids_exact %}
+                                  <li class="search-breadcrumb-item">{{place|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                            {% if selected_facets.citation_institutions_by_subject_ids_exact %}
+                              {% for institution in selected_facets.citation_institutions_by_subject_ids_exact %}
+                                  <li class="search-breadcrumb-item">{{institution|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                            {% if selected_facets.citation_people_by_subject_ids_exact %}
+                              {% for person in selected_facets.citation_people_by_subject_ids_exact %}
+                                  <li class="search-breadcrumb-item">{{person|get_authority_name}}</li>
+                              {% endfor %}
+                            {% endif %}
+
+                                  <li>Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results</li>
+                          </ol>
+                      </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6 ">
                             {% include "search/search_facets_citations.html" %}
                         </div>
 
-                        <div class="col-sm-8 col-md-9 ">
+                        <div class="col-sm-6 col-md-6 ">
                             {% include "search/search_results_citations.html" %}
                         </div>
                     </div>
