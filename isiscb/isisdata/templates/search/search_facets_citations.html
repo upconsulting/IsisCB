@@ -437,7 +437,7 @@
         <ul class="unselected_facets">
           {% for time_period in facets_citation.fields.time_period_ids %}
           {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="far fa-square"></i> </a>({{ time_period.1 }}) <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?">{{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }})</li>
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}"><i class="far fa-square"></i> </a> <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?">{{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }})</li>
           {% endif %}
           {% endfor %}
         </ul>
@@ -544,46 +544,3 @@
     </div>
   </div>
 </div><!-- /modal -->
-
-<!-- publisher Modal -->
-<!-- <div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Book Publisher</h4>
-      </div>
-      <div class="modal-body">
-        <ul class="unselected_facets">
-          {% for publisher in facets_citation.fields.publishers %}
-          {% if "citation_publishers_exact" not in selected_facets.keys or publisher.0 not in selected_facets.citation_publishers_exact %}
-              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_publishers_exact:{{ publisher.0|urlencode }}"><i class="far fa-square"></i> {{ publisher.0 }} </a>({{ publisher.1 }})</li>
-          {% endif %}
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div> -->
-<!-- /modal -->
-
-<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
-<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
-<script>
-$("input[name='exclude_reviews']").bootstrapSwitch({
-  'size':'mini',
-  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
-  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
-});
-
-$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
-  if (includeReviews) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
-  }
-});
-</script>

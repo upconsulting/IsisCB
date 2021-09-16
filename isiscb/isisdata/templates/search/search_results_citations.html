@@ -133,6 +133,8 @@
             <i class="fa fa-photo-video"></i>
           {% elif result.type == "Chapter" %}
             <i class="fa fa-book-open"></i>
+          {% else %}
+            <i class="far fa-file-alt"></i>
           {% endif %}
 
           [{{ result.type }}]
@@ -257,7 +259,7 @@
             {% if page.citation.number >= 4 and p == first %}
               <li {% if page.citation.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ first }}</a></li>
               <li class="disabled"><span>...</span></li>
-            {% elif page.citation.number <= p|add:"2" and page.citation.number >= p|add:"-5" %}
+            {% elif page.citation.number <= p|add:"2" and page.citation.number >= p|add:"-4" %}
               <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
             {% elif p == last %}
               <li class="disabled"><span>...</span></li>
@@ -298,38 +300,20 @@
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}
 
-{{ facets_citation.fields.publication_date|json_script:"publicationDateData" }}
+<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
+<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
+<script>
+$("input[name='exclude_reviews']").bootstrapSwitch({
+  'size':'mini',
+  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+});
 
-<script type="text/javascript">
-  let publicationDates = JSON.parse(document.getElementById('publicationDateData').textContent);
-
-  let publicationDateRange = [];
-
-  publicationDates.map(date => {
-    publicationDateRange.push(Number(date[0]));
-  })
-
-  publicationDateRange = publicationDateRange.filter(date => {
-    return !isNaN(date) && date.toString().length == 4;
-  })
-
-  let minDate = Math.min.apply(null, publicationDateRange);
-
-  let maxDate = Math.max.apply(null, publicationDateRange);
-
-  console.log(publicationDateRange);
-
-  $( function() {
-    $( "#slider-range" ).slider({
-      range: true,
-      min: minDate,
-      max: maxDate,
-      values: [ minDate, maxDate ],
-      slide: function( event, ui ) {
-        $( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
-      }
-    });
-    $( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) +
-      " - " + $( "#slider-range" ).slider( "values", 1 ) );
-  } );
-  </script>
+$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
+  if (includeReviews) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+  }
+});
+</script>
