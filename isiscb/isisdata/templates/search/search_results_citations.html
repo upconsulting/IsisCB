@@ -82,12 +82,12 @@
                 <div class="col-md-12" style="padding-top: 10px;">
                   <small>
                   {% if request.get_full_path|are_reviews_excluded %}
-                  <input type="checkbox" name="exclude_reviews" >
+                  <input type="checkbox" class="toggleBtn" name="exclude_reviews" >
 
                     <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"> Book Reviews are excluded</a>
                   {% endif %}
                   {% if not request.get_full_path|are_reviews_excluded %}
-                  <input type="checkbox" name="exclude_reviews" checked>
+                  <input type="checkbox" class="toggleBtn" name="exclude_reviews" checked>
                   <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"> Book Reviews are included</a>
                   {% endif %}
                 </small>
@@ -96,12 +96,12 @@
                 <div class="col-md-12" style="padding-top: 10px;">
                   <small>
                   {% if request.get_full_path|are_stubs_excluded %}
-                  <input type="checkbox" name="exclude_reviews" >
+                  <input type="checkbox" class="toggleBtn" name="exclude_stubs" >
 
                     <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
                   {% endif %}
                   {% if not request.get_full_path|are_stubs_excluded %}
-                  <input type="checkbox" name="exclude_reviews" checked>
+                  <input type="checkbox" class="toggleBtn" name="exclude_stubs" checked>
                   <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
                   {% endif %}
                 </small>
@@ -303,7 +303,7 @@
 <link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
 <script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
 <script>
-$("input[name='exclude_reviews']").bootstrapSwitch({
+$("input.toggleBtn").bootstrapSwitch({
   'size':'mini',
   'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
   'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
@@ -314,6 +314,14 @@ $('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(e
     window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
   } else {
     window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+  }
+});
+
+$('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
+  if (includeStubs) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
   }
 });
 </script>
