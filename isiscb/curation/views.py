@@ -2460,6 +2460,7 @@ def export_citations(request):
             export_linked_records = form.cleaned_data.get('export_linked_records')
             export_metadata = form.cleaned_data.get('export_metadata', False)
             use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
+            use_preset = form.cleaned_data.get('use_preset', False)
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2474,7 +2475,8 @@ def export_citations(request):
             # configuration for export
             config = {
                 'authority_delimiter': " || " if use_pipe_delimiter else " ",
-                'export_metadata': export_metadata
+                'export_metadata': export_metadata,
+                'use_preset': use_preset
             }
 
             export_tasks = {
