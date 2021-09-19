@@ -99,6 +99,15 @@ def bulk_update_citations(user_id, filter_params_raw, field, value, task_id=None
 @shared_task
 def export_to_csv(user_id, path, fields, filter_params_raw, task_id=None, export_type='Citation', export_extra=True, config={}):
     print('export to csv:: %s' % str(task_id))
+    # IEXP-302 (A) a preset export for only the following fields
+    if config['use_preset']:
+        fields = ['record-id', 'title', 'record-type', 'subtype', 'edition-details', 'description', 'language',
+        'physical-details', 'pages-free-text', 'record-nature', 'fullyentered', 'proofed', 'spw-checked', 'published-print',
+        'journal-volume', 'journal-issue', 'extent', 'linked-data', 'attributes', 'related-authorities', 'related-citations',
+        'abstract', 'staff-notes', 'record-history', 'dataset', 'complete-citation', 'stub-record-status', 'created-date',
+        'modified-date', 'creator', 'modifier']
+        config['authority_delimiter'] = " || "
+
     if config['export_metadata']:
         fields.append('creator')
         fields.append('modifier')
