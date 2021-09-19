@@ -3,57 +3,169 @@
 {% load citation_filters %}
 {% load search_filters %}
 {% load facet_filters %}
+{% load static %}
 
+{% block extra_head %}
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+{% endblock %}
+
+{% if query %}
 <div class="row">
-  <div class="col-md-8">
-    <h3><span class="visible-print-inline">Citations </span>Search Results</h3>
-    <div class="results-info">Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results.</div>
-  </div>
-  <div class="col-md-4 menuContainer">
+  <div class="col-md-12 menuContainer">
+    <div class="panel-group hidden-print" id="type_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href="#collapseTypes" class="accordion-toggle">
+              Sort & Filter
+            </a>
+          </h4>
+        </div>
+        <div id="collapseTypes" class="panel-collapse collapse">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row" style="margin-bottom:10px;">
+              <div class="col-md-12 panel-cell" style="padding-top:4px">
+                <div class="dropdown hidden-print">
+                  {% if sort_order_dir_citation == 'descend' %}
+                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                  {% else %}
+                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                  {% endif %}
+                  <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+                    Sort by: {{ sort_order_citation|get_current_sort_order_citation }}
+                      <span class="caret"></span>
+                  </button>
 
-    <div class="dropdown pull-right hidden-print">
-      {% if sort_order_dir_citation == 'descend' %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
-      {% else %}
-      <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
-      {% endif %}
-      <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
-        Sort by: {{ sort_order_citation|get_current_sort_order_citation }}
-          <span class="caret"></span>
-      </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
+                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
+                    <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
+                    <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
+                  </ul>
+                </div>
+                <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+              </div>
+            </div>
+            <hr style="margin-top: 4px; margin-bottom: 4px;">
 
-      <ul class="dropdown-menu pull-right" aria-labelledby="dropdownMenu1">
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
-        <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
-        <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
-      </ul>
-      <div class="clearfix" style="padding-top: 10px">
-        {% if request.get_full_path|is_has_reviews %}
-        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-on" aria-hidden="true"></i>
- Showing only citations with reviews</a>
-        {% else %}
-        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-off" aria-hidden="true"></i>
- Show only citations with reviews</a>
-        {% endif %}
-      </div>
-      <div class="clearfix">
-        {% if request.get_full_path|is_has_personal_recognition %}
-        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-on" aria-hidden="true"></i>
- Showing only citations with awards</a>
-        {% else %}
-        <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator }}"> <i class="fa fa-toggle-off" aria-hidden="true"></i>
- Show only citations with awards</a>
-        {% endif %}
+            <div class="row panel-row">
+              <div class="col-md-6 panel-cell">
+                <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
+
+                {% if facets_citation.fields.type %}
+                  <div class="col-md-12">
+                    {% for type in selected_facets.citation_type %}
+                    {% with type|create_facet_string:'citation_type' as encoded_type %}
+                    <div class="col-md-12">
+                      <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i> {{ type }}</a>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+
+                    {% for type in facets_citation.fields.type %}
+                    {% if type.0 %}
+                    {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
+                    <div class="col-md-12">
+                      <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i> {{ type.0 }}</a> ({{ type.1 }})
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+
+                  </div>
+
+                {% else %}
+                  <div class="row panel-row">
+                    <div class="col-md-12 panel-cell">
+                      <p>No type facets.</p>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col-md-6 panel-cell">
+                <div class="col-md-12" style="padding-top: 10px;">
+                  <small>
+                  {% if request.get_full_path|are_reviews_excluded %}
+                  <input type="checkbox" class="toggleBtn" name="exclude_reviews" >
+
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"> Book Reviews are excluded</a>
+                  {% endif %}
+                  {% if not request.get_full_path|are_reviews_excluded %}
+                  <input type="checkbox" class="toggleBtn" name="exclude_reviews" checked>
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"> Book Reviews are included</a>
+                  {% endif %}
+                </small>
+                </div>
+
+                <div class="col-md-12" style="padding-top: 5px;">
+                  <small>
+                    {% if request.get_full_path|are_stubs_excluded %}
+                    <input type="checkbox" class="toggleBtn" name="exclude_stubs" >
+
+                      <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+                    {% endif %}
+                    {% if not request.get_full_path|are_stubs_excluded %}
+                    <input type="checkbox" class="toggleBtn" name="exclude_stubs" checked>
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
+                    {% endif %}
+                  </small>
+                </div>
+
+                <div class="col-md-12" style="padding-top: 5px;">
+                  <small>
+                    {% if request.get_full_path|is_has_reviews %}
+                    <input type="checkbox" class="toggleBtn" name="has_reviews" checked>
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator }}">
+                      Showing only citations with reviews</a>
+                    {% else %}
+                    <input type="checkbox" class="toggleBtn" name="has_reviews" >
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator }}">
+                      Show only citations with reviews</a>
+                    {% endif %}
+                  </small>
+                </div>
+
+                <div class="col-md-12" style="padding-top: 5px;">
+                  <small>
+                    {% if request.get_full_path|is_has_personal_recognition %}
+                    <input type="checkbox" class="toggleBtn" name="has_awards" checked>
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator }}">
+             Showing only citations with awards</a>
+                    {% else %}
+                    <input type="checkbox" class="toggleBtn" name="has_awards" >
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator }}">
+             Show only citations with awards</a>
+                    {% endif %}
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
   </div>
 </div>
 
     {% for result in page.citation.object_list %}
     <p>
-          <span class="glyphicon glyphicon-book"></span>
+          {% if result.type == "Book" %}
+            <i class="fa fa-book"></i>
+          {% elif result.type == "Article" or result.type == "Review" %}
+            <i class="far fa-file-alt"></i>
+          {% elif result.type == "Thesis" %}
+            <i class="fa fa-graduation-cap"></i>
+          {% elif result.type == "Multimedia object" %}
+            <i class="fa fa-photo-video"></i>
+          {% elif result.type == "Chapter" %}
+            <i class="fa fa-book-open"></i>
+          {% else %}
+            <i class="far fa-file-alt"></i>
+          {% endif %}
+
           [{{ result.type }}]
 
           <br>
@@ -134,8 +246,8 @@
                     });
                 </script>
             </span>
-
         </p>
+
         {% if result.reviews_data %}
         <div style="margin-left: 30px; margin-top: -10px;">
         Reviewed by:
@@ -161,22 +273,15 @@
         </div>
         {% endif %}
     {% empty %}
-        <p>No results found.</p>
+        <h3>No results found . . . <i class="fas fa-child"></i></h3>
     {% endfor %}
+
     {% if page.citation.has_previous or page.citation.has_next %}
     <nav class="hidden-print">
       <ul class="pagination">
+
         <li class="disabled"><a>Go to page:</a></li>
           {% if page.citation.has_previous %}
-          <li>
-            {% with pagenr=1|stringformat:"s" %}
-            {% with ppage="page_citation:"|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="First">
-              <span aria-hidden="true">First</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
           <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
             {% with ppage="page_citation:"|add:pagenr %}
@@ -188,33 +293,38 @@
           </li>
           {% else %}
           <li class="disabled">
-            {% with pagenr=1|stringformat:"s"  %}
-            {% with ppage='page_citation:'|add:pagenr %}
-            <a aria-label="First">
-              <span aria-hidden="true">First</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s"  %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a aria-label="Previous">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Previous">
               <span aria-hidden="true">&laquo;</span>
             </a>
             {% endwith %}
             {% endwith %}
           </li>
           {% endif %}
+
           {% if page.citation.has_previous or page.citation.has_next %}
-          {% for p in page.citation.paginator|get_page_range:page.citation.number %}
-          {% with pagenr=p|stringformat:"s" %}
+          {% for p in page.citation.paginator.page_range %}
+          {% with pagenr=forloop.counter|stringformat:"s" %}
           {% with ppage='page_citation:'|add:pagenr %}
+          {% with page.citation.paginator.page_range|last as last %}
+          {% with page.citation.paginator.page_range|first as first %}
+            {% if page.citation.number >= 4 and p == first %}
+              <li {% if page.citation.number == first %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ first }}</a></li>
+              <li class="disabled"><span>...</span></li>
+            {% elif page.citation.number <= p|add:"2" and page.citation.number >= p|add:"-4" %}
               <li {% if page.citation.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ p }}</a></li>
+            {% elif p == last %}
+              <li class="disabled"><span>...</span></li>
+              <li {% if page.citation.number == last %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}">{{ last }}</a></li>
+            {% endif %}
+          {% endwith %}
+          {% endwith %}
           {% endwith %}
           {% endwith %}
           {% endfor %}
           {% endif %}
+
           {% if page.citation.has_next %}
           <li>
             {% with pagenr=page.citation.next_page_number|stringformat:"s" %}
@@ -225,30 +335,12 @@
             {% endwith %}
             {% endwith %}
           </li>
-          <li>
-            {% with pagenr=page.citation.paginator.num_pages|stringformat:"s" %}
-            {% with ppage='page_citation:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Last">
-              <span aria-hidden="true">Last</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
           {% else %}
           <li class="disabled">
             {% with pagenr=page.citation.number|stringformat:"s" %}
             {% with ppage='page_citation:'|add:pagenr %}
-            <a aria-label="Next">
+            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.citation' }}" aria-label="Next">
               <span aria-hidden="true">&raquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          <li class="disabled">
-            {% with pagenr=page.citation.paginator.num_pages|stringformat:"s" %}
-            {% with ppage='page_citation:'|add:pagenr %}
-            <a aria-label="Last">
-              <span aria-hidden="true">Last</span>
             </a>
             {% endwith %}
             {% endwith %}
@@ -257,3 +349,48 @@
         </ul>
       </nav>
       {% endif %}
+{% else %}
+    {# Show some example queries to run, maybe query syntax, something else? #}
+{% endif %}
+
+<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
+<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
+<script>
+$("input.toggleBtn").bootstrapSwitch({
+  'size':'mini',
+  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+});
+
+$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
+  if (includeReviews) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+  }
+});
+
+$('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
+  if (includeStubs) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
+  }
+});
+
+$('input[name="has_reviews"]').on('switchChange.bootstrapSwitch', function(event, onlyHasReviews) {
+  if (onlyHasReviews) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator|safe }}"
+  } else {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator|safe }} "
+  }
+});
+
+$('input[name="has_awards"]').on('switchChange.bootstrapSwitch', function(event, onlyHasAwards) {
+  if (onlyHasAwards) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator|safe }}"
+  }
+});
+</script>
