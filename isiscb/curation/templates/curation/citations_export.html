@@ -26,15 +26,6 @@
         $(".form-group input[type=checkbox]").prop( "disabled", true );
       }
     })
-    $("#id_use_preset").change(function() {
-      if ($("#id_use_preset").prop("checked") == true) {
-        $("#id_fields").prop('required',false);
-        $("#id_fields").prop('disabled', true);
-      } else {
-        $("#id_fields").prop('required',true);
-        $("#id_fields").prop('disabled', false);
-      }
-    })
   })
 </script>
 <form class="form" action="?confirmed=true" method="POST">
