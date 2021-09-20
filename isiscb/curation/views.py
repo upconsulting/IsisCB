@@ -2488,12 +2488,15 @@ def export_citations(request):
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
-            export_task = export_tasks.get(form.cleaned_data.get('export_format', 'CSV'), None)
+            format = form.cleaned_data.get('export_format', 'CSV')
+            export_task = export_tasks.get(format, None)
             if export_task:
                 result = export_task.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)
             else:
+                if format == 'SWP_PRESET':
+                    config['use_preset'] = True
                 result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)
