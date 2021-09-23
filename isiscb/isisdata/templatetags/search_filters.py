@@ -6,7 +6,7 @@ from isisdata.models import *
 import base64, urllib.request, urllib.parse, urllib.error
 
 from urllib.parse import quote
-import codecs
+import codecs, re
 
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 
@@ -58,3 +58,7 @@ def get_page_range(paginator, current_page):
 @register.filter
 def get_data_parts(review_string):
     return review_string.split("##")
+
+@register.filter
+def remove_range_filter(url):
+    return re.sub(r"(&range_filters=.*?)($|&)", r"\2", url)

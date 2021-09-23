@@ -1135,6 +1135,16 @@ class IsisSearchView(FacetedSearchView):
         extra['sort_order_dir_citation'] = self.request.GET.get('sort_order_dir_citation')
         extra['sort_order_dir_authority'] = self.request.GET.get('sort_order_dir_authority')
 
+        if self.request.GET.get('range_filters'):
+            for range_filter in self.request.GET.getlist('range_filters'):
+                if ":" not in range_filter:
+                    continue
+
+                field, value = range_filter.split(":", 1)
+                start, end = value.split("-")
+                extra[field + "_start"] = start
+                extra[field + "_end"] = end
+
         # we need to change something about this, this is terrible...
         # but it works
         if not extra['sort_order_dir_citation'] and (not extra['sort_order_citation'] or 'publication_date_for_sort' in extra['sort_order_citation']):

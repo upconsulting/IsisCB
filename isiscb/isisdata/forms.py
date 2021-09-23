@@ -190,10 +190,18 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
             if range_filters_split_citation:
                 for field in range_filters_split_citation:
-                    sqs_citation = sqs_citation.filter(**{field + "__range": range_filters_split_citation[field].split("-")})
+                    start_end = range_filters_split_citation[field].split("-")
+                    if start_end[0]:
+                        sqs_citation = sqs_citation.filter(**{field + "__gte": start_end[0]})
+                    if start_end[1]:
+                        sqs_citation = sqs_citation.filter(**{field + "__lte": start_end[1]})
             if range_filters_split_authority:
+                start_end = range_filters_split_authority[field].split("-")
                 for field in range_filters_split_authority:
-                    results_authority = results_authority.filter(**{field + "__range": range_filters_split_authority[field].split("-")})
+                    if start_end[0]:
+                        sqs_authority = sqs_authority.filter(**{field + "__gte": start_end[0]})
+                    if start_end[1]:
+                        sqs_authority = sqs_authority.filter(**{field + "__lte": start_end[1]})
 
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)

@@ -52,7 +52,7 @@
             <hr style="margin-top: 4px; margin-bottom: 4px;">
 
             <div class="row panel-row">
-              <div class="col-md-6 panel-cell">
+              <div class="col-md-5 panel-cell">
                 <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
 
                 {% if facets_citation.fields.type %}
@@ -85,7 +85,7 @@
                   </div>
                 {% endif %}
               </div>
-              <div class="col-md-6 panel-cell">
+              <div class="col-md-7 panel-cell">
                 <div class="col-md-12" style="padding-top: 10px;">
                   <small>
                   {% if request.get_full_path|are_reviews_excluded %}
@@ -139,6 +139,12 @@
                     <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator }}">
              Show only citations with awards</a>
                     {% endif %}
+                  </small>
+                </div>
+
+                <div class="col-md-12" style="padding-top: 5px;">
+                  <small>
+                    Filter by publication date from <input type="text" {% if citation_publication_date_date_field_start %}value="{{ citation_publication_date_date_field_start }}"{% endif %} id="pub_start" size="6"> to <input type="text" {% if citation_publication_date_date_field_end %}value="{{ citation_publication_date_date_field_end }}"{% endif %} id="pub_end" size="6"> <a href="#" id="pubdate_filter"><i class="fa fa-filter" aria-hidden="true"></i></a>
                   </small>
                 </div>
               </div>
@@ -356,41 +362,74 @@
 <link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
 <script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
 <script>
-$("input.toggleBtn").bootstrapSwitch({
-  'size':'mini',
-  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
-  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
-});
+  //# sourceURL=filters.js
+  $(function() {
+    $("input.toggleBtn").bootstrapSwitch({
+      'size':'mini',
+      'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+      'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+    });
 
-$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
-  if (includeReviews) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
-  }
-});
+    $('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
+      if (includeReviews) {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
+      } else {
+        window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+      }
+    });
 
-$('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
-  if (includeStubs) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
-  }
-});
+    $('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
+      if (includeStubs) {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
+      } else {
+        window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
+      }
+    });
 
-$('input[name="has_reviews"]').on('switchChange.bootstrapSwitch', function(event, onlyHasReviews) {
-  if (onlyHasReviews) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator|safe }}"
-  } else {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator|safe }} "
-  }
-});
+    $('input[name="has_reviews"]').on('switchChange.bootstrapSwitch', function(event, onlyHasReviews) {
+      if (onlyHasReviews) {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_reviews:true'|add_facet_or_operator|safe }}"
+      } else {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_reviews:true'|add_facet_or_operator|safe }} "
+      }
+    });
 
-$('input[name="has_awards"]').on('switchChange.bootstrapSwitch', function(event, onlyHasAwards) {
-  if (onlyHasAwards) {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator|safe }} "
-  } else {
-    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator|safe }}"
-  }
-});
+    $('input[name="has_awards"]').on('switchChange.bootstrapSwitch', function(event, onlyHasAwards) {
+      if (onlyHasAwards) {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_selected_facet:'citation_has_personal_recognition:true'|add_facet_or_operator|safe }} "
+      } else {
+        window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'selected_facets=citation_has_personal_recognition:true'|add_facet_or_operator|safe }}"
+      }
+    });
+
+    function filterByPubDate(e) {
+      e.preventDefault();
+      var start = $("#pub_start").val();
+      var end = $("#pub_end").val();
+      var range = [];
+      if (start != undefined) {
+        range.push(start)
+      } else {
+        range.push("")
+      }
+      if (end != undefined) {
+        range.push(end)
+      } else {
+        range.push("")
+      }
+      window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_range_filter|safe }}" + "&range_filters=citation_publication_date_date_field:" + range.join("-");
+    }
+
+    $("#pub_start").on('keypress',function(e) {
+        if(e.which == 13) {
+            filterByPubDate(e);
+        }
+    });
+    $("#pub_end").on('keypress',function(e) {
+        if(e.which == 13) {
+            filterByPubDate(e);
+        }
+    });
+    $("#pubdate_filter").click(filterByPubDate)
+  });
 </script>
