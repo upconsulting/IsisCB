@@ -226,6 +226,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         else:
             identifier, data = obj      # groupby yields keys and iterators.
 
+        print("Preparing " + str(identifier))
         # We need to able to __getitem__, below.
         data = [row for row in data]
         self.prepared_data = {
@@ -627,7 +628,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         return ''
 
     def prepare_publication_date_date_field(self, data):
-        print(data['publication_date'])
         if data['publication_date']:
             return data['publication_date']
         return None
