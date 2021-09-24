@@ -1210,7 +1210,7 @@ class Citation(ReferencedEntity, CuratedMixin):
     @property
     def get_authors_string(self):
         authors = self.all_acrelations.filter(public=True).filter(type_controlled=ACRelation.AUTHOR).order_by('data_display_order')
-        author_string = ";".join([acrel.name_for_display_in_citation for acrel in authors[:3]])
+        author_string = ";".join([acrel.name_for_display_in_citation if acrel.name_for_display_in_citation else "" for acrel in authors[:3]])
         if len(authors) > 3:
             author_string += "; et al."
         return author_string
