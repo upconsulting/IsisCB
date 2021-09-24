@@ -8,6 +8,8 @@ from django.conf import settings
 from isisdata.models import *
 from isisdata.tasks import _get_filtered_object_queryset
 import haystack
+import traceback
+
 
 import math
 
@@ -35,5 +37,6 @@ def reindex_citations(user_id, filter_params_raw, task_id=None, object_type='CIT
     except Exception as E:
         print('bulk_update_citations failed for %s' % filter_params_raw, end=' ')
         print(E)
+        traceback.print_exc()
         task.state = 'FAILURE'
         task.save()
