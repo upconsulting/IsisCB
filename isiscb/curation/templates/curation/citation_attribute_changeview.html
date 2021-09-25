@@ -172,6 +172,19 @@ $(document).ready(function() {
     var type = $('#id_attribute-type_controlled option').filter(function () { return $(this).html().startsWith(typeControlled + " ("); }).attr('selected','');
     $("#id_attribute-type_controlled").trigger('change')
   }
+
+  $("[data-type='citation_id']").change(function() {
+    $.ajax({
+      url: "{% url 'curation:api_citation' %}" + "?id=" + $("[data-type='citation_id']").val(),
+      success: function(data) {
+        $("#ajax_errors").text("")
+        $("#id_value-citation_name").val(data['title'])
+      },
+      error: function(data) {
+        $("#ajax_errors").html('<i class="fa fa-warning" aria-hidden="true"></i> Citation with provided id could not be found.')
+      }
+    });
+  });
 });
 </script>
 
