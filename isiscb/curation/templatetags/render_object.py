@@ -306,7 +306,7 @@ def order_by(queryset, args):
 
 @register.filter
 def get_other_relation_side(ccrel, elem):
-    if ccrel.subject.id == elem.id:
+    if ccrel.subject and ccrel.subject.id == elem.id:
         return ccrel.object
     return ccrel.subject
 

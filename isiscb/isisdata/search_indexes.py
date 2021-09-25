@@ -456,7 +456,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         def _fill_data(type_controlled, get_citation, id):
             if type_controlled == CCRelation.ASSOCIATED_WITH:
                 ccrelation = CCRelation.objects.filter(pk=id).first()
-                if get_citation(ccrelation).type_controlled == Citation.PERSONAL_RECOGNITION and id not in multivalue_data['personal_recognition_ids']:
+                if get_citation(ccrelation) and get_citation(ccrelation).type_controlled == Citation.PERSONAL_RECOGNITION and id not in multivalue_data['personal_recognition_ids']:
                     multivalue_data['personal_recognition_ids'].append(id)
                     if ccrelation:
                         multivalue_data['personal_recognition_data'] = _build_data_string(get_citation(ccrelation))
