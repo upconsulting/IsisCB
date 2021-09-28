@@ -48,8 +48,8 @@
                    {# Provide only the top 10 authors #}
                    {% for author in facets_citation.fields.persons_ids|slice:":10" %}
                    {% if "citation_persons_ids" not in selected_facets.keys or author.0 not in selected_facets.citation_persons_ids %}
-                   <div class="col-md-12">
-                     <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?">{{ author.0|get_authority_name }}</a> ({{ author.1 }})
+                   <div class="col-md-12" style="padding:0 0 0 15px">
+                     <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i></a> ({{ author.1 }}) <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?">{{ author.0|get_authority_name }}</a>
                    </div>
                    {% endif %}
                    {% endfor %}
@@ -115,8 +115,8 @@
 
                   {% for concept in facets_citation.fields.concepts_by_subject_ids|slice:":10" %}
                   {% if "citation_concepts_by_subject_ids_exact" not in selected_facets.keys or concept.0 not in selected_facets.citation_concepts_by_subject_ids_exact %}
-                  <div class="col-md-12">
-                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_concepts_by_subject_ids_exact:{{ concept.0|urlencode }}" title="Show only results involving {{ concept.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{concept.0|get_authority_name}}" href="{% url 'authority' concept.0 %}?">{{ concept.0|get_authority_name }}</a> ({{ concept.1 }})
+                  <div class="col-md-12" style="padding:0 0 0 15px">
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_concepts_by_subject_ids_exact:{{ concept.0|urlencode }}" title="Show only results involving {{ concept.0|get_authority_name }}"><i class="far fa-square"></i> ({{ concept.1 }})</a> | <a title="Go to authority record for {{concept.0|get_authority_name}}" href="{% url 'authority' concept.0 %}?">{{ concept.0|get_authority_name }}</a>
                   </div>
                   {% endif %}
                   {% endfor %}
@@ -180,7 +180,7 @@
 
                   {% for time_period in facets_citation.fields.time_period_ids|slice:":10" %}
                   {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
-                  <div class="col-md-12">
+                  <div class="col-md-12" style="padding:0 0 0 15px">
                     <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}" title="Show only results involving {{ time_period.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?">{{ time_period.0|get_authority_name }}</a> ({{ time_period.1 }})
                   </div>
                   {% endif %}
@@ -242,7 +242,7 @@
 
                   {% for geographic in facets_citation.fields.geographic_ids|slice:":10" %}
                   {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
-                      <div class="col-md-12">
+                      <div class="col-md-12" style="padding:0 0 0 15px">
                         <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}" title="Show only results involving {{ geographic.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?">{{ geographic.0|get_authority_name }}</a> ({{ geographic.1 }})
                       </div>
                   {% endif %}
@@ -307,7 +307,7 @@
 
                 {% for institution in facets_citation.fields.institutions_by_subject_ids|slice:":10" %}
                 {% if "citation_institutions_by_subject_ids_exact" not in selected_facets.keys or institution.0 not in selected_facets.citation_institutions_by_subject_ids_exact %}
-                <div class="col-md-12">
+                <div class="col-md-12" style="padding:0 0 0 15px">
                   <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_institutions_by_subject_ids_exact:{{ institution.0|urlencode }}" title="Show only results involving {{ institution.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{institution.0|get_authority_name}}" href="{% url 'authority' institution.0 %}?">{{ institution.0|get_authority_name }}</a> ({{ institution.1 }})
                 </div>
                 {% endif %}
@@ -397,7 +397,136 @@
     </div>
   </div>
 </div>
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel-group hidden-print" id="publisher-panel">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href="#collapsePublishers" class="accordion-toggle">
+              Publishers <span class="badge {% if selected_facets.citation_publisher_ids  %}active{% endif %}">{{ facets_citation.fields.publisher_ids|length }}</span>
+            </a>
+          </h4>
+        </div>
+        <div id="collapsePublishers" class="panel-collapse collapse in">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row">
+              <div class="col-md-12">
+                <h5><small>Click on an publisher to only see books published by that publisher. </small></h5>
+              </div>
+            </div>
 
+            {% if facets_citation.fields.publisher_ids %}
+
+              <div class="row panel-row">
+
+                {% for publisher in selected_facets.citation_publisher_ids %}
+                {% with publisher|create_facet_string:'citation_publisher_ids' as encoded_publisher %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|remove_facet:encoded_publisher|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{publisher|get_authority_name}}" href="{% url 'authority' publisher %}?">{{publisher|get_authority_name}}</a>
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+                {% if selected_facets.citation_publisher_ids %}
+                <div class="col-md-12">
+                  <hr style="margin-top: 4px; margin-bottom: 4px;">
+                </div>
+                {% endif %}
+
+                {% for publisher in facets_citation.fields.publisher_ids|slice:":10" %}
+                {% if "citation_publisher_ids" not in selected_facets.keys or publisher.0 not in selected_facets.citation_publisher_ids %}
+                <div class="col-md-12" style="padding:0 0 0 15px">
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_publisher_ids:{{ publisher.0|urlencode }}" title="Show only results involving {{ publisher.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{publisher.0|get_authority_name}}" href="{% url 'authority' publisher.0 %}?">{{ publisher.0|get_authority_name }}</a> ({{ publisher.1 }})
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+
+              {% if facets_citation.fields.publisher_ids|length > 10 %}
+              <div class="more-facets">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#publisherModal">
+                  More...
+                </button>
+              </div>
+              {% endif %}
+            {% else %}
+            <div class="col-md-12">
+              <p>No publisher facets.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel-group hidden-print" id="periodical_panel">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion"
+              href="#collapsePeriodicals" class="accordion-toggle">
+              Journals <span class="badge {% if selected_facets.citation_periodical_ids  %}active{% endif %}">{{ facets_citation.fields.periodical_ids|length }}</span>
+            </a>
+          </h4>
+        </div>
+        <div id="collapsePeriodicals" class="panel-collapse collapse in">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row">
+              <div class="col-md-12">
+                <h5><small>Click on a journal to only see articles published in that journal. </small></h5>
+              </div>
+            </div>
+
+            {% if facets_citation.fields.periodical_ids %}
+
+              <div class="row panel-row">
+
+                {% for periodical in selected_facets.citation_periodical_ids %}
+                {% with periodical|create_facet_string:'citation_periodical_ids' as encoded_periodical %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|remove_facet:encoded_periodical|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{periodical|get_authority_name}}" href="{% url 'authority' periodical %}?">{{periodical|get_authority_name}}</a>
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+                {% if selected_facets.citation_periodical_ids %}
+                <div class="col-md-12">
+                  <hr style="margin-top: 4px; margin-bottom: 4px;">
+                </div>
+                {% endif %}
+
+                {% for periodical in facets_citation.fields.periodical_ids|slice:":10" %}
+                {% if "citation_periodical_ids" not in selected_facets.keys or periodical.0 not in selected_facets.periodical_ids %}
+                <div class="col-md-12" style="padding:0 0 0 15px">
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_periodical_ids:{{ periodical.0|urlencode }}" title="Show only results involving {{ periodical.0|get_authority_name }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{periodical.0|get_authority_name}}" href="{% url 'authority' periodical.0 %}?">{{ periodical.0|get_authority_name }}</a> ({{ periodical.1 }})
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+
+              {% if facets_citation.fields.periodical_ids|length > 10 %}
+              <div class="more-facets">
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#periodicalModal">
+                  More...
+                </button>
+              </div>
+              {% endif %}
+            {% else %}
+            <div class="col-md-12">
+              <p>No journal facets.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endif %}
 
@@ -534,6 +663,54 @@
           {% for person in facets_citation.fields.people_by_subject_ids %}
           {% if "citation_people_by_subject_ids_exact" not in selected_facets.keys or person.0 not in selected_facets.citation_people_by_subject_ids_exact %}
               <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_people_by_subject_ids_exact:{{ person.0|urlencode }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{ person.0|get_authority_name}}" href="{% url 'authority' person.0 %}?">{{ person.0|get_authority_name }}</a> ({{ person.1 }})</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- publisher Modal -->
+<div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Publisher</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for publisher in facets_citation.fields.publisher_ids %}
+          {% if "citation_publisher_ids" not in selected_facets.keys or publisher.0 not in selected_facets.citation_publisher_ids %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_publisher_ids:{{ publisher.0|urlencode }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{ publisher.0|get_authority_name}}" href="{% url 'authority' publisher.0 %}?">{{ publisher.0|get_authority_name }}</a> ({{ publisher.1 }})</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- periodical Modal -->
+<div class="modal fade" id="periodicalModal" tabindex="-1" role="dialog" aria-labelledby="periodicalModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Journal</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for periodical in facets_citation.fields.periodical_ids %}
+          {% if "citation_periodical_ids" not in selected_facets.keys or periodical.0 not in selected_facets.citation_periodical_ids %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_periodical_ids:{{ periodical.0|urlencode }}"><i class="far fa-square"></i></a> <a title="Go to authority record for {{ periodical.0|get_authority_name}}" href="{% url 'authority' periodical.0 %}?">{{ periodical.0|get_authority_name }}</a> ({{ periodical.1 }})</li>
           {% endif %}
           {% endfor %}
         </ul>
