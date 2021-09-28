@@ -127,6 +127,20 @@ div.timeline {
   color: #fff;
 }
 
+#citations-tab.active {
+  background-color: #337AB7;
+  color: #fff;
+}
+
+#authorities-tab.active {
+  background-color: #337AB7;
+  color: #fff;
+}
+
+#citation-breadcrumbs .authority-breadcrumbs {
+  display: none;
+}
+
 .search-header h2 {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -157,6 +171,17 @@ div.timeline {
   background-color: #337ab7;
 }
 
+.author-column {
+  padding-left: 0px;
+}
+
+.concept-column {
+  padding-right: 0px;
+}
+
+.search-filter-square-link {
+  color: #000;
+}
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;
@@ -482,7 +507,6 @@ ul.topics_list {
 .panel-default>.panel-heading .active {
   background-color: #F5F5F5;
   color: #3274AB;
-  float: right;
 }
 
 .panel-isiscb>.panel-heading {
@@ -512,7 +536,7 @@ div.panel-cell>hr {
 div.facet_panel {
   padding-left: 0px;
   padding-bottom: 5px;
-  padding-top: 0px;
+  padding-top: 7px;
 }
 
 div.facet_panel > ul {

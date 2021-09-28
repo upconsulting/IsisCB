@@ -16,16 +16,16 @@
   <div class="col-md-12 menuContainer">
     <div class="panel-group hidden-print" id="type_panel">
       <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion"
-              href="#collapseTypes" class="accordion-toggle">
-              Sort & Filter
-            </a>
-          </h4>
+        <div class="panel-heading clearfix">
+            <h4 class="panel-title pull-left">
+              <a data-toggle="collapse" data-parent="#accordion"
+                href="#collapseTypes" class="accordion-toggle">
+                Sort & Filter
+              </a>
+            </h4>
         </div>
-        <div id="collapseTypes" class="panel-collapse collapse">
-          <div class="facet_panel panel-body">
+        <div id="collapseTypes" class="panel-collapse collapse {% if selected_facets.citation_type %}in{% endif %}">
+          <div id="citations-filter-panel" class="facet_panel panel-body">
             <div class="row panel-row" style="margin-bottom:10px;">
               <div class="col-md-12 panel-cell" style="padding-top:4px">
                 <div class="dropdown hidden-print">

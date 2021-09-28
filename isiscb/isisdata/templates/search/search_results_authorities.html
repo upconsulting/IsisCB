@@ -1,105 +1,185 @@
 {% load app_filters %}
 {% load metadata_filters %}
+{% load citation_filters %}
 {% load search_filters %}
+{% load facet_filters %}
+{% load static %}
+
+{% block extra_head %}
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+{% endblock %}
 
 {% if query %}
 <div class="row">
-  <div class="col-md-8">
-    <h3><span class="visible-print-inline">Authority </span>Search Results</h3>
-    <div class="results-info">Showing {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results.</div>
-  </div>
-  <div class="col-md-4 menuContainer hidden-print">
-    <div class="dropdown pull-right">
-        {% if sort_order_dir_authority == 'descend' %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
-        {% else %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
-        {% endif %}
+  <div class="col-md-12 menuContainer">
+    <div class="panel-group hidden-print" id="type_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h4 class="panel-title pull-left">
+              <a data-toggle="collapse" data-parent="#accordion"
+                href="#collapseAuthorityTypes" class="accordion-toggle">
+                Sort & Filter
+              </a>
+            </h4>
+        </div>
+        <div id="collapseAuthorityTypes" class="panel-collapse collapse {% if selected_facets.authority_authority_type %}in{% endif %}">
+          <div class="facet_panel panel-body">
+            <div class="row panel-row" style="margin-bottom:10px;">
+              <div class="col-md-12 panel-cell" style="padding-top:4px">
+                <div class="dropdown hidden-print">
+                  {% if sort_order_dir_authority == 'descend' %}
+                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                  {% else %}
+                  <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                  {% endif %}
+                </div>
+                <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+              </div>
+            </div>
+            <hr style="margin-top: 4px; margin-bottom: 4px;">
+            <div class="row panel-row">
+              <div class="col-md-4 panel-cell">
+                <h5 style="margin:4px 0"><small>Select the type of authority you would like see.</small></h5>
+              </div>
+            </div>
 
+            {% if facets_authority.fields.authority_type %}
+                  <div class="row panel-row ">
+                    {% for auth_type in selected_facets.authority_authority_type %}
+                    {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
+                    <div class="col-md-12">
+                      <a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><i class="fa fa-check-square"></i> {{ auth_type }}</a>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+
+                    {# Provide only the top 7 types #}
+                    {% for auth_type in facets_authority.fields.authority_type|slice:":7" %}
+                    {% if auth_type.0 %}
+                    {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
+                    <div class="col-md-12">
+                      <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="far fa-square"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                  </div>
+            {% else %}
+                      <div class="col-md-12"><p>No authority type facets.</p></div>
+            {% endif %}
+          </div>
+        </div>
       </div>
-      <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
     </div>
   </div>
+</div>
 
+{% for result in page.authority.object_list %}
+{% if result.id %}
+<p>
+      <span class="glyphicon glyphicon-bookmark"></span>
+      [{{ result.authority_type }}]
+      {% url 'authority' result.id|get_pk as authority_url %}
+      <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
+      {% with result.dates as dates %}
+      {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
+      {% endwith %}
+      ({{ result.object | get_nr_of_citations }})
 
-    {% for result in page.authority.object_list %}
-    {% if result.id %}
-    <p>
-          <span class="glyphicon glyphicon-bookmark"></span>
-          [{{ result.authority_type }}]
-          {% url 'authority' result.id|get_pk as authority_url %}
-          <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
-          {% with result.dates as dates %}
-          {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
-          {% endwith %}
-          ({{ result.object | get_nr_of_citations }})
+      <span class="visible-print-inline">({{ authority_url }})</span>
 
-          <span class="visible-print-inline">({{ authority_url }})</span>
-
-    </p>
-    {% endif %}
-    {% empty %}
-        <p>No results found.</p>
-    {% endfor %}
-    {% if page.authority.has_previous or page.authority.has_next %}
-    <nav class="hidden-print">
-      <ul class="pagination">
-        <li class="disabled"><a>Go to page:</a></li>
-
-          {% if page.authority.has_previous %}
-          <li>
-            {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% else %}
-          <li class="disabled">
-            {% with pagenr=page.authority.number|stringformat:"s"  %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% endif %}
-          {% if page.authority.has_previous or page.authority.has_next %}
-          {% for p in page.authority.paginator.page_range %}
-          {% with pagenr=forloop.counter|stringformat:"s" %}
-          {% with ppage='page_authority:'|add:pagenr %}
-              <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
-          {% endwith %}
-          {% endwith %}
-          {% endfor %}
-          {% endif %}
-          {% if page.authority.has_next %}
-          <li>
-            {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% else %}
-          <li class="disabled">
-            {% with pagenr=page.authority.number|stringformat:"s" %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% endif %}
-{% else %}
-    {# Show some example queries to run, maybe query syntax, something else? #}
+</p>
 {% endif %}
+{% empty %}
+    <p>No results found.</p>
+{% endfor %}
+{% if page.authority.has_previous or page.authority.has_next %}
+<nav class="hidden-print">
+  <ul class="pagination">
+    <li class="disabled"><a>Go to page:</a></li>
+
+      {% if page.authority.has_previous %}
+      <li>
+        {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
+        {% with ppage='page_authority:'|add:pagenr %}
+        <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+        {% endwith %}
+        {% endwith %}
+      </li>
+      {% else %}
+      <li class="disabled">
+        {% with pagenr=page.authority.number|stringformat:"s"  %}
+        {% with ppage='page_authority:'|add:pagenr %}
+        <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+        {% endwith %}
+        {% endwith %}
+      </li>
+      {% endif %}
+      {% if page.authority.has_previous or page.authority.has_next %}
+      {% for p in page.authority.paginator.page_range %}
+      {% with pagenr=forloop.counter|stringformat:"s" %}
+      {% with ppage='page_authority:'|add:pagenr %}
+          <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
+      {% endwith %}
+      {% endwith %}
+      {% endfor %}
+      {% endif %}
+      {% if page.authority.has_next %}
+      <li>
+        {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
+        {% with ppage='page_authority:'|add:pagenr %}
+        <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+        {% endwith %}
+        {% endwith %}
+      </li>
+      {% else %}
+      <li class="disabled">
+        {% with pagenr=page.authority.number|stringformat:"s" %}
+        {% with ppage='page_authority:'|add:pagenr %}
+        <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+        {% endwith %}
+        {% endwith %}
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+{% else %}
+{# Show some example queries to run, maybe query syntax, something else? #}
+{% endif %}
+
+<link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
+<script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
+<script>
+$("input.toggleBtn").bootstrapSwitch({
+  'size':'mini',
+  'offText': '<i class="fa fa-times" aria-hidden="true"></i>',
+  'onText': '<i class="fa fa-check" aria-hidden="true"></i>',
+});
+
+$('input[name="exclude_reviews"]').on('switchChange.bootstrapSwitch', function(event, includeReviews) {
+  if (includeReviews) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator|safe }}"
+  }
+});
+
+$('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(event, includeStubs) {
+  if (includeStubs) {
+    window.location = "{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator|safe }} "
+  } else {
+    window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
+  }
+});
+</script>
