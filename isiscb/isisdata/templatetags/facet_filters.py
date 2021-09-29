@@ -12,7 +12,7 @@ register = template.Library()
 @register.filter
 def get_authority_name(id):
     try:
-        authority = Authority.objects.get(id=id)
+        authority = Authority.objects.get(id=id.upper())
         name = authority.name
     except:
         name = id
@@ -82,3 +82,17 @@ def add_excluded_stub_record_status_facet(url, facet):
         url = url.replace('selected_facets=' + facet_str, '')
     url = url + '&excluded_facets=' + facet_str
     return url.replace('&&', '&')
+
+@register.filter
+def check_overlong_query(query):
+    authority_redirect_query_pattern = '\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA[0-9]{9}'
+    is_overlong_query = re.search(authority_redirect_query_pattern, query, re.IGNORECASE)
+    if is_overlong_query:
+        try:
+            authority = Authority.objects.get(id=is_overlong_query.group(1))
+            name = authority.name
+        except:
+            name = id
+        return "[All items related to]: " + name
+    else:
+        return query

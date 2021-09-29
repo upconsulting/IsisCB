@@ -59,7 +59,7 @@ $(document).ready(function() {
                    </a>
                 </div>
                   <ol id="citation-breadcrumbs" class="breadcrumb">
-                          <li> Results for: <b><i>"{{ query }}"</i></b></li>
+                          <li> Results for: <b><i>"{{ query|check_overlong_query }}"</i></b></li>
 
                     {% if selected_facets.citation_persons_ids %}
                       {% for author in selected_facets.citation_persons_ids %}
