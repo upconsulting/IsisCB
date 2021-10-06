@@ -118,12 +118,12 @@ div.timeline {
 /* search page */
 
 .btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
-  background-color: #337AB7;
+  background-color: #337ab7;
   color: #fff;
 }
 
 .btn-default.active.focus, .btn-default:active:focus, .open>.dropdown-toggle.btn-default {
-  background-color: #337AB7;
+  background-color: #337ab7;
   color: #fff;
 }
 
@@ -139,6 +139,27 @@ div.timeline {
 .search-breadcrumb-item + .search-breadcrumb-item::before {
         content: "and";
     }
+
+.stub-search-result {
+  border-left: 3px solid #CE4F71;
+}
+
+.stub-search-result p{
+  background-color: #E8E8E8;
+  padding-left: 7px;
+  /* border-radius: 5px; */
+}
+
+.stub-search-result p,
+.search-result p{
+
+}
+
+.stub-search-result-label{
+  color: #CE4F71;
+}
+
+/* end search css */
 
 #slider-range > span {
   border-bottom-right-radius: 50%;
