@@ -5,6 +5,73 @@
 {% load citation_filters %}
 {% load facet_filters %}
 
+<!-- gets wikimedia image and synopsis where possible -->
+<script type="text/javascript">
+    const authorityType = "{{ authority.get_type_controlled_display }}";
+
+    let authorityName = "{{ authority.name }}";
+
+    if (authorityType === "Person") {
+      let firstName = "{{ authority.personal_name_first }}";
+
+      let lastName = "{{ authority.personal_name_last}}";
+
+      if (firstName && firstName.length > 0 && lastName &&lastName.length > 0) {
+        authorityName = firstName + " " + lastName;
+
+      } else if (authorityName.indexOf(",") >= 0){
+        firstName = authorityName.substring(authorityName.indexOf(",") + 2, authorityName.length).trim();
+
+        if (firstName.indexOf(" ") >= 0) {
+          firstName = firstName.substring(0, firstName.indexOf(" "));
+        }
+
+        lastName = authorityName.substring(0, authorityName.indexOf(","));
+
+        authorityName = firstName + " " + lastName;
+      }
+    } else if (authorityType === "Concept") {
+        if (authorityName.indexOf(";") >= 0) {
+          authorityName = authorityName.substring(0, authorityName.indexOf(";")).trim();
+        }
+    } else if (authorityType === "Geographic Term") {
+        if (authorityName.indexOf("(") >= 0) {
+          authorityName = authorityName.substring(0, authorityName.indexOf("(")).trim();
+        }
+    }
+
+    let imgUrl=`http://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${authorityName}&origin=*`;
+
+    let introUrl=`http://en.wikipedia.org/w/api.php?action=query&titles=${authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*`;
+
+    fetch(imgUrl)
+        .then(function(response){return response.json();})
+        .then(function(response) {
+            let wikiImage = response.query.pages[Object.keys(response.query.pages)[0]].original.source;
+            if (wikiImage) {
+              document.getElementById('wikiImage').src = wikiImage;
+              document.getElementById('wikiImage').style.display = "block";
+              document.getElementById('wikiImageBorder').style.display = "block";
+            }
+        })
+        .catch(function(error){});
+
+    fetch(introUrl)
+        .then(function(response){return response.json();})
+        .then(function(response) {
+          let wikiIntro = response.query.pages[Object.keys(response.query.pages)[0]].extract;
+
+          if (wikiIntro) {
+            document.getElementById('wikiIntro').innerHTML = wikiIntro;
+            document.getElementById('wikiIntroButton').style.display = "inline-block";
+            document.getElementById('wikiIntroBreak').style.display = "inline-block";
+          }
+
+        })
+        .catch(function(error){});
+</script>
+
+
 
 <!-- Progress through search results, if arriving from search view. -->
 {% if search_results|length > 0 and fromsearch and search_current %}
@@ -52,114 +119,248 @@
         gap: 5,
       });
     })
+
+    $("#uriLink").click(function() {
+      var copyTextarea = document.querySelector('#hiddenUriLink');
+      copyTextarea.focus();
+      copyTextarea.select();
+      document.execCommand("copy");
+      $.notify("URL of this record has been copied to your clipboard.", "info", {
+        clickToHide: true,
+        style: 'bootstrap',
+        gap: 5,
+      });
+    })
   })
 </script>
-<div class="panel panel-default">
+<div class="panel panel-default" id="infoPanel">
   <div class="panel-heading">
-    <strong style="font-size:1.5em">{{ authority.get_type_controlled_display }}</strong>
+    <strong style="font-size:1.3em; color: #012E63;">{{ authority.get_type_controlled_display }}</strong>
       <span class="btn-grp pull-right" style="padding-top:5px">
-        <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ authority.id }}</span>
-        <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
           {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
           <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
       </span>
+      <br>
+      <hr style="margin-top:5px; margin-bottom:5px;">
+      <strong style="margin-top: 5px; font-size:1.7em;" id="recordName">{{ authority.name }}</strong>
+      <br>
+      <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">ID: {{ authority.id }} <i class="far fa-copy"></i></span>
+      <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
   </div>
 
-  <div class="panel-body" style="height: 210px; overflow-y:scroll">
+  <div class="panel-body">
   {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
 
-  <h3 style="margin-top: 5px;">{{ authority.name }}</h3>
+      <img id="wikiImage" style="max-height:100%; max-width:100%; margin-left:auto; margin-right:auto; display:none;"></img>
 
-  <p>
-    <i class="fa fa-bookmark" aria-hidden="true"></i>
-    {% if related_citations_count > 0 %}
-    Show all
-    <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
-      {{related_citations_count}} citations
-    </a>
-    to this authority.
-    {% endif %}
-    {% if author_contributor_count > 0 %}
-    Show
-    <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
-    {{author_contributor_count}} citations
-    </a>
-    as author, etc.
-    {% endif %}
-    {% if publisher_count > 0 %}
-    Show
-    <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
-    {{publisher_count}} citations
-    </a>
-    as publisher/journal.
-    {% endif %}
-    {% if subject_category_count > 0 %}
-    Show
-    <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
-    {{subject_category_count}} citations
-    </a>
-    as subject or category.
-    {% endif %}
-  </p>
+      <hr id="wikiImageBorder" style="display:none;">
 
-  {% if authority.description %}
-  <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:15 }}</span>
-    {% if authority.description|truncatewords:15|length < authority.description|length %}
-      <a href="#" id="desc_more" class="hidden-print">More</a>
-      <span id="desc_full" class="hidden-print" style="display:none">
-        {{ authority.description }}
-        <a href="#" id="desc_hide">Less</a>
-      </span>
-      <span class="visible-print-block">
-        {{ authority.description }}
-      </span>
-    {% endif %}
-  </p>
-  <script>
-    $(function() {
-      $("#desc_more").click(function() {
-        $("#desc_snippet").hide()
-        $("#desc_more").hide()
-        $("#desc_full").show()
-      })
+      <p>
 
-      $("#desc_hide").click(function() {
-        $("#desc_full").hide()
-        $("#desc_snippet").show()
-        $("#desc_more").show()
-      })
-    })
-  </script>
-  {% endif %}
+        {% if related_citations_count > 0 %}
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        {{authority.name}} is related to
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+          {{related_citations_count}} citations
+        </a>
+        <br>
+        {% endif %}
 
-  {% with authority|get_bibliographic_essays as bib_essays %}
-  {% if bib_essays %}
-  {% for bib_essay in bib_essays %}
-  <p>
-    <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
-    <!-- todo: list all and link link -->
-    {% if bib_essay.value.cvalue|get_urls %}
-    {% for url in bib_essay.value.cvalue|get_urls %}
-    <br><strong>Link:</strong> {{ url.resource_name }}
-    {% endfor %}
-    {% endif %}
-  </p>
-  {% endfor %}
-  {% endif %}
-  {% endwith %}
+        {% if author_contributor_count > 0 %}
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        {{authority.name}} is an author/contributor on
+        <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{author_contributor_count}} citations
+        </a>
+        <br>
+        {% endif %}
 
-  {% for attribute in authority.attributes.all %}
-  {% if attribute|is_attribute_visible and not attribute|is_bibliographic_essay %}
-  <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
-  {% endif %}
-  {% endfor %}
+        {% if publisher_count > 0 %}
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        {{authority.name}} is the publisher of
+        <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{publisher_count}} citations
+        </a>
+        <br>
+        {% endif %}
 
+        {% if subject_category_count > 0 %}
+        <i class="fa fa-bookmark" aria-hidden="true"></i>
+        {{authority.name}} is a subject or category of
+        <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
+        {{subject_category_count}} citations
+        </a>
+        <br>
+        {% endif %}
+      </p>
 
-  <table  class="details_authority" style="margin-top: 20px;">
-    <tr>
-      <td>Authority URI:</td>
-      <td>{{ authority | get_uri }}</td>
-    </tr>
-  </table>
+      {% for attribute in authority.attributes.all %}
+      {% if attribute|is_attribute_visible and not attribute|is_bibliographic_essay %}
+      <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+      {% endif %}
+      {% endfor %}
+
+      <hr>
+
+      <p class="wikiIntro" id="wikiIntro" style="margin-bottom:0;"></p>
+      <a class="readMore btn" id="wikiIntroButton" style="padding-top:0; padding-left:0; display:none;">...More</a>
+      <br id="wikiIntroBreak" style="display:none">
+
+      {% if authority.description %}
+      <p><strong>Description:</strong> <span id="desc_snippet" class="hidden-print">{{ authority.description|truncatewords:19 }}</span>
+        {% if authority.description|truncatewords:19|length < authority.description|length %}
+          <a href="#" id="desc_more" class="hidden-print">More</a>
+          <span id="desc_full" class="hidden-print" style="display:none">
+            {{ authority.description }}
+            <a href="#" id="desc_hide">Less</a>
+          </span>
+          <span class="visible-print-block">
+            {{ authority.description }}
+          </span>
+        {% endif %}
+      </p>
+      <script>
+        $(function() {
+          $("#desc_more").click(function() {
+            $("#desc_snippet").hide()
+            $("#desc_more").hide()
+            $("#desc_full").show()
+          })
+
+          $("#desc_hide").click(function() {
+            $("#desc_full").hide()
+            $("#desc_snippet").show()
+            $("#desc_more").show()
+          })
+        })
+      </script>
+      {% endif %}
+
+      {% with authority|get_bibliographic_essays as bib_essays %}
+      {% if bib_essays %}
+      {% for bib_essay in bib_essays %}
+      <p>
+        <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
+        <!-- todo: list all and link link -->
+        {% if bib_essay.value.cvalue|get_urls %}
+        {% for url in bib_essay.value.cvalue|get_urls %}
+        <br><strong>Link:</strong> {{ url.resource_name }}
+        {% endfor %}
+        {% endif %}
+      </p>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+
+      <div class="panel panel-default facet-box">
+        <div class="panel-heading-links panel-heading">
+          <strong>Outside Links <a data-toggle="modal" data-target="#outsideLinksModal">(Show all)</a></strong>
+        </div>
+        <div class="panel-body panel-body-links">
+          {% with authority.linkeddata_public as linkeddata_public %}
+            {% if linkeddata_public.count > 0 %}
+            <div style="padding-bottom: 20px;">
+              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+              {% for entry in linkeddata_public.all %}
+              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+              {% endif %}
+              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+              {% if entry.type_controlled.name != url_linked_data_name %}
+              ({{ entry.type_controlled }})
+              {% endif %}
+              <br/> {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+
+          <img src="https://plato.stanford.edu/symbols/sep-man-red.png" height="14px" width="14px"> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <br>
+          <i class="fab fa-wikipedia-w"></i> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+          <br>
+          <img src="https://researchworks.oclc.org/archivegrid/assets/img/archivegrid_logo_home.png" height="14px" width="14px"></img> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+          <br>
+          <img src="https://www.chstm.org/sites/default/files/chstm-logo-header.png" height="14px" width="14px" style="filter: grayscale(100%); filter: invert(1)"></img> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+          <br>
+          <img src="https://networks.h-net.org/sites/all/themes/custom/hnt/logo.png" height="14px" width="14px"></img> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+          <br>
+          <i class="fab fa-twitter"></i> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">Authority URI</div>
+        <div class="panel-body" style="font-size:.95em;">
+          <span id="uriLink" style="cursor: copy;" title="Click to copy">data.isiscb.org/isis/authority/{{authority.id}} <i class="far fa-copy"></i></span>
+          <textarea style="position: absolute;left: -9999px;" id="hiddenUriLink">{{ authority | get_uri }}</textarea>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+
+<!-- facet modals -->
+  <!-- outside links modal -->
+  <div class="modal fade" id="outsideLinksModal" tabindex="-1" role="dialog" aria-labelledby="OutsideLinksModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Outside Links</h4>
+        </div>
+        <div class="modal-body">
+          {% with authority.linkeddata_public as linkeddata_public %}
+            {% if linkeddata_public.count > 0 %}
+            <div style="padding-bottom: 20px;">
+              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
+              {% for entry in linkeddata_public.all %}
+              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+              {{entry.resource_name}}:
+              {% endif %}
+              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                {{ entry.universal_resource_name }}
+              </a>
+              {% if entry.type_controlled.name != url_linked_data_name %}
+              ({{ entry.type_controlled }})
+              {% endif %}
+              <br/> {% endfor %}
+            </div>
+            {% endif %}
+          {% endwith %}
+
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
+          <br>
+          <span  class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://researchworks.oclc.org/archivegrid/?p=1&q={{authority.name}}">Archive Grid</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://www.chstm.org/collections/search?text={{authority.name}}&text-join=&title=&creator=&subject=">Consortium of History of Science</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://snaccooperative.org/?count=10&start=0&entity_type=&term={{authority.name}}&command=search">SNAC</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://networks.h-net.org/search/site/{{authority.name}}?f%5B0%5D=im_group_audience%3A229">H-Net</a>
+          <br>
+          <span class="glyphicon glyphicon-search"></span> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+
+  <script>
+    var textHolder = document.querySelector('.wikiIntro');
+    var btn = document.querySelector('.readMore');
+
+    function toggleText() {
+    textHolder.classList.toggle("truncate");
+    }
+
+    btn.addEventListener('click', toggleText);
+    toggleText(); //to truncate at first time
+  </script>
