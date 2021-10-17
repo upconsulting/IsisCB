@@ -40,9 +40,9 @@
         }
     }
 
-    let imgUrl=`http://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${authorityName}&origin=*`;
+    let imgUrl=`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${authorityName}&origin=*`;
 
-    let introUrl=`http://en.wikipedia.org/w/api.php?action=query&titles=${authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*`;
+    let introUrl=`https://en.wikipedia.org/w/api.php?action=query&titles=${authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*`;
 
     fetch(imgUrl)
         .then(function(response){return response.json();})
