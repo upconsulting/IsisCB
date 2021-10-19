@@ -182,6 +182,7 @@ div.timeline {
 .search-filter-square-link {
   color: #000;
 }
+
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;
