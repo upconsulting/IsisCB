@@ -23,6 +23,73 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
 <script src="{% static "isisdata/js/comments.js" %}"></script>
 
+<script type="text/javascript">
+
+    let citationType = "{{ citation.get_type_controlled_display }}";
+
+    console.log(citationType);
+
+    if (citationType === "Book"){
+      let citationTitle = "{{citation|get_title|lower}}";
+      let apiKey = "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I";
+
+      let url = `https://www.googleapis.com/books/v1/volumes?q=${citationTitle}&key=${apiKey}`;
+
+      fetch(url)
+        .then(function(res){
+          return res.json();
+        })
+        .then(function(result){
+          items = result.items;
+
+          if (items[0]) {
+              let bookGoogleId = items[0].id;
+
+              let url = `https://www.googleapis.com/books/v1/volumes/${bookGoogleId}?key=${apiKey}&projection=lite`;
+
+              fetch(url)
+                .then(function(res){
+                  return res.json();
+                })
+                .then(function(result){
+
+                    let img = "";
+
+                    let imageLinks = Object.keys(result.volumeInfo.imageLinks);
+
+                    if (imageLinks.indexOf("small") >= 0) {
+                        img = result.volumeInfo.imageLinks.small;
+                    } else if (imageLinks.indexOf("thumbnail") >= 0) {
+                        img = result.volumeInfo.imageLinks.thumbnail;
+                        document.getElementById("citationImage").style.height = "auto";
+                    }
+
+                    if (img !== "") {
+                      document.getElementById("citationImage").style.display = "block";
+                      document.getElementById("citationImage").src = img;
+                    }
+
+                })
+          } else {
+            return;
+          }
+
+          // let img = items[0].volumeInfo.imageLinks.thumbnail;
+          // console.log(items[0]);
+          // img = img.replace("&zoom=1","&zoom=4");
+          // console.log(img);
+          //
+          // document.getElementById("citationImage").src = img;
+        }),
+        function (error) {
+          console.log(error);
+        };
+    } else if (citationType === "Article" || citationType === "Review" || citationType == "Essay Review") {
+
+    }
+
+</script>
+
 <meta property="og:url"                content="{{ request.build_absolute_uri }}" />
 <meta property="og:site_name"          content="Isis Current Bibliography" />
 <meta property="og:type"               content="article" />
@@ -42,64 +109,55 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   $('[data-toggle="popover"]').popover()
 })
 </script>
+
+<!-- Progress through search results, if arriving from search view. -->
+{% if search_results|length > 0 and fromsearch and search_current %}
 <div class="row">
-  <div class="col-sm-12 col-md-2 hidden-print">
-    <div class="menu hidden-print">
-      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
-      &nbsp; &nbsp;
-      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
-      <hr>
-    </div>
-
-    {% include "isisdata/citation_nav.html" %}
-
-  </div>
-  <div class=" main col-sm-12 col-md-10">
-    <!-- Progress through search results, if arriving from search view. -->
-    {% if search_results|length > 0 and fromsearch and search_current %}
-    <div class="alert alert-warning hidden-print">
+  <div class="col-sm-12 col-md-12">
+    <div class="alert alert-info hidden-print" style="padding: 5px">
         <div class="row">
             <div class="col-xs-3 text-center">
                 {% if search_current >= 2 and search_previous %}
                 <a href="{% url 'citation' search_previous|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Previous" class="btn btn-xs">
-                    <span aria-hidden="true" class="text-small">&laquo;Previous</span>
+                    <div class="btn btn-sm btn-primary"><i class="fas fa-angle-double-left"></i> Previous</div>
                 </a>
                 {% endif %}
             </div>
-            <div class="col-xs-6 text-center">
+            <div class="col-xs-6 text-center" style="font-size:1.1em">
                 Showing result {{ search_current }} of {{ search_results|length }}
             </div>
             <div class="col-xs-3 text-center">
                 {% if search_index < search_count and search_next %}
                 <a href="{% url 'citation' search_next|get_pk %}?fromsearch=true&query_string={{ query_string }}&last_query={{ last_query|encode_query }}" aria-label="Next" class="btn btn-xs">
-                    <span aria-hidden="true" class="text-small">Next&raquo;</span>
+                    <div class="btn btn-sm btn-primary">Next <i class="fas fa-angle-double-right"></i> </div>
                 </a>
                 {% endif %}
             </div>
         </div>
     </div>
-    {% endif %}
+  </div>
+</div>
+{% endif %}
 
+<div class="row">
+  <div class=" main col-sm-12 col-md-4">
     <div class="panel panel-default">
       <div class="panel-heading">
-      <strong style="font-size:1.5em">{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}<strong>:</Strong><span style="font-size:1.5em">&nbsp{{ citation.subtype.name }}</span>{% endif %}
-        <span class="btn-grp pull-right" style="padding-bottom:10px">
-          <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">IsisCB ID: {{ citation.id }}</span>
-          <textarea style="position: absolute;left: -9999px;" id="hiddenCitationLink">{{ citation | get_uri }}</textarea>
-            {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
-            <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
-        </span>
-      </div>
-      <div class="panel-body">
-        <span style="display:none;">
-           <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
-        </span>
+        <div class="row" style="padding-left: 15px">
+          <strong style="font-size:1.4em; color:#012E63">{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}<strong>:</Strong><span style="font-size:1.5em">&nbsp{{ citation.subtype.name }}</span>{% endif %}
+            <span class="btn-grp pull-right" style="padding-bottom:5px">
+              <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy">ID: {{ citation.id }}</span>
+              <textarea style="position: absolute;left: -9999px;" id="hiddenCitationLink">{{ citation | get_uri }}</textarea>
+                {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
+                <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
+            </span>
+        </div>
+
+        <hr style="margin: 5px 0">
 
         {% with citation|get_pub_year as pub_year %}
         {% with citation|get_title as citation_title %}
-        <h3>{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
+        <h3 style="margin-top: 0px">{{ citation_title|bleach_safe }} {% if pub_year %}({{ pub_year}}){% endif %}
           {% if citation.stub_record_status == 'SR' %}
           <sup><i data-container="body" data-toggle="popover" data-placement="right" data-trigger="hover" data-content="This record is not fully entered or proofed in the database. Some fields may be blank or incorrect." class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i></sup>
           {% endif %}
@@ -111,8 +169,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endif %}
         {% endwith %}
         {% endwith %}
+      </div>
 
-
+      <div class="panel-body">
+        <span style="display:none;">
+           <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
+        </span>
 
         <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
 
@@ -160,19 +222,23 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         </script>
 
         {% if authors|length > 0 %}
-        <p><strong>Authors &amp; Contributors:</strong> {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{% endif %}{{ acrelation|contributor_with_role_as_string }};{% if acrelation.authority %}<i class="fa fa-info-circle"></i></a>{% endif %} {% endfor %}
+        <p><span class="label label-default">Authors & Contributors</span>
+        {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation|contributor_with_role_as_string }}</a>;{% endif %} {% endfor %}
+        </p>
         {% endif %}
 
+        <img id="citationImage" height="300px" width="auto" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto">
+
         {% if citation.abstract %}
-        <p><strong>Abstract:</strong> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
+        <p><span class="label label-default">Abstract</span> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
         {% endif %}
 
         {% if citation.description %}
-        <p><strong>Description:</strong> {{ citation.description|bleach_safe }}</p>
+        <p><span class="label label-default">Description</span> {{ citation.description|bleach_safe }}</p>
         {% endif %}
 
         {% for attribute in citation.attributes.all %}
-        <p><strong>{{ attribute.type_controlled.display_name }}:</strong> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
+        <p><span class="label label-default">{{ attribute.type_controlled.display_name }}</span> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}</p>
         {% endfor %}
 
 
