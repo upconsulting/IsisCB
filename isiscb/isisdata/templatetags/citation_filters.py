@@ -99,3 +99,7 @@ def contributor_with_role_as_string(acrelation):
     kwargs = {'name': name,
               'role': acrelation.get_type_controlled_display()}
     return u"{name} ({role})".format(**kwargs)
+
+@register.filter
+def get_contributor_role_as_string(acrelation):
+    return acrelation.get_type_controlled_display()
