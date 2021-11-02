@@ -91,17 +91,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows authors, editors, etc. of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_contributors_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}
             {% endfor %}
 
             {% if related_contributors_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#authorModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -113,17 +113,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows journals of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_journal_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}
             {% endfor %}
 
             {% if related_journal_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#journalModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -135,17 +135,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows publishers of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_publisher_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}
             {% endfor %}
 
             {% if related_publisher_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#publisherModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -157,7 +157,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows publishers of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
@@ -182,17 +182,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_subject_people_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids'%}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids'%}
             {% endfor %}
 
             {% if related_subject_people_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#peopleModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -204,17 +204,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_subject_institutions_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact'%}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact'%}
             {% endfor %}
 
             {% if related_subject_institutions_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#institutionModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -226,17 +226,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows relationships to category terms of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_categories_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}
             {% endfor %}
 
             {% if related_categories_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#categoryModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -249,17 +249,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="right" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_subject_concepts_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids_exact' %}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids_exact' %}
             {% endfor %}
 
             {% if related_subject_concepts_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#subjectModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -271,17 +271,17 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a class="pull-right" style="color:black" data-container="body" data-toggle="popover"
               data-placement="left" data-trigger="focus" tabindex="0" role="button"
               data-content="This list shows relationships to subject terms of Citation records linked to this Authority record.">
-              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <i class="far fa-question-circle" aria-hidden="true"></i>
             </a>
           </div>
           <div class="panel-body">
             {% for facet in related_timeperiod_facet|slice:"7" %}
-            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}<br>
+            {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}
             {% endfor %}
 
             {% if related_timeperiod_facet|length > 7 %}
             <button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
-              More...
+              More <i class="far fa-caret-square-down"></i>
             </button>
             {% endif %}
           </div>
@@ -326,7 +326,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <ul class="unselected_facets">
             {% for facet in related_subject_concepts_facet %}
               <li>
-                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids' %}<br>
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_concepts_by_subject_ids' %}
               </li>
             {% endfor %}
           </ul>
@@ -349,7 +349,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_subject_people_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_people_by_subject_ids_exact' %}
             </li>
           {% endfor %}
         </ul>
@@ -373,7 +373,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_subject_institutions_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_institutions_by_subject_ids_exact' %}
             </li>
           {% endfor %}
         </ul>
@@ -397,7 +397,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_categories_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_category_ids_exact' %}
             </li>
           {% endfor %}
         </ul>
@@ -421,7 +421,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_timeperiod_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact' %}
             </li>
           {% endfor %}
         </ul>
@@ -445,7 +445,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_publisher_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_publisher_ids' %}
             </li>
           {% endfor %}
         </ul>
@@ -470,7 +470,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <ul class="unselected_facets">
           {% for facet in related_journal_facet %}
             <li>
-              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}<br>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}
             </li>
           {% endfor %}
         </ul>
