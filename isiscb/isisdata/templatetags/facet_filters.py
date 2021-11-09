@@ -30,7 +30,7 @@ def set_excluded_facets(url, available_facets):
 
 @register.filter
 def remove_url_part(url, arg):
-    return url.replace(arg, "").replace("&&", "&")
+    return urllib.parse.unquote(url).replace(arg, "").replace("&&", "&")
 
 @register.filter
 def add_selected_facet(url, facet):

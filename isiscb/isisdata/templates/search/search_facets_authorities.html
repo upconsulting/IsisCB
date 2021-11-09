@@ -8,10 +8,10 @@
   <div class="facet_panel panel-body">
     <div class="row panel-row">
       <div class="col-md-12 panel-cell">
-        <h5><small>Select the type of authority you would like see. {{ facets_authority.fields.authority_type }}</small></h5>
+        <h5><small>Select the type of authority you would like see.</small></h5>
       </div>
     </div>
-    
+
   {% if facets_authority.fields.authority_type %}
         <div class="row panel-row ">
           {% for auth_type in selected_facets.authority_authority_type %}

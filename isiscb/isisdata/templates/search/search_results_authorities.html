@@ -3,48 +3,97 @@
 {% load search_filters %}
 
 {% if query %}
-<div class="row">
-  <div class="col-md-8">
-    <h3><span class="visible-print-inline">Authority </span>Search Results</h3>
-    <div class="results-info">Showing {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results.</div>
-  </div>
-  <div class="col-md-4 menuContainer hidden-print">
-    <div class="dropdown pull-right">
-        {% if sort_order_dir_authority == 'descend' %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
-        {% else %}
-        <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
-        {% endif %}
 
+<ol class="breadcrumb" style="margin-left: 0; border-color: #777777;">
+        <li> {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} <strong>Authority</strong> results for: <b><i>"{{ query }}"</i></b></li>
+</ol>
+
+    <button type="button" class="btn btn-primary btn-lg citations_authorities_headers" style="padding: 5px 8px; background-color:#fff; border: 1px solid #404040; color: #404040; margin-bottom: 10px;">Authorities</button>
+
+<div class="panel-group hidden-print" id="type_panel">
+    <div class="panel panel-default" style="margin-bottom: 15px; margin-right: 7.5px">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion"
+            href="#collapseAuthorityTypes" class="accordion-toggle">
+            Sort & Filter
+          </a>
+        </h4>
       </div>
-      <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+    <div id="collapseAuthorityTypes" class="panel-collapse collapse {% if selected_facets.authority_authority_type %}in{% endif %}" aria-expanded="{% if selected_facets.authority_authority_type %}true{% else %}false{% endif %}">
+      <div class="facet_panel panel-body">
+        <div class="row panel-row" style="margin-bottom:10px;">
+          <div class="col-md-12 panel-cell" style="padding-top:4px">
+            <div class="dropdown">
+                {% if sort_order_dir_authority == 'descend' %}
+                <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:ascend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                {% else %}
+                <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+        <hr style="margin-top: 4px; margin-bottom: 4px;">
+
+        <div class="row panel-row">
+          <div class="col-md-12 panel-cell">
+            <h5 style="margin:4px 0"><small>Select the type of authority you would like see.</small></h5>
+          </div>
+        </div>
+
+        {% if facets_authority.fields.authority_type %}
+              <div class="row panel-row ">
+                {% for auth_type in selected_facets.authority_authority_type %}
+                {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|remove_facet:encoded_auth_type|set_page_to_one|set_index_model:'models:isisdata.authority' }}"><i class="far fa-check-square"></i> {{ auth_type }}</a>
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+                {% for auth_type in facets_authority.fields.authority_type %}
+                {% if auth_type.0 %}
+                {% if "authority_authority_type" not in selected_facets.keys or auth_type.0 not in selected_facets.authority_authority_type %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.authority' }}&amp;selected_facets=authority_authority_type:{{ auth_type.0|urlencode }}"><i class="far fa-square"></i> {{ auth_type.0 }} </a>({{ auth_type.1 }})
+                </div>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+              </div>
+        {% else %}
+                  <div class="col-md-12"><p>No authority type facets.</p></div>
+        {% endif %}
+      </div>
     </div>
   </div>
-
+</div>
 
     {% for result in page.authority.object_list %}
     {% if result.id %}
-    <p>
-          <span class="glyphicon glyphicon-bookmark"></span>
-          [{{ result.authority_type }}]
-          {% url 'authority' result.id|get_pk as authority_url %}
-          <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
-          {% with result.dates as dates %}
-          {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
-          {% endwith %}
-          ({{ result.object | get_nr_of_citations }})
+    <div style="border-left: 2px solid #777777">
+      <p style="padding-left: 8px; margin-bottom: 15px;">
+            <span class="label label-default">{{ result.authority_type }}</span>
+            {% url 'authority' result.id|get_pk as authority_url %}
+            <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
+            {% with result.dates as dates %}
+            {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
+            {% endwith %}
+            ({{ result.object | get_nr_of_citations }})
 
-          <span class="visible-print-inline">({{ authority_url }})</span>
+            <span class="visible-print-inline">({{ authority_url }})</span>
 
-    </p>
+      </p>
+    </div>
     {% endif %}
     {% empty %}
         <p>No results found.</p>
     {% endfor %}
+
     {% if page.authority.has_previous or page.authority.has_next %}
     <nav class="hidden-print">
       <ul class="pagination">
-        <li class="disabled"><a>Go to page:</a></li>
+        <li class="disabled"><a>Page:</a></li>
 
           {% if page.authority.has_previous %}
           <li>

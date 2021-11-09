@@ -13,18 +13,19 @@
 
 {% if query %}
 <div class="row">
-  <div class="col-md-12 menuContainer">
+  <div class="col-sm-12 col-md-12 menuContainer">
+    <button type="button" class="btn btn-primary btn-lg citations_authorities_headers" style="padding: 5px 8px; background-color:#fff; border: 1px solid #337AB7; color: #337AB7; margin-bottom: 10px;">Citations</button>
     <div class="panel-group hidden-print" id="type_panel">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion"
-              href="#collapseTypes" class="accordion-toggle">
+              href="#collapseCitationTypes" class="accordion-toggle">
               Sort & Filter
             </a>
           </h4>
         </div>
-        <div id="collapseTypes" class="panel-collapse collapse">
+        <div id="collapseCitationTypes" class="panel-collapse collapse {% if selected_facets.citation_type %}in{% endif %}" aria-expanded="{% if selected_facets.citation_type %}true{% else %}false{% endif %}">
           <div class="facet_panel panel-body">
             <div class="row panel-row" style="margin-bottom:10px;">
               <div class="col-md-12 panel-cell" style="padding-top:4px">
@@ -52,14 +53,14 @@
             <hr style="margin-top: 4px; margin-bottom: 4px;">
 
             <div class="row panel-row">
-              <div class="col-md-4 panel-cell">
+              <div class="col-md-12 panel-cell">
                 <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
               </div>
             </div>
 
             <div class="row panel-row ">
               {% if facets_citation.fields.type %}
-                <div class="col-md-4">
+                <div class="col-md-12">
                   {% for type in selected_facets.citation_type %}
                   {% with type|create_facet_string:'citation_type' as encoded_type %}
                   <div class="col-md-12">
@@ -118,15 +119,12 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
-
 
     {% for result in page.citation.object_list %}
-      <div class="{% if result.stub_record_status == 'SR' %} stub-search-result {% else %} search-result {% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
-        <p>
+      <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+        <p style="margin-bottom: 20px; font-size: 1.1em;">
           {% if result.stub_record_status == 'SR' %}
-            <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
+            <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
           {% endif %}
 
           {% if result.type == "Book" %}
@@ -143,7 +141,7 @@
             <i class="far fa-file-alt"></i>
           {% endif %}
 
-          [{{ result.type }}]
+          <span class="label label-primary">{{ result.type }}</span>
 
           {% url 'citation' result.id|get_pk as citation_url %}
           {% if result.title == 'Title missing' and result.complete_citation %}
@@ -152,7 +150,7 @@
           </a>
           {% else %}
             {% if result.authors %}
-               {{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}
+               <strong style="font-weight: 500;">{{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}</strong>
             {% endif %}
             {% if result.publication_date.0 and result.authors %}
               ({{ result.publication_date.0 }})
@@ -234,7 +232,7 @@
     <nav class="hidden-print">
       <ul class="pagination">
 
-        <li class="disabled"><a>Go to page:</a></li>
+        <li class="disabled"><a>Page:</a></li>
           {% if page.citation.has_previous %}
           <li>
             {% with pagenr=page.citation.previous_page_number|stringformat:"s" %}
@@ -306,6 +304,8 @@
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}
+  </div>
+</div>
 
 <link rel="stylesheet" href={% static "isisdata/switch/bootstrap-switch.css" %}>
 <script src={% static "isisdata/switch/bootstrap-switch.min.js" %} type="text/javascript"></script>
