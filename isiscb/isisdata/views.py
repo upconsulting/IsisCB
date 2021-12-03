@@ -15,8 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.db.models import Q
-from django.db.models import Prefetch
+from django.db.models import Q, Prefetch, Count, Subquery, OuterRef
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -35,7 +34,7 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale
+import codecs, datetime, uuid, base64, zlib, locale, json, requests
 
 from collections import defaultdict
 from .helpers.mods_xml import initial_response, generate_mods_xml
@@ -703,8 +702,20 @@ def citation(request, citation_id):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
 
     subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True)
-                                              & ~Q(authority__type_controlled__in=['GE', 'TI'], citation__public=True))\
+                                              & ~Q(type_controlled__in=['GE', 'TI'], citation__public=True))\
                                       .filter(public=True)
+
+    # sqs = SearchQuerySet().models(Citation).facet('subject_ids', size=100)
+    #
+    # subjectsUniquenesses = {}
+    #
+    # for subject in subjects:
+    #     subjectsUniquenesses[subject.authority_id] = sqs.all().exclude(public="false").filter(subject_ids=subject.authority_id).count()
+    #
+    # print("----------")
+    # # print(subjects.all())
+    # print(subjects.values())
+    # print("----------")
 
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
@@ -714,6 +725,15 @@ def citation(request, citation_id):
 
     query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
     places = citation.acrelation_set.filter(query_places).filter(public=True)
+
+    query_concepts = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['CO'], citation__public=True)
+    concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
+
+    query_institutions = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['IN'], citation__public=True)
+    institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
+
+    query_people = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['PE'], citation__public=True)
+    people = citation.acrelation_set.filter(query_people).filter(public=True)
 
     related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True).filter(public=True)
     related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True).filter(public=True)
@@ -729,10 +749,71 @@ def citation(request, citation_id):
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
+    similar_citations = Citation.objects.filter(Q(related_authorities__acrelation__in=subjects.all())).filter(public=True).annotate(Count('related_authorities__acrelation')).order_by('-related_authorities__acrelation__count').exclude(title=citation.title)[0:20]
+
+    # more_like_this = SearchQuerySet().more_like_this(citation)[:10]
+    #
+    # print(more_like_this)
+    # print(values(more_like_this))
+
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
+
+    # Provide image for citation
+    if citation.type_controlled in ['BO'] or citation.type_controlled in ['CH']:
+        if citation.type_controlled in ['BO']:
+            title = citation.title
+            contrib = citation.get_all_contributors[0].authority.name
+        else:
+            parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+            title = parent_relation[0].subject.title
+            contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
+
+        apiKey = "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I"
+
+        if contrib.index(',') >= 0:
+            contribSurname = contrib[:contrib.index(',')]
+        else:
+            contribSurname = contrib[contrib.rindex(' '):]
+
+        url = f"https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}"
+        url = url.replace(" ", "%20")
+
+        if len(title):
+            resp = requests.get(url)
+            books = resp.json()
+
+            items = books["items"]
+
+
+            for i in items:
+                if i["volumeInfo"]["title"].lower() in title.lower() or (i["volumeInfo"]["authors"] and any(contribSurname in s for s in i["volumeInfo"]["authors"])):
+                    bookGoogleId = i["id"]
+                    break
+
+            url2 = f"https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite"
+            url2 = url2.replace(" ", "%20")
+
+            response = urlopen(url2)
+            book = json.load(response)
+
+            imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+            cover_image = {}
+
+            if "medium" in imageLinks:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+            elif "small" in imageLinks:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            elif "thumbnail" in imageLinks:
+                cover_image["size"] = "thumbnail"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+    else:
+        cover_image = {}
 
     # Location of citation in REST API
     api_view = reverse('citation-detail', args=[citation.id], request=request)
@@ -814,10 +895,13 @@ def citation(request, citation_id):
         'authors': authors,
         'properties_map': properties,
         'subjects': subjects,
+        'concepts': concepts,
         'persons': persons,
         'categories': categories,
+        'people': people,
         'time_periods': time_periods,
         'places': places,
+        'institutions': institutions,
         'source_instance_id': citation_id,
         'source_content_type': ContentType.objects.get(model='citation').id,
         'related_citations_ic': related_citations_ic,
@@ -839,6 +923,8 @@ def citation(request, citation_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
+        'similar_citations': similar_citations,
+        'cover_image': cover_image,
     }
     return render(request, 'isisdata/citation.html', context)
 
