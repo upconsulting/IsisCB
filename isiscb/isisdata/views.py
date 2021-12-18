@@ -799,19 +799,21 @@ def citation(request, citation_id):
             response = urlopen(url2)
             book = json.load(response)
 
-            imageLinks = book["volumeInfo"]["imageLinks"].keys()
-
+            print(book)
             cover_image = {}
 
-            if "medium" in imageLinks:
-                cover_image["size"] = "standard"
-                cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-            elif "small" in imageLinks:
-                cover_image["size"] = "standard"
-                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-            elif "thumbnail" in imageLinks:
-                cover_image["size"] = "thumbnail"
-                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            if 'imageLinks' in book["volumeInfo"]:
+                imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+                if "medium" in imageLinks:
+                    cover_image["size"] = "standard"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+                elif "small" in imageLinks:
+                    cover_image["size"] = "standard"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+                elif "thumbnail" in imageLinks:
+                    cover_image["size"] = "thumbnail"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
     else:
         cover_image = {}
 
