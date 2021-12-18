@@ -14,8 +14,7 @@
         let related_citations_count = parseInt("{{ related_citations_count }}");
         let author_contributor_count = parseInt("{{ author_contributor_count }}");
 
-        if (authorityType == "Person" && author_contributor_count !== 0 && author_contributor_count / related_citations_count > .9) {
-        } else {
+        if (!(authorityType == "Person" && author_contributor_count !== 0 && author_contributor_count / related_citations_count > .9)) {
           wikiFetch();
         }
 
