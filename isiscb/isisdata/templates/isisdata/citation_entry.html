@@ -2,13 +2,13 @@
 {% load citation_filters %}
 
 <p>
-  {% if citation_object.get_type_controlled_display == "Book" %}
+  {% if citation_object.type_controlled == "BO" %}
     <i class="fa fa-book"></i>
-  {% elif citation.get_type_controlled_display == "Thesis" %}
+  {% elif citation_object.type_controlled == "TH" %}
     <i class="fa fa-graduation-cap"></i>
-  {% elif citation.get_type_controlled_display == "Multimedia Object" %}
+  {% elif citation_object.type_controlled == "MO" %}
     <i class="fa fa-photo-video"></i>
-  {% elif citation.get_type_controlled_display == "Chapter" %}
+  {% elif citation.type_controlled == "CH" %}
     <i class="fa fa-book-open"></i>
   {% else %}
     <i class="far fa-file-alt"></i>

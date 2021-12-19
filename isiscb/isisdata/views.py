@@ -705,18 +705,6 @@ def citation(request, citation_id):
                                               & ~Q(type_controlled__in=['GE', 'TI'], citation__public=True))\
                                       .filter(public=True)
 
-    # sqs = SearchQuerySet().models(Citation).facet('subject_ids', size=100)
-    #
-    # subjectsUniquenesses = {}
-    #
-    # for subject in subjects:
-    #     subjectsUniquenesses[subject.authority_id] = sqs.all().exclude(public="false").filter(subject_ids=subject.authority_id).count()
-    #
-    # print("----------")
-    # # print(subjects.all())
-    # print(subjects.values())
-    # print("----------")
-
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
 
@@ -751,18 +739,13 @@ def citation(request, citation_id):
 
     similar_citations = Citation.objects.filter(Q(related_authorities__acrelation__in=subjects.all())).filter(public=True).annotate(Count('related_authorities__acrelation')).order_by('-related_authorities__acrelation__count').exclude(title=citation.title)[0:20]
 
-    # more_like_this = SearchQuerySet().more_like_this(citation)[:10]
-    #
-    # print(more_like_this)
-    # print(values(more_like_this))
-
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
 
     # Provide image for citation
-    if citation.type_controlled in ['BO'] or citation.type_controlled in ['CH']:
+    if citation.type_controlled in ['BO','CH']:
         if citation.type_controlled in ['BO']:
             title = citation.title
             contrib = citation.get_all_contributors[0].authority.name
@@ -799,7 +782,6 @@ def citation(request, citation_id):
             response = urlopen(url2)
             book = json.load(response)
 
-            print(book)
             cover_image = {}
 
             if 'imageLinks' in book["volumeInfo"]:

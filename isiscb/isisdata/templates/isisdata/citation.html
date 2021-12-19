@@ -26,12 +26,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <script type="text/javascript">
 
   window.addEventListener('DOMContentLoaded', (event) => {
-    let citationType = "{{ citation.get_type_controlled_display }}";
+    let citationType = "{{ citation.type_controlled }}";
     let coverImg = "{{ cover_image }}";
     let imgSize = "{{ cover_image.size }}";
     let imgUrl = "{{ cover_image.url|safe }}";
 
-    if (citationType === "Book" || citationType === "Chapter"){
+    // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation; 
+    // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
+    // (using a selection from 3 color choices) to use as the citation's featured image. 
+    // Dr. Weldon wanted each journal to have the same cover color everytime, 
+    // so the journal title's location in the alphabet determines the color.
+
+    if (["BO","CH"].includes(citationType)){
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -45,7 +51,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageCaption").style.display = "block";
         }
 
-    } else if (citationType === "Article" || citationType === "Review" || citationType === "Essay Review") {
+    } else if (["AR","RE","ES"].includes(citationType)) {
         let backgroundColors = ["#780000", "#004b23", "#001d3d"];
         let backgroundColor;
 
@@ -304,7 +310,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <div class="col-sm-12 col-md-12" id="citationImageAdjacent" style="padding: 0; padding-left: 15px;">
             {% if authors|length > 0 %}
             <p><span class="label label-default">Authors & Contributors</span><br/>
-            {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation|get_contributor_role_as_string}})<br/> {% endif %}{% endfor %}
+            {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
             </p>
             <hr style="margin: 10px 0">
             {% endif %}
@@ -689,15 +695,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {% endif %}
 
                 {% if citation.type_controlled == "BO" %}
-                  <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.type_controlled|convert_type }}</span>
+                  <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% elif citation.type_controlled == "TH" %}
-                  <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.type_controlled|convert_type }}</span>
+                  <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% elif citation.type_controlled == "MO" %}
-                  <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.type_controlled|convert_type }}</span>
+                  <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% elif citation.type_controlled == "CH" %}
-                  <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.type_controlled|convert_type }}</span>
+                  <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% else %}
-                  <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type_controlled|convert_type }}</span>
+                  <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% endif %}
 
                 {% url 'citation' citation.id|get_pk as citation_url %}

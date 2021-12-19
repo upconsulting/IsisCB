@@ -99,30 +99,3 @@ def contributor_with_role_as_string(acrelation):
     kwargs = {'name': name,
               'role': acrelation.get_type_controlled_display()}
     return u"{name} ({role})".format(**kwargs)
-
-@register.filter
-def get_contributor_role_as_string(acrelation):
-    return acrelation.get_type_controlled_display()
-
-@register.filter
-def convert_type(type):
-    typeDict = {
-        'BO': 'Book',
-        'AR': 'Article',
-        'RE': 'Review',
-        'ES': 'Essay Review',
-        'MO': 'Multimedia Object',
-        'CH': 'Chapter',
-        'TH': 'Thesis',
-        'EV': 'Event',
-        'WO': 'Web Object',
-        'AO': 'Archive Object',
-        'DR': 'Digital Resource',
-        'PC': 'Personal Recognition',
-        'PR': 'Presentation',
-        'IN': 'Interactive',
-        'WE': 'Website',
-        'AP': 'Application',
-    }
-
-    return typeDict[type]
