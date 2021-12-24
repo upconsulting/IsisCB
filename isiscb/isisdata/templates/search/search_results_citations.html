@@ -20,12 +20,12 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <a data-toggle="collapse" data-parent="#accordion"
-              href="#collapseCitationTypes" class="accordion-toggle">
+              href=".collapseCitationTypes" class="accordion-toggle">
               Sort & Filter
             </a>
           </h4>
         </div>
-        <div id="collapseCitationTypes" class="panel-collapse collapse {% if selected_facets.citation_type %}in{% endif %}" aria-expanded="{% if selected_facets.citation_type %}true{% else %}false{% endif %}">
+        <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse collapse {% if selected_facets.citation_type %}in{% endif %}" aria-expanded="{% if selected_facets.citation_type %}true{% else %}false{% endif %}">
           <div class="facet_panel panel-body">
             <div class="row panel-row" style="margin-bottom:10px;">
               <div class="col-md-12 panel-cell" style="padding-top:4px">
