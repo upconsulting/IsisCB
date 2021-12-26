@@ -31,11 +31,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     let imgSize = "{{ cover_image.size }}";
     let imgUrl = "{{ cover_image.url|safe }}";
 
-    // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation; 
-    // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
-    // (using a selection from 3 color choices) to use as the citation's featured image. 
-    // Dr. Weldon wanted each journal to have the same cover color everytime, 
-    // so the journal title's location in the alphabet determines the color.
+    // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation 
 
     if (["BO","CH"].includes(citationType)){
         if (imgUrl.length){
@@ -50,6 +46,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageAdjacent").classList.add("col-md-8");
           document.getElementById("citationImageCaption").style.display = "block";
         }
+
+    // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
+    // (using a selection from 3 color choices) to use as the citation's featured image. 
+    // Weldon wanted each journal to have the same cover color everytime, 
+    // so the journal title's location in the alphabet determines the color.
 
     } else if (["AR","RE","ES"].includes(citationType)) {
         let backgroundColors = ["#780000", "#004b23", "#001d3d"];
@@ -289,7 +290,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
           <div id="placeholderImage" style="height: 314px; width: 100%; display: none; padding: 5% 7%; vertical-align: middle;">
             {% for prop in properties_map %}
-              {% if prop.get_type_controlled_display == "Periodical" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+              {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
             {% endfor %}
             {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
               <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
@@ -423,7 +424,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                     <br>
                   {% endif %}
 
-                  {% if citation.get_type_controlled_display == "Book" or citation.get_type_controlled_display == "Chapter"%}
+                  {% if citation.type_controlled == "BO" or citation.type_controlled == "CH"%}
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
                     <br>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
@@ -431,7 +432,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?tbm=bks&q={{citation|get_title|bleach_safe}}">Google Books</a>
                     <br>
                   {% endif %}
-                  {% if citation.get_type_controlled_display == "Article" or citation.get_type_controlled_display == "Review" or citation.get_type_controlled_display == "Essay Review"%}
+                  {% if citation.type_controlled == "AR" or citation.type_controlled == "RE" or citation.type_controlled == "ES"%}
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
                     <br>
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
