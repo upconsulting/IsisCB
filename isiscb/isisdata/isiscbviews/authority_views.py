@@ -197,33 +197,27 @@ def authority(request, authority_id):
     wikiImage = ''
     wikiCredit = ''
     wikiIntro = ''
-    # print(hasattr(authority, 'personal_name_first'))
-    print(type(authority))
-    print(hasattr(authority, 'person'))
+    authorityName = ''
+
     if authority.type_controlled != 'SE' and not(authority.type_controlled == 'PE' and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
         authorityName = authority.name
-
         if hasattr(authority, 'person'):
-            firstName = authority.personal_name_first
-            lastName = authority.personal_name_last
-
-            if firstName and len(firstName) > 0 and lastName and len(lastName) > 0:
-                authorityName = firstName + " " + lastName
-            elif authorityName.index(',') >= 0:
-                # print(authorityName)
+            if authorityName.find(',') >= 0:
                 firstName = authorityName[authorityName.index(',') + 2:len(authorityName)].strip()
-                if firstName.index(' ') >= 0:
-                    firstName = firstName[:firstName.index(' ')]
-                lastName = authorityName[:authorityName.index(',')]
+                if firstName.find(' ') >= 0:
+                    firstName = firstName[:firstName.find(' ')]
+                lastName = authorityName[:authorityName.find(',')]
                 authorityName = firstName + ' ' + lastName  
-    elif authority.type_controlled == 'CO':
-        if authorityName.index(';') >= 0:
-            authorityName = authorityName[:authorityName.index(';').strip()]
-    elif authority.type_controlled == 'GE':
-        if authorityName.index('(') >= 0:
-            authorityName = authorityName[:authorityName.index('(').strip]
+        elif authority.type_controlled == 'CO':
+            if authorityName.find(';') >= 0:
+                authorityName = authorityName[:authorityName.find(';').strip()]
+        elif authority.type_controlled == 'GE':
+            if authorityName.find('(') >= 0:
+                authorityName = authorityName[:authorityName.find('(').strip]
     
-    if authorityName:
+    print(authorityName)
+
+    if authorityName != '':
         imgURL = f'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*'
         introURL = f'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*'
 
