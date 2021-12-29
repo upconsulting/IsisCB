@@ -23,6 +23,7 @@ import pytz
 import base64
 import csv
 import os
+import requests
 
 # The following code initializes two maps:
 #  - one that maps two letter country codes (e.g. DE, US) to three letter country codes (e.g. DEU, USA)
@@ -191,6 +192,53 @@ def authority(request, authority_id):
     related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
+    
+    # gets featured image and synopsis of authority from wikipedia
+    wikiImage = ''
+    wikiCredit = ''
+    wikiIntro = ''
+    # print(hasattr(authority, 'personal_name_first'))
+    print(type(authority))
+    print(hasattr(authority, 'person'))
+    if authority.type_controlled != 'SE' and not(authority.type_controlled == 'PE' and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
+        authorityName = authority.name
+
+        if hasattr(authority, 'person'):
+            firstName = authority.personal_name_first
+            lastName = authority.personal_name_last
+
+            if firstName and len(firstName) > 0 and lastName and len(lastName) > 0:
+                authorityName = firstName + " " + lastName
+            elif authorityName.index(',') >= 0:
+                # print(authorityName)
+                firstName = authorityName[authorityName.index(',') + 2:len(authorityName)].strip()
+                if firstName.index(' ') >= 0:
+                    firstName = firstName[:firstName.index(' ')]
+                lastName = authorityName[:authorityName.index(',')]
+                authorityName = firstName + ' ' + lastName  
+    elif authority.type_controlled == 'CO':
+        if authorityName.index(';') >= 0:
+            authorityName = authorityName[:authorityName.index(';').strip()]
+    elif authority.type_controlled == 'GE':
+        if authorityName.index('(') >= 0:
+            authorityName = authorityName[:authorityName.index('(').strip]
+    
+    if authorityName:
+        imgURL = f'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*'
+        introURL = f'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*'
+
+        imgResp = requests.get(imgURL)
+        imgJSON = imgResp.json()
+        if list(imgJSON['query']['pages'].items())[0][0] != '-1':
+            imgPage = list(imgJSON['query']['pages'].items())[0][1]
+            imgPageID = imgPage['pageid']
+            wikiCredit = f'http://en.wikipedia.org/?curid={imgPageID}'
+            if imgPage.get('original') and imgPage['original'].get('source'):
+                wikiImage = imgPage['original']['source']
+
+            introResp = requests.get(introURL)
+            introJSON = introResp.json()
+            wikiIntro = list(introJSON['query']['pages'].items())[0][1]['extract']
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -317,6 +365,9 @@ def authority(request, authority_id):
         'related_subject_institutions_facet': related_subject_institutions_facet,
         'url_linked_data_name': settings.URL_LINKED_DATA_NAME,
         'related_dataset_facet': related_dataset_facet,
+        'wikiIntro': wikiIntro,
+        'wikiImage': wikiImage,
+        'wikiCredit': wikiCredit,
     }
 
     return render(request, 'isisdata/authority.html', context)

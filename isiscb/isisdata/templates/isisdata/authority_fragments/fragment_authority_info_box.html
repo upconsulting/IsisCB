@@ -5,96 +5,6 @@
 {% load citation_filters %}
 {% load facet_filters %}
 
-<!-- gets wikimedia image and synopsis where possible -->
-<script type="text/javascript">
-    const authorityType = "{{ authority.get_type_controlled_display }}";
-
-    if (authorityType !== "Serial Publication") {
-
-        let related_citations_count = parseInt("{{ related_citations_count }}");
-        let author_contributor_count = parseInt("{{ author_contributor_count }}");
-
-        if (!(authorityType == "Person" && author_contributor_count !== 0 && author_contributor_count / related_citations_count > .9)) {
-          wikiFetch();
-        }
-
-        function wikiFetch() {
-            let authorityName = "{{ authority.name }}";
-
-            if (authorityType === "Person") {
-              let firstName = "{{ authority.personal_name_first }}";
-
-              let lastName = "{{ authority.personal_name_last}}";
-
-              if (firstName && firstName.length > 0 && lastName &&lastName.length > 0) {
-                authorityName = firstName + " " + lastName;
-
-              } else if (authorityName.indexOf(",") >= 0){
-                firstName = authorityName.substring(authorityName.indexOf(",") + 2, authorityName.length).trim();
-
-                if (firstName.indexOf(" ") >= 0) {
-                  firstName = firstName.substring(0, firstName.indexOf(" "));
-                }
-
-                lastName = authorityName.substring(0, authorityName.indexOf(","));
-
-                authorityName = firstName + " " + lastName;
-              }
-            } else if (authorityType === "Concept") {
-                if (authorityName.indexOf(";") >= 0) {
-                  authorityName = authorityName.substring(0, authorityName.indexOf(";")).trim();
-                }
-            } else if (authorityType === "Geographic Term") {
-                if (authorityName.indexOf("(") >= 0) {
-                  authorityName = authorityName.substring(0, authorityName.indexOf("(")).trim();
-                }
-            }
-
-            let imgUrl=`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${authorityName}&origin=*`;
-
-            let introUrl=`https://en.wikipedia.org/w/api.php?action=query&titles=${authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*`;
-
-            let wikiImagePage = "";
-            let wikiURL = "";
-
-            fetch(imgUrl)
-                .then(function(response){return response.json();})
-                .then(function(response) {
-                    wikiImagePage = response.query.pages[Object.keys(response.query.pages)[0]].pageid;
-                    wikiURL = `http://en.wikipedia.org/?curid=${wikiImagePage}`;
-                    let wikiImage = response.query.pages[Object.keys(response.query.pages)[0]].original.source;
-                    if (wikiImage) {
-                      document.getElementById('wikiImage').src = wikiImage;
-                      document.getElementById('wikiImage').style.display = "block";
-                      document.getElementById('wikiImageBorder').style.display = "block";
-                      document.getElementById('wikiImageCredit').style.display = "block";
-                      document.getElementById('wikiImageCredit').href = wikiURL;
-                    }
-                })
-                .catch(function(error){});
-
-            fetch(introUrl)
-                .then(function(response){return response.json();})
-                .then(function(response) {
-                  let wikiIntro = response.query.pages[Object.keys(response.query.pages)[0]].extract;
-
-                  if (wikiIntro) {
-                    document.getElementById('wikiIntro').innerHTML = wikiIntro;
-                    document.getElementById('wikiIntroButton').style.display = "inline-block";
-                    document.getElementById('wikiIntroBreak').style.display = "inline-block";
-                    document.getElementById('wikiSynopsisCredit').style.display = "block";
-                    document.getElementById('wikiSynopsisCredit').href = wikiURL;
-                  }
-
-                })
-                .catch(function(error){});
-        }
-    }
-
-</script>
-
-
-
 <!-- Progress through search results, if arriving from search view. -->
 {% if search_results|length > 0 and fromsearch and search_current %}
 <div class="panel panel-default" style="margin-bottom: 5px;">
@@ -173,7 +83,7 @@
   <div class="panel-body">
   {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
 
-      <img id="wikiImage" style="max-height:100%; max-width:100%; margin-left:auto; margin-right:auto; display:none;"></img>
+      <img id="wikiImage" style="max-height:100%; max-width:100%; margin-left:auto; margin-right:auto; display:none;" src=''></img>
       <a id="wikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
       <hr id="wikiImageBorder" style="display:none;">
 
@@ -336,3 +246,113 @@
     btn.addEventListener('click', toggleText);
     toggleText(); //to truncate at first time
   </script>
+
+<!-- gets wikimedia image and synopsis where possible -->
+<script type="text/javascript">
+
+  let wikiImage = "{{ wikiImage|safe }}";
+  let wikiIntro = `{{ wikiIntro }}`;
+  let wikiCredit = "{{ wikiCredit|safe }}";
+
+  if (wikiImage !== "") {
+    console.log(wikiImage);
+    document.getElementById('wikiImage').src = wikiImage;
+    document.getElementById('wikiImage').style.display = "block";
+    document.getElementById('wikiImageBorder').style.display = "block";
+    document.getElementById('wikiImageCredit').style.display = "block";
+    document.getElementById('wikiImageCredit').href = wikiCredit;
+  }
+
+  if (wikiIntro !== "") {
+    document.getElementById('wikiIntro').innerHTML = wikiIntro;
+    document.getElementById('wikiIntroButton').style.display = "inline-block";
+    document.getElementById('wikiIntroBreak').style.display = "inline-block";
+    document.getElementById('wikiSynopsisCredit').style.display = "block";
+    document.getElementById('wikiSynopsisCredit').href = wikiCredit;
+  }
+
+  {% comment %} const authorityType = "{{ authority.get_type_controlled_display }}";
+
+  if (authorityType !== "Serial Publication") {
+
+      let related_citations_count = parseInt("{{ related_citations_count }}");
+      let author_contributor_count = parseInt("{{ author_contributor_count }}");
+
+      if (!(authorityType == "Person" && author_contributor_count !== 0 && author_contributor_count / related_citations_count > .9)) {
+        wikiFetch();
+      }
+
+      function wikiFetch() {
+          let authorityName = "{{ authority.name }}";
+
+          if (authorityType === "Person") {
+            let firstName = "{{ authority.personal_name_first }}";
+
+            let lastName = "{{ authority.personal_name_last}}";
+
+            if (firstName && firstName.length > 0 && lastName &&lastName.length > 0) {
+              authorityName = firstName + " " + lastName;
+
+            } else if (authorityName.indexOf(",") >= 0){
+              firstName = authorityName.substring(authorityName.indexOf(",") + 2, authorityName.length).trim();
+
+              if (firstName.indexOf(" ") >= 0) {
+                firstName = firstName.substring(0, firstName.indexOf(" "));
+              }
+
+              lastName = authorityName.substring(0, authorityName.indexOf(","));
+
+              authorityName = firstName + " " + lastName;
+            }
+          } else if (authorityType === "Concept") {
+              if (authorityName.indexOf(";") >= 0) {
+                authorityName = authorityName.substring(0, authorityName.indexOf(";")).trim();
+              }
+          } else if (authorityType === "Geographic Term") {
+              if (authorityName.indexOf("(") >= 0) {
+                authorityName = authorityName.substring(0, authorityName.indexOf("(")).trim();
+              }
+          }
+
+          let imgUrl=`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=${authorityName}&origin=*`;
+
+          let introUrl=`https://en.wikipedia.org/w/api.php?action=query&titles=${authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*`;
+
+          let wikiImagePage = "";
+          let wikiURL = "";
+
+          fetch(imgUrl)
+              .then(function(response){return response.json();})
+              .then(function(response) {
+                  wikiImagePage = response.query.pages[Object.keys(response.query.pages)[0]].pageid;
+                  wikiURL = `http://en.wikipedia.org/?curid=${wikiImagePage}`;
+                  let wikiImage = response.query.pages[Object.keys(response.query.pages)[0]].original.source;
+                  if (wikiImage) {
+                    document.getElementById('wikiImage').src = wikiImage;
+                    document.getElementById('wikiImage').style.display = "block";
+                    document.getElementById('wikiImageBorder').style.display = "block";
+                    document.getElementById('wikiImageCredit').style.display = "block";
+                    document.getElementById('wikiImageCredit').href = wikiURL;
+                  }
+              })
+              .catch(function(error){});
+
+          fetch(introUrl)
+              .then(function(response){return response.json();})
+              .then(function(response) {
+                let wikiIntro = response.query.pages[Object.keys(response.query.pages)[0]].extract;
+
+                if (wikiIntro) {
+                  document.getElementById('wikiIntro').innerHTML = wikiIntro;
+                  document.getElementById('wikiIntroButton').style.display = "inline-block";
+                  document.getElementById('wikiIntroBreak').style.display = "inline-block";
+                  document.getElementById('wikiSynopsisCredit').style.display = "block";
+                  document.getElementById('wikiSynopsisCredit').href = wikiURL;
+                }
+
+              })
+              .catch(function(error){});
+      }
+  } {% endcomment %}
+
+</script>
