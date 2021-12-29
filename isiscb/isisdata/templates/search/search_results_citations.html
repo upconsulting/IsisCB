@@ -197,26 +197,30 @@
             </span>
 
 
-            <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print">
+            <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
                 <script>
                 {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
                 $.ajax("{{ ajax_linkresolve_url }}",
                     {
                         success: function(result) {
-
-                            if (result.url.length > 0) {
-                                var linkElem = '<a href="'+ result.url +'">';
-                                if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; }
+                            if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
+                                var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" href="'+ result.url +'">';
+                                if (result.icon.length > 0) { 
+                                  linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
+                                } else { 
+                                  linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; 
+                                }
                                 linkElem += '</a>';
-                                $('#linkresolver_{{ result.id|get_pk }}').append(linkElem);
+                                $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
+                                console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
                             } else {
                                 // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                $('#linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                                $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
                             }
                         },
                         error: function() {
                             // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                            $('#linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                            $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
                         },
                     });
                 </script>
