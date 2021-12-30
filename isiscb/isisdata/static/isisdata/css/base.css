@@ -73,6 +73,124 @@ div.timeline {
   padding-right: 0px;
 }
 
+.help-section .help-container {
+  /* width: 100%; */
+  /* height: 500px; */
+  background-color: #eee;
+  padding: 5px 5%;
+  margin: 0px 15px;
+  border-radius: 6px;
+}
+
+.section-title h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.tutorial-videos td {
+  font-size: 1.2em;
+  padding: 5px 10px;
+  font-weight: 200;
+}
+
+.help-links {
+}
+
+.help-links td {
+  font-size: 1.2em;
+  padding: 5px 10px;
+  font-weight: 200;
+}
+
+.video-container {
+  border-left: 1px solid #A9A9A9;
+}
+
+.bibliographical-essays-panel li {
+    list-style-type: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 0 20px;
+}
+
+/* search page */
+
+.btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.btn-default.active.focus, .btn-default:active:focus, .open>.dropdown-toggle.btn-default {
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.search-header h2 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.search-breadcrumbs {
+  display:inline;
+}
+
+.search-breadcrumb-item + .search-breadcrumb-item::before {
+        content: "and";
+    }
+
+.breadcrumb {
+  border: 1px solid #ddd;
+  border-left: 6px solid #ddd;
+  background-color: #fff;
+}
+
+.search-result {
+  border-left: 2px solid #337AB7;
+}
+
+.stub-search-result {
+  border-left: 2px solid #B7337A;
+}
+
+.stub-search-result p,
+.search-result p {
+  /* background-color: #E8E8E8; */
+  padding-left: 8px;
+  /* border-radius: 5px; */
+}
+
+.stub-search-result-label{
+  color: #CE4F71;
+}
+
+.citations_authorities_headers:hover {
+  cursor: default;
+}
+
+.citations_container .panel-body {
+  padding-top: 10px;
+}
+/* end search css */
+
+#slider-range > span {
+  border-bottom-right-radius: 50%;
+  border-bottom-left-radius: 50%;
+  border-top-right-radius: 50%;
+  border-top-left-radius: 50%;
+  background-color: #337ab7;
+  border-color: #fff;
+}
+
+#slider-range > span:hover {
+  background-color: #0E6DFD;
+}
+
+#slider-range > div {
+  background-color: #337ab7;
+}
+
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;
@@ -368,10 +486,6 @@ li {
   margin-top: 15px;
 }
 
-.menuContainer {
-    margin-top: 20px;
-}
-
 .panel-title {
   font-size: 14px;
 }
@@ -440,7 +554,7 @@ div.facet_panel > ul {
 }
 
 .panel-group {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .more-facets {
@@ -451,7 +565,6 @@ div.facet_panel > ul {
     max-height: 420px;
     overflow-y: auto;
 }
-
 
 .text-small {
     font-size: 9pt;
