@@ -194,45 +194,7 @@ def authority(request, authority_id):
     related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
     
     # gets featured image and synopsis of authority from wikipedia
-    wikiImage = ''
-    wikiCredit = ''
-    wikiIntro = ''
-    authorityName = ''
-
-    if authority.type_controlled != 'SE' and not(authority.type_controlled == 'PE' and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
-        authorityName = authority.name
-        if hasattr(authority, 'person'):
-            if authorityName.find(',') >= 0:
-                firstName = authorityName[authorityName.index(',') + 2:len(authorityName)].strip()
-                if firstName.find(' ') >= 0:
-                    firstName = firstName[:firstName.find(' ')]
-                lastName = authorityName[:authorityName.find(',')]
-                authorityName = firstName + ' ' + lastName  
-        elif authority.type_controlled == 'CO':
-            if authorityName.find(';') >= 0:
-                authorityName = authorityName[:authorityName.find(';').strip()]
-        elif authority.type_controlled == 'GE':
-            if authorityName.find('(') >= 0:
-                authorityName = authorityName[:authorityName.find('(').strip]
-    
-    print(authorityName)
-
-    if authorityName != '':
-        imgURL = f'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*'
-        introURL = f'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*'
-
-        imgResp = requests.get(imgURL)
-        imgJSON = imgResp.json()
-        if list(imgJSON['query']['pages'].items())[0][0] != '-1':
-            imgPage = list(imgJSON['query']['pages'].items())[0][1]
-            imgPageID = imgPage['pageid']
-            wikiCredit = f'http://en.wikipedia.org/?curid={imgPageID}'
-            if imgPage.get('original') and imgPage['original'].get('source'):
-                wikiImage = imgPage['original']['source']
-
-            introResp = requests.get(introURL)
-            introJSON = introResp.json()
-            wikiIntro = list(introJSON['query']['pages'].items())[0][1]['extract']
+    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count)
 
     # Provide progression through search results, if present.
     last_query = request.GET.get('last_query', None) #request.session.get('last_query', None)
@@ -365,6 +327,50 @@ def authority(request, authority_id):
     }
 
     return render(request, 'isisdata/authority.html', context)
+
+def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
+    wikiImage = ''
+    wikiCredit = ''
+    wikiIntro = ''
+    authorityName = ''
+    wikiImageUrl = settings.WIKIPEDIA_IMAGE_API_PATH
+    wikiIntroUrl = settings.WIKIPEDIA_INTRO_API_PATH
+    wikiPageUrl = settings.WIKIPEDIA_PAGE_PATH
+
+    if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
+        authorityName = authority.name
+        if hasattr(authority, 'person'):
+            if authorityName.find(',') >= 0:
+                firstName = authorityName[authorityName.index(',') + 2:len(authorityName)].strip()
+                if firstName.find(',') >= 0:
+                    firstName = firstName[:firstName.find(',')]
+                lastName = authorityName[:authorityName.find(',')]
+                authorityName = firstName + ' ' + lastName  
+        elif authority.type_controlled == 'CO':
+            if authorityName.find(';') >= 0:
+                authorityName = authorityName[:authorityName.find(';').strip()]
+        elif authority.type_controlled == 'GE':
+            if authorityName.find('(') >= 0:
+                authorityName = authorityName[:authorityName.find('(').strip]
+
+    if authorityName:
+        imgURL = wikiImageUrl.format(authorityName = authorityName)
+        introURL = wikiIntroUrl.format(authorityName = authorityName)
+        imgJSON = requests.get(imgURL).json()
+
+        if list(imgJSON['query']['pages'].items())[0][0] != '-1':
+            imgPage = list(imgJSON['query']['pages'].items())[0][1]
+            imgPageID = imgPage['pageid']
+            wikiCredit = f'{wikiPageUrl}{imgPageID}'
+            if imgPage.get('original') and imgPage['original'].get('source'):
+                wikiImage = imgPage['original']['source']
+
+            introJSON = requests.get(introURL).json()
+            extract = list(introJSON['query']['pages'].items())[0][1]['extract']
+            if extract.find('may refer to') < 0:
+                wikiIntro = extract
+    
+    return wikiImage, wikiIntro, wikiCredit
 
 def get_place_map_data(request, authority_id):
     sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)

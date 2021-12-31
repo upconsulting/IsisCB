@@ -429,3 +429,7 @@ DATASET_ISISCB_NAME_PREFIX = os.environ.get('DATASET_ISISCB_NAME_PREFIX', 'Isis 
 DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isis Bibliography of the History of Science')
 DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
 DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
+
+WIKIPEDIA_IMAGE_API_PATH = 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*'
+WIKIPEDIA_INTRO_API_PATH = 'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*'
+WIKIPEDIA_PAGE_PATH = 'http://en.wikipedia.org/?curid='

@@ -236,15 +236,14 @@
   </div>
 
   <script>
-    var textHolder = document.querySelector('.wikiIntro');
-    var btn = document.querySelector('.readMore');
+    let textHolder = document.querySelector('.wikiIntro');
+    let btn = document.querySelector('.readMore');
 
     function toggleText() {
-    textHolder.classList.toggle("truncate");
+      textHolder.classList.toggle("truncate");
     }
 
     btn.addEventListener('click', toggleText);
-    toggleText(); //to truncate at first time
   </script>
 
 <!-- gets wikimedia image and synopsis where possible -->
@@ -264,11 +263,24 @@
   }
 
   if (wikiIntro !== "") {
-    document.getElementById('wikiIntro').innerHTML = wikiIntro;
-    document.getElementById('wikiIntroButton').style.display = "inline-block";
+    let textHolder = document.querySelector('.wikiIntro');
+
+    textHolder.innerHTML = wikiIntro;
     document.getElementById('wikiIntroBreak').style.display = "inline-block";
     document.getElementById('wikiSynopsisCredit').style.display = "block";
     document.getElementById('wikiSynopsisCredit').href = wikiCredit;
+
+    let other = $(textHolder).clone();
+    $(other).html('a<br>b').hide().appendTo('body');
+    let size = $(other).height() / 2;
+    $(other).remove();
+    let lines = $(textHolder).height() /  size;
+    console.log(lines);
+
+    if (lines > 7) {
+      document.getElementById('wikiIntroButton').style.display = "inline-block";
+      toggleText(); //to truncate at first time
+    }
   }
 
 </script>
