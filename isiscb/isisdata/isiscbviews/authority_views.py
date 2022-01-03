@@ -333,9 +333,6 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
     wikiCredit = ''
     wikiIntro = ''
     authorityName = ''
-    wikiImageUrl = settings.WIKIPEDIA_IMAGE_API_PATH
-    wikiIntroUrl = settings.WIKIPEDIA_INTRO_API_PATH
-    wikiPageUrl = settings.WIKIPEDIA_PAGE_PATH
 
     if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
         authorityName = authority.name
@@ -346,22 +343,22 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                     firstName = firstName[:firstName.find(',')]
                 lastName = authorityName[:authorityName.find(',')]
                 authorityName = firstName + ' ' + lastName  
-        elif authority.type_controlled == 'CO':
+        elif authority.type_controlled == authority.PERSON:
             if authorityName.find(';') >= 0:
                 authorityName = authorityName[:authorityName.find(';').strip()]
-        elif authority.type_controlled == 'GE':
+        elif authority.type_controlled == authority.GEOGRAPHIC_TERM:
             if authorityName.find('(') >= 0:
                 authorityName = authorityName[:authorityName.find('(').strip]
 
     if authorityName:
-        imgURL = wikiImageUrl.format(authorityName = authorityName)
-        introURL = wikiIntroUrl.format(authorityName = authorityName)
+        imgURL = settings.WIKIPEDIA_IMAGE_API_PATH.format(authorityName = authorityName)
+        introURL = settings.WIKIPEDIA_INTRO_API_PATH.format(authorityName = authorityName)
         imgJSON = requests.get(imgURL).json()
 
         if list(imgJSON['query']['pages'].items())[0][0] != '-1':
             imgPage = list(imgJSON['query']['pages'].items())[0][1]
             imgPageID = imgPage['pageid']
-            wikiCredit = f'{wikiPageUrl}{imgPageID}'
+            wikiCredit = f'{settings.WIKIPEDIA_PAGE_PATH}{imgPageID}'
             if imgPage.get('original') and imgPage['original'].get('source'):
                 wikiImage = imgPage['original']['source']
 

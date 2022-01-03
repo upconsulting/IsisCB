@@ -180,7 +180,7 @@ LOGGING = {
 		"app_analyzer": {
 			"level": "DEBUG",
 			"class": "logging.FileHandler",
-			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
+			"filename": "/Users/paulvieth/Desktop/IsisCBCode/logs/app_analyzer.log",
 			"formatter": "verbose",
 		}
 	},
@@ -385,3 +385,7 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
                                 AWS_SECRET_ACCESS_KEY,
                                 AWS_EXPORT_BUCKET_NAME)
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
+
+WIKIPEDIA_IMAGE_API_PATH = os.environ.get('WIKIPEDIA_IMAGE_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*')
+WIKIPEDIA_INTRO_API_PATH = os.environ.get('WIKIPEDIA_INTRO_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*')
+WIKIPEDIA_PAGE_PATH = os.environ.get('WIKIPEDIA_PAGE_PATH', 'https://en.wikipedia.org/?curid=')
