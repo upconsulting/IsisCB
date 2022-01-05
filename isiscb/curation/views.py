@@ -406,84 +406,6 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
-def create_acrelation_for_authority(request, authority_id):
-    authority = get_object_or_404(Authority, pk=authority_id)
-    search_key = request.GET.get('search', request.POST.get('search'))
-    current_index = request.GET.get('current', request.POST.get('current'))
-
-    context = {
-        'curation_section': 'datasets',
-        'curation_subsection': 'authorities',
-        'instance': authority,
-        'search_key': search_key,
-        'current_index': current_index
-
-    }
-    if request.method == 'GET':
-        initial = {
-            'authority': authority.id,
-            'name_for_display_in_citation': authority.name
-        }
-        type_controlled = request.GET.get('type_controlled', None)
-        if type_controlled:
-            initial.update({'type_controlled': type_controlled.upper()})
-        form = ACRelationForm(prefix='acrelation', initial=initial)
-
-    elif request.method == 'POST':
-        form = ACRelationForm(request.POST, prefix='acrelation')
-        if form.is_valid():
-            form.save()
-
-            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
-            if search_key and current_index:
-                target += '&search=%s&current=%s' % (search_key, current_index)
-            return HttpResponseRedirect(target)
-
-    context.update({
-        'form': form,
-    })
-    template = 'curation/authority_acrelation_changeview.html'
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
-def acrelation_for_authority(request, authority_id, acrelation_id):
-    authority = get_object_or_404(Authority, pk=authority_id)
-    acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
-
-    search_key = request.GET.get('search', request.POST.get('search'))
-    current_index = request.GET.get('current', request.POST.get('current'))
-
-    context = {
-        'curation_section': 'datasets',
-        'curation_subsection': 'authorities',
-        'instance': authority,
-        'acrelation': acrelation,
-        'search_key': search_key,
-        'current_index': current_index
-    }
-    if request.method == 'GET':
-        form = ACRelationForm(instance=acrelation, prefix='acrelation')
-
-    elif request.method == 'POST':
-        form = ACRelationForm(request.POST, instance=acrelation, prefix='acrelation')
-        if form.is_valid():
-            form.save()
-            target = reverse('curation:curate_authority', args=(authority.id,)) + '?tab=acrelations'
-            if search_key and current_index:
-                target += '&search=%s&current=%s' % (search_key, current_index)
-            return HttpResponseRedirect(target)
-
-    context.update({
-        'form': form,
-    })
-    template = 'curation/authority_acrelation_changeview.html'
-    return render(request, template, context)
-
-
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -1660,7 +1582,7 @@ def citations(request):
               'part_details__pages_free_text', 'part_details__volume_free_text',
               'part_details__issue_free_text', 'created_on_fm',
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
-              'modified_by__first_name', 'modified_by__last_name', 'modified_by' )
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
     qs = queryset.select_related('part_details').values(*fields)
     filtered_objects = CitationFilter(filter_params, queryset=qs)
@@ -1854,8 +1776,10 @@ def authority(request, authority_id):
             'form': form,
             'instance': authority,
             'acrelations': authority.acrelation_set.all()[0:20],
+            'aarelations': authority.aarelations_all.all()[0:20],
             'end': 20,
             'total_acrelations': authority.acrelation_set.count(),
+            'total_aarelations': authority.aarelations_all.count(),
             'person_form': person_form,
             'tracking_records': tracking_records,
             # 'total': filtered_objects.qs.count(),
@@ -2212,6 +2136,19 @@ def search_users(request):
     } for u in queryset[:20]]
     return JsonResponse(results, safe=False)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def get_citation_by_id(request):
+    id = request.GET.get('id', None)
+    if not id:
+        return JsonResponse({'citation': None})
+
+    citation = Citation.objects.filter(id=id).first()
+    if not citation:
+        return JsonResponse({}, status=404)
+    return JsonResponse({
+        'id': citation.id,
+        'title': citation.title_for_display,
+    })
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_citation_search(request):
@@ -2369,7 +2306,7 @@ def _get_filtered_queryset(request, object_type='CITATION'):
         if 'collection_only' in filter_params:
             filter_params.pop('collection_only')
     filter_params_raw = filter_params.urlencode()#.encode('utf-8')
-    if object_type is 'CITATION':
+    if object_type == 'CITATION':
         _qs = operations.filter_queryset(request.user, Citation.objects.all())
         queryset = CitationFilter(filter_params, queryset=_qs)
     else:
@@ -2523,23 +2460,23 @@ def export_citations(request):
             export_linked_records = form.cleaned_data.get('export_linked_records')
             export_metadata = form.cleaned_data.get('export_metadata', False)
             use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
+            use_preset = form.cleaned_data.get('use_preset', False)
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             _out_name = '%s--%s.csv' % (_datestamp, tag)
-            # _compress = form.cleaned_data.get('compress_output', False)
-            s3_path = 's3://%s:%s@%s/%s' % (settings.AWS_ACCESS_KEY_ID,
-                                            settings.AWS_SECRET_ACCESS_KEY,
-                                            settings.AWS_EXPORT_BUCKET_NAME,
-                                            _out_name)
 
+            s3_path = settings.UPLOAD_IMPORT_PATH + _out_name
+
+            # _compress = form.cleaned_data.get('compress_output', False)
             # if _compress:
             #     s3_path += '.gz'
 
             # configuration for export
             config = {
                 'authority_delimiter': " || " if use_pipe_delimiter else " ",
-                'export_metadata': export_metadata
+                'export_metadata': export_metadata,
+                'use_preset': use_preset
             }
 
             export_tasks = {
@@ -2551,12 +2488,15 @@ def export_citations(request):
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
-            export_task = export_tasks.get(form.cleaned_data.get('export_format', 'CSV'), None)
+            format = form.cleaned_data.get('export_format', 'CSV')
+            export_task = export_tasks.get(format, None)
             if export_task:
                 result = export_task.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)
             else:
+                if format == 'SWP_PRESET':
+                    config['use_preset'] = True
                 result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)

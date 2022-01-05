@@ -13,6 +13,8 @@ def _create_attribute_value_forms():
             value_forms[at.id] = ISODateValueForm
         elif value_class is AuthorityValue:
             value_forms[at.id] = AuthorityValueForm
+        elif value_class is CitationValue:
+            value_forms[at.id] = CitationValueForm
         else:
             value_forms[at.id] = modelform_factory(value_class,
                                     exclude=('attribute', 'child_class'))

@@ -201,33 +201,7 @@
                 {% include "curation/fragment_authority_linkeddata.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'aarelations' %} active{% endif %} panel-body" id="aarelations">
-                <ul class="list-group">
-                {% for aarelation in instance.aarelation_set.all %}
-                    <a class="list-group-item">
-                        {% if instance.id == aarelation.subject.id %}
-                        <span class="text text-warning">This <span class="label label-success">{{ instance.get_type_controlled_display }}</span></span>
-                        {% else %}
-
-                        The <span class="label label-success">{{ aarelation.subject.get_type_controlled_display }}</span> <span class="text text-warning">{{ aarelation.subject|get_citation_title }}</span>
-
-                        {% endif %}
-                        <span class="label label-primary">{{ aarelation.get_type_controlled_display }}</span>
-                        {% if aarelation.type_free %}
-                        <span class="label label-success">{{ aarelation.type_free }}</span>
-                        {% endif %}
-
-                        {% if instance.id == aarelation.object.id %}
-                        <span class="text text-warning">this <span class="label label-success">{{ instance.get_type_controlled_display }}</span>.</span>
-                        {% else %}
-                        the <span class="label label-success">{{ aarelation.object.get_type_controlled_display }}</span> <span class="text text-warning">{{ aarelation.object|get_citation_title }}</span>.
-                        {% endif %}
-
-
-                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
-                    </a>
-                {% endfor %}
-                </ul>
-
+                {% include "curation/fragment_authority_aarelations.html" %}
             </div>
             <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
                 {% include "curation/fragment_authority_acrelations.html" %}

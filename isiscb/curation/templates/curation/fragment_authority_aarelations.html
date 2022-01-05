@@ -1,0 +1,131 @@
+{% load render_object %}
+{% load static %}
+
+{% load rules %}
+{% load permission_tags %}
+
+{% with 'aarelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_authority_field' user permTuple as can_update %}
+{% test_rule 'can_view_authority_field' user permTuple as can_view %}
+
+<div class="form-group">
+    <label>Filter by base relation type</label>
+    <select class="form-control" id="aarelation-filter-type" name="aarelation-filter-type">
+        <option value="" selected="selected">---------</option>
+        <option value="IDTO">Is Identical To</option>
+        <option value="PAOF">Is Parent Of</option>
+        <option value="ASWI">Is Associated With</option>
+    </select>
+</div>
+<script>
+    $('#aarelation-filter-type').change(function(e) {
+        var selected_type = $('#aarelation-filter-type').val();
+        if (selected_type == "") {
+            $('.aarelation').show();
+        } else {
+          var types = selected_type.split(",");
+          $('.aarelation').hide();
+          types.forEach(function(type, index, array) {
+            $('.aarelation-type-' + type).show();
+          });
+        }
+    });
+</script>
+
+<script src="{% static "isisdata/js/jquery.jscroll.js" %}" type="text/javascript"></script>
+<script>
+  $(document).ready(function() {
+    $('#aarelations_scroll').jscroll({
+      nextSelector:'a#nextPage',
+      autoTrigger: false,
+    });
+  });
+</script>
+
+
+{% if can_view %}
+<p>
+Total number of AARelations: {{ total_aarelations }}
+</p>
+<ul id="aarelations_scroll" class="list-group">
+        {% include 'curation/authority_aarelations.html' %}
+</ul>
+{% if can_update %}
+    <a class="list-group-item text-muted" href="{% url "curation:create_aarelation_for_authority" instance.id %}?search={{ search_key }}&current={{ current_index }}">
+        <span class="glyphicon glyphicon-plus"></span> Create new relation
+    </a>
+{% endif %}
+{% endif %}
+
+{% if not can_view %}
+<ul class="list-group">
+<li class="list-group-item">
+  <div class="alert alert-warning" role="alert">
+  You do not have sufficient permissions to view related citations.
+  </div>
+</li>
+</ul>
+{% endif %}
+
+
+{% endwith %}
+
+<script>
+  //# sourceURL=deleteaa.js
+$(document).ready(function() {
+    $('.delete-aarelation').click(function() {
+        var elem = $(this);
+        var aarelation_id = elem.attr('aarelation-id');
+        var aarelation_title = elem.attr('aarelation-title');
+        $('#aarelation-id-container').val(aarelation_id);
+        $('#delete-aarelation-target-name').html(aarelation_title);
+        $('#delete-aarelation-modal').modal('show');
+    });
+
+});
+
+var delete_aarelation = function() {
+    $('#delete-aarelation-modal').modal('hide');
+    var aarelation_id = $('#aarelation-id-container').val();
+    if (aarelation_id) {
+        $.ajax("{% url "curation:create_aarelation_for_authority" instance.id %}" + aarelation_id + '/delete.json?', {
+            'method': "POST",
+            'data': {
+              'confirm': 'true',
+            },
+            'success': function(data) {
+                if (data['result'] == true) {
+                  $('#aarelation-' + aarelation_id).remove();
+                }
+            },
+        });
+    }
+}
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="delete-aarelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-aarelation-modal-label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="delete-aarelation-modal-label">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You are about to delete an authority-citation relation with <span class="text-warning" id="delete-aarelation-target-name"></span>. Deletion cannot be undone!
+                </p>
+                <p>
+                    This will not delete the related citation itself, only the relation between the citation and this authority.
+                </p>
+
+                <input type="hidden" id="aarelation-id-container" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                <button type="button" class="btn btn-danger" onclick="delete_aarelation();">Delete forever</button>
+            </div>
+        </div>
+    </div>
+</div>

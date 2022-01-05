@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 from curation import views
 from curation.bulk_views import bulk_change_csv_views
 from curation.bulk_views import citation_views
+from curation.authority_views import relation_views as authority_relation_views
+from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
 import rules
 from .rules import *
@@ -46,6 +48,8 @@ urlpatterns = [
     re_path(r'^bulk/csv/status$', bulk_change_csv_views.bulk_csv_status, name="bulk-csv-status"),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
+
+    re_path(r'^api/citation$', views.get_citation_by_id, name='api_citation'),
 
     re_path(r'^timelines$', bulk_change_csv_views.timeline_tasks, name='timeline_tasks'),
     re_path(r'^timelines/(?P<authority_id>[A-Z0-9]+)/delete$', bulk_change_csv_views.timeline_delete, name='delete_timeline'),
@@ -97,10 +101,14 @@ urlpatterns = [
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_citation, name='update_acrelation_for_citation'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_citation, name='delete_acrelation_for_citation'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_citation, name='delete_acrelation_for_citation_format'),
-    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/$', views.create_acrelation_for_authority, name='create_acrelation_for_authority'),
-    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', views.acrelation_for_authority, name='update_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/$', authority_relation_views.create_acrelation_for_authority, name='create_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/$', authority_relation_views.create_aarelation_for_authority, name='create_aarelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/$', authority_relation_views.acrelation_for_authority, name='update_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/$', authority_relation_views.aarelation_for_authority, name='update_aarelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete/$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/delete/$', authority_relation_views.delete_aarelation_for_authority, name='delete_aarelation_for_authority'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelation/(?P<acrelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', views.delete_acrelation_for_authority, name='delete_acrelation_for_authority_format'),
+    re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/aarelation/(?P<aarelation_id>[A-Z0-9]+)/delete\.(?P<format>[a-z]+)$', authority_relation_views.delete_aarelation_for_authority, name='delete_aarelation_for_authority_format'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/acrelations/$', views.authority_acrelations, name='authority_acrelations'),
 
     re_path(r'^authority/$', views.authorities, name='authority_list'),
@@ -134,6 +142,14 @@ urlpatterns = [
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.authority_delete_linkeddata_duplicates, name='authority_delete_linkeddata_duplicates'),
 
     re_path(r'^acrelation/quickcreate/$', views.quick_create_acrelation, name='quick_create_acrelation'),
+
+    re_path(r'^aarsets/$', aarset_views.aarsets, name='aarsets'),
+    re_path(r'^aarsets/aarset/$', aarset_views.change_aarset, name='create_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/edit$', aarset_views.change_aarset, name='edit_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)$', aarset_views.view_aarset, name='view_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/delete$', aarset_views.delete_aarset, name='delete_aarset'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type$', aarset_views.change_aartype, name='create_aartype'),
+    re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type/(?P<aartype_id>[A-Z0-9]+)$', aarset_views.change_aartype, name='edit_aartype'),
 
     re_path(r'^users/$', views.users, name='user_list'),
     re_path(r'^users/(?P<user_id>[0-9]+)$', views.user, name='user'),
