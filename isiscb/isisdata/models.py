@@ -1492,6 +1492,26 @@ class Person(Authority):
     personal_name_suffix = models.CharField(max_length=255, blank=True)
     personal_name_preferred = models.CharField(max_length=255, blank=True)
 
+class WikipediaData(models.Model):
+    """
+    Context data for an authority, including a featured image and synopsis, sourced from Wikipedia.
+
+    """
+
+    authority = models.OneToOneField(
+        Authority,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    img_url = models.URLField(max_length=255)
+
+    intro = models.TextField(blank=True, null=True)
+
+    credit = models.URLField(max_length=255)
+
+    last_modified = models.DateTimeField(auto_now=True)
+
 
 class ACRelation(ReferencedEntity, CuratedMixin):
     """
