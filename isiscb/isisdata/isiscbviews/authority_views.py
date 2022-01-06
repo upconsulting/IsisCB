@@ -334,9 +334,9 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
     wikiIntro = ''
     authorityName = ''
 
-    wikipedia_data = WikipediaData.objects.get(authority__id=authority.id)
+    wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
 
-    if (datetime.now() - wikipedia_data.last_modified).days < 30 and wikipedia_data.img_url and wikipedia_data.extract and wikipedia_data.credit :
+    if wikipedia_data and (datetime.datetime.now(datetime.timezone.utc) - wikipedia_data.last_modified).days < 30 and wikipedia_data.img_url and wikipedia_data.intro and wikipedia_data.credit :
         wikiImage = wikipedia_data.img_url
         wikiCredit = wikipedia_data.credit
         wikiIntro = wikipedia_data.intro
@@ -375,12 +375,10 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                 if extract.find('may refer to') < 0:
                     wikiIntro = extract
         
-        wikipedia_data.img_url = wikiImage
-        wikipedia_data.credit = wikiCredit
-        wikipedia_data.intro = wikiIntro
+        wikipedia_data = WikipediaData(img_url=wikiImage, credit=wikiCredit, intro=wikiIntro, authority_id=authority.id)
         wikipedia_data.save()
 
-        return wikiImage, wikiIntro, wikiCredit
+    return wikiImage, wikiIntro, wikiCredit
 
 def get_place_map_data(request, authority_id):
     sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)
