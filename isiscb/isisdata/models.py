@@ -1240,6 +1240,21 @@ class CitationSubtype(models.Model):
     def __str__(self):
         return self.name if self.name else 'Subtype'
 
+class GoogleBooksData(models.Model):
+    """
+    Context data for a citation, including a featured image, sourced from Google Books.
+    """
+
+    citation = models.OneToOneField(
+        Citation,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    image_url = models.TextField()
+    image_size = models.CharField(max_length=255, blank=True)
+
+    last_modified = models.DateTimeField(auto_now=True)
 
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'

@@ -739,65 +739,12 @@ def citation(request, citation_id):
 
     similar_citations = Citation.objects.filter(Q(related_authorities__acrelation__in=subjects.all())).filter(public=True).annotate(Count('related_authorities__acrelation')).order_by('-related_authorities__acrelation__count').exclude(title=citation.title)[0:20]
 
+    googleBooksImage = get_google_books_image(citation)
+
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
-
-    # Provide image for citation
-    if citation.type_controlled in ['BO','CH']:
-        if citation.type_controlled in ['BO']:
-            title = citation.title
-            contrib = citation.get_all_contributors[0].authority.name
-        else:
-            parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
-            title = parent_relation[0].subject.title
-            contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
-
-        apiKey = "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I"
-
-        if contrib.index(',') >= 0:
-            contribSurname = contrib[:contrib.index(',')]
-        else:
-            contribSurname = contrib[contrib.rindex(' '):]
-
-        url = f"https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}"
-        url = url.replace(" ", "%20")
-
-        if len(title):
-            resp = requests.get(url)
-            books = resp.json()
-
-            items = books["items"]
-
-
-            for i in items:
-                if i["volumeInfo"]["title"].lower() in title.lower() or (i["volumeInfo"]["authors"] and any(contribSurname in s for s in i["volumeInfo"]["authors"])):
-                    bookGoogleId = i["id"]
-                    break
-
-            url2 = f"https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite"
-            url2 = url2.replace(" ", "%20")
-
-            response = urlopen(url2)
-            book = json.load(response)
-
-            cover_image = {}
-
-            if 'imageLinks' in book["volumeInfo"]:
-                imageLinks = book["volumeInfo"]["imageLinks"].keys()
-
-                if "medium" in imageLinks:
-                    cover_image["size"] = "standard"
-                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                elif "small" in imageLinks:
-                    cover_image["size"] = "standard"
-                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-                elif "thumbnail" in imageLinks:
-                    cover_image["size"] = "thumbnail"
-                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-    else:
-        cover_image = {}
 
     # Location of citation in REST API
     api_view = reverse('citation-detail', args=[citation.id], request=request)
@@ -908,10 +855,82 @@ def citation(request, citation_id):
         'last_query': last_query,
         'query_string': query_string,
         'similar_citations': similar_citations,
-        'cover_image': cover_image,
+        'cover_image': googleBooksImage,
     }
     return render(request, 'isisdata/citation.html', context)
 
+def get_google_books_image(citation):
+    # Provide image for citation
+    if citation.type_controlled in ['BO','CH']:
+        cover_image = {}
+        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+
+        if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < settings.GOOGLE_BOOKS_REFRESH_TIME:
+            cover_image['size'] = google_books_data.image_size
+            cover_image['url'] = google_books_data.image_url
+        else:
+            if citation.type_controlled in ['BO']:
+                title = citation.title
+                contrib = citation.get_all_contributors[0].authority.name
+            else:
+                parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+                title = parent_relation[0].subject.title
+                contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
+
+            apiKey = settings.GOOGLE_BOOKS_API_KEY
+
+            if contrib.index(',') >= 0:
+                contribSurname = contrib[:contrib.index(',')]
+            else:
+                contribSurname = contrib[contrib.rindex(' '):]
+
+            # url = f"https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}"
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+            url = url.replace(" ", "%20")
+
+            if len(title):
+                resp = requests.get(url)
+                books = resp.json()
+
+                items = books["items"]
+
+
+                for i in items:
+                    if i["volumeInfo"]["title"].lower() in title.lower() or (i["volumeInfo"]["authors"] and any(contribSurname in s for s in i["volumeInfo"]["authors"])):
+                        bookGoogleId = i["id"]
+                        break
+
+                # url2 = f"https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite"
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+                url2 = url2.replace(" ", "%20")
+
+                response = urlopen(url2)
+                book = json.load(response)
+
+                if 'imageLinks' in book["volumeInfo"]:
+                    imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+                    if "medium" in imageLinks:
+                        cover_image["size"] = "standard"
+                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+                    elif "small" in imageLinks:
+                        cover_image["size"] = "standard"
+                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+                    elif "thumbnail" in imageLinks:
+                        cover_image["size"] = "thumbnail"
+                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+                
+                    print(cover_image["url"])
+                    print(len(cover_image["url"]))
+                    print(cover_image["size"])
+                    print(len(cover_image["size"]))
+                
+                    google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+                    google_books_data.save()
+    else:
+        cover_image = {}
+
+    return cover_image
 
 @login_required
 def search_saved(request):
