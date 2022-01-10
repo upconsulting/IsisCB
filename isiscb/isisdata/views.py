@@ -701,9 +701,7 @@ def citation(request, citation_id):
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True)
-                                              & ~Q(type_controlled__in=['GE', 'TI'], citation__public=True))\
-                                      .filter(public=True)
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
 
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
@@ -861,71 +859,71 @@ def citation(request, citation_id):
 
 def get_google_books_image(citation):
     # Provide image for citation
-    if citation.type_controlled in ['BO','CH']:
-        cover_image = {}
-        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+    if not (citation.BOOK or citation.CHAPTER):
+        return {}
 
-        if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < 0:
-            cover_image['size'] = google_books_data.image_size
-            cover_image['url'] = google_books_data.image_url
+    cover_image = {}
+    google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+
+    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < 30:
+        cover_image['size'] = google_books_data.image_size
+        cover_image['url'] = google_books_data.image_url
+    else:
+        contrib = ''
+        title = ''
+        
+        if citation.type_controlled in ['BO']:
+            title = citation.title
+            if citation.get_all_contributors:
+                contrib = citation.get_all_contributors[0].authority.name.strip()
         else:
-            contrib = ''
-            if citation.type_controlled in ['BO']:
-                title = citation.title
-                if citation.get_all_contributors:
-                    contrib = citation.get_all_contributors[0].authority.name.strip()
-            else:
-                parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
-                if parent_relation:
-                    title = parent_relation[0].subject.title
-                    if parent_relation[0].subject.get_all_contributors:
-                        contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
+            parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+            if parent_relation:
+                title = parent_relation[0].subject.title
+                if parent_relation[0].subject.get_all_contributors:
+                    contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
 
-            if contrib.find(',') >= 0:
-                contrib = contrib[:contrib.find(',')]
-            elif ' ' in contrib:
-                contrib = contrib[contrib.find(' '):]
+        if ',' in contrib:
+            contrib = contrib[:contrib.find(',')]
+        elif ' ' in contrib:
+            contrib = contrib[contrib.find(' '):]
 
+        if title:
             apiKey = settings.GOOGLE_BOOKS_API_KEY
 
             url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
             url = url.replace(" ", "%20")
 
-            if len(title):
-                resp = requests.get(url)
+            with requests.get(url) as resp:
                 books = resp.json()
-
                 items = books["items"]
 
+            for i in items:
+                if i["volumeInfo"]["title"].lower() in title.lower() or ('authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"])):
+                    bookGoogleId = i["id"]
+                    break
 
-                for i in items:
-                    if i["volumeInfo"]["title"].lower() in title.lower() or ('authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"])):
-                        bookGoogleId = i["id"]
-                        break
+            url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+            url2 = url2.replace(" ", "%20")
 
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
-                url2 = url2.replace(" ", "%20")
-
-                response = urlopen(url2)
+            with urlopen(url2) as response:
                 book = json.load(response)
 
-                if 'imageLinks' in book["volumeInfo"]:
-                    imageLinks = book["volumeInfo"]["imageLinks"].keys()
+            if 'imageLinks' in book["volumeInfo"]:
+                imageLinks = book["volumeInfo"]["imageLinks"].keys()
 
-                    if "medium" in imageLinks:
-                        cover_image["size"] = "standard"
-                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                    elif "small" in imageLinks:
-                        cover_image["size"] = "standard"
-                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-                    elif "thumbnail" in imageLinks:
-                        cover_image["size"] = "thumbnail"
-                        cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-                
-                    google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
-                    google_books_data.save()
-    else:
-        cover_image = {}
+                if "medium" in imageLinks:
+                    cover_image["size"] = "standard"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+                elif "small" in imageLinks:
+                    cover_image["size"] = "standard"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+                elif "thumbnail" in imageLinks:
+                    cover_image["size"] = "thumbnail"
+                    cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            
+                google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+                google_books_data.save()
 
     return cover_image
 
