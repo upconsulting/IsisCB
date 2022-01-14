@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.db.models import Q, Prefetch, Count, Subquery, OuterRef
+from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -735,7 +735,9 @@ def citation(request, citation_id):
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
-    similar_citations = Citation.objects.filter(Q(related_authorities__acrelation__in=subjects.all())).filter(public=True).annotate(Count('related_authorities__acrelation')).order_by('-related_authorities__acrelation__count').exclude(title=citation.title)[0:20]
+    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
+    sqs.query.set_limits(low=0, high=20)
+    similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()\
 
     googleBooksImage = get_google_books_image(citation)
 

@@ -1,6 +1,7 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
 {% load citation_filters %}
+{% load facet_filters %}
 {% load static %}
 {% load metadata_filters %}
 {% load search_filters %}
@@ -689,12 +690,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       </div>
       <div class="panel-body">
         {% for citation in similar_citations %}
+          {% with citation.id|get_citation_object as citation %}
             <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
               <p style="margin-bottom: 15px;">
                 {% if citation.stub_record_status == 'SR' %}
                   <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
                 {% endif %}
-
                 {% if citation.type_controlled == "BO" %}
                   <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
                 {% elif citation.type_controlled == "TH" %}
@@ -723,7 +724,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <a href="{% url 'authority' editor.authority_id|upper %}?">{{editor.name_for_display_in_citation}}</a>;
                     {% endfor %}
                   {% endif %}
-                  {% if citation.publication_date and citation|get_authors or citation|get_editors %}
+                  {% if citation.publication_date and citation|get_authors or citation.publication_date and citation|get_editors %}
                     ({{ citation.publication_date.year }})
                     <br>
                     <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
@@ -740,8 +741,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   </a>
                   {% endif %}
                 {% endif %}
-
-                ({{citation.related_authorities__acrelation__count}})
                   <span class="visible-print-inline">({{ citation_url }})</span>
 
                   <!-- Zotero -->
@@ -751,6 +750,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
               </p>
             </div>
+          {% endwith %}
           {% empty %}
               <h3>No results found . . . <i class="fas fa-child"></i></h3>
           {% endfor %}
