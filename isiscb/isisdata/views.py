@@ -737,7 +737,7 @@ def citation(request, citation_id):
 
     sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
     sqs.query.set_limits(low=0, high=20)
-    similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()\
+    similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
 
     googleBooksImage = get_google_books_image(citation)
 

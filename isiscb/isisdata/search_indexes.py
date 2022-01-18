@@ -44,6 +44,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    persons_with_ids = indexes.MultiValueField(stored=True, indexed=False, null=True)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
     persons_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
@@ -388,6 +389,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
                 multivalue_data['persons'].append(name)
                 multivalue_data['persons_ids'].append(ident)
+                contrib = {}
+                contrib['name'] = name
+                contrib['id'] = ident
+                multivalue_data['persons_with_ids'].append(contrib)
                 if int(a['acrelation__data_display_order']) < 30:
                     multivalue_data['all_contributor_ids'].append(ident)
 
@@ -409,7 +414,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         else:
             self.prepared_data['author_for_sort'] = u""
         self.prepared_data.update(multivalue_data)
-
+        
         return self.prepared_data
 
     def _index_belongs_to(self, data):

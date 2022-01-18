@@ -690,22 +690,21 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       </div>
       <div class="panel-body">
         {% for citation in similar_citations %}
-          {% with citation.id|get_citation_object as citation %}
-            <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+            <div class="{% if citation.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if citation.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
               <p style="margin-bottom: 15px;">
                 {% if citation.stub_record_status == 'SR' %}
                   <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
                 {% endif %}
-                {% if citation.type_controlled == "BO" %}
-                  <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
-                {% elif citation.type_controlled == "TH" %}
-                  <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
-                {% elif citation.type_controlled == "MO" %}
-                  <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
-                {% elif citation.type_controlled == "CH" %}
-                  <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                {% if citation.type == "Book" %}
+                  <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Thesis" %}
+                  <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Multimedia Object" %}
+                  <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.type }}</span>
+                {% elif citation.type == "Chapter" %}
+                  <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.type }}</span>
                 {% else %}
-                  <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                  <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type }}</span>
                 {% endif %}
 
                 {% url 'citation' citation.id|get_pk as citation_url %}
@@ -714,18 +713,13 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {{citation.complete_citation}}
                 </a>
                 {% else %}
-                  {% if citation|get_authors %}
-                    {% for author in citation|get_authors %}
-                      <a href="{% url 'authority' author.authority_id|upper %}?">{{author.name_for_display_in_citation}}</a>;
+                  {% if citation.persons_with_ids %}
+                    {% for person in citation.persons_with_ids %}
+                      <a href="{% url 'authority' person.id|upper %}?">{{person.name}}</a>;
                     {% endfor %}
                   {% endif %}
-                  {% if citation|get_editors %}
-                    {% for editor in citation|get_editors %}
-                      <a href="{% url 'authority' editor.authority_id|upper %}?">{{editor.name_for_display_in_citation}}</a>;
-                    {% endfor %}
-                  {% endif %}
-                  {% if citation.publication_date and citation|get_authors or citation.publication_date and citation|get_editors %}
-                    ({{ citation.publication_date.year }})
+                  {% if citation.publication_date %}
+                    ({{ citation.publication_date.0 }})
                     <br>
                     <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
                       {{ citation.title|bleach_safe }}
@@ -750,7 +744,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
               </p>
             </div>
-          {% endwith %}
           {% empty %}
               <h3>No results found . . . <i class="fas fa-child"></i></h3>
           {% endfor %}
