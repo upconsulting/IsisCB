@@ -20,6 +20,8 @@ from itertools import groupby
 import time
 from collections import defaultdict
 
+class DictMultiValueField(indexes.MultiValueField):
+    field_type = 'object'
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
@@ -44,7 +46,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
-    persons_with_ids = indexes.MultiValueField(stored=True, indexed=False, null=True)
+    persons_with_ids = DictMultiValueField(stored=True, indexed=False, null=True)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
     persons_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 

@@ -84,6 +84,19 @@ class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
         }
     }
 
+    def build_schema(self, fields):
+        content_field_name, mapping = super(
+            IsisCBElasticsearchSearchBackend, self
+        ).build_schema(
+            fields
+        )
+
+        for field_name, field_class in fields.items():
+            field_mapping = mapping[field_class.index_fieldname]
+            if field_class.field_type == "object":
+                mapping[field_class.index_fieldname] = {"type": "object"}
+
+        return (content_field_name, mapping)
 
 class IsisCBElasticsearchSearchEngine(ElasticsearchSearchEngine):
     backend = IsisCBElasticsearchSearchBackend
