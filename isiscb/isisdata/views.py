@@ -735,9 +735,15 @@ def citation(request, citation_id):
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
-    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
-    sqs.query.set_limits(low=0, high=20)
-    similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
+    # Similar Citations Generator
+    if subjects:
+        sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
+        sqs.query.set_limits(low=0, high=20)
+        similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
+    else:
+        mlt = SearchQuerySet().more_like_this(citation)
+        mlt.query.set_limits(low=0, high=20)
+        similar_citations = mlt.all().exclude(public="false").query.get_results()
 
     googleBooksImage = get_google_books_image(citation)
 
@@ -894,10 +900,13 @@ def get_google_books_image(citation):
         if title:
             apiKey = settings.GOOGLE_BOOKS_API_KEY
 
-            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey='AIzaSyBOJhkEJsolkLi4aoVV1Ncu_dJykR39E3U')
             url = url.replace(" ", "%20")
 
             with requests.get(url) as resp:
+                if resp.status_code != 200:
+                    return {}
+
                 books = resp.json()
                 items = books["items"]
 
@@ -909,7 +918,7 @@ def get_google_books_image(citation):
                     break
             
             if bookGoogleId:
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey='AIzaSyBOJhkEJsolkLi4aoVV1Ncu_dJykR39E3U')
                 url2 = url2.replace(" ", "%20")
 
                 with urlopen(url2) as response:
