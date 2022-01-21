@@ -900,7 +900,7 @@ def get_google_books_image(citation):
         if title:
             apiKey = settings.GOOGLE_BOOKS_API_KEY
 
-            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey='AIzaSyBOJhkEJsolkLi4aoVV1Ncu_dJykR39E3U')
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
             url = url.replace(" ", "%20")
 
             with requests.get(url) as resp:
@@ -918,7 +918,7 @@ def get_google_books_image(citation):
                     break
             
             if bookGoogleId:
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey='AIzaSyBOJhkEJsolkLi4aoVV1Ncu_dJykR39E3U')
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
                 url2 = url2.replace(" ", "%20")
 
                 with urlopen(url2) as response:
