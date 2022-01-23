@@ -740,10 +740,12 @@ def citation(request, citation_id):
         sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
         sqs.query.set_limits(low=0, high=20)
         similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
-    else:
+    elif citation.type_controlled not in ['RE']:
         mlt = SearchQuerySet().more_like_this(citation)
         mlt.query.set_limits(low=0, high=20)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
+    else:
+        similar_citations = []
 
     googleBooksImage = get_google_books_image(citation)
 
