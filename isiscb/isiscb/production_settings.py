@@ -159,6 +159,7 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': ELASTICSEARCH_INDEX,
     },
 }
+HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
 
 ELASTICSEARCH_INDEX_SETTINGS = {
      "settings" : {

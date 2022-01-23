@@ -210,7 +210,7 @@ HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack1',
+        'INDEX_NAME': 'haystack',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
