@@ -892,7 +892,6 @@ def get_google_books_image(citation):
     if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time:
         cover_image['size'] = google_books_data.image_size
         cover_image['url'] = google_books_data.image_url
-        print('jup')
     else:
         contrib = ''
         title = ''
@@ -914,7 +913,7 @@ def get_google_books_image(citation):
         if title:
             apiKey = settings.GOOGLE_BOOKS_API_KEY
 
-            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey='AIzaSyADQG7Nad_DR--kWdrLk9H3Yem8vJSgH6U')
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
             url = url.replace(" ", "%20")
 
             with requests.get(url) as resp:
@@ -932,7 +931,7 @@ def get_google_books_image(citation):
                     break
 
             if bookGoogleId:
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey='AIzaSyADQG7Nad_DR--kWdrLk9H3Yem8vJSgH6U')
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
                 url2 = url2.replace(" ", "%20")
 
                 with urlopen(url2) as response:
