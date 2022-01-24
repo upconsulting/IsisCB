@@ -431,4 +431,9 @@ DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isi
 DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
 DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
 
-GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I")
+GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
+GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
+GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
+
+# number of days after which we want to refresh cached data about books from google books
+GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
