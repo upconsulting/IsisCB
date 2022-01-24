@@ -702,6 +702,10 @@ def citation(request, citation_id):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
 
     subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
+    subject_ids = []
+    for subject in subjects:
+        if subject.authority.id:
+            subject_ids.append(subject.authority.id)
 
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
@@ -737,7 +741,7 @@ def citation(request, citation_id):
 
     # Similar Citations Generator
     if subjects:
-        sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
+        sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=subject_ids)
         sqs.query.set_limits(low=0, high=20)
         similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
     elif citation.type_controlled not in ['RE']:
@@ -873,26 +877,34 @@ def get_google_books_image(citation):
         return {}
 
     cover_image = {}
-    google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+
+    parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+    if parent_relations:
+        parent_id = parent_relations[0].subject.id
+    
+    if citation.type_controlled in ['CH'] and parent_id:
+        google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
+    else:
+        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+
     google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
 
     if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time:
         cover_image['size'] = google_books_data.image_size
         cover_image['url'] = google_books_data.image_url
+        print('jup')
     else:
         contrib = ''
         title = ''
 
         if citation.type_controlled in ['BO']:
             title = citation.title
-            if citation.get_all_contributors:
+            if citation.get_all_contributors[0].authority.name:
                 contrib = citation.get_all_contributors[0].authority.name.strip()
-        else:
-            parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
-            if parent_relation:
-                title = parent_relation[0].subject.title
-                if parent_relation[0].subject.get_all_contributors:
-                    contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
+        elif citation.type_controlled in ['CH'] and parent_relations[0].subject.title:
+            title = parent_relations[0].subject.title
+            if parent_relations[0].subject.get_all_contributors[0].authority.name:
+                contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
 
         if ',' in contrib:
             contrib = contrib[:contrib.find(',')]
@@ -902,7 +914,7 @@ def get_google_books_image(citation):
         if title:
             apiKey = settings.GOOGLE_BOOKS_API_KEY
 
-            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey='AIzaSyADQG7Nad_DR--kWdrLk9H3Yem8vJSgH6U')
             url = url.replace(" ", "%20")
 
             with requests.get(url) as resp:
@@ -920,7 +932,7 @@ def get_google_books_image(citation):
                     break
 
             if bookGoogleId:
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey='AIzaSyADQG7Nad_DR--kWdrLk9H3Yem8vJSgH6U')
                 url2 = url2.replace(" ", "%20")
 
                 with urlopen(url2) as response:
@@ -939,7 +951,10 @@ def get_google_books_image(citation):
                             cover_image["size"] = "thumbnail"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
 
-                        google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+                        if citation.type_controlled in ['BO']:
+                            google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+                        elif citation.type_controlled in ['CH'] and parent_id:
+                            google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
                         google_books_data.save()
 
     return cover_image
