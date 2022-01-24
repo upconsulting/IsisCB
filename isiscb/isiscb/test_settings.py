@@ -202,11 +202,12 @@ DATABASES = {
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack',
+        'INDEX_NAME': 'haystack-test',
     },
 }
+HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
 
 
 ELASTICSEARCH_INDEX_SETTINGS = {
@@ -380,3 +381,5 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
                                 AWS_SECRET_ACCESS_KEY,
                                 AWS_EXPORT_BUCKET_NAME)
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
+
+GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I")

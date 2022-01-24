@@ -6,6 +6,10 @@ from isisdata.templatetags.app_filters import *
 
 register = template.Library()
 
+@register.filter
+def get_citation_object(id):
+    citation = Citation.objects.get(pk=id)
+    return citation
 
 @register.filter
 def get_page_string(citation):

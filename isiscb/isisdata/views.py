@@ -15,8 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.db.models import Q
-from django.db.models import Prefetch
+from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
@@ -35,7 +34,7 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale
+import codecs, datetime, uuid, base64, zlib, locale, json, requests
 
 from collections import defaultdict
 from .helpers.mods_xml import initial_response, generate_mods_xml
@@ -702,9 +701,7 @@ def citation(request, citation_id):
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True)
-                                              & ~Q(authority__type_controlled__in=['GE', 'TI'], citation__public=True))\
-                                      .filter(public=True)
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
 
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
@@ -714,6 +711,15 @@ def citation(request, citation_id):
 
     query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
     places = citation.acrelation_set.filter(query_places).filter(public=True)
+
+    query_concepts = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['CO'], citation__public=True)
+    concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
+
+    query_institutions = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['IN'], citation__public=True)
+    institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
+
+    query_people = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['PE'], citation__public=True)
+    people = citation.acrelation_set.filter(query_people).filter(public=True)
 
     related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True).filter(public=True)
     related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True).filter(public=True)
@@ -728,6 +734,20 @@ def citation(request, citation_id):
     related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
+
+    # Similar Citations Generator
+    if subjects:
+        sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=[sub.authority.id for sub in subjects])
+        sqs.query.set_limits(low=0, high=20)
+        similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
+    elif citation.type_controlled not in ['RE']:
+        mlt = SearchQuerySet().more_like_this(citation)
+        mlt.query.set_limits(low=0, high=20)
+        similar_citations = mlt.all().exclude(public="false").query.get_results()
+    else:
+        similar_citations = []
+
+    googleBooksImage = get_google_books_image(citation)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
@@ -752,7 +772,7 @@ def citation(request, citation_id):
     query_string = request.GET.get('query_string', None)
 
     if query_string:
-        query_string = query_string.encode('ascii','ignore')
+        query_string = quote(query_string) #query_string.encode('ascii','ignore')
         search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
@@ -814,10 +834,13 @@ def citation(request, citation_id):
         'authors': authors,
         'properties_map': properties,
         'subjects': subjects,
+        'concepts': concepts,
         'persons': persons,
         'categories': categories,
+        'people': people,
         'time_periods': time_periods,
         'places': places,
+        'institutions': institutions,
         'source_instance_id': citation_id,
         'source_content_type': ContentType.objects.get(model='citation').id,
         'related_citations_ic': related_citations_ic,
@@ -839,9 +862,87 @@ def citation(request, citation_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
+        'similar_citations': similar_citations,
+        'cover_image': googleBooksImage,
     }
     return render(request, 'isisdata/citation.html', context)
 
+def get_google_books_image(citation):
+    # Provide image for citation
+    if not (citation.BOOK or citation.CHAPTER):
+        return {}
+
+    cover_image = {}
+    google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+    google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
+
+    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time:
+        cover_image['size'] = google_books_data.image_size
+        cover_image['url'] = google_books_data.image_url
+    else:
+        contrib = ''
+        title = ''
+
+        if citation.type_controlled in ['BO']:
+            title = citation.title
+            if citation.get_all_contributors:
+                contrib = citation.get_all_contributors[0].authority.name.strip()
+        else:
+            parent_relation = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+            if parent_relation:
+                title = parent_relation[0].subject.title
+                if parent_relation[0].subject.get_all_contributors:
+                    contrib = parent_relation[0].subject.get_all_contributors[0].authority.name
+
+        if ',' in contrib:
+            contrib = contrib[:contrib.find(',')]
+        elif ' ' in contrib:
+            contrib = contrib[contrib.find(' '):]
+
+        if title:
+            apiKey = settings.GOOGLE_BOOKS_API_KEY
+
+            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+            url = url.replace(" ", "%20")
+
+            with requests.get(url) as resp:
+                if resp.status_code != 200:
+                    return {}
+
+                books = resp.json()
+                items = books["items"]
+
+            bookGoogleId = ''
+
+            for i in items:
+                if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
+                    bookGoogleId = i["id"]
+                    break
+
+            if bookGoogleId:
+                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+                url2 = url2.replace(" ", "%20")
+
+                with urlopen(url2) as response:
+                    book = json.load(response)
+
+                    if 'imageLinks' in book["volumeInfo"]:
+                        imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+                        if "medium" in imageLinks:
+                            cover_image["size"] = "standard"
+                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+                        elif "small" in imageLinks:
+                            cover_image["size"] = "standard"
+                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+                        elif "thumbnail" in imageLinks:
+                            cover_image["size"] = "thumbnail"
+                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+
+                        google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+                        google_books_data.save()
+
+    return cover_image
 
 @login_required
 def search_saved(request):

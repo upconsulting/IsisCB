@@ -208,11 +208,12 @@ DATABASES = {
 HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
-        'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
+        'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
         'INDEX_NAME': 'haystack',
     },
 }
+HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
 
 
 ELASTICSEARCH_INDEX_SETTINGS = {
@@ -385,3 +386,10 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
                                 AWS_SECRET_ACCESS_KEY,
                                 AWS_EXPORT_BUCKET_NAME)
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
+
+GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "AIzaSyCL5NFL222QeXGv6AwbkCirpshZdpHaq5I")
+GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
+GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
+
+# number of days after which we want to refresh cached data about books from google books
+GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)

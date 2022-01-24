@@ -10,13 +10,11 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
         value to the backend.
         A basic (override-able) implementation is provided.
         """
-        # print query_fragment
         if not isinstance(query_fragment, six.string_types):
             return query_fragment
 
         words = query_fragment.split()
         cleaned_words = []
-        # print words
         for word in words:
             if word in self.backend.RESERVED_WORDS:
                 word = word.replace(word, word.lower())
@@ -25,7 +23,6 @@ class IsisCBElasticsearchSearchQuery(ElasticsearchSearchQuery):
                 word = word.replace(char, '\\%s' % char)
 
             cleaned_words.append(word)
-        # print cleaned_words
 
         return ' '.join(cleaned_words)
 
@@ -84,6 +81,19 @@ class IsisCBElasticsearchSearchBackend(ElasticsearchSearchBackend):
         }
     }
 
+    def build_schema(self, fields):
+        content_field_name, mapping = super(
+            IsisCBElasticsearchSearchBackend, self
+        ).build_schema(
+            fields
+        )
+
+        for field_name, field_class in fields.items():
+            field_mapping = mapping[field_class.index_fieldname]
+            if field_class.field_type == "object":
+                mapping[field_class.index_fieldname] = {"type": "object"}
+
+        return (content_field_name, mapping)
 
 class IsisCBElasticsearchSearchEngine(ElasticsearchSearchEngine):
     backend = IsisCBElasticsearchSearchBackend
