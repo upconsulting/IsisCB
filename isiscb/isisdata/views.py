@@ -772,7 +772,7 @@ def citation(request, citation_id):
     query_string = request.GET.get('query_string', None)
 
     if query_string:
-        query_string = query_string.encode('ascii','ignore')
+        query_string = quote(query_string) #query_string.encode('ascii','ignore')
         search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
@@ -882,7 +882,7 @@ def get_google_books_image(citation):
     else:
         contrib = ''
         title = ''
-        
+
         if citation.type_controlled in ['BO']:
             title = citation.title
             if citation.get_all_contributors:
@@ -918,7 +918,7 @@ def get_google_books_image(citation):
                 if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
                     bookGoogleId = i["id"]
                     break
-            
+
             if bookGoogleId:
                 url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
                 url2 = url2.replace(" ", "%20")
@@ -938,7 +938,7 @@ def get_google_books_image(citation):
                         elif "thumbnail" in imageLinks:
                             cover_image["size"] = "thumbnail"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-                    
+
                         google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
                         google_books_data.save()
 
