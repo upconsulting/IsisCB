@@ -1,6 +1,7 @@
 {% extends "isisdata/__base.html" %}
 {% load app_filters %}
 {% load metadata_filters %}
+{% load facet_filters %}
 {% block title %}Search{% endblock %}
 
 {% block meta_tags %}
@@ -14,10 +15,14 @@
 //# sourceURL=dynamicScript.js
 $(document).ready(function() {
   if ('{{models.0}}' == 'isisdata.citation') {
-    $('#search_tabs li:eq(0) a').tab('show')
+    $('a[href="#citations"]').tab('show')
+    $('#authorities-tab').removeClass("active")
+    $('#citations-tab').addClass("active")
   }
   if ('{{models.0}}' == 'isisdata.authority') {
-    $('#search_tabs li:eq(1) a').tab('show')
+    $('a[href="#authorities"]').tab('show')
+    $('#citations-tab').removeClass("active")
+    $('#authorities-tab').addClass("active")
   }
 });
 </script>
@@ -26,75 +31,343 @@ $(document).ready(function() {
 
 {% block content %}
 
-    <div class="row">
-
-        <div class="col-sm-12 col-md-12">
-            <ul id="search_tabs" class="nav nav-tabs space-top hidden-print" role="tablist">
-                <li role="presentation" class="active"><a href="#citations" data-target="#citations, #citations_facets" role="tab" data-toggle="tab">Citations ({{ count_citation }})</a></li>
-                <li role="presentation"><a href="#authorities" data-target="#authorities, #authorities_facets" role="tab" data-toggle="tab">Authorities ({{ count_authority }})</a></li>
-                <li><a class="no-tab" href="#" data-toggle="modal" data-target="#searchModal"><span style="font-size: 16px" data-toggle="tooltip" title="Which tab should I use?" class="glyphicon glyphicon-question-sign"></span></a></li>
-                <li class="no-tab pull-right">
-                    <div class="topnav text-center">
-                        {% include "isisdata/navbuttons.html" %}
-                    </div>
-                </lu>
-            </ul>
-
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="citations">
-
-                    <div class="row space-top">
-                        <div class="col-sm-4 col-md-3 ">
-                            {% include "search/search_facets_citations.html" %}
-                        </div>
-
-                        <div class="col-sm-8 col-md-9 ">
-                            {% include "search/search_results_citations.html" %}
-                        </div>
-                    </div>
-
-
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="row search-header">
+          <div class="col-sm-12 col-md-4">
+            <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist">
+               <a id="citations-tab" href="#citations" class="btn btn-default active" role="tab" data-toggle="tab">
+                 <input type="radio" />Citations ({{ count_citation }})
+               </a>
+               <a id="authorities-tab" href="#authorities" class="btn btn-default" role="tab" data-toggle="tab">
+                 <input type="radio" />Authorities ({{ count_authority }})
+               </a>
+               <a id="everything-tab" href="#everything" class="btn btn-default" role="tab" data-toggle="tab">
+                 <input type="radio" />Everything ({{ count_authority|add:count_citation }})
+               </a>
             </div>
+          </div>
+        </div>
 
-            <div role="tabpanel" class="tab-pane" id="authorities">
-                <div class="row space-top">
-                    <div class="col-sm-4 col-md-3">
-                        {% include "search/search_facets_authorities.html" %}
-                    </div>
-                    <div class="col-sm-8 col-md-9">
-                        {% include "search/search_results_authorities.html" %}
-                    </div>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane" id="everything">
+            <div class="row space-top" style="margin-left: 0px; margin-right: 0px;">
+              <div class="col-sm-12 col-md-9">
+                <div class="row" style="margin-right: -7.5px;">
+                  <ol class="breadcrumb" style="border-color: #337ab7;">
+                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} <strong>Citation</strong> results for: <b><i>"{{ query }}"</i></b></li>
+
+                    {% if selected_facets.citation_persons_ids %}
+                      {% for author in selected_facets.citation_persons_ids %}
+                          <li class="search-breadcrumb-item">{{author|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+
+                    {% if selected_facets.citation_concepts_by_subject_ids_exact %}
+                      {% for concept in selected_facets.citation_concepts_by_subject_ids_exact %}
+                          <li class="search-breadcrumb-item">{{concept|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+
+                    {% if selected_facets.citation_time_period_ids_exact %}
+                      {% for time in selected_facets.citation_time_period_ids_exact %}
+                          <li class="search-breadcrumb-item">{{time|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+
+                    {% if selected_facets.citation_geographic_ids_exact %}
+                      {% for place in selected_facets.citation_geographic_ids_exact %}
+                          <li class="search-breadcrumb-item">{{place|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+
+                    {% if selected_facets.citation_institutions_by_subject_ids_exact %}
+                      {% for institution in selected_facets.citation_institutions_by_subject_ids_exact %}
+                          <li class="search-breadcrumb-item">{{institution|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+
+                    {% if selected_facets.citation_people_by_subject_ids_exact %}
+                      {% for person in selected_facets.citation_people_by_subject_ids_exact %}
+                          <li class="search-breadcrumb-item">{{person|get_authority_name}}</li>
+                      {% endfor %}
+                    {% endif %}
+                  </ol>
                 </div>
+                <div class="row" style="margin-right: -7.5px;">
+                  <div class="col-sm-12 col-md-6 citations_container" style="padding-left: 0;">
+                      {% include "search/search_facets_citations.html" %}
+                  </div>
 
+                  <div class="col-sm-12 col-md-6" style="padding-right: 0;">
+                      {% include "search/search_results_citations.html" %}
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-3" style="padding-left: 7.5px; padding-right: 0;">
+                  {% include "search/search_results_authorities.html" %}
+              </div>
             </div>
 
+          </div>
+
+          <div role="tabpanel" class="tab-pane" id="authorities">
+              <div class="row space-top">
+                  <div class="col-sm-12 col-md-12">
+                      {% include "search/search_results_authorities.html" %}
+                  </div>
+              </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane active" id="citations">
+              <div class="row space-top">
+                <div class="col-sm-12 col-md-12">
+                    <ol class="breadcrumb" style="border-color: #337ab7;">
+                            <li>Results for: <b><i>"{{ query }}"</i></b></li>
+
+                      {% if selected_facets.citation_persons_ids %}
+                        {% for author in selected_facets.citation_persons_ids %}
+                            <li class="search-breadcrumb-item">{{author|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if selected_facets.citation_concepts_by_subject_ids_exact %}
+                        {% for concept in selected_facets.citation_concepts_by_subject_ids_exact %}
+                            <li class="search-breadcrumb-item">{{concept|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if selected_facets.citation_time_period_ids_exact %}
+                        {% for time in selected_facets.citation_time_period_ids_exact %}
+                            <li class="search-breadcrumb-item">{{time|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if selected_facets.citation_geographic_ids_exact %}
+                        {% for place in selected_facets.citation_geographic_ids_exact %}
+                            <li class="search-breadcrumb-item">{{place|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if selected_facets.citation_institutions_by_subject_ids_exact %}
+                        {% for institution in selected_facets.citation_institutions_by_subject_ids_exact %}
+                            <li class="search-breadcrumb-item">{{institution|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                      {% if selected_facets.citation_people_by_subject_ids_exact %}
+                        {% for person in selected_facets.citation_people_by_subject_ids_exact %}
+                            <li class="search-breadcrumb-item">{{person|get_authority_name}}</li>
+                        {% endfor %}
+                      {% endif %}
+
+                            <li>Showing {{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results</li>
+                    </ol>
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-sm-6 col-md-6 citations_container">
+                      {% include "search/search_facets_citations.html" %}
+                  </div>
+
+                  <div class="col-sm-6 col-md-6 ">
+                      {% include "search/search_results_citations.html" %}
+                  </div>
+              </div>
+          </div>
         </div>
     </div>
 </div>
 
-</div>
-
-<!-- Modal -->
-<div id="searchModal" class="modal fade" role="dialog">
-
-  <div class="modal-dialog">
-
-    <!-- Modal content-->
+<!-- author/contributor Modal -->
+<div class="modal fade authorModal" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Search Help</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Author</h4>
       </div>
       <div class="modal-body">
-        <p>Use the 'Citations' tab to find bibliographic records. Think of this as a traditional citation search.</p>
-
-        <p>Use the 'Authorities' tab to search for people, institutions, subject terms, and more. Think of it as an index. </p>
+        <ul class="unselected_facets">
+          {% for author in facets_citation.fields.all_contributor_ids %}
+          {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
+          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ author.1 }})</a> <a title="Go to authority record for {{ author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?">{{ author.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>
+  </div>
+</div><!-- /modal -->
 
+<!-- time period Modal -->
+<div class="modal fade" id="timeModal" tabindex="-1" role="dialog" aria-labelledby="timeModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Time Period</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for time_period in facets_citation.fields.time_period_ids %}
+          {% if "citation_time_period_ids_exact" not in selected_facets.keys or time_period.0 not in selected_facets.citation_time_period_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_time_period_ids_exact:{{ time_period.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ time_period.1 }})</a> <a title="Go to authority record for {{ time_period.0|get_authority_name}}" href="{% url 'authority' time_period.0 %}?">{{ time_period.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
     </div>
-</div>
+  </div>
+</div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placeModal" tabindex="-1" role="dialog" aria-labelledby="placeModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Place</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for geographic in facets_citation.fields.geographic_ids %}
+          {% if "citation_geographic_ids_exact" not in selected_facets.keys or geographic.0 not in selected_facets.citation_geographic_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_geographic_ids_exact:{{ geographic.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ geographic.1 }})</a> <a title="Go to authority record for {{ geographic.0|get_authority_name}}" href="{% url 'authority' geographic.0 %}?">{{ geographic.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- concept Modal -->
+<div class="modal fade" id="conceptModal" tabindex="-1" role="dialog" aria-labelledby="conceptModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Concept</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for concept in facets_citation.fields.concepts_by_subject_ids %}
+          {% if "citation_concepts_by_subject_ids_exact" not in selected_facets.keys or concept.0 not in selected_facets.citation_concepts_by_subject_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_concepts_by_subject_ids_exact:{{ concept.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ concept.1 }})</a> <a title="Go to authority record for {{ concept.0|get_authority_name}}" href="{% url 'authority' concept.0 %}?">{{ concept.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- institution Modal -->
+<div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Institution</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for institution in facets_citation.fields.institutions_by_subject_ids %}
+          {% if "citation_institutions_by_subject_ids_exact" not in selected_facets.keys or institution.0 not in selected_facets.citation_institutions_by_subject_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_institutions_by_subject_ids_exact:{{ institution.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ institution.1 }})</a> <a title="Go to authority record for {{ institution.0|get_authority_name}}" href="{% url 'authority' institution.0 %}?">{{ institution.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- people Modal -->
+<div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Person</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for person in facets_citation.fields.people_by_subject_ids %}
+          {% if "citation_people_by_subject_ids_exact" not in selected_facets.keys or person.0 not in selected_facets.citation_people_by_subject_ids_exact %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_people_by_subject_ids_exact:{{ person.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ person.1 }})</a> <a title="Go to authority record for {{ person.0|get_authority_name}}" href="{% url 'authority' person.0 %}?">{{ person.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- publisher Modal -->
+<div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Publisher</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for publisher in facets_citation.fields.publisher_ids %}
+          {% if "citation_publisher_ids" not in selected_facets.keys or publisher.0 not in selected_facets.citation_publisher_ids %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_publisher_ids:{{ publisher.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ publisher.1 }})</a> <a title="Go to authority record for {{ publisher.0|get_authority_name}}" href="{% url 'authority' publisher.0 %}?">{{ publisher.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- periodical Modal -->
+<div class="modal fade" id="periodicalModal" tabindex="-1" role="dialog" aria-labelledby="periodicalModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select Journal</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for periodical in facets_citation.fields.periodical_ids %}
+          {% if "citation_periodical_ids" not in selected_facets.keys or periodical.0 not in selected_facets.citation_periodical_ids %}
+              <li ><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_periodical_ids:{{ periodical.0|urlencode }}" style="color: #000"><i class="far fa-square"></i> ({{ periodical.1 }})</a> <a title="Go to authority record for {{ periodical.0|get_authority_name}}" href="{% url 'authority' periodical.0 %}?">{{ periodical.0|get_authority_name }}</a></li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
 {% endblock %}

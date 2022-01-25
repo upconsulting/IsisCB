@@ -12,7 +12,7 @@ register = template.Library()
 @register.filter
 def get_authority_name(id):
     try:
-        authority = Authority.objects.get(id=id)
+        authority = Authority.objects.get(id=id.upper())
         name = authority.name
     except:
         name = id
@@ -30,7 +30,7 @@ def set_excluded_facets(url, available_facets):
 
 @register.filter
 def remove_url_part(url, arg):
-    return url.replace(arg, "").replace("&&", "&")
+    return urllib.parse.unquote(url).replace(arg, "").replace("&&", "&")
 
 @register.filter
 def add_selected_facet(url, facet):
@@ -73,7 +73,7 @@ def are_reviews_excluded(url):
 
 @register.filter
 def are_stubs_excluded(url):
-    return 'excluded_facets=citation_stub_record_status:SR' in url
+    return 'excluded_facets=citation_stub_record_status:SR' in urllib.parse.unquote(url)
 
 @register.filter
 def add_excluded_stub_record_status_facet(url, facet):
