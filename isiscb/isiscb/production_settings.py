@@ -431,18 +431,15 @@ DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isi
 DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
 DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
 
-<<<<<<< HEAD
 WIKIPEDIA_IMAGE_API_PATH = os.environ.get('WIKIPEDIA_IMAGE_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*')
 WIKIPEDIA_INTRO_API_PATH = os.environ.get('WIKIPEDIA_INTRO_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*')
 WIKIPEDIA_PAGE_PATH = os.environ.get('WIKIPEDIA_PAGE_PATH', 'https://en.wikipedia.org/?curid=')
 
 # number of days after which we want to refresh cached data about authorities from wikipedia
 WIKIPEDIA_REFRESH_TIME = os.environ.get('WIKPEDIA_REFRESH_TIME', 30)
-=======
 GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
 GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
 GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
 
 # number of days after which we want to refresh cached data about books from google books
 GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
->>>>>>> epic/IEXP-327
