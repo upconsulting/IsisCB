@@ -702,10 +702,7 @@ def citation(request, citation_id):
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
 
     subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
-    subject_ids = []
-    for subject in subjects:
-        if subject.authority.id:
-            subject_ids.append(subject.authority.id)
+    subject_ids = [subject.authority.id for subject in subjects if subject.authority]
 
     persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
     categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
@@ -879,7 +876,7 @@ def get_google_books_image(citation):
     cover_image = {}
 
     parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
-    if parent_relations:
+    if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
     
     if citation.type_controlled in ['CH'] and parent_id:
@@ -898,11 +895,11 @@ def get_google_books_image(citation):
 
         if citation.type_controlled in ['BO']:
             title = citation.title
-            if citation.get_all_contributors[0].authority.name:
+            if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
                 contrib = citation.get_all_contributors[0].authority.name.strip()
-        elif citation.type_controlled in ['CH'] and parent_relations[0].subject.title:
+        elif citation.type_controlled in ['CH'] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
             title = parent_relations[0].subject.title
-            if parent_relations[0].subject.get_all_contributors[0].authority.name:
+            if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
                 contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
 
         if ',' in contrib:
