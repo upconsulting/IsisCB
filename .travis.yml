@@ -4,12 +4,11 @@ python:
 services:
 - postgresql
 #- elasticsearch
-addons:
-  apt:
-    sources:
-      - elasticsearch-1.7
-    packages:
-      - elasticsearch
+before_install:
+  - curl https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-1.7.6.deb -o elasticsearch.deb
+  - sudo dpkg -i --force-confnew elasticsearch.deb
+  - sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
+  - sudo service elasticsearch restart
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.test_settings
