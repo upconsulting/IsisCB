@@ -3,7 +3,13 @@ python:
 - '3.8'
 services:
 - postgresql
-- elasticsearch
+#- elasticsearch
+addons:
+  apt:
+    sources:
+      - elasticsearch-1.7
+    packages:
+      - elasticsearch
 env:
   global:
     - DJANGO_SETTINGS_MODULE=isiscb.test_settings
