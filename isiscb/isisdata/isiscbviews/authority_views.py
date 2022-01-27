@@ -329,11 +329,11 @@ def authority(request, authority_id):
     return render(request, 'isisdata/authority.html', context)
 
 def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
-    if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
-        wikiImage = ''
-        wikiCredit = ''
-        wikiIntro = ''
+    wikiImage = ''
+    wikiCredit = ''
+    wikiIntro = ''
 
+    if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
         wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
 
         if wikipedia_data and (datetime.datetime.now(datetime.timezone.utc) - wikipedia_data.last_modified).days < settings.WIKIPEDIA_REFRESH_TIME:
@@ -377,7 +377,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
             wikipedia_data = WikipediaData(img_url=wikiImage, credit=wikiCredit, intro=wikiIntro, authority_id=authority.id)
             wikipedia_data.save()
 
-        return wikiImage, wikiIntro, wikiCredit
+    return wikiImage, wikiIntro, wikiCredit
 
 def get_place_map_data(request, authority_id):
     sqs =SearchQuerySet().models(Citation).facet('geographic_ids', size=1000).facet('geocodes', size=1000)
