@@ -362,7 +362,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                 introURL = settings.WIKIPEDIA_INTRO_API_PATH.format(authorityName = authorityName)
                 imgJSON = requests.get(imgURL).json()
 
-                if imgJSON.get('query') and imgJSON['query'].get('pages') and imgJSON['query']['pages'].items() and list(imgJSON['query']['pages'].items())[0][0] != '-1':
+                if list(imgJSON['query']['pages'].items())[0][0] != '-1':
                     imgPage = list(imgJSON['query']['pages'].items())[0][1]
                     imgPageID = imgPage['pageid']
                     wikiCredit = f'{settings.WIKIPEDIA_PAGE_PATH}{imgPageID}'
@@ -370,8 +370,7 @@ def get_wikipedia_image_synopsis(authority, author_contributor_count, related_ci
                         wikiImage = imgPage['original']['source']
 
                     introJSON = requests.get(introURL).json()
-                    if introJSON.get('query') and introJSON['query'].get('pages'):
-                        extract = list(introJSON['query']['pages'].items())[0][1]['extract']
+                    extract = list(introJSON['query']['pages'].items())[0][1]['extract']
                     if extract.find('may refer to') < 0:
                         wikiIntro = extract
             
