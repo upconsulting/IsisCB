@@ -180,7 +180,7 @@ LOGGING = {
 		"app_analyzer": {
 			"level": "DEBUG",
 			"class": "logging.FileHandler",
-			"filename": "/Users/paulvieth/Desktop/IsisCBCode/logs/app_analyzer.log",
+			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
 			"formatter": "verbose",
 		}
 	},
@@ -210,7 +210,7 @@ HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack',
+        'INDEX_NAME': 'haystack1',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'

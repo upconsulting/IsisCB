@@ -742,7 +742,7 @@ def citation(request, citation_id):
         sqs.query.set_limits(low=0, high=20)
         similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
     elif citation.type_controlled not in ['RE']:
-        mlt = SearchQuerySet().more_like_this(citation)
+        mlt = SearchQuerySet().models(Citation).more_like_this(citation)
         mlt.query.set_limits(low=0, high=20)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
     else:
@@ -878,7 +878,7 @@ def get_google_books_image(citation):
     parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
-    
+
     if citation.type_controlled in ['CH'] and parent_id:
         google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
     else:
