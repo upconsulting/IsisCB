@@ -868,6 +868,10 @@ class ExportAuthorityForm(forms.Form):
     fields = forms.MultipleChoiceField(choices=[(c.slug, c.label) for c in export_authority.AUTHORITY_COLUMNS])
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
+class FeaturedAuthorityForm(forms.Form):
+    start_date = forms.DateField(required=False, help_text='This date is when the selected authorities will begin being featured')
+    end_date = forms.DateField(required=False, help_text='This date is when the selected authorities will stop being featured')
+    filters = forms.CharField(widget=forms.widgets.HiddenInput())
 class BulkChangeCSVForm(forms.Form):
     csvFile = forms.FileField()
     NO_CHOICE = None

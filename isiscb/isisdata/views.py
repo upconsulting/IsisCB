@@ -24,6 +24,7 @@ from itertools import chain
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.inputs import Raw
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -34,7 +35,8 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale, json, requests
+import codecs, datetime, uuid, base64, zlib, locale, json, requests, random
+import pytz
 
 from collections import defaultdict
 from .helpers.mods_xml import initial_response, generate_mods_xml
@@ -745,10 +747,12 @@ def citation(request, citation_id):
         mlt = SearchQuerySet().models(Citation).more_like_this(citation)
         mlt.query.set_limits(low=0, high=20)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
+        print('a')
+        print(similar_citations)
     else:
         similar_citations = []
 
-    googleBooksImage = get_google_books_image(citation)
+    googleBooksImage = get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
     properties_map = defaultdict(list)
@@ -868,7 +872,7 @@ def citation(request, citation_id):
     }
     return render(request, 'isisdata/citation.html', context)
 
-def get_google_books_image(citation):
+def get_google_books_image(citation, featured):
     # Provide image for citation
     if not (citation.BOOK or citation.CHAPTER):
         return {}
@@ -886,7 +890,7 @@ def get_google_books_image(citation):
 
     google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
 
-    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time:
+    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time and not featured:
         cover_image['size'] = google_books_data.image_size
         cover_image['url'] = google_books_data.image_url
     else:
@@ -937,10 +941,12 @@ def get_google_books_image(citation):
                     if 'imageLinks' in book["volumeInfo"]:
                         imageLinks = book["volumeInfo"]["imageLinks"].keys()
 
-                        if "medium" in imageLinks:
+                        if "medium" in imageLinks and not featured:
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                        elif "small" in imageLinks:
+                            print('a')
+                        elif "small" in imageLinks and not featured:
+                            print('b')
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
                         elif "thumbnail" in imageLinks:
@@ -1365,6 +1371,64 @@ def home(request):
     """
     The landing view, at /.
     """
+    # Get featured citation and authority
+    now = datetime.datetime.now(pytz.timezone('US/Central'))
+    current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    current_featured_authority_ids = []
+    for featured_authority in current_featured_authorities:
+        current_featured_authority_ids.append(featured_authority.authority.id)
+    featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
+
+    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=current_featured_authority_ids, type__in=['book','article'])
+    sqs.query.set_limits(low=0, high=30)
+    featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+
+    featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
+    featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+
+    featured_citation_image = get_google_books_image(featured_citation, True)
+    featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
+    wikiImage = featured_authority_wikipedia_data.img_url
+    wikiCredit = featured_authority_wikipedia_data.credit
+    wikiIntro = featured_authority_wikipedia_data.intro
+    ###
+
+    # Get featured tweet
+    recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
+    twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
+    tweet_url = settings.TWITTER_API_TWEET_PATH
+
+    with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
+        if resp.status_code != 200:
+            return {}
+
+        recent_tweets = resp.json()
+        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
+        # recent_tweet_id = recent_tweets['data'][0]['id']
+
+    with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
+        if resp.status_code != 200:
+            return {}
+
+        recent_tweet = resp.json()
+        print(recent_tweet)
+        recent_tweet_text = recent_tweet['data']['text']
+        recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
+
+        recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
+        URL_REGEX = re.compile(r'''((?:https://).{15})''')
+        recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
+        
+        if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
+            recent_tweet_image = recent_tweet['includes']['media'][0]['url']
+        else:
+            recent_tweet_image = ''
+        
+    ###
+
+    properties = featured_citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
 
     start_index = 0
     end_index = 10
@@ -1388,6 +1452,17 @@ def home(request):
         'active': 'home',
         'records_recent': recent_records[:10],
         'comments_recent': Comment.objects.order_by('-modified_on')[:10],
+        'citation': featured_citation,
+        'featured_citation_authors': featured_citation_authors,
+        'featured_authority': featured_authority,
+        'featured_citation_image': featured_citation_image,
+        'wikiImage': wikiImage,
+        'wikiCredit': wikiCredit,
+        'wikiIntro': wikiIntro,
+        'properties_map': properties,
+        'tweet_text': recent_tweet_text,
+        'tweet_url': recent_tweet_url,
+        'tweet_image': recent_tweet_image,
     }
     return render(request, 'isisdata/home.html', context=context)
 

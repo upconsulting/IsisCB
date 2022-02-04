@@ -1527,7 +1527,20 @@ class WikipediaData(models.Model):
 
     last_modified = models.DateTimeField(auto_now=True)
 
+class FeaturedAuthority(models.Model):
+    """
+    Contains the authorities that will be featured on the home page, the date they will start being featured and the date they will stop being featured.
+    """
 
+    authority = models.OneToOneField(
+        Authority,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    
 class ACRelation(ReferencedEntity, CuratedMixin):
     """
     A relation between a :class:`.Authority` and a :class:`.Citaton`\.

@@ -53,8 +53,6 @@ import iso8601, rules, datetime, hashlib, math
 from itertools import chain
 from unidecode import unidecode
 import bleach
-import datetime
-
 import logging
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
@@ -2594,6 +2592,58 @@ def export_authorities(request):
     context.update({
         'form': form,
         'queryset': queryset,
+    })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def featured_authorities(request):
+
+    template = 'curation/authorities_featured.html'
+    context = {}
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:authority_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+    now = datetime.datetime.now(pytz.timezone('US/Central'))
+    current_featured = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
+    past_featured = FeaturedAuthority.objects.filter(end_date__lt=now)
+
+    if isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    if request.GET.get('confirmed', False):
+        # The user has selected the desired configuration settings.
+        form = FeaturedAuthorityForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            start_date_str = request.POST.getlist('start_date')[0]
+            end_date_str = request.POST.getlist('end_date')[0]
+            start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+        
+
+            if request.POST.update:
+                for authority in queryset:
+                    featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
+                    featured_authority_data.save()
+            else:
+                authority_ids = []
+                for authority in queryset:
+                    authority_ids.append(authority.id)
+                FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
+    else:       # Display the featured authorities configuration form.
+        form = FeaturedAuthorityForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+        'current_featured': current_featured,
+        'future_featured': future_featured,
+        'past_featured': past_featured,
     })
 
     return render(request, template, context)

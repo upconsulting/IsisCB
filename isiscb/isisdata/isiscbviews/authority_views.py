@@ -388,7 +388,6 @@ def get_place_map_data(request, authority_id):
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-
     geocodes = word_cloud_results.facet_counts()['fields']['geocodes'] if 'fields' in word_cloud_results.facet_counts() else []
     citation_count = _get_citation_count_per_country(geocodes)
     country_map_data, country_name_map, is_mapped_map = _get_authority_places_map_data(related_geographics_facet)
