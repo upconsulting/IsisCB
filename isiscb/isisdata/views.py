@@ -21,6 +21,7 @@ from django.views.generic.edit import FormView
 from django.utils.translation import get_language
 
 from itertools import chain
+from operator import itemgetter
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
@@ -36,7 +37,7 @@ from urllib.parse import quote
 from urllib.request import urlopen
 import codecs, datetime, uuid, base64, zlib, locale, json, requests
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from .helpers.mods_xml import initial_response, generate_mods_xml
 from .helpers.linked_data import generate_authority_rdf, generate_citation_rdf
 from ipware.ip import get_real_ip
@@ -700,6 +701,7 @@ def citation(request, citation_id):
         raise Http404("No such Citation")
 
     authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    author_ids = [author.authority.id for author in authors if author.authority]
 
     subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
     subject_ids = [subject.authority.id for subject in subjects if subject.authority]
@@ -738,15 +740,42 @@ def citation(request, citation_id):
 
     # Similar Citations Generator
     if subjects:
-        sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=subject_ids)
+        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         sqs.query.set_limits(low=0, high=20)
-        similar_citations = sqs.all().exclude(public="false").exclude(id=citation_id).query.get_results()
+
+        results = sqs.all().exclude(public="false")
+        similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
+
     elif citation.type_controlled not in ['RE']:
-        mlt = SearchQuerySet().models(Citation).more_like_this(citation)
+        mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         mlt.query.set_limits(low=0, high=20)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
     else:
         similar_citations = []
+        word_cloud_results = EmptySearchQuerySet()
+    
+    # if authors and len(authors) > 1:
+    #     word_cloud_results = results.filter(all_contributor_ids__in=author_ids)
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)  
+    # else:
+    #     word_cloud_results = results
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
+
+    similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet = get_facets_from_similar_citations(similar_citations) 
 
     googleBooksImage = get_google_books_image(citation)
 
@@ -865,10 +894,104 @@ def citation(request, citation_id):
         'query_string': query_string,
         'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
+        'related_contributors_facet': similar_contribs_facet,
+        'related_institutions_facet': similar_institutions_facet,
+        'related_geographics_facet': similar_places_facet,
+        'related_timeperiods_facet': similar_time_periods_facet,
+        'related_publishers_facet': similar_publishers_facet,
+        'related_journals_facet': similar_journals_facet,
+        'related_subject_concepts_facet': similar_concepts_facet,
+        'related_subject_people_facet': similar_people_facet,
+        'related_subject_institutions_facet': similar_institutions_facet,
+        # 'subject_ids_facet': subject_ids_facet,
+        # 'related_institutions_facet': related_institutions_facet,
+        # 'related_geographics_facet': related_geographics_facet,
+        # 'related_timeperiod_facet': related_timeperiod_facet,
+        # 'related_categories_facet': related_categories_facet,
+        # 'related_other_person_facet': related_other_person_facet,
+        # 'related_publisher_facet': related_publisher_facet,
+        # 'related_journal_facet': related_journal_facet,
+        # 'related_subject_concepts_facet': related_subject_concepts_facet,
+        # 'related_subject_people_facet': related_subject_people_facet,
+        # 'related_subject_institutions_facet': related_subject_institutions_facet,
     }
     return render(request, 'isisdata/citation.html', context)
 
+def get_facets_from_similar_citations(similar_citations):
+    similar_contribs = []
+    similar_contribs_facet = []
+    similar_journals = []
+    similar_journals_facet = []
+    similar_publishers = []
+    similar_publishers_facet = []
+    similar_concepts = []
+    similar_concepts_facet = []
+    similar_people = []
+    similar_people_facet = []
+    similar_places = []
+    similar_places_facet = []
+    similar_time_periods = []
+    similar_time_periods_facet = []
+    similar_institutions = []
+    similar_institutions_facet = []
+
+    if similar_citations:
+        similar_citations_ids = [citation.id for citation in similar_citations]
+        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
+        similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
+        similar_acrelations_set = list(chain(*similar_acrelations_sets))
+        # print(similar_acrelations_set[0].__dict__)
+        for acrelation in similar_acrelations_set:
+            if acrelation.type_broad_controlled == 'PR':
+                similar_contribs.append(acrelation.authority)
+            if acrelation.type_broad_controlled == 'SC':
+                if acrelation.authority.type_controlled == 'CO':
+                    print(acrelation.authority)
+                    similar_concepts.append(acrelation.authority)
+                if acrelation.authority.type_controlled == 'IN':
+                    similar_institutions.append(acrelation.authority)
+                if acrelation.authority.type_controlled == 'TI':
+                    similar_time_periods.append(acrelation.authority)
+                if acrelation.authority.type_controlled == 'GE':
+                    similar_places.append(acrelation.authority)
+                if acrelation.authority.type_controlled == 'PE':
+                    similar_people.append(acrelation.authority)
+            if acrelation.type_broad_controlled == 'IH':
+                similar_publishers.append(acrelation.authority)
+            if acrelation.type_broad_controlled == 'PH':
+                similar_journals.append(acrelation.authority)
+                        
+    if similar_contribs:
+        similar_contribs_facet = generate_similar_facets(similar_contribs)
+    if similar_journals:
+        similar_journals_facet = generate_similar_facets(similar_journals)
+    if similar_publishers:
+        similar_publishers_facet = generate_similar_facets(similar_publishers)
+    if similar_concepts:
+        similar_concepts_facet = generate_similar_facets(similar_concepts)
+    if similar_people:
+        similar_people_facet = generate_similar_facets(similar_people)
+    if similar_places:
+        similar_places_facet = generate_similar_facets(similar_places)
+    if similar_time_periods:
+        similar_time_periods_facet = generate_similar_facets(similar_time_periods)
+    if similar_institutions:
+        similar_institutions_facet = generate_similar_facets(similar_institutions)
+    
+    return similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet
+
+def generate_similar_facets(similar_authorities):
+    authorities_count = Counter(similar_authorities)
+    similar_facets = []
+
+    for authority in authorities_count:
+        similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
+    similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+
+    return similar_facets
+
 def get_google_books_image(citation):
+
     # Provide image for citation
     if not (citation.BOOK or citation.CHAPTER):
         return {}
@@ -954,6 +1077,22 @@ def get_google_books_image(citation):
                         google_books_data.save()
 
     return cover_image
+
+def get_facets(word_cloud_results):
+    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+    related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+
+    return subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet
 
 @login_required
 def search_saved(request):

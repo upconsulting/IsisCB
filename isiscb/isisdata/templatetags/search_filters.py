@@ -6,7 +6,7 @@ from isisdata.models import *
 import base64, urllib.request, urllib.parse, urllib.error
 
 from urllib.parse import quote
-import codecs
+import codecs, re
 
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
 
@@ -48,3 +48,20 @@ def include_facet(url, arg):
 @register.filter
 def create_exclude_facet_string(facet, field):
     return 'excluded_facets=' + field + ':' + quote(codecs.encode(facet,'utf-8'))
+
+@register.filter
+def format_query(query):
+    authority_id = re.match("\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA", query)
+    if authority_id:
+        authority_id = authority_id.group(1)
+        try:
+            authority = Authority.objects.get(id=authority_id)
+            name = authority.name
+            authority_type = authority.get_type_controlled_display()
+        except:
+            name = authority_id
+            authority_type = "subject"
+        return "items related to " + "the " + authority_type + ": " + name
+    else:
+        return query
+    
