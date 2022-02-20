@@ -1560,6 +1560,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
     MAINTAINING_INSTITUTION = 'MI'
     PRESENTING_GROUP = 'PG'
 
+    # IEXP-316: types added here need to be added to the broad type mapping below (e.g. PERSONAL_RESPONS_TYPES)
     TYPE_CHOICES = (
         (AUTHOR, 'Author'),
         (EDITOR, 'Editor'),
