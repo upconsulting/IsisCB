@@ -3,7 +3,7 @@
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
 
-        <div class="navbar-header col-md-3"><!--  width: 250px;"-->
+        <div class="navbar-header col-md-2"><!--  width: 250px;"-->
             <a class="navbar-brand" href="/"><img class="img img-responsive" style="padding-top:1px; max-width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
@@ -12,28 +12,45 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-3">
-            <div class="navbar-center" style="padding-top:14px; margin-left: 20px;">
-
-                    <form method="get" action="/isis/">
-                        <div class="input-group">
-                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">Search</button>
-                            </span>
+        <div class="col-md-4" style="padding-right: 0;">
+            <div class="navbar-center" style="padding-top:14px;">
+                <form method="get" action="/isis/">
+                    <div class="input-group">
+                        <input id="id_q" name="q" type="search" type="text" class="form-control" value="{% if query == '*' %}{% else %}{{ query }}{% endif %}" placeholder="Explore the IsisCB...">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="submit" style="border-radius: 0;" >Search</button>
                         </div>
-                        <div>
-                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
-                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
-                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
-                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
-                        </div>
-                    </form>
+                    </div>
+                    <div>
+                        <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                        <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                        <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                        <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                        <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="navbar-collapse collapse" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
+        <div class="col-md-1" style="padding-left: 0;">
+            <div class="navbar-center" style="padding-top:14px;">
+                <form method="get" action="/isis/">
+                    <div class="input-group">
+                        <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                        <span>
+                            <button class="btn btn-default" style="border-radius: 0 4px 4px 0; border-left-color: transparent" type="submit">Browse</button>
+                        </span>
+                    </div>
+                    <div>
+                        <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                        <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                        <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                        <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
                 <ul class="nav navbar-nav navbar-nav-home">
 
                     <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
@@ -45,7 +62,6 @@
                         </ul>
                     </li>
                     <li><a href="http://isiscb.org">Blog</a></li>
-                    <li class="{% if active == 'help' %}active{% endif %}"><a href="http://wiki.isiscb.org/User_Guide:Welcome_to_the_IsisCB">Help</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
                         <ul class="dropdown-menu">

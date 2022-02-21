@@ -191,6 +191,26 @@ div.timeline {
   background-color: #337ab7;
 }
 
+.label-concepts {
+  background-color: #1e6091;
+}
+
+.label-times {
+  background-color: #52b69a;
+}
+
+.label-places {
+  background-color: #168aad;
+}
+
+.label-people {
+  background-color: #99d98c;
+}
+
+.label-institutions {
+  background-color: #34a0a4;
+}
+
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;
@@ -275,10 +295,10 @@ div.timeline {
     padding-bottom: 0px;
 }
 
-
 .navbar-inverse .navbar-nav>li>a:hover {
     color: #1562a5;
 }
+
 .navbar-inverse .navbar-nav> .active>a {
     background-color: #1562a5;
 }

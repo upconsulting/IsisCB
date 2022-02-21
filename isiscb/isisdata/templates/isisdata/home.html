@@ -82,6 +82,7 @@
             <div class="col-sm-12 col-md-6">
                 <h2> An open access discovery service for the history of science.</h2>
                 <p>Built on 50-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+                <p><img src='{% static "isisdata/images/hss_society_logo-1.jpeg" %}' style="height: 75px"/></p>
             </div>
             <div class="col-sm-12 col-md-6">
                 <div class="search-bar">
@@ -101,7 +102,24 @@
                     </form>
                 </div>
                 <br>
-                <p class="pull-right"><img src='{% static "isisdata/images/hss_society_logo-1.jpeg" %}' style="height: 75px"/></p>
+                <div class="row">
+                    <div class="browse-button" style="float: right; padding: 0 15px 0 0;">
+                        <form method="get" action="/isis/">
+                            <div class="input-group">
+                                <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                                <span>
+                                    <button class="btn btn-primary btn-lg" style="font-weight: 300" type="submit">or <strong>browse</strong> the entire database</button>
+                                </span>
+                            </div>
+                            <div>
+                                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
@@ -205,7 +223,7 @@
                                 <h1 style="margin: 0; color: #555;"><i class="fas fa-star-of-life"></i></h1>
                             </div>
                             <div class="media-body">
-                                <span style="font-size: 1.2em; font-weight: 300; display: inline;">The featured theme is currently the history of pandemics in order to highlight important scholarship in this area. Check out our open-process <a href="https://isiscb.org/special-issue-on-pandemics/">special edition on the history of pandemics</a> and our <a href="https://isiscb.org/history-in-the-time-of-covid-19/">pandemics resources project</a> to see more great work in this area.</span>
+                                <span style="font-size: 1.2em; font-weight: 300; display: inline;">The featured theme is currently the <strong>history of pandemics</strong> in order to highlight important scholarship in this area. Check out our open-process <a href="https://isiscb.org/special-issue-on-pandemics/">special edition on the history of pandemics</a> and our <a href="https://isiscb.org/history-in-the-time-of-covid-19/">pandemics resources project</a> to see more great work in this area.</span>
                             </div>
                         </div>
                     </div>
@@ -222,7 +240,7 @@
                             {{tweet_text|safe}}
                         </p>
                         {% if tweet_image %}
-                            <img src={{tweet_image}} style="max-height: 350px;">
+                            <img src={{tweet_image}} style="max-height: 350px; max-width: 100%;">
                         {% endif %}
                     </div>
                 </div>
@@ -231,12 +249,9 @@
     </div>
 </div>
 <div class='row content-container connect-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
-    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">Connect with Us</h2>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">Get to Know Us</h2>
     <div class="col-sm-12 col-md-6" style='padding: 10px 50px'>
         <div class="media">
-            <div class="media-left media-middle">
-                <img src="{% static "isisdata/images/weldon_profile_thumbnail.jpeg" %}" alt="stephen weldon director of the isis bibliography" style="width: 100px;">
-            </div>
             <div class="media-body">
                 <h4 class="media-heading">Stephen Weldon</h4>
                 <h5>Director of the Isis Bibliography</h5>
@@ -245,15 +260,27 @@
             </div>
         </div>
         <hr>
-        <h4>Assistants</h4>
-        <span>Rebecca Marcolina, University of Oklahoma | <i class="far fa-envelope"></i> rmarcolina[at]ou[dot]edu</span><br>
-        <span>Camille Testa, University of Oklahoma | <i class="far fa-envelope"></i> Camille.R.Testa-1[at]ou[dot]edu</span><br>
-        <span>Paul Vieth, University of Oklahoma | <i class="far fa-envelope"></i> pvieth[at]ou[dot]edu</span><br>
+        <div style="font-size: 1.1em;">
+            <a href="https://isiscb.org/isiscb_staff/">IsisCB Staff</a><br>
+            <a href="https://isiscb.org/advisory-board/">IsisCB Advisory Board</a><br>
+            <a href="https://isiscb.org/contributing-editors/">IsisCB Contributing Editors</a>
+        </div>
     </div>
     <div class="col-sm-12 col-md-6" style='padding: 10px 50px; font-size: 1.1em;'>
-        <i class="fab fa-twitter"></i> <a href="https://twitter.com/HSSIsisCB">twitter.com/HSSIsisCB</a><br>
-        <i class="far fa-envelope"></i> <a href="mailto:isisbibliography@gmail.com">IsisBibliography@gmail.com</a><br>
-        <i class="fab fa-youtube"></i> <a href="https://www.youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g">youtube.com/channel/IsisCB</a>
+        <div>
+            <i class="fab fa-twitter"></i> <a href="https://twitter.com/HSSIsisCB">twitter.com/HSSIsisCB</a><br>
+            <i class="far fa-envelope"></i> <a href="mailto:isisbibliography@gmail.com">IsisBibliography@gmail.com</a><br>
+            <i class="fab fa-youtube"></i> <a href="https://www.youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g">youtube.com/channel/IsisCB</a>
+        </div>
+        <hr>
+        <div>
+            <h4>IsisCB Projects</h4>
+            <div style="font-size: 1em;">
+                <a href="https://isiscb.org/history-in-the-time-of-covid-19/">Pandemics Project</a><br>
+                <a href="https://isiscb.org/race-and-history-of-science-project/">Race and Science Project</a><br>
+                <a href="https://isiscb.org/overview-of-isiscb-activities/">Overview of our activities</a>
+            </div>
+        </div>
     </div>
 </div>
 <div class='row content-container about-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #eee;'>
@@ -265,12 +292,24 @@
         <p>IsisCB Explore is an open access discovery service. Opened in 2015, it utilizes citation data in the Isis Bibliography dataset to power a robust search engine. Using Explore, you can discover publications, people, and concepts in all areas of history of science, technology, and medicine. The project was funded through a two-year development grant by the Alfred P. Sloan Foundation.</p>
         <p>IsisCB Explore enables users to search for citations, authors, editors, publisher, journals, and concepts using a dataset of over 220,000 citations to historical works across more than four decades of research in the field. The content is updated daily, so users always have the most up-to-date resources in the field.</p>
         <p>The innovative design works through a relational network graph of the data based on two record types: citations (the bibliographic entries that have been classified and indexed) and authorities (the identity records for subjects, categories, authors, contributors, publishers, journals, places, people, and institutions).</p>
-        <p>All of our source code is at GitHub. Our data is open for use following the Creative Commons Attribution-NonCommercial 4.0 International License.</p>
+        <p>All of our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use following the Creative Commons Attribution-NonCommercial 4.0 International License.</p>
     </div>
     <div class="row" style="margin-top: 20px">
         <div class="col-md-12 col-sm-12 col-xs-12">
           <h4 class="text-center" style="margin-top: 30px; font-weight: 300; font-size: 20px">Isis Cumulative Bibliography, 1913-1975 is now available to browse: <a href="http://cumulative.isiscb.org">cumulative.isiscb.org</a>.</h4>
         </div>
+    </div>
+</div>
+<div class='row content-container sponsor-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">With Support From</h2>
+    <div class="col-xs-12 col-sm-4">
+    </div>
+    <div class="col-xs-12 col-sm-4" style="margin: 0 8px; padding: 0">
+        <a href="https://hssonline.org/"><img src="{% static "isisdata/images/hss_society_logo-1.jpeg" %}" alt="history of science society hss logo" height="75px"></a>
+        <a href="https://libraries.ou.edu/frontpage" style="margin: 0 25px;"><img src="{% static "isisdata/images/oulib_logo.jpeg" %}" alt="university of oklahoma libraries logo" height='125px'></a>
+        <a href="https://sloan.org/"><img src="{% static "isisdata/images/sloan_logo.jpeg" %}" alt="alfred p. sloan foundation logo" height="75px"></a>
+    </div>
+    <div class="col-xs-12 col-sm-4">
     </div>
 </div>
 <div class="row comments-log">
@@ -293,13 +332,24 @@
             <li class="list-group-item">
                 <div>
                     {% if record|to_class_name == 'Citation' %}
-                    <span class="label label-info">
+                    <span class="label" style="background-color: #337ab7">{{ record.get_type_controlled_display }}</span>
                     {% endif %}
                     {% if record|to_class_name == 'Authority' %}
-                    <span class="label label-warning">
+                        {% if record.get_type_controlled_display == "Concept" %}
+                            <span class="label label-concepts">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Person" %}
+                            <span class="label label-people">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Institution" %}
+                            <span class="label label-institutions">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Geographic Term" %}
+                            <span class="label label-places">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Time Period" %}
+                            <span class="label label-times">{{ record.get_type_controlled_display }}</span>
+                        {% else %}
+                            <span class="label label-info">{{ record.get_type_controlled_display }}</span>
+                        {% endif %}
                     {% endif %}
-                    {{record|to_class_name}}</span>
-                    [{{ record.get_type_controlled_display }}] <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
+                    <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
                 </div>
                 <div>
                   {% if record|to_class_name == 'Citation' and record.abstract %}
@@ -327,13 +377,24 @@
             <li class="list-group-item">
                 <div>
                     {% if comment.subject_content_type.model == 'citation' %}
-                    <span class="label label-info">
+                    <span class="label" style="background-color: #337ab7">{{ comment.subject.get_type_controlled_display }}</span>
                     {% endif %}
                     {% if comment.subject_content_type.model == 'authority' %}
-                    <span class="label label-warning">
+                        {% if comment.subject.get_type_controlled_display == "Concept" %}
+                            <span class="label label-concepts">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Person" %}
+                            <span class="label label-people">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Institution" %}
+                            <span class="label label-institutions">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Geographic Term" %}
+                            <span class="label label-places">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Time Period" %}
+                            <span class="label label-times">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% else %}
+                            <span class="label label-info">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% endif %}
                     {% endif %}
-                    {{ comment.subject_content_type.model|capfirst }}</span>
-                    [{{ comment.subject.get_type_controlled_display }}] <a href="{% url 'index' comment.subject.id %}">{{ comment.subject|get_label_string|safe }}</a>
+                    <a href="{% url 'index' comment.subject.id %}">{{ comment.subject|get_label_string|safe }}</a>
 
                 </div>
                  <div>
