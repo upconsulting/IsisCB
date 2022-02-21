@@ -5,10 +5,8 @@
 {% if query %}
 
 <ol class="breadcrumb" style="margin-left: 0; border-color: #777777;">
-        <li> {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} <strong>Authority</strong> results for: <b><i>"{{ query }}"</i></b></li>
+        <li> {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} <strong>Catalog</strong> results for: <b><i>"{{ query|format_query }}"</i></b></li>
 </ol>
-
-    <button type="button" class="btn btn-primary btn-lg citations_authorities_headers" style="padding: 5px 8px; background-color:#fff; border: 1px solid #404040; color: #404040; margin-bottom: 10px;">Authorities</button>
 
 <div class="panel-group hidden-print" id="type_panel">
     <div class="panel panel-default" style="margin-bottom: 15px; margin-right: 7.5px">
@@ -71,7 +69,7 @@
 
     {% for result in page.authority.object_list %}
     {% if result.id %}
-    <div style="border-left: 2px solid #777777">
+    <div class="authority-search-result">
       <p style="padding-left: 8px; margin-bottom: 15px;">
             <span class="label label-default">{{ result.authority_type }}</span>
             {% url 'authority' result.id|get_pk as authority_url %}

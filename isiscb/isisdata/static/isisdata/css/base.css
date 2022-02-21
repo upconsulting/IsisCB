@@ -146,8 +146,12 @@ div.timeline {
   background-color: #fff;
 }
 
-.search-result {
+.search-result:hover {
   border-left: 2px solid #337AB7;
+}
+
+.authority-search-result:hover {
+  border-left: 2px solid #777777;
 }
 
 .stub-search-result {
@@ -512,13 +516,15 @@ li {
 
 .panel-title .accordion-toggle:after {
     /* symbol for "opening" panels */
-    font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+    font-family: 'Font Awesome 5 Free';  /* essential for enabling glyphicon */
     content: "\f078";    /* adjust as needed, taken from bootstrap.css */
+    font-weight: 900;
     font-size: 12px;
 }
 .panel-title .accordion-toggle.collapsed:after {
     /* symbol for "collapsed" panels */
     content: "\f054";    /* adjust as needed, taken from bootstrap.css */
+    font-weight: 900;
     font-size: 12px;
 }
 

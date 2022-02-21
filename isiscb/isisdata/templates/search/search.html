@@ -2,6 +2,7 @@
 {% load app_filters %}
 {% load metadata_filters %}
 {% load facet_filters %}
+{% load search_filters %}
 {% block title %}Search{% endblock %}
 
 {% block meta_tags %}
@@ -15,17 +16,27 @@
 //# sourceURL=dynamicScript.js
 $(document).ready(function() {
   if ('{{models.0}}' == 'isisdata.citation') {
-    $('a[href="#citations"]').tab('show')
-    $('#authorities-tab').removeClass("active")
-    $('#citations-tab').addClass("active")
+    $('a[href="#basic"]').tab('show')
+    $('#advanced-tab').removeClass("active")
+    $('#basic-tab').addClass("active")
   }
   if ('{{models.0}}' == 'isisdata.authority') {
-    $('a[href="#authorities"]').tab('show')
-    $('#citations-tab').removeClass("active")
-    $('#authorities-tab').addClass("active")
+    $('a[href="#advanced"]').tab('show')
+    $('#basic-tab').removeClass("active")
+    $('#advanced-tab').addClass("active")
   }
 });
 </script>
+
+<style>
+  .facet-truncate {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box;
+     -webkit-line-clamp: 1;
+     -webkit-box-orient: vertical;
+    }
+</style>
 
 {% endblock %}
 
@@ -36,26 +47,26 @@ $(document).ready(function() {
         <div class="row search-header">
           <div class="col-sm-12 col-md-4">
             <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist">
-               <a id="citations-tab" href="#citations" class="btn btn-default active" role="tab" data-toggle="tab">
-                 <input type="radio" />Citations ({{ count_citation }})
+               <a id="basic-tab" href="#basic" class="btn btn-default active" role="tab" data-toggle="tab">
+                 <input type="radio" />Basic ({{ count_citation }})
                </a>
-               <a id="authorities-tab" href="#authorities" class="btn btn-default" role="tab" data-toggle="tab">
-                 <input type="radio" />Authorities ({{ count_authority }})
-               </a>
-               <a id="everything-tab" href="#everything" class="btn btn-default" role="tab" data-toggle="tab">
-                 <input type="radio" />Everything ({{ count_authority|add:count_citation }})
+               <a id="advanced-tab" href="#advanced" class="btn btn-default" role="tab" data-toggle="tab">
+                 <input type="radio" />Advanced ({{ count_authority|add:count_citation }})
                </a>
             </div>
           </div>
         </div>
 
         <div class="tab-content">
-          <div role="tabpanel" class="tab-pane" id="everything">
+          <div role="tabpanel" class="tab-pane" id="advanced">
             <div class="row space-top" style="margin-left: 0px; margin-right: 0px;">
+              <div class="col-sm-12 col-md-3" style="padding-left: 0px">
+                  {% include "search/search_results_authorities.html" %}
+              </div>
               <div class="col-sm-12 col-md-9">
                 <div class="row" style="margin-right: -7.5px;">
                   <ol class="breadcrumb" style="border-color: #337ab7;">
-                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} <strong>Citation</strong> results for: <b><i>"{{ query }}"</i></b></li>
+                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} <strong>Bookshelf</strong> results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                     {% if selected_facets.citation_persons_ids %}
                       {% for author in selected_facets.citation_persons_ids %}
@@ -104,26 +115,14 @@ $(document).ready(function() {
                   </div>
                 </div>
               </div>
-              <div class="col-sm-12 col-md-3" style="padding-left: 7.5px; padding-right: 0;">
-                  {% include "search/search_results_authorities.html" %}
-              </div>
             </div>
-
           </div>
 
-          <div role="tabpanel" class="tab-pane" id="authorities">
-              <div class="row space-top">
-                  <div class="col-sm-12 col-md-12">
-                      {% include "search/search_results_authorities.html" %}
-                  </div>
-              </div>
-          </div>
-
-          <div role="tabpanel" class="tab-pane active" id="citations">
+          <div role="tabpanel" class="tab-pane active" id="basic">
               <div class="row space-top">
                 <div class="col-sm-12 col-md-12">
                     <ol class="breadcrumb" style="border-color: #337ab7;">
-                            <li>Results for: <b><i>"{{ query }}"</i></b></li>
+                            <li><strong>Bookshelf </strong>results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                       {% if selected_facets.citation_persons_ids %}
                         {% for author in selected_facets.citation_persons_ids %}

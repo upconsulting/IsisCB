@@ -180,7 +180,7 @@ LOGGING = {
 		"app_analyzer": {
 			"level": "DEBUG",
 			"class": "logging.FileHandler",
-			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
+			"filename": "/Users/paulvieth/Desktop/IsisCBCode/logs/app_analyzer.log",
 			"formatter": "verbose",
 		}
 	},
@@ -210,7 +210,7 @@ HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack1',
+        'INDEX_NAME': 'haystack',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
@@ -393,6 +393,7 @@ WIKIPEDIA_PAGE_PATH = os.environ.get('WIKIPEDIA_PAGE_PATH', 'https://en.wikipedi
 
 # number of days after which we want to refresh cached data about authorities from wikipedia
 WIKIPEDIA_REFRESH_TIME = os.environ.get('WIKPEDIA_REFRESH_TIME', 30)
+
 GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
 GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
 GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
@@ -400,6 +401,6 @@ GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https
 # number of days after which we want to refresh cached data about books from google books
 GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
 
-TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_API_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', 'AAAAAAAAAAAAAAAAAAAAAEEyYwEAAAAAjJhT5gXHOf7fMrIGIK%2Fm6kGQIbU%3D1xezKSO21knWezAWBr0fUVLgADMtTu135MvnxuDADnwbFDNgkK')
+TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
