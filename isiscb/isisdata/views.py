@@ -946,7 +946,6 @@ def get_facets_from_similar_citations(similar_citations):
                 similar_contribs.append(acrelation.authority)
             if acrelation.type_broad_controlled == 'SC':
                 if acrelation.authority.type_controlled == 'CO':
-                    print(acrelation.authority)
                     similar_concepts.append(acrelation.authority)
                 if acrelation.authority.type_controlled == 'IN':
                     similar_institutions.append(acrelation.authority)

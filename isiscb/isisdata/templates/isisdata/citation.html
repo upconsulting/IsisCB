@@ -757,9 +757,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                     {{citation.complete_citation}}
                   </a>
                   {% else %}
-                    {% if citation.author_ids %}
-                      {% for id in citation.author_ids %}
-                        <a href="{% url 'authority' id|upper %}?">{{id|get_authority_name}}</a>;
+                    {% if citation.authors_exact %}
+                      {% for author in citation.authors_exact %}
+                        <span>{{ author }};</span>
                       {% endfor %}
                     {% endif %}
                     {% if citation.publication_date %}
