@@ -775,7 +775,7 @@ def citation(request, citation_id):
     #     word_cloud_results = results
     #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
 
-    similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet = get_facets_from_similar_citations(similar_citations) 
+    similar_objects = get_facets_from_similar_citations(similar_citations) 
 
     googleBooksImage = get_google_books_image(citation)
 
@@ -894,100 +894,42 @@ def citation(request, citation_id):
         'query_string': query_string,
         'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
-        'related_contributors_facet': similar_contribs_facet,
-        'related_institutions_facet': similar_institutions_facet,
-        'related_geographics_facet': similar_places_facet,
-        'related_timeperiods_facet': similar_time_periods_facet,
-        'related_publishers_facet': similar_publishers_facet,
-        'related_journals_facet': similar_journals_facet,
-        'related_subject_concepts_facet': similar_concepts_facet,
-        'related_subject_people_facet': similar_people_facet,
-        'related_subject_institutions_facet': similar_institutions_facet,
-        # 'subject_ids_facet': subject_ids_facet,
-        # 'related_institutions_facet': related_institutions_facet,
-        # 'related_geographics_facet': related_geographics_facet,
-        # 'related_timeperiod_facet': related_timeperiod_facet,
-        # 'related_categories_facet': related_categories_facet,
-        # 'related_other_person_facet': related_other_person_facet,
-        # 'related_publisher_facet': related_publisher_facet,
-        # 'related_journal_facet': related_journal_facet,
-        # 'related_subject_concepts_facet': related_subject_concepts_facet,
-        # 'related_subject_people_facet': related_subject_people_facet,
-        # 'related_subject_institutions_facet': related_subject_institutions_facet,
+        'similar_objects': similar_objects,
     }
     return render(request, 'isisdata/citation.html', context)
 
 def get_facets_from_similar_citations(similar_citations):
-    similar_contribs = []
-    similar_contribs_facet = []
-    similar_journals = []
-    similar_journals_facet = []
-    similar_publishers = []
-    similar_publishers_facet = []
-    similar_concepts = []
-    similar_concepts_facet = []
-    similar_people = []
-    similar_people_facet = []
-    similar_places = []
-    similar_places_facet = []
-    similar_time_periods = []
-    similar_time_periods_facet = []
-    similar_institutions = []
-    similar_institutions_facet = []
+    similar_objects = {'PR': [], 'IH': [], 'PH': [], 'PE': [], 'IN': [], 'TI': [], 'GE': [], 'SE': [], 'CT': [], 'CO': [], 'CW': [], 'EV': [], 'CR': [], 'BL': [],}
 
     if similar_citations:
         similar_citations_ids = [citation.id for citation in similar_citations]
         similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
         similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
-        similar_acrelations_set = list(chain(*similar_acrelations_sets))
-        # print(similar_acrelations_set[0].__dict__)
-        for acrelation in similar_acrelations_set:
-            if acrelation.type_broad_controlled == 'PR':
-                similar_contribs.append(acrelation.authority)
+        similar_acrelations= list(chain(*similar_acrelations_sets))
+
+        for acrelation in similar_acrelations:
+            if acrelation.type_broad_controlled in ['PR', 'IH', 'PH']:
+                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
             if acrelation.type_broad_controlled == 'SC':
-                if acrelation.authority.type_controlled == 'CO':
-                    similar_concepts.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'IN':
-                    similar_institutions.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'TI':
-                    similar_time_periods.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'GE':
-                    similar_places.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'PE':
-                    similar_people.append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'IH':
-                similar_publishers.append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'PH':
-                similar_journals.append(acrelation.authority)
+                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
                         
-    if similar_contribs:
-        similar_contribs_facet = generate_similar_facets(similar_contribs)
-    if similar_journals:
-        similar_journals_facet = generate_similar_facets(similar_journals)
-    if similar_publishers:
-        similar_publishers_facet = generate_similar_facets(similar_publishers)
-    if similar_concepts:
-        similar_concepts_facet = generate_similar_facets(similar_concepts)
-    if similar_people:
-        similar_people_facet = generate_similar_facets(similar_people)
-    if similar_places:
-        similar_places_facet = generate_similar_facets(similar_places)
-    if similar_time_periods:
-        similar_time_periods_facet = generate_similar_facets(similar_time_periods)
-    if similar_institutions:
-        similar_institutions_facet = generate_similar_facets(similar_institutions)
+    if similar_objects:
+        similar_objects = generate_similar_facets(similar_objects)
     
-    return similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet
+    return similar_objects
 
-def generate_similar_facets(similar_authorities):
-    authorities_count = Counter(similar_authorities)
-    similar_facets = []
+def generate_similar_facets(similar_objects):
+    for key in similar_objects:
+        authorities_count = Counter(similar_objects[key])
+        similar_facets = []
 
-    for authority in authorities_count:
-        similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
-    similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+        for authority in authorities_count:
+            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
+        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
 
-    return similar_facets
+        similar_objects[key] = similar_facets
+
+    return similar_objects
 
 def get_google_books_image(citation):
 

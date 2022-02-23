@@ -66,7 +66,7 @@ $(document).ready(function() {
               <div class="col-sm-12 col-md-9">
                 <div class="row" style="margin-right: -7.5px;">
                   <ol class="breadcrumb" style="border-color: #337ab7;">
-                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} <strong>Bookshelf</strong> results for: <b><i>"{{ query|format_query }}"</i></b></li>
+                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                     {% if selected_facets.citation_persons_ids %}
                       {% for author in selected_facets.citation_persons_ids %}
@@ -122,7 +122,7 @@ $(document).ready(function() {
               <div class="row space-top">
                 <div class="col-sm-12 col-md-12">
                     <ol class="breadcrumb" style="border-color: #337ab7;">
-                            <li><strong>Bookshelf </strong>results for: <b><i>"{{ query|format_query }}"</i></b></li>
+                            <li>results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                       {% if selected_facets.citation_persons_ids %}
                         {% for author in selected_facets.citation_persons_ids %}
