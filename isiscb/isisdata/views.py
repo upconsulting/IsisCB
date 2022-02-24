@@ -767,15 +767,15 @@ def citation(request, citation_id):
     else:
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
-    
+
     # if authors and len(authors) > 1:
     #     word_cloud_results = results.filter(all_contributor_ids__in=author_ids)
-    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)  
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
     # else:
     #     word_cloud_results = results
     #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
 
-    similar_objects = get_facets_from_similar_citations(similar_citations) 
+    similar_objects = get_facets_from_similar_citations(similar_citations)
 
     googleBooksImage = get_google_books_image(citation)
 
@@ -904,18 +904,19 @@ def get_facets_from_similar_citations(similar_citations):
     if similar_citations:
         similar_citations_ids = [citation.id for citation in similar_citations]
         similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
-        similar_acrelations= list(chain(*similar_acrelations_sets))
-
+        #similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
+        #similar_acrelations= list(chain(*similar_acrelations_sets))
+        # how about this instead:
+        similar_acrelations = [acr for acr in list(similar_citation.acrelations.all()) for similar_citation in similar_citations_qs]
         for acrelation in similar_acrelations:
             if acrelation.type_broad_controlled in ['PR', 'IH', 'PH']:
                 similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
             if acrelation.type_broad_controlled == 'SC':
                 similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
-                        
+
     if similar_objects:
         similar_objects = generate_similar_facets(similar_objects)
-    
+
     return similar_objects
 
 def generate_similar_facets(similar_objects):
