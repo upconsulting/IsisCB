@@ -907,7 +907,7 @@ def get_facets_from_similar_citations(similar_citations):
         #similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
         #similar_acrelations= list(chain(*similar_acrelations_sets))
         # how about this instead:
-        similar_acrelations = [acr for acr in list(similar_citation.acrelations.all()) for similar_citation in similar_citations_qs]
+        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
         for acrelation in similar_acrelations:
             if acrelation.type_broad_controlled in ['PR', 'IH', 'PH']:
                 similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
