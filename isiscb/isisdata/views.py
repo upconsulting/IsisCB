@@ -904,14 +904,11 @@ def get_facets_from_similar_citations(similar_citations):
     if similar_citations:
         similar_citations_ids = [citation.id for citation in similar_citations]
         similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        #similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
-        #similar_acrelations= list(chain(*similar_acrelations_sets))
-        # how about this instead:
         similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
         for acrelation in similar_acrelations:
-            if acrelation.type_broad_controlled in ['PR', 'IH', 'PH']:
+            if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
                 similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'SC':
+            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT:
                 similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
     if similar_objects:
