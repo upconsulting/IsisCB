@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
+from email.policy import default
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
@@ -899,7 +900,7 @@ def citation(request, citation_id):
     return render(request, 'isisdata/citation.html', context)
 
 def get_facets_from_similar_citations(similar_citations):
-    similar_objects = {'PR': [], 'IH': [], 'PH': [], 'PE': [], 'IN': [], 'TI': [], 'GE': [], 'SE': [], 'CT': [], 'CO': [], 'CW': [], 'EV': [], 'CR': [], 'BL': [],}
+    similar_objects = defaultdict(list)
 
     if similar_citations:
         similar_citations_ids = [citation.id for citation in similar_citations]
@@ -1217,6 +1218,7 @@ class IsisSearchView(FacetedSearchView):
         context = self.get_context_data(**{
             # self.form_name: form,
         })
+
         return self.render_to_response(context)
 
     def build_page(self):

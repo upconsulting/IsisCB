@@ -40,6 +40,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     physical_details = indexes.CharField(null=True, indexed=False)
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
+    language = indexes.MultiValueField(indexed=False)
 
     authors = indexes.MultiValueField(faceted=True, indexed=False)
     author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
@@ -138,8 +139,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
-
-
     data_fields = [
         'id',
         'title',
@@ -150,6 +149,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'abstract',
         'edition_details',
         'physical_details',
+        'language__name',
         'belongs_to',
         'belongs_to__name',
         'complete_citation',
@@ -238,6 +238,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'type_controlled': data[0]['type_controlled'],
             'publication_date': data[0]['publication_date'],
             'abstract': data[0]['abstract'],
+            'language': data[0]['language__name'],
             'complete_citation': data[0]['complete_citation'],
             'stub_record_status': data[0]['stub_record_status'],
             'edition_details': data[0]['edition_details'],
