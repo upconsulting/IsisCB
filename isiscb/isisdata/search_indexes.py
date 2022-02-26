@@ -238,7 +238,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'type_controlled': data[0]['type_controlled'],
             'publication_date': data[0]['publication_date'],
             'abstract': data[0]['abstract'],
-            'language': data[0]['language__name'],
             'complete_citation': data[0]['complete_citation'],
             'stub_record_status': data[0]['stub_record_status'],
             'edition_details': data[0]['edition_details'],
@@ -251,6 +250,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'acrelations': [],
             'ccrelations_from': [],
             'ccrelations_to': [],
+            'language': [],
         }
 
         for row in data:
@@ -262,6 +262,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['ccrelations_from'].append(row)
             if row['relations_to__id']:
                 data_organized['ccrelations_to'].append(row)
+            if row['language__name']:
+                data_organized['language'].append(row['language__name'])
+        
+        print(data_organized['language'])
 
         self._index_belongs_to(data)
 
@@ -411,7 +415,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         aname = name
                     if aname not in multivalue_data['authors']:
                         multivalue_data['authors'].append(aname)
-
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
         else:
@@ -579,6 +582,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
+    
+    def prepare_language(self, data):
+        data['language'] = list(dict.fromkeys(data['language']))
+        for language in data['language']:
+            language = remove_control_characters(language)
+        return data['language']
 
     def prepare_complete_citation(self, data):
         return remove_control_characters(data['complete_citation'])

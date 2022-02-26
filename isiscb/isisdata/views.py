@@ -1369,7 +1369,6 @@ class IsisSearchView(FacetedSearchView):
         extra['excluded_facets'] = excluded_facets_map
         extra['excluded_facets_raw'] = excluded_facets_raw
 
-
         return extra
 
 
