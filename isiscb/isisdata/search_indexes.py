@@ -264,8 +264,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['ccrelations_to'].append(row)
             if row['language__name']:
                 data_organized['language'].append(row['language__name'])
-        
-        print(data_organized['language'])
+            else:
+                data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
 
         self._index_belongs_to(data)
 

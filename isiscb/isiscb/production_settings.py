@@ -447,3 +447,5 @@ GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
 TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', 'AAAAAAAAAAAAAAAAAAAAAEEyYwEAAAAAjJhT5gXHOf7fMrIGIK%2Fm6kGQIbU%3D1xezKSO21knWezAWBr0fUVLgADMtTu135MvnxuDADnwbFDNgkK')
 TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
+
+DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
