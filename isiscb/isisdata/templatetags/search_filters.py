@@ -52,6 +52,7 @@ def create_exclude_facet_string(facet, field):
 @register.filter
 def format_query(query):
     authority_id = re.match("\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA", query)
+    all_results = re.match("\*", query)
     if authority_id:
         authority_id = authority_id.group(1)
         try:
@@ -62,6 +63,8 @@ def format_query(query):
             name = authority_id
             authority_type = "subject"
         return "items related to " + "the " + authority_type + ": " + name
+    elif all_results:
+        return "the whole database"
     else:
         return query
     

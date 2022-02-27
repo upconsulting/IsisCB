@@ -6,10 +6,150 @@
 
 {% if query %}
 
-    <div class="alert alert-info" role="alert" style="padding: 7px; margin-right: -15px; background-color: #fff; border-left: 6px solid #777777; border-color: #777777; color: #333333; font-size: 1.1em;">Map of the Field</div>
-
 <div class="row">
-    <div class="col-sm-12 col-md-6" style="padding-right: 7.5px;">
+    <div class='col-sm-12 col-md-4' style="padding-right: 0;">
+      <div class="panel-group hidden-print" id="type_panel">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion"
+                href=".collapseCitationTypes" class="accordion-toggle">
+                Sort & Filter
+              </a>
+            </h4>
+          </div>
+          <div id="collapseCitationTypes" class="collapseCitationTypes panel-collapse {% if selected_facets.citation_type %}in{% endif %}" aria-expanded="{% if selected_facets.citation_type %}true{% else %}false{% endif %}">
+            <div class="facet_panel panel-body">
+              <div class="row panel-row" style="margin-bottom:10px;">
+                <div class="col-md-12 panel-cell" style="padding-top:4px">
+                  <div class="dropdown hidden-print">
+                    {% if sort_order_dir_citation == 'descend' %}
+                    <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:ascend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: descending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes-alt"></span></a>
+                    {% else %}
+                    <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_citation:descend'|set_index_model:'models:isisdata.citation' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+                    {% endif %}
+                    <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+                      Sort: {{ sort_order_citation|get_current_sort_order_citation }}
+                        <span class="caret"></span>
+                    </button>
+  
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                      <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:title_for_sort'|set_index_model:'models:isisdata.citation' }}">Title</a></li>
+                      <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:author_for_sort'|set_index_model:'models:isisdata.citation' }}">First Author</a></li>
+                      <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:publication_date_for_sort'|set_index_model:'models:isisdata.citation' }}">Publication Date</a></li>
+                      <!--<li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_citation:_score' }}">Relevance</a></li>-->
+                    </ul>
+                  </div>
+                  <!--<input id="id_sort" name="sort_order" type="hidden" value="title_for_sort">-->
+                </div>
+              </div>
+              <hr style="margin-top: 4px; margin-bottom: 4px;">
+              
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
+                </div>
+              </div>
+  
+              <div class="row panel-row ">
+                {% if facets_citation.fields.type %}
+                  <div class="col-md-12">
+                    {% for type in selected_facets.citation_type %}
+                    {% with type|create_facet_string:'citation_type' as encoded_type %}
+                    <div class="col-md-12">
+                      <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i> {{ type }}</a>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+  
+                    {% for type in facets_citation.fields.type %}
+                    {% if type.0 %}
+                    {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
+                    <div class="col-md-12">
+                      <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i> {{ type.0 }}</a> ({{ type.1 }})
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                  </div>
+                {% else %}
+                <div class="row panel-row">
+                  <div class="col-md-12 panel-cell">
+                    <p>No type facets.</p>
+                  </div>
+                </div>
+              {% endif %}
+              </div>
+
+              <div class="row panel-row">
+                <div class="col-md-12 panel-cell">
+                  <h5 style="margin:4px 0"><small>Select the publication language(s) you would like to see.</small></h5>
+                </div>
+              </div>
+  
+              <div class="row panel-row ">
+                {% if facets_citation.fields.language %}
+                  <div class="col-md-12">
+                    {% for language in selected_facets.citation_language %}
+                    {% with language|create_facet_string:'citation_language' as encoded_language %}
+                    <div class="col-md-12">
+                      <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i> {{ language }}</a>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+  
+                    {% for language in facets_citation.fields.language %}
+                    {% if language.0 %}
+                    {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
+                    <div class="col-md-12">
+                      <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i> {{ language.0 }}</a> ({{ language.1 }})
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                  </div>
+                {% else %}
+                <div class="row panel-row">
+                  <div class="col-md-12 panel-cell">
+                    <p>No language facets.</p>
+                  </div>
+                </div>
+              {% endif %}
+              </div>
+
+              <div class="col-md-12" style="padding-top: 10px;">
+                <small>
+                  {% if request.get_full_path|are_reviews_excluded %}
+                  <input type="checkbox" name="exclude_reviews" >
+
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_type:Review'|add_facet_or_operator }}"> Book Reviews are excluded</a>
+                  {% endif %}
+                  {% if not request.get_full_path|are_reviews_excluded %}
+                  <input type="checkbox" name="exclude_reviews" checked>
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"> Book Reviews are included</a>
+                  {% endif %} 
+                </small>
+              </div>
+
+              <div class="col-md-12" style="padding-top: 10px;">
+                <small>
+                  {% if request.get_full_path|are_stubs_excluded %}
+                  <input type="checkbox" name="exclude_stubs" >
+
+                    <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+                  {% endif %}
+                  {% if not request.get_full_path|are_stubs_excluded %}
+                  <input type="checkbox" name="exclude_stubs" checked>
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
+                  {% endif %}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-4" style="padding-right: 7.5px;">
       <!-- Author panel -->
       <div class="panel-group hidden-print" id="author_panel">
         <div class="panel panel-info">
@@ -17,7 +157,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapseAuthors" class="accordion-toggle">
-                Authors & Contributors <span class="badge {% if selected_facets.citation_all_contributor_ids_exact %}active{% endif %}">{{ facets_citation.fields.all_contributor_ids|length }}</span>
+                Authors & Contributors
               </a>
             </h4>
           </div>
@@ -79,7 +219,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapsePublishers" class="accordion-toggle">
-                Publishers <span class="badge {% if selected_facets.citation_publisher_ids  %}active{% endif %}">{{ facets_citation.fields.publisher_ids|length }}</span>
+                Publishers
               </a>
             </h4>
           </div>
@@ -138,7 +278,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapsePeriodicals" class="accordion-toggle">
-                Journals <span class="badge {% if selected_facets.citation_periodical_ids  %}active{% endif %}">{{ facets_citation.fields.periodical_ids|length }}</span>
+                Journals
               </a>
             </h4>
           </div>
@@ -190,7 +330,7 @@
         </div>
       </div>
     </div>
-    <div class="col-sm-12 col-md-6" style="padding-left: 7.5px; padding-right: 0;">
+    <div class="col-sm-12 col-md-4" style="padding-left: 7.5px; padding-right: 0;">
 
       <!-- Concepts panel -->
       <div class="panel-group hidden-print" id="concept_panel">
@@ -199,7 +339,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapseConcepts" class="accordion-toggle">
-                Concepts <span class="badge {% if selected_facets.citation_concepts_by_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.concepts_by_subject_ids|length }}</span>
+                Concepts
               </a>
             </h4>
           </div>
@@ -258,7 +398,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapseTime" class="accordion-toggle">
-                Time Periods <span class="badge {% if selected_facets.citation_time_period_ids_exact %}active{% endif %}">{{ facets_citation.fields.time_period_ids|length }}</span>
+                Time Periods
               </a>
             </h4>
           </div>
@@ -316,7 +456,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapsePlaces" class="accordion-toggle">
-                Places <span class="badge {% if selected_facets.citation_geographic_ids_exact %}active{% endif %}">{{ facets_citation.fields.geographic_ids|length }}</span>
+                Places
               </a>
             </h4>
           </div>
@@ -373,7 +513,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapsePeople" class="accordion-toggle">
-                People <span class="badge {% if selected_facets.citation_people_by_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.people_by_subject_ids|length }}</span>
+                People
               </a>
             </h4>
           </div>
@@ -432,7 +572,7 @@
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion"
                 href=".collapseInstitutions" class="accordion-toggle">
-                Institutions <span class="badge {% if selected_facets.citation_institutions_by_subject_ids_exact  %}active{% endif %}">{{ facets_citation.fields.institutions_by_subject_ids|length }}</span>
+                Institutions
               </a>
             </h4>
           </div>

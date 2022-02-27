@@ -66,7 +66,7 @@ $(document).ready(function() {
               <div class="col-sm-12 col-md-9">
                 <div class="row" style="margin-right: -7.5px;">
                   <ol class="breadcrumb" style="border-color: #337ab7;">
-                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} <strong>Bookshelf</strong> results for: <b><i>"{{ query|format_query }}"</i></b></li>
+                          <li>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }} results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                     {% if selected_facets.citation_persons_ids %}
                       {% for author in selected_facets.citation_persons_ids %}
@@ -106,11 +106,11 @@ $(document).ready(function() {
                   </ol>
                 </div>
                 <div class="row" style="margin-right: -7.5px;">
-                  <div class="col-sm-12 col-md-6 citations_container" style="padding-left: 0;">
+                  <div class="col-sm-12 col-md-8 citations_container" style="padding-left: 0;">
                       {% include "search/search_facets_citations.html" %}
                   </div>
 
-                  <div class="col-sm-12 col-md-6" style="padding-right: 0;">
+                  <div class="col-sm-12 col-md-4" style="padding-right: 0;">
                       {% include "search/search_results_citations.html" %}
                   </div>
                 </div>
@@ -122,7 +122,7 @@ $(document).ready(function() {
               <div class="row space-top">
                 <div class="col-sm-12 col-md-12">
                     <ol class="breadcrumb" style="border-color: #337ab7;">
-                            <li><strong>Bookshelf </strong>results for: <b><i>"{{ query|format_query }}"</i></b></li>
+                            <li>results for: <b><i>"{{ query|format_query }}"</i></b></li>
 
                       {% if selected_facets.citation_persons_ids %}
                         {% for author in selected_facets.citation_persons_ids %}
@@ -165,11 +165,11 @@ $(document).ready(function() {
                 </div>
               </div>
               <div class="row">
-                  <div class="col-sm-6 col-md-6 citations_container">
+                  <div class="col-sm-7 col-md-7 citations_container">
                       {% include "search/search_facets_citations.html" %}
                   </div>
 
-                  <div class="col-sm-6 col-md-6 ">
+                  <div class="col-sm-5 col-md-5 ">
                       {% include "search/search_results_citations.html" %}
                   </div>
               </div>

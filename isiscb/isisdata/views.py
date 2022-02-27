@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
+from email.policy import default
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
@@ -699,44 +700,44 @@ def citation(request, citation_id):
         return HttpResponseForbidden()
 
     # Some citations are deleted. These should be hidden from public view.
-    if citation.status_of_record == 'DL':
+    if citation.status_of_record == Citation.DELETE:
         raise Http404("No such Citation")
 
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     author_ids = [author.authority.id for author in authors if author.authority]
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True, public=True))
     subject_ids = [subject.authority.id for subject in subjects if subject.authority]
 
-    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
-    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=[ACRelation.PERSONAL_RESPONS], citation__public=True, public=True)
+    categories = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.CATEGORY]), citation__public=True, public=True)
 
-    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['TI'], citation__public=True))
+    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.TIME_PERIOD], citation__public=True))
     time_periods = citation.acrelation_set.filter(query_time).filter(public=True)
 
-    query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
+    query_places = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.GEOGRAPHIC_TERM], citation__public=True)
     places = citation.acrelation_set.filter(query_places).filter(public=True)
 
-    query_concepts = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['CO'], citation__public=True)
+    query_concepts = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.CONCEPT], citation__public=True)
     concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
 
-    query_institutions = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['IN'], citation__public=True)
+    query_institutions = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.INSTITUTION], citation__public=True)
     institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
 
-    query_people = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['PE'], citation__public=True)
+    query_people = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.PERSON], citation__public=True)
     people = citation.acrelation_set.filter(query_people).filter(public=True)
 
-    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True).filter(public=True)
-    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True).filter(public=True)
-    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA', object__public=True).filter(public=True)
-    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA', subject__public=True).filter(public=True)
+    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, object__public=True).filter(public=True)
+    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, subject__public=True).filter(public=True)
+    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, object__public=True).filter(public=True)
+    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, subject__public=True).filter(public=True)
 
-    query = Q(subject_id=citation_id, type_controlled='RO', object__public=True) | Q(object_id=citation_id, type_controlled='RB', subject__public=True)
+    query = Q(subject_id=citation_id, type_controlled=CCRelation.REVIEW_OF, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, subject__public=True)
     related_citations_ro = CCRelation.objects.filter(query).filter(public=True)
 
-    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True).filter(public=True)
-    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True).filter(public=True)
-    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
+    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, object__public=True).filter(public=True)
+    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, object__public=True).filter(public=True)
+    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, subject__public=True).filter(public=True)
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
@@ -769,19 +770,19 @@ def citation(request, citation_id):
     else:
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
-    
+
     # if authors and len(authors) > 1:
     #     word_cloud_results = results.filter(all_contributor_ids__in=author_ids)
-    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)  
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
     # else:
     #     word_cloud_results = results
     #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
 
-    similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet = get_facets_from_similar_citations(similar_citations) 
+    similar_objects = get_facets_from_similar_citations(similar_citations)
 
     googleBooksImage = get_google_books_image(citation, False)
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
+    properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
@@ -896,99 +897,40 @@ def citation(request, citation_id):
         'query_string': query_string,
         'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
-        'related_contributors_facet': similar_contribs_facet,
-        'related_institutions_facet': similar_institutions_facet,
-        'related_geographics_facet': similar_places_facet,
-        'related_timeperiods_facet': similar_time_periods_facet,
-        'related_publishers_facet': similar_publishers_facet,
-        'related_journals_facet': similar_journals_facet,
-        'related_subject_concepts_facet': similar_concepts_facet,
-        'related_subject_people_facet': similar_people_facet,
-        'related_subject_institutions_facet': similar_institutions_facet,
-        # 'subject_ids_facet': subject_ids_facet,
-        # 'related_institutions_facet': related_institutions_facet,
-        # 'related_geographics_facet': related_geographics_facet,
-        # 'related_timeperiod_facet': related_timeperiod_facet,
-        # 'related_categories_facet': related_categories_facet,
-        # 'related_other_person_facet': related_other_person_facet,
-        # 'related_publisher_facet': related_publisher_facet,
-        # 'related_journal_facet': related_journal_facet,
-        # 'related_subject_concepts_facet': related_subject_concepts_facet,
-        # 'related_subject_people_facet': related_subject_people_facet,
-        # 'related_subject_institutions_facet': related_subject_institutions_facet,
+        'similar_objects': similar_objects,
     }
     return render(request, 'isisdata/citation.html', context)
 
 def get_facets_from_similar_citations(similar_citations):
-    similar_contribs = []
-    similar_contribs_facet = []
-    similar_journals = []
-    similar_journals_facet = []
-    similar_publishers = []
-    similar_publishers_facet = []
-    similar_concepts = []
-    similar_concepts_facet = []
-    similar_people = []
-    similar_people_facet = []
-    similar_places = []
-    similar_places_facet = []
-    similar_time_periods = []
-    similar_time_periods_facet = []
-    similar_institutions = []
-    similar_institutions_facet = []
+    similar_objects = defaultdict(list)
 
     if similar_citations:
         similar_citations_ids = [citation.id for citation in similar_citations]
         similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
-        similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
-        similar_acrelations_set = list(chain(*similar_acrelations_sets))
-        for acrelation in similar_acrelations_set:
-            if acrelation.type_broad_controlled == 'PR':
-                similar_contribs.append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'SC':
-                if acrelation.authority.type_controlled == 'CO':
-                    similar_concepts.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'IN':
-                    similar_institutions.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'TI':
-                    similar_time_periods.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'GE':
-                    similar_places.append(acrelation.authority)
-                if acrelation.authority.type_controlled == 'PE':
-                    similar_people.append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'IH':
-                similar_publishers.append(acrelation.authority)
-            if acrelation.type_broad_controlled == 'PH':
-                similar_journals.append(acrelation.authority)
-                        
-    if similar_contribs:
-        similar_contribs_facet = generate_similar_facets(similar_contribs)
-    if similar_journals:
-        similar_journals_facet = generate_similar_facets(similar_journals)
-    if similar_publishers:
-        similar_publishers_facet = generate_similar_facets(similar_publishers)
-    if similar_concepts:
-        similar_concepts_facet = generate_similar_facets(similar_concepts)
-    if similar_people:
-        similar_people_facet = generate_similar_facets(similar_people)
-    if similar_places:
-        similar_places_facet = generate_similar_facets(similar_places)
-    if similar_time_periods:
-        similar_time_periods_facet = generate_similar_facets(similar_time_periods)
-    if similar_institutions:
-        similar_institutions_facet = generate_similar_facets(similar_institutions)
-    
-    return similar_contribs_facet, similar_journals_facet, similar_publishers_facet, similar_concepts_facet, similar_people_facet, similar_places_facet, similar_time_periods_facet, similar_institutions_facet
+        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
+        for acrelation in similar_acrelations:
+            if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
+                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
+            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT:
+                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
-def generate_similar_facets(similar_authorities):
-    authorities_count = Counter(similar_authorities)
-    similar_facets = []
+    if similar_objects:
+        similar_objects = generate_similar_facets(similar_objects)
 
-    for authority in authorities_count:
-        similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
-    similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+    return similar_objects
 
-    return similar_facets
+def generate_similar_facets(similar_objects):
+    for key in similar_objects:
+        authorities_count = Counter(similar_objects[key])
+        similar_facets = []
+
+        for authority in authorities_count:
+            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
+        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+
+        similar_objects[key] = similar_facets
+
+    return similar_objects
 
 def get_google_books_image(citation, featured):
 
@@ -1278,6 +1220,7 @@ class IsisSearchView(FacetedSearchView):
         context = self.get_context_data(**{
             # self.form_name: form,
         })
+
         return self.render_to_response(context)
 
     def build_page(self):
@@ -1427,7 +1370,6 @@ class IsisSearchView(FacetedSearchView):
 
         extra['excluded_facets'] = excluded_facets_map
         extra['excluded_facets_raw'] = excluded_facets_raw
-
 
         return extra
 

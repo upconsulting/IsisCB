@@ -14,6 +14,7 @@ from django.conf import settings
 
 sqs = SearchQuerySet().facet('authors', size=100). \
         facet('type', size=100). \
+        facet('language', size=100). \
         facet('publication_date', size=100). \
         facet('persons', size=100). \
         facet('persons_ids', size=100). \

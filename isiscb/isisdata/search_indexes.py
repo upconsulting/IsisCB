@@ -40,6 +40,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     physical_details = indexes.CharField(null=True, indexed=False)
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
+    language = indexes.MultiValueField(indexed=False)
 
     authors = indexes.MultiValueField(faceted=True, indexed=False)
     author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
@@ -138,8 +139,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
-
-
     data_fields = [
         'id',
         'title',
@@ -150,6 +149,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'abstract',
         'edition_details',
         'physical_details',
+        'language__name',
         'belongs_to',
         'belongs_to__name',
         'complete_citation',
@@ -250,6 +250,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'acrelations': [],
             'ccrelations_from': [],
             'ccrelations_to': [],
+            'language': [],
         }
 
         for row in data:
@@ -261,6 +262,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['ccrelations_from'].append(row)
             if row['relations_to__id']:
                 data_organized['ccrelations_to'].append(row)
+            if row['language__name']:
+                data_organized['language'].append(row['language__name'])
+        
+        print(data_organized['language'])
 
         self._index_belongs_to(data)
 
@@ -410,7 +415,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         aname = name
                     if aname not in multivalue_data['authors']:
                         multivalue_data['authors'].append(aname)
-
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
         else:
@@ -578,6 +582,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
+    
+    def prepare_language(self, data):
+        data['language'] = list(dict.fromkeys(data['language']))
+        for language in data['language']:
+            language = remove_control_characters(language)
+        return data['language']
 
     def prepare_complete_citation(self, data):
         return remove_control_characters(data['complete_citation'])
