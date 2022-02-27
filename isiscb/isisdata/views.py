@@ -698,44 +698,44 @@ def citation(request, citation_id):
         return HttpResponseForbidden()
 
     # Some citations are deleted. These should be hidden from public view.
-    if citation.status_of_record == 'DL':
+    if citation.status_of_record == Citation.DELETE:
         raise Http404("No such Citation")
 
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     author_ids = [author.authority.id for author in authors if author.authority]
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True, public=True))
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True, public=True))
     subject_ids = [subject.authority.id for subject in subjects if subject.authority]
 
-    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
-    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=[ACRelation.PERSONAL_RESPONS], citation__public=True, public=True)
+    categories = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.CATEGORY]), citation__public=True, public=True)
 
-    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['TI'], citation__public=True))
+    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.TIME_PERIOD], citation__public=True))
     time_periods = citation.acrelation_set.filter(query_time).filter(public=True)
 
-    query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
+    query_places = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.GEOGRAPHIC_TERM], citation__public=True)
     places = citation.acrelation_set.filter(query_places).filter(public=True)
 
-    query_concepts = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['CO'], citation__public=True)
+    query_concepts = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.CONCEPT], citation__public=True)
     concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
 
-    query_institutions = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['IN'], citation__public=True)
+    query_institutions = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.INSTITUTION], citation__public=True)
     institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
 
-    query_people = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['PE'], citation__public=True)
+    query_people = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.PERSON], citation__public=True)
     people = citation.acrelation_set.filter(query_people).filter(public=True)
 
-    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True).filter(public=True)
-    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True).filter(public=True)
-    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA', object__public=True).filter(public=True)
-    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA', subject__public=True).filter(public=True)
+    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, object__public=True).filter(public=True)
+    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, subject__public=True).filter(public=True)
+    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, object__public=True).filter(public=True)
+    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, subject__public=True).filter(public=True)
 
-    query = Q(subject_id=citation_id, type_controlled='RO', object__public=True) | Q(object_id=citation_id, type_controlled='RB', subject__public=True)
+    query = Q(subject_id=citation_id, type_controlled=CCRelation.REVIEW_OF, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, subject__public=True)
     related_citations_ro = CCRelation.objects.filter(query).filter(public=True)
 
-    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True).filter(public=True)
-    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True).filter(public=True)
-    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
+    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, object__public=True).filter(public=True)
+    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, object__public=True).filter(public=True)
+    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, subject__public=True).filter(public=True)
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
@@ -780,7 +780,7 @@ def citation(request, citation_id):
 
     googleBooksImage = get_google_books_image(citation)
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
+    properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
