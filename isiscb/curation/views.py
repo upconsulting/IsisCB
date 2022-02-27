@@ -50,6 +50,7 @@ import curation.view_helpers as view_helpers
 from haystack.query import SearchQuerySet
 
 import iso8601, rules, datetime, hashlib, math
+from dateutil.relativedelta import relativedelta
 from itertools import chain
 from unidecode import unidecode
 import bleach
@@ -2605,10 +2606,12 @@ def featured_authorities(request):
         return HttpResponseRedirect(reverse('curation:authority_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
-    now = datetime.datetime.now(pytz.timezone('US/Central'))
+    now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
+    six_months_ago = now - relativedelta(months=6)
     current_featured = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
     future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
-    past_featured = FeaturedAuthority.objects.filter(end_date__lt=now)
+    #display only the most recent 6 months of past featured authorities so that this list doesn't balloon
+    past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago).filter(end_date__lt=now)
 
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
@@ -2619,22 +2622,24 @@ def featured_authorities(request):
         form.fields['filters'].initial = filter_params_raw
 
         if form.is_valid():
-            start_date_str = request.POST.getlist('start_date')[0]
-            end_date_str = request.POST.getlist('end_date')[0]
-            start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
-        
+            print(request)
+            print(request.POST)
+            if request.POST.get('update'):
+                # add new or update the dates of the featured authorities
+                start_date_str = request.POST.getlist('start_date')[0]
+                end_date_str = request.POST.getlist('end_date')[0]
+                start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
+                end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
 
-            if request.POST.update:
                 for authority in queryset:
                     featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
                     featured_authority_data.save()
             else:
-                authority_ids = []
-                for authority in queryset:
-                    authority_ids.append(authority.id)
+                # remove the currently selected authorities from the list of featured authorities
+                authority_ids = [authority.id for authority in queryset]
                 FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
-    else:       # Display the featured authorities configuration form.
+    else:       
+        # Display the featured authorities configuration form.
         form = FeaturedAuthorityForm()
         form.fields['filters'].initial = filter_params_raw
 

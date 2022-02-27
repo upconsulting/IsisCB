@@ -766,8 +766,6 @@ def citation(request, citation_id):
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         mlt.query.set_limits(low=0, high=20)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
-        print('a')
-        print(similar_citations)
     else:
         similar_citations = []
         word_cloud_results = EmptySearchQuerySet()
@@ -944,13 +942,11 @@ def get_facets_from_similar_citations(similar_citations):
         similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
         similar_acrelations_sets = [list(similar_citation.acrelations) for similar_citation in similar_citations_qs if similar_citation.acrelations]
         similar_acrelations_set = list(chain(*similar_acrelations_sets))
-        # print(similar_acrelations_set[0].__dict__)
         for acrelation in similar_acrelations_set:
             if acrelation.type_broad_controlled == 'PR':
                 similar_contribs.append(acrelation.authority)
             if acrelation.type_broad_controlled == 'SC':
                 if acrelation.authority.type_controlled == 'CO':
-                    print(acrelation.authority)
                     similar_concepts.append(acrelation.authority)
                 if acrelation.authority.type_controlled == 'IN':
                     similar_institutions.append(acrelation.authority)
@@ -1067,9 +1063,7 @@ def get_google_books_image(citation, featured):
                         if "medium" in imageLinks and not featured:
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                            print('a')
                         elif "small" in imageLinks and not featured:
-                            print('b')
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
                         elif "thumbnail" in imageLinks:
@@ -1511,7 +1505,7 @@ def home(request):
     The landing view, at /.
     """
     # Get featured citation and authority
-    now = datetime.datetime.now(pytz.timezone('US/Central'))
+    now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
     current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
     current_featured_authority_ids = []
     for featured_authority in current_featured_authorities:
@@ -1522,16 +1516,32 @@ def home(request):
     sqs.query.set_limits(low=0, high=30)
     featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
 
-    featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
-    featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
-    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
-    featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+    if featured_citations:
+        featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
+        featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
+    else: 
+        #set default featured citation in case no featured authorities have been selected
+        featured_citation = get_object_or_404(Citation, pk=settings.FEATURED_CITATION_ID)
 
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)
+
+    if featured_authorities:    
+        featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+    else:
+        #set default featured authorities in case no featured authorities have been selected
+        featured_authority = get_object_or_404(Authority, pk=settings.FEATURED_AUTHORITY_ID)
+
     featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
-    wikiImage = featured_authority_wikipedia_data.img_url
-    wikiCredit = featured_authority_wikipedia_data.credit
-    wikiIntro = featured_authority_wikipedia_data.intro
+    
+    if featured_authority_wikipedia_data:
+        wikiImage = featured_authority_wikipedia_data.img_url
+        wikiCredit = featured_authority_wikipedia_data.credit
+        wikiIntro = featured_authority_wikipedia_data.intro
+    else: 
+        wikiImage = ''
+        wikiCredit = ''
+        wikiIntro = ''
     ###
 
     # Get featured tweet
@@ -1552,7 +1562,6 @@ def home(request):
             return {}
 
         recent_tweet = resp.json()
-        print(recent_tweet)
         recent_tweet_text = recent_tweet['data']['text']
         recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
 
@@ -1567,7 +1576,7 @@ def home(request):
         
     ###
 
-    properties = featured_citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
+    properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 
     start_index = 0
     end_index = 10
