@@ -62,6 +62,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     complete_citation = indexes.CharField(null=True, indexed=True)
     stub_record_status = indexes.CharField(indexed=False, null=True, faceted=True)
 
+    book_reviews = indexes.MultiValueField(faceted=False, indexed=False)
+
     # # Fields for COinS metadata.
     # # TODO: Populate these fields with values.
     # volume = indexes.CharField(null=True, stored=True)
@@ -209,7 +211,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         del(self.prepared_data[field.index_fieldname])
                     except KeyError:    # It was never there....
                         pass
-
+        
+        print(self.prepared_data)
         return self.prepared_data
 
     def prepare(self, obj):
@@ -248,8 +251,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             },
             'attributes': [],
             'acrelations': [],
-            'ccrelations_from': [],
-            'ccrelations_to': [],
+            'ccrelations': [],
             'language': [],
         }
 
@@ -258,14 +260,18 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['attributes'].append(row)
             if row['acrelation__id']:
                 data_organized['acrelations'].append(row)
-            if row['relations_from__id']:
-                data_organized['ccrelations_from'].append(row)
-            if row['relations_to__id']:
-                data_organized['ccrelations_to'].append(row)
+            if row['relations_from__id'] and row['relations_from__type_controlled']:
+                relation = {'id': row['relations_from__id'], 'type': row['relations_from__type_controlled'], 'title': row['relations_from__object__title']}
+                data_organized['ccrelations'].append(relation)
+            if row['relations_to__id'] and row['relations_to__type_controlled']:
+                relation = {'id': row['relations_to__id'], 'type': row['relations_to__type_controlled'], 'title': row['relations_to__subject__title']}
+                data_organized['ccrelations'].append(relation)
             if row['language__name']:
                 data_organized['language'].append(row['language__name'])
             else:
                 data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
+        
+        data_organized['ccrelations'] = list({v['id']:v for v in data_organized['ccrelations']}.values())
 
         self._index_belongs_to(data)
 
@@ -415,6 +421,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         aname = name
                     if aname not in multivalue_data['authors']:
                         multivalue_data['authors'].append(aname)
+        for relation in data_organized['ccrelations']:
+            multivalue_data['ccrelations'].append(relation)
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
         else:

@@ -1229,6 +1229,7 @@ class IsisSearchView(FacetedSearchView):
         should be a simple matter to override this method to do what they would
         like.
         """
+
         try:
             page_no_authority = int(self.request.GET.get('page_authority', 1))
         except (TypeError, ValueError):
@@ -1260,6 +1261,8 @@ class IsisSearchView(FacetedSearchView):
             paginator_authority = Paginator(self.queryset['authority'], self.results_per_page)
             paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
 
+
+        print(self.queryset['citation'][0].__dict__)
 
         try:
             page_authority = paginator_authority.page(page_no_authority)

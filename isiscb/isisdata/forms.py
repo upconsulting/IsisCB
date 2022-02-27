@@ -40,6 +40,8 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
 
+    # &excluded_facets=citation_type:Review&facet_operators=type:or
+
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
         self.excluded_facets = kwargs.get('data', {}).getlist('excluded_facets', [])
@@ -179,7 +181,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 
-        return {'authority' : results_authority,
+        return {'authority': results_authority,
                 'citation': results_citation}
 
     def set_facets(self, selected_facets, sqs, type_string, facet_operators):
@@ -216,11 +218,11 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sqs
 
-    def exclude_facets(sef, excluded_facets, sqs, type_string):
+    def exclude_facets(self, excluded_facets, sqs, type_string):
         for facet in excluded_facets:
             if ":" not in facet:
                 continue
-
+            
             field, value = facet.split(":", 1)
             field = field.strip()
             value = value.strip()

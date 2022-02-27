@@ -40,9 +40,9 @@
 
           {% url 'citation' result.id|get_pk as citation_url %}
           {% if result.title == 'Title missing' and result.complete_citation %}
-          <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-            {{result.complete_citation}}
-          </a>
+            <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+              {{result.complete_citation}}
+            </a>
           {% else %}
             {% if result.authors %}
                <strong style="font-weight: 500;">{{ result.authors|slice:"0:3"|joinby:"; " }}{% if result.authors|length > 3 %}; et al.{% endif %}</strong>
@@ -84,43 +84,48 @@
           {% endif %}
 
 
-            <span class="visible-print-inline">({{ citation_url }})</span>
+          <span class="visible-print-inline">({{ citation_url }})</span>
 
-            <!-- Zotero -->
-            <span style="display:none;">
-               <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
+          <!-- Zotero -->
+          <span style="display:none;">
+              <abbr class="unapi-id" title="{{ result.id|get_pk }}">unapi</abbr>
+          </span>
+
+
+          <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
+              <script>
+              {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
+              $.ajax("{{ ajax_linkresolve_url }}",
+                  {
+                      success: function(result) {
+                          if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
+                              var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" href="'+ result.url +'">';
+                              if (result.icon.length > 0) { 
+                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
+                              } else { 
+                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; 
+                              }
+                              linkElem += '</a>';
+                              $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
+                              console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
+                          } else {
+                              // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                              $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                          }
+                      },
+                      error: function() {
+                          // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                          $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
+                      },
+                  });
+              </script>
+          </span>
+          <br>
+          {% if result.type == "Book" and result.ccrelations %}
+            <span style="background-color: #fff; margin-left: 20px; font-size: .9em;">
+              <i class="fas fa-book"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Reviewed by {{result.ccrelations|count_relations:"RB"}} citation(s)
             </span>
-
-
-            <span id="linkresolver_{{ result.id|get_pk }}" class="hidden-print linkresolver_{{ result.id|get_pk }}">
-                <script>
-                {% url 'linkresolver' citation_id=result.id|get_pk as ajax_linkresolve_url %}
-                $.ajax("{{ ajax_linkresolve_url }}",
-                    {
-                        success: function(result) {
-                            if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
-                                var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" href="'+ result.url +'">';
-                                if (result.icon.length > 0) { 
-                                  linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
-                                } else { 
-                                  linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; 
-                                }
-                                linkElem += '</a>';
-                                $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
-                                console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
-                            } else {
-                                // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
-                            }
-                        },
-                        error: function() {
-                            // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                            $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
-                        },
-                    });
-                </script>
-            </span>
-
+          {% endif %}
         </p>
       </div>
     {% empty %}
