@@ -69,7 +69,7 @@ def create_facet_with_field(facet, field):
 
 @register.filter
 def are_reviews_excluded(url):
-    return 'excluded_facets=citation_type:Review' in url
+    return 'excluded_facets=citation_type:Review' in urllib.parse.unquote(url)
 
 @register.filter
 def are_stubs_excluded(url):

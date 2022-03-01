@@ -12,13 +12,23 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-4" style="padding-right: 0;">
-            <div class="navbar-center" style="padding-top:14px;">
-                <form method="get" action="/isis/">
-                    <div class="input-group">
-                        <input id="id_q" name="q" type="search" type="text" class="form-control" value="{% if query == '*' %}{% else %}{{ query }}{% endif %}" placeholder="Explore the IsisCB...">
-                        <div class="input-group-btn">
-                            <button class="btn btn-default" type="submit" style="border-radius: 0;" >Search</button>
+        <div class="col-md-4">
+            <div class="navbar-center" style="padding-top:14px; margin-left: 20px;">
+
+                    <form method="get" action="/isis/">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
                         </div>
                     </div>
                     <div>
@@ -29,7 +39,7 @@
                         <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
                     </div>
                 </form>
-            </div>
+            
         </div>
         <div class="col-md-1" style="padding-left: 0;">
             <div class="navbar-center" style="padding-top:14px;">

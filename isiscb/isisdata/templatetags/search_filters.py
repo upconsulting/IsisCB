@@ -67,4 +67,12 @@ def format_query(query):
         return "the whole database"
     else:
         return query
+
+@register.filter
+def count_relations(relations, type):
+    count = 0
+    for relation in relations:
+        if relation['type'] == type:
+            count += 1
+    return count
     
