@@ -1265,8 +1265,6 @@ class IsisSearchView(FacetedSearchView):
             paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
 
 
-        print(self.queryset['citation'][0].__dict__)
-
         try:
             page_authority = paginator_authority.page(page_no_authority)
         except InvalidPage:
