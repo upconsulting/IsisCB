@@ -1008,9 +1008,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       <div class="modal-body">
         <ul class="unselected_facets">
           {% for facet in similar_objects.CO %}
+          {% if facet.authority %}
             <li>
               <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
             </li>
+          {% endif %}
           {% endfor %}
         </ul>
       </div>
@@ -1031,9 +1033,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-body">
       <ul class="unselected_facets">
         {% for facet in similar_objects.PE %}
+        {% if facet.authority %}
           <li>
             <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
           </li>
+        {% endif %}
         {% endfor %}
       </ul>
     </div>
@@ -1055,9 +1059,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-body">
       <ul class="unselected_facets">
         {% for facet in similar_objects.IN %}
+        {% if facet.authority %}
           <li>
             <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
           </li>
+        {% endif %}
         {% endfor %}
       </ul>
     </div>
@@ -1079,9 +1085,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-body">
       <ul class="unselected_facets">
         {% for facet in similar_objects.TI %}
+        {% if facet.authority %}
           <li>
             <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
           </li>
+        {% endif %}
         {% endfor %}
       </ul>
     </div>
@@ -1103,9 +1111,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-body">
       <ul class="unselected_facets">
         {% for facet in similar_objects.IH %}
+        {% if facet.authority %}
           <li>
             <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
           </li>
+        {% endif %}
         {% endfor %}
       </ul>
     </div>
@@ -1128,9 +1138,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     <div class="modal-body">
       <ul class="unselected_facets">
         {% for facet in similar_objects.PH %}
+        {% if facet.authority %}
           <li>
             <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
           </li>
+        {% endif %}
         {% endfor %}
       </ul>
     </div>
