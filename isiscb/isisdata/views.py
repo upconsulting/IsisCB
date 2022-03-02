@@ -940,7 +940,7 @@ def get_google_books_image(citation, featured):
 
     cover_image = {}
 
-    #parent_id = None
+    parent_id = None
     parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
