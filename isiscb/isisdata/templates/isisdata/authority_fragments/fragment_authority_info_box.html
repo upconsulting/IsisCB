@@ -81,7 +81,7 @@
   <div class="panel-body">
     <div class="col-sm-12 col-md-6" style="padding-left: 0">
       {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
-  
+
       <img id="wikiImage" style="max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none;" src=''></img>
       <a id="wikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
       <hr id="wikiImageBorder" style="display:none;">
@@ -171,6 +171,7 @@
       {% with authority|get_bibliographic_essays as bib_essays %}
         {% if bib_essays %}
           {% for bib_essay in bib_essays %}
+          {% if bib_essay.value.cvalue %}
           <p>
             <strong>There is a bibliographic essay on this topic: "<a href="{% url 'citation' bib_essay.value.cvalue.id %}">{{bib_essay.value.cvalue.title_for_display}}</a>" by {{bib_essay.value.cvalue|get_authors|join_authors:""}}</strong>
             <!-- todo: list all and link link -->
@@ -180,6 +181,7 @@
             {% endfor %}
             {% endif %}
           </p>
+          {% endif %}
           {% endfor %}
         {% endif %}
       {% endwith %}
@@ -216,7 +218,7 @@
             </div>
             {% endif %}
           {% endwith %}
-  
+
           <img src="https://plato.stanford.edu/symbols/sep-man-red.png" height="14px" width="14px"> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
           <br>
           <i class="fab fa-wikipedia-w"></i> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
