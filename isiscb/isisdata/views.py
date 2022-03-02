@@ -940,6 +940,7 @@ def get_google_books_image(citation, featured):
 
     cover_image = {}
 
+    #parent_id = None
     parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
@@ -1464,26 +1465,26 @@ def home(request):
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
         featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
-    else: 
+    else:
         #set default featured citation in case no featured authorities have been selected
         featured_citation = get_object_or_404(Citation, pk=settings.FEATURED_CITATION_ID)
 
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)
 
-    if featured_authorities:    
+    if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
     else:
         #set default featured authorities in case no featured authorities have been selected
         featured_authority = get_object_or_404(Authority, pk=settings.FEATURED_AUTHORITY_ID)
 
     featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
-    
+
     if featured_authority_wikipedia_data:
         wikiImage = featured_authority_wikipedia_data.img_url
         wikiCredit = featured_authority_wikipedia_data.credit
         wikiIntro = featured_authority_wikipedia_data.intro
-    else: 
+    else:
         wikiImage = ''
         wikiCredit = ''
         wikiIntro = ''
@@ -1513,12 +1514,12 @@ def home(request):
         recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
         URL_REGEX = re.compile(r'''((?:https://).{15})''')
         recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
-        
+
         if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
             recent_tweet_image = recent_tweet['includes']['media'][0]['url']
         else:
             recent_tweet_image = ''
-        
+
     ###
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
