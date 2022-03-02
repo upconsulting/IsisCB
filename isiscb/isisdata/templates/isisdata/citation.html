@@ -808,8 +808,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.PR|slice:"6" %}
+                  {% if facet.authority %}
                     <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                     <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -827,8 +829,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.PH|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -846,8 +850,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.IH|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -867,8 +873,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.CO|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -886,8 +894,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.PE|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -905,8 +915,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.GE|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -924,8 +936,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.TI|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -943,8 +957,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 </div>
                 <div class="panel-body">
                   {% for facet in similar_objects.IN|slice:"6" %}
+                  {% if facet.authority %}
                   <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
                   <br>
+                  {% endif %}
                   {% endfor %}
                 </div>
               </div>
