@@ -62,11 +62,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   color: #337ab7;
 }
 
-#catalog-tab, #bookshelf-tab {
-  font-size: 1em;
-  font-weight: 400;
-}
-
 .tab-btn-default {
   background-color: #fff;
   color: #337ab7;
@@ -212,7 +207,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                                 {
                                     success: function(result) {
                                         if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
-                                            var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" href="'+ result.url +'">';
+                                            var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" target="_blank" href="'+ result.url +'">';
                                             if (result.icon.length > 0) { 
                                             linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
                                             } else { 

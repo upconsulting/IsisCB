@@ -390,7 +390,11 @@ def authority(request, authority_id):
 
     author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-            
+    
+    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).count()
+    
+    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+
     page_number = request.GET.get('page_citation', 1)
     paginator = Paginator(related_citations, 20)
     page_results = paginator.get_page(page_number)
@@ -403,6 +407,7 @@ def authority(request, authority_id):
         'authority': authority,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
+        'display_type': display_type,
         'related_citations_count': related_citations_count,
         'api_view': api_view,
         'redirect_from': redirect_from,
@@ -413,6 +418,14 @@ def authority(request, authority_id):
         'page_results': page_results,
     }
     return render(request, 'isisdata/authority.html', context)
+
+def get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
+    if authority.type_controlled == authority.PERSON and author_contributor_count != 0 and related_citations_count !=0 and author_contributor_count/related_citations_count > .9:
+        return 'Author'
+    elif authority.type_controlled == authority.INSTITUTION and publisher_count != 0 and related_citations_count !=0 and publisher_count/related_citations_count > .9:
+        return 'Publisher'
+    else:
+        return authority.get_type_controlled_display
 
 def remove_self_from_facets(facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]

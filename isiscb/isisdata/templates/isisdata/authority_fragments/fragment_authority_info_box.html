@@ -67,7 +67,7 @@
 </script>
 <div class="panel panel-default" id="infoPanel">
   <div class="panel-heading">
-    <strong style="font-size:1.3em; color: #012E63;">{{ authority.get_type_controlled_display }}</strong>
+    <strong style="font-size:1.3em; color: #012E63;">{{ display_type }}</strong>
       <span class="btn-grp pull-right" style="padding-top:5px">
           <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
           <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
@@ -187,13 +187,14 @@
       {% endwith %}
 
       <div class="panel panel-default">
-        <div class="panel-heading">Authority URI</div>
+        <div class="panel-heading">Permalink</div>
         <div class="panel-body" style="font-size:.95em;">
           <span id="uriLink" style="cursor: copy;" title="Click to copy">data.isiscb.org/isis/authority/{{authority.id}} <i class="far fa-copy"></i></span>
           <textarea style="position: absolute;left: -9999px;" id="hiddenUriLink">{{ authority | get_uri }}</textarea>
         </div>
       </div>
     </div>
+
     <div class="col-sm-12 col-md-6" style="padding: 0;">
       <div class="panel panel-default facet-box">
         <div class="panel-heading-links panel-heading">
@@ -202,23 +203,31 @@
         <div class="panel-body panel-body-links">
           {% with authority.linkeddata_public as linkeddata_public %}
             {% if linkeddata_public.count > 0 %}
-            <div style="padding-bottom: 20px;">
-              <span class="glyphicon glyphicon-globe"></span> Linked Data:<br>
               {% for entry in linkeddata_public.all %}
-              {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
-              {{entry.resource_name}}:
-              {% endif %}
-              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
-                {{ entry.universal_resource_name }}
-              </a>
-              {% if entry.type_controlled.name != url_linked_data_name %}
-              ({{ entry.type_controlled }})
-              {% endif %}
-              <br/> {% endfor %}
-            </div>
+                {% if entry.type_controlled.name == 'VIAF' %}
+                  <img src="https://viaf.org/viaf/images/viaf.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>VIAF</a>
+                {% elif entry.type_controlled.name == 'DNB' %}
+                <img src="https://www.oxforddnb.com/fileasset/images/favicon.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>DNB</a>
+                {% else %}
+                  <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+                    {{ entry.universal_resource_name }}
+                  </a>
+                {% endif %}
+                {% if entry.type_controlled.name == url_linked_data_name and entry.resource_name %}
+                  {{entry.resource_name}}:
+                {% endif %}
+                <br/>
+              {% endfor %}
+              <hr style='margin: 7px 0;'>
             {% endif %}
           {% endwith %}
-
+          
+          {% if display_type == 'Author' %}
+            <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
+            <br>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?q={{authority.name}}+site%3A.edu">Academic sites</a>
+            <br>
+          {% endif %}
           <img src="https://plato.stanford.edu/symbols/sep-man-red.png" height="14px" width="14px"> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
           <br>
           <i class="fab fa-wikipedia-w"></i> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>

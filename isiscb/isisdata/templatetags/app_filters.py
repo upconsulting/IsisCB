@@ -303,6 +303,15 @@ def get_current_sort_order_citation(sort_field):
         return 'Relevance'
     return sort_field
 
+@register.filter
+def get_current_sort_order_authority(sort_field):
+    if not sort_field:
+        return "Count"
+    if 'name' in sort_field:
+        return "Name"
+    if 'count' in sort_field:
+        return "Count"
+    return sort_field
 
 @register.filter
 def get_user_id(user):

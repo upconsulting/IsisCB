@@ -36,6 +36,7 @@ def model_choices(using=DEFAULT_ALIAS):
 
 class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
+    sort_order_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='citation_count')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
@@ -79,12 +80,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return sort_order
 
     def get_sort_order_authority(self):
-        sort_order = 'name'
+        sort_order = 'citation_count'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order_authority', 'name')
+            sort_order = self.cleaned_data.get('sort_order_authority', 'citation_count')
             if not sort_order:
-                sort_order = 'name'
+                sort_order = 'citation_count'
             #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
             #    sort_order = 'name'
 
@@ -106,13 +107,13 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return sort_order_dir
 
     def get_sort_order_direction_authority(self):
-        sort_order_dir = 'ascend'
+        sort_order_dir = 'descend'
 
         if self.is_valid():
-            sort_order_dir = self.cleaned_data.get('sort_order_dir_authority', 'ascend')
+            sort_order_dir = self.cleaned_data.get('sort_order_dir_authority', 'descend')
 
             if not sort_order_dir:
-                sort_order_dir = 'ascend'
+                sort_order_dir = 'descend'
 
         return sort_order_dir
 

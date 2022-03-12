@@ -1451,14 +1451,13 @@ def home(request):
     # Get featured citation and authority
     now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
     current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
-    current_featured_authority_ids = []
-    for featured_authority in current_featured_authorities:
-        current_featured_authority_ids.append(featured_authority.authority.id)
+    current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
     featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
 
-    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=current_featured_authority_ids, type__in=['book','article'])
+    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=current_featured_authority_ids).filter(type_controlled__in=['BO', 'AR'])
     sqs.query.set_limits(low=0, high=30)
-    featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+    # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+    featured_citations = sqs.all().exclude(public="false").query.get_results()
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
@@ -1489,34 +1488,34 @@ def home(request):
     ###
 
     # Get featured tweet
-    recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
-    twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
-    tweet_url = settings.TWITTER_API_TWEET_PATH
+    # recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
+    # twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
+    # tweet_url = settings.TWITTER_API_TWEET_PATH
 
-    with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
+    # with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
+    #     if resp.status_code != 200:
+    #         return {}
 
-        recent_tweets = resp.json()
-        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
-        # recent_tweet_id = recent_tweets['data'][0]['id']
+    #     recent_tweets = resp.json()
+    #     recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
+    #     # recent_tweet_id = recent_tweets['data'][0]['id']
 
-    with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
+    # with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
+    #     if resp.status_code != 200:
+    #         return {}
 
-        recent_tweet = resp.json()
-        recent_tweet_text = recent_tweet['data']['text']
-        recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
+    #     recent_tweet = resp.json()
+    #     recent_tweet_text = recent_tweet['data']['text']
+    #     recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
 
-        recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
-        URL_REGEX = re.compile(r'''((?:https://).{15})''')
-        recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
+    #     recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
+    #     URL_REGEX = re.compile(r'''((?:https://).{15})''')
+    #     recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
 
-        if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
-            recent_tweet_image = recent_tweet['includes']['media'][0]['url']
-        else:
-            recent_tweet_image = ''
+    #     if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
+    #         recent_tweet_image = recent_tweet['includes']['media'][0]['url']
+    #     else:
+    #         recent_tweet_image = ''
 
     ###
 
@@ -1552,9 +1551,9 @@ def home(request):
         'wikiCredit': wikiCredit,
         'wikiIntro': wikiIntro,
         'properties_map': properties,
-        'tweet_text': recent_tweet_text,
-        'tweet_url': recent_tweet_url,
-        'tweet_image': recent_tweet_image,
+        # 'tweet_text': recent_tweet_text,
+        # 'tweet_url': recent_tweet_url,
+        # 'tweet_image': recent_tweet_image,
     }
     return render(request, 'isisdata/home.html', context=context)
 

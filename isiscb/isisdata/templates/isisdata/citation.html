@@ -151,15 +151,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     color: #337ab7;
   }
 
-  #catalog-tab, #bookshelf-tab {
-    font-size: 1em;
-    font-weight: 400;
-  }
-
-  #catalog-tab, #bookshelf-tab a:hover {
-    text-decoration: none;
-  }
-
   .tab-btn-default {
     background-color: #fff;
     color: #337ab7;
@@ -423,7 +414,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                           {
                               success: function(result) {
                                       if (result.url.length > 0) {
-                                          var linkElem = '<a href="'+ result.url +'" class="text-warnging">';
+                                          var linkElem = '<a href="'+ result.url +'" target="_blank" class="text-warning">';
                                           // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
                                           if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
                                           linkElem += '</a>';
