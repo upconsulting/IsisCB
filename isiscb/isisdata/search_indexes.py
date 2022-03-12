@@ -255,8 +255,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             'language': [],
         }
 
-        print(data_organized['type_controlled'])
-
         for row in data:
             if row['attributes__id']:
                 data_organized['attributes'].append(row)
