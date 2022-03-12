@@ -1454,10 +1454,11 @@ def home(request):
     current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
     featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
 
-    sqs = SearchQuerySet().models(Citation).filter(subject_ids__in=current_featured_authority_ids).filter(type_controlled__in=['BO', 'AR'])
+    sqs = SearchQuerySet().models(Citation)
     sqs.query.set_limits(low=0, high=30)
     # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
-    featured_citations = sqs.all().exclude(public="false").query.get_results()
+    featured_citations = sqs.all().exclude(public="false")
+    featured_citations = featured_citations.filter(subject_ids__in=current_featured_authority_ids).filter(type__in=['Book', 'Article']).filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
@@ -1496,7 +1497,7 @@ def home(request):
             return {}
 
         recent_tweets = resp.json()
-        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']d
+        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
 
     with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
         if resp.status_code != 200:
