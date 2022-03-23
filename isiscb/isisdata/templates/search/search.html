@@ -84,15 +84,12 @@ $(document).ready(function() {
     <div class='col-xs-12' style='padding: 0;'>
       <div class='well' style='padding-top: 10px;'>
         <div class='row' style='padding-left: 15px'>
-          <strong style="font-size: 1.4em; color: #012E63">Search</strong>
+          <strong style="font-size: 1.4em; color: #012E63">Search:</strong> <span class='h3' style='margin: 0'>{{ query|format_query }}</span>
         </div>
-        <hr style="margin-top:5px; margin-bottom:5px;">
-        <span class='h3' style='margin: 0'>{{ query|format_query }}</span>
-          <ol class="breadcrumb pull-right">
-            {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids_exact or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
-              <span class='label label-default' style='font-size: .9em; margin-right: 10px;'><i class="fas fa-filter"></i> filters</span>
-            {% endif %}
-
+        {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids_exact or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
+          <hr style="margin-top:5px; margin-bottom:5px;">
+          
+          <ol class="breadcrumb" style='margin-bottom: 0;'>
             {% if selected_facets.citation_type %}
               {% for type in selected_facets.citation_type %}
               {% with type|create_facet_string:'citation_type' as encoded_type %}
@@ -172,7 +169,10 @@ $(document).ready(function() {
               {% endwith %}
               {% endfor %}
             {% endif %}
+
+            <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|remove_all_facets|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class='label label-danger'>remove all filters</span></a></li>
           </ol>
+        {% endif %}
       </div>
     </div>
   </div>

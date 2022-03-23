@@ -239,8 +239,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 {% endif %}
 
 <div class="row">
-  <div class="main col-sm-12 col-md-7">
-    <div class="panel panel-default">
+    <div class="panel panel-default" style='margin: 0 15px 20px 15px;'>
       <div class="panel-heading">
         <div class="row" style="padding-left: 15px">
           <strong style="font-size: 1.4em; color: #012E63">{{ citation.get_type_controlled_display }}</strong>{% if citation.subtype %}<strong>:</Strong><span style="font-size: 1.5em">&nbsp{{ citation.subtype.name }}</span>{% endif %}
@@ -268,699 +267,700 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% endwith %}
       </div>
       <div class="panel-body">
-        <span style="display:none;">
-           <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
-        </span>
-
-        <script>
-          //# sourceURL=copy.js
-          $(function() {
-            $(".topAuthorityLink").click(function() {
-              let copyTextarea = document.querySelector('.hiddenCitationLink');
-              // copyTextarea.focus();
-              copyTextarea.select();
-              document.execCommand("copy");
-              $(".topAuthorityLink").notify("URL of this record has been copied to your clipboard.", "default", {
-                clickToHide: true,
-                style: 'bootstrap',
-                position: 'top right',
-                gap: 5,
-              });
-            })
-          })
-
-          //# sourceURL=copy.js
-          $(function() {
-            $(".bottomAuthorityLink").click(function() {
-              let copyTextarea = document.querySelector('.hiddenCitationLink');
-              // copyTextarea.focus();
-              copyTextarea.select();
-              document.execCommand("copy");
-              $(".bottomAuthorityLink").notify("URL of this record has been copied to your clipboard.", "default", {
-                clickToHide: true,
-                style: 'bootstrap',
-                position: 'top right',
-                gap: 5,
-              });
-            })
-          })
-        </script>
-
-        <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
-          <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
-            {% for prop in properties_map %}
-              {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
-            {% endfor %}
-            {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
-              <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
-                  {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
-                    <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
-                  {% endif %}
-                  {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
-                    <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
-                  {% endif %}
-              </div>
-            {% endif %}
-            <div style="width: 0; height: 0; border-style: solid; border-width: 0 0 30px 30px; border-color: white white white #ccc; position: absolute; right: 26px; bottom: 0">
+        <div class="col-sm-12 col-md-7">
+          <span style="display:none;">
+            <abbr class="unapi-id" title="{{ citation.id }}">unapi</abbr>
+         </span>
+ 
+         <script>
+           //# sourceURL=copy.js
+           $(function() {
+             $(".topAuthorityLink").click(function() {
+               let copyTextarea = document.querySelector('.hiddenCitationLink');
+               // copyTextarea.focus();
+               copyTextarea.select();
+               document.execCommand("copy");
+               $(".topAuthorityLink").notify("URL of this record has been copied to your clipboard.", "default", {
+                 clickToHide: true,
+                 style: 'bootstrap',
+                 position: 'top right',
+                 gap: 5,
+               });
+             })
+           })
+ 
+           //# sourceURL=copy.js
+           $(function() {
+             $(".bottomAuthorityLink").click(function() {
+               let copyTextarea = document.querySelector('.hiddenCitationLink');
+               // copyTextarea.focus();
+               copyTextarea.select();
+               document.execCommand("copy");
+               $(".bottomAuthorityLink").notify("URL of this record has been copied to your clipboard.", "default", {
+                 clickToHide: true,
+                 style: 'bootstrap',
+                 position: 'top right',
+                 gap: 5,
+               });
+             })
+           })
+         </script>
+ 
+         <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
+           <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+             {% for prop in properties_map %}
+               {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+             {% endfor %}
+             {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+               <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
+                   {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+                     <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
+                   {% endif %}
+                   {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                     <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
+                   {% endif %}
+               </div>
+             {% endif %}
+             <div style="width: 0; height: 0; border-style: solid; border-width: 0 0 30px 30px; border-color: white white white #ccc; position: absolute; right: 26px; bottom: 0">
+             </div>
+           </div>
+           <img id="citationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
+           <span id="citationImageCaption" style="color: gray; text-align: center; display: none; font-size: .9em;">source: Google Books</span>
+         </div>
+ 
+         <div class="col-sm-12 col-md-12" id="citationImageAdjacent" style="padding: 0; padding-left: 15px; font-size: 1.1em">
+           <div class='col-sm-12 col-md-6' style='padding: 0;'>
+             {% if authors|length > 0 %}
+             <p>
+             {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
+             </p>
+             <hr style="margin: 10px 0">
+             {% endif %}
+ 
+             {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+               {% for prop in properties_map %}
+               {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
+               <br/>
+               {% endfor %}
+ 
+               {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+               <span>Volume: </span>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}
+               <br/>
+               {% endif %}
+ 
+               {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+               <span>Issue: </span> {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}
+               <br/>
+               {% endif %}
+ 
+               {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
+               <span>Pages: </span> {{ citation|get_public_page_string }}
+               <br/>
+               {% endif %}
+ 
+               <hr style="margin: 10px 0">
+             {% endif %}
+ 
+             {% if citation.linkeddata_public.all|length > 0 %}
+                 {% for entry in citation.linkeddata_public.all %}
+                   <span>{{ entry.type_controlled }}: </span><a href="{{ entry|linkeddata_for_display }}" taget="_blank"> {{ entry.universal_resource_name }}</a><br/>
+                 {% endfor %}
+             {% endif %}
+ 
+             {% if citation.attributes|length > 0 or citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language|length > 0 %}
+                 <hr style="margin: 10px 0">
+                 <div style="font-size: .9em;">
+                   {% for attribute in citation.attributes.all %}
+                     <span>{{ attribute.type_controlled.display_name }}: </span> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}
+                     <br>
+                   {% endfor %}
+ 
+                   {% if citation.edition_details|length > 0 %}
+                     <span>Edition Details: </span> {% if citation.edition_details %}{{ citation.edition_details|bleach_safe }}{% endif %}
+                     <br>
+                   {% endif %}
+ 
+                   {% if citation.physical_details|length > 0 %}
+                     <span>Physical Details: </span> {% if citation.physical_details %}{{ citation.physical_details|bleach_safe }}{% endif %}
+                     <br>
+                   {% endif %}
+ 
+                   {% if citation.extent %}
+                     <span>Extent: </span> {% if citation.extent %}{{ citation.extent|bleach_safe }}{% endif %}
+                     <br>
+                   {% endif %}
+ 
+                   {% if citation.language.all|length > 0 %}
+                     <span>Language: </span> {% for language in citation.language.all %}{{ language.name }}{% endfor %}
+                     <br>
+                   {% endif %}
+                 </div>
+                 <hr style="margin: 10px 0">
+             {% endif %}
+           </div>
+           <div class='col-sm-12 col-md-6'>
+             <div class="panel panel-default">
+               <div class="panel-heading-links panel-heading">
+                   <i class="fas fa-search"></i> Outside Links
+               </div>
+               <div class="panel-body panel-body-links">
+                 {% if user.profile.resolver_institution %}
+                   <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
+                   <!-- This tag displays an icon/link that points to the users' institution's
+                        link resolver. -->
+                   <span id="linkresolver" class="hidden-print">
+                       <script>
+                       $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
+                           {
+                               success: function(result) {
+                                       if (result.url.length > 0) {
+                                           var linkElem = '<a href="'+ result.url +'" target="_blank" class="text-warning">';
+                                           // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
+                                           if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
+                                           linkElem += '</a>';
+                                           $('#linkresolver').append(linkElem);
+                                           $('#linkresolver').append('<br>');
+                                       } else {
+                                           // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                           $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                                           $('#linkresolver').append('<br>');
+                                       }
+                               },
+                               error: function() {
+                                   // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
+                                   $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
+                               },
+                           });
+                       </script>
+                   </span>
+                 {% else %}
+                   <i class="fas fa-book-reader"></i> <a class="modal-link" data-toggle="modal" data-target="#linkResolverModal">Find this item through your library</a>
+                   <br>
+                 {% endif %}
+ 
+                 {% if "Medicine" in categories.0.authority.name %}
+                   <img src="https://cdn.ncbi.nlm.nih.gov/coreutils/nwds/img/favicons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/?term={{citation|get_title|bleach_safe}}">PubMed</a>
+                   <br>
+                 {% endif %}
+                 {% if "Air and space" in categories.0.authority.name %}
+                   <img src="https://ui.adsabs.harvard.edu/styles/img/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://ui.adsabs.harvard.edu/search/q=title%3A%22{{citation|get_title|bleach_safe}}%22&sort=date%20desc%2C%20bibcode%20desc&p_=0">Astrophysics Data System</a>
+                   <br>
+                 {% endif %}
+ 
+                 {% if citation.type_controlled == "BO" or citation.type_controlled == "CH"%}
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
+                   <br>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
+                   <br>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?tbm=bks&q={{citation|get_title|bleach_safe}}">Google Books</a>
+                   <br>
+                 {% endif %}
+                 {% if citation.type_controlled == "AR" or citation.type_controlled == "RE" or citation.type_controlled == "ES"%}
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
+                   <br>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
+                   <br>
+                   <img src="https://upload.wikimedia.org/wikipedia/sco/thumb/5/56/JSTOR_vector_logo.svg/1200px-JSTOR_vector_logo.svg.png" height="14px" width="11px"> <a target="_blank" href="https://www.jstor.org/action/doBasicSearch?Query={{citation|get_title|bleach_safe}}&so=rel">JSTOR</a>
+                   <br>
+                 {% endif %}
+ 
+               </div>
+             </div>
+           </div>
+         </div>
+         <div class="col-sm-12 col-md-12" style="padding: 0;">
+           <hr style="margin: 10px 0; display: none;" id="citatationImageBreak">
+ 
+           {% if concepts or time_periods or places or people or institutions %}
+             <div class="panel panel-default">
+               <div class="panel-body subject-tags" style="padding: 15px;">
+                 {% if concepts %}
+                   {% for concept in concepts %}
+                   {% if concept.authority %}
+                   <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                       <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
+                   </a>
+                   {% endif %}
+                   {% endfor %}
+                 {% endif %}
+                 {% if time_periods %}
+                   {% for time in time_periods %}
+                   {% if time.authority %}
+                   <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
+                       <span class="label label-times link-label">{{ time.authority.name }}</span>
+                   </a>
+                   {% endif %}
+                   {% endfor %}
+                 {% endif %}
+                 {% if places %}
+                   {% for place in places %}
+                   {% if place.authority %}
+                   <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
+                       <span class="label label-places link-label">{{ place.authority.name }}</span>
+                   </a>
+                   {% endif %}
+                   {% endfor %}
+                 {% endif %}
+                 {% if people %}
+                   {% for person in people %}
+                   {% if person.authority %}
+                   <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
+                       <span class="label label-people link-label">{{ person.authority.name }}</span>
+                   </a>
+                   {% endif %}
+                   {% endfor %}
+                 {% endif %}
+                 {% if institutions %}
+                   {% for institution in institutions %}
+                   {% if institution.authority %}
+                   <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
+                       <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
+                   </a>
+                   {% endif %}
+                   {% endfor %}
+                 {% endif %}
+               </div>
+             </div>
+           {% endif %}
+ 
+           {% if citation.abstract %}
+           <p class="itemAbstract" style="margin-bottom: 0"> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
+           <a class="readMore" style="cursor: pointer;">...More</a>
+           <hr style="margin: 10px 0">
+           {% endif %}
+ 
+           {% if citation.description %}
+           <p><span class="label label-default">Description</span> {{ citation.description|bleach_safe }}</p>
+           <hr style="margin: 10px 0">
+           {% endif %}
+ 
+           <!-- <div></div> -->
+           {% if related_citations_rb %}
+             <div class="panel panel-default">
+               <div class="panel-heading">
+                  <i class="fas fa-book"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Reviewed By
+               </div>
+               <div class="panel-body">
+                   {% for cc_rel in related_citations_rb %}
+                     {% with cc_rel.object as citation_object %}
+                       {% include "isisdata/citation_entry.html" %}
+                     {% endwith %}
+                   {% endfor %}
+               </div>
+             </div>
+           {% endif %}
+ 
+           <!-- Review of -->
+           {% if related_citations_ro or related_citations_inv_rb %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="fas fa-book"></i> Review Of
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_ro %}
+                 {% if cc_rel.subject.id == citation_id %}
+                   {% with cc_rel.object as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% else %}
+                   {% with cc_rel.subject as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% endif %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           <!-- Includes Chapter -->
+           {% if related_citations_ic %}
+             <div class="panel panel-default">
+               <div class="panel-heading">
+                 <i class="fas fa-book"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book-open"></i> Includes Chapters
+               </div>
+               <div class="panel-body">
+                   {% for cc_rel in related_citations_ic %}
+                     {% with cc_rel.object as citation_object %}
+                       {% include "isisdata/citation_entry.html" %}
+                     {% endwith %}
+                   {% endfor %}
+               </div>
+             </div>
+           {% endif %}
+ 
+           {% if related_citations_inv_ic %}
+           <div class="panel panel-default chapter-included">
+             <div class="panel-heading">
+               <i class="fas fa-book-open"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book"></i> Included in
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_inv_ic %}
+                 {% with cc_rel.subject as citation_object %}
+                   {% include "isisdata/citation_entry.html" %}
+                 {% endwith %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           <!-- Includes Series Article -->
+           {% if related_citations_isa %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Includes Series Articles
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_isa %}
+                   {% with cc_rel.object as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           {% if related_citations_inv_isa %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Included in
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_inv_isa %}
+                   {% with cc_rel.subject as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           <!-- Response to -->
+           {% if related_citations_re %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Response to
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_re %}
+                   {% with cc_rel.object as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           {% if related_citations_inv_re %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Has Response
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_inv_re %}
+                   {% with cc_rel.subject as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           <!-- Associated with -->
+           {% if related_citations_as %}
+           <div class="panel panel-default">
+             <div class="panel-heading">
+               <i class="far fa-file-alt"></i> <i class="fas fa-arrows-alt-h"></i> <i class="far fa-file-alt"></i> Associated with
+             </div>
+             <div class="panel-body">
+                 {% for cc_rel in related_citations_as %}
+                   {% if cc_rel.subject.id == citation.id %}
+                   {% with cc_rel.object as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                   {% else %}
+                   {% with cc_rel.subject as citation_object %}
+                     {% include "isisdata/citation_entry.html" %}
+                   {% endwith %}
+                   {% endif %}
+                 {% endfor %}
+             </div>
+           </div>
+           {% endif %}
+ 
+           <div class="panel panel-default">
+             <div class="panel-heading"><i class="fas fa-link"></i> Citation URI</div>
+             <div class="panel-body">
+               <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation.generate_uri }}</span> <i class="far fa-copy"></i></span>
+             </div>
+           </div>
+         </div>
+        </div>
+        <div class="col-sm-12 col-md-5">
+          <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
+            <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
+              <a id="bookshelf-tab" href="#bookshelf" class="btn tab-btn-default active" role="tab" data-toggle="tab">
+                <input type="radio" />Bookshelf
+              </a>
+              <a id="catalog-tab" href="#catalog" class="btn tab-btn-default" role="tab" data-toggle="tab">
+                <input type="radio" />Catalog
+              </a>
             </div>
           </div>
-          <img id="citationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
-          <span id="citationImageCaption" style="color: gray; text-align: center; display: none; font-size: .9em;">source: Google Books</span>
-        </div>
-
-        <div class="col-sm-12 col-md-12" id="citationImageAdjacent" style="padding: 0; padding-left: 15px; font-size: 1.1em">
-          <div class='col-sm-12 col-md-6' style='padding: 0;'>
-            {% if authors|length > 0 %}
-            <p>
-            {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
-            </p>
-            <hr style="margin: 10px 0">
-            {% endif %}
-
-            {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
-              {% for prop in properties_map %}
-              {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
-              <br/>
-              {% endfor %}
-
-              {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
-              <span>Volume: </span>{% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}
-              <br/>
-              {% endif %}
-
-              {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
-              <span>Issue: </span> {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}
-              <br/>
-              {% endif %}
-
-              {% if citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
-              <span>Pages: </span> {{ citation|get_public_page_string }}
-              <br/>
-              {% endif %}
-
-              <hr style="margin: 10px 0">
-            {% endif %}
-
-            {% if citation.linkeddata_public.all|length > 0 %}
-                {% for entry in citation.linkeddata_public.all %}
-                  <span>{{ entry.type_controlled }}: </span><a href="{{ entry|linkeddata_for_display }}" taget="_blank"> {{ entry.universal_resource_name }}</a><br/>
-                {% endfor %}
-            {% endif %}
-
-            {% if citation.attributes|length > 0 or citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language|length > 0 %}
-                <hr style="margin: 10px 0">
-                <div style="font-size: .9em;">
-                  {% for attribute in citation.attributes.all %}
-                    <span>{{ attribute.type_controlled.display_name }}: </span> {% if attribute.value_freeform %}{{ attribute.value_freeform }}{% else %}{{ attribute.value.display }}{% endif %}
-                    <br>
+      
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="bookshelf">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 style="margin: 0;">Similar Citations</h4>
+                </div>
+                <div class="panel-body">
+                  {% for citation in similar_citations %}
+                    <div class="{% if citation.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if citation.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+                      <p style="margin-bottom: 15px;">
+                        {% if citation.stub_record_status == 'SR' %}
+                          <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
+                        {% endif %}
+                        {% if citation.type == "Book" %}
+                          <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.type }}</span>
+                        {% elif citation.type == "Thesis" %}
+                          <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.type }}</span>
+                        {% elif citation.type == "Multimedia Object" %}
+                          <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.type }}</span>
+                        {% elif citation.type == "Chapter" %}
+                          <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.type }}</span>
+                        {% else %}
+                          <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type }}</span>
+                        {% endif %}
+      
+                        {% url 'citation' citation.id|get_pk as citation_url %}
+                        {% if citation.title == 'Title missing' and citation.complete_citation %}
+                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                          {{citation.complete_citation}}
+                        </a>
+                        {% else %}
+                          {% if citation.authors_exact %}
+                            {% for author in citation.authors_exact %}
+                              <span>{{ author }};</span>
+                            {% endfor %}
+                          {% endif %}
+                          {% if citation.publication_date %}
+                            ({{ citation.publication_date.0 }})
+                            <br>
+                            {% if citation.title %}
+                              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                {{ citation.title|bleach_safe }}
+                              </a>
+                            {% endif %}
+                          {% elif citation.publication_date.0 and not authors %}
+                            {% if citation.title %}
+                              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                {{ citation.title|bleach_safe }}
+                              </a>
+                            {% endif %}
+                            ({{ citation.publication_date.0 }})
+                          {% else %}
+                            {% if citation.title %}
+                              <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                {{ citation.title|bleach_safe }}
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                        {% endif %}
+                          <span class="visible-print-inline">({{ citation_url }})</span>
+      
+                          <!-- Zotero -->
+                          <span style="display:none;">
+                              <abbr class="unapi-id" title="{{ citation.id|get_pk }}">unapi</abbr>
+                          </span>
+      
+                      </p>
+                    </div>
+                  {% empty %}
+                      <h3>No results found . . . <i class="fas fa-child"></i></h3>
                   {% endfor %}
-
-                  {% if citation.edition_details|length > 0 %}
-                    <span>Edition Details: </span> {% if citation.edition_details %}{{ citation.edition_details|bleach_safe }}{% endif %}
-                    <br>
+      
+                </div>
+              </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="catalog">
+              <div class="row">
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if similar_objects.PR %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-relation panel-heading">
+                        <strong>Authors & Contributors</strong>
+                        {% if similar_objects.PR|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#authorModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.PR|slice:"6" %}
+                        {% if facet.authority %}
+                          <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                          <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-
-                  {% if citation.physical_details|length > 0 %}
-                    <span>Physical Details: </span> {% if citation.physical_details %}{{ citation.physical_details|bleach_safe }}{% endif %}
-                    <br>
+      
+                  {% if similar_objects.PH %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading panel-heading-relation">
+                        <strong>Journals</strong>
+                        {% if similar_objects.PH|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#journalModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.PH|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-
-                  {% if citation.extent %}
-                    <span>Extent: </span> {% if citation.extent %}{{ citation.extent|bleach_safe }}{% endif %}
-                    <br>
-                  {% endif %}
-
-                  {% if citation.language.all|length > 0 %}
-                    <span>Language: </span> {% for language in citation.language.all %}{{ language.name }}{% endfor %}
-                    <br>
+      
+                  {% if similar_objects.IH %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading panel-heading-relation">
+                        <strong>Publishers</strong>
+                        {% if similar_objects.IH|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#publisherModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.IH|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
                 </div>
-                <hr style="margin: 10px 0">
-            {% endif %}
-          </div>
-          <div class='col-sm-12 col-md-6'>
-            <div class="panel panel-default">
-              <div class="panel-heading-links panel-heading">
-                  <i class="fas fa-search"></i> Outside Links
-              </div>
-              <div class="panel-body panel-body-links">
-                {% if user.profile.resolver_institution %}
-                  <!-- OpenURL Link Resolver tags. http://ocoins.info/ -->
-                  <!-- This tag displays an icon/link that points to the users' institution's
-                       link resolver. -->
-                  <span id="linkresolver" class="hidden-print">
-                      <script>
-                      $.ajax("{% url 'linkresolver' citation_id=citation.id %}",
-                          {
-                              success: function(result) {
-                                      if (result.url.length > 0) {
-                                          var linkElem = '<a href="'+ result.url +'" target="_blank" class="text-warning">';
-                                          // Use the link_icon for the Resolver if possible; otherwise just use the link_text.
-                                          if (result.icon.length > 0) { linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; } else { linkElem += '<span class="h4">' + result.text + '</span>'; };
-                                          linkElem += '</a>';
-                                          $('#linkresolver').append(linkElem);
-                                          $('#linkresolver').append('<br>');
-                                      } else {
-                                          // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                          $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
-                                          $('#linkresolver').append('<br>');
-                                      }
-                              },
-                              error: function() {
-                                  // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
-                                  $('#linkresolver').append('<span class="Z3988" title="{{ citation|get_coins_from_citation }}"></span>');
-                              },
-                          });
-                      </script>
-                  </span>
-                {% else %}
-                  <i class="fas fa-book-reader"></i> <a class="modal-link" data-toggle="modal" data-target="#linkResolverModal">Find this item through your library</a>
-                  <br>
-                {% endif %}
-
-                {% if "Medicine" in categories.0.authority.name %}
-                  <img src="https://cdn.ncbi.nlm.nih.gov/coreutils/nwds/img/favicons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/?term={{citation|get_title|bleach_safe}}">PubMed</a>
-                  <br>
-                {% endif %}
-                {% if "Air and space" in categories.0.authority.name %}
-                  <img src="https://ui.adsabs.harvard.edu/styles/img/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://ui.adsabs.harvard.edu/search/q=title%3A%22{{citation|get_title|bleach_safe}}%22&sort=date%20desc%2C%20bibcode%20desc&p_=0">Astrophysics Data System</a>
-                  <br>
-                {% endif %}
-
-                {% if citation.type_controlled == "BO" or citation.type_controlled == "CH"%}
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
-                  <br>
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
-                  <br>
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?tbm=bks&q={{citation|get_title|bleach_safe}}">Google Books</a>
-                  <br>
-                {% endif %}
-                {% if citation.type_controlled == "AR" or citation.type_controlled == "RE" or citation.type_controlled == "ES"%}
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
-                  <br>
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
-                  <br>
-                  <img src="https://upload.wikimedia.org/wikipedia/sco/thumb/5/56/JSTOR_vector_logo.svg/1200px-JSTOR_vector_logo.svg.png" height="14px" width="11px"> <a target="_blank" href="https://www.jstor.org/action/doBasicSearch?Query={{citation|get_title|bleach_safe}}&so=rel">JSTOR</a>
-                  <br>
-                {% endif %}
-
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-12 col-md-12" style="padding: 0;">
-          <hr style="margin: 10px 0; display: none;" id="citatationImageBreak">
-
-          {% if concepts or time_periods or places or people or institutions %}
-            <div class="panel panel-default">
-              <div class="panel-body subject-tags" style="padding: 15px;">
-                {% if concepts %}
-                  {% for concept in concepts %}
-                  {% if concept.authority %}
-                  <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
-                      <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
-                  </a>
+      
+                <div class="col-sm-12 col-md-6" style="padding-left: 0;">
+                  {% if similar_objects.CO %}
+                    <div class="panel panel-primary facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Concepts</strong>
+                        {% if similar_objects.CO|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#subjectModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.CO|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
-                {% if time_periods %}
-                  {% for time in time_periods %}
-                  {% if time.authority %}
-                  <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
-                      <span class="label label-times link-label">{{ time.authority.name }}</span>
-                  </a>
+      
+                  {% if similar_objects.PE %}
+                    <div class="panel panel-primary facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>People</strong>
+                        {% if similar_objects.PE|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.PE|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
-                {% if places %}
-                  {% for place in places %}
-                  {% if place.authority %}
-                  <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
-                      <span class="label label-places link-label">{{ place.authority.name }}</span>
-                  </a>
+      
+                  {% if similar_objects.GE %}
+                    <div class="panel panel-primary facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Places</strong>
+                        {% if similar_objects.GE|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.GE|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
-                {% if people %}
-                  {% for person in people %}
-                  {% if person.authority %}
-                  <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
-                      <span class="label label-people link-label">{{ person.authority.name }}</span>
-                  </a>
+      
+                  {% if similar_objects.TI %}
+                    <div class="panel panel-primary facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Times</strong>
+                        {% if similar_objects.TI|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.TI|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
-                {% if institutions %}
-                  {% for institution in institutions %}
-                  {% if institution.authority %}
-                  <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
-                      <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
-                  </a>
+      
+                  {% if similar_objects.IN %}
+                    <div class="panel panel-primary facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Institutions </strong>
+                        {% if similar_objects.IN|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in similar_objects.IN|slice:"6" %}
+                        {% if facet.authority %}
+                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
                   {% endif %}
-                  {% endfor %}
-                {% endif %}
+                </div>
               </div>
-            </div>
-          {% endif %}
-
-          {% if citation.abstract %}
-          <p class="itemAbstract" style="margin-bottom: 0"> {{ citation.abstract|filter_abstract|bleach_safe }}</p>
-          <a class="readMore" style="cursor: pointer;">...More</a>
-          <hr style="margin: 10px 0">
-          {% endif %}
-
-          {% if citation.description %}
-          <p><span class="label label-default">Description</span> {{ citation.description|bleach_safe }}</p>
-          <hr style="margin: 10px 0">
-          {% endif %}
-
-          <!-- <div></div> -->
-          {% if related_citations_rb %}
-            <div class="panel panel-default">
-              <div class="panel-heading">
-                 <i class="fas fa-book"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Reviewed By
-              </div>
-              <div class="panel-body">
-                  {% for cc_rel in related_citations_rb %}
-                    {% with cc_rel.object as citation_object %}
-                      {% include "isisdata/citation_entry.html" %}
-                    {% endwith %}
-                  {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          <!-- Review of -->
-          {% if related_citations_ro or related_citations_inv_rb %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="fas fa-book"></i> Review Of
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_ro %}
-                {% if cc_rel.subject.id == citation_id %}
-                  {% with cc_rel.object as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% else %}
-                  {% with cc_rel.subject as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% endif %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Includes Chapter -->
-          {% if related_citations_ic %}
-            <div class="panel panel-default">
-              <div class="panel-heading">
-                <i class="fas fa-book"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book-open"></i> Includes Chapters
-              </div>
-              <div class="panel-body">
-                  {% for cc_rel in related_citations_ic %}
-                    {% with cc_rel.object as citation_object %}
-                      {% include "isisdata/citation_entry.html" %}
-                    {% endwith %}
-                  {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-
-          {% if related_citations_inv_ic %}
-          <div class="panel panel-default chapter-included">
-            <div class="panel-heading">
-              <i class="fas fa-book-open"></i> <i class="fas fa-arrows-alt-h"></i> <i class="fas fa-book"></i> Included in
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_inv_ic %}
-                {% with cc_rel.subject as citation_object %}
-                  {% include "isisdata/citation_entry.html" %}
-                {% endwith %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Includes Series Article -->
-          {% if related_citations_isa %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Includes Series Articles
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_isa %}
-                  {% with cc_rel.object as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          {% if related_citations_inv_isa %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Included in
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_inv_isa %}
-                  {% with cc_rel.subject as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Response to -->
-          {% if related_citations_re %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Response to
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_re %}
-                  {% with cc_rel.object as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          {% if related_citations_inv_re %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrow-right"></i> <i class="far fa-file-alt"></i> Has Response
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_inv_re %}
-                  {% with cc_rel.subject as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Associated with -->
-          {% if related_citations_as %}
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <i class="far fa-file-alt"></i> <i class="fas fa-arrows-alt-h"></i> <i class="far fa-file-alt"></i> Associated with
-            </div>
-            <div class="panel-body">
-                {% for cc_rel in related_citations_as %}
-                  {% if cc_rel.subject.id == citation.id %}
-                  {% with cc_rel.object as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                  {% else %}
-                  {% with cc_rel.subject as citation_object %}
-                    {% include "isisdata/citation_entry.html" %}
-                  {% endwith %}
-                  {% endif %}
-                {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <div class="panel panel-default">
-            <div class="panel-heading"><i class="fas fa-link"></i> Citation URI</div>
-            <div class="panel-body">
-              <span class="authorityLink bottomAuthorityLink" title="Click to copy"><span class="bottomHiddenCitationLink">{{ citation.generate_uri }}</span> <i class="far fa-copy"></i></span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="col-sm-12 col-md-5">
-    <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
-      <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
-        <a id="bookshelf-tab" href="#bookshelf" class="btn tab-btn-default active" role="tab" data-toggle="tab">
-          <input type="radio" />Bookshelf
-        </a>
-        <a id="catalog-tab" href="#catalog" class="btn tab-btn-default" role="tab" data-toggle="tab">
-          <input type="radio" />Catalog
-        </a>
-      </div>
-    </div>
-
-    <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="bookshelf">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 style="margin: 0;">Similar Citations</h4>
-          </div>
-          <div class="panel-body">
-            {% for citation in similar_citations %}
-              <div class="{% if citation.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if citation.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
-                <p style="margin-bottom: 15px;">
-                  {% if citation.stub_record_status == 'SR' %}
-                    <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
-                  {% endif %}
-                  {% if citation.type == "Book" %}
-                    <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.type }}</span>
-                  {% elif citation.type == "Thesis" %}
-                    <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.type }}</span>
-                  {% elif citation.type == "Multimedia Object" %}
-                    <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.type }}</span>
-                  {% elif citation.type == "Chapter" %}
-                    <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.type }}</span>
-                  {% else %}
-                    <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type }}</span>
-                  {% endif %}
-
-                  {% url 'citation' citation.id|get_pk as citation_url %}
-                  {% if citation.title == 'Title missing' and citation.complete_citation %}
-                  <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                    {{citation.complete_citation}}
-                  </a>
-                  {% else %}
-                    {% if citation.authors_exact %}
-                      {% for author in citation.authors_exact %}
-                        <span>{{ author }};</span>
-                      {% endfor %}
-                    {% endif %}
-                    {% if citation.publication_date %}
-                      ({{ citation.publication_date.0 }})
-                      <br>
-                      {% if citation.title %}
-                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                          {{ citation.title|bleach_safe }}
-                        </a>
-                      {% endif %}
-                    {% elif citation.publication_date.0 and not authors %}
-                      {% if citation.title %}
-                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                          {{ citation.title|bleach_safe }}
-                        </a>
-                      {% endif %}
-                      ({{ citation.publication_date.0 }})
-                    {% else %}
-                      {% if citation.title %}
-                        <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
-                          {{ citation.title|bleach_safe }}
-                        </a>
-                      {% endif %}
-                    {% endif %}
-                  {% endif %}
-                    <span class="visible-print-inline">({{ citation_url }})</span>
-
-                    <!-- Zotero -->
-                    <span style="display:none;">
-                        <abbr class="unapi-id" title="{{ citation.id|get_pk }}">unapi</abbr>
-                    </span>
-
-                </p>
-              </div>
-            {% empty %}
-                <h3>No results found . . . <i class="fas fa-child"></i></h3>
-            {% endfor %}
-
-          </div>
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-pane" id="catalog">
-        <div class="row">
-          <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-            {% if similar_objects.PR %}
-              <div class="panel panel-default facet-box">
-                <div class="panel-heading-relation panel-heading">
-                  <strong>Authors & Contributors</strong>
-                  {% if similar_objects.PR|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#authorModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.PR|slice:"6" %}
-                  {% if facet.authority %}
-                    <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                    <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.PH %}
-              <div class="panel panel-default facet-box">
-                <div class="panel-heading panel-heading-relation">
-                  <strong>Journals</strong>
-                  {% if similar_objects.PH|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#journalModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.PH|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.IH %}
-              <div class="panel panel-default facet-box">
-                <div class="panel-heading panel-heading-relation">
-                  <strong>Publishers</strong>
-                  {% if similar_objects.IH|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#publisherModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.IH|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-          </div>
-
-          <div class="col-sm-12 col-md-6" style="padding-left: 0;">
-            {% if similar_objects.CO %}
-              <div class="panel panel-primary facet-box">
-                <div class="panel-heading-subjects panel-heading">
-                  <strong>Concepts</strong>
-                  {% if similar_objects.CO|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#subjectModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.CO|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.PE %}
-              <div class="panel panel-primary facet-box">
-                <div class="panel-heading-subjects panel-heading">
-                  <strong>People</strong>
-                  {% if similar_objects.PE|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.PE|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.GE %}
-              <div class="panel panel-primary facet-box">
-                <div class="panel-heading-subjects panel-heading">
-                  <strong>Places</strong>
-                  {% if similar_objects.GE|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.GE|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.TI %}
-              <div class="panel panel-primary facet-box">
-                <div class="panel-heading-subjects panel-heading">
-                  <strong>Times</strong>
-                  {% if similar_objects.TI|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.TI|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-
-            {% if similar_objects.IN %}
-              <div class="panel panel-primary facet-box">
-                <div class="panel-heading-subjects panel-heading">
-                  <strong>Institutions </strong>
-                  {% if similar_objects.IN|length > 6 %}
-                  <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style="float:right">
-                    More <i class="far fa-caret-square-down"></i>
-                  </button>
-                  {% endif %}
-                </div>
-                <div class="panel-body">
-                  {% for facet in similar_objects.IN|slice:"6" %}
-                  {% if facet.authority %}
-                  <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                  <br>
-                  {% endif %}
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- facet modals -->

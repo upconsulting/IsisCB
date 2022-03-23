@@ -63,7 +63,7 @@
                   {% for type in selected_facets.citation_type %}
                   {% with type|create_facet_string:'citation_type' as encoded_type %}
                   <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i> {{ type }}</a>
+                    <a href="{{ request.get_full_path|remove_facet:encoded_type|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ type }}
                   </div>
                   {% endwith %}
                   {% endfor %}
@@ -72,7 +72,7 @@
                   {% if type.0 %}
                   {% if "citation_type" not in selected_facets.keys or type.0 not in selected_facets.citation_type %}
                   <div class="col-md-12">
-                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i> {{ type.0 }}</a> ({{ type.1 }})
+                    <a title="Add Document Type facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_type:{{ type.0|urlencode }}"><i class="far fa-square"></i></a> {{ type.0 }} ({{ type.1 }})
                   </div>
                   {% endif %}
                   {% endif %}
@@ -99,7 +99,7 @@
                   {% for language in selected_facets.citation_language %}
                   {% with language|create_facet_string:'citation_language' as encoded_language %}
                   <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i> {{ language }}</a>
+                    <a href="{{ request.get_full_path|remove_facet:encoded_language|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ language }}
                   </div>
                   {% endwith %}
                   {% endfor %}
@@ -108,7 +108,7 @@
                   {% if language.0 %}
                   {% if "citation_language" not in selected_facets.keys or language.0 not in selected_facets.citation_language %}
                   <div class="col-md-12">
-                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i> {{ language.0 }}</a> ({{ language.1 }})
+                    <a title="Add Document Language facet" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_language:{{ language.0|urlencode }}"><i class="far fa-square"></i></a> {{ language.0 }} ({{ language.1 }})
                   </div>
                   {% endif %}
                   {% endif %}

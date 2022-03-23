@@ -175,6 +175,8 @@ def authority_catalog(request, authority_id):
     publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
     subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
 
+    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+
     # the following count was used before, but it seems to be off
     #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
     #                                                   .values('citation_id').distinct('citation_id')\
@@ -283,6 +285,7 @@ def authority_catalog(request, authority_id):
     context = {
         'authority_id': authority_id,
         'authority': authority,
+        'display_type': display_type,
         'related_citations_count': related_citations_count,
         'related_citations_author': related_citations_author,
         'related_citations_author_count': related_citations_author_count,
