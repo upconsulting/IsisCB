@@ -50,6 +50,7 @@ from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
+from isisdata.twitter_methods import get_featured_tweet
 
 from unidecode import unidecode
 import datetime
@@ -1462,19 +1463,19 @@ def home(request):
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
-        featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
+        featured_citation = Citation.objects.filter(pk=featured_citation.id)
     else:
         #set default featured citation in case no featured authorities have been selected
-        featured_citation = get_object_or_404(Citation, pk=settings.FEATURED_CITATION_ID)
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID)
 
-    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
     else:
         #set default featured authorities in case no featured authorities have been selected
-        featured_authority = get_object_or_404(Authority, pk=settings.FEATURED_AUTHORITY_ID)
+        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID)
 
     featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
 
@@ -1488,33 +1489,7 @@ def home(request):
         wikiIntro = ''
 
     #Get featured tweet
-    recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
-    twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
-    tweet_url = settings.TWITTER_API_TWEET_PATH
-
-    with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
-
-        recent_tweets = resp.json()
-        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
-
-    with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
-
-        recent_tweet = resp.json()
-        recent_tweet_text = recent_tweet['data']['text']
-        recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
-
-        recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
-        URL_REGEX = re.compile(r'''((?:https://).{15})''')
-        recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
-
-        if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
-            recent_tweet_image = recent_tweet['includes']['media'][0]['url']
-        else:
-            recent_tweet_image = ''
+    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 

@@ -2622,8 +2622,6 @@ def featured_authorities(request):
         form.fields['filters'].initial = filter_params_raw
 
         if form.is_valid():
-            print(request)
-            print(request.POST)
             if request.POST.get('update'):
                 # add new or update the dates of the featured authorities
                 start_date_str = request.POST.getlist('start_date')[0]
@@ -2635,7 +2633,7 @@ def featured_authorities(request):
                     featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
                     featured_authority_data.save()
             else:
-                # remove the currently selected authorities from the list of featured authorities
+                # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
                 authority_ids = [authority.id for authority in queryset]
                 FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
     else:       
