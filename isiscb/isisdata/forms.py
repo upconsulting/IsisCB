@@ -41,8 +41,6 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
 
-    # &excluded_facets=citation_type:Review&facet_operators=type:or
-
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
         self.excluded_facets = kwargs.get('data', {}).getlist('excluded_facets', [])
@@ -255,9 +253,6 @@ class UserRegistrationForm(SignupForm):
             return username
 
         raise forms.ValidationError(u'Username "%s" is already in use.' % username)
-
-
-
 
 class UserProfileForm(forms.Form):
     email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))

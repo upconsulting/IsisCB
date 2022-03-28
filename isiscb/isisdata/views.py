@@ -1716,3 +1716,61 @@ def user_profile(request, username):
     else:
         template = 'isisdata/userprofile.html'
     return render(request, template, context)
+
+def subject_explorer(request):
+    context = {}
+
+    if request.method == 'POST':
+
+        node_ids = set()
+        nodes = []
+        links = []
+        subjects = json.loads(request.body)['subjects']
+
+        for subject in subjects:
+            node_ids.add(subject) #add the CBA id of the selected subjects to node_ids
+
+            sqs =SearchQuerySet().models(Citation).facet('subject_ids', size=50)
+
+            word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=subject).filter_or(contributor_ids=subject) \
+                    .filter_or(editor_ids=subject).filter_or(subject_ids=subject).filter_or(institution_ids=subject) \
+                    .filter_or(category_ids=subject).filter_or(advisor_ids=subject).filter_or(translator_ids=subject) \
+                    .filter_or(publisher_ids=subject).filter_or(school_ids=subject).filter_or(meeting_ids=subject) \
+                    .filter_or(periodical_ids=subject).filter_or(book_series_ids=subject).filter_or(time_period_ids=subject) \
+                    .filter_or(geographic_ids=subject).filter_or(about_person_ids=subject).filter_or(other_person_ids=subject)
+
+            #add subjects to list of nodes
+            subject_ids_facets = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+            for subject_ids_facet in subject_ids_facets:
+                node_ids.add(subject_ids_facet[0])
+            #remove selected authority from facet results
+            subject_ids = [x for x in subject_ids_facets if x[0].upper() != subject.upper()]
+
+            #create links between selected authority and its related subjects
+            if subject_ids:
+                for subject_id in subject_ids:
+                    link = {}
+                    link['source'] = subject
+                    link['target'] = subject_id[0]
+                    link['value'] = subject_id[1]
+                    links.append(link)
+
+        authorities = Authority.objects.filter(pk__in=list(node_ids)).values('id', 'name', 'type_controlled')
+        if authorities:
+            for authority in authorities:
+                node = {}
+                node['id'] = authority['id']
+                node['name'] = authority['name']
+                node['type'] = authority['type_controlled']
+                node['selected'] = True if authority['id'] in subjects else False
+                nodes.append(node)
+
+        context = {
+            'nodes': json.dumps(nodes),
+            'links': json.dumps(links),
+            'subjects': subjects,
+        }
+
+        return JsonResponse(context)
+
+    return render(request, 'isisdata/subject_explorer.html', context)

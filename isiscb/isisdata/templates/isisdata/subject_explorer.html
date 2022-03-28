@@ -1,0 +1,619 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+<style>
+    #subject-list-group > li, #category-list-group > li {
+        padding: 5px 15px;
+    }
+
+    #abstract_panel div.panel-heading {
+        padding: 1px 15px;
+    }
+    #abstract_panel div.panel-body {
+        padding: 5px;
+    }
+
+    .node circle {
+        cursor: pointer;
+        stroke: #3182bd;
+        stroke-width: 1.5px;
+    }
+    
+    .node text {
+        font: 10px sans-serif;
+        pointer-events: none;
+        text-anchor: middle;
+    }
+    
+    line.link {
+        fill: none;
+        stroke: #9ecae1;
+        stroke-width: 1.5px;
+    }
+
+</style>
+
+{% block content %}
+    <div>
+        <div class='col-sm-12 col-md-3' style="padding: 0;">
+            <div id="addSubjects">
+                <p style='height: 100%;'>
+                    <div class="input-group" id="subjectSearch" style='height: 100%;'>
+                        <span class="input-group-btn">
+                            <span class="button-checkbox">
+                                <button type="button" class="btn btn-default" id="forceSearch" title="Force search" style="height:3.8em" data-color="primary">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                            <span class="button-checkbox">
+                                <button type="button" class="btn" data-color="primary">C</button>
+                                <input id="filterConcepts" type="checkbox" class="hidden" />
+                            </span>
+                            <span class="button-checkbox">
+                                <button type="button" class="btn" data-color="primary">P</button>
+                                <input id="filterPersons" type="checkbox" class="hidden" />
+                            </span>
+                            <span class="button-checkbox">
+                                <button type="button" class="btn" data-color="primary">I</button>
+                                <input id="filterInstitutions" type="checkbox" class="hidden" />
+                            </span>
+                            <span class="button-checkbox">
+                                <button type="button" class="btn" data-color="primary">G</button>
+                                <input id="filterGeoTerms" type="checkbox" class="hidden" />
+                            </span>
+                            <span class="button-checkbox">
+                                <button type="button" class="btn" data-color="primary">T</button>
+                                <input id="filterTimePeriods" type="checkbox" class="hidden" />
+                            </span>
+                            <span>
+                                <button id="filterAll" type="button" class="btn btn-default" style="line-height:240%; height: 3.8em;">All</button>
+                            </span>
+                        </span>
+                    </div>
+                </p>
+
+                <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.8em">
+                </input>
+
+                <ul class="list-group" id="subjectSearchResultsContainer">
+                </ul>
+            </div>
+        </div>
+        <div class='col-sm-12 col-md-7' id="graphColumn" style="padding: 0;">
+            <svg id="graphContainer" height="1000" width="822" viewBox="0 0 1000 822">
+            </svg>
+        </div>
+        <div class='col-sm-12 col-md-2' id="legendColumn" style="padding: 0;">
+            <div id="selectedTermsContainer" style="border: 2px solid #555; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
+                <h5 style="margin-top: 0;">Selected Terms<a class="float-right" href='javascript:;' onclick='clearSubjects();' style="margin-left: 30px; text-decoration: none;"><span class="label label-danger">Clear All</span></a></h5>
+                <hr style="margin: 5px 0">
+                <ul id="selectedLegend" width="100%" height="1" style="list-style-type: none; padding: 0; margin: 0">
+                </ul>
+            </div>
+            <div id="legendContainer">
+                <svg id="typeLegend" width="100%"></svg>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <script>
+        var subjects = [];
+        var INITIAL_MAX_RESULTS = 10;
+        var max_results = INITIAL_MAX_RESULTS;
+        var types = [];
+
+        var searchTimerSubjects = 0;
+        function triggerSearchSubjects(force) {
+            if (searchTimerSubjects) {
+                clearTimeout(searchTimerSubjects);
+            }
+
+            var query = $('#subjectSearchQuery').val();
+            searchTimerSubjects = setTimeout(function() {
+            $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+                success: function(result) {
+                    var resultsContainer = $('#subjectSearchResultsContainer');
+                    resultsContainer.empty();
+                    result.results.forEach(function(r) {
+                    var newLi = $("<li></li>");
+                    newLi.addClass("list-group-item");
+                    newLi.attr('data-acrelation-id', r.name);
+                    var publicLink = $('<a></a>');
+                    publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+                    publicLink.attr('target', "_blank");
+                    publicLink.html(r.name + ' (' + r.citation_count + ')' );
+                    newLi.append(publicLink);
+                    newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+                    resultsContainer.append(newLi);
+
+                    var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
+                    addBtn.append('<i class="fas fa-broom" aria-hidden="true" style="margin-right:10px;"></i>');
+                    addBtn.click(addConcept);
+                    newLi.prepend(addBtn);
+                    });
+
+                    if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+                    var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+                    resultsContainer.append(msg);
+                    } else if (result.results.length == 0 && !force && query.length < 3) {
+                    var msg = $('<p>Your query was too short. </p>');
+                    var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
+                    forceLink.click(function() {
+                        triggerSearchSubjects(true);
+                    });
+                    msg.append(forceLink);
+                    msg.append(" to force the search.");
+                    resultsContainer.append(msg);
+                    }
+
+                    if (result.results.length == max_results) {
+                    var load_more = `
+                        <li class="list-group-item search-result">
+                        <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+                        </li>
+                    `;
+                    resultsContainer.append(load_more);
+                    $('#load-more-subjects').click(function() {
+                        max_results += 10;
+                        triggerSearchSubjects(force);
+                    });
+                    }
+                }
+                });
+            }, 500);
+        }
+
+        // checkbox settings
+        var settings = {
+            on: {
+                icon: 'glyphicon glyphicon-check'
+            },
+            off: {
+                icon: 'glyphicon glyphicon-unchecked'
+            }
+        };
+
+        $(document).ready(function() {
+
+            $("#forceSearch").click(function() {
+            triggerSearchSubjects(true);
+            });
+
+            $('#subjectSearchQuery').on('keyup', function() {
+            max_results = INITIAL_MAX_RESULTS;
+            triggerSearchSubjects(false);
+            });
+
+            // add checkbox search handlers
+            $("#filterConcepts").change(function() {
+            filterType("CO", $("#filterConcepts"));
+            });
+            $("#filterPersons").change(function() {
+            filterType("PE", $("#filterPersons"));
+            });
+            $("#filterInstitutions").change(function() {
+            filterType("IN", $("#filterInstitutions"));
+            });
+            $("#filterGeoTerms").change(function() {
+            filterType("GE", $("#filterGeoTerms"));
+            });
+            $("#filterTimePeriods").change(function() {
+            filterType("TI", $("#filterTimePeriods"));
+            });
+            $("#filterAll").click(function() {
+            $('.button-checkbox').each(function () {
+                var checkbox = $(this).find('input:checkbox');
+                checkbox.attr('checked', false);
+                updateDisplay(checkbox);
+            });
+            types = []
+            triggerSearchSubjects(false);
+            });
+
+            // checkbox styling
+            $('.button-checkbox').each(function () {
+                    // Settings
+                    var $widget = $(this),
+                        $button = $widget.find('button'),
+                        $checkbox = $widget.find('input:checkbox'),
+                        color = $button.data('color')
+
+
+                    // Event Handlers
+                    $button.on('click', function () {
+                        $checkbox.prop('checked', !$checkbox.is(':checked'));
+                        $checkbox.triggerHandler('change');
+                        updateDisplay($checkbox);
+                    });
+                    $checkbox.on('change', function () {
+                        updateDisplay($checkbox);
+                    });
+
+                    // Initialization
+                    function init() {
+
+                        updateDisplay($checkbox);
+
+                        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                        // Inject the icon if applicable
+                        if ($button.find('.state-icon').length == 0) {
+                            $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                        }
+                        }
+                    }
+                    init();
+                });
+        });
+
+        // checkbox update display
+        function updateDisplay($checkbox) {
+            var isChecked = $checkbox.is(':checked');
+            var $button = $checkbox.siblings('button')
+            var color = $button.data('color');
+
+            // Set the button's state
+            $button.data('state', (isChecked) ? "on" : "off");
+
+            if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+                // Set the button's icon
+                $button.find('.state-icon')
+                    .removeClass()
+                    .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+            }
+
+            // Update the button's color
+            if (isChecked) {
+                $button
+                    .removeClass('btn-default')
+                    .addClass('btn-' + color + ' active');
+            }
+            else {
+                $button
+                    .removeClass('btn-' + color + ' active')
+                    .addClass('btn-default');
+            }
+        }
+
+        function filterType(type, element) {
+            if (element.is(':checked')) {
+            types.push(type);
+            } else {
+            var typeIndex = types.indexOf(type);
+            if (typeIndex > -1) {
+                types.splice(typeIndex, 1);
+            }
+            }
+            triggerSearchSubjects(false);
+        }
+
+        function addConcept(event) {
+            let link = event.target.closest('a');
+            let acRelId = $(link).data('id');
+            subjects.push(acRelId)
+            let payload = {
+                'subjects': subjects
+            };
+
+            getData(payload);
+        }
+
+        function explodeConcept(subjects) {
+            let payload = {
+                "subjects": subjects
+            };
+
+            getData(payload);
+        }
+
+        function getData(payload) {
+            const csrftoken = getCookie('csrftoken');
+
+            async function postData(url='', data = {}) {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  mode: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                  },
+                  body: JSON.stringify(data)
+                });
+                return response.json();
+            }
+
+            postData("{% url "subject_explorer"  %}", payload)
+                .then(data => {
+
+                    nodes = JSON.parse(data.nodes);
+                    links = JSON.parse(data.links);
+                    subjects = data.subjects;
+                    
+                    forceGraph(nodes, links, subjects);
+
+                });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function clearSubjects() {
+            nodes = [];
+            links = [];
+            subjects = [];
+
+            forceGraph(nodes, links, subjects);
+        }
+
+        function removeChildren(elem) {
+            let child = elem.lastElementChild; 
+            while (child) {
+                elem.removeChild(child);
+                child = elem.lastElementChild;
+            }
+        }
+
+        // D3 network graph generator
+        // Released under the GNU General Public License, version 3.
+        // https://bl.ocks.org/mbostock/4062045
+
+        function forceGraph(nodes, links, subjects) {
+            const labelHeight = 16;
+
+            const colorScale = {
+                "CO": "#1e6091",
+                "TI": "#52b69a",
+                "GE": "#168aad",
+                "PE": "#99d98c",
+                "IN": "#34a0a4",
+                "CT": "#184e77",
+                "SE": "#d9ed92",
+                "PU": "#1a759f"
+            }
+
+            const fontColorScale = {
+                "CO": "#fff",
+                "TI": "#fff",
+                "GE": "#fff",
+                "PE": "#fff",
+                "IN": "#fff",
+                "CT": "#fff",
+                "SE": "#fff",
+                "PU": "#fff"
+            }
+
+            const typeMap = {
+                "CO": "Concept",
+                "TI": "Time Period",
+                "GE": "Place",
+                "PE": "Person",
+                "IN": "Institution",
+                "CT": "Category",
+                "SE": "Journal",
+                "PU": "Publisher"
+            }
+
+            let typesPresent = [];
+            nodes.map(node => {
+                if (typesPresent.indexOf(node.type) < 0){
+                    typesPresent.push(node.type);
+                }
+            })
+
+            let subjectNodes = [];
+
+            subjects.map(subject => {
+                subjectNodes.push(nodes.find(node => node.id === subject));
+            });
+
+            let selectedLegend = document.getElementById("selectedLegend");
+            removeChildren(selectedLegend);
+            let tooltipContainer = document.getElementsByClassName("tooltip");
+            if (tooltipContainer.length){
+                for (tooltip of tooltipContainer) {
+                    tooltip.remove();
+                }
+            }
+
+            subjectNodes.map(subject => {
+                let li = document.createElement("li");
+                let dot = document.createElement("div");
+                dot.style.backgroundColor = colorScale[subject.type];
+                dot.style.width = "17px";
+                dot.style.height = "17px";
+                dot.style.border = "3px solid gold";
+                dot.style.borderRadius = "50%";
+                dot.style.display = "inline-block";
+                dot.style.verticalAlign = "middle";
+                dot.style.marginRight = "5px";
+                li.appendChild(dot);
+                let span = document.createElement("span");
+                span.appendChild(document.createTextNode(subject.name));
+                span.setAttribute("class", "label label-default");
+                span.style.whiteSpace = "nowrap";
+                span.style.overflow = "hidden";
+                span.style.textOverflow = "ellipsis";
+                span.style.verticalAlign = "middle";
+                span.style.maxWidth = "178px";
+                span.style.display = "inline-block";
+                li.appendChild(span);
+                selectedLegend.appendChild(li);
+            })
+
+            let typeLegend = d3.select("#typeLegend")
+                .attr("height", ((typesPresent.length - 1) * 25 + 40));
+            typeLegend.selectAll("*").remove();
+
+            d3.select("#legendContainer")
+                .style("border-width", "0px")
+
+            if (typesPresent.length) {
+                d3.select("#legendContainer")
+                    .style("border", "2px solid #555")
+                    .style("border-radius", "5px")
+
+                typeLegend.selectAll("legendDots")
+                    .data(typesPresent)
+                    .enter()
+                    .append("circle")
+                        .attr("cx", 20)
+                        .attr("cy", function(d,i){ return 20 + i*25})
+                        .attr("r", 7)
+                        .style("fill", function(d){ return colorScale[d]})
+
+                typeLegend.selectAll("legendLabels")
+                    .data(typesPresent)
+                    .enter()
+                    .append("text")
+                        .attr("x", 35)
+                        .attr("y", function(d,i){ return 20 + i*25})
+                        .style("fill", "#000")
+                        .text(function(d){ return typeMap[d]})
+                        .attr("text-anchor", "left")
+                        .style("alignment-baseline", "middle")
+            }
+
+            linkValues = [];
+            links.map(link => {
+                if (linkValues.indexOf(link.value) == -1) {
+                    linkValues.push(link.value);
+                }
+            });
+            
+            //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link strength
+            let linkForceScale = d3.scaleLinear()
+                .domain([Math.min(...linkValues), Math.max(...linkValues)])
+                .range([.1, .4]);
+            
+            //takes the link value (number of citations connected to both nodes of the link) and scales it to the range specified to serve as the link thickness
+            let linkStrokeWidthScale = d3.scaleLinear()
+                .domain([Math.min(...linkValues), Math.max(...linkValues)])
+                .range([1,5])
+
+            var width = 822;
+            var height = 600;
+
+            var svg = d3.select("#graphContainer");
+            svg.selectAll("*").remove();
+        
+            var simulation = d3.forceSimulation()
+                .force("link", d3.forceLink().strength(function(link){ return linkForceScale(link.value) }).id(function(d) { return d.id; }))
+                .force("charge", d3.forceManyBody(-300))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+        
+            var link = svg.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("stroke", "#999")
+                .attr("stroke-width", function(d) { return linkStrokeWidthScale(d.value); });
+        
+            var tooltip = d3.select("#graphColumn").append("div")
+                .attr("class", "tooltip")			
+                .style("opacity", 0)
+                .style("border", "2px solid #B7337A")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+                .style("right", "20px")		
+                .style("top", "0px")
+                .style("background-color", "#fff")
+                .style("color", "#000");
+        
+            var node = svg.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(nodes)
+                .enter().append("circle")
+                .attr("r", 8)
+                .attr("fill", function(d) { return colorScale[d.type]; })
+                .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                .attr("stroke", "gold")
+                .style("opacity", .9)
+                .on("mouseover", function(d) {
+                    d3.selectAll("circle")
+                        .attr("stroke-width", function(d){ return d.selected ? "4px" : "0"})
+                        .attr("stroke", "gold");	
+                    d3.select(this).style("cursor", "cell")
+                        .attr("stroke-width", "4px")
+                        .attr("stroke", "#B7337A");
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", 0);
+                    tooltip.transition()		
+                        .duration(200)		
+                        .style("opacity", 1);		
+                    tooltip.html(typeMap[d.type] + "<br><a href='https://data.isiscb.org/isis/authority/" + d.id + "' target='_blank'>" + d.name + "</a>");		
+                    })					
+                .on("mouseout", function(d) {	
+                    d3.select(this).style("cursor", "default")	
+                })
+                .on("click", function(d){
+                    subjects.push(d.id);
+                    explodeConcept(subjects);
+                })
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+        
+            simulation
+                .nodes(nodes)
+                .on("tick", ticked);
+        
+            simulation.force("link")
+                .links(links);
+        
+            function ticked() {
+                link
+                    .attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+        
+                node
+                    .attr("cx", function(d) { return d.x; })
+                    .attr("cy", function(d) { return d.y; });
+            }
+        
+            function dragstarted(d) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+            }
+        
+            function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+            }
+        
+            function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+            }
+        }
+
+    </script>
+{% endblock %}
