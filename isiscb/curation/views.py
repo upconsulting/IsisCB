@@ -2616,14 +2616,12 @@ def featured_authorities(request):
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
-    if request.GET.get('confirmed', False):
+    if request.POST:
         # The user has selected the desired configuration settings.
         form = FeaturedAuthorityForm(request.POST)
         form.fields['filters'].initial = filter_params_raw
 
         if form.is_valid():
-            print(request)
-            print(request.POST)
             if request.POST.get('update'):
                 # add new or update the dates of the featured authorities
                 start_date_str = request.POST.getlist('start_date')[0]
