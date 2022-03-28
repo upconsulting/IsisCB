@@ -18,23 +18,36 @@
         $.ajax({
           url: "{% url 'authority_map_data' authority.id %}",
           success: function(jsonData) {
+            let map_data = jsonData.map_data;
+            let map_data_max = Math.max(...map_data);
+            colorValues = map_data.map(value => {
+              return value/map_data_max;
+            })
+
+            console.log(colorValues);
+            console.log(jsonData.countries);
+
             var data = [{
                 type: 'choropleth',
                 locations: jsonData['countries'],
-                z: jsonData['map_data'],
+                z: colorValues,
                 hovertemplate: "%{text}",
                 text: jsonData['labels'],
-                // colorscale: 'Blues',
+                // colorscale: 'Blues', from https://colorbrewer2.org/#type=sequential&scheme=PuBu&n=5
                 colorscale: [
-                  [0, 'rgb(4,90,141)'],
-                  [0.25, 'rgb(43,140,190)'],
-                  [0.5, 'rgb(116,169,207)'],
-                  [0.75,' rgb(189,201,225)'],
-                  [1, 'rgb(241,238,246)']
+                  [0, 'rgb(166,189,219)'],
+                  [0.2, 'rgb(166,189,219)'],
+                  [0.2, 'rgb(116,169,207)'],
+                  [0.4, 'rgb(116,169,207)'],
+                  [0.4,' rgb(54,144,192)'],
+                  [0.6,' rgb(54,144,192)'],
+                  [0.6, 'rgb(5,112,176)'],
+                  [0.8,' rgb(5,112,176)'],
+                  [0.8, 'rgb(3,78,123)'],
+                  [1, 'rgb(3,78,123)']
 
                 ],
                 autocolorscale: false,
-                reversescale: true,
                 marker: {
                     line: {
                         color: 'rgb(180,180,180)',
