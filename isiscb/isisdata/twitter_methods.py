@@ -9,7 +9,7 @@ def get_five_most_recent_tweets():
 
     with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
         if resp.status_code != 200:
-            return {}
+            return []
 
         return resp.json()
 

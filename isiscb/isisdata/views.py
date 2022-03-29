@@ -936,7 +936,7 @@ def generate_similar_facets(similar_objects):
 def get_google_books_image(citation, featured):
 
     # Provide image for citation
-    if not (citation.BOOK or citation.CHAPTER):
+    if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
         return {}
 
     cover_image = {}
@@ -946,7 +946,7 @@ def get_google_books_image(citation, featured):
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
 
-    if citation.type_controlled in ['CH'] and parent_id:
+    if citation.type_controlled in [Citation.CHAPTER] and parent_id:
         google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
     else:
         google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
@@ -960,11 +960,11 @@ def get_google_books_image(citation, featured):
         contrib = ''
         title = ''
 
-        if citation.type_controlled in ['BO']:
+        if citation.type_controlled in [Citation.BOOK]:
             title = citation.title
             if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
                 contrib = citation.get_all_contributors[0].authority.name.strip()
-        elif citation.type_controlled in ['CH'] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
+        elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
             title = parent_relations[0].subject.title
             if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
                 contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
@@ -1014,9 +1014,9 @@ def get_google_books_image(citation, featured):
                             cover_image["size"] = "thumbnail"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
 
-                        if citation.type_controlled in ['BO']:
+                        if citation.type_controlled in [Citation.BOOK]:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
-                        elif citation.type_controlled in ['CH'] and parent_id:
+                        elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
                         google_books_data.save()
 
@@ -1463,10 +1463,10 @@ def home(request):
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
-        featured_citation = Citation.objects.filter(pk=featured_citation.id)
+        featured_citation = Citation.objects.filter(pk=featured_citation.id)[0]
     else:
         #set default featured citation in case no featured authorities have been selected
-        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID)
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID)[0]
 
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)

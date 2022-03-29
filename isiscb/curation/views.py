@@ -2616,7 +2616,7 @@ def featured_authorities(request):
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
-    if request.GET.get('confirmed', False):
+    if request.POST:
         # The user has selected the desired configuration settings.
         form = FeaturedAuthorityForm(request.POST)
         form.fields['filters'].initial = filter_params_raw
