@@ -1463,10 +1463,10 @@ def home(request):
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
-        featured_citation = Citation.objects.filter(pk=featured_citation.id)[0]
+        featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
     else:
         #set default featured citation in case no featured authorities have been selected
-        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID)[0]
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
 
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)
