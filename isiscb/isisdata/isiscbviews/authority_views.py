@@ -380,7 +380,7 @@ def authority(request, authority_id):
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
                 facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
                 facet('category_ids', size=100).facet('other_person_ids', size=100).\
@@ -446,9 +446,7 @@ def remove_self_from_facets(facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]
 
 def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
-    wikiImage = ''
-    wikiCredit = ''
-    wikiIntro = ''
+    wikiImage = wikiCredit = wikiIntro = ''
 
     if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
         wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()

@@ -51,6 +51,7 @@ from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
+from isisdata.isiscbviews.authority_views import get_wikipedia_image_synopsis
 
 from unidecode import unidecode
 import datetime
@@ -1476,17 +1477,23 @@ def home(request):
     else:
         #set default featured authorities in case no featured authorities have been selected
         featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID)
+    
+    #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
+    sqs = SearchQuerySet().models(Citation)
 
-    featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
+    related_citations_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(subject_ids=featured_authority.id).filter_or(institution_ids=featured_authority.id) \
+            .filter_or(category_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id) \
+            .filter_or(publisher_ids=featured_authority.id).filter_or(school_ids=featured_authority.id).filter_or(meeting_ids=featured_authority.id) \
+            .filter_or(periodical_ids=featured_authority.id).filter_or(book_series_ids=featured_authority.id).filter_or(time_period_ids=featured_authority.id) \
+            .filter_or(geographic_ids=featured_authority.id).filter_or(about_person_ids=featured_authority.id).filter_or(other_person_ids=featured_authority.id) \
+            .count()
+    
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
 
-    if featured_authority_wikipedia_data:
-        wikiImage = featured_authority_wikipedia_data.img_url
-        wikiCredit = featured_authority_wikipedia_data.credit
-        wikiIntro = featured_authority_wikipedia_data.intro
-    else:
-        wikiImage = ''
-        wikiCredit = ''
-        wikiIntro = ''
+    # get wikipedia data
+    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
 
     #Get featured tweet
     recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
