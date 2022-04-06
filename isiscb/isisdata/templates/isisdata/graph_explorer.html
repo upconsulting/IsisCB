@@ -298,7 +298,7 @@
         function addConcept(event) {
             let link = event.target.closest('a');
             let acRelId = $(link).data('id');
-            subjects.push(acRelId)
+            subjects.push(acRelId);
             let payload = {
                 'subjects': subjects
             };
@@ -330,7 +330,7 @@
                 return response.json();
             }
 
-            postData("{% url "subject_explorer"  %}", payload)
+            postData("{% url "graph_explorer"  %}", payload)
                 .then(data => {
 
                     nodes = JSON.parse(data.nodes);

@@ -1,0 +1,357 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+<style>
+    #subject-list-group > li, #category-list-group > li {
+        padding: 5px 15px;
+    }
+
+    #abstract_panel div.panel-heading {
+        padding: 1px 15px;
+    }
+    #abstract_panel div.panel-body {
+        padding: 5px;
+    }
+</style>
+
+{% block content %}
+
+<div class="col-sm-12">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne" style='padding: 20px;'>
+            <h4 class="panel-title">
+            <a role="button" class="btn btn-primary btn-xs {% if not selected.left and not selected.right %}collpsed{% endif %}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="color: #fff;">
+                Show/Hide Settings
+            </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse {% if not selected.left and not selected.right %}in{% endif %}" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <div id="compareContainer" style="display: none; border-bottom: 1px solid lightgray;">
+                    <div class="col-sm-12" style="text-align: center;">
+                        <a href="javascript:void(0);" onclick="compare();" role="button" id="compareButton" class="btn btn-success" style="color: #fff;"><i class="fas fa-balance-scale"></i> Compare</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <ol class="breadcrumb pull-right" id="leftBreadcrumb" style="background-color: #fff;">
+                            </ol>
+                        </div>
+                        <div class="col-sm-2" style="text-align: center; padding: 0;">
+                            <h5>to</h5>
+                        </div>
+                        <div class="col-sm-5">
+                            <ol class="breadcrumb" id="rightBreadcrumb" style="background-color: #fff;">
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12" style="text-align: center;">
+                    <p style='height: 100%;'>
+                        <div class="input-group" id="subjectSearch" style='height: 100%;'>
+                            <span class="input-group-btn">
+                                <span class="button-checkbox">
+                                    <button type="button" class="btn" data-color="primary">Concepts</button>
+                                    <input id="filterConcepts" type="checkbox" class="hidden filterConcepts" />
+                                </span>
+                                <span class="button-checkbox">
+                                    <button type="button" class="btn" data-color="primary">People</button>
+                                    <input id="filterPersons" type="checkbox" class="hidden filterPersons" />
+                                </span>
+                                <span class="button-checkbox">
+                                    <button type="button" class="btn" data-color="primary">Institutions</button>
+                                    <input id="filterInstitutions" type="checkbox" class="hidden filterInstitutions" />
+                                </span>
+                                <span class="button-checkbox">
+                                    <button type="button" class="btn" data-color="primary">Places</button>
+                                    <input id="filterGeoTerms" type="checkbox" class="hidden filterGeoTerms" />
+                                </span>
+                                <span class="button-checkbox">
+                                    <button type="button" class="btn" data-color="primary">Time Periods</button>
+                                    <input id="filterTimePeriods" type="checkbox" class="hidden filterTimePeriods" />
+                                </span>
+                                <span>
+                                    <button id="filterAll" type="button" class="btn btn-default filterAll" style="line-height:240%; height: 3.8em;">All</button>
+                                </span>
+                            </span>
+                        </div>
+                    </p>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div id="addSubjects">
+                        <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for something to study ... (e.g. [Physics] [19th century])" style="height:3.8em">
+                        </input>
+        
+                        <ul class="list-group" id="subjectSearchResultsContainer">
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var leftSelected = [];
+    var rightSelected = [];
+    var INITIAL_MAX_RESULTS = 10;
+    var max_results = INITIAL_MAX_RESULTS;
+    var types = [];
+
+    var searchTimerSubjects = 0;
+    function triggerSearchSubjects(force) {
+        if (searchTimerSubjects) {
+            clearTimeout(searchTimerSubjects);
+        }
+
+        var query = $('#subjectSearchQuery').val();
+
+        SearchTimerSubjects = setTimeout(function() {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+            success: function(result) {
+                generateSearchResults(result, query, force)
+            }
+            });
+        }, 500);
+    }
+
+    function generateSearchResults(result, query, force) {
+        var resultsContainer = $('#subjectSearchResultsContainer');
+        resultsContainer.empty();
+        result.results.forEach(function(r) {
+        var newLi = $("<li></li>");
+        newLi.addClass("list-group-item");
+        newLi.attr('data-acrelation-id', r.name);
+        var publicLink = $('<a></a>');
+        publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+        publicLink.attr('target', "_blank");
+        publicLink.html(r.name + ' (' + r.citation_count + ')' );
+        newLi.append(publicLink);
+        newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+        resultsContainer.append(newLi);
+
+        var leftAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
+        leftAddBtn.append('<i class="far fa-arrow-alt-circle-left" aria-hidden="true" style="margin-right:10px;"></i>');
+        leftAddBtn.click({column: 'left'}, addConcept);
+        var rightAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
+        rightAddBtn.append('<i class="far fa-arrow-alt-circle-right" aria-hidden="true" style="margin-right:10px;"></i>');
+        rightAddBtn.click({column: 'right'}, addConcept);
+        newLi.prepend(rightAddBtn);
+        newLi.prepend(leftAddBtn);
+        });
+
+        if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+        var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+        resultsContainer.append(msg);
+        } else if (result.results.length == 0 && !force && query.length < 3) {
+        var msg = $('<p>Your query was too short. </p>');
+        resultsContainer.append(msg);
+        }
+
+        if (result.results.length == max_results) {
+        var load_more = `
+            <li class="list-group-item search-result">
+            <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+            </li>
+        `;
+        resultsContainer.append(load_more);
+        $(`#load-more-subjects`).click(function() {
+            max_results += 10;
+            triggerSearchSubjects(force);
+        });
+        }
+    }
+
+    // checkbox settings
+    var settings = {
+        on: {
+            icon: 'glyphicon glyphicon-check'
+        },
+        off: {
+            icon: 'glyphicon glyphicon-unchecked'
+        }
+    };
+
+    $(document).ready(function() {
+        $('#subjectSearchQuery').on('keyup', function() {
+        max_results = INITIAL_MAX_RESULTS;
+        triggerSearchSubjects(false);
+        });
+
+        // add checkbox search handlers
+        $(".filterConcepts").change(function() {
+        filterType("CO", $(".filterConcepts"));
+        });
+        $(".filterPersons").change(function() {
+        filterType("PE", $(".filterPersons"));
+        });
+        $(".filterInstitutions").change(function() {
+        filterType("IN", $(".filterInstitutions"));
+        });
+        $(".filterGeoTerms").change(function() {
+        filterType("GE", $(".filterGeoTerms"));
+        });
+        $(".filterTimePeriods").change(function() {
+        filterType("TI", $(".filterTimePeriods"));
+        });
+        $(".filterAll").click(function() {
+        $('.button-checkbox').each(function () {
+            var checkbox = $(this).find('input:checkbox');
+            checkbox.attr('checked', false);
+            updateDisplay(checkbox);
+        });
+        types = []
+        triggerSearchSubjects(false);
+        });
+
+        // checkbox styling
+        $('.button-checkbox').each(function () {
+                // Settings
+                var $widget = $(this),
+                    $button = $widget.find('button'),
+                    $checkbox = $widget.find('input:checkbox'),
+                    color = $button.data('color')
+
+
+                // Event Handlers
+                $button.on('click', function () {
+                    $checkbox.prop('checked', !$checkbox.is(':checked'));
+                    $checkbox.triggerHandler('change');
+                    updateDisplay($checkbox);
+                });
+                $checkbox.on('change', function () {
+                    updateDisplay($checkbox);
+                });
+
+                // Initialization
+                function init() {
+
+                    updateDisplay($checkbox);
+
+                    if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                    // Inject the icon if applicable
+                    if ($button.find('.state-icon').length == 0) {
+                        $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                    }
+                    }
+                }
+                init();
+            });
+    });
+
+    // checkbox update display
+    function updateDisplay($checkbox) {
+        var isChecked = $checkbox.is(':checked');
+        var $button = $checkbox.siblings('button')
+        var color = $button.data('color');
+
+        // Set the button's state
+        $button.data('state', (isChecked) ? "on" : "off");
+
+        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+            // Set the button's icon
+            $button.find('.state-icon')
+                .removeClass()
+                .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+        }
+
+        // Update the button's color
+        if (isChecked) {
+            $button
+                .removeClass('btn-default')
+                .addClass('btn-' + color + ' active');
+        }
+        else {
+            $button
+                .removeClass('btn-' + color + ' active')
+                .addClass('btn-default');
+        }
+    }
+
+    function filterType(type, element) {
+        if (element.is(':checked')) {
+        types.push(type);
+        } else {
+        var typeIndex = types.indexOf(type);
+        if (typeIndex > -1) {
+            types.splice(typeIndex, 1);
+        }
+        }
+        triggerSearchSubjects(false);
+    }
+
+    function addConcept(event) {
+        $('#compareContainer').css('display', 'block');
+        let link = event.target.closest('a');
+        let acRelId = $(link).data('id');
+        let conceptName = $(link).data('name');
+        if (event.data.column === "left") {
+            leftSelected.push(acRelId);
+        } else {
+            rightSelected.push(acRelId);
+        }
+
+        let crumb = $(`<li class="search-breadcrumb-item"><span class="label label-default">${conceptName}</span></li>`);
+        
+        $(`#${event.data.column}Breadcrumb`).append(crumb);
+    }
+
+    function compare() {
+        if (leftSelected.length === 0 || rightSelected.length === 0) {
+            $.notify("Please select terms to compare on both sides", "error");
+        } else {
+            selected = {};
+            selected.left = leftSelected;
+            selected.right = rightSelected;
+
+            const csrftoken = getCookie('csrftoken');
+
+            async function postData(url='', data = {}) {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  mode: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                  },
+                  body: JSON.stringify(data)
+                });
+                return response.json();
+            }
+
+            postData("{% url "term_explorer"  %}", selected)
+                .then(data => {
+
+                });
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+</script>
+
+{% endblock %}
