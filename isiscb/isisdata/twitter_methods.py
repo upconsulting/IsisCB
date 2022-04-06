@@ -34,6 +34,5 @@ def get_featured_tweet():
                     recent_tweet_image = recent_tweet['includes']['media'][0]['url']
                 else:
                     recent_tweet_image = ''
-    print(recent_tweet_url, recent_tweet_text, recent_tweet_image)
     
     return recent_tweet_url, recent_tweet_text, recent_tweet_image

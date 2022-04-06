@@ -1476,7 +1476,7 @@ def home(request):
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
     else:
         #set default featured authorities in case no featured authorities have been selected
-        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID)
+        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
     
     #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
     sqs = SearchQuerySet().models(Citation)

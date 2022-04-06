@@ -2632,7 +2632,7 @@ def featured_authorities(request):
                 for authority in queryset:
                     featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
                     featured_authority_data.save()
-            else:
+            elif request.POST.get('remove'):
                 # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
                 authority_ids = [authority.id for authority in queryset]
                 FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
