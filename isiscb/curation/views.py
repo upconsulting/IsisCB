@@ -2613,6 +2613,7 @@ def featured_authorities(request):
     future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
     #display only the most recent 6 months of past featured authorities so that this list doesn't balloon
     past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago).filter(end_date__lt=now)
+    print(past_featured[0].__dict__)
 
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
@@ -2627,8 +2628,8 @@ def featured_authorities(request):
                 # add new or update the dates of the featured authorities
                 start_date_str = request.POST.getlist('start_date')[0]
                 end_date_str = request.POST.getlist('end_date')[0]
-                start_date = timezone.localize(datetime.datetime.strptime(start_date_str, '%Y-%m-%d'))
-                end_date = timezone.localize(datetime.datetime.strptime(end_date_str, '%Y-%m-%d'))
+                start_date = timezone.localize(datetime.datetime.strptime(start_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
+                end_date = timezone.localize(datetime.datetime.strptime(end_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
 
                 for authority in queryset:
                     featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
