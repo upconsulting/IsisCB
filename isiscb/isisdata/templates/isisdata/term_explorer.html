@@ -6,6 +6,7 @@
 {% load metadata_filters %}
 {% load search_filters %}
 
+{% block extra_head %}
 <style>
     #subject-list-group > li, #category-list-group > li {
         padding: 5px 15px;
@@ -17,7 +18,30 @@
     #abstract_panel div.panel-body {
         padding: 5px;
     }
+
+    .tab-btn-default {
+        background-color: #fff;
+        color: #337ab7;
+        border-color: #337ab7;
+    }
+
+    .tab-btn-default.active {
+        border-color: #337ab7;
+        background-color: #337ab7;
+        color: #fff;
+    }
+
+    .tab-btn-default.active:hover {
+        border-color: #337ab7;
+        background-color: #337ab7;
+        color: #fff;
+    }
+
+    .tab-btn-default:hover {
+        background-color: #e6e6e6;
+    }
 </style>
+{% endblock %}
 
 {% block content %}
 
@@ -25,12 +49,12 @@
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne" style='padding: 20px;'>
             <h4 class="panel-title">
-            <a role="button" class="btn btn-primary btn-xs {% if not selected.left and not selected.right %}collpsed{% endif %}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="color: #fff;">
+            <a role="button" class="btn btn-primary btn-xs collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="color: #fff;">
                 Show/Hide Settings
             </a>
             </h4>
         </div>
-        <div id="collapseOne" class="panel-collapse collapse {% if not selected.left and not selected.right %}in{% endif %}" role="tabpanel" aria-labelledby="headingOne">
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body">
                 <div id="compareContainer" style="display: none; border-bottom: 1px solid lightgray;">
                     <div class="col-sm-12" style="text-align: center;">
@@ -85,7 +109,7 @@
                 </div>
                 <div class="col-sm-12 col-md-6">
                     <div id="addSubjects">
-                        <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for something to study ... (e.g. [Physics] [19th century])" style="height:3.8em">
+                        <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for something to study ... (e.g. [Biology] [19th century])" style="height:3.8em">
                         </input>
         
                         <ul class="list-group" id="subjectSearchResultsContainer">
@@ -96,6 +120,117 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<div class="row" id="tablesContainer">
+    <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
+        <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
+            <a id="overview-tab" href="#overview" class="btn tab-btn-default active" role="tab" data-toggle="tab">
+            <input type="radio" />Overview
+            </a>
+            <a id="concepts-tab" href="#concepts" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Concepts
+            </a>
+            <a id="authors-tab" href="#authors" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Authors
+            </a>
+            <a id="people-tab" href="#people" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />People
+            </a>
+            <a id="places-tab" href="#places" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Places
+            </a>
+            <a id="times-tab" href="#times" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Times
+            </a>
+            <a id="institutions-tab" href="#institutions" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Institutions
+            </a>
+            <a id="journals-tab" href="#journals" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Journals
+            </a>
+            <a id="publishers-tab" href="#publishers" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <input type="radio" />Publishers
+            </a>
+        </div>
+    </div>
+    <div class="tab-content" style="height: 100vh;">
+        <div role="tabpanel" class="tab-pane active" id="overview">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+                <div class="col-sm-6" id="overview-left-left-column">
+                </div>
+                <div class="col-sm-6" id="overview-left-right-column">
+                </div>
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+                <div class="col-sm-6" id="overview-right-left-column">
+                </div>
+                <div class="col-sm-6" id="overview-right-right-column">
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="concepts">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="authors">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="people">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="places">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="times">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="institutions">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="journals">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="publishers">
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            </div>
+        </div>
+    </div>
+    
+</div>
+<div class="col-sm-12">
+    <div class="well well-lg" style="border-left: 5px solid #337ab7">
+        <h3>Using this exploratory tool</h3>
+        <h5>This is a tool for comparing different sets of subjects in the database</h5>
+        <p>Say, for example that you wanted to see how the history of 19th century biology differs from the history of 18th century biology ...</p>
+        <ol>
+            <li>First, use the search bar to find biology. Biology is a "concept", so you can use the checkbox filter for concepts to narrow your search.</li>
+            <li>Because we want to compare the history of biology across two different time periods, the concept "Biology" will appear on both sides of the comparison, so click the <i class="far fa-arrow-alt-circle-left"></i> icon to add biology to the left side of the comparison and the <i class="far fa-arrow-alt-circle-right"></i> icon to add biology to the right side of the comparison.</li>
+            <li>Next, we need to add the time periods "19th century" and "18th century" to the comparison, so search for each of these (remember, you can use the checkboxes to filter by subject type, so the "Time Periods" filter might help you here). Use the <i class="far fa-arrow-alt-circle-left"></i> and <i class="far fa-arrow-alt-circle-right"></i> icons to add one of these time period to the left side of the comparison and one to the right side.</li>
+            <li>Now that all of the elements of your comparison are selected and in place, all you need to do is click the green "<i class="fas fa-balance-scale"></i> Compare" button to generate the results of the comparison</li>
+        </ol>
     </div>
 </div>
 
@@ -329,9 +464,34 @@
                 return response.json();
             }
 
-            postData("{% url "term_explorer"  %}", selected)
+            postData("{% url "term_explorer" %}", selected)
                 .then(data => {
+                    $('#tablesContainer').css("display", "block");
+                    $('#collapseOne').removeClass('in');
+                    console.log(data);
+                    
+                    // handle left side
+                    // left side authors/contributors
+                    let facet_fields = Object.keys(data.left_boxes);
+                    facet_fields.map(field => {
+                        if (field === "contributors" || field === "journals" || field === "publishers") {
+                            $('#overview-left-left-column').append(`<div class="panel panel-default facet-box" id="overview-left-${field}-box">`);
+                            $(`#overview-left-${field}-box`).append(`<div class="panel-heading-relation panel-heading"><strong>${field}</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>`);
 
+                            $('#overview-right-left-column').append(`<div class="panel panel-default facet-box" id="overview-right-${field}-box">`);
+                            $('#overview-left-contributors-box').append('<div class="panel-heading-relation panel-heading"><strong>Authors & Contributors</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>');
+                        } else {
+
+                        }
+                    })
+                    $('#overview-left-left-column').append('<div class="panel panel-default facet-box" id="overview-left-contributors-box">');
+                    $('#overview-left-contributors-box').append('<div class="panel-heading-relation panel-heading"><strong>Authors & Contributors</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>');
+                    
+                    data.left_boxes.related_contributors_facet.map((contributor, i) => {
+                        if (i < 10) {
+                            $('#overview-left-contributors-box-body').append(`<a href="data.isiscb.org/isis/authority/${contributor.id} target="_blank"><span>${contributor.name}</span></a><span> (${contributor.count})</span></br>`);
+                        }
+                    })
                 });
         }
     }

@@ -1778,77 +1778,85 @@ def term_explorer(request):
         left_boxes = get_facet_boxes(left_ids)
         right_boxes = get_facet_boxes(right_ids)
 
+        # print(left_ids)
+        # print(right_ids)
+
         context['selected']['left'] = left_ids
         context['selected']['right'] = right_ids
         context['left_boxes'] = left_boxes
         context['right_boxes'] = right_boxes
 
         return JsonResponse(context)
-        
 
     return render(request, 'isisdata/term_explorer.html', context)
 
 def get_facet_boxes(authority_ids):
     sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('subject_ids', size=100). \
                 facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('institutions_by_subject_ids', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
     word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids__in=authority_ids).filter_or(contributor_ids__in=authority_ids) \
             .filter_or(editor_ids__in=authority_ids).filter_or(subject_ids__in=authority_ids).filter_or(institution_ids__in=authority_ids) \
             .filter_or(category_ids__in=authority_ids).filter_or(advisor_ids__in=authority_ids).filter_or(translator_ids__in=authority_ids) \
-            .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids=authority_ids).filter_or(meeting_ids__in=authority_ids) \
+            .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
             .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
             .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
 
-    subject_ids_facet = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_contributors_facet = word_cloud_results.facet_counts()['fields']['all_contributor_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_institutions_facet = word_cloud_results.facet_counts()['fields']['institution_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_timeperiod_facet = word_cloud_results.facet_counts()['fields']['events_timeperiods_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_categories_facet = word_cloud_results.facet_counts()['fields']['category_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_other_person_facet = word_cloud_results.facet_counts()['fields']['other_person_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_publisher_facet = word_cloud_results.facet_counts()['fields']['publisher_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_journal_facet = word_cloud_results.facet_counts()['fields']['periodical_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_subject_concepts_facet = word_cloud_results.facet_counts()['fields']['concepts_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_subject_people_facet = word_cloud_results.facet_counts()['fields']['people_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
     related_subject_institutions_facet = word_cloud_results.facet_counts()['fields']['institutions_by_subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-    related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
 
     # remove current authority from facet results
-    subject_ids_facet = remove_self_from_facets(subject_ids_facet, authority_ids)
     related_contributors_facet = remove_self_from_facets(related_contributors_facet, authority_ids)
-    related_institutions_facet = remove_self_from_facets(related_institutions_facet, authority_ids)
     related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_ids)
     related_timeperiod_facet = remove_self_from_facets(related_timeperiod_facet, authority_ids)
-    related_categories_facet = remove_self_from_facets(related_categories_facet, authority_ids)
-    related_other_person_facet = remove_self_from_facets(related_other_person_facet, authority_ids)
     related_publisher_facet = remove_self_from_facets(related_publisher_facet, authority_ids)
     related_journal_facet = remove_self_from_facets(related_journal_facet, authority_ids)
     related_subject_concepts_facet = remove_self_from_facets(related_subject_concepts_facet, authority_ids)
     related_subject_people_facet = remove_self_from_facets(related_subject_people_facet, authority_ids)
     related_subject_institutions_facet = remove_self_from_facets(related_subject_institutions_facet, authority_ids)
-    related_dataset_facet = remove_self_from_facets(related_dataset_facet, authority_ids)
+
+    # get authority name for facet results
+    related_contributors_facet = get_authority_name(related_contributors_facet)
+    related_geographics_facet = get_authority_name(related_geographics_facet)
+    related_timeperiod_facet = get_authority_name(related_timeperiod_facet)
+    related_publisher_facet = get_authority_name(related_publisher_facet)
+    related_journal_facet = get_authority_name(related_journal_facet)
+    related_subject_concepts_facet = get_authority_name(related_subject_concepts_facet)
+    related_subject_people_facet = get_authority_name(related_subject_people_facet)
+    related_subject_institutions_facet = get_authority_name(related_subject_institutions_facet)
 
     facets = {}
-    facets['subject_ids_facet'] = subject_ids_facet
-    facets['related_contributors_facet'] = related_contributors_facet
-    facets['related_institutions_facet'] = related_institutions_facet
-    facets['related_geographics_facet'] = related_geographics_facet
-    facets['related_timeperiod_facet'] = related_timeperiod_facet
-    facets['related_categories_facet'] = related_categories_facet
-    facets['related_other_person_facet'] = related_other_person_facet
-    facets['related_publisher_facet'] = related_publisher_facet
-    facets['related_journal_facet'] = related_journal_facet
-    facets['related_subject_concepts_facet'] = related_subject_concepts_facet
-    facets['related_subject_people_facet'] = related_subject_people_facet
-    facets['related_subject_institutions_facet'] = related_subject_institutions_facet
-    facets['related_dataset_facet'] = related_dataset_facet
+    facets['contributors'] = related_contributors_facet
+    facets['places'] = related_geographics_facet
+    facets['times'] = related_timeperiod_facet
+    facets['publishers'] = related_publisher_facet
+    facets['journals'] = related_journal_facet
+    facets['concepts'] = related_subject_concepts_facet
+    facets['people'] = related_subject_people_facet
+    facets['institutions'] = related_subject_institutions_facet
 
     return facets
 
+def get_authority_name(facets):
+    new_facets = []
+    for facet in facets:
+        authority_object = Authority.objects.get(id=facet[0])
+        name = authority_object.name
+        new_facet = {}
+        new_facet['name'] = name
+        new_facet['count'] = facet[1]
+        new_facet['id'] = facet[0]
+        new_facets.append(new_facet)
+    return new_facets
+
 def remove_self_from_facets(facet, authority_ids):
-        return [x for x in facet if x[0].upper() not in authority_ids]
+    return [x for x in facet if x[0].upper() not in authority_ids]
