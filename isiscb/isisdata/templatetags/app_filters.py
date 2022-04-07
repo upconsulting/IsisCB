@@ -75,7 +75,7 @@ def get_uri(entry):
 
 @register.filter
 def get_authority_uri_from_id(id):
-        return settings.URI_PREFIX + "authority/" + id
+    return settings.URI_PREFIX + "authority/" + id
 
 
 @register.filter
