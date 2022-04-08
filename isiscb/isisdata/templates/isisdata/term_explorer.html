@@ -40,6 +40,37 @@
     .tab-btn-default:hover {
         background-color: #e6e6e6;
     }
+
+    .tab-pane {
+        padding: 0 30px;
+        height: 75vh;
+    }
+
+    .tab-pane .col-sm-6 {
+        height: 100%;
+        overflow: auto;
+        margin-bottom: 30px;
+    }
+
+    table {
+        position: relative;
+    }
+
+    th {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        border-bottom: 2px solid #000;
+    }
+
+    th, td {
+        padding: 5px 15px 5px 15px;
+      }
+
+    td {
+        border-bottom: 1px solid #999;
+    }
+      
 </style>
 {% endblock %}
 
@@ -47,7 +78,7 @@
 
 <div class="col-sm-12">
     <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingOne" style='padding: 20px;'>
+        <div class="panel-heading" role="tab" id="headingOne" style='padding: 10px;'>
             <h4 class="panel-title">
             <a role="button" class="btn btn-primary btn-xs collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="color: #fff;">
                 Show/Hide Settings
@@ -57,8 +88,13 @@
         <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body">
                 <div id="compareContainer" style="display: none; border-bottom: 1px solid lightgray;">
-                    <div class="col-sm-12" style="text-align: center;">
+                    <div class="col-sm-2" style="text-align: center;">
+                    </div>
+                    <div class="col-sm-8" style="text-align: center;">
                         <a href="javascript:void(0);" onclick="compare();" role="button" id="compareButton" class="btn btn-success" style="color: #fff;"><i class="fas fa-balance-scale"></i> Compare</a>
+                    </div>
+                    <div class="col-sm-2" style="text-align: center;">
+                        <a href="javascript:void(0);" onclick="clearAll();" role="button" id="compareButton" class="btn btn-danger pull-right" style="color: #fff;"><i class="fas fa-ban"></i> Clear All</a>
                     </div>
                     <div class="row">
                         <div class="col-sm-5">
@@ -122,7 +158,7 @@
         </div>
     </div>
 </div>
-<div class="row" id="tablesContainer">
+<div class="row" id="tablesContainer" style="display: none;">
     <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
         <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
             <a id="overview-tab" href="#overview" class="btn tab-btn-default active" role="tab" data-toggle="tab">
@@ -131,7 +167,7 @@
             <a id="concepts-tab" href="#concepts" class="btn tab-btn-default" role="tab" data-toggle="tab">
             <input type="radio" />Concepts
             </a>
-            <a id="authors-tab" href="#authors" class="btn tab-btn-default" role="tab" data-toggle="tab">
+            <a id="authors-tab" href="#contributors" class="btn tab-btn-default" role="tab" data-toggle="tab">
             <input type="radio" />Authors
             </a>
             <a id="people-tab" href="#people" class="btn tab-btn-default" role="tab" data-toggle="tab">
@@ -154,67 +190,206 @@
             </a>
         </div>
     </div>
-    <div class="tab-content" style="height: 100vh;">
+    <div class="col-sm-6">
+        <ol class="breadcrumb pull-right" id="left-selected-container" style="background-color: #fff; margin-bottom: 10px; padding-right: 0;">
+        </ol>
+    </div>
+    <div class="col-sm-6">
+        <ol class="breadcrumb" id="right-selected-container" style="background-color: #fff; margin-bottom: 10px; padding-left: 0;">
+        </ol>
+    </div>
+    <div class="tab-content">
         <div role="tabpanel" class="tab-pane active" id="overview">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-                <div class="col-sm-6" id="overview-left-left-column">
+            <div class="col-sm-6">
+                <div class="col-sm-4" id="overview-left-left-column" style="padding-right: 0">
                 </div>
-                <div class="col-sm-6" id="overview-left-right-column">
+                <div class="col-sm-4" id="overview-left-center-column" style="padding-right: 0">
                 </div>
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-                <div class="col-sm-6" id="overview-right-left-column">
-                </div>
-                <div class="col-sm-6" id="overview-right-right-column">
+                <div class="col-sm-4" id="overview-left-right-column" style="padding-right: 0">
                 </div>
             </div>
-        </div>
-        <div role="tabpanel" class="tab-pane active" id="concepts">
             <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-        </div>
-        <div role="tabpanel" class="tab-pane active" id="authors">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+                <div class="col-sm-4" id="overview-right-left-column" style="padding-left: 0">
+                </div>
+                <div class="col-sm-4" id="overview-right-center-column" style="padding-left: 0">
+                </div>
+                <div class="col-sm-4" id="overview-right-right-column" style="padding-left: 0">
+                </div>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane active" id="people">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+        <div role="tabpanel" class="tab-pane" id="concepts" >
+            <div class="col-sm-6" id="concepts-left-column">
+                <table class="pull-right" id="concepts-left-table">
+                    <tr id="concepts-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
             </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-        </div>
-        <div role="tabpanel" class="tab-pane active" id="places">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-        </div>
-        <div role="tabpanel" class="tab-pane active" id="times">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-        </div>
-        <div role="tabpanel" class="tab-pane active" id="institutions">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
-            </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            <div class="col-sm-6" id="concepts-right-column">
+                <table id="concepts-right-table">
+                    <tr id="concepts-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane active" id="journals">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+        <div role="tabpanel" class="tab-pane" id="contributors">
+            <div class="col-sm-6" id="contributors-left-column">
+                <table class="pull-right" id="contributors-left-table">
+                    <tr id="contributors-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
             </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            <div class="col-sm-6" id="contributors-right-column">
+                <table id="contributors-right-table">
+                    <tr id="contributors-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane active" id="publishers">
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+        <div role="tabpanel" class="tab-pane" id="people">
+            <div class="col-sm-6" id="people-left-column">
+                <table class="pull-right" id="people-left-table">
+                    <tr id="people-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
             </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            <div class="col-sm-6" id="people-right-column">
+                <table id="people-right-table">
+                    <tr id="people-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="places">
+            <div class="col-sm-6" id="places-left-column">
+                <table class="pull-right" id="places-left-table">
+                    <tr id="places-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-sm-6" id="places-right-column">
+                <table id="places-right-table">
+                    <tr id="places-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="times">
+            <div class="col-sm-6" id="times-left-column">
+                <table class="pull-right" id="times-left-table">
+                    <tr id="times-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-sm-6" id="times-right-column">
+                <table id="times-right-table">
+                    <tr id="times-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="institutions">
+            <div class="col-sm-6" id="institutions-left-column">
+                <table class="pull-right" id="institutions-left-table">
+                    <tr id="institutions-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-sm-6" id="institutions-right-column">
+                <table id="institutions-right-table">
+                    <tr id="institutions-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="journals">
+            <div class="col-sm-6" id="journals-left-column">
+                <table class="pull-right" id="journals-left-table">
+                    <tr id="journals-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-sm-6" id="journals-right-column">
+                <table id="journals-right-table">
+                    <tr id="journals-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="publishers">
+            <div class="col-sm-6" id="publishers-left-column">
+                <table class="pull-right" id="publishers-left-table">
+                    <tr id="publishers-left-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Count</th>
+                        <th>%</th>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-sm-6" id="publishers-right-column">
+                <table id="publishers-right-table">
+                    <tr id="publishers-right-table-header">
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Citation Count</th>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -224,7 +399,7 @@
     <div class="well well-lg" style="border-left: 5px solid #337ab7">
         <h3>Using this exploratory tool</h3>
         <h5>This is a tool for comparing different sets of subjects in the database</h5>
-        <p>Say, for example that you wanted to see how the history of 19th century biology differs from the history of 18th century biology ...</p>
+        <p>Say, for example, that you wanted to see how the history of 19th century biology differs from the history of 18th century biology ...</p>
         <ol>
             <li>First, use the search bar to find biology. Biology is a "concept", so you can use the checkbox filter for concepts to narrow your search.</li>
             <li>Because we want to compare the history of biology across two different time periods, the concept "Biology" will appear on both sides of the comparison, so click the <i class="far fa-arrow-alt-circle-left"></i> icon to add biology to the left side of the comparison and the <i class="far fa-arrow-alt-circle-right"></i> icon to add biology to the right side of the comparison.</li>
@@ -468,32 +643,141 @@
                 .then(data => {
                     $('#tablesContainer').css("display", "block");
                     $('#collapseOne').removeClass('in');
-                    console.log(data);
                     
-                    // handle left side
-                    // left side authors/contributors
+                    data.left_selected_names.map(name => {
+                        $('#left-selected-container').append(`<li class="search-breadcrumb-item"><h4 style="margin: 0;"><span class="label label-primary">${name}</span></h4></li>`)
+                    })
+
+                    data.right_selected_names.map(name => {
+                        $('#right-selected-container').append(`<li class="search-breadcrumb-item"><h4 style="margin: 0;"><span class="label label-primary">${name}</span></h4></li>`)
+                    })
+
+                    console.log(data);
+
+                    let field_map = {
+                        "contributors": {
+                            "name": "Authors & Contributors",
+                            "column": "left",
+                            "box_color": "default",
+                        },
+                        "journals": {
+                            "name": "Journals",
+                            "column": "left",
+                            "box_color": "default",
+                        },
+                        "publishers": {
+                            "name": "Publishers",
+                            "column": "left",
+                            "box_color": "default",
+                        },
+                        "people": {
+                            "name": "People",
+                            "column": "center",
+                            "box_color": "primary",
+                        },
+                        "places": {
+                            "name": "Places",
+                            "column": "center",
+                            "box_color": "primary",
+                        },
+                        "concepts": {
+                            "name": "Concepts",
+                            "column": "right",
+                            "box_color": "primary",
+                        },
+                        "times": {
+                            "name": "Time Periods",
+                            "column": "right",
+                            "box_color": "primary",
+                        },
+                        "institutions": {
+                            "name": "Institutions",
+                            "column": "right",
+                            "box_color": "primary",
+                        },
+                    };
+                    
+                    // map through each authority type to generate containing divs and authority lists for each facet
                     let facet_fields = Object.keys(data.left_boxes);
                     facet_fields.map(field => {
-                        if (field === "contributors" || field === "journals" || field === "publishers") {
-                            $('#overview-left-left-column').append(`<div class="panel panel-default facet-box" id="overview-left-${field}-box">`);
-                            $(`#overview-left-${field}-box`).append(`<div class="panel-heading-relation panel-heading"><strong>${field}</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>`);
-
-                            $('#overview-right-left-column').append(`<div class="panel panel-default facet-box" id="overview-right-${field}-box">`);
-                            $('#overview-left-contributors-box').append('<div class="panel-heading-relation panel-heading"><strong>Authors & Contributors</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>');
-                        } else {
-
+                        // append panels
+                        $(`#overview-left-${field_map[field].column}-column`).append(`<div class="panel panel-${field_map[field].box_color} facet-box" id="overview-left-${field}-box">`);
+                        $(`#overview-right-${field_map[field].column}-column`).append(`<div class="panel panel-${field_map[field].box_color} facet-box" id="overview-right-${field}-box">`);
+                        
+                        // append panel headers
+                        $(`#overview-left-${field}-box`).append(`<div class="panel-heading-relation panel-heading"><strong>${field_map[field].name}</strong></div><div class="panel-body" id="overview-left-${field}-box-body"></div>`);
+                        $(`#overview-right-${field}-box`).append(`<div class="panel-heading-relation panel-heading"><strong>${field_map[field].name}</strong></div><div class="panel-body" id="overview-right-${field}-box-body"></div>`);
+                        
+                        if (data.left_boxes[field].length) {
+                            data.left_boxes[field].map((authority, i) => {
+                                if (i < 10) {
+                                    $(`#overview-left-${field}-box-body`).append(`<a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
+                                }
+    
+                                $(`#${field}-left-table tr:last`).after(`<tr id="${field}-left-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
+                            })
                         }
-                    })
-                    $('#overview-left-left-column').append('<div class="panel panel-default facet-box" id="overview-left-contributors-box">');
-                    $('#overview-left-contributors-box').append('<div class="panel-heading-relation panel-heading"><strong>Authors & Contributors</strong></div><div class="panel-body" id="overview-left-contributors-box-body"></div>');
-                    
-                    data.left_boxes.related_contributors_facet.map((contributor, i) => {
-                        if (i < 10) {
-                            $('#overview-left-contributors-box-body').append(`<a href="data.isiscb.org/isis/authority/${contributor.id} target="_blank"><span>${contributor.name}</span></a><span> (${contributor.count})</span></br>`);
+
+                        if (data.right_boxes[field].length) {
+                            data.right_boxes[field].map((authority, i) => {
+                                if (i < 10) {
+                                    $(`#overview-right-${field}-box-body`).append(`<a href="data.isiscb.org/isis/authority/${authority.id} target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
+                                }
+
+                                $(`#${field}-right-table tr:last`).after(`<tr id="${field}-right-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
+                            })
                         }
                     })
                 });
         }
+    }
+
+    function color(value, max) {
+        let colorScale = d3.scaleLinear()
+                .domain([0, max])
+                .interpolate(d3.interpolateHcl)
+                .range([d3.rgb("#fff5eb"), d3.rgb('#f16913')]);
+        
+        return colorScale(value)
+    }
+
+    function get_count_max(field, data) {
+        left_max = data.left_boxes[field].length ? data.left_boxes[field][0].count : 0;
+        right_max = data.right_boxes[field].length ? data.right_boxes[field][0].count : 0;
+
+        return Math.max(left_max, right_max);
+    }
+
+    function get_percent_max(field, data) {
+        left_max = data.left_boxes[field].length ? data.left_boxes[field][0].percent : 0;
+        right_max = data.right_boxes[field].length ? data.right_boxes[field][0].percent : 0;
+        
+        return Math.max(left_max, right_max);
+    }
+
+    function mouseOver(row) {
+        let id = $(row).attr('id');
+        let pair_id = id.indexOf('left') >= 0 ? id.replace('left', 'right') : id.replace('right', 'left');
+        let paired_row_array = $(`#${pair_id}`);
+        let paired_row = paired_row_array.length ? paired_row_array[0] : false;
+        if (paired_row) {
+            $(row).css("background-color", "#B6D7A7");
+            $(paired_row).css("background-color", "#B6D7A7");
+            let column = $(paired_row).attr('id').slice(0, -12) + 'column';
+            column = document.getElementById(column);
+            column.scroll({top: paired_row.offsetTop -186, behavior: 'smooth'});
+        } else {
+            $(row).css("background-color", "#f5f5f5");
+        }
+    }
+
+    function mouseOut(row) {
+        let id = $(row).attr('id');
+        let pair_id = id.indexOf('left') >= 0 ? id.replace('left', 'right') : id.replace('right', 'left');
+        let paired_row_array = $(`#${pair_id}`);
+        let paired_row = paired_row_array[0];
+        $(row).css("background-color", "#fff");
+        $(paired_row).css("background-color", "#fff");
     }
 
     function getCookie(name) {
@@ -510,6 +794,14 @@
             }
         }
         return cookieValue;
+    }
+
+    function clearAll() {
+        leftSelected = [];
+        rightSelected = [];
+
+        $('#leftBreadcrumb').empty();
+        $('#rightBreadcrumb').empty();
     }
 
 </script>
