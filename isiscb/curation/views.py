@@ -2613,7 +2613,6 @@ def featured_authorities(request):
     future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
     #display only the most recent 6 months of past featured authorities so that this list doesn't balloon
     past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago).filter(end_date__lt=now)
-    print(past_featured[0].__dict__)
 
     if isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs

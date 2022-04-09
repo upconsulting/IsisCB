@@ -92,8 +92,8 @@
                         <tr>
                             <td>{{authority.authority.id}}</td>
                             <td>{{authority.authority.name}}</td>
-                            <td>{{authority.start_date|date:"Y-m-d"}}</td>
-                            <td>{{authority.end_date|date:"Y-m-d"}}</td>
+                            <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
+                            <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -117,8 +117,8 @@
                         <tr>
                             <td>{{authority.authority.id}}</td>
                             <td>{{authority.authority.name}}</td>
-                            <td>{{authority.start_date|date:"Y-m-d" }}</td>
-                            <td>{{authority.end_date|date:"Y-m-d"}}</td>
+                            <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i" }}</td>
+                            <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -143,8 +143,8 @@
                     <tr>
                         <td>{{authority.authority.id}}</td>
                         <td>{{authority.authority.name}}</td>
-                        <td>{{authority.start_date|date:"Y-m-d" }}</td>
-                        <td>{{authority.end_date|date:"Y-m-d"}}</td>
+                        <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i" }}</td>
+                        <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
                     </tr>
                 {% endfor %}
             </table>

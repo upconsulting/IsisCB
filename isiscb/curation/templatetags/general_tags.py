@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 from django import template
 from isisdata.models import *
+from dateutil.relativedelta import relativedelta
 
 register = template.Library()
 
@@ -40,3 +41,8 @@ def field_type(field):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def adjust_datetime_hours(datetime_object, hours):
+    hours = int(hours)
+    return datetime_object + relativedelta(hours=hours)
