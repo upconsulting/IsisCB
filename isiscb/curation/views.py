@@ -2648,6 +2648,7 @@ def featured_authorities(request):
         'current_featured': current_featured,
         'future_featured': future_featured,
         'past_featured': past_featured,
+        'admin_timezone': settings.ADMIN_TIMEZONE
     })
 
     return render(request, template, context)

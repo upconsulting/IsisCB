@@ -41,8 +41,3 @@ def field_type(field):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
-
-@register.filter
-def adjust_datetime_hours(datetime_object, hours):
-    hours = int(hours)
-    return datetime_object + relativedelta(hours=hours)

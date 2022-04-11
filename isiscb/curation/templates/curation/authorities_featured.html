@@ -1,6 +1,7 @@
 {% extends "curation/base.html" %}
 {% load static %}
 {% load addcss %}
+{% load tz %}
 {% load general_tags %}
 {% block extrahead %}
     <style>
@@ -36,6 +37,7 @@
 {% endblock %}
 
 {% block content %}
+{% timezone admin_timezone %}
 <div class="col-md-12">
     <div class="h2">Featured authorities</div>
 
@@ -92,8 +94,8 @@
                         <tr>
                             <td>{{authority.authority.id}}</td>
                             <td>{{authority.authority.name}}</td>
-                            <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
-                            <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
+                            <td>{{authority.start_date|date:"Y-m-d G:i"}}</td>
+                            <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -117,8 +119,8 @@
                         <tr>
                             <td>{{authority.authority.id}}</td>
                             <td>{{authority.authority.name}}</td>
-                            <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i" }}</td>
-                            <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
+                            <td>{{authority.start_date|date:"Y-m-d G:i" }}</td>
+                            <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -143,12 +145,13 @@
                     <tr>
                         <td>{{authority.authority.id}}</td>
                         <td>{{authority.authority.name}}</td>
-                        <td>{{authority.start_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i" }}</td>
-                        <td>{{authority.end_date|adjust_datetime_hours:"-5"|date:"Y-m-d G:i"}}</td>
+                        <td>{{authority.start_date|date:"Y-m-d G:i" }}</td>
+                        <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
                     </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
 </div>
+{% endtimezone %}
 {% endblock %}
