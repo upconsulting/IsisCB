@@ -620,7 +620,7 @@
         if (leftSelected.length === 0 || rightSelected.length === 0) {
             $.notify("Please select terms to compare on both sides", "error");
         } else {
-            selected = {};
+            var selected = {};
             selected.left = leftSelected;
             selected.right = rightSelected;
 
@@ -799,7 +799,8 @@
     function clearAll() {
         leftSelected = [];
         rightSelected = [];
-
+        $('#left-selected-container').empty();
+        $('#right-selected-container').empty();
         $('#leftBreadcrumb').empty();
         $('#rightBreadcrumb').empty();
     }

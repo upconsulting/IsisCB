@@ -570,6 +570,12 @@ def about(request):
     """
     return render(request, 'isisdata/about.html', context={'active': 'about'})
 
+def playground(request):
+    """
+    View for playground page
+    """
+    return render(request, 'isisdata/playground.html', context={'active': 'playground'})
+
 
 def statistics(request):
     """
@@ -1873,3 +1879,94 @@ def get_facets_authority_name(facets, total_citations):
 
 def remove_self_from_facets(facet, authority_ids):
     return [x for x in facet if x[0].upper() not in authority_ids]
+
+def ngram_explorer(request):
+
+    context = {
+    }
+    
+    if request.method == 'POST':
+        context = {}
+        selected_groups = json.loads(request.body)
+        data = []
+        max_years = []
+        min_years = []
+        max_ngrams = []
+
+        for selected_group in selected_groups:
+            if selected_groups[selected_group]:
+                group = {}
+                group['name'] = selected_group
+                group['selected_ids'] = selected_groups[selected_group]
+                group['authority_names'] = get_authority_names(selected_groups[selected_group])
+                group['values'], group_max_year, group_min_year, group_max_ngram = get_ngram_data(selected_groups[selected_group])
+                data.append(group)
+                max_years.append(group_max_year)
+                min_years.append(group_min_year)
+                max_ngrams.append(group_max_ngram)
+        
+        context['max_year'] = max(max_years)
+        context['min_year'] = min(min_years)
+        context['max_ngram'] = max(max_ngrams)
+        context['data'] = data
+
+        return JsonResponse(context)
+
+    return render(request, 'isisdata/ngram_explorer.html', context)
+
+def get_ngram_data(authority_ids):
+    sqs_all =SearchQuerySet().models(Citation).auto_query('*').facet('publication_date')
+    all_facet_results = sqs_all.all().exclude(public="false")
+    all_pub_date_facet = all_facet_results.facet_counts()['fields']['publication_date'] if 'fields' in all_facet_results.facet_counts() else []
+    all_pub_date_facet = clean_dates(all_pub_date_facet)
+    all_dates_map = {}
+    citations = 0
+    for facet in all_pub_date_facet:
+        all_dates_map[facet[0]] = facet[1]
+        citations = citations + facet[1]
+
+    sqs =SearchQuerySet().models(Citation).facet('publication_date', size=200)
+
+    facet_results = sqs.all().exclude(public="false").filter_or(author_ids__in=authority_ids).filter_or(contributor_ids__in=authority_ids) \
+            .filter_or(editor_ids__in=authority_ids).filter_or(subject_ids__in=authority_ids).filter_or(institution_ids__in=authority_ids) \
+            .filter_or(category_ids__in=authority_ids).filter_or(advisor_ids__in=authority_ids).filter_or(translator_ids__in=authority_ids) \
+            .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
+            .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
+            .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
+    
+    pub_date_facet = facet_results.facet_counts()['fields']['publication_date'] if 'fields' in facet_results.facet_counts() else []
+
+    pub_date_facet = clean_dates(pub_date_facet)
+
+    ngrams = []
+    all_years = []
+    all_ngrams = []
+
+    for facet in pub_date_facet:
+        all_years.append(int(facet[0]))
+        date_facet = {}
+        date_facet['year'] = facet[0]
+        ngram = 100 * facet[1]/all_dates_map[facet[0]] if facet[0] in all_dates_map else 0
+        ngram = round(ngram, 4)
+        all_ngrams.append(ngram)
+        date_facet['ngram'] = ngram
+        ngrams.append(date_facet)
+    
+    ngrams = sorted(ngrams, key = lambda ngram: int(ngram['year']))
+
+    print(max(all_years))
+    print(min(all_years))
+    print(max(all_ngrams))
+    
+    return ngrams, max(all_years), min(all_years), max(all_ngrams)
+    
+
+def clean_dates(date_facet):
+    new_date_facet = []
+    for date in date_facet:
+        date_pattern = re.compile("^[0-9]{4}$")
+        if re.search(date_pattern, date[0]):
+            new_date_facet.append(date)
+    return new_date_facet
+
+    

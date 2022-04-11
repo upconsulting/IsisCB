@@ -1,0 +1,613 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block extra_head %}
+<style>
+    #subject-list-group > li, #category-list-group > li {
+        padding: 5px 15px;
+    }
+
+    #abstract_panel div.panel-heading {
+        padding: 1px 15px;
+    }
+    #abstract_panel div.panel-body {
+        padding: 5px;
+    }
+
+    .tab-btn-default {
+        background-color: #fff;
+        color: #337ab7;
+        border-color: #337ab7;
+    }
+
+    .tab-btn-default.active {
+        border-color: #337ab7;
+        background-color: #337ab7;
+        color: #fff;
+    }
+
+    .tab-btn-default.active:hover {
+        border-color: #337ab7;
+        background-color: #337ab7;
+        color: #fff;
+    }
+
+    .tab-btn-default:hover {
+        background-color: #e6e6e6;
+    }
+
+    .tab-pane {
+        padding: 0 30px;
+        height: 75vh;
+    }
+
+    .tab-pane .col-sm-6 {
+        height: 100%;
+        overflow: auto;
+        margin-bottom: 30px;
+    }
+
+    .selectedGroup {
+        padding: 10px;
+        background-color: #fff;
+        border-left: 5px solid #999;
+    }
+
+    .selectedGroup:hover {
+        background-color: #f5f5f5;
+    }
+
+    .highlighted {
+        border-left: 5px solid #337ab7;
+    }
+
+    .groupTermContainer {
+        overflow-wrap: anywhere;
+    }
+
+    .groupTermContainer span {
+        margin-right: 5px;
+    }
+
+    svg {
+        font-family: Sans-Serif, Arial;
+    }
+    .line {
+      stroke-width: 2;
+      fill: none;
+    }
+    
+    .axis path {
+      stroke: black;
+    }
+    
+    .text {
+      font-size: 12px;
+    }
+    
+    .title-text {
+      font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-sm-12">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne" style='padding: 10px;'>
+            <h4 class="panel-title">
+            <a role="button" class="btn btn-primary btn-xs collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="color: #fff;">
+                Show/Hide Settings
+            </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <div class="col-sm-12 col-md-6">
+                    <div class="col-sm-12" style="text-align: center;">
+                        <p style='height: 100%;'>
+                            <div class="input-group" id="subjectSearch" style='height: 100%;'>
+                                <span class="input-group-btn">
+                                    <span class="button-checkbox">
+                                        <button type="button" class="btn" data-color="primary">Concepts</button>
+                                        <input id="filterConcepts" type="checkbox" class="hidden filterConcepts" />
+                                    </span>
+                                    <span class="button-checkbox">
+                                        <button type="button" class="btn" data-color="primary">People</button>
+                                        <input id="filterPersons" type="checkbox" class="hidden filterPersons" />
+                                    </span>
+                                    <span class="button-checkbox">
+                                        <button type="button" class="btn" data-color="primary">Institutions</button>
+                                        <input id="filterInstitutions" type="checkbox" class="hidden filterInstitutions" />
+                                    </span>
+                                    <span class="button-checkbox">
+                                        <button type="button" class="btn" data-color="primary">Places</button>
+                                        <input id="filterGeoTerms" type="checkbox" class="hidden filterGeoTerms" />
+                                    </span>
+                                    <span class="button-checkbox">
+                                        <button type="button" class="btn" data-color="primary">Time Periods</button>
+                                        <input id="filterTimePeriods" type="checkbox" class="hidden filterTimePeriods" />
+                                    </span>
+                                    <span>
+                                        <button id="filterAll" type="button" class="btn btn-default filterAll" style="line-height:240%; height: 3.8em;">All</button>
+                                    </span>
+                                </span>
+                            </div>
+                        </p>
+                    </div>
+                    <div class="col-sm-12 col-md-1">
+                    </div>
+                    <div class="col-sm-12 col-md-10">
+                        <div id="addSubjects">
+                            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for terms to add to the selected group ..." style="height:3.8em">
+                            </input>
+            
+                            <ul class="list-group" id="subjectSearchResultsContainer">
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-1">
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="col-sm-12" style="text-align: center; margin-bottom: 15px;">
+                        <a href="javascript:void(0);" onclick="compare();" role="button" id="compareButton" class="btn btn-success" style="color: #fff;"><i class="fas fa-chart-area"></i>Generate ngram graph</a>
+                    </div>
+                    <div class="col-sm-12" id="selectedGroupsContainer">
+                        <div class="well selectedGroup highlighted" id="selectedGroup1" onclick="highlightGroup(this);">
+                            <h4>Group 1</h4>
+                            <div class="groupTermContainer" id="group1TermContainer">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12" style="text-align: center;">
+                        <a href="javascript:void(0);" onclick="addGroup();" role="button" id="addGroupButton" class="btn btn-default"><i class="fas fa-plus"></i> Add Group</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-12" id="graphContainer" style="width: 100%; height: 600px;">
+</div>
+
+
+<script>
+    var numberOfGroups = 1;
+    var highlightedGroup = 1;
+    var selected = {};
+    selected.group1 = [];
+    var INITIAL_MAX_RESULTS = 10;
+    var max_results = INITIAL_MAX_RESULTS;
+    var types = [];
+
+    var searchTimerSubjects = 0;
+    function triggerSearchSubjects(force) {
+        if (searchTimerSubjects) {
+            clearTimeout(searchTimerSubjects);
+        }
+
+        var query = $('#subjectSearchQuery').val();
+
+        SearchTimerSubjects = setTimeout(function() {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+            success: function(result) {
+                generateSearchResults(result, query, force)
+            }
+            });
+        }, 500);
+    }
+
+    function generateSearchResults(result, query, force) {
+        var resultsContainer = $('#subjectSearchResultsContainer');
+        resultsContainer.empty();
+        result.results.forEach(function(r) {
+        var newLi = $("<li></li>");
+        newLi.addClass("list-group-item");
+        newLi.attr('data-acrelation-id', r.name);
+        var publicLink = $('<a></a>');
+        publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+        publicLink.attr('target', "_blank");
+        publicLink.html(r.name + ' (' + r.citation_count + ')' );
+        newLi.append(publicLink);
+        newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+        resultsContainer.append(newLi);
+
+        var addBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
+        addBtn.append('<i class="fas fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+        addBtn.click({column: 'left'}, addConcept);
+        newLi.prepend(addBtn);
+        });
+
+        if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+        var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+        resultsContainer.append(msg);
+        } else if (result.results.length == 0 && !force && query.length < 3) {
+        var msg = $('<p>Your query was too short. </p>');
+        resultsContainer.append(msg);
+        }
+
+        if (result.results.length == max_results) {
+        var load_more = `
+            <li class="list-group-item search-result">
+            <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+            </li>
+        `;
+        resultsContainer.append(load_more);
+        $(`#load-more-subjects`).click(function() {
+            max_results += 10;
+            triggerSearchSubjects(force);
+        });
+        }
+    }
+
+    // checkbox settings
+    var settings = {
+        on: {
+            icon: 'glyphicon glyphicon-check'
+        },
+        off: {
+            icon: 'glyphicon glyphicon-unchecked'
+        }
+    };
+
+    $(document).ready(function() {
+        $('#subjectSearchQuery').on('keyup', function() {
+        max_results = INITIAL_MAX_RESULTS;
+        triggerSearchSubjects(false);
+        });
+
+        // add checkbox search handlers
+        $(".filterConcepts").change(function() {
+        filterType("CO", $(".filterConcepts"));
+        });
+        $(".filterPersons").change(function() {
+        filterType("PE", $(".filterPersons"));
+        });
+        $(".filterInstitutions").change(function() {
+        filterType("IN", $(".filterInstitutions"));
+        });
+        $(".filterGeoTerms").change(function() {
+        filterType("GE", $(".filterGeoTerms"));
+        });
+        $(".filterTimePeriods").change(function() {
+        filterType("TI", $(".filterTimePeriods"));
+        });
+        $(".filterAll").click(function() {
+        $('.button-checkbox').each(function () {
+            var checkbox = $(this).find('input:checkbox');
+            checkbox.attr('checked', false);
+            updateDisplay(checkbox);
+        });
+        types = []
+        triggerSearchSubjects(false);
+        });
+
+        // checkbox styling
+        $('.button-checkbox').each(function () {
+                // Settings
+                var $widget = $(this),
+                    $button = $widget.find('button'),
+                    $checkbox = $widget.find('input:checkbox'),
+                    color = $button.data('color')
+
+
+                // Event Handlers
+                $button.on('click', function () {
+                    $checkbox.prop('checked', !$checkbox.is(':checked'));
+                    $checkbox.triggerHandler('change');
+                    updateDisplay($checkbox);
+                });
+                $checkbox.on('change', function () {
+                    updateDisplay($checkbox);
+                });
+
+                // Initialization
+                function init() {
+
+                    updateDisplay($checkbox);
+
+                    if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+
+                    // Inject the icon if applicable
+                    if ($button.find('.state-icon').length == 0) {
+                        $button.prepend('<i class="state-icon ' + settings[$button.data('state')].icon + '"></i><br>');
+                    }
+                    }
+                }
+                init();
+            });
+    });
+
+    // checkbox update display
+    function updateDisplay($checkbox) {
+        var isChecked = $checkbox.is(':checked');
+        var $button = $checkbox.siblings('button')
+        var color = $button.data('color');
+
+        // Set the button's state
+        $button.data('state', (isChecked) ? "on" : "off");
+
+        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+            // Set the button's icon
+            $button.find('.state-icon')
+                .removeClass()
+                .addClass('state-icon ' + settings[$button.data('state')].icon);
+
+        }
+
+        // Update the button's color
+        if (isChecked) {
+            $button
+                .removeClass('btn-default')
+                .addClass('btn-' + color + ' active');
+        }
+        else {
+            $button
+                .removeClass('btn-' + color + ' active')
+                .addClass('btn-default');
+        }
+    }
+
+    function filterType(type, element) {
+        if (element.is(':checked')) {
+        types.push(type);
+        } else {
+        var typeIndex = types.indexOf(type);
+        if (typeIndex > -1) {
+            types.splice(typeIndex, 1);
+        }
+        }
+        triggerSearchSubjects(false);
+    }
+
+    function compare() {
+        $('#collapseOne').removeClass('in');
+        $('#graphContainer').empty();
+
+        let noTermSelected = true;
+        for (const key in selected) {
+            if (selected[key].length) {
+                noTermSelected = false;
+                break;
+            }
+        }
+
+        if (noTermSelected) {
+            $.notify("Please select at least one term to plot", "error");
+        } else {
+
+            const csrftoken = getCookie('csrftoken');
+
+            async function postData(url='', data = {}) {
+                const response = await fetch(url, {
+                  method: 'POST',
+                  mode: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                  },
+                  body: JSON.stringify(data)
+                });
+                return response.json();
+            }
+
+            postData("{% url "ngram_explorer" %}", selected)
+                .then(data => {
+                    generate_line_graph(data.data, data.max_year, data.min_year, data.max_ngram);
+                })
+        }
+    }
+
+    function addConcept(event) {
+        let link = event.target.closest('a');
+        let acRelId = $(link).data('id');
+        let conceptName = $(link).data('name');
+        selected[`group${highlightedGroup}`].push(acRelId);
+
+        let label = $(`<span class="label label-default">${conceptName}</span>&nbsp`);
+        
+        console.log(highlightedGroup)
+        $(`#group${highlightedGroup}TermContainer`).append(label);
+    }
+
+    function addGroup() {
+        numberOfGroups ++;
+        highlightedGroup = numberOfGroups;
+        selected[`group${numberOfGroups}`] = [];
+        $("#selectedGroupsContainer>div").removeClass('highlighted');
+        let newGroup = `<div class="well selectedGroup highlighted" id="selectedGroup${numberOfGroups}" onclick="highlightGroup(this);"><h4>Group ${numberOfGroups}</h4><div class="groupTermContainer" id="group${numberOfGroups}TermContainer"></div></div>`
+        $(`#selectedGroup${numberOfGroups - 1}`).after(newGroup);
+    }
+
+    function highlightGroup(elem) {
+        highlightedGroup = parseInt(elem.id.slice(-1));
+        $("#selectedGroupsContainer>div").removeClass('highlighted');
+        $(elem).addClass('highlighted');
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function generate_line_graph(data, max_year, min_year, max_ngram) {
+        // modified from: https://codepen.io/zakariachowdhury/pen/JEmjwq
+
+        var width = 900;
+        var height = 550;
+        var margin = 50;
+        var duration = 250;
+
+        var lineOpacity = "0.5";
+        var lineOpacityHover = "0.85";
+        var otherLinesOpacityHover = "0.1";
+        var lineStroke = "3px";
+        var lineStrokeHover = "4px";
+
+        var circleOpacity = '0.85';
+        var circleOpacityOnLineHover = "0.25"
+        var circleRadius = 3;
+        var circleRadiusHover = 6;
+
+
+        /* Format Data */
+        var parseDate = d3.timeParse("%Y");
+        data.forEach(function(d) { 
+            d.values.forEach(function(d) {
+                d.year = parseDate(d.year);  
+            });
+        });
+
+
+        /* Scale */
+        var xScale = d3.scaleTime()
+        .domain([parseDate(min_year), parseDate(max_year)])
+        .range([0, width-margin]);
+
+        var yScale = d3.scaleLinear()
+        .domain([0, max_ngram])
+        .range([height-margin, 0]);
+
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        /* Add SVG */
+        var svg = d3.select("#graphContainer").append("svg")
+        .attr("width", (width+margin)+"px")
+        .attr("height", (height+margin)+"px")
+        .append('g')
+        .attr("transform", `translate(${margin}, ${margin})`);
+
+
+        /* Add line into SVG */
+        var line = d3.line()
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.ngram))
+        .curve(d3.curveMonotoneX);
+
+        let lines = svg.append('g')
+        .attr('class', 'lines');
+
+        lines.selectAll('.line-group')
+        .data(data).enter()
+        .append('g')
+        .attr('class', 'line-group')  
+        .on("mouseover", function(d, i) {
+            svg.append("text")
+                .attr("class", "title-text")
+                .style("fill", color(i))        
+                .text(`${d.authority_names}`)
+                .attr("text-anchor", "middle")
+                .attr("x", (width-margin)/2)
+                .attr("y", 5)
+                .style('font-size', '1.2em');
+            })
+        .on("mouseout", function(d) {
+            svg.select(".title-text").remove();
+            })
+        .append('path')
+        .attr('class', 'line')  
+        .attr('d', d => line(d.values))
+        .style('stroke', (d, i) => color(i))
+        .style('opacity', lineOpacity)
+        .on("mouseover", function(d) {
+            d3.selectAll('.line')
+                            .style('opacity', otherLinesOpacityHover);
+            d3.selectAll('.circle')
+                            .style('opacity', circleOpacityOnLineHover);
+            d3.select(this)
+                .style('opacity', lineOpacityHover)
+                .style("stroke-width", lineStrokeHover)
+                .style("cursor", "pointer");
+            })
+        .on("mouseout", function(d) {
+            d3.selectAll(".line")
+                            .style('opacity', lineOpacity);
+            d3.selectAll('.circle')
+                            .style('opacity', circleOpacity);
+            d3.select(this)
+                .style("stroke-width", lineStroke)
+                .style("cursor", "none");
+            });
+
+
+        /* Add circles in the line */
+        lines.selectAll("circle-group")
+        .data(data).enter()
+        .append("g")
+        .style("fill", (d, i) => color(i))
+        .selectAll("circle")
+        .data(d => d.values).enter()
+        .append("g")
+        .attr("class", "circle")  
+        .on("mouseover", function(d) {
+            d3.select(this)     
+                .style("cursor", "pointer")
+                .append("text")
+                .attr("class", "text")
+                .text(`${d.year.getFullYear()}: ${d.ngram}%`)
+                .attr("x", d => xScale(d.year) + 5)
+                .attr("y", d => yScale(d.ngram) - 10);
+            })
+        .on("mouseout", function(d) {
+            d3.select(this)
+                .style("cursor", "none")  
+                .transition()
+                .duration(duration)
+                .selectAll(".text").remove();
+            })
+        .append("circle")
+        .attr("cx", d => xScale(d.year))
+        .attr("cy", d => yScale(d.ngram))
+        .attr("r", circleRadius)
+        .style('opacity', circleOpacity)
+        .on("mouseover", function(d) {
+                d3.select(this)
+                .transition()
+                .duration(duration)
+                .attr("r", circleRadiusHover);
+            })
+            .on("mouseout", function(d) {
+                d3.select(this) 
+                .transition()
+                .duration(duration)
+                .attr("r", circleRadius);  
+            });
+
+
+        /* Add Axis into SVG */
+        var xAxis = d3.axisBottom(xScale).ticks(data[0].values.length/2);
+        var yAxis = d3.axisLeft(yScale).ticks(10);
+
+        svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0, ${height-margin})`)
+        .call(xAxis);
+
+        svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append('text')
+        .attr("y", 15)
+        .attr("transform", "rotate(-90)")
+        .attr("fill", "#000")
+        .text("% of citations for that year");
+    }
+</script>
+{% endblock %}
