@@ -1,16 +1,87 @@
 {% extends "isisdata/__base_home.html" %}
 {% load app_filters %}
+{% load citation_filters %}
+{% load facet_filters %}
+{% load metadata_filters %}
+{% load search_filters %}
 {% load static %}
 
+{% block extra_head%}
+<script type="text/javascript">
+    window.addEventListener('DOMContentLoaded', (event) => {
+        let citationType = "{{ citation.type_controlled }}";
+        let propertiesMap = "{{properties_map}}"
+
+        // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal 
+        // (using a selection from 3 color choices) to use as the citation's featured image. 
+        // Weldon wanted each journal to have the same cover color everytime, 
+        // so the journal title's location in the alphabet determines the color.
+
+        if (citationType === 'AR') {
+            let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+            let backgroundColor;
+
+            let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+            let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+
+            if (periodicalName.length) {
+                if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+                backgroundColor = backgroundColors[0];
+                } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+                backgroundColor = backgroundColors[1];
+                } else {
+                backgroundColor = backgroundColors[2];
+                }
+            }
+            document.getElementById("citationImage").style.display = "none";
+            document.getElementById("citationImageCaption").style.display = "none";
+            document.getElementById("placeholderImage").style.display = "block";
+            document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
+            document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+            document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+        }
+
+        $('#author-timeline strong').html('Related citations | ');
+    });
+</script>
+
+    <style>
+        .truncate {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 10;
+            -webkit-box-orient: vertical;
+            }
+        
+        .featured-citation p,
+        .featured-authority p,
+        .featured-tweet p {
+            font-size: 14px;
+        }
+
+        #about-text p {
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+
+        .content-container {
+            padding: 15px 50px 50px 50px;
+        }
+    </style>
+{% endblock %}
 
 {% block content %}
-<div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat;">
-    <div class="container">
+<div class="jumbotron mainjumbo" style="background-image: url(''); background-repeat: no-repeat; margin-bottom: 0;">
+    <div class="container" style='margin: 0px; width: 100%;'>
         <div class="row">
-            <div class="col-md-6 col-sm-12 col-xs-12">
-                <iframe width="100%" height="315" src="https://www.youtube.com/embed/ntqtn0tyy-E" frameborder="0" allowfullscreen></iframe>
+            <div class="col-sm-12 col-md-6">
+                <h2> An open access discovery service for the history of science.</h2>
+                <p>Built on 50-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
+                <p><img src='{% static "isisdata/images/hss_society_logo-1.jpeg" %}' style="height: 75px"/></p>
             </div>
-            <div class="col-md-6 col-sm-12 col-xs-12">
+            <div class="col-sm-12 col-md-6">
                 <div class="search-bar">
                     <form method="get" action="/isis/">
                         <div class="input-group">
@@ -23,33 +94,225 @@
                             <input id="id_models" name="models" type="hidden" value="isisdata.citation">
                             <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
                             <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
-
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
                         </div>
                     </form>
                 </div>
-
-                <h2> An open access discovery service for the history of science.</h2>
-                <p>Built on 40-years of data in the <em>Isis Bibliography of the History of Science</em>.</p>
-                <p class="pull-right"><img src='{% static "isisdata/images/hss_logo.jpg" %}' style="padding-top: 30px;" /></p>
+                <br>
+                <div class="row">
+                    <div class="browse-button" style="float: right; padding: 0 15px 0 0;">
+                        <form method="get" action="/isis/">
+                            <div class="input-group">
+                                <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                                <span>
+                                    <button class="btn btn-primary btn-lg" style="font-weight: 300" type="submit">or <strong>browse</strong> the entire database</button>
+                                </span>
+                            </div>
+                            <div>
+                                <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                                <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                                <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                                <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                                <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                                <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row" style="margin-top: 20px">
-          <div class="col-md-12 col-sm-12 col-xs-12">
-            <p class="text-center"><span class="text-danger"><strong>New!</strong></span> Isis Cumulative Bibliography, 1913-1975 is now available to browse: <a href="http://cumulative.isiscb.org">cumulative.isiscb.org</a>.</p>
-          </div>
-        </div>
-
+        <hr style="border-color: #999; margin: 5px 0 25px 0;">
         <div class="row">
-            <div class="row-height">
-                <div class="col-md-9 col-sm-12 col-height col-xs-12 col-bottom">
-
+            <div class="col-sm-12 col-md-8" style="padding: 0;">
+                <div class="col-xs-12 col-sm-12 col-md-6 featured-citation">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
+    
+                            <div class="row" style="padding-left: 15px; ">
+                            {% if citation.get_type_controlled_display == "Book" %}
+                                <i class="fa fa-book"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Thesis" %}
+                                <i class="fa fa-graduation-cap"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Multimedia Object" %}
+                                <i class="fa fa-photo-video"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% elif citation.get_type_controlled_display == "Chapter" %}
+                                <i class="fa fa-book-open"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% else %}
+                                <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.get_type_controlled_display }}</span>
+                            {% endif %}
+                            </div>
+                    
+                            {% url 'citation' citation.id|get_pk as citation_url %}
+                            {% if citation.title == 'Title missing' and citation.complete_citation %}
+                                <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                {{citation.complete_citation}}
+                                </a>
+                            {% else %}
+                                <h4 style="margin: 5px 0px">
+                                    <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
+                                    {{ citation.title|bleach_safe }}
+                                    </a>
+                                </h4>
+                            {% endif %}
+                            <hr style="margin: 5px 0">
+                            {% if featured_citation_authors|length > 0 %}
+                                {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a>{% if acrelation != citation.get_all_contributors|last %},{% else %}<br>{% endif %}{% endif %}{% endfor %}
+                            {% endif %}
+                            {% if citation|get_pub_year %}
+                                {{citation|get_pub_year}}
+                            {% endif %}
+                        </div>
+                    
+                        <div class="panel-body">
+                            <div class="col-sm-12 col-md-12" style="padding: 0;">
+                                <div class="col-sm-12 {% if citation.abstract %}col-md-5{% else %}col-md-12{% endif %}" style="padding: 0;">
+                                    <div id="placeholderImage" style="height: 250px; width: 100%; display: none; padding: 5% 7% 10% 7%; vertical-align: middle;">
+                                        {% for prop in properties_map %}
+                                            {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+                                        {% endfor %}
+                                        {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                                        <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
+                                            {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
+                                                <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
+                                            {% endif %}
+                                            {% if citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+                                                <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Issue: {% if citation.part_details.issue_begin %}{{ citation.part_details.issue_begin }}{% if citation.part_details.issue_end %} - {{ citation.part_details.issue_end}}{% endif %}{% else %}{{ citation.part_details.issue_free_text }}{% endif %}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        <div style="width: 0; height: 0; border-style: solid; border-width: 0 0 30px 30px; border-color: white white white #ccc; position: absolute; right: 0; bottom: 20px"></div>
+                                    </div>
+                                    <img id="citationImage" src={{ featured_citation_image.url|safe }}><br>
+                                    <span id="citationImageCaption" style="color: gray; text-align: center; font-size: .9em;">source: Google Books</span>
+                                </div>
+                                <div class="col-sm-12 {% if citation.abstract %}col-md-7{% else %}col-md-0{% endif %}" style="padding: 0 0 0 10px;">
+                                    <p class="itemAbstract truncate" style="margin-bottom: 0">{{ citation.abstract|filter_abstract|bleach_safe }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 col-sm-12 col-xs-12 col-height">
-
+                <div class="col-xs-12 col-sm-12 col-md-6 featured-authority">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="btn-grp pull-right" style="color: #555"><i class="fas fa-star-of-life"></i></span>
+                            <span class="label label-default">{{featured_authority.get_type_controlled_display}}</span><br>
+                            <a href="{{ featured_authority.id|get_authority_uri_from_id }}"><h4 style="margin: 5px 0px">{{ featured_authority.name }}</h4></a>
+                        </div>
+                        <div class="panel-body">
+                            <div class="{% if wikiImage%}col-sm-12 col-md-5{% else %}col-xs-0{% endif %}" style="padding: 0; {% if not wikiImage%}height: 0;{% endif%}">
+                                <img src="{{ wikiImage|safe }}" href="{{ wikiCredit }}" style="width: 100%">
+                            </div>
+                            <div class="col-sm-12 {% if wikiImage%}col-md-7{% endif%}">
+                                <p class="truncate" style="margin-bottom: 0">{{ wikiIntro }}</p>
+                            </div>
+                            <div class='row'>
+                                <div class="col-sm-12" style="margin-top: 10px;">
+                                    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' with authority=featured_authority %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="alert alert-default" role="alert" style="padding: 7px; margin-right: -15px; background-color: #eee; border-left: 6px solid #555; border-color: #555">
+                        <div class="media">
+                            <div class="media-left media-middle">
+                                <h1 style="margin: 0; color: #555;"><i class="fas fa-star-of-life"></i></h1>
+                            </div>
+                            <div class="media-body">
+                                <span style="font-size: 1.2em; font-weight: 300; display: inline;">The featured theme is currently the <strong>history of pandemics</strong> in order to highlight important scholarship in this area. Check out our open-process <a href="https://isiscb.org/special-issue-on-pandemics/">special edition on the history of pandemics</a> and our <a href="https://isiscb.org/history-in-the-time-of-covid-19/">pandemics resources project</a> to see more great work in this area.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4 featured-tweet">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="btn-grp pull-right" style="color: #555"><i class="fab fa-twitter"></i></span>
+                        <h4><a href={{tweet_url}}>Recent Tweet from IsisCB</a></h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>
+                            {{tweet_text|safe}}
+                        </p>
+                        {% if tweet_image %}
+                            <img src={{tweet_image}} style="max-height: 350px; max-width: 100%;">
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<div class='row content-container connect-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">Get to Know Us</h2>
+    <div class="col-sm-12 col-md-6" style='padding: 10px 50px'>
+        <div class="media">
+            <div class="media-body">
+                <h4 class="media-heading">Stephen Weldon</h4>
+                <h5>Director of the Isis Bibliography</h5>
+                <i class="far fa-envelope"></i> <span>spweldon[at]ou[dot]edu</span><br>
+                <i class="far fa-user-circle"></i> <a href="https://www.ou.edu/cas/hsci/people/faculty/stephen-weldon">ou.edu/cas/hsci/people/faculty/stephen-weldon</a>
+            </div>
+        </div>
+        <hr>
+        <div style="font-size: 1.1em;">
+            <a href="https://isiscb.org/isiscb_staff/">IsisCB Staff</a><br>
+            <a href="https://isiscb.org/advisory-board/">IsisCB Advisory Board</a><br>
+            <a href="https://isiscb.org/contributing-editors/">IsisCB Contributing Editors</a>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-6" style='padding: 10px 50px; font-size: 1.1em;'>
+        <div>
+            <i class="fab fa-twitter"></i> <a href="https://twitter.com/HSSIsisCB">twitter.com/HSSIsisCB</a><br>
+            <i class="far fa-envelope"></i> <a href="mailto:isisbibliography@gmail.com">IsisBibliography@gmail.com</a><br>
+            <i class="fab fa-youtube"></i> <a href="https://www.youtube.com/channel/UC2z3H0zE-0YISH9zu9jCC3g">youtube.com/channel/IsisCB</a>
+        </div>
+        <hr>
+        <div>
+            <h4>IsisCB Projects</h4>
+            <div style="font-size: 1em;">
+                <a href="https://isiscb.org/history-in-the-time-of-covid-19/">Pandemics Project</a><br>
+                <a href="https://isiscb.org/race-and-history-of-science-project/">Race and Science Project</a><br>
+                <a href="https://isiscb.org/overview-of-isiscb-activities/">Overview of our activities</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='row content-container about-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #eee;'>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">About IsisCB Explore</h2>
+    <div class="col-md-6 col-sm-12 col-xs-12">
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/ntqtn0tyy-E" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div class="col-sm-12 col-md-6" id='about-text'>
+        <p>IsisCB Explore is an open access discovery service. Opened in 2015, it utilizes citation data in the Isis Bibliography dataset to power a robust search engine. Using Explore, you can discover publications, people, and concepts in all areas of history of science, technology, and medicine. The project was funded through a two-year development grant by the Alfred P. Sloan Foundation.</p>
+        <p>IsisCB Explore enables users to search for citations, authors, editors, publisher, journals, and concepts using a dataset of over 220,000 citations to historical works across more than four decades of research in the field. The content is updated daily, so users always have the most up-to-date resources in the field.</p>
+        <p>The innovative design works through a relational network graph of the data based on two record types: citations (the bibliographic entries that have been classified and indexed) and authorities (the identity records for subjects, categories, authors, contributors, publishers, journals, places, people, and institutions).</p>
+        <p>All of our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use following the Creative Commons Attribution-NonCommercial 4.0 International License.</p>
+    </div>
+    <div class="row" style="margin-top: 20px">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+          <h4 class="text-center" style="margin-top: 30px; font-weight: 300; font-size: 20px">Isis Cumulative Bibliography, 1913-1975 is now available to browse: <a href="http://cumulative.isiscb.org">cumulative.isiscb.org</a>.</h4>
+        </div>
+    </div>
+</div>
+<div class='row content-container sponsor-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">With Support From</h2>
+    <div class="col-xs-12 col-sm-4">
+    </div>
+    <div class="col-xs-12 col-sm-4" style="margin: 0 8px; padding: 0">
+        <a href="https://hssonline.org/"><img src="{% static "isisdata/images/hss_society_logo-1.jpeg" %}" alt="history of science society hss logo" height="75px"></a>
+        <a href="https://libraries.ou.edu/frontpage" style="margin: 0 25px;"><img src="{% static "isisdata/images/oulib_logo.jpeg" %}" alt="university of oklahoma libraries logo" height='125px'></a>
+        <a href="https://sloan.org/"><img src="{% static "isisdata/images/sloan_logo.jpeg" %}" alt="alfred p. sloan foundation logo" height="75px"></a>
+    </div>
+    <div class="col-xs-12 col-sm-4">
     </div>
 </div>
 <div class="row comments-log">
@@ -57,26 +320,39 @@
     <div class="col-sm-6 col-md-6">
         <div class="panel panel-default panel-isiscb">
             <div class="panel-heading">
-              Recently added records
-              <span class="pull-right">
-                <a style="color: white;" href="{% url 'recent_records' %}"><i class="fa fa-calendar" aria-hidden="true"></i>
-Last month</a>&nbsp; &nbsp;
-                <a style="color: white;" href="{% url 'recent_records' %}?interval=week"><i class="fa fa-calendar" aria-hidden="true"></i>
-Last week</a>
-              </span>
+                Recently added records
+                <span class="pull-right">
+                    <a style="color: white;" href="{% url 'recent_records' %}"><i class="fa fa-calendar" aria-hidden="true"></i>
+                        Last month
+                    </a>&nbsp; &nbsp;
+                    <a style="color: white;" href="{% url 'recent_records' %}?interval=week"><i class="fa fa-calendar" aria-hidden="true"></i>
+                        Last week
+                    </a>
+                </span>
             </div>
             <ul class="list-group">
             {% for record in records_recent %}
             <li class="list-group-item">
                 <div>
                     {% if record|to_class_name == 'Citation' %}
-                    <span class="label label-info">
+                    <span class="label" style="background-color: #337ab7">{{ record.get_type_controlled_display }}</span>
                     {% endif %}
                     {% if record|to_class_name == 'Authority' %}
-                    <span class="label label-warning">
+                        {% if record.get_type_controlled_display == "Concept" %}
+                            <span class="label label-concepts">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Person" %}
+                            <span class="label label-people">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Institution" %}
+                            <span class="label label-institutions">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Geographic Term" %}
+                            <span class="label label-places">{{ record.get_type_controlled_display }}</span>
+                        {% elif record.get_type_controlled_display == "Time Period" %}
+                            <span class="label label-times">{{ record.get_type_controlled_display }}</span>
+                        {% else %}
+                            <span class="label label-info">{{ record.get_type_controlled_display }}</span>
+                        {% endif %}
                     {% endif %}
-                    {{record|to_class_name}}</span>
-                    [{{ record.get_type_controlled_display }}] <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
+                    <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
                 </div>
                 <div>
                   {% if record|to_class_name == 'Citation' and record.abstract %}
@@ -104,13 +380,24 @@ Last week</a>
             <li class="list-group-item">
                 <div>
                     {% if comment.subject_content_type.model == 'citation' %}
-                    <span class="label label-info">
+                    <span class="label" style="background-color: #337ab7">{{ comment.subject.get_type_controlled_display }}</span>
                     {% endif %}
                     {% if comment.subject_content_type.model == 'authority' %}
-                    <span class="label label-warning">
+                        {% if comment.subject.get_type_controlled_display == "Concept" %}
+                            <span class="label label-concepts">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Person" %}
+                            <span class="label label-people">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Institution" %}
+                            <span class="label label-institutions">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Geographic Term" %}
+                            <span class="label label-places">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% elif comment.subject.get_type_controlled_display == "Time Period" %}
+                            <span class="label label-times">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% else %}
+                            <span class="label label-info">{{ comment.subject.get_type_controlled_display }}</span>
+                        {% endif %}
                     {% endif %}
-                    {{ comment.subject_content_type.model|capfirst }}</span>
-                    [{{ comment.subject.get_type_controlled_display }}] <a href="{% url 'index' comment.subject.id %}">{{ comment.subject|get_label_string|safe }}</a>
+                    <a href="{% url 'index' comment.subject.id %}">{{ comment.subject|get_label_string|safe }}</a>
 
                 </div>
                  <div>
@@ -124,5 +411,4 @@ Last week</a>
         </div>
     </div>
 </div>
-
 {% endblock %}

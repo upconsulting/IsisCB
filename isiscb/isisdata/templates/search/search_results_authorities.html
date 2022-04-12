@@ -3,24 +3,17 @@
 {% load search_filters %}
 
 {% if query %}
-
-<ol class="breadcrumb" style="margin-left: 0; border-color: #777777;">
-        <li> {{ page.authority.start_index }} to {{ page.authority.end_index }} of {{ count_authority }} results for: <b><i>"{{ query|format_query }}"</i></b></li>
-</ol>
-
-<div class="panel-group hidden-print" id="type_panel">
-    <div class="panel panel-default" style="margin-bottom: 15px; margin-right: 7.5px">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion"
-            href=".collapseAuthorityTypes" class="accordion-toggle">
-            Sort & Filter
-          </a>
-        </h4>
-      </div>
-    <div id="collapseAuthorityTypes" class="collapseAuthorityTypes panel-collapse collapse {% if selected_facets.authority_authority_type %}in{% endif %}" aria-expanded="{% if selected_facets.authority_authority_type %}true{% else %}false{% endif %}">
-      <div class="facet_panel panel-body">
-        <div class="row panel-row" style="margin-bottom:10px;">
+  <div class='panel panel-default'>
+    <div class='panel-heading'>
+      <h4 class='panel-title'>
+        <a data-toggle="collapse" data-parent="#accordion" href=".collapseAuthorityResults" class="accordion-toggle">
+          All Authorities
+        </a>
+      </h4>
+    </div>
+    <div id="collapseAuthorityResults" class="collapseAuthorityResults panel-collapse collapse" style='height: 0px;'>
+      <div class='panel-body'>
+        <div class="row" style="margin-bottom:10px;">
           <div class="col-md-12 panel-cell" style="padding-top:4px">
             <div class="dropdown">
                 {% if sort_order_dir_authority == 'descend' %}
@@ -28,19 +21,28 @@
                 {% else %}
                 <a href="{{ request.get_full_path|set_sort_direction:'sort_order_dir_authority:descend'|set_index_model:'models:isisdata.authority' }}" title="Current sort order: ascending" class="btn btn-default"><span class="glyphicon glyphicon-sort-by-attributes"></span></a>
                 {% endif %}
+
+                <button class="btn btn-default dropdown-toggle" type="button" id="sort_dropdown" data-toggle="dropdown" aria-haspopup="true">
+                  Sort: {{ sort_order_authority|get_current_sort_order_authority }}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                  <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:name'|set_index_model:'models:isisdata.authority' }}">Name</a></li>
+                  <li><a href="{{ request.get_full_path|set_page_to_one|set_sort_order:'sort_order_authority:citation_count'|set_index_model:'models:isisdata.authority' }}">Count</a></li>
+                </ul>
             </div>
           </div>
         </div>
         <hr style="margin-top: 4px; margin-bottom: 4px;">
 
-        <div class="row panel-row">
+        <div class="row">
           <div class="col-md-12 panel-cell">
             <h5 style="margin:4px 0"><small>Select the type of authority you would like see.</small></h5>
           </div>
         </div>
 
         {% if facets_authority.fields.authority_type %}
-              <div class="row panel-row ">
+              <div class="row">
                 {% for auth_type in selected_facets.authority_authority_type %}
                 {% with auth_type|create_facet_string:'authority_authority_type' as encoded_auth_type %}
                 <div class="col-md-12">
@@ -62,91 +64,93 @@
         {% else %}
                   <div class="col-md-12"><p>No authority type facets.</p></div>
         {% endif %}
+
+        <hr>
+
+        {% for result in page.authority.object_list %}
+        {% if result.id %}
+        <div class="authority-search-result">
+          <p style="padding-left: 8px; margin-bottom: 15px;">
+                <span class="label label-default">{{ result.authority_type }}</span>
+                {% url 'authority' result.id|get_pk as authority_url %}
+                <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
+                {% with result.dates as dates %}
+                {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
+                {% endwith %}
+                ({{ result.citation_count }})
+
+                <span class="visible-print-inline">({{ authority_url }})</span>
+
+          </p>
+        </div>
+        {% endif %}
+        {% empty %}
+            <p>No results found.</p>
+        {% endfor %}
+
+        {% if page.authority.has_previous or page.authority.has_next %}
+        <nav class="hidden-print">
+          <ul class="pagination">
+            <li class="disabled"><a>Page:</a></li>
+
+              {% if page.authority.has_previous %}
+              <li>
+                {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
+                {% with ppage='page_authority:'|add:pagenr %}
+                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+                {% endwith %}
+                {% endwith %}
+              </li>
+              {% else %}
+              <li class="disabled">
+                {% with pagenr=page.authority.number|stringformat:"s"  %}
+                {% with ppage='page_authority:'|add:pagenr %}
+                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+                {% endwith %}
+                {% endwith %}
+              </li>
+              {% endif %}
+              {% if page.authority.has_previous or page.authority.has_next %}
+              {% for p in page.authority.paginator.page_range %}
+              {% with pagenr=forloop.counter|stringformat:"s" %}
+              {% with ppage='page_authority:'|add:pagenr %}
+                  <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
+              {% endwith %}
+              {% endwith %}
+              {% endfor %}
+              {% endif %}
+              {% if page.authority.has_next %}
+              <li>
+                {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
+                {% with ppage='page_authority:'|add:pagenr %}
+                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+                {% endwith %}
+                {% endwith %}
+              </li>
+              {% else %}
+              <li class="disabled">
+                {% with pagenr=page.authority.number|stringformat:"s" %}
+                {% with ppage='page_authority:'|add:pagenr %}
+                <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+                {% endwith %}
+                {% endwith %}
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
       </div>
     </div>
   </div>
-</div>
 
-    {% for result in page.authority.object_list %}
-    {% if result.id %}
-    <div class="authority-search-result">
-      <p style="padding-left: 8px; margin-bottom: 15px;">
-            <span class="label label-default">{{ result.authority_type }}</span>
-            {% url 'authority' result.id|get_pk as authority_url %}
-            <a href="{{ authority_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">{{ result.name }}</a>
-            {% with result.dates as dates %}
-            {% if dates %}({{ dates|join_attributes_flat:', ' }}){% endif %}
-            {% endwith %}
-            ({{ result.object | get_nr_of_citations }})
-
-            <span class="visible-print-inline">({{ authority_url }})</span>
-
-      </p>
-    </div>
-    {% endif %}
-    {% empty %}
-        <p>No results found.</p>
-    {% endfor %}
-
-    {% if page.authority.has_previous or page.authority.has_next %}
-    <nav class="hidden-print">
-      <ul class="pagination">
-        <li class="disabled"><a>Page:</a></li>
-
-          {% if page.authority.has_previous %}
-          <li>
-            {% with pagenr=page.authority.previous_page_number|stringformat:"s"  %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% else %}
-          <li class="disabled">
-            {% with pagenr=page.authority.number|stringformat:"s"  %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Previous">
-              <span aria-hidden="true">&laquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% endif %}
-          {% if page.authority.has_previous or page.authority.has_next %}
-          {% for p in page.authority.paginator.page_range %}
-          {% with pagenr=forloop.counter|stringformat:"s" %}
-          {% with ppage='page_authority:'|add:pagenr %}
-              <li {% if page.authority.number == p %} class="active" {% endif %}><a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}">{{ p }}</a></li>
-          {% endwith %}
-          {% endwith %}
-          {% endfor %}
-          {% endif %}
-          {% if page.authority.has_next %}
-          <li>
-            {% with pagenr=page.authority.next_page_number|stringformat:"s" %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% else %}
-          <li class="disabled">
-            {% with pagenr=page.authority.number|stringformat:"s" %}
-            {% with ppage='page_authority:'|add:pagenr %}
-            <a href="{{ request.get_full_path|set_page:ppage|set_index_model:'models:isisdata.authority' }}" aria-label="Next">
-              <span aria-hidden="true">&raquo;</span>
-            </a>
-            {% endwith %}
-            {% endwith %}
-          </li>
-          {% endif %}
-        </ul>
-      </nav>
-      {% endif %}
 {% else %}
     {# Show some example queries to run, maybe query syntax, something else? #}
 {% endif %}

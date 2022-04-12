@@ -175,6 +175,8 @@ def authority_catalog(request, authority_id):
     publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
     subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
 
+    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+
     # the following count was used before, but it seems to be off
     #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
     #                                                   .values('citation_id').distinct('citation_id')\
@@ -283,6 +285,7 @@ def authority_catalog(request, authority_id):
     context = {
         'authority_id': authority_id,
         'authority': authority,
+        'display_type': display_type,
         'related_citations_count': related_citations_count,
         'related_citations_author': related_citations_author,
         'related_citations_author_count': related_citations_author_count,
@@ -377,7 +380,15 @@ def authority(request, authority_id):
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs = SearchQuerySet().models(Citation)
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+
     related_citations = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
             .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
@@ -386,11 +397,18 @@ def authority(request, authority_id):
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
             .order_by('-publication_date_for_sort')
 
+    related_geographics_facet = related_citations.facet_counts()['fields']['geographic_ids'] if 'fields' in related_citations.facet_counts() else []
+    related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_id)
+
     related_citations_count = related_citations.count()
 
     author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-            
+    
+    publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).count()
+    
+    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+
     page_number = request.GET.get('page_citation', 1)
     paginator = Paginator(related_citations, 20)
     page_results = paginator.get_page(page_number)
@@ -403,6 +421,7 @@ def authority(request, authority_id):
         'authority': authority,
         'source_instance_id': authority_id,
         'source_content_type': ContentType.objects.get(model='authority').id,
+        'display_type': display_type,
         'related_citations_count': related_citations_count,
         'api_view': api_view,
         'redirect_from': redirect_from,
@@ -411,16 +430,23 @@ def authority(request, authority_id):
         'wikiImage': wikiImage,
         'wikiCredit': wikiCredit,
         'page_results': page_results,
+        'related_geographics_facet': related_geographics_facet,
     }
     return render(request, 'isisdata/authority.html', context)
+
+def get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
+    if authority.type_controlled == authority.PERSON and author_contributor_count != 0 and related_citations_count !=0 and author_contributor_count/related_citations_count > .9:
+        return 'Author'
+    elif authority.type_controlled == authority.INSTITUTION and publisher_count != 0 and related_citations_count !=0 and publisher_count/related_citations_count > .9:
+        return 'Publisher'
+    else:
+        return authority.get_type_controlled_display
 
 def remove_self_from_facets(facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]
 
 def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
-    wikiImage = ''
-    wikiCredit = ''
-    wikiIntro = ''
+    wikiImage = wikiCredit = wikiIntro = ''
 
     if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
         wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
@@ -477,7 +503,6 @@ def get_place_map_data(request, authority_id):
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
     related_geographics_facet = word_cloud_results.facet_counts()['fields']['geographic_ids'] if 'fields' in word_cloud_results.facet_counts() else []
-
     geocodes = word_cloud_results.facet_counts()['fields']['geocodes'] if 'fields' in word_cloud_results.facet_counts() else []
     citation_count = _get_citation_count_per_country(geocodes)
     country_map_data, country_name_map, is_mapped_map = _get_authority_places_map_data(related_geographics_facet)

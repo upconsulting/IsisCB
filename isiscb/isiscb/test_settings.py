@@ -399,4 +399,11 @@ TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', 'AAAAAAAAA
 TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
 TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
 
+# admin timezone
+ADMIN_TIMEZONE = os.environ.get('ADMIN_TIMEZONE', 'US/Central')
+
+#homepage featured defaults
+FEATURED_CITATION_ID = os.environ.get('FEATURED_CITATION_ID', 'CBB000932135')
+FEATURED_AUTHORITY_ID = os.environ.get('FEATURED_AUTHORITY_ID', 'CBA000113752')
+
 DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')

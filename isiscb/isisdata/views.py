@@ -26,6 +26,7 @@ from operator import itemgetter
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.inputs import Raw
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -36,7 +37,8 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale, json, requests
+import codecs, datetime, uuid, base64, zlib, locale, json, requests, random
+import pytz
 
 from collections import defaultdict, Counter
 from .helpers.mods_xml import initial_response, generate_mods_xml
@@ -48,6 +50,8 @@ from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
+from isisdata.twitter_methods import get_featured_tweet
+from isisdata.isiscbviews.authority_views import get_wikipedia_image_synopsis
 
 from unidecode import unidecode
 import datetime
@@ -778,7 +782,7 @@ def citation(request, citation_id):
 
     similar_objects = get_facets_from_similar_citations(similar_citations)
 
-    googleBooksImage = get_google_books_image(citation)
+    googleBooksImage = get_google_books_image(citation, False)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
@@ -930,37 +934,38 @@ def generate_similar_facets(similar_objects):
 
     return similar_objects
 
-def get_google_books_image(citation):
+def get_google_books_image(citation, featured):
 
     # Provide image for citation
-    if not (citation.BOOK or citation.CHAPTER):
+    if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
         return {}
 
     cover_image = {}
 
+    parent_id = None
     parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
 
-    if citation.type_controlled in ['CH'] and parent_id:
+    if citation.type_controlled in [Citation.CHAPTER] and parent_id:
         google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
     else:
         google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
 
     google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
 
-    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time:
+    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time and not featured:
         cover_image['size'] = google_books_data.image_size
         cover_image['url'] = google_books_data.image_url
     else:
         contrib = ''
         title = ''
 
-        if citation.type_controlled in ['BO']:
+        if citation.type_controlled in [Citation.BOOK]:
             title = citation.title
             if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
                 contrib = citation.get_all_contributors[0].authority.name.strip()
-        elif citation.type_controlled in ['CH'] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
+        elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
             title = parent_relations[0].subject.title
             if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
                 contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
@@ -1000,19 +1005,19 @@ def get_google_books_image(citation):
                     if 'imageLinks' in book["volumeInfo"]:
                         imageLinks = book["volumeInfo"]["imageLinks"].keys()
 
-                        if "medium" in imageLinks:
+                        if "medium" in imageLinks and not featured:
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                        elif "small" in imageLinks:
+                        elif "small" in imageLinks and not featured:
                             cover_image["size"] = "standard"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
                         elif "thumbnail" in imageLinks:
                             cover_image["size"] = "thumbnail"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
 
-                        if citation.type_controlled in ['BO']:
+                        if citation.type_controlled in [Citation.BOOK]:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
-                        elif citation.type_controlled in ['CH'] and parent_id:
+                        elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
                         google_books_data.save()
 
@@ -1262,8 +1267,6 @@ class IsisSearchView(FacetedSearchView):
             paginator_citation = Paginator(self.queryset['citation'], self.results_per_page)
 
 
-        print(self.queryset['citation'][0].__dict__)
-
         try:
             page_authority = paginator_authority.page(page_no_authority)
         except InvalidPage:
@@ -1447,6 +1450,55 @@ def home(request):
     """
     The landing view, at /.
     """
+    # Get featured citation and authority
+    now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
+    current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
+    featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
+
+    sqs = SearchQuerySet().models(Citation)
+    sqs.query.set_limits(low=0, high=30)
+    # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+    featured_citations = sqs.all().exclude(public="false")
+    featured_citations = featured_citations.filter(subject_ids__in=current_featured_authority_ids).filter(type__in=['Book', 'Article']).filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+
+    if featured_citations:
+        featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
+        featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
+    else:
+        #set default featured citation in case no featured authorities have been selected
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
+
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
+    featured_citation_image = get_google_books_image(featured_citation, True)
+
+    if featured_authorities:
+        featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+    else:
+        #set default featured authorities in case no featured authorities have been selected
+        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
+    
+    #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
+    sqs = SearchQuerySet().models(Citation)
+
+    related_citations_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(subject_ids=featured_authority.id).filter_or(institution_ids=featured_authority.id) \
+            .filter_or(category_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id) \
+            .filter_or(publisher_ids=featured_authority.id).filter_or(school_ids=featured_authority.id).filter_or(meeting_ids=featured_authority.id) \
+            .filter_or(periodical_ids=featured_authority.id).filter_or(book_series_ids=featured_authority.id).filter_or(time_period_ids=featured_authority.id) \
+            .filter_or(geographic_ids=featured_authority.id).filter_or(about_person_ids=featured_authority.id).filter_or(other_person_ids=featured_authority.id) \
+            .count()
+    
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
+
+    # get wikipedia data
+    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
+
+    #Get featured tweet
+    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
+
+    properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 
     start_index = 0
     end_index = 10
@@ -1470,6 +1522,17 @@ def home(request):
         'active': 'home',
         'records_recent': recent_records[:10],
         'comments_recent': Comment.objects.order_by('-modified_on')[:10],
+        'citation': featured_citation,
+        'featured_citation_authors': featured_citation_authors,
+        'featured_authority': featured_authority,
+        'featured_citation_image': featured_citation_image,
+        'wikiImage': wikiImage,
+        'wikiCredit': wikiCredit,
+        'wikiIntro': wikiIntro,
+        'properties_map': properties,
+        'tweet_text': recent_tweet_text,
+        'tweet_url': recent_tweet_url,
+        'tweet_image': recent_tweet_image,
     }
     return render(request, 'isisdata/home.html', context=context)
 

@@ -73,6 +73,10 @@ def get_uri(entry):
         return settings.URI_PREFIX + "citation/" + entry.id
     return ""
 
+@register.filter
+def get_authority_uri_from_id(id):
+    return settings.URI_PREFIX + "authority/" + id
+
 
 @register.filter
 def get_title(citation):
@@ -128,6 +132,9 @@ def get_pub_year(citation):
 def remove_facet(url, arg):
     return url.replace(arg, "").replace("&&", "&")
 
+@register.filter
+def remove_all_facets(path):
+    return re.sub(r"&selected_facets=[a-z_]*:CBA[0-9]{9}", "", path)
 
 @register.filter
 def create_facet_string(facet, field):
@@ -299,6 +306,15 @@ def get_current_sort_order_citation(sort_field):
         return 'Relevance'
     return sort_field
 
+@register.filter
+def get_current_sort_order_authority(sort_field):
+    if not sort_field:
+        return "Count"
+    if 'name' in sort_field:
+        return "Name"
+    if 'count' in sort_field:
+        return "Count"
+    return sort_field
 
 @register.filter
 def get_user_id(user):

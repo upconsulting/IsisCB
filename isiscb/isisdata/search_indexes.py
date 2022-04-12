@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from builtins import str
 import datetime
 from haystack import indexes
+from haystack.query import SearchQuerySet
 from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
@@ -212,7 +213,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                     except KeyError:    # It was never there....
                         pass
         
-        print(self.prepared_data)
         return self.prepared_data
 
     def prepare(self, obj):
@@ -427,6 +427,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
         else:
             self.prepared_data['author_for_sort'] = u""
+
         self.prepared_data.update(multivalue_data)
         
         return self.prepared_data
@@ -448,15 +449,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
 
         # The review - reviewed CCRelation may go in either direction.
-        for ccrelation in data['ccrelations_from']:
-            if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
-                return ccrelation['relations_from__object__title']
+        if 'ccrelations_from' in data:
+            for ccrelation in data['ccrelations_from']:
+                if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
+                    return ccrelation['relations_from__object__title']
 
         # If we're still here, it means that there is no posessive CCRelation
         #  from this Citation; so we check the opposite direction.
-        for ccrelation in data['ccrelations_to']:
-            if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
-                return ccrelation['relations_to__subject__title']
+        if "ccrelations_to" in data:
+            for ccrelation in data['ccrelations_to']:
+                if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
+                    return ccrelation['relations_to__subject__title']
 
         return None
 
@@ -498,10 +501,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         belongs.
         """
         if data['type_controlled'] == Citation.CHAPTER:
-            for ccrelation in data['ccrelations_to']:
-                if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
-                    # we assume there is just one
-                    return remove_control_characters(ccrelation['relations_to__subject__title'])
+            if 'ccrelations_to' in data:
+                for ccrelation in data['ccrelations_to']:
+                    if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
+                        # we assume there is just one
+                        return remove_control_characters(ccrelation['relations_to__subject__title'])
         return None
 
     def prepare_title_for_sort(self, data):
@@ -638,6 +642,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
     dates = indexes.MultiValueField(indexed=False)
+    citation_count = indexes.IntegerField(indexed=False)
     #citation_nr = indexes.CharField(indexed=False)
 
     def get_model(self):
@@ -691,5 +696,5 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_dates(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue', 'isodatevalue', 'isodaterangevalue', 'daterangevalue'])]
 
-    #def prepare_citation_nr(self, obj):
-        #ACRelation.objects.filter(authority=obj, citation__public=True).distinct('citation_id').count()
+    def prepare_citation_count(self, obj):
+        return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
