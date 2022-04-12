@@ -12,9 +12,9 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-6">
-            <div class='form-inline' style='padding-right: 30px;'>
-                <div class="navbar-center" style="padding-top:14px; margin-left: 20px; width: 85%;">
+        <div class="col-md-5" style='padding: 0;'>
+            <div class='form-inline'>
+                <div class="navbar-center" style="padding-top:14px; margin-left: 20px; width: 83%;">
                     <form method="get" action="/isis/" style='width: 100%'>
                         <div class="input-group" style='width: 100%'>
                             <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
@@ -54,7 +54,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-5" style="padding-right: 0;">
             <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
                 <ul class="nav navbar-nav navbar-nav-home">
 
@@ -79,7 +79,7 @@
                         <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             {{ user.username }} <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
                             <!-- <li><a href="/profile/">Dashboard</a></li> -->
                             <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
                             <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
