@@ -2606,7 +2606,8 @@ def featured_authorities(request):
         return HttpResponseRedirect(reverse('curation:authority_list'))
 
     queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
-    now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
+    timezone = pytz.timezone(settings.ADMIN_TIMEZONE)
+    now = datetime.datetime.now(timezone)
     six_months_ago = now - relativedelta(months=6)
     current_featured = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
     future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
@@ -2626,14 +2627,14 @@ def featured_authorities(request):
                 # add new or update the dates of the featured authorities
                 start_date_str = request.POST.getlist('start_date')[0]
                 end_date_str = request.POST.getlist('end_date')[0]
-                start_date = datetime.datetime.strptime(start_date_str, '%Y-%m-%d')
-                end_date = datetime.datetime.strptime(end_date_str, '%Y-%m-%d')
+                start_date = timezone.localize(datetime.datetime.strptime(start_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
+                end_date = timezone.localize(datetime.datetime.strptime(end_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
 
                 for authority in queryset:
                     featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
                     featured_authority_data.save()
-            else:
-                # remove the currently selected authorities from the list of featured authorities
+            elif request.POST.get('remove'):
+                # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
                 authority_ids = [authority.id for authority in queryset]
                 FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
     else:       
@@ -2647,6 +2648,7 @@ def featured_authorities(request):
         'current_featured': current_featured,
         'future_featured': future_featured,
         'past_featured': past_featured,
+        'admin_timezone': settings.ADMIN_TIMEZONE
     })
 
     return render(request, template, context)

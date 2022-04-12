@@ -869,8 +869,8 @@ class ExportAuthorityForm(forms.Form):
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
 
 class FeaturedAuthorityForm(forms.Form):
-    start_date = forms.DateField(required=False, help_text='This date is when the selected authorities will begin being featured')
-    end_date = forms.DateField(required=False, help_text='This date is when the selected authorities will stop being featured')
+    start_date = forms.DateField(required=False, help_text='This date is when the selected authorities will begin being featured. Must be YYYY-MM-DD format.')
+    end_date = forms.DateField(required=False, help_text='This date is when the selected authorities will stop being featured. Must be YYYY-MM-DD format.')
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     
 class BulkChangeCSVForm(forms.Form):

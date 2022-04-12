@@ -13,7 +13,7 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <strong>Authors & Contributors</strong>
-            {% if facets_citation.fields.persons_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right" data-toggle="modal" data-target="#authorModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -66,7 +66,7 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <strong>Journals</strong>
-            {% if facets_citation.fields.periodical_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right" data-toggle="modal" data-target="#periodicalModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -115,7 +115,7 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <strong>Publishers</strong>
-            {% if facets_citation.fields.publisher_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right" data-toggle="modal" data-target="#publisherModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -217,7 +217,7 @@
         <div class="panel panel-primary">
           <div class="panel-heading">
             <strong>Time Periods</strong>
-            {% if facets_citation.fields.time_period_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#timeModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -266,7 +266,7 @@
         <div class="panel panel-primary">
           <div class="panel-heading">
             <strong>Places</strong>
-            {% if facets_citation.fields.geographic_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#placeModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -315,7 +315,7 @@
         <div class="panel panel-primary">
           <div class="panel-heading">
             <strong>People</strong>
-            {% if facets_citation.fields.people_by_subject_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>
@@ -365,7 +365,7 @@
         <div class="panel panel-primary">
           <div class="panel-heading">
             <strong>Institutions</strong>
-            {% if facets_citation.fields.institutions_by_subject_ids|length > 5 %}
+            {% if facets_citation.fields.concepts_by_subject_ids|length > 5 %}
                   <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style='float:right;'>
                     More <i class="fas fa-angle-down"></i>
                   </button>

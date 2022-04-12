@@ -75,7 +75,7 @@ def get_uri(entry):
 
 @register.filter
 def get_authority_uri_from_id(id):
-        return settings.URI_PREFIX + "authority/" + id
+    return settings.URI_PREFIX + "authority/" + id
 
 
 @register.filter
@@ -308,10 +308,12 @@ def get_current_sort_order_citation(sort_field):
 
 @register.filter
 def get_current_sort_order_authority(sort_field):
-    if not sort_field or 'count' in sort_field:
+    if not sort_field:
         return "Count"
     if 'name' in sort_field:
         return "Name"
+    if 'count' in sort_field:
+        return "Count"
     return sort_field
 
 @register.filter

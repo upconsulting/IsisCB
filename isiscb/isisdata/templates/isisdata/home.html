@@ -17,8 +17,6 @@
         // Weldon wanted each journal to have the same cover color everytime, 
         // so the journal title's location in the alphabet determines the color.
 
-        console.log(propertiesMap);
-
         if (citationType === 'AR') {
             let backgroundColors = ["#780000", "#004b23", "#001d3d"];
             let backgroundColor;
@@ -36,7 +34,6 @@
                 backgroundColor = backgroundColors[2];
                 }
             }
-            console.log(backgroundColor);
             document.getElementById("citationImage").style.display = "none";
             document.getElementById("citationImageCaption").style.display = "none";
             document.getElementById("placeholderImage").style.display = "block";

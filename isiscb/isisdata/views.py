@@ -50,6 +50,8 @@ from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
+from isisdata.twitter_methods import get_featured_tweet
+from isisdata.isiscbviews.authority_views import get_wikipedia_image_synopsis
 
 from unidecode import unidecode
 import datetime
@@ -941,7 +943,7 @@ def generate_similar_facets(similar_objects):
 def get_google_books_image(citation, featured):
 
     # Provide image for citation
-    if not (citation.BOOK or citation.CHAPTER):
+    if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
         return {}
 
     cover_image = {}
@@ -951,7 +953,7 @@ def get_google_books_image(citation, featured):
     if parent_relations and parent_relations[0].subject:
         parent_id = parent_relations[0].subject.id
 
-    if citation.type_controlled in ['CH'] and parent_id:
+    if citation.type_controlled in [Citation.CHAPTER] and parent_id:
         google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
     else:
         google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
@@ -965,11 +967,11 @@ def get_google_books_image(citation, featured):
         contrib = ''
         title = ''
 
-        if citation.type_controlled in ['BO']:
+        if citation.type_controlled in [Citation.BOOK]:
             title = citation.title
             if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
                 contrib = citation.get_all_contributors[0].authority.name.strip()
-        elif citation.type_controlled in ['CH'] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
+        elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
             title = parent_relations[0].subject.title
             if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
                 contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
@@ -1019,9 +1021,9 @@ def get_google_books_image(citation, featured):
                             cover_image["size"] = "thumbnail"
                             cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
 
-                        if citation.type_controlled in ['BO']:
+                        if citation.type_controlled in [Citation.BOOK]:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
-                        elif citation.type_controlled in ['CH'] and parent_id:
+                        elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
                             google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
                         google_books_data.save()
 
@@ -1452,59 +1454,39 @@ def home(request):
 
     if featured_citations:
         featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
-        featured_citation = get_object_or_404(Citation, pk=featured_citation.id)
+        featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
     else:
         #set default featured citation in case no featured authorities have been selected
-        featured_citation = get_object_or_404(Citation, pk=settings.FEATURED_CITATION_ID)
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
 
-    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = get_google_books_image(featured_citation, True)
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
     else:
         #set default featured authorities in case no featured authorities have been selected
-        featured_authority = get_object_or_404(Authority, pk=settings.FEATURED_AUTHORITY_ID)
+        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
+    
+    #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
+    sqs = SearchQuerySet().models(Citation)
 
-    featured_authority_wikipedia_data = WikipediaData.objects.filter(authority__id=featured_authority.id).first()
+    related_citations_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(subject_ids=featured_authority.id).filter_or(institution_ids=featured_authority.id) \
+            .filter_or(category_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id) \
+            .filter_or(publisher_ids=featured_authority.id).filter_or(school_ids=featured_authority.id).filter_or(meeting_ids=featured_authority.id) \
+            .filter_or(periodical_ids=featured_authority.id).filter_or(book_series_ids=featured_authority.id).filter_or(time_period_ids=featured_authority.id) \
+            .filter_or(geographic_ids=featured_authority.id).filter_or(about_person_ids=featured_authority.id).filter_or(other_person_ids=featured_authority.id) \
+            .count()
+    
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
 
-    if featured_authority_wikipedia_data:
-        wikiImage = featured_authority_wikipedia_data.img_url
-        wikiCredit = featured_authority_wikipedia_data.credit
-        wikiIntro = featured_authority_wikipedia_data.intro
-    else:
-        wikiImage = ''
-        wikiCredit = ''
-        wikiIntro = ''
+    # get wikipedia data
+    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
 
     #Get featured tweet
-    recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
-    twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
-    tweet_url = settings.TWITTER_API_TWEET_PATH
-
-    with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
-
-        recent_tweets = resp.json()
-        recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id']
-
-    with requests.get(tweet_url.format(tweetID=recent_tweet_id), headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
-        if resp.status_code != 200:
-            return {}
-
-        recent_tweet = resp.json()
-        recent_tweet_text = recent_tweet['data']['text']
-        recent_tweet_url = recent_tweet_text[recent_tweet_text.rfind('https://'):]
-
-        recent_tweet_text = recent_tweet_text[:recent_tweet_text.rfind('https://')]
-        URL_REGEX = re.compile(r'''((?:https://).{15})''')
-        recent_tweet_text = URL_REGEX.sub(r'<a href="\1">\1</a>', recent_tweet_text)
-
-        if 'includes' in recent_tweet and recent_tweet['includes'] and recent_tweet['includes']['media'] and recent_tweet['includes']['media'][0]:
-            recent_tweet_image = recent_tweet['includes']['media'][0]['url']
-        else:
-            recent_tweet_image = ''
+    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 
