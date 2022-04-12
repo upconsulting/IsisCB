@@ -54,7 +54,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-5" style="padding-right: 0;">
             <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
                 <ul class="nav navbar-nav navbar-nav-home">
 
@@ -79,7 +79,7 @@
                         <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             {{ user.username }} <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
                             <!-- <li><a href="/profile/">Dashboard</a></li> -->
                             <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
                             <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
