@@ -24,7 +24,7 @@
     <div class="col-sm-6 col-md-4">
       <div class="thumbnail">
         <a href="{% url 'graph_explorer' %}">
-            <img src="/static/isisdata/images/graph_explorer.png" alt="thumbnail depicting isis cb graph exploratory tool">
+            <img src="{% static "isisdata/images/graph_explorer.png" %}" alt="thumbnail depicting isis cb graph exploratory tool">
         </a>
         <div class="caption">
           <a href="{% url 'graph_explorer' %}"><h3>Graph Explorer</h3></a>
@@ -35,7 +35,7 @@
     <div class="col-sm-6 col-md-4">
         <div class="thumbnail">
           <a href="{% url 'term_explorer' %}">
-            <img src="/static/isisdata/images/table_explorer.png" alt="thumbnail depicting isis cb table exploratory tool">
+            <img src="{% static "isisdata/images/table_explorer.png" %}" alt="thumbnail depicting isis cb table exploratory tool">
           </a>
           <div class="caption">
             <a href="{% url 'term_explorer' %}"><h3>Table Explorer</h3></a>
@@ -46,7 +46,7 @@
     <div class="col-sm-6 col-md-4">
         <div class="thumbnail">
             <a href="{% url 'ngram_explorer' %}">
-                <img src="/static/isisdata/images/ngram_explorer.png" alt="thumbnail depicting isis cb ngram exploratory tool">
+                <img src="{% static "isisdata/images/ngram_explorer.png" %}" alt="thumbnail depicting isis cb ngram exploratory tool">
             </a>  
             <div class="caption">
                 <a href="{% url 'ngram_explorer' %}"><h3>Ngram Explorer</h3></a>
