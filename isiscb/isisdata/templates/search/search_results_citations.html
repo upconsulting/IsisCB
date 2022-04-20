@@ -142,11 +142,11 @@
                 {% if request.get_full_path|are_stubs_excluded %}
                 <input type="checkbox" name="exclude_stubs" >
 
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Stub records are excluded</a>
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|remove_url_part:'excluded_facets=citation_stub_record_status:SR'|add_facet_or_operator }}"> Incomplete records are excluded</a>
                 {% endif %}
                 {% if not request.get_full_path|are_stubs_excluded %}
                 <input type="checkbox" name="exclude_stubs" checked>
-                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Stub records are included</a>
+                <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator }}"> Incomplete records are included</a>
                 {% endif %}
               </small>
             </div>
@@ -158,16 +158,16 @@
     {% include "search/search_results_authorities.html" %}
   </div>
   <div class="col-sm-12 col-md-8 menuContainer">
-    <div class="row" style="margin: 0 0 15px 0; border: 1px solid #337ab7; border-left-width: 4px; border-radius: 4px; padding: 5px 10px;">
+    <div class="row" style="margin: 0 0 15px 0; border: 1px solid #337ab7; border-left-width: 4px; border-radius: 4px; padding: 5px 10px; color: #fff; background-color: #337ab7;">
       <strong>Citations</strong>
       <span class='pull-right'>{{ page.citation.start_index }} to {{ page.citation.end_index }} of {{ count_citation }}</span>
     </div>
 
     {% for result in page.citation.object_list %}
-      <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is not fully proofed or indexed in the database {% endif %}">
+      <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is incomplete {% endif %}">
         <p style="margin-bottom: 20px; font-size: 1.1em;">
           {% if result.stub_record_status == 'SR' %}
-            <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is not fully entered or proofed in the database Some fields may be blank or incorrect."></i></span>
+            <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is incomplete."></i></span>
           {% endif %}
 
           {% if result.type == "Book" %}

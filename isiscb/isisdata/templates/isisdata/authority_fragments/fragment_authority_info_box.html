@@ -10,6 +10,9 @@
 
   <img id="wikiImage" style="max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none;" src=''></img>
   <a id="wikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
+  <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+    <p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{authority.name}}</p>
+  </div>
   <hr id="wikiImageBorder" style="display:none;">
 
   <p>
@@ -194,14 +197,55 @@
   let wikiImage = "{{ wikiImage|safe }}";
   let wikiIntro = `{{ wikiIntro }}`;
   let wikiCredit = "{{ wikiCredit|safe }}";
+  let type = "{{display_type}}";
+
+  console.log(wikiImage);
+
+  let default_image_map = {
+    "Concept": "{% static 'isisdata/images/concept_default_image.png' %}",
+    "Person": "{% static 'isisdata/images/person_default_image.jpeg' %}",
+    "Author": "{% static 'isisdata/images/person_default_image.jpeg' %}",
+    "Geographic Term": "{% static 'isisdata/images/place_default_image.png' %}",
+    "Institution": "{% static 'isisdata/images/institution_default_image.png' %}",
+    "Publisher": "{% static 'isisdata/images/publisher_default_image.jpeg' %}",
+    "Time Period": "{% static 'isisdata/images/time_default_image.jpeg' %}",
+    "Classification Term": "{% static 'isisdata/images/category_default_image.png' %}",
+  };
 
   if (wikiImage !== "") {
     document.getElementById('wikiImage').src = wikiImage;
-    document.getElementById('wikiImage').style.display = "block";
-    document.getElementById('wikiImageBorder').style.display = "block";
     document.getElementById('wikiImageCredit').style.display = "block";
     document.getElementById('wikiImageCredit').href = wikiCredit;
+    document.getElementById('wikiImage').style.display = "block";
+  } else if (type !== "Serial Publication" && type !== "Creative Work" && type !== "Cross-reference" && type !== "Bibliographic List"){
+    document.getElementById('wikiImage').src = default_image_map[type];
+    document.getElementById('wikiImage').style.height = "200px";
+    document.getElementById('wikiImage').style.width = "200px";
+    document.getElementById('wikiImage').style.display = "block";
+  } else if (type == "Serial Publication"){
+    let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+    let backgroundColor;
+
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+
+    if (periodicalName.length) {
+        if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[0];
+        } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[1];
+        } else {
+          backgroundColor = backgroundColors[2];
+        }
+    }
+
+    document.getElementById("placeholderImage").style.display = "block";
+    document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
   }
+
+  
+  document.getElementById('wikiImageBorder').style.display = "block";
 
   if (wikiIntro !== "") {
     let textHolder = document.querySelector('.wikiIntro');

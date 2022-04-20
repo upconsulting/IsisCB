@@ -108,7 +108,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     font-weight: 500;
   }
 
-  .search-result {
+  .search-result:hover {
   border-left: 2px solid #337AB7;
   }
 
@@ -247,7 +247,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               <span class="authorityLink topAuthorityLink" style="margin-right: 20px;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ citation.id }} <i class="far fa-copy"></i></span>
               <textarea style="position: absolute;left: -9999px;" class="hiddenCitationLink">{{ citation | get_uri }}</textarea>
                 {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
-                <a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>
+                {% if user.is_authenticated %}<a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>{% endif %}
             </span>
         </div>
 
@@ -307,12 +307,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
          </script>
  
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
-           <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+           <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
              {% for prop in properties_map %}
                {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
              {% endfor %}
              {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
-               <div style="position: absolute; bottom: 10%; width: 100%; left: 0; text-align: center;">
+               <div style="text-align: center;">
                    {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
                      <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>
                    {% endif %}
@@ -321,8 +321,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                    {% endif %}
                </div>
              {% endif %}
-             <div style="width: 0; height: 0; border-style: solid; border-width: 0 0 30px 30px; border-color: white white white #ccc; position: absolute; right: 26px; bottom: 0">
-             </div>
            </div>
            <img id="citationImage" style="border: 1px solid lightgray; display: none; margin-left: auto; margin-right: auto; max-height: 300px; max-width: 100%;">
            <span id="citationImageCaption" style="color: gray; text-align: center; display: none; font-size: .9em;">source: Google Books</span>
@@ -362,9 +360,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              {% endif %}
  
              {% if citation.linkeddata_public.all|length > 0 %}
-                 {% for entry in citation.linkeddata_public.all %}
-                   <span>{{ entry.type_controlled }}: </span><a href="{{ entry|linkeddata_for_display }}" taget="_blank"> {{ entry.universal_resource_name }}</a><br/>
-                 {% endfor %}
+                {% for entry in citation.linkeddata_public.all %}
+                  <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                   <span>{{ entry.type_controlled }}: <a href="{{ entry|linkeddata_for_display }}" taget="_blank"> {{ entry.universal_resource_name }}</a></span>
+                  </div>
+                {% endfor %}
              {% endif %}
  
              {% if citation.attributes|length > 0 or citation.edition_details|length > 0 or citation.physical_details|length > 0 or citation.language|length > 0 %}
@@ -398,7 +398,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  <hr style="margin: 10px 0">
              {% endif %}
            </div>
-           <div class='col-sm-12 col-md-6'>
+           <div class='col-sm-12 col-md-6' style="padding-right: 0;">
              <div class="panel panel-default">
                <div class="panel-heading-links panel-heading">
                    <i class="fas fa-search"></i> Outside Links
@@ -790,7 +790,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-heading-relation panel-heading">
                         <strong>Authors & Contributors</strong>
                         {% if similar_objects.PR|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#authorModal" style="float:right">
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
                           More <i class="far fa-caret-square-down"></i>
                         </button>
                         {% endif %}
@@ -811,7 +811,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-heading panel-heading-relation">
                         <strong>Journals</strong>
                         {% if similar_objects.PH|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#journalModal" style="float:right">
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#journalModal" style="float:right">
                           More <i class="far fa-caret-square-down"></i>
                         </button>
                         {% endif %}
@@ -832,7 +832,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-heading panel-heading-relation">
                         <strong>Publishers</strong>
                         {% if similar_objects.IH|length > 6 %}
-                        <button type="button" class="btn btn-xs btn-primary pull-right" data-toggle="modal" data-target="#publisherModal" style="float:right">
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#publisherModal" style="float:right">
                           More <i class="far fa-caret-square-down"></i>
                         </button>
                         {% endif %}
@@ -851,7 +851,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
       
                 <div class="col-sm-12 col-md-6" style="padding-left: 0;">
                   {% if similar_objects.CO %}
-                    <div class="panel panel-primary facet-box">
+                    <div class="panel panel-default facet-box">
                       <div class="panel-heading-subjects panel-heading">
                         <strong>Concepts</strong>
                         {% if similar_objects.CO|length > 6 %}
@@ -872,7 +872,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {% endif %}
       
                   {% if similar_objects.PE %}
-                    <div class="panel panel-primary facet-box">
+                    <div class="panel panel-default facet-box">
                       <div class="panel-heading-subjects panel-heading">
                         <strong>People</strong>
                         {% if similar_objects.PE|length > 6 %}
@@ -893,7 +893,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {% endif %}
       
                   {% if similar_objects.GE %}
-                    <div class="panel panel-primary facet-box">
+                    <div class="panel panel-default facet-box">
                       <div class="panel-heading-subjects panel-heading">
                         <strong>Places</strong>
                         {% if similar_objects.GE|length > 6 %}
@@ -914,7 +914,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {% endif %}
       
                   {% if similar_objects.TI %}
-                    <div class="panel panel-primary facet-box">
+                    <div class="panel panel-default facet-box">
                       <div class="panel-heading-subjects panel-heading">
                         <strong>Times</strong>
                         {% if similar_objects.TI|length > 6 %}
@@ -935,7 +935,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                   {% endif %}
       
                   {% if similar_objects.IN %}
-                    <div class="panel panel-primary facet-box">
+                    <div class="panel panel-default facet-box">
                       <div class="panel-heading-subjects panel-heading">
                         <strong>Institutions </strong>
                         {% if similar_objects.IN|length > 6 %}
@@ -1162,10 +1162,12 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div><!-- /modal -->
 </div>
-<div class="row" ng-app="commentsApp">
-  <div class="col-sm-12">
-      {% include "isisdata/comments.html" %}
 
+<div ng-app="commentsApp">
+  <div class="col-md-12" style="padding-top: 15px">
+    <div class="col-sm-12 main" style="padding-top: 15px">
+      {% include "isisdata/comments.html" %}
+    </div>
   </div>
 </div>
 

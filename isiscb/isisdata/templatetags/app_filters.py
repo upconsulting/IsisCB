@@ -134,7 +134,7 @@ def remove_facet(url, arg):
 
 @register.filter
 def remove_all_facets(path):
-    return re.sub(r"&selected_facets=[a-z_]*:CBA[0-9]{9}", "", path)
+    return re.sub(r"&selected_facets=[a-z_]*:[A-za-z0-9_]*", "", path)
 
 @register.filter
 def create_facet_string(facet, field):
