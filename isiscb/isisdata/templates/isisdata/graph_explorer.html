@@ -85,12 +85,12 @@
             </div>
         </div>
         <div class='col-sm-12 col-md-7' id="graphColumn" style="padding: 0;">
-            <svg id="graphContainer" height="1000" width="822" viewBox="0 0 1000 822">
+            <svg id="graphContainer" height="0" width="822" viewBox="0 0 1000 822">
             </svg>
         </div>
         <div class='col-sm-12 col-md-2' id="legendColumn" style="padding: 0;">
             <div id="selectedTermsContainer" style="border: 2px solid #555; border-radius: 5px; padding: 15px; margin-bottom: 20px;">
-                <h5 style="margin-top: 0;">Selected Terms<a class="float-right" href='javascript:;' onclick='clearSubjects();' style="margin-left: 30px; text-decoration: none;"><span class="label label-danger">Clear All</span></a></h5>
+                <h5 style="margin-top: 0;">Selected Terms<a class="float-right" href='javascript:;' onclick='clearSubjects();' style="margin-left: 30px; text-decoration: none;"><span class="label label-danger"><i class="fas fa-ban"></i> Clear All</span></a></h5>
                 <hr style="margin: 5px 0">
                 <ul id="selectedLegend" width="100%" height="1" style="list-style-type: none; padding: 0; margin: 0">
                 </ul>
@@ -100,8 +100,26 @@
             </div>
         </div>
     </div>
-    
 
+    <div class="col-sm-12">
+        <div class="well well-lg" style="border-left: 5px solid #337ab7">
+            <h3>Using this exploratory tool</h3>
+            <h4>This is a tool for exploring how different subjects in the database are directly and indirectly connected</h4>
+            <strong>TLDR: The search bar finds subjects to explore. The <i class="fas fa-broom"></i> icon adds subjects and the 50 other subjects most closely related to them to the graph. Hovering over a node in the graph displays the subject type and name. Clicking a node "explodes" that node to reveal its 50 most closely related subjects (allowing you to "follow the breadcrumb trail" from node to node through the data).</strong>
+            <p/>
+            <p>Say, for example, that you wanted to compare two specialist journals, <i>Physics Today</i> and <i>Physics in Perspective</i>, to see which of them was likely to be a better resource for learning about the history of quantum mechanics ...</p>
+            <ol>
+                <li>First, use the search bar to find "Physics Today". Then use the <i class="fas fa-broom"></i> icon to add it to the graph.</li>
+                <li>Repeat the process for "Physics in Perspective" and "Quantum mechanics"</li>
+                <li>You'll now see all three of these subjects, their connections to each other, and their top 50 related subjects displayed on the graph. (If the connections are too messy, you can click-and-drag the central nodes away from one another to tidy them up).</li>
+                <li>You can see from this graph that "Quantum mechanics" shares many more connections with "Physics in Perspective" than with "Physics Today". These connections have simulated forces applied to them, so the fact "Quantum mechanics" is <i>physically</i> closer to "Physics in Perspective" means that they are more closely connected.</li>
+                <li>From this view you can also see the set of subject that are shared by all 3 of the subjects you selected and by any two of them.</li>
+                <li>The legend on the right will tell you which terms you have selected (and their colors), and the colors or the various types of subjects represented on the graph.</li>
+                <li>If you hover over any node, it will be highlighted in pink and you'll see the type and name of that subject displayed above the graph. You can click the name to view the page for that subject.</li>
+                <li>If you click on any node, that node will "explode", revealing the subjects connected to it.</li>
+            </ol>
+        </div>
+    </div>
 
     <script>
         var subjects = [];
@@ -332,7 +350,7 @@
 
             postData("{% url "graph_explorer"  %}", payload)
                 .then(data => {
-
+                    $('#graphContainer').attr('height', 1000);
                     nodes = JSON.parse(data.nodes);
                     links = JSON.parse(data.links);
                     subjects = data.subjects;
@@ -359,6 +377,7 @@
         }
 
         function clearSubjects() {
+            $('#graphContainer').attr('height', 0);
             nodes = [];
             links = [];
             subjects = [];
@@ -411,7 +430,8 @@
                 "IN": "Institution",
                 "CT": "Category",
                 "SE": "Journal",
-                "PU": "Publisher"
+                "PU": "Publisher",
+                "CR": "Cross-reference",
             }
 
             let typesPresent = [];
@@ -464,6 +484,8 @@
             let typeLegend = d3.select("#typeLegend")
                 .attr("height", ((typesPresent.length - 1) * 25 + 40));
             typeLegend.selectAll("*").remove();
+
+            console.log(typesPresent);
 
             d3.select("#legendContainer")
                 .style("border-width", "0px")

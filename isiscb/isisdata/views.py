@@ -1947,7 +1947,7 @@ def clean_dates(date_facet):
     new_date_facet = []
     for date in date_facet:
         date_pattern = re.compile("^[0-9]{4}$")
-        if re.search(date_pattern, date[0]):
+        if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)
     return new_date_facet
 

@@ -156,7 +156,8 @@
                 </div>
                 <div class="col-sm-12 col-md-6">
                     <div class="col-sm-12" style="text-align: center; margin-bottom: 15px;">
-                        <a href="javascript:void(0);" onclick="compare();" role="button" id="compareButton" class="btn btn-success" style="color: #fff;"><i class="fas fa-chart-area"></i>Generate ngram graph</a>
+                        <a href="javascript:void(0);" onclick="removeAll();" role="button" id="removeButton" class="btn btn-danger pull-right" style="color: #fff;"><i class="fas fa-ban"></i> Clear All</a>
+                        <a href="javascript:void(0);" onclick="compare();" role="button" id="compareButton" class="btn btn-success pull-right" style="color: #fff; margin-right: 15px;"><i class="fas fa-chart-area"></i>Generate ngram graph</a>
                     </div>
                     <div class="col-sm-12" id="selectedGroupsContainer">
                         <div class="well selectedGroup highlighted" id="selectedGroup1" onclick="highlightGroup(this);">
@@ -173,7 +174,25 @@
         </div>
     </div>
 </div>
-<div class="col-sm-12" id="graphContainer" style="width: 100%; height: 600px;">
+<div class="col-sm-12" id="graphContainer" style="width: 100%; height: 600px; display: none;">
+</div>
+
+<div class="col-sm-12">
+    <div class="well well-lg" style="border-left: 5px solid #337ab7">
+        <h3>Using this exploratory tool</h3>
+        <h4>This is a tool for comparing how different sets of subjects in the database have been used in historical scholarship over time</h4>
+        <strong>TLDR: The search bar finds subjects to explore. The <i class="fas fa-plus-circle"></i> icon adds subjects to groups. The "+ Add Groups" button creates a new group. The active group is marked blue; inactive groups are grey.</strong>
+        <br>
+        <p>Say, for example, that you wanted to see how scholarly interest in alchemy compares to interest in chemistry over time ...</p>
+        <ol>
+            <li>First, use the search bar to find alchemy. Alchemy is a concept, so you can use the checkbox filter for concepts to narrow your search.</li>
+            <li>Note that "Group 1" (in the right-hand column) is automatically selected when the page loads, so to add alchemy to Group 1, all you need to do is click the <i class="fas fa-plus-circle"></i> icon.
+            <li>If you accidentally add the wrong subject, or add the right subject to the wrong group, you can remove all subjects with the red "<i class="fas fa-ban"></i> Clear All" button.</li>
+            <li>Since we want to compare historians' interest in alchemy to their interest in chemistry, we need to create another group to contain "chemistry". Click the "+ Add Group" button on the right hand side to do so. When you add a new group, that group automatically becomes the selected group in blue. (Note: the groups allow you to aggregate ngrams for multiple terms, so, for example, you could put "alchemy" and "chemistry" in a group and put "astronomy" and "astrology" in another group to compare those combinations of subjects).</li>
+            <li>Now that you have a second group selected, you can use the left-hand search bar to searchy for "chemistry" and use the <i class="fas fa-plus-circle"></i> icon to add it to Group 2</li>
+            <li>Now that all of the elements of your comparison are selected and in place, all you need to do is click the green "<i class="fas fa-chart-area"></i>Generate ngram graph" button to generate the results of the comparison</li>
+        </ol>
+    </div>
 </div>
 
 
@@ -367,9 +386,6 @@
     }
 
     function compare() {
-        $('#collapseOne').removeClass('in');
-        $('#graphContainer').empty();
-
         let noTermSelected = true;
         for (const key in selected) {
             if (selected[key].length) {
@@ -381,6 +397,9 @@
         if (noTermSelected) {
             $.notify("Please select at least one term to plot", "error");
         } else {
+            $('#graphContainer').css('display', 'block');
+            $('#collapseOne').removeClass('in');
+            $('#graphContainer').empty();
 
             const csrftoken = getCookie('csrftoken');
 
@@ -412,7 +431,6 @@
 
         let label = $(`<span class="label label-default">${conceptName}</span>&nbsp`);
         
-        console.log(highlightedGroup)
         $(`#group${highlightedGroup}TermContainer`).append(label);
     }
 
@@ -429,6 +447,17 @@
         highlightedGroup = parseInt(elem.id.slice(-1));
         $("#selectedGroupsContainer>div").removeClass('highlighted');
         $(elem).addClass('highlighted');
+    }
+
+    function removeAll(){
+        console.log(selected);
+        console.log(numberOfGroups);
+        selected = {};
+        for (let i=1; i <= numberOfGroups; i++) {
+            selected[`group${i}`] = [];
+        }
+        console.log(selected);
+        $('.groupTermContainer').empty();
     }
 
     function getCookie(name) {
