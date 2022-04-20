@@ -306,110 +306,14 @@
 </div>
 <div class='row content-container sponsor-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
     <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">With Support From</h2>
-    <div class="col-xs-12 col-sm-4">
+    <div class="col-xs-12 col-sm-3">
     </div>
-    <div class="col-xs-12 col-sm-4" style="margin: 0 8px; padding: 0">
+    <div class="col-xs-12 col-sm-6" style="margin: 0 8px; padding: 0; text-align: center;">
         <a href="https://hssonline.org/"><img src="{% static "isisdata/images/hss_society_logo-1.jpeg" %}" alt="history of science society hss logo" height="75px"></a>
         <a href="https://libraries.ou.edu/frontpage" style="margin: 0 25px;"><img src="{% static "isisdata/images/oulib_logo.jpeg" %}" alt="university of oklahoma libraries logo" height='125px'></a>
         <a href="https://sloan.org/"><img src="{% static "isisdata/images/sloan_logo.jpeg" %}" alt="alfred p. sloan foundation logo" height="75px"></a>
     </div>
-    <div class="col-xs-12 col-sm-4">
-    </div>
-</div>
-<div class="row comments-log">
-    <!-- citation comments -->
-    <div class="col-sm-6 col-md-6">
-        <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">
-                Recently added records
-                <span class="pull-right">
-                    <a style="color: white;" href="{% url 'recent_records' %}"><i class="fa fa-calendar" aria-hidden="true"></i>
-                        Last month
-                    </a>&nbsp; &nbsp;
-                    <a style="color: white;" href="{% url 'recent_records' %}?interval=week"><i class="fa fa-calendar" aria-hidden="true"></i>
-                        Last week
-                    </a>
-                </span>
-            </div>
-            <ul class="list-group">
-            {% for record in records_recent %}
-            <li class="list-group-item">
-                <div>
-                    {% if record|to_class_name == 'Citation' %}
-                    <span class="label" style="background-color: #337ab7">{{ record.get_type_controlled_display }}</span>
-                    {% endif %}
-                    {% if record|to_class_name == 'Authority' %}
-                        {% if record.get_type_controlled_display == "Concept" %}
-                            <span class="label label-concepts">{{ record.get_type_controlled_display }}</span>
-                        {% elif record.get_type_controlled_display == "Person" %}
-                            <span class="label label-people">{{ record.get_type_controlled_display }}</span>
-                        {% elif record.get_type_controlled_display == "Institution" %}
-                            <span class="label label-institutions">{{ record.get_type_controlled_display }}</span>
-                        {% elif record.get_type_controlled_display == "Geographic Term" %}
-                            <span class="label label-places">{{ record.get_type_controlled_display }}</span>
-                        {% elif record.get_type_controlled_display == "Time Period" %}
-                            <span class="label label-times">{{ record.get_type_controlled_display }}</span>
-                        {% else %}
-                            <span class="label label-info">{{ record.get_type_controlled_display }}</span>
-                        {% endif %}
-                    {% endif %}
-                    <a href="{% url 'index' record.id %}">{{ record|get_label_string|safe }}</a>
-                </div>
-                <div>
-                  {% if record|to_class_name == 'Citation' and record.abstract %}
-                  {{ record.abstract|truncatewords:20 }}
-                  {% endif %}
-                  {% if record|to_class_name == 'Authority' and record.description %}
-                  {{ record.description|truncatewords:20 }}
-                  {% endif %}
-                </div>
-                <div>
-                     <span class="text text-warning text-small">Added to IsisCB on <script type="text/javascript">document.write(new Date('{{ record.created_on|date:"c" }}').toLocaleString());</script></span>
-                 </div>
-
-            </li>
-            {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <!-- authority comments -->
-    <div class="col-sm-6 col-md-6">
-        <div class="panel panel-default panel-isiscb">
-            <div class="panel-heading">Recent Comments</div>
-            {% for comment in comments_recent %}
-            <li class="list-group-item">
-                <div>
-                    {% if comment.subject_content_type.model == 'citation' %}
-                    <span class="label" style="background-color: #337ab7">{{ comment.subject.get_type_controlled_display }}</span>
-                    {% endif %}
-                    {% if comment.subject_content_type.model == 'authority' %}
-                        {% if comment.subject.get_type_controlled_display == "Concept" %}
-                            <span class="label label-concepts">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% elif comment.subject.get_type_controlled_display == "Person" %}
-                            <span class="label label-people">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% elif comment.subject.get_type_controlled_display == "Institution" %}
-                            <span class="label label-institutions">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% elif comment.subject.get_type_controlled_display == "Geographic Term" %}
-                            <span class="label label-places">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% elif comment.subject.get_type_controlled_display == "Time Period" %}
-                            <span class="label label-times">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% else %}
-                            <span class="label label-info">{{ comment.subject.get_type_controlled_display }}</span>
-                        {% endif %}
-                    {% endif %}
-                    <a href="{% url 'index' comment.subject.id %}">{{ comment.subject|get_label_string|safe }}</a>
-
-                </div>
-                 <div>
-                     {{ comment.linkified|safe }}
-                 </div>
-                <div>
-                    <span class="text-warning text-small">Comment by <a href="{% url 'user_profile' comment.created_by.username %}">{{comment.created_by}}</a> <script type="text/javascript">document.write(new Date('{{ comment.created_on|date:"c" }}').toLocaleString());</script></span>
-                </div>
-            </li>
-            {% endfor %}
-        </div>
+    <div class="col-xs-12 col-sm-3">
     </div>
 </div>
 {% endblock %}
