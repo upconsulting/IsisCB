@@ -53,6 +53,19 @@ def create_exclude_facet_string(facet, field):
 def format_query(query):
     authority_id = re.match("\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA", query)
     all_results = re.match("\*", query)
+    authority_type_label_map = {
+        'Concept': ' label-concepts',
+        'Time Period': ' label-times',
+        'Geographic Term': ' label-places',
+        'Person': ' label-people',
+        'Institution': ' label-institutions',
+        'Serial Publication': ' label-institutions',
+        'PU': ' label-institutions',
+        'Classification Term': ' label-default',
+        'Creative Work': ' label-default',
+        'Cross-reference': ' label-default',
+        'Bibliographic List': ' label-default',
+    }
     if authority_id:
         authority_id = authority_id.group(1)
         try:
@@ -62,11 +75,11 @@ def format_query(query):
         except:
             name = authority_id
             authority_type = "subject"
-        return "items related to " + "the " + authority_type + ": " + name
+        return mark_safe('<strong style="font-size: 1.4em; color: #337ab7">items related to: </strong><span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map[authority_type] + '">' + authority_type + '</span></span>')
     elif all_results:
-        return "the whole database"
+        return mark_safe('<strong style="font-size: 1.4em; color: #337ab7">items related to: </strong><span class="h4" style="margin: 0">everything</span>')
     else:
-        return query
+        return mark_safe('<strong style="font-size: 1.4em; color: #337ab7">search: </strong>' + '<span class="h4" style="margin: 0">"' + query + '"</span>')
 
 @register.filter
 def count_relations(relations, type):

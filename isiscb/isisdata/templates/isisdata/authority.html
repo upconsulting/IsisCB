@@ -169,7 +169,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
             <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
             {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            <a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>
+            {% if user.is_authenticated %}<a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>{% endif %}
         </span>
         <br>
         <hr style="margin-top:5px; margin-bottom:5px;">
@@ -384,7 +384,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% include "isisdata/comments.html" %}
       </div>
     </div>
-
 </div>
 
 <script>
