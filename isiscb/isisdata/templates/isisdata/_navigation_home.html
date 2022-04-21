@@ -15,6 +15,7 @@
         <div class="navbar-collapse collapse navbar-right" id="navbar">
             <ul class="nav navbar-nav navbar-nav-home">
                 <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
+                <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
                 <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
                 <li><a href="http://isiscb.org" target="_blank">Blog</a></li>
                 <li class="dropdown">
