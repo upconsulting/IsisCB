@@ -1935,10 +1935,6 @@ def get_ngram_data(authority_ids):
         ngrams.append(date_facet)
     
     ngrams = sorted(ngrams, key = lambda ngram: int(ngram['year']))
-
-    print(max(all_years))
-    print(min(all_years))
-    print(max(all_ngrams))
     
     return ngrams, max(all_years), min(all_years), max(all_ngrams)
     
