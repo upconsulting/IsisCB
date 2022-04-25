@@ -200,14 +200,13 @@
       {% for facet in related_geographics_facet %}
       <div class="mappedFacet" data-facet-id="{{facet.0}}">
           {% with facet.0|get_authority_name as authority_name %}
-          <a style="color:black" title="Go to authority record for {{authority_name}}" href="{% url 'authority' facet.0 %}?">
-            <i class="fa fa-info-circle"></i>
-            {{authority_name}}
-          </a>
           <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.0|urlencode }}">
-             ({{facet.1}} citations)
+            <i class="far fa-square"></i> ({{facet.1}})
           </a>
-
+          {{authority_name}}
+          <a title="Go to authority record for {{authority_name}}" href="{% url 'authority' facet.0 %}?">
+            <i class="fas fa-external-link-alt"></i>
+          </a>
           <span class="isMapped" data-facet-id="{{facet.0}}"></span>
           {% endwith %}
       </div>

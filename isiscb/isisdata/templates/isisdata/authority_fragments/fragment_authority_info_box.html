@@ -7,8 +7,12 @@
 
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
   {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
-
-  <img id="wikiImage" style="max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none;" src=''></img>
+  <div style="z-index: 10; position: relative;">
+    <div id="wikiImageContainer" style="display:none; position: relative;  margin: auto;">
+      <h3 style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">{{display_type}}:<br/>{{authority.name}}</h3>
+      <img id="wikiImage" style="position: relative; max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none; z-index: -1;" src=''></img>
+    </div>
+  </div>
   <a id="wikiImageCredit" style="display:none; float: right; font-size: .9em;">source: Wikipedia</a>
   <div id="placeholderImage" style="height: 314px; width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
     <p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{authority.name}}</p>
@@ -19,37 +23,41 @@
 
     {% if related_citations_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
-    {{authority.name}} is connected to
+    Show 
     <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR subject_ids:{{ authority.id }} OR institution_ids:{{ authority.id }} OR category_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }} OR publisher_ids:{{ authority.id }} OR school_ids:{{ authority.id }} OR meeting_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }} OR book_series_ids:{{ authority.id }} OR time_period_ids:{{ authority.id }} OR geographic_ids:{{ authority.id }} OR about_person_ids:{{ authority.id }} OR other_person_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
       {{related_citations_count}} citations
     </a>
+    related to {{authority.name}}
     <br>
     {% endif %}
 
     {% if author_contributor_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
-    {{authority.name}} is an author/contributor on
+    Show
     <a href="{% url 'haystack_search' %}?q=(author_ids:{{ authority.id }} OR contributor_ids:{{ authority.id }} OR editor_ids:{{ authority.id }} OR advisor_ids:{{ authority.id }} OR translator_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{author_contributor_count}} citations
     </a>
+    related to {{ authority.name }} as an author
     <br>
     {% endif %}
 
     {% if publisher_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
-    {{authority.name}} is the publisher of
+    Show
     <a href="{% url 'haystack_search' %}?q=(publisher_ids:{{ authority.id }} OR periodical_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{publisher_count}} citations
     </a>
+    related to {{ authority.name }} as a publisher
     <br>
     {% endif %}
 
     {% if subject_category_count > 0 %}
     <i class="fa fa-bookmark" aria-hidden="true"></i>
-    {{authority.name}} is a subject or category of
+    Show
     <a href="{% url 'haystack_search' %}?q=(subject_ids:{{ authority.id }} OR category_ids:{{ authority.id }})&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True">
     {{subject_category_count}} citations
     </a>
+    related to {{authority.name }} as a subject or category
     <br>
     {% endif %}
   </p>
@@ -136,9 +144,11 @@
             {% if entry.type_controlled.name == 'VIAF' %}
               <img src="https://viaf.org/viaf/images/viaf.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>VIAF</a>
             {% elif entry.type_controlled.name == 'DNB' %}
-            <img src="https://www.oxforddnb.com/fileasset/images/favicon.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>DNB</a>
+            <img src="https://www.dnb.de/SiteGlobals/Frontend/DNBWeb/Images/favicon.png?__blob=normal&v=4" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>DNB</a>
+            {% elif entry.type_controlled.name == 'GeoNames' %}
+            <img src="https://www.geonames.org/geonames.ico" height="14px" width="14px"></img> <a target="_blank" href={{ entry|linkeddata_for_display }}>GeoNames</a>
             {% else %}
-              <a href="{{ entry|linkeddata_for_display }}" taget="_blank">
+              <a href="{{ entry|linkeddata_for_display }}" target="_blank">
                 {{ entry.universal_resource_name }}
               </a>
             {% endif %}
@@ -154,9 +164,9 @@
       {% if display_type == 'Author' %}
         <img src="https://orcid.org/assets/icons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://orcid.org/orcid-search/search?searchQuery={{authority.name}}">ORCiD</a>
         <br>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?q={{authority.name}}+site%3A.edu">Academic sites</a>
-        <br>
       {% endif %}
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?q={{authority.name}}+site%3A.edu">Academic sites</a>
+      <br>
       <img src="https://plato.stanford.edu/symbols/sep-man-red.png" height="14px" width="14px"> <a target="_blank" href="https://plato.stanford.edu/search/searcher.py?query={{authority.name}}">Stanford Encyclopedia</a>
       <br>
       <i class="fab fa-wikipedia-w"></i> <a target="_blank" href="https://en.wikipedia.org/w/index.php?search={{authority.name}}">Wikipedia</a>
@@ -212,12 +222,28 @@
     "Classification Term": "{% static 'isisdata/images/category_default_image.png' %}",
   };
 
+  let default_background_map = {
+    "Concept": "rgb(30, 96, 145, 0.5)",
+    "Person": "rgb(153, 217, 140, 0.5)",
+    "Author": "rgb(153, 217, 140, 0.5)",
+    "Geographic Term": "rgb(22, 138, 173, 0.5)",
+    "Institution": "rgb(52, 160, 164, 0.5)",
+    "Publisher": "rgb(52, 160, 164, 0.5)",
+    "Time Period": "rgb(82, 182, 154, 0.5)",
+    "Classification Term": "rgb(30, 96, 145, 0.5)",
+  };
+
   if (wikiImage !== "") {
+    document.getElementById('wikiImageContainer').style.display = 'block';
     document.getElementById('wikiImage').src = wikiImage;
     document.getElementById('wikiImageCredit').style.display = "block";
     document.getElementById('wikiImageCredit').href = wikiCredit;
     document.getElementById('wikiImage').style.display = "block";
   } else if (type !== "Serial Publication" && type !== "Creative Work" && type !== "Cross-reference" && type !== "Bibliographic List"){
+    document.getElementById('wikiImageContainer').style.display = 'block';
+    document.getElementById('wikiImageContainer').style.height = '200px';
+    document.getElementById('wikiImageContainer').style.width = '200px';
+    document.getElementById('wikiImageContainer').style.backgroundColor = default_background_map[type];
     document.getElementById('wikiImage').src = default_image_map[type];
     document.getElementById('wikiImage').style.height = "200px";
     document.getElementById('wikiImage').style.width = "200px";
