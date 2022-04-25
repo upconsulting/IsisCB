@@ -401,7 +401,7 @@ def authority(request, authority_id):
     related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_id)
 
     related_citations_count = related_citations.count()
-
+    subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
     author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
     
@@ -431,6 +431,9 @@ def authority(request, authority_id):
         'wikiCredit': wikiCredit,
         'page_results': page_results,
         'related_geographics_facet': related_geographics_facet,
+        'author_contributor_count': author_contributor_count,
+        'publisher_count': publisher_count,
+        'subject_category_count': subject_category_count,
     }
     return render(request, 'isisdata/authority.html', context)
 

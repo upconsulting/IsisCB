@@ -178,7 +178,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
             <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
             {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            {% if user.is_authenticated %}<a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>{% endif %}
+            {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
         </span>
         <br>
         <hr style="margin-top:5px; margin-bottom:5px;">
@@ -192,11 +192,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <div class="row col-sm-12" style="text-align:center; margin: 15px 0 30px 0;">
           <div id="tab search_tabs" class="btn-group" role="group" style="font-size: 1.1em; font-weight: 400;">
             <label onclick="location.href='{% url 'authority' authority_id|upper %}';" id="bookshelf-tab" type="button" class="btn tab-btn-default" style="border-color: #337ab7; color: #337ab7;">
-              Bookshelf
+              Citations
           </label>
-            <label id="catalog-tab" type="button" class="btn tab-btn-default active" style="border-color:#337ab7">
-                Catalog
-            </label>
+          <label id="catalog-tab" type="button" class="btn tab-btn-default active" style="border-color:#337ab7">
+              Indexes
+          </label>
         </div>
         </div>
         <div class="row">
@@ -212,7 +212,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               </div>
               <div class="panel-body">
                 {% for facet in related_contributors_facet|slice:"6" %}
-                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_all_contributor_ids_exact'%}
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_persons_ids'%}
                 {% endfor %}
               </div>
             </div>

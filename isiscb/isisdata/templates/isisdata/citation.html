@@ -246,8 +246,8 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <span class="btn-grp pull-right" style="padding-bottom:5px">
               <span class="authorityLink topAuthorityLink" style="margin-right: 20px;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ citation.id }} <i class="far fa-copy"></i></span>
               <textarea style="position: absolute;left: -9999px;" class="hiddenCitationLink">{{ citation | get_uri }}</textarea>
-                {% if user.is_staff %}<a class="btn btn-small glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" title="Edit this entry"></a>{% endif %}
-                {% if user.is_authenticated %}<a class="btn btn-small glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" title="View in REST API"></a>{% endif %}
+              {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_citation" citation.id %}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="Edit this entry"></a>{% endif %}
+              {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
             </span>
         </div>
 
@@ -699,10 +699,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
             <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
               <a id="bookshelf-tab" href="#bookshelf" class="btn tab-btn-default active" role="tab" data-toggle="tab">
-                <input type="radio" />Bookshelf
+                <input type="radio" />Citations
               </a>
               <a id="catalog-tab" href="#catalog" class="btn tab-btn-default" role="tab" data-toggle="tab">
-                <input type="radio" />Catalog
+                <input type="radio" />Indexes
               </a>
             </div>
           </div>
@@ -798,7 +798,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PR|slice:"6" %}
                         {% if facet.authority %}
-                          <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          {{facet.authority.name}}
+                          <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
                         {% endif %}
                         {% endfor %}
@@ -819,8 +821,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PH|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
-                        <br>
+                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          {{facet.authority.name}}
+                          <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                          <br>
                         {% endif %}
                         {% endfor %}
                       </div>
@@ -840,7 +844,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.IH|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -863,7 +869,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.CO|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -884,7 +892,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PE|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -905,7 +915,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.GE|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -926,7 +938,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.TI|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -947,7 +961,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.IN|slice:"6" %}
                         {% if facet.authority %}
-                        <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -963,7 +979,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
 </div>
 
-<!-- facet modals -->
+<!-- authors modal -->
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -976,7 +992,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in similar_objects.PR %}
           {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
           {% endif %}
           {% endfor %}
@@ -988,7 +1006,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 </div><!-- /modal -->
-<!-- subject Modal -->
+<!-- concepts Modal -->
 <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -1001,7 +1019,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in similar_objects.CO %}
           {% if facet.authority %}
             <li>
-              <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+              <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
           {% endfor %}
@@ -1013,7 +1033,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
   </div>
 </div><!-- /modal -->
-<!-- institution Modal -->
+<!-- people Modal -->
 <div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
 <div class="modal-dialog" role="document">
   <div class="modal-content">
@@ -1026,7 +1046,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.PE %}
         {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1038,6 +1060,34 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div>
 </div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in similar_objects.GE %}
+          {% if facet.authority %}
+            <li>
+              <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
 
 <!-- institution Modal -->
 <div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
@@ -1052,7 +1102,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.IN %}
         {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1065,7 +1117,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div>
 </div><!-- /modal -->
 
-<!-- categories Modal -->
+<!-- times Modal -->
 <div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
 <div class="modal-dialog" role="document">
   <div class="modal-content">
@@ -1078,7 +1130,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.TI %}
         {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1104,7 +1158,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.IH %}
         {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1131,7 +1187,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.PH %}
         {% if facet.authority %}
           <li>
-            <a href={% url 'authority' facet.authority.id %}>{{facet.authority.name}}</a>
+            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            {{facet.authority.name}}
+            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}

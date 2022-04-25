@@ -86,7 +86,7 @@ $(document).ready(function() {
         <div class='row' style='padding-left: 15px'>
           {{ query|format_query }}
         </div>
-        {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids_exact or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
+        {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
           <hr style="margin-top:5px; margin-bottom:5px;">
           
           <ol class="breadcrumb" style='margin-bottom: 0;'>
@@ -146,9 +146,9 @@ $(document).ready(function() {
               {% endfor %}
             {% endif %}
   
-            {% if selected_facets.citation_people_by_subject_ids_exact %}
-              {% for person in selected_facets.citation_people_by_subject_ids_exact %}
-              {% with person|create_facet_string:'citation_people_by_subject_ids_exact' as encoded_person %}
+            {% if selected_facets.citation_people_by_subject_ids %}
+              {% for person in selected_facets.citation_people_by_subject_ids %}
+              {% with person|create_facet_string:'citation_people_by_subject_ids' as encoded_person %}
               <li class="search-breadcrumb-item"><a class='filter-label-link' href="{{ request.get_full_path|remove_facet:encoded_person|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><span class='label citation-type-label filter-label'>{{person|get_authority_name}}<span class='appear-on-hover'>&nbsp<i class="far fa-times-circle nix-icon"></i></span></span></a></li>
               {% endwith %}
               {% endfor %}

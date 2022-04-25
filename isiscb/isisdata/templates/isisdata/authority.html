@@ -169,7 +169,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <span id="authorityLink" style="margin-right: 20px;cursor: copy;" title="Click to copy"><i class="fas fa-fingerprint"></i> ID: {{ authority.id }} <i class="far fa-copy"></i></span>
             <textarea style="position: absolute;left: -9999px;" id="hiddenAuthorityLink">{{ authority | get_uri }}</textarea>
             {% if user.is_staff %}<a class="glyphicon glyphicon-edit" href="{% url "curation:curate_authority" authority.id %}" style="padding-right: 5px;"></a>{% endif %}
-            {% if user.is_authenticated %}<a class="glyphicon glyphicon-console" href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API"></a>{% endif %}
+            {% if user.is_authenticated %}<a href="{{ api_view}}" data-toggle="tooltip" data-placement="top" style="padding-right: 5px;" title="View in REST API">API</a>{% endif %}
         </span>
         <br>
         <hr style="margin-top:5px; margin-bottom:5px;">
@@ -183,10 +183,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
           <div id="tab search_tabs" class="btn-group btn-group" data-toggle="buttons" role="tablist" style="font-size: 1.1em; font-weight: 400;">
             <a id="bookshelf-tab" href="#" class="btn tab-btn-default active" role="tab" data-toggle="tab" style="border-color:#337ab7">
-              <input type="radio" />Bookshelf
+              <input type="radio" />Citations
             </a>
             <a id="catalog-tab" onclick="location.href='{% url 'authority_catalog' authority_id|upper %}';" class="btn tab-btn-default" role="tab" data-toggle="tab" style="border-color: #337ab7; color: #337ab7;">
-              <input type="radio" />Catalog
+              <input type="radio" />Indexes
             </a>
          </div>
         </div>
