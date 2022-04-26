@@ -51,7 +51,9 @@ def create_exclude_facet_string(facet, field):
 
 @register.filter
 def format_query(query):
-    authority_id = re.match("\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA", query)
+    author_match = re.match("\(author_ids:(CBA[0-9]{9}) OR contributor_ids:CBA", query)
+    subject_match = re.match("\(subject_ids:(CBA[0-9]{9}) OR category_ids:CBA", query)
+    publisher_match = re.match("\(publisher_ids:(CBA[0-9]{9}) OR periodical_ids:CBA", query)
     all_results = re.match("\*", query)
     authority_type_label_map = {
         'Concept': ' label-concepts',
@@ -66,8 +68,14 @@ def format_query(query):
         'Cross-reference': ' label-default',
         'Bibliographic List': ' label-default',
     }
-    if authority_id:
-        authority_id = authority_id.group(1)
+    if author_match or subject_match or publisher_match:
+        if author_match:
+            authority_id = author_match.group(1)
+        elif subject_match:
+            authority_id = subject_match.group(1)
+        else:
+            authority_id = publisher_match.group(1)
+            
         try:
             authority = Authority.objects.get(id=authority_id)
             name = authority.name
