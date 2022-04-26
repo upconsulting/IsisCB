@@ -9,7 +9,7 @@
   {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
   <div style="z-index: 10; position: relative;">
     <div id="wikiImageContainer" style="display:none; position: relative;  margin: auto;">
-      <h3 style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">{{display_type}}:<br/>{{authority.name}}</h3>
+      <h3 id="imageCaption" style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">{{display_type}}:<br/>{{authority.name}}</h3>
       <img id="wikiImage" style="position: relative; max-height:375px; max-width:100%; margin-left:auto; margin-right:auto; display:none; z-index: -1;" src=''></img>
     </div>
   </div>
@@ -243,6 +243,7 @@
     document.getElementById('wikiImageContainer').style.display = 'block';
     document.getElementById('wikiImageContainer').style.height = '200px';
     document.getElementById('wikiImageContainer').style.width = '200px';
+    document.getElementById('imageCaption').style.display = 'block';
     document.getElementById('wikiImageContainer').style.backgroundColor = default_background_map[type];
     document.getElementById('wikiImage').src = default_image_map[type];
     document.getElementById('wikiImage').style.height = "200px";
