@@ -1864,7 +1864,6 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     """
     This method searches authorities. It accepts the following paramters:
