@@ -165,7 +165,7 @@
 
     {% for result in page.citation.object_list %}
       <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is incomplete {% endif %}">
-        <p style="margin-bottom: 20px; font-size: 1.1em;">
+        <p style="margin-bottom: 20px;">
           {% if result.stub_record_status == 'SR' %}
             <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is incomplete."></i></span>
           {% endif %}

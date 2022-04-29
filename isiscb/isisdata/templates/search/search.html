@@ -7,6 +7,7 @@
 
 {% block meta_tags %}
 <meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
 {% endblock %}
 
 {% block extra_head %}
@@ -72,6 +73,10 @@ $(document).ready(function() {
 
     .filter-label-link:hover {
       text-decoration: none;
+    }
+
+    p {
+      font-size: 1.1em;
     }
 </style>
 
@@ -199,9 +204,9 @@ $(document).ready(function() {
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
-          {% for author in facets_citation.fields.all_contributor_ids %}
-          {% if "citation_all_contributor_ids_exact" not in selected_facets.keys or author.0 not in selected_facets.citation_all_contributor_ids_exact %}
-          <li><a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_all_contributor_ids_exact:{{ author.0|urlencode }}"><i class="far fa-square"></i> ({{ author.1 }})</a> {{ author.0|get_authority_name }} <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fas fa-external-link-alt"></i></a>
+          {% for author in facets_citation.fields.persons_ids %}
+          {% if "citation_persons_ids" not in selected_facets.keys or author.0 not in selected_facets.citation_persons_ids %}
+          <li><a title="Show only results involving {{ author.0|get_authority_name }}" href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i> ({{ author.1 }})</a> {{ author.0|get_authority_name }} <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fas fa-external-link-alt"></i></a>
           {% endif %}
           {% endfor %}
         </ul>

@@ -798,9 +798,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PR|slice:"6" %}
                         {% if facet.authority %}
-                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                          <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
                         {% endif %}
                         {% endfor %}
@@ -821,9 +821,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PH|slice:"6" %}
                         {% if facet.authority %}
-                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                          <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
                         {% endif %}
                         {% endfor %}
@@ -844,9 +844,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.IH|slice:"6" %}
                         {% if facet.authority %}
-                          <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -869,9 +869,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.CO|slice:"6" %}
                         {% if facet.authority %}
-                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -892,9 +892,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PE|slice:"6" %}
                         {% if facet.authority %}
-                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -915,9 +915,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.GE|slice:"6" %}
                         {% if facet.authority %}
-                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -938,9 +938,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.TI|slice:"6" %}
                         {% if facet.authority %}
-                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -961,9 +961,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.IN|slice:"6" %}
                         {% if facet.authority %}
-                        <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -992,9 +992,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in similar_objects.PR %}
           {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
           {% endif %}
           {% endfor %}
@@ -1019,9 +1019,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in similar_objects.CO %}
           {% if facet.authority %}
             <li>
-              <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
               {{facet.authority.name}}
-              <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
           {% endfor %}
@@ -1046,9 +1046,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.PE %}
         {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1074,9 +1074,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in similar_objects.GE %}
           {% if facet.authority %}
             <li>
-              <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
               {{facet.authority.name}}
-              <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
           {% endfor %}
@@ -1102,9 +1102,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.IN %}
         {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1130,9 +1130,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.TI %}
         {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1158,9 +1158,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.IH %}
         {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1187,9 +1187,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         {% for facet in similar_objects.PH %}
         {% if facet.authority %}
           <li>
-            <a style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}

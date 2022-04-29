@@ -3,7 +3,7 @@
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
         <div class="navbar-header col-md-3">
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 50px;" src="{% static "isisdata/images/IsisCB-188.svg" %}"> </a>
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 50px;" src="{% static "isisdata/images/IsisCB-550.png" %}"> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -27,7 +27,7 @@
                 {% if user.is_authenticated %}
                 <li class="{% if active == 'user' %}active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        {{ user.username }} <span class="caret"></span>
+                        <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
                     <!-- <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     </button> -->
                     </a>

@@ -70,6 +70,22 @@
     td {
         border-bottom: 1px solid #999;
     }
+
+    .loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: #fff;
+        opacity: 0.7;
+    }
+    .loader img{
+        position: relative;
+        left: 40%;
+        top: 40%;
+    }
       
 </style>
 {% endblock %}
@@ -208,7 +224,7 @@
                 <div class="col-sm-4" id="overview-left-right-column" style="padding-right: 0">
                 </div>
             </div>
-            <div class="col-sm-6" style="height: 100%; overflow-y: scroll;">
+            <div class="col-sm-6">
                 <div class="col-sm-4" id="overview-right-left-column" style="padding-left: 0">
                 </div>
                 <div class="col-sm-4" id="overview-right-center-column" style="padding-left: 0">
@@ -408,6 +424,7 @@
         </ol>
     </div>
 </div>
+<div class="loader" id="loader" style="display: none;"><img width="20%" height="auto" src="{% static "isisdata/images/loading_icon.gif" %}"></div>
 
 <script>
     var leftSelected = [];
@@ -437,25 +454,27 @@
         var resultsContainer = $('#subjectSearchResultsContainer');
         resultsContainer.empty();
         result.results.forEach(function(r) {
-        var newLi = $("<li></li>");
-        newLi.addClass("list-group-item");
-        newLi.attr('data-acrelation-id', r.name);
-        var publicLink = $('<a></a>');
-        publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
-        publicLink.attr('target', "_blank");
-        publicLink.html(r.name + ' (' + r.citation_count + ')' );
-        newLi.append(publicLink);
-        newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
-        resultsContainer.append(newLi);
+            if (r.type !== 'Cross-reference' && r.type !== 'Creative Work' && r.type !== 'Bibliographic List') {
+                var newLi = $("<li></li>");
+                newLi.addClass("list-group-item");
+                newLi.attr('data-acrelation-id', r.name);
+                var publicLink = $('<a></a>');
+                publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+                publicLink.attr('target', "_blank");
+                publicLink.html(r.name + ' (' + r.citation_count + ')' );
+                newLi.append(publicLink);
+                newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+                resultsContainer.append(newLi);
 
-        var leftAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
-        leftAddBtn.append('<i class="far fa-arrow-alt-circle-left" aria-hidden="true" style="margin-right:10px;"></i>');
-        leftAddBtn.click({column: 'left'}, addConcept);
-        var rightAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
-        rightAddBtn.append('<i class="far fa-arrow-alt-circle-right" aria-hidden="true" style="margin-right:10px;"></i>');
-        rightAddBtn.click({column: 'right'}, addConcept);
-        newLi.prepend(rightAddBtn);
-        newLi.prepend(leftAddBtn);
+                var leftAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
+                leftAddBtn.append('<i class="far fa-arrow-alt-circle-left" aria-hidden="true" style="margin-right:10px;"></i>');
+                leftAddBtn.click({column: 'left'}, addConcept);
+                var rightAddBtn = $('<a href="#" data-id="' + r.id + '" data-type="' + r.type + '" data-name="' + r.name + '"></a>');
+                rightAddBtn.append('<i class="far fa-arrow-alt-circle-right" aria-hidden="true" style="margin-right:10px;"></i>');
+                rightAddBtn.click({column: 'right'}, addConcept);
+                newLi.prepend(rightAddBtn);
+                newLi.prepend(leftAddBtn);
+            }
         });
 
         if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
@@ -620,11 +639,12 @@
         if (leftSelected.length === 0 || rightSelected.length === 0) {
             $.notify("Please select terms to compare on both sides", "error");
         } else {
+            $('#loader').css('display', 'block');
             var selected = {};
             selected.left = leftSelected;
             selected.right = rightSelected;
 
-            const csrftoken = getCookie('csrftoken');
+            let csrftoken = getCookie('csrftoken');
 
             async function postData(url='', data = {}) {
                 const response = await fetch(url, {
@@ -641,8 +661,11 @@
 
             postData("{% url "term_explorer" %}", selected)
                 .then(data => {
+                    $('#loader').css('display', 'none');
                     $('#tablesContainer').css("display", "block");
                     $('#collapseOne').removeClass('in');
+                    $('#left-selected-container').empty();
+                    $('#right-selected-container').empty();
                     
                     data.left_selected_names.map(name => {
                         $('#left-selected-container').append(`<li class="search-breadcrumb-item"><h4 style="margin: 0;"><span class="label label-primary">${name}</span></h4></li>`)
@@ -651,8 +674,6 @@
                     data.right_selected_names.map(name => {
                         $('#right-selected-container').append(`<li class="search-breadcrumb-item"><h4 style="margin: 0;"><span class="label label-primary">${name}</span></h4></li>`)
                     })
-
-                    console.log(data);
 
                     let field_map = {
                         "contributors": {
@@ -696,10 +717,22 @@
                             "box_color": "primary",
                         },
                     };
+
+                    // remove any facet boxes from previous comparisons
+                    $(`#overview-left-left-column`).empty();
+                    $(`#overview-left-center-column`).empty();
+                    $(`#overview-left-right-column`).empty();
+                    $(`#overview-right-left-column`).empty();
+                    $(`#overview-right-center-column`).empty();
+                    $(`#overview-right-right-column`).empty();
                     
                     // map through each authority type to generate containing divs and authority lists for each facet
                     let facet_fields = Object.keys(data.left_boxes);
                     facet_fields.map(field => {
+                        // remove any tables from previous comparisons
+                        $(`#${field}-left-table`).find("tr:gt(0)").remove();
+                        $(`#${field}-right-table`).find("tr:gt(0)").remove();
+
                         // append panels
                         $(`#overview-left-${field_map[field].column}-column`).append(`<div class="panel panel-${field_map[field].box_color} facet-box" id="overview-left-${field}-box">`);
                         $(`#overview-right-${field_map[field].column}-column`).append(`<div class="panel panel-${field_map[field].box_color} facet-box" id="overview-right-${field}-box">`);
@@ -711,20 +744,20 @@
                         if (data.left_boxes[field].length) {
                             data.left_boxes[field].map((authority, i) => {
                                 if (i < 10) {
-                                    $(`#overview-left-${field}-box-body`).append(`<a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
+                                    $(`#overview-left-${field}-box-body`).append(`<a href="https://data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
                                 }
-    
-                                $(`#${field}-left-table tr:last`).after(`<tr id="${field}-left-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
+
+                                $(`#${field}-left-table tr:last`).after(`<tr id="${field}-left-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="https://data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
                             })
                         }
 
                         if (data.right_boxes[field].length) {
                             data.right_boxes[field].map((authority, i) => {
                                 if (i < 10) {
-                                    $(`#overview-right-${field}-box-body`).append(`<a href="data.isiscb.org/isis/authority/${authority.id} target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
+                                    $(`#overview-right-${field}-box-body`).append(`<a href="https://data.isiscb.org/isis/authority/${authority.id} target="_blank"><span>${authority.name}</span></a><span> (${authority.count})</span></br>`);
                                 }
 
-                                $(`#${field}-right-table tr:last`).after(`<tr id="${field}-right-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
+                                $(`#${field}-right-table tr:last`).after(`<tr id="${field}-right-${authority.id}" onmouseover="mouseOver(this)" onmouseout="mouseOut(this)" data-id="${authority.id}"><td><span>${authority.rank}</span></td><td><a href="https://data.isiscb.org/isis/authority/${authority.id}" target="_blank"><span>${authority.name}</span></a><span></td><td style="background-color: ${color(authority.count, get_count_max(field, data))}"><span>${authority.count}</span></td><td style="background-color: ${color(authority.percent, get_percent_max(field, data))}"><span>${authority.percent}</span></td></tr>`);
                             })
                         }
                     })
@@ -799,8 +832,6 @@
     function clearAll() {
         leftSelected = [];
         rightSelected = [];
-        $('#left-selected-container').empty();
-        $('#right-selected-container').empty();
         $('#leftBreadcrumb').empty();
         $('#rightBreadcrumb').empty();
     }
