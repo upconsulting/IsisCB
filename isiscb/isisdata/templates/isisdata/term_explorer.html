@@ -435,6 +435,7 @@
 
     var searchTimerSubjects = 0;
     function triggerSearchSubjects(force) {
+        $('#subjectSearchQuery').addClass('search-loading');
         if (searchTimerSubjects) {
             clearTimeout(searchTimerSubjects);
         }
@@ -453,6 +454,7 @@
     function generateSearchResults(result, query, force) {
         var resultsContainer = $('#subjectSearchResultsContainer');
         resultsContainer.empty();
+        $('#subjectSearchQuery').removeClass('search-loading');
         result.results.forEach(function(r) {
             if (r.type !== 'Cross-reference' && r.type !== 'Creative Work' && r.type !== 'Bibliographic List') {
                 var newLi = $("<li></li>");

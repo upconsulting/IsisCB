@@ -226,6 +226,14 @@ div.timeline {
   background-color: #34a0a4;
 }
 
+.search-loading {    
+  background-color: #ffffff;
+  background-image: url("/static/isisdata/images/loading_icon.gif");
+  background-size: 115px auto;
+  background-position: 105% center;
+  background-repeat: no-repeat;
+}
+
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;

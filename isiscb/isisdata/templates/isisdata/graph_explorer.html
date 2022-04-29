@@ -129,6 +129,7 @@
 
         var searchTimerSubjects = 0;
         function triggerSearchSubjects(force) {
+            $('#subjectSearchQuery').addClass('search-loading');
             if (searchTimerSubjects) {
                 clearTimeout(searchTimerSubjects);
             }
@@ -139,6 +140,7 @@
                 success: function(result) {
                     var resultsContainer = $('#subjectSearchResultsContainer');
                     resultsContainer.empty();
+                    $('#subjectSearchQuery').removeClass('search-loading');
                     result.results.forEach(function(r) {
                     var newLi = $("<li></li>");
                     newLi.addClass("list-group-item");
