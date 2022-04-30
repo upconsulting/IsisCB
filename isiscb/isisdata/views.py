@@ -1912,9 +1912,10 @@ def ngram_explorer(request):
         for selected_group in selected_groups:
             if selected_groups[selected_group]:
                 group = {}
+                authorities, names = get_authorities(selected_groups[selected_group])
                 group['name'] = selected_group
                 group['selected_ids'] = selected_groups[selected_group]
-                group['authority_names'] = get_authority_names(selected_groups[selected_group])
+                group['authority_names'] = names
                 group['values'], group_max_year, group_min_year, group_max_ngram = get_ngram_data(selected_groups[selected_group])
                 data.append(group)
                 max_years.append(group_max_year)
