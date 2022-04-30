@@ -31,7 +31,7 @@
                   {% for author in selected_facets.citation_persons_ids %}
                   {% with author|create_facet_string:'citation_persons_ids' as encoded_author %}
                   <div class="col-md-12">
-                    <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?">{{author|get_authority_name}}</a>
+                    <a href="{{ request.get_full_path|remove_facet:encoded_author|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{author|get_authority_name}} <a title="Go to authority record for {{author|get_authority_name}}" href="{% url 'authority' author %}?"><i class="fas fa-external-link-alt"></i></a>
                   </div>
                   {% endwith %}
                   {% endfor %}
@@ -85,7 +85,7 @@
                 {% for periodical in selected_facets.citation_periodical_ids %}
                 {% with periodical|create_facet_string:'citation_periodical_ids' as encoded_periodical %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_periodical|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{periodical|get_authority_name}}" href="{% url 'authority' periodical %}?">{{periodical|get_authority_name}}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_periodical|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{periodical|get_authority_name}} <a title="Go to authority record for {{periodical|get_authority_name}}" href="{% url 'authority' periodical %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -135,7 +135,7 @@
                 {% for publisher in selected_facets.citation_publisher_ids %}
                 {% with publisher|create_facet_string:'citation_publisher_ids' as encoded_publisher %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_publisher|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{publisher|get_authority_name}}" href="{% url 'authority' publisher %}?">{{publisher|get_authority_name}}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_publisher|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{publisher|get_authority_name}} <a title="Go to authority record for {{publisher|get_authority_name}}" href="{% url 'authority' publisher %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -187,7 +187,7 @@
                 {% for concept in selected_facets.citation_concepts_by_subject_ids_exact %}
                 {% with concept|create_facet_string:'citation_concepts_by_subject_ids_exact' as encoded_concept %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_concept|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{concept|get_authority_name}}" href="{% url 'authority' concept %}?">{{concept|get_authority_name}}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_concept|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{concept|get_authority_name}} <a title="Go to authority record for {{concept|get_authority_name}}" href="{% url 'authority' concept %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -236,7 +236,7 @@
                 {% for time_period in selected_facets.citation_time_period_ids_exact %}
                 {% with time_period|create_facet_string:'citation_time_period_ids_exact' as encoded_time_period %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a>  <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?">{{ time_period|get_authority_name }}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_time_period|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ time_period|get_authority_name }} <a title="Go to authority record for {{ time_period|get_authority_name}}" href="{% url 'authority' time_period %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -285,7 +285,7 @@
                 {% for geographic in selected_facets.citation_geographic_ids_exact %}
                 {% with geographic|create_facet_string:'citation_geographic_ids_exact' as encoded_geographic %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?">{{ geographic|get_authority_name }}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_geographic|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{ geographic|get_authority_name }} <a title="Go to authority record for {{ geographic|get_authority_name }}" href="{% url 'authority' geographic %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -335,7 +335,7 @@
                 {% for person in selected_facets.citation_people_by_subject_ids %}
                 {% with person|create_facet_string:'citation_people_by_subject_ids' as encoded_person %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_person|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{person|get_authority_name}}" href="{% url 'authority' person %}?">{{person|get_authority_name}}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_person|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{person|get_authority_name}} <a title="Go to authority record for {{person|get_authority_name}}" href="{% url 'authority' person %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
@@ -385,7 +385,7 @@
                 {% for institution in selected_facets.citation_institutions_by_subject_ids_exact %}
                 {% with institution|create_facet_string:'citation_institutions_by_subject_ids_exact' as encoded_institution %}
                 <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_institution|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> <a title="Go to authority record for {{institution|get_authority_name}}" href="{% url 'authority' institution %}?">{{institution|get_authority_name}}</a>
+                  <a href="{{ request.get_full_path|remove_facet:encoded_institution|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{institution|get_authority_name}} <a title="Go to authority record for {{institution|get_authority_name}}" href="{% url 'authority' institution %}?"><i class="fas fa-external-link-alt"></i></a>
                 </div>
                 {% endwith %}
                 {% endfor %}
