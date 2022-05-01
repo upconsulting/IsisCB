@@ -148,7 +148,7 @@ def get_coins_from_result(result):
         kv_pairs['rft.atitle'] = result.title.encode('utf-8')
 
         # Journal title.
-        if result.periodicals and len(result.periodicals) > 0:
+        if result.periodicals and len(result.periodicals) > 0 and result.periodicals[0]:
             kv_pairs['rft.jtitle'] = result.periodicals[0].encode('utf-8')
 
         # Start and end pages.
