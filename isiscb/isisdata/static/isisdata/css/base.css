@@ -244,6 +244,12 @@ div.timeline {
   }
 }
 
+@media screen and (max-width: 800px) {
+  #search-bar {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
 @media screen and (max-width: 400px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     /*margin-left: -50px;*/

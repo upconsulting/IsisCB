@@ -4,7 +4,7 @@
     <div class="container-fluid">
 
         <div class="navbar-header col-md-2" style="padding-top: 5px;"><!--  width: 250px;"-->
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px;" src="{% static "isisdata/images/IsisCB-550.png" %}"> </a>
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
             <div style="height: 100%; padding-top: 5px; position: relative; left: -3px;">
                 <span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span>
             </div>
@@ -17,7 +17,7 @@
         </div>
         <div class="col-md-6" style='padding: 0;'>
             <div class='form-inline'>
-                <div class="navbar-center" style="padding-top:14px; width: 76%; margin-left: 20px">
+                <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
                     <form method="get" action="/isis/" style='width: 100%'>
                         <div class="input-group" style='width: 100%'>
                             <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
@@ -36,7 +36,7 @@
                         </div>
                     </form>
                 </div>
-                <div class="navbar-center pull-right" style="padding-top:14px;">
+                <div class="navbar-center pull-right" style="padding: 14px 0;">
                     <form method="get" action="/isis/">
                         <div class="input-group">
                             <input id="id_q" name="q" type="hidden" class="form-control" value="*">
