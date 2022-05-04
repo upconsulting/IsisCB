@@ -385,3 +385,5 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
                                 AWS_SECRET_ACCESS_KEY,
                                 AWS_EXPORT_BUCKET_NAME)
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
+
+DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
