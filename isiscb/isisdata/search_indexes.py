@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from builtins import str
 import datetime
 from haystack import indexes
+from haystack.query import SearchQuerySet
 from haystack.constants import DEFAULT_OPERATOR, DJANGO_CT, DJANGO_ID, FUZZY_MAX_EXPANSIONS, FUZZY_MIN_SIM, ID
 from django.forms import MultiValueField
 from django.db.models import Prefetch
@@ -20,6 +21,8 @@ from itertools import groupby
 import time
 from collections import defaultdict
 
+class DictMultiValueField(indexes.MultiValueField):
+    field_type = 'object'
 
 class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.EdgeNgramField(document=True)
@@ -38,12 +41,14 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     physical_details = indexes.CharField(null=True, indexed=False)
     attributes = indexes.MultiValueField()
     authorities = indexes.MultiValueField(faceted=True, indexed=False)
+    language = indexes.MultiValueField(indexed=False)
 
     authors = indexes.MultiValueField(faceted=True, indexed=False)
     author_for_sort = indexes.CharField(null=True, indexed=False, stored=True)
     author_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
     all_contributor_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
     contributor_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
+    persons_with_ids = DictMultiValueField(stored=True, indexed=False, null=True)
     persons = indexes.MultiValueField(faceted=True, indexed=False)
     persons_ids = indexes.MultiValueField(faceted=False, indexed=False, null=True)
 
@@ -57,6 +62,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     complete_citation = indexes.CharField(null=True, indexed=True)
     stub_record_status = indexes.CharField(indexed=False, null=True, faceted=True)
+
+    book_reviews = indexes.MultiValueField(faceted=False, indexed=False)
 
     # # Fields for COinS metadata.
     # # TODO: Populate these fields with values.
@@ -135,8 +142,6 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
-
-
     data_fields = [
         'id',
         'title',
@@ -147,6 +152,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'abstract',
         'edition_details',
         'physical_details',
+        'language__name',
         'belongs_to',
         'belongs_to__name',
         'complete_citation',
@@ -206,7 +212,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         del(self.prepared_data[field.index_fieldname])
                     except KeyError:    # It was never there....
                         pass
-
+        
         return self.prepared_data
 
     def prepare(self, obj):
@@ -245,8 +251,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             },
             'attributes': [],
             'acrelations': [],
-            'ccrelations_from': [],
-            'ccrelations_to': [],
+            'ccrelations': [],
+            'language': [],
         }
 
         for row in data:
@@ -254,10 +260,18 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['attributes'].append(row)
             if row['acrelation__id']:
                 data_organized['acrelations'].append(row)
-            if row['relations_from__id']:
-                data_organized['ccrelations_from'].append(row)
-            if row['relations_to__id']:
-                data_organized['ccrelations_to'].append(row)
+            if row['relations_from__id'] and row['relations_from__type_controlled']:
+                relation = {'id': row['relations_from__id'], 'type': row['relations_from__type_controlled'], 'title': row['relations_from__object__title']}
+                data_organized['ccrelations'].append(relation)
+            if row['relations_to__id'] and row['relations_to__type_controlled']:
+                relation = {'id': row['relations_to__id'], 'type': row['relations_to__type_controlled'], 'title': row['relations_to__subject__title']}
+                data_organized['ccrelations'].append(relation)
+            if row['language__name']:
+                data_organized['language'].append(row['language__name'])
+            else:
+                data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
+        
+        data_organized['ccrelations'] = list({v['id']:v for v in data_organized['ccrelations']}.values())
 
         self._index_belongs_to(data)
 
@@ -388,6 +402,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             if a['acrelation__type_broad_controlled'] == ACRelation.PERSONAL_RESPONS:
                 multivalue_data['persons'].append(name)
                 multivalue_data['persons_ids'].append(ident)
+                contrib = {}
+                contrib['name'] = name
+                contrib['id'] = ident
+                multivalue_data['persons_with_ids'].append(contrib)
                 if int(a['acrelation__data_display_order']) < 30:
                     multivalue_data['all_contributor_ids'].append(ident)
 
@@ -403,13 +421,15 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                         aname = name
                     if aname not in multivalue_data['authors']:
                         multivalue_data['authors'].append(aname)
-
+        for relation in data_organized['ccrelations']:
+            multivalue_data['ccrelations'].append(relation)
         if len(multivalue_data['authors']) > 0:
             self.prepared_data['author_for_sort'] = multivalue_data['authors'][0]
         else:
             self.prepared_data['author_for_sort'] = u""
-        self.prepared_data.update(multivalue_data)
 
+        self.prepared_data.update(multivalue_data)
+        
         return self.prepared_data
 
     def _index_belongs_to(self, data):
@@ -429,15 +449,17 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         """
 
         # The review - reviewed CCRelation may go in either direction.
-        for ccrelation in data['ccrelations_from']:
-            if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
-                return ccrelation['relations_from__object__title']
+        if 'ccrelations_from' in data:
+            for ccrelation in data['ccrelations_from']:
+                if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
+                    return ccrelation['relations_from__object__title']
 
         # If we're still here, it means that there is no posessive CCRelation
         #  from this Citation; so we check the opposite direction.
-        for ccrelation in data['ccrelations_to']:
-            if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
-                return ccrelation['relations_to__subject__title']
+        if "ccrelations_to" in data:
+            for ccrelation in data['ccrelations_to']:
+                if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
+                    return ccrelation['relations_to__subject__title']
 
         return None
 
@@ -479,10 +501,11 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         belongs.
         """
         if data['type_controlled'] == Citation.CHAPTER:
-            for ccrelation in data['ccrelations_to']:
-                if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
-                    # we assume there is just one
-                    return remove_control_characters(ccrelation['relations_to__subject__title'])
+            if 'ccrelations_to' in data:
+                for ccrelation in data['ccrelations_to']:
+                    if ccrelation['relations_to__type_controlled'] == CCRelation.INCLUDES_CHAPTER:
+                        # we assume there is just one
+                        return remove_control_characters(ccrelation['relations_to__subject__title'])
         return None
 
     def prepare_title_for_sort(self, data):
@@ -571,6 +594,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_abstract(self, data):
         return remove_control_characters(data['abstract'])
+    
+    def prepare_language(self, data):
+        data['language'] = list(dict.fromkeys(data['language']))
+        for language in data['language']:
+            language = remove_control_characters(language)
+        return data['language']
 
     def prepare_complete_citation(self, data):
         return remove_control_characters(data['complete_citation'])
@@ -613,6 +642,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     authority_type = indexes.CharField(model_attr='type_controlled', indexed=False, null=True)
     public = indexes.BooleanField(model_attr='public', faceted=True, indexed=False)
     dates = indexes.MultiValueField(indexed=False)
+    citation_count = indexes.IntegerField(indexed=False)
     #citation_nr = indexes.CharField(indexed=False)
 
     def get_model(self):
@@ -666,5 +696,5 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_dates(self, obj):
         return [date.value_freeform for date in obj.attributes.filter(type_controlled__value_content_type__model__in=['datevalue', 'datetimevalue', 'isodatevalue', 'isodaterangevalue', 'daterangevalue'])]
 
-    #def prepare_citation_nr(self, obj):
-        #ACRelation.objects.filter(authority=obj, citation__public=True).distinct('citation_id').count()
+    def prepare_citation_count(self, obj):
+        return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
