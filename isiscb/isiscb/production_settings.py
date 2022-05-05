@@ -429,3 +429,5 @@ DATASET_ISISCB_NAME_PREFIX = os.environ.get('DATASET_ISISCB_NAME_PREFIX', 'Isis 
 DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isis Bibliography of the History of Science')
 DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
 DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
+
+DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
