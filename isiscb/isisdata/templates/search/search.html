@@ -89,7 +89,7 @@ $(document).ready(function() {
     <div class='col-xs-12' style='padding: 0;'>
       <div class='well' style='padding-top: 10px;'>
         <div class='row' style='padding-left: 15px'>
-          {{ query|format_query }}
+          {{ query|format_query_preamble }}{{query|format_query}}
         </div>
         {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %}
           <hr style="margin-top:5px; margin-bottom:5px;">
@@ -200,7 +200,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Author</h4>
+        <h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.persons_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.persons_ids|length }} Authors & Contributors Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -224,7 +224,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Time Period</h4>
+        <h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.time_period_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.time_period_ids|length }} Time Periods Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -248,7 +248,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Place</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.geographic_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.geographic_ids|length }} Places Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -272,7 +272,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Concept</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.concepts_by_subject_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.concepts_by_subject_ids|length }} Concepts Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -296,7 +296,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Institution</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.institutions_by_subject_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.institutions_by_subject_ids|length }} Institutions Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -320,7 +320,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Person</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.people_by_subject_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.people_by_subject_ids|length }} People Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -344,7 +344,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Publisher</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.publisher_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.publisher_ids|length }} Publishers Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
@@ -368,7 +368,7 @@ $(document).ready(function() {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Select Journal</h4>
+        <h4 class="modal-title" id="myModalLabel"><h4 class="modal-title" id="myModalLabel">List of {% if facets_citation.fields.periodical_ids|length == 100 %}Top {% else %}All {% endif %}{{facets_citation.fields.periodical_ids|length }} Journals Related to {{ query|format_query }} {% if selected_facets.citation_type or selected_facets.citation_language or selected_facets.citation_persons_ids or selected_facets.citation_concepts_by_subject_ids_exact or selected_facets.citation_time_period_ids_exact or selected_facets.citation_geographic_ids_exact or selected_facets.citation_institutions_by_subject_ids_exact or selected_facets.citation_people_by_subject_ids or selected_facets.citation_periodical_ids or selected_facets.citation_publisher_ids %} and Your Filters{% endif %}</h4>
       </div>
       <div class="modal-body">
         <ul class="unselected_facets">
