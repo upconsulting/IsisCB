@@ -431,29 +431,4 @@ DATASET_ISISCB_NAME_DISPLAY = os.environ.get('DATASET_ISISCB_NAME_DISPLAY', 'Isi
 DATASET_SHOT_NAME_PREFIX = os.environ.get('DATASET_SHOT_NAME_PREFIX', 'Technology & Culture Bibliography')
 DATASET_SHOT_NAME_DISPLAY = os.environ.get('DATASET_SHOT_NAME_DISPLAY', 'Technology & Culture Bibliography')
 
-WIKIPEDIA_IMAGE_API_PATH = os.environ.get('WIKIPEDIA_IMAGE_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles={authorityName}&origin=*')
-WIKIPEDIA_INTRO_API_PATH = os.environ.get('WIKIPEDIA_INTRO_API_PATH', 'https://en.wikipedia.org/w/api.php?action=query&titles={authorityName}&prop=extracts&exintro&explaintext&redirects=1&format=json&origin=*')
-WIKIPEDIA_PAGE_PATH = os.environ.get('WIKIPEDIA_PAGE_PATH', 'https://en.wikipedia.org/?curid=')
-
-# number of days after which we want to refresh cached data about authorities from wikipedia
-WIKIPEDIA_REFRESH_TIME = os.environ.get('WIKPEDIA_REFRESH_TIME', 30)
-GOOGLE_BOOKS_API_KEY = os.environ.get('GOOGLE_BOOKS_API_KEY', "")
-GOOGLE_BOOKS_TITLE_QUERY_PATH = os.environ.get('GOOGLE_BOOKS_TITLE_QUERY_PATH', "https://www.googleapis.com/books/v1/volumes?q={title}&key={apiKey}")
-GOOGLE_BOOKS_ITEM_GET_PATH = os.environ.get('GOOGLE_BOOKS_ITEM_GET_PATH', "https://www.googleapis.com/books/v1/volumes/{bookGoogleId}?key={apiKey}&projection=lite")
-
-# number of days after which we want to refresh cached data about books from google books
-GOOGLE_BOOKS_REFRESH_TIME = os.environ.get('GOOGLE_BOOKS_REFRESH_TIME', 30)
-
-TWITTER_API_BEARER_TOKEN = os.environ.get('TWITTER_API_BEARER_TOKEN', 'AAAAAAAAAAAAAAAAAAAAAEEyYwEAAAAAjJhT5gXHOf7fMrIGIK%2Fm6kGQIbU%3D1xezKSO21knWezAWBr0fUVLgADMtTu135MvnxuDADnwbFDNgkK')
-TWITTER_API_RECENT_TWEETS_PATH = os.environ.get('TWITTER_RECENT_TWEETS_PATH', 'https://api.twitter.com/2/users/1596475122/tweets?exclude=retweets,replies&max_results=5&tweet.fields=attachments,text')
-TWITTER_API_TWEET_PATH = os.environ.get('TWITTER_API_TWEET_PATH', 'https://api.twitter.com/2/tweets/{tweetID}?expansions=attachments.media_keys&media.fields=url,preview_image_url')
-
-
-# admin timezone
-ADMIN_TIMEZONE = os.environ.get('ADMIN_TIMEZONE', 'US/Central')
-
-#homepage featured defaults
-FEATURED_CITATION_ID = os.environ.get('FEATURED_CITATION_ID', 'CBB000932135')
-FEATURED_AUTHORITY_ID = os.environ.get('FEATURED_AUTHORITY_ID', 'CBA000113752')
-
 DATABASE_DEFAULT_LANGUAGE = os.environ.get('DATABASE_DEFAULT_LANGUAGE', 'English')
