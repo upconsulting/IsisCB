@@ -97,36 +97,8 @@ def format_query_preamble(query):
     subject_match = re.match("\(subject_ids:(CBA[0-9]{9}) OR category_ids:CBA", query)
     publisher_match = re.match("\(publisher_ids:(CBA[0-9]{9}) OR periodical_ids:CBA", query)
     all_results = re.match("\*", query)
-    authority_type_label_map = {
-        'Concept': ' label-concepts',
-        'Time Period': ' label-times',
-        'Geographic Term': ' label-places',
-        'Person': ' label-people',
-        'Institution': ' label-institutions',
-        'Serial Publication': ' label-institutions',
-        'PU': ' label-institutions',
-        'Classification Term': ' label-default',
-        'Creative Work': ' label-default',
-        'Cross-reference': ' label-default',
-        'Bibliographic List': ' label-default',
-    }
 
     if author_match or subject_match or publisher_match:
-        if author_match:
-            authority_id = author_match.group(1)
-        elif subject_match:
-            authority_id = subject_match.group(1)
-        else:
-            authority_id = publisher_match.group(1)
-            
-        try:
-            authority = Authority.objects.get(id=authority_id)
-            name = authority.name
-            authority_type = authority.get_type_controlled_display()
-        except:
-            name = authority_id
-            authority_type = "subject"
-
         return mark_safe('<strong style="font-size: 1.4em; color: #337ab7">items related to: </strong>')
     elif all_results:
         return mark_safe('<strong style="font-size: 1.4em; color: #337ab7">items related to: </strong>')

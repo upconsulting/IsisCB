@@ -8,8 +8,7 @@ register = template.Library()
 
 @register.filter
 def get_citation_object(id):
-    citation = Citation.objects.get(pk=id)
-    return citation
+    return Citation.objects.get(pk=id)
 
 @register.filter
 def get_page_string(citation):
