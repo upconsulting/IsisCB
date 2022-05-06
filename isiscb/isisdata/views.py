@@ -919,7 +919,7 @@ def get_facets_from_similar_citations(similar_citations):
         for acrelation in similar_acrelations:
             if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
                 similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
-            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT:
+            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
                 similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
 
     if similar_objects:
