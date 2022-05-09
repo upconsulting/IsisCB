@@ -1240,6 +1240,21 @@ class CitationSubtype(models.Model):
     def __str__(self):
         return self.name if self.name else 'Subtype'
 
+class GoogleBooksData(models.Model):
+    """
+    Context data for a citation, including a featured image, sourced from Google Books.
+    """
+
+    citation = models.OneToOneField(
+        Citation,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    image_url = models.TextField()
+    image_size = models.CharField(max_length=255, blank=True)
+
+    last_modified = models.DateTimeField(auto_now=True)
 
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
@@ -1492,7 +1507,40 @@ class Person(Authority):
     personal_name_suffix = models.CharField(max_length=255, blank=True)
     personal_name_preferred = models.CharField(max_length=255, blank=True)
 
+class WikipediaData(models.Model):
+    """
+    Context data for an authority, including a featured image and synopsis, sourced from Wikipedia.
 
+    """
+
+    authority = models.OneToOneField(
+        Authority,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    img_url = models.URLField(max_length=255)
+
+    intro = models.TextField(blank=True, null=True)
+
+    credit = models.URLField(max_length=255)
+
+    last_modified = models.DateTimeField(auto_now=True)
+
+class FeaturedAuthority(models.Model):
+    """
+    Contains the authorities that will be featured on the home page, the date they will start being featured and the date they will stop being featured.
+    """
+
+    authority = models.OneToOneField(
+        Authority,
+        on_delete=models.CASCADE,
+        primary_key=True,
+    )
+
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    
 class ACRelation(ReferencedEntity, CuratedMixin):
     """
     A relation between a :class:`.Authority` and a :class:`.Citaton`\.

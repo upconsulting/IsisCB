@@ -2460,6 +2460,7 @@ def export_citations(request):
             export_linked_records = form.cleaned_data.get('export_linked_records')
             export_metadata = form.cleaned_data.get('export_metadata', False)
             use_pipe_delimiter = form.cleaned_data.get('use_pipe_delimiter')
+            use_preset = form.cleaned_data.get('use_preset', False)
 
             # TODO: generalize this, so that we are not tied directly to S3.
             _datestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -2474,7 +2475,8 @@ def export_citations(request):
             # configuration for export
             config = {
                 'authority_delimiter': " || " if use_pipe_delimiter else " ",
-                'export_metadata': export_metadata
+                'export_metadata': export_metadata,
+                'use_preset': use_preset
             }
 
             export_tasks = {
@@ -2486,12 +2488,15 @@ def export_citations(request):
             # We create the AsyncTask object first, so that we can keep it
             #  updated while the task is running.
             task = AsyncTask.objects.create()
-            export_task = export_tasks.get(form.cleaned_data.get('export_format', 'CSV'), None)
+            format = form.cleaned_data.get('export_format', 'CSV')
+            export_task = export_tasks.get(format, None)
             if export_task:
                 result = export_task.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)
             else:
+                if format == 'SWP_PRESET':
+                    config['use_preset'] = True
                 result = data_tasks.export_to_csv.delay(request.user.id, s3_path,
                                                     fields, filter_params_raw,
                                                     task.id, "Citation", export_linked_records, config)

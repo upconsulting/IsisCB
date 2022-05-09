@@ -262,7 +262,7 @@ def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     if matches:
         matched_by = { match: ["Linked Data"] for match in matches }
 
-    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title)), type_controlled=dcitation.type_controlled)
+    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title) if dcitation.title else ""), type_controlled=dcitation.type_controlled)
     possible_matches = possible_matches.prefetch_related('related_authorities')
     if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
         series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
