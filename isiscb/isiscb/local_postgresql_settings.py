@@ -209,12 +209,12 @@ HAYSTACK_DEFAULT_INDEX = 'default'
 HAYSTACK_CONNECTIONS = {
     HAYSTACK_DEFAULT_INDEX: {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
+        #'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack',
+        'INDEX_NAME': 'haystack2',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
-
 
 ELASTICSEARCH_INDEX_SETTINGS = {
      "settings" : {
