@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
-from email.policy import default
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
@@ -960,72 +959,78 @@ def get_google_books_image(citation, featured):
 
     google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
 
+    # If we have the google books data cached, we can just return the cached data
     if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time and not featured:
         cover_image['size'] = google_books_data.image_size
         cover_image['url'] = google_books_data.image_url
-    else:
-        contrib = ''
-        title = ''
 
-        if citation.type_controlled in [Citation.BOOK]:
-            title = citation.title
-            if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
-                contrib = citation.get_all_contributors[0].authority.name.strip()
-        elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
-            title = parent_relations[0].subject.title
-            if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
-                contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
+        return cover_image
 
-        if ',' in contrib:
-            contrib = contrib[:contrib.find(',')]
-        elif ' ' in contrib:
-            contrib = contrib[contrib.find(' '):]
+    contrib = ''
+    title = ''
 
-        if title:
-            apiKey = settings.GOOGLE_BOOKS_API_KEY
+    if citation.type_controlled in [Citation.BOOK]:
+        title = citation.title
+        if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
+            contrib = citation.get_all_contributors[0].authority.name.strip()
+    elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
+        title = parent_relations[0].subject.title
+        if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
+            contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
+    if not title:
+        return
 
-            url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
-            url = url.replace(" ", "%20")
+    if ',' in contrib:
+        contrib = contrib[:contrib.find(',')]
+    elif ' ' in contrib:
+        contrib = contrib[contrib.find(' '):]
 
-            with requests.get(url) as resp:
-                if resp.status_code != 200:
-                    return {}
+    apiKey = settings.GOOGLE_BOOKS_API_KEY
 
-                books = resp.json()
-                items = books["items"]
+    url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+    url = url.replace(" ", "%20")
 
-            bookGoogleId = ''
+    with requests.get(url) as resp:
+        if resp.status_code != 200:
+            return {}
 
-            for i in items:
-                if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
-                    bookGoogleId = i["id"]
-                    break
+        books = resp.json()
+        items = books["items"]
 
-            if bookGoogleId:
-                url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
-                url2 = url2.replace(" ", "%20")
+    bookGoogleId = ''
 
-                with urlopen(url2) as response:
-                    book = json.load(response)
+    for i in items:
+        if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
+            bookGoogleId = i["id"]
+            break
 
-                    if 'imageLinks' in book["volumeInfo"]:
-                        imageLinks = book["volumeInfo"]["imageLinks"].keys()
+    if not bookGoogleId:
+        return {}
 
-                        if "medium" in imageLinks and not featured:
-                            cover_image["size"] = "standard"
-                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
-                        elif "small" in imageLinks and not featured:
-                            cover_image["size"] = "standard"
-                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
-                        elif "thumbnail" in imageLinks:
-                            cover_image["size"] = "thumbnail"
-                            cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+    url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+    url2 = url2.replace(" ", "%20")
 
-                        if citation.type_controlled in [Citation.BOOK]:
-                            google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
-                        elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
-                            google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
-                        google_books_data.save()
+    with urlopen(url2) as response:
+        book = json.load(response)
+
+        if 'imageLinks' in book["volumeInfo"]:
+            imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+            if "medium" in imageLinks and not featured:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+            elif "small" in imageLinks and not featured:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            elif "thumbnail" in imageLinks:
+                cover_image["size"] = "thumbnail"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+
+            if citation.type_controlled in [Citation.BOOK]:
+                google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+            elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
+                google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
+            google_books_data.save()
 
     return cover_image
 
@@ -1797,9 +1802,6 @@ def get_facet_boxes(authorities):
     sqs = sqs.all().exclude(public="false")
 
     for authority in authorities:
-        print('------v-----')
-        print(authority.name)
-        print(authority.type_controlled)
         if authority.type_controlled == authority.CONCEPT:
             sqs = sqs.narrow(u'%s:"%s"' % ('concepts_by_subject_ids_exact', authority.id))
         elif authority.type_controlled == authority.TIME_PERIOD:
@@ -1858,6 +1860,7 @@ def get_facet_boxes(authorities):
     return facets
 
 def rank(facets):
+    # This method arranges facet box items by related citation count in descending order
     new_facets = []
     prev = None
     place = 0
@@ -1871,12 +1874,16 @@ def rank(facets):
     return new_facets
 
 def get_authorities(authority_ids):
-    authorities = []
-    names = []
-    for authority_id in authority_ids:
-        authority = Authority.objects.get(id=authority_id)
-        authorities.append(authority)
-        names.append(authority.name)
+    # authorities = []
+    # names = []
+    # for authority_id in authority_ids:
+    #     authority = Authority.objects.get(id=authority_id)
+    #     authorities.append(authority)
+    #     names.append(authority.name)
+    # return authorities, names
+
+    authorities = Authority.objects.filter(id__in=authority_ids)
+    names = [authority.name for authority in authorities]
     return authorities, names
 
 def get_facets_authority_name(facets, total_citations):

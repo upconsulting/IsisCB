@@ -151,21 +151,7 @@ def authority_catalog(request, authority_id):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    # boxes
-    sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
-            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
-            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
-            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
-            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+    sqs, word_cloud_results = get_word_cloud_results(authority.id)
 
     related_citations_count = word_cloud_results.count()
 
@@ -379,23 +365,10 @@ def authority(request, authority_id):
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
+    
+    sqs, related_citations = get_word_cloud_results(authority.id)
 
-    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
-                facet('subject_ids', size=100).facet('institution_ids', size=100). \
-                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
-                facet('category_ids', size=100).facet('other_person_ids', size=100).\
-                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
-                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
-                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
-                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
-
-    related_citations = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
-            .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
-            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
-            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
-            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
-            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id) \
-            .order_by('-publication_date_for_sort')
+    related_citations = related_citations.order_by('-publication_date_for_sort')
 
     related_geographics_facet = related_citations.facet_counts()['fields']['geographic_ids'] if 'fields' in related_citations.facet_counts() else []
     related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_id)
@@ -436,6 +409,25 @@ def authority(request, authority_id):
         'subject_category_count': subject_category_count,
     }
     return render(request, 'isisdata/authority.html', context)
+
+def get_word_cloud_results(authority_id):
+    # boxes
+    sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+    word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
+            .filter_or(editor_ids=authority_id).filter_or(subject_ids=authority_id).filter_or(institution_ids=authority_id) \
+            .filter_or(category_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id) \
+            .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
+            .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
+            .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+    
+    return sqs, word_cloud_results
 
 def get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
     if authority.type_controlled == authority.PERSON and author_contributor_count != 0 and related_citations_count !=0 and author_contributor_count/related_citations_count > .9:

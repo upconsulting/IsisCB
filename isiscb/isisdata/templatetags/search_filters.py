@@ -56,17 +56,17 @@ def format_query(query):
     publisher_match = re.match("\(publisher_ids:(CBA[0-9]{9}) OR periodical_ids:CBA", query)
     all_results = re.match("\*", query)
     authority_type_label_map = {
-        'Concept': ' label-concepts',
-        'Time Period': ' label-times',
-        'Geographic Term': ' label-places',
-        'Person': ' label-people',
-        'Institution': ' label-institutions',
-        'Serial Publication': ' label-institutions',
+        'CO': ' label-concepts',
+        'TI': ' label-times',
+        'GE': ' label-places',
+        'PE': ' label-people',
+        'IN': ' label-institutions',
+        'SE': ' label-institutions',
         'PU': ' label-institutions',
-        'Classification Term': ' label-default',
-        'Creative Work': ' label-default',
-        'Cross-reference': ' label-default',
-        'Bibliographic List': ' label-default',
+        'CT': ' label-default',
+        'CW': ' label-default',
+        'CR': ' label-default',
+        'BL': ' label-default',
     }
 
     if author_match or subject_match or publisher_match:
@@ -80,12 +80,15 @@ def format_query(query):
         try:
             authority = Authority.objects.get(id=authority_id)
             name = authority.name
-            authority_type = authority.get_type_controlled_display()
+            authority_type = authority.type_controlled
         except:
             name = authority_id
-            authority_type = "subject"
-
-        return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map[authority_type] + '">' + authority_type + '</span></span>')
+            authority_type = "CO"
+        
+        if authority_type_label_map[authority_type]:
+            return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map[authority_type] + '">' + authority.get_type_controlled_display() + '</span></span>')
+        else:
+            return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map["CO"] + '">' + authority.get_type_controlled_display() + '</span></span>') 
     elif all_results:
         return mark_safe('<span class="h4" style="margin: 0">everything</span>')
     else:

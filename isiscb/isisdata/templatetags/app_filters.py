@@ -280,9 +280,16 @@ def set_page(link, sort_str):
 @register.filter
 def set_bookshelf_page(link, sort_str):
     [key, page_number] = sort_str.split(":")
-    if not (key + "=") in link:
-        return link + "?" + key + "=" + str(page_number)
-    return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
+    if key in link:
+        return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
+    else:
+        new_link = link
+        if "?" not in new_link:
+            new_link = new_link + "?"
+        else:
+            new_link = new_link + "&"
+        return new_link + key + "=" + str(page_number)
+        
 
 @register.filter
 def set_index_model(link, model_str):
