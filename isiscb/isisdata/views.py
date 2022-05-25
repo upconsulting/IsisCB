@@ -50,7 +50,7 @@ from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
-from isisdata.isiscbviews.authority_views import get_wikipedia_image_synopsis
+from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
 
 from unidecode import unidecode
 import datetime
@@ -1488,7 +1488,7 @@ def home(request):
             .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
 
     # get wikipedia data
-    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
+    wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
 
     #Get featured tweet
     recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
@@ -1786,19 +1786,12 @@ def term_explorer(request):
     return render(request, 'isisdata/term_explorer.html', context)
 
 def get_facet_boxes(authorities):
-
     sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
                 facet('institutions_by_subject_ids', size=100).facet('geocodes', size=1000)
-    # word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids__in=authority_ids).filter_or(contributor_ids__in=authority_ids) \
-    #         .filter_or(editor_ids__in=authority_ids).filter_or(subject_ids__in=authority_ids).filter_or(institution_ids__in=authority_ids) \
-    #         .filter_or(category_ids__in=authority_ids).filter_or(advisor_ids__in=authority_ids).filter_or(translator_ids__in=authority_ids) \
-    #         .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
-    #         .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
-    #         .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
-
+    
     sqs = sqs.all().exclude(public="false")
 
     for authority in authorities:
@@ -1845,13 +1838,10 @@ def get_facet_boxes(authorities):
 
     for facet_type in facet_types:
         facet = sqs.facet_counts()['fields'][facet_type] if 'fields' in sqs.facet_counts() else []
-
         # remove current authority from facet results
-        facet = remove_self_from_facets(facet, [authority.id for authority in authorities])
-
+        facet = remove_self_from_facets(facet, [authority.id for authority in authorities]) 
         # assign ranks to each authority
         facet = rank(facet)
-
         # get authority name for facet results
         facet = get_facets_authority_name(facet, total_citations)
 
@@ -1860,7 +1850,7 @@ def get_facet_boxes(authorities):
     return facets
 
 def rank(facets):
-    # This method arranges facet box items by related citation count in descending order
+    # This method arranges facet box items by related citation count in descending order and assigns a rank to each facet. Facets with the same count are assinged the same rank even though they'll have a different index value in the list
     new_facets = []
     prev = None
     place = 0
@@ -1874,14 +1864,6 @@ def rank(facets):
     return new_facets
 
 def get_authorities(authority_ids):
-    # authorities = []
-    # names = []
-    # for authority_id in authority_ids:
-    #     authority = Authority.objects.get(id=authority_id)
-    #     authorities.append(authority)
-    #     names.append(authority.name)
-    # return authorities, names
-
     authorities = Authority.objects.filter(id__in=authority_ids)
     names = [authority.name for authority in authorities]
     return authorities, names
