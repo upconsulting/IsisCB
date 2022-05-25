@@ -56,17 +56,17 @@ def format_query(query):
     publisher_match = re.match("\(publisher_ids:(CBA[0-9]{9}) OR periodical_ids:CBA", query)
     all_results = re.match("\*", query)
     authority_type_label_map = {
-        'CO': ' label-concepts',
-        'TI': ' label-times',
-        'GE': ' label-places',
-        'PE': ' label-people',
-        'IN': ' label-institutions',
-        'SE': ' label-institutions',
+        Authority.CONCEPT: ' label-concepts',
+        Authority.TIME_PERIOD: ' label-times',
+        Authority.GEOGRAPHIC_TERM: ' label-places',
+        Authority.PERSON: ' label-people',
+        Authority.INSTITUTION: ' label-institutions',
+        Authority.SERIAL_PUBLICATION: ' label-institutions',
         'PU': ' label-institutions',
-        'CT': ' label-default',
-        'CW': ' label-default',
-        'CR': ' label-default',
-        'BL': ' label-default',
+        Authority.CLASSIFICATION_TERM: ' label-default',
+        Authority.CREATIVE_WORK: ' label-default',
+        Authority.CROSSREFERENCE: ' label-default',
+        Authority.BIBLIOGRAPHIC_LIST: ' label-default',
     }
 
     if author_match or subject_match or publisher_match:
