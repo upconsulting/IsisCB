@@ -88,7 +88,7 @@ def format_query(query):
         if authority_type_label_map[authority_type]:
             return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map[authority_type] + '">' + authority.get_type_controlled_display() + '</span></span>')
         else:
-            return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map["CO"] + '">' + authority.get_type_controlled_display() + '</span></span>') 
+            return mark_safe('<span class="h4" style="margin: 0">' + name + '&nbsp<span class="label' + authority_type_label_map[authority.CONCEPT] + '">' + authority.get_type_controlled_display() + '</span></span>') 
     elif all_results:
         return mark_safe('<span class="h4" style="margin: 0">everything</span>')
     else:

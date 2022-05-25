@@ -277,17 +277,14 @@ def set_page(link, sort_str):
         return link + "&" + key + "=" + str(page_number)
     return re.sub(r"&" + key + "=[0-9]+&?", "&" + key + "=" + str(page_number) + "&", link)
 
+# This method figures out what page number each paginator button should link to given the current page number. Key is the url code for setting the page: 'page_citation'. 'sort_str' contains this key and the page number in question.
 @register.filter
 def set_bookshelf_page(link, sort_str):
     [key, page_number] = sort_str.split(":")
     if key in link:
         return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
     else:
-        new_link = link
-        if "?" not in new_link:
-            new_link = new_link + "?"
-        else:
-            new_link = new_link + "&"
+        new_link = link + "?" if "?" not in link else link + "&"
         return new_link + key + "=" + str(page_number)
         
 

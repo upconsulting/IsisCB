@@ -44,29 +44,10 @@ def authority_catalog(request, authority_id):
     """
 
     authority = Authority.objects.get(id=authority_id)
-    # Some authority entries are deleted. These should be hidden from public
-    #  view.
-    if authority.record_status_value == CuratedMixin.INACTIVE or (authority.record_status == Authority.DELETE and not authority.record_status_value):
-        raise Http404("No such Authority")
+    
+    redirect_from = _get_redirect_from(authority, request)
 
-    # If the user has been redirected from another Authority entry, this should
-    #  be indicated in the view.
-    redirect_from_id = request.GET.get('redirect_from')
-    if redirect_from_id:
-        redirect_from = Authority.objects.get(pk=redirect_from_id)
-    else:
-        redirect_from = None
-
-    # There are several authority entries that redirect to other entries,
-    #  usually because the former is a duplicate of the latter.
-    if (authority.record_status == Authority.REDIRECT or authority.record_status_value == CuratedMixin.REDIRECT) and authority.redirect_to is not None:
-        redirect_kwargs = {'authority_id': authority.redirect_to.id}
-        base_url = reverse('authority', kwargs=redirect_kwargs)
-        redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
-        return HttpResponseRedirect(redirect_url)
-
-    if not authority.public:
-        return HttpResponseForbidden()
+    _handle_authority_redirects(authority)
 
     show_nr = 3
     acrelation_qs = ACRelation.objects.filter(public=True)
@@ -151,7 +132,7 @@ def authority_catalog(request, authority_id):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, word_cloud_results = get_word_cloud_results(authority.id)
+    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
 
     related_citations_count = word_cloud_results.count()
 
@@ -161,7 +142,7 @@ def authority_catalog(request, authority_id):
     publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).filter_or(periodical_ids=authority_id).count()
     subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
 
-    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+    display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
     # the following count was used before, but it seems to be off
     #related_citations_count = acrelation_qs.filter(authority=authority, public=True, citation__public=True)\
@@ -183,19 +164,19 @@ def authority_catalog(request, authority_id):
     related_dataset_facet = word_cloud_results.facet_counts()['fields']['dataset_typed_names'] if 'fields' in word_cloud_results.facet_counts() else []
 
     # remove current authority from facet results
-    subject_ids_facet = remove_self_from_facets(subject_ids_facet, authority_id)
-    related_contributors_facet = remove_self_from_facets(related_contributors_facet, authority_id)
-    related_institutions_facet = remove_self_from_facets(related_institutions_facet, authority_id)
-    related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_id)
-    related_timeperiod_facet = remove_self_from_facets(related_timeperiod_facet, authority_id)
-    related_categories_facet = remove_self_from_facets(related_categories_facet, authority_id)
-    related_other_person_facet = remove_self_from_facets(related_other_person_facet, authority_id)
-    related_publisher_facet = remove_self_from_facets(related_publisher_facet, authority_id)
-    related_journal_facet = remove_self_from_facets(related_journal_facet, authority_id)
-    related_subject_concepts_facet = remove_self_from_facets(related_subject_concepts_facet, authority_id)
-    related_subject_people_facet = remove_self_from_facets(related_subject_people_facet, authority_id)
-    related_subject_institutions_facet = remove_self_from_facets(related_subject_institutions_facet, authority_id)
-    related_dataset_facet = remove_self_from_facets(related_dataset_facet, authority_id)
+    subject_ids_facet = _remove_self_from_facets(subject_ids_facet, authority_id)
+    related_contributors_facet = _remove_self_from_facets(related_contributors_facet, authority_id)
+    related_institutions_facet = _remove_self_from_facets(related_institutions_facet, authority_id)
+    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
+    related_timeperiod_facet = _remove_self_from_facets(related_timeperiod_facet, authority_id)
+    related_categories_facet = _remove_self_from_facets(related_categories_facet, authority_id)
+    related_other_person_facet = _remove_self_from_facets(related_other_person_facet, authority_id)
+    related_publisher_facet = _remove_self_from_facets(related_publisher_facet, authority_id)
+    related_journal_facet = _remove_self_from_facets(related_journal_facet, authority_id)
+    related_subject_concepts_facet = _remove_self_from_facets(related_subject_concepts_facet, authority_id)
+    related_subject_people_facet = _remove_self_from_facets(related_subject_people_facet, authority_id)
+    related_subject_institutions_facet = _remove_self_from_facets(related_subject_institutions_facet, authority_id)
+    related_dataset_facet = _remove_self_from_facets(related_dataset_facet, authority_id)
 
     # gets featured image and synopsis of authority from wikipedia
     wikipedia_data = WikipediaData.objects.filter(authority__id=authority.id).first()
@@ -339,39 +320,20 @@ def authority_catalog(request, authority_id):
 def authority(request, authority_id):
 
     authority = Authority.objects.get(id=authority_id)
-    # Some authority entries are deleted. These should be hidden from public
-    #  view.
-    if authority.record_status_value == CuratedMixin.INACTIVE or (authority.record_status == Authority.DELETE and not authority.record_status_value):
-        raise Http404("No such Authority")
+    
+    redirect_from = _get_redirect_from(authority, request)
 
-    # If the user has been redirected from another Authority entry, this should
-    #  be indicated in the view.
-    redirect_from_id = request.GET.get('redirect_from')
-    if redirect_from_id:
-        redirect_from = Authority.objects.get(pk=redirect_from_id)
-    else:
-        redirect_from = None
-
-    # There are several authority entries that redirect to other entries,
-    #  usually because the former is a duplicate of the latter.
-    if (authority.record_status == Authority.REDIRECT or authority.record_status_value == CuratedMixin.REDIRECT) and authority.redirect_to is not None:
-        redirect_kwargs = {'authority_id': authority.redirect_to.id}
-        base_url = reverse('authority', kwargs=redirect_kwargs)
-        redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
-        return HttpResponseRedirect(redirect_url)
-
-    if not authority.public:
-        return HttpResponseForbidden()
+    _handle_authority_redirects(authority)
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
     
-    sqs, related_citations = get_word_cloud_results(authority.id)
+    sqs, related_citations = _get_word_cloud_results(authority.id)
 
     related_citations = related_citations.order_by('-publication_date_for_sort')
 
     related_geographics_facet = related_citations.facet_counts()['fields']['geographic_ids'] if 'fields' in related_citations.facet_counts() else []
-    related_geographics_facet = remove_self_from_facets(related_geographics_facet, authority_id)
+    related_geographics_facet = _remove_self_from_facets(related_geographics_facet, authority_id)
 
     related_citations_count = related_citations.count()
     subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
@@ -380,14 +342,14 @@ def authority(request, authority_id):
     
     publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).count()
     
-    display_type = get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
+    display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
     page_number = request.GET.get('page_citation', 1)
     paginator = Paginator(related_citations, 20)
     page_results = paginator.get_page(page_number)
 
     # gets featured image and synopsis of authority from wikipedia
-    wikiImage, wikiIntro, wikiCredit = get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count)
+    wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count)
 
     context = {
         'authority_id': authority_id,
@@ -410,7 +372,7 @@ def authority(request, authority_id):
     }
     return render(request, 'isisdata/authority.html', context)
 
-def get_word_cloud_results(authority_id):
+def _get_word_cloud_results(authority_id):
     # boxes
     sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
@@ -429,7 +391,7 @@ def get_word_cloud_results(authority_id):
     
     return sqs, word_cloud_results
 
-def get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
+def _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
     if authority.type_controlled == authority.PERSON and author_contributor_count != 0 and related_citations_count !=0 and author_contributor_count/related_citations_count > .9:
         return 'Author'
     elif authority.type_controlled == authority.INSTITUTION and publisher_count != 0 and related_citations_count !=0 and publisher_count/related_citations_count > .9:
@@ -437,10 +399,10 @@ def get_display_type(authority, author_contributor_count, publisher_count, relat
     else:
         return authority.get_type_controlled_display
 
-def remove_self_from_facets(facet, authority_id):
+def _remove_self_from_facets(facet, authority_id):
         return [x for x in facet if x[0].upper() != authority_id.upper()]
 
-def get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
+def _get_wikipedia_image_synopsis(authority, author_contributor_count, related_citations_count):
     wikiImage = wikiCredit = wikiIntro = ''
 
     if not authority.type_controlled == authority.SERIAL_PUBLICATION and not(authority.type_controlled == authority.PERSON and author_contributor_count != 0 and author_contributor_count/related_citations_count > .9):
@@ -552,6 +514,33 @@ def _get_authority_places_map_data(facets):
 
     return country_map, country_name_map, is_mapped_map
 
+def _get_redirect_from(authority, request):
+    # Some authority entries are deleted. These should be hidden from public
+    #  view.
+    if authority.record_status_value == CuratedMixin.INACTIVE or (authority.record_status == Authority.DELETE and not authority.record_status_value):
+        raise Http404("No such Authority")
+
+    # If the user has been redirected from another Authority entry, this should
+    #  be indicated in the view.
+    redirect_from_id = request.GET.get('redirect_from')
+    if redirect_from_id:
+        redirect_from = Authority.objects.get(pk=redirect_from_id)
+    else:
+        redirect_from = None
+    
+    return redirect_from
+
+def _handle_authority_redirects(authority):
+    # There are several authority entries that redirect to other entries,
+    #  usually because the former is a duplicate of the latter.
+    if (authority.record_status == Authority.REDIRECT or authority.record_status_value == CuratedMixin.REDIRECT) and authority.redirect_to is not None:
+        redirect_kwargs = {'authority_id': authority.redirect_to.id}
+        base_url = reverse('authority', kwargs=redirect_kwargs)
+        redirect_url = base_url + '?redirect_from={0}'.format(authority.id)
+        return HttpResponseRedirect(redirect_url)
+
+    if not authority.public:
+        return HttpResponseForbidden()
 
 def authority_author_timeline(request, authority_id):
     now = datetime.datetime.now()
