@@ -47,7 +47,9 @@ def authority_catalog(request, authority_id):
     
     redirect_from = _get_redirect_from(authority, request)
 
-    _handle_authority_redirects(authority)
+    redirect = _handle_authority_redirects(authority)
+    if redirect:
+        return redirect
 
     show_nr = 3
     acrelation_qs = ACRelation.objects.filter(public=True)
@@ -323,7 +325,9 @@ def authority(request, authority_id):
     
     redirect_from = _get_redirect_from(authority, request)
 
-    _handle_authority_redirects(authority)
+    redirect = _handle_authority_redirects(authority)
+    if redirect:
+        return redirect
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)

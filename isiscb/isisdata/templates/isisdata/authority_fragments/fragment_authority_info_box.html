@@ -6,7 +6,6 @@
 {% load facet_filters %}
 
 <div class="col-sm-12 col-md-6" style="padding-left: 0">
-  {% if redirect_from %}<p class="text-muted text-danger"><em>Redirected from <strong>{{ redirect_from.name }}</strong> ({{ redirect_from.id }}).</em></p>{% endif %}
   <div style="z-index: 10; position: relative;">
     <div id="wikiImageContainer" style="display:none; position: relative;  margin: auto;">
       <h3 id="imageCaption" style="color: #fff; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">{{display_type}}:<br/>{{authority.name}}</h3>
