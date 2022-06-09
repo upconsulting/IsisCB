@@ -14,6 +14,7 @@ from django.conf import settings
 
 sqs = SearchQuerySet().facet('authors', size=100). \
         facet('type', size=100). \
+        facet('language', size=100). \
         facet('publication_date', size=100). \
         facet('persons', size=100). \
         facet('persons_ids', size=100). \
@@ -58,12 +59,13 @@ urlpatterns = [
     url(r'^(?P<obj_id>[A-Z]+[0-9]+)/$', views.index, name='index'),
     url(r'^recent/$', publicsite_views.recent_records, name='recent_records'),
     url(r'^recent/load$', publicsite_views.recent_records_range, name='recent_records_range'),
-    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/$', authority_views.authority, name='authority'),
-    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
-    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
+    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/map$', authority_views.get_place_map_data, name='authority_map_data'),
+    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/authortimeline$', authority_views.authority_author_timeline, name='authority_author_timeline'),
+    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
     url(r'^user/(?P<username>[^/]+)/$', views.user_profile, name='user_profile'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)/$', views.citation, name='citation'),
-    url(r'^authority/(?P<authority_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
+    url(r'^authority/(?P<authority_id>[A-Za-z]+[0-9]+)\.rdf/$', views.rdf_authority_view, name='authority_rdf'),
     url(r'^citation/(?P<citation_id>[A-Z]+[0-9]+)\.rdf/$', views.rdf_citation_view, name='citation_rdf'),
     url(r'^(?P<base_view>[A-Za-z]+)/(?P<obj_id>[A-Z]+[0-9]+).json$', views.api_redirect),
     url(r'^search/', IsisSearchView.as_view(form_class=MyFacetedSearchForm, queryset=sqs), name='haystack_search'),
@@ -75,6 +77,10 @@ urlpatterns = [
     url(r'^api', views.api_documentation, name='api'),
     url(r'^(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
     url(r'^curation/', include('curation.urls', namespace="curation")),
+    url(r'^playground', views.playground, name="playground"),
+    url(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
+    url(r'^termexplorer', views.term_explorer, name="term_explorer"),
+    url(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
 ]
 
 #if settings.DEBUG:

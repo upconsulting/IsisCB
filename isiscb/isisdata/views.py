@@ -15,16 +15,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.db.models import Q
-from django.db.models import Prefetch
+from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
 
 from itertools import chain
+from operator import itemgetter
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
+from haystack.inputs import Raw
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
@@ -35,9 +36,10 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale
+import codecs, datetime, uuid, base64, zlib, locale, json, requests, random
+import pytz
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from .helpers.mods_xml import initial_response, generate_mods_xml
 from .helpers.linked_data import generate_authority_rdf, generate_citation_rdf
 from ipware.ip import get_real_ip
@@ -47,6 +49,8 @@ from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
+from isisdata.twitter_methods import get_featured_tweet
+from isisdata.isiscbviews.authority_views import _get_wikipedia_image_synopsis
 
 from unidecode import unidecode
 import datetime
@@ -567,6 +571,12 @@ def about(request):
     """
     return render(request, 'isisdata/about.html', context={'active': 'about'})
 
+def playground(request):
+    """
+    View for playground page
+    """
+    return render(request, 'isisdata/playground.html', context={'active': 'playground'})
+
 
 def statistics(request):
     """
@@ -697,39 +707,89 @@ def citation(request, citation_id):
         return HttpResponseForbidden()
 
     # Some citations are deleted. These should be hidden from public view.
-    if citation.status_of_record == 'DL':
+    if citation.status_of_record == Citation.DELETE:
         raise Http404("No such Citation")
 
-    authors = citation.acrelation_set.filter(type_controlled__in=['AU', 'CO', 'ED'], citation__public=True, public=True)
+    authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
+    author_ids = [author.authority.id for author in authors if author.authority]
 
-    subjects = citation.acrelation_set.filter(Q(type_controlled__in=['SU'], citation__public=True)
-                                              & ~Q(authority__type_controlled__in=['GE', 'TI'], citation__public=True))\
-                                      .filter(public=True)
+    subjects = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True, public=True))
+    subject_ids = [subject.authority.id for subject in subjects if subject.authority]
 
-    persons = citation.acrelation_set.filter(type_broad_controlled__in=['PR'], citation__public=True, public=True)
-    categories = citation.acrelation_set.filter(Q(type_controlled__in=['CA']), citation__public=True, public=True)
+    persons = citation.acrelation_set.filter(type_broad_controlled__in=[ACRelation.PERSONAL_RESPONS], citation__public=True, public=True)
+    categories = citation.acrelation_set.filter(Q(type_controlled__in=[ACRelation.CATEGORY]), citation__public=True, public=True)
 
-    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['TI'], citation__public=True))
+    query_time = Q(type_controlled__in=['TI'], citation__public=True) | (Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.TIME_PERIOD], citation__public=True))
     time_periods = citation.acrelation_set.filter(query_time).filter(public=True)
 
-    query_places = Q(type_controlled__in=['SU'], citation__public=True) & Q(authority__type_controlled__in=['GE'], citation__public=True)
+    query_places = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.GEOGRAPHIC_TERM], citation__public=True)
     places = citation.acrelation_set.filter(query_places).filter(public=True)
 
-    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled='IC', object__public=True).filter(public=True)
-    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled='IC', subject__public=True).filter(public=True)
-    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled='ISA', object__public=True).filter(public=True)
-    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled='ISA', subject__public=True).filter(public=True)
+    query_concepts = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.CONCEPT], citation__public=True)
+    concepts = citation.acrelation_set.filter(query_concepts).filter(public=True)
 
-    query = Q(subject_id=citation_id, type_controlled='RO', object__public=True) | Q(object_id=citation_id, type_controlled='RB', subject__public=True)
+    query_institutions = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.INSTITUTION], citation__public=True)
+    institutions = citation.acrelation_set.filter(query_institutions).filter(public=True)
+
+    query_people = Q(type_controlled__in=[ACRelation.SUBJECT], citation__public=True) & Q(authority__type_controlled__in=[Authority.PERSON], citation__public=True)
+    people = citation.acrelation_set.filter(query_people).filter(public=True)
+
+    related_citations_ic = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, object__public=True).filter(public=True)
+    related_citations_inv_ic = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_CHAPTER, subject__public=True).filter(public=True)
+    related_citations_isa = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, object__public=True).filter(public=True)
+    related_citations_inv_isa = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.INCLUDES_SERIES_ARTICLE, subject__public=True).filter(public=True)
+
+    query = Q(subject_id=citation_id, type_controlled=CCRelation.REVIEW_OF, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, subject__public=True)
     related_citations_ro = CCRelation.objects.filter(query).filter(public=True)
 
-    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RB', object__public=True).filter(public=True)
-    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled='RE', object__public=True).filter(public=True)
-    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled='RE', subject__public=True).filter(public=True)
+    related_citations_rb = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.REVIEWED_BY, object__public=True).filter(public=True)
+    related_citations_re = CCRelation.objects.filter(subject_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, object__public=True).filter(public=True)
+    related_citations_inv_re = CCRelation.objects.filter(object_id=citation_id, type_controlled=CCRelation.RESPONDS_TO, subject__public=True).filter(public=True)
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
-    properties = citation.acrelation_set.exclude(type_controlled__in=['AU', 'ED', 'CO', 'SU', 'CA']).filter(public=True)
+    # Similar Citations Generator
+    if subjects:
+        sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+        sqs.query.set_limits(low=0, high=20)
+
+        results = sqs.all().exclude(public="false")
+        similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
+
+    elif citation.type_controlled not in ['RE']:
+        mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
+                facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+        mlt.query.set_limits(low=0, high=20)
+        similar_citations = mlt.all().exclude(public="false").query.get_results()
+    else:
+        similar_citations = []
+        word_cloud_results = EmptySearchQuerySet()
+
+    # if authors and len(authors) > 1:
+    #     word_cloud_results = results.filter(all_contributor_ids__in=author_ids)
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
+    # else:
+    #     word_cloud_results = results
+    #     subject_ids_facet, related_contributors_facet, related_institutions_facet, related_geographics_facet, related_timeperiod_facet, related_categories_facet, related_other_person_facet, related_publisher_facet, related_journal_facet, related_subject_concepts_facet, related_subject_people_facet, related_subject_institutions_facet = get_facets(word_cloud_results)
+
+    similar_objects = get_facets_from_similar_citations(similar_citations)
+
+    googleBooksImage = get_google_books_image(citation, False)
+
+    properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
     for prop in properties:
         properties_map[prop.type_controlled] += [prop]
@@ -752,7 +812,7 @@ def citation(request, citation_id):
     query_string = request.GET.get('query_string', None)
 
     if query_string:
-        query_string = query_string.encode('ascii','ignore')
+        query_string = quote(query_string) #query_string.encode('ascii','ignore')
         search_key = base64.b64encode(bytes(last_query, 'utf-8'))
         # search_key = base64.b64encode(query_string) #request.session.get('search_key', None)
     else:
@@ -814,10 +874,13 @@ def citation(request, citation_id):
         'authors': authors,
         'properties_map': properties,
         'subjects': subjects,
+        'concepts': concepts,
         'persons': persons,
         'categories': categories,
+        'people': people,
         'time_periods': time_periods,
         'places': places,
+        'institutions': institutions,
         'source_instance_id': citation_id,
         'source_content_type': ContentType.objects.get(model='citation').id,
         'related_citations_ic': related_citations_ic,
@@ -839,9 +902,137 @@ def citation(request, citation_id):
         'fromsearch': fromsearch,
         'last_query': last_query,
         'query_string': query_string,
+        'similar_citations': similar_citations,
+        'cover_image': googleBooksImage,
+        'similar_objects': similar_objects,
     }
     return render(request, 'isisdata/citation.html', context)
 
+def get_facets_from_similar_citations(similar_citations):
+    similar_objects = defaultdict(list)
+
+    if similar_citations:
+        similar_citations_ids = [citation.id for citation in similar_citations]
+        similar_citations_qs = Citation.objects.all().filter(id__in=similar_citations_ids)
+        similar_acrelations = [acr for similar_citation in similar_citations_qs for acr in similar_citation.acrelations.all()]
+        for acrelation in similar_acrelations:
+            if acrelation.type_broad_controlled in [acrelation.PERSONAL_RESPONS, acrelation.INSTITUTIONAL_HOST, acrelation.PUBLICATION_HOST]:
+                similar_objects[acrelation.type_broad_controlled].append(acrelation.authority)
+            if acrelation.type_broad_controlled == acrelation.SUBJECT_CONTENT and acrelation.authority and acrelation.authority.type_controlled:
+                similar_objects[acrelation.authority.type_controlled].append(acrelation.authority)
+
+    if similar_objects:
+        similar_objects = generate_similar_facets(similar_objects)
+
+    return similar_objects
+
+def generate_similar_facets(similar_objects):
+    for key in similar_objects:
+        authorities_count = Counter(similar_objects[key])
+        similar_facets = []
+
+        for authority in authorities_count:
+            similar_facets.append({'authority':authority, 'count':authorities_count[authority]})
+        similar_facets = sorted(similar_facets, key=itemgetter('count'), reverse=True)
+
+        similar_objects[key] = similar_facets
+
+    return similar_objects
+
+def get_google_books_image(citation, featured):
+
+    # Provide image for citation
+    if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
+        return {}
+
+    cover_image = {}
+
+    parent_id = None
+    parent_relations = CCRelation.objects.filter(object_id=citation.id, type_controlled='IC')
+    if parent_relations and parent_relations[0].subject:
+        parent_id = parent_relations[0].subject.id
+
+    if citation.type_controlled in [Citation.CHAPTER] and parent_id:
+        google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
+    else:
+        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+
+    google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
+
+    # If we have the google books data cached, we can just return the cached data
+    if google_books_data and (datetime.datetime.now(datetime.timezone.utc) - google_books_data.last_modified).days < google_books_refresh_time and not featured:
+        cover_image['size'] = google_books_data.image_size
+        cover_image['url'] = google_books_data.image_url
+
+        return cover_image
+
+    contrib = ''
+    title = ''
+
+    if citation.type_controlled in [Citation.BOOK]:
+        title = citation.title
+        if citation.get_all_contributors and citation.get_all_contributors[0].authority and citation.get_all_contributors[0].authority.name:
+            contrib = citation.get_all_contributors[0].authority.name.strip()
+    elif citation.type_controlled in [Citation.CHAPTER] and parent_relations and parent_relations[0].subject and parent_relations[0].subject.title:
+        title = parent_relations[0].subject.title
+        if parent_relations[0].subject.get_all_contributors and parent_relations[0].subject.get_all_contributors[0].authority and parent_relations[0].subject.get_all_contributors[0].authority.name:
+            contrib = parent_relations[0].subject.get_all_contributors[0].authority.name.strip()
+    if not title:
+        return
+
+    if ',' in contrib:
+        contrib = contrib[:contrib.find(',')]
+    elif ' ' in contrib:
+        contrib = contrib[contrib.find(' '):]
+
+    apiKey = settings.GOOGLE_BOOKS_API_KEY
+
+    url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
+    url = url.replace(" ", "%20")
+
+    with requests.get(url) as resp:
+        if resp.status_code != 200:
+            return {}
+
+        books = resp.json()
+        items = books["items"]
+
+    bookGoogleId = ''
+
+    for i in items:
+        if i["volumeInfo"]["title"].lower() in title.lower() or 'authors' in i["volumeInfo"] and any(contrib in s for s in i["volumeInfo"]["authors"]):
+            bookGoogleId = i["id"]
+            break
+
+    if not bookGoogleId:
+        return {}
+
+    url2 = settings.GOOGLE_BOOKS_ITEM_GET_PATH.format(bookGoogleId=bookGoogleId, apiKey=apiKey)
+    url2 = url2.replace(" ", "%20")
+
+    with urlopen(url2) as response:
+        book = json.load(response)
+
+        if 'imageLinks' in book["volumeInfo"]:
+            imageLinks = book["volumeInfo"]["imageLinks"].keys()
+
+            if "medium" in imageLinks and not featured:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["medium"].replace("http://", "https://")
+            elif "small" in imageLinks and not featured:
+                cover_image["size"] = "standard"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+            elif "thumbnail" in imageLinks:
+                cover_image["size"] = "thumbnail"
+                cover_image["url"] = book["volumeInfo"]["imageLinks"]["thumbnail"].replace("http://", "https://")
+
+            if citation.type_controlled in [Citation.BOOK]:
+                google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=citation.id)
+            elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
+                google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
+            google_books_data.save()
+
+    return cover_image
 
 @login_required
 def search_saved(request):
@@ -1027,6 +1218,7 @@ class IsisSearchView(FacetedSearchView):
         context = self.get_context_data(**{
             # self.form_name: form,
         })
+
         return self.render_to_response(context)
 
     def build_page(self):
@@ -1037,6 +1229,7 @@ class IsisSearchView(FacetedSearchView):
         should be a simple matter to override this method to do what they would
         like.
         """
+
         try:
             page_no_authority = int(self.request.GET.get('page_authority', 1))
         except (TypeError, ValueError):
@@ -1177,7 +1370,6 @@ class IsisSearchView(FacetedSearchView):
         extra['excluded_facets'] = excluded_facets_map
         extra['excluded_facets_raw'] = excluded_facets_raw
 
-
         return extra
 
 
@@ -1253,6 +1445,55 @@ def home(request):
     """
     The landing view, at /.
     """
+    # Get featured citation and authority
+    now = datetime.datetime.now(pytz.timezone(settings.ADMIN_TIMEZONE))
+    current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
+    featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
+
+    sqs = SearchQuerySet().models(Citation)
+    sqs.query.set_limits(low=0, high=30)
+    # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+    featured_citations = sqs.all().exclude(public="false")
+    featured_citations = featured_citations.filter(subject_ids__in=current_featured_authority_ids).filter(type__in=['Book', 'Article']).filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
+
+    if featured_citations:
+        featured_citation = featured_citations[random.randint(0,len(featured_citations)-1)]
+        featured_citation = Citation.objects.filter(pk=featured_citation.id).first()
+    else:
+        #set default featured citation in case no featured authorities have been selected
+        featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
+
+    featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
+    featured_citation_image = get_google_books_image(featured_citation, True)
+
+    if featured_authorities:
+        featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
+    else:
+        #set default featured authorities in case no featured authorities have been selected
+        featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
+    
+    #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
+    sqs = SearchQuerySet().models(Citation)
+
+    related_citations_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(subject_ids=featured_authority.id).filter_or(institution_ids=featured_authority.id) \
+            .filter_or(category_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id) \
+            .filter_or(publisher_ids=featured_authority.id).filter_or(school_ids=featured_authority.id).filter_or(meeting_ids=featured_authority.id) \
+            .filter_or(periodical_ids=featured_authority.id).filter_or(book_series_ids=featured_authority.id).filter_or(time_period_ids=featured_authority.id) \
+            .filter_or(geographic_ids=featured_authority.id).filter_or(about_person_ids=featured_authority.id).filter_or(other_person_ids=featured_authority.id) \
+            .count()
+    
+    author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
+            .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
+
+    # get wikipedia data
+    wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
+
+    #Get featured tweet
+    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
+
+    properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 
     start_index = 0
     end_index = 10
@@ -1276,6 +1517,17 @@ def home(request):
         'active': 'home',
         'records_recent': recent_records[:10],
         'comments_recent': Comment.objects.order_by('-modified_on')[:10],
+        'citation': featured_citation,
+        'featured_citation_authors': featured_citation_authors,
+        'featured_authority': featured_authority,
+        'featured_citation_image': featured_citation_image,
+        'wikiImage': wikiImage,
+        'wikiCredit': wikiCredit,
+        'wikiIntro': wikiIntro,
+        'properties_map': properties,
+        'tweet_text': recent_tweet_text,
+        'tweet_url': recent_tweet_url,
+        'tweet_image': recent_tweet_image,
     }
     return render(request, 'isisdata/home.html', context=context)
 
@@ -1441,3 +1693,282 @@ def user_profile(request, username):
     else:
         template = 'isisdata/userprofile.html'
     return render(request, template, context)
+
+def graph_explorer(request):
+    context = {}
+
+    if request.method == 'POST':
+
+        node_ids = set()
+        nodes = []
+        links = []
+        subjects = json.loads(request.body)['subjects']
+
+        for subject in subjects:
+            node_ids.add(subject) #add the CBA id of the selected subjects to node_ids
+
+            sqs =SearchQuerySet().models(Citation).facet('subject_ids', size=50)
+
+            word_cloud_results = sqs.all().exclude(public="false").filter_or(author_ids=subject).filter_or(contributor_ids=subject) \
+                    .filter_or(editor_ids=subject).filter_or(subject_ids=subject).filter_or(institution_ids=subject) \
+                    .filter_or(category_ids=subject).filter_or(advisor_ids=subject).filter_or(translator_ids=subject) \
+                    .filter_or(publisher_ids=subject).filter_or(school_ids=subject).filter_or(meeting_ids=subject) \
+                    .filter_or(periodical_ids=subject).filter_or(book_series_ids=subject).filter_or(time_period_ids=subject) \
+                    .filter_or(geographic_ids=subject).filter_or(about_person_ids=subject).filter_or(other_person_ids=subject)
+
+            #add subjects to list of nodes
+            subject_ids_facets = word_cloud_results.facet_counts()['fields']['subject_ids'] if 'fields' in word_cloud_results.facet_counts() else []
+            for subject_ids_facet in subject_ids_facets:
+                node_ids.add(subject_ids_facet[0])
+            #remove selected authority from facet results
+            subject_ids = [x for x in subject_ids_facets if x[0].upper() != subject.upper()]
+
+            #create links between selected authority and its related subjects
+            if subject_ids:
+                for subject_id in subject_ids:
+                    link = {}
+                    link['source'] = subject
+                    link['target'] = subject_id[0]
+                    link['value'] = subject_id[1]
+                    links.append(link)
+
+        authorities = Authority.objects.filter(pk__in=list(node_ids)).values('id', 'name', 'type_controlled')
+        if authorities:
+            for authority in authorities:
+                node = {}
+                node['id'] = authority['id']
+                node['name'] = authority['name']
+                node['type'] = authority['type_controlled']
+                node['selected'] = True if authority['id'] in subjects else False
+                nodes.append(node)
+
+        context = {
+            'nodes': json.dumps(nodes),
+            'links': json.dumps(links),
+            'subjects': subjects,
+        }
+
+        return JsonResponse(context)
+
+    return render(request, 'isisdata/graph_explorer.html', context)
+
+def term_explorer(request):
+    leftSelected = rightSelected = []
+
+    selected = {
+        'left': leftSelected,
+        'right': rightSelected,
+    }
+
+    context = {
+        'selected': selected,
+    }
+    
+    if request.method == 'POST':
+        left_ids = json.loads(request.body)['left']
+        right_ids = json.loads(request.body)['right']
+
+        left_authorities, left_selected_names = get_authorities(left_ids)
+        right_authorities, right_selected_names = get_authorities(right_ids)
+
+        left_boxes = get_facet_boxes(left_authorities)
+        right_boxes = get_facet_boxes(right_authorities)
+
+        context['left_selected_ids'] = left_ids
+        context['right_selected_ids'] = right_ids
+        context['left_selected_names'] = left_selected_names
+        context['right_selected_names'] = right_selected_names
+        context['left_boxes'] = left_boxes
+        context['right_boxes'] = right_boxes
+
+        return JsonResponse(context)
+
+    return render(request, 'isisdata/term_explorer.html', context)
+
+def get_facet_boxes(authorities):
+    sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                facet('institutions_by_subject_ids', size=100).facet('geocodes', size=1000)
+    
+    sqs = sqs.all().exclude(public="false")
+
+    for authority in authorities:
+        if authority.type_controlled == authority.CONCEPT:
+            sqs = sqs.narrow(u'%s:"%s"' % ('concepts_by_subject_ids_exact', authority.id))
+        elif authority.type_controlled == authority.TIME_PERIOD:
+            sqs = sqs.narrow(u'%s:"%s"' % ('time_period_ids_exact', authority.id))
+        elif authority.type_controlled == authority.GEOGRAPHIC_TERM:
+            sqs = sqs.narrow(u'%s:"%s"' % ('geographic_ids_exact', authority.id))
+        elif authority.type_controlled == authority.SERIAL_PUBLICATION:
+            sqs = sqs.narrow(u'%s:"%s"' % ('periodical_ids', authority.id))
+        elif authority.type_controlled == authority.CLASSIFICATION_TERM:
+            sqs = sqs.narrow(u'%s:"%s"' % ('category_ids_exact', authority.id))
+        elif authority.type_controlled == authority.PERSON:
+            if_author_results = sqs.narrow(u'%s:"%s"' % ('persons_ids', authority.id))
+            if_person_results = sqs.narrow(u'%s:"%s"' % ('people_by_subject_ids', authority.id))
+            if if_author_results.count() >= if_person_results.count():
+                sqs = if_author_results
+            else:
+                sqs = if_person_results
+        elif authority.type_controlled == authority.INSTITUTION:
+            if_publisher_results = sqs.narrow(u'%s:"%s"' % ('publisher_ids', authority.id))
+            if_institution_results = sqs.narrow(u'%s:"%s"' % ('institutions_by_subject_ids_exact', authority.id))
+            if if_publisher_results.count() >= if_institution_results.count():
+                sqs = if_publisher_results
+            else:
+                sqs = if_institution_results
+    
+    total_citations = sqs.count()
+
+    facet_types = ['all_contributor_ids', 'periodical_ids', 'publisher_ids', 'people_by_subject_ids', 'geographic_ids', 'concepts_by_subject_ids', 'time_period_ids', 'institutions_by_subject_ids']
+    facet_name_map = {
+        'all_contributor_ids': 'contributors', 
+        'periodical_ids': 'journals', 
+        'publisher_ids': 'publishers', 
+        'people_by_subject_ids': 'people', 
+        'geographic_ids': 'places', 
+        'concepts_by_subject_ids': 'concepts', 
+        'time_period_ids': 'times', 
+        'institutions_by_subject_ids': 'institutions',
+    }
+
+    facets = {}
+
+    for facet_type in facet_types:
+        facet = sqs.facet_counts()['fields'][facet_type] if 'fields' in sqs.facet_counts() else []
+        # remove current authority from facet results
+        facet = remove_self_from_facets(facet, [authority.id for authority in authorities]) 
+        # assign ranks to each authority
+        facet = rank(facet)
+        # get authority name for facet results
+        facet = get_facets_authority_name(facet, total_citations)
+
+        facets[facet_name_map[facet_type]] = facet
+
+    return facets
+
+def rank(facets):
+    # This method arranges facet box items by related citation count in descending order and assigns a rank to each facet. Facets with the same count are assinged the same rank even though they'll have a different index value in the list
+    new_facets = []
+    prev = None
+    place = 0
+    for i,(id, count) in enumerate(facets):
+        if count != prev:
+            place = place + 1
+            prev = count
+        new_facet = (id, count, place)
+        new_facets.append(new_facet)
+
+    return new_facets
+
+def get_authorities(authority_ids):
+    authorities = Authority.objects.filter(id__in=authority_ids)
+    names = [authority.name for authority in authorities]
+    return authorities, names
+
+def get_facets_authority_name(facets, total_citations):
+    new_facets = []
+    for facet in facets:
+        authority_object = Authority.objects.get(id=facet[0])
+        name = authority_object.name
+        new_facet = {}
+        new_facet['name'] = name
+        new_facet['count'] = facet[1]
+        new_facet['id'] = facet[0]
+        new_facet['rank'] = facet[2]
+        new_facet['percent'] = round(facet[1]/total_citations * 100, 2)
+        new_facets.append(new_facet)
+    return new_facets
+
+def remove_self_from_facets(facet, authority_ids):
+    return [x for x in facet if x[0].upper() not in authority_ids]
+
+def ngram_explorer(request):
+
+    context = {
+    }
+    
+    if request.method == 'POST':
+        context = {}
+        selected_groups = json.loads(request.body)
+        data = []
+        max_years = []
+        min_years = []
+        max_ngrams = []
+
+        for selected_group in selected_groups:
+            if selected_groups[selected_group]:
+                group = {}
+                authorities, names = get_authorities(selected_groups[selected_group])
+                group['name'] = selected_group
+                group['selected_ids'] = selected_groups[selected_group]
+                group['authority_names'] = names
+                group['values'], group_max_year, group_min_year, group_max_ngram = get_ngram_data(selected_groups[selected_group])
+                data.append(group)
+                max_years.append(group_max_year)
+                min_years.append(group_min_year)
+                max_ngrams.append(group_max_ngram)
+        
+        context['max_year'] = max(max_years)
+        context['min_year'] = min(min_years)
+        context['max_ngram'] = max(max_ngrams)
+        context['data'] = data
+
+        return JsonResponse(context)
+
+    return render(request, 'isisdata/ngram_explorer.html', context)
+
+def get_ngram_data(authority_ids):
+    sqs_all =SearchQuerySet().models(Citation).auto_query('*').facet('publication_date')
+    all_facet_results = sqs_all.all().exclude(public="false")
+    all_pub_date_facet = all_facet_results.facet_counts()['fields']['publication_date'] if 'fields' in all_facet_results.facet_counts() else []
+    all_pub_date_facet = clean_dates(all_pub_date_facet)
+    all_dates_map = {}
+    citations = 0
+    for facet in all_pub_date_facet:
+        all_dates_map[facet[0]] = facet[1]
+        citations = citations + facet[1]
+
+    sqs =SearchQuerySet().models(Citation).facet('publication_date', size=200)
+
+    facet_results = sqs.all().exclude(public="false").filter_or(author_ids__in=authority_ids).filter_or(contributor_ids__in=authority_ids) \
+            .filter_or(editor_ids__in=authority_ids).filter_or(subject_ids__in=authority_ids).filter_or(institution_ids__in=authority_ids) \
+            .filter_or(category_ids__in=authority_ids).filter_or(advisor_ids__in=authority_ids).filter_or(translator_ids__in=authority_ids) \
+            .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
+            .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
+            .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
+    
+    pub_date_facet = facet_results.facet_counts()['fields']['publication_date'] if 'fields' in facet_results.facet_counts() else []
+
+    pub_date_facet = clean_dates(pub_date_facet)
+
+    ngrams = []
+    all_years = []
+    all_ngrams = []
+
+    for facet in pub_date_facet:
+        all_years.append(int(facet[0]))
+        date_facet = {}
+        date_facet['year'] = facet[0]
+        ngram = 100 * facet[1]/all_dates_map[facet[0]] if facet[0] in all_dates_map else 0
+        ngram = round(ngram, 4)
+        all_ngrams.append(ngram)
+        date_facet['ngram'] = ngram
+        ngrams.append(date_facet)
+    
+    ngrams = sorted(ngrams, key = lambda ngram: int(ngram['year']))
+    
+    return ngrams, max(all_years), min(all_years), max(all_ngrams)
+    
+
+def clean_dates(date_facet):
+    new_date_facet = []
+    for date in date_facet:
+        date_pattern = re.compile("^[0-9]{4}$")
+        if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
+            new_date_facet.append(date)
+    return new_date_facet
+
+    

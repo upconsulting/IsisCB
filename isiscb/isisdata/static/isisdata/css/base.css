@@ -73,6 +73,167 @@ div.timeline {
   padding-right: 0px;
 }
 
+.help-section .help-container {
+  /* width: 100%; */
+  /* height: 500px; */
+  background-color: #eee;
+  padding: 5px 5%;
+  margin: 0px 15px;
+  border-radius: 6px;
+}
+
+.section-title h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.tutorial-videos td {
+  font-size: 1.2em;
+  padding: 5px 10px;
+  font-weight: 200;
+}
+
+.help-links {
+}
+
+.help-links td {
+  font-size: 1.2em;
+  padding: 5px 10px;
+  font-weight: 200;
+}
+
+.video-container {
+  border-left: 1px solid #A9A9A9;
+}
+
+.bibliographical-essays-panel li {
+    list-style-type: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 0 20px;
+}
+
+/* search page */
+
+.btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.btn-default.active.focus, .btn-default:active:focus, .open>.dropdown-toggle.btn-default {
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.search-header h2 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.search-breadcrumbs {
+  display:inline;
+}
+
+.search-breadcrumb-item {
+  font-size: 1.1em;
+  margin-left: -7px;
+}
+
+.appear-on-hover {
+  display: none;
+}
+
+.filter-label:hover .appear-on-hover {
+  display: inline-block;
+}
+
+.nix-icon {
+  color: #d43f3a;
+}
+
+.search-breadcrumb-item + .search-breadcrumb-item::before {
+        content: "";
+    }
+
+.search-result:hover {
+  border-left: 2px solid #337AB7;
+}
+
+.authority-search-result:hover {
+  border-left: 2px solid #777777;
+}
+
+.stub-search-result {
+  border-left: 2px solid #B7337A;
+}
+
+.stub-search-result p,
+.search-result p {
+  /* background-color: #E8E8E8; */
+  padding-left: 8px;
+  /* border-radius: 5px; */
+}
+
+.stub-search-result-label{
+  color: #CE4F71;
+}
+
+.citations_authorities_headers:hover {
+  cursor: default;
+}
+
+.citations_container .panel-body {
+  padding-top: 10px;
+}
+/* end search css */
+
+#slider-range > span {
+  border-bottom-right-radius: 50%;
+  border-bottom-left-radius: 50%;
+  border-top-right-radius: 50%;
+  border-top-left-radius: 50%;
+  background-color: #337ab7;
+  border-color: #fff;
+}
+
+#slider-range > span:hover {
+  background-color: #0E6DFD;
+}
+
+#slider-range > div {
+  background-color: #337ab7;
+}
+
+.label-concepts {
+  background-color: #1e6091;
+}
+
+.label-times {
+  background-color: #52b69a;
+}
+
+.label-places {
+  background-color: #168aad;
+}
+
+.label-people {
+  background-color: #99d98c;
+}
+
+.label-institutions {
+  background-color: #34a0a4;
+}
+
+.search-loading {    
+  background-color: #ffffff;
+  background-image: url("/static/isisdata/images/loading_icon.gif");
+  background-size: 115px auto;
+  background-position: 105% center;
+  background-repeat: no-repeat;
+}
+
 @media screen and (min-width: 800px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     width: 100%;
@@ -83,6 +244,12 @@ div.timeline {
   }
 }
 
+@media screen and (max-width: 800px) {
+  #search-bar {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+}
 @media screen and (max-width: 400px) {
   .jumbotron .search-bar .input-group .form-control#id_q {
     /*margin-left: -50px;*/
@@ -157,10 +324,10 @@ div.timeline {
     padding-bottom: 0px;
 }
 
-
 .navbar-inverse .navbar-nav>li>a:hover {
     color: #1562a5;
 }
+
 .navbar-inverse .navbar-nav> .active>a {
     background-color: #1562a5;
 }
@@ -368,23 +535,21 @@ li {
   margin-top: 15px;
 }
 
-.menuContainer {
-    margin-top: 20px;
-}
-
 .panel-title {
   font-size: 14px;
 }
 
 .panel-title .accordion-toggle:after {
     /* symbol for "opening" panels */
-    font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+    font-family: 'Font Awesome 5 Free';  /* essential for enabling glyphicon */
     content: "\f078";    /* adjust as needed, taken from bootstrap.css */
+    font-weight: 900;
     font-size: 12px;
 }
 .panel-title .accordion-toggle.collapsed:after {
     /* symbol for "collapsed" panels */
     content: "\f054";    /* adjust as needed, taken from bootstrap.css */
+    font-weight: 900;
     font-size: 12px;
 }
 
@@ -432,7 +597,6 @@ div.panel-cell>hr {
 div.facet_panel {
   padding-left: 0px;
   padding-bottom: 5px;
-  padding-top: 0px;
 }
 
 div.facet_panel > ul {
@@ -440,7 +604,7 @@ div.facet_panel > ul {
 }
 
 .panel-group {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .more-facets {
@@ -451,7 +615,6 @@ div.facet_panel > ul {
     max-height: 420px;
     overflow-y: auto;
 }
-
 
 .text-small {
     font-size: 9pt;
@@ -468,4 +631,35 @@ span.help {
 .tooltip-inner {
     width: 150px;
     background-color: #333333;
+}
+
+#catalog-tab, #bookshelf-tab {
+  font-size: 1em;
+  font-weight: 400;
+}
+
+#catalog-tab, #bookshelf-tab a:hover {
+  text-decoration: none;
+}
+
+.tab-btn-default {
+  background-color: #fff;
+  color: #337ab7;
+  border-color: #337ab7;
+}
+
+.tab-btn-default.active {
+  border-color: #337ab7;
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.tab-btn-default.active:hover {
+  border-color: #337ab7;
+  background-color: #337ab7;
+  color: #fff;
+}
+
+.tab-btn-default:hover {
+  background-color: #e6e6e6;
 }

@@ -1,0 +1,157 @@
+{% extends "curation/base.html" %}
+{% load static %}
+{% load addcss %}
+{% load tz %}
+{% load general_tags %}
+{% block extrahead %}
+    <style>
+        .featureTable {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 1em;
+        }
+        
+        .featureTable td, .featureTable th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        
+        .featureTable tr:nth-child(even){background-color: #f2f2f2 !important;}
+        
+        .featureTable tr:hover {background-color: #ddd;}
+        
+        .featureTable th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #012e64;
+            color: white;
+        }
+
+        table th, table td {
+            margin: 10px;
+            padding: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{% timezone admin_timezone %}
+<div class="col-md-12">
+    <div class="h2">Featured authorities</div>
+
+    <p class="text-warning">
+        This will change featured status for {{ queryset.count }} authorities:<br>
+        {% for authority in queryset %}
+            <span>{{authority.name.strip}};</span>
+        {% endfor %}
+    </p>
+</div>
+<div class='row'>
+    <form class="form" action="?confirmed=true" method="POST">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="col-md-12">
+                {% for error in field.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    {% if field|field_type != 'HiddenInput' %}
+                    <label>{{ field.label }}</label>
+                    {% endif %}
+                    <span class="pull-right">{{ field.help_text }}</span>
+                    {{ field|addcss:"form-control" }}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="btn-group btn-group" role="group" aria-label="..." style="float: right; margin-right: 15px">
+            <div class="btn-group" role="group">
+            <input type="submit" class="btn btn-danger" name="remove" value="Remove" />
+            </div>
+            <div class="btn-group" role="group">
+            <input type="submit" class="btn btn-success" name="update" value="Add or Update" />
+            </div>
+        </div>
+    </form>
+</div>
+<div class='row' style="margin-top:15px;">
+    <div class='col-sm-12 col-md-6'>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Currently Featured ({{current_featured.count}} authorities)</h3>
+            </div>
+            <div class="panel-body">
+                <table class='featureTable'>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                    </tr>
+                    {% for authority in current_featured %}
+                        <tr>
+                            <td>{{authority.authority.id}}</td>
+                            <td>{{authority.authority.name}}</td>
+                            <td>{{authority.start_date|date:"Y-m-d G:i"}}</td>
+                            <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+          </div>
+    </div>
+    <div class='col-sm-12 col-md-6'>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Future Featured ({{future_featured.count}} authorities)</h3>
+            </div>
+            <div class="panel-body">
+                <table class='featureTable'>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Start Date</th>
+                      <th>End Date</th>
+                    </tr>
+                    {% for authority in future_featured %}
+                        <tr>
+                            <td>{{authority.authority.id}}</td>
+                            <td>{{authority.authority.name}}</td>
+                            <td>{{authority.start_date|date:"Y-m-d G:i" }}</td>
+                            <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='row' style="margin-top:15px;">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Past Featured ({{past_featured.count}} authorities)</h3>
+        </div>
+        <div class="panel-body">
+            <table class='featureTable'>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                </tr>
+                {% for authority in past_featured %}
+                    <tr>
+                        <td>{{authority.authority.id}}</td>
+                        <td>{{authority.authority.name}}</td>
+                        <td>{{authority.start_date|date:"Y-m-d G:i" }}</td>
+                        <td>{{authority.end_date|date:"Y-m-d G:i"}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endtimezone %}
+{% endblock %}

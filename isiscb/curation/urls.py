@@ -83,6 +83,7 @@ urlpatterns = [
     re_path(r'^authority/collection/create$', views.create_authority_collection, name='create-authority-collection'),
     re_path(r'^authority/bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='bulk_change_from_csv'),
     re_path(r'^authority/select$', views.bulk_select_authority, name='authority-bulk-select'),
+    re_path(r'^authority/featured$', views.featured_authorities, name='featured-authorities'),
 
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/tracking$', views.tracking_for_citation, name='tracking-citation'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/tracking/(?P<tracking_id>[A-Z0-9]+)$', tracking_views.delete_tracking_for_citation, name='delete-tracking-citation'),

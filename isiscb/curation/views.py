@@ -50,11 +50,10 @@ import curation.view_helpers as view_helpers
 from haystack.query import SearchQuerySet
 
 import iso8601, rules, datetime, hashlib, math
+from dateutil.relativedelta import relativedelta
 from itertools import chain
 from unidecode import unidecode
 import bleach
-import datetime
-
 import logging
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
@@ -1865,7 +1864,6 @@ def quick_and_dirty_language_search(request):
     } for language in queryset[:20]]
     return JsonResponse({'results': results})
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def quick_and_dirty_authority_search(request):
     """
     This method searches authorities. It accepts the following paramters:
@@ -2594,6 +2592,62 @@ def export_authorities(request):
     context.update({
         'form': form,
         'queryset': queryset,
+    })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def featured_authorities(request):
+
+    template = 'curation/authorities_featured.html'
+    context = {}
+    if request.method != 'POST':
+        return HttpResponseRedirect(reverse('curation:authority_list'))
+
+    queryset, filter_params_raw = _get_filtered_queryset(request, 'AUTHORITY')
+    timezone = pytz.timezone(settings.ADMIN_TIMEZONE)
+    now = datetime.datetime.now(timezone)
+    six_months_ago = now - relativedelta(months=6)
+    current_featured = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
+    future_featured =  FeaturedAuthority.objects.filter(start_date__gt=now)
+    #display only the most recent 6 months of past featured authorities so that this list doesn't balloon
+    past_featured = FeaturedAuthority.objects.filter(start_date__gt=six_months_ago).filter(end_date__lt=now)
+
+    if isinstance(queryset, AuthorityFilter):
+        queryset = queryset.qs
+
+    if request.POST:
+        # The user has selected the desired configuration settings.
+        form = FeaturedAuthorityForm(request.POST)
+        form.fields['filters'].initial = filter_params_raw
+
+        if form.is_valid():
+            if request.POST.get('update'):
+                # add new or update the dates of the featured authorities
+                start_date_str = request.POST.getlist('start_date')[0]
+                end_date_str = request.POST.getlist('end_date')[0]
+                start_date = timezone.localize(datetime.datetime.strptime(start_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
+                end_date = timezone.localize(datetime.datetime.strptime(end_date_str, '%Y-%m-%d')).replace(hour=now.hour, minute=now.minute, second=now.second)
+
+                for authority in queryset:
+                    featured_authority_data = FeaturedAuthority(authority_id=authority.id, start_date=start_date, end_date=end_date)
+                    featured_authority_data.save()
+            elif request.POST.get('remove'):
+                # if not POST.get.update then the remove button has been clicked -- removes the currently selected authorities from the list of featured authorities
+                authority_ids = [authority.id for authority in queryset]
+                FeaturedAuthority.objects.filter(authority_id__in=authority_ids).delete()
+    else:       
+        # Display the featured authorities configuration form.
+        form = FeaturedAuthorityForm()
+        form.fields['filters'].initial = filter_params_raw
+
+    context.update({
+        'form': form,
+        'queryset': queryset,
+        'current_featured': current_featured,
+        'future_featured': future_featured,
+        'past_featured': past_featured,
+        'admin_timezone': settings.ADMIN_TIMEZONE
     })
 
     return render(request, template, context)

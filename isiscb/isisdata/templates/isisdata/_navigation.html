@@ -3,8 +3,11 @@
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
 
-        <div class="navbar-header col-md-3"><!--  width: 250px;"-->
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="padding-top:1px; max-width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
+        <div class="navbar-header col-md-2" style="padding-top: 5px;"><!--  width: 250px;"-->
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
+            <div style="height: 100%; padding-top: 5px; position: relative; left: -3px;">
+                <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
+            </div>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -12,13 +15,13 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-3">
-            <div class="navbar-center" style="padding-top:14px; margin-left: 20px;">
-
-                    <form method="get" action="/isis/">
-                        <div class="input-group">
+        <div class="col-md-6" style='padding: 0;'>
+            <div class='form-inline'>
+                <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
+                    <form method="get" action="/isis/" style='width: 100%'>
+                        <div class="input-group" style='width: 100%'>
                             <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
-                            <span class="input-group-btn">
+                            <span class="input-group-btn" style='width: 20px;'>
                                 <button class="btn btn-default" type="submit">Search</button>
                             </span>
                         </div>
@@ -26,27 +29,40 @@
                             <input id="id_models" name="models" type="hidden" value="isisdata.citation">
                             <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
                             <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
-                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="ascend">
-
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
                         </div>
                     </form>
-
+                </div>
+                <div class="navbar-center pull-right" style="padding: 14px 0;">
+                    <form method="get" action="/isis/">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                            <span>
+                                <button class="btn btn-default" type="submit">Browse Everything</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="navbar-collapse collapse" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
+        <div class="col-md-4" style="padding-right: 0;">
+            <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
                 <ul class="nav navbar-nav navbar-nav-home">
-
-                    <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
-                    <li class="{% if active == 'about' %}active{% endif %}" class="dropdown">
-                        <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                          <li><a href="{% url "about" %}">About IsisCB Explore</a></li>
-                          <li><a href="{% url "statistics" %}">Statistics </a></li>
-                        </ul>
-                    </li>
-                    <li><a href="http://isiscb.org">Blog</a></li>
-                    <li class="{% if active == 'help' %}active{% endif %}"><a href="http://wiki.isiscb.org/User_Guide:Welcome_to_the_IsisCB">Help</a></li>
+                    <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
+                    <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                    <li><a href="https://isiscb.org" target="_blank">Blog</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
                         <ul class="dropdown-menu">
@@ -57,9 +73,9 @@
                     {% if user.is_authenticated %}
                     <li class="{% if active == 'user' %}active{% endif %}">
                         <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            {{ user.username }} <span class="caret"></span>
+                            <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
                         </a>
-                        <ul class="dropdown-menu" id="usercontext" aria-labelledby="usermenu">
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
                             <!-- <li><a href="/profile/">Dashboard</a></li> -->
                             <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
                             <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
