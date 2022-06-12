@@ -108,7 +108,7 @@
                             <div class="input-group">
                                 <input id="id_q" name="q" type="hidden" class="form-control" value="*">
                                 <span>
-                                    <button class="btn btn-primary btn-lg" style="font-weight: 300" type="submit">or <strong>browse</strong> everything</button>
+                                    <button class="btn btn-primary btn-lg" style="background-color: #999; border-color: #fff; color: #fff;" type="submit">Browse</button>
                                 </span>
                             </div>
                             <div>
@@ -122,12 +122,27 @@
                             </div>
                         </form>
                     </div>
+                    <span style="float: right; font-size: 20px; margin-right: 15px; padding-top: 9px;">Explore the entire database</span>
                 </div>
             </div>
         </div>
         <hr style="border-color: #999; margin: 5px 0 25px 0;">
         <div class="row">
             <div class="col-sm-12 col-md-8" style="padding: 0;">
+                <div class='row' style='margin: 0;'>
+                    <div class="col-xs-12" style="padding-right: 15px;">
+                        <div class="alert alert-default" role="alert" style="padding: 7px; background-color: #eee; border-left: 6px solid #999; border-color: #999">
+                            <div class="media">
+                                <div class="media-left media-middle">
+                                    <h3 style="margin: 0; color: #555;"><i class="fas fa-star-of-life"></i></h3>
+                                </div>
+                                <div class="media-body">
+                                    <span style="font-size: 1.15em; font-weight: 300; display: inline;">Selected entries from our featured theme: <strong>History of Pandemics</strong>. See our <strong><a href="https://isiscb.org/special-issue-on-pandemics/">History of Pandemics special issue</a></strong>.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-sm-12 col-md-6 featured-citation">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -219,23 +234,9 @@
                         </div>
                     </div>
                 </div>
-                <div class='row' style='margin: 0;'>
-                    <div class="col-xs-12" style="padding-right: 15px;">
-                        <div class="alert alert-default" role="alert" style="padding: 7px; background-color: #eee; border-left: 6px solid #eee; border-color: #eee">
-                            <div class="media">
-                                <div class="media-left media-middle">
-                                    <h3 style="margin: 0; color: #555;"><i class="fas fa-star-of-life"></i></h3>
-                                </div>
-                                <div class="media-body">
-                                    <span style="font-size: 1.2em; font-weight: 300; display: inline;">Featured theme: <strong>history of pandemics</strong>. See our <strong><a href="https://isiscb.org/special-issue-on-pandemics/">History of Pandemics special issue</a></strong>.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="col-sm-12 col-md-4 featured-tweet">
-                <div class="panel panel-default">
+                <div class="panel panel-default" style="margin-top: 63px;">
                     <div class="panel-heading">
                         <span class="btn-grp pull-right" style="color: #555"><i class="fab fa-twitter"></i></span>
                         <h4><a href={{tweet_url}}>Recent Tweet from IsisCB</a></h4>
@@ -253,7 +254,39 @@
         </div>
     </div>
 </div>
-<div class='row content-container connect-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
+<div class='row content-container new-container' style='width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: #fff;'>
+    <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">What's <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;">New</a> with the IsisCB</h2>
+    <div class="col-sm-12 col-md-4">
+        <div class="thumbnail">
+            <img src="{% static "isisdata/images/similar_citations.png" %}" alt="thumbnail depicting isis c b similar citations tool">
+            <div class="caption">
+            <h3>Similar Citations</h3>
+            <p>IsisCB now uses subjects tags and other citation metadata to generate recommendations for other citations you might be interested in. You'll find these recommendations alongside any citation record.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-4">
+        <div class="thumbnail">
+            <iframe width="100%" height="auto" src="https://www.youtube.com/embed/ntqtn0tyy-E" frameborder="0" allowfullscreen></iframe>
+            <div class="caption">
+            <h3>New Interface</h3>
+            <p>The short demo video above will introduce you to the new features and tools of the IsisCB. Learn how to search for articles, books, people, concepts, places and more. Learn how to browse the entire database. And, learn how to explore the data and underlying connections that power it.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-4">
+        <div class="thumbnail">
+            <a href="{% url 'playground' %}">
+                <img width="70%" height="auto" src="{% static "isisdata/images/graph_explorer.png" %}" alt="thumbnail depicting isis c b graph exploratory tool">
+            </a>
+            <div class="caption">
+                <a href="{% url 'playground' %}"><h3>Playground</h3></a>
+                <p>The new playground tools provide users with interactive data visualizations that allow you to see and making meaning from our database of citations, concepts, people, places, historians, and time periods and the rich connections between them.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class='row content-container connect-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #eee;'>
     <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">Get to Know Us</h2>
     <div class="col-sm-12 col-md-6" style='padding: 10px 50px'>
         <div class="media">
@@ -288,10 +321,9 @@
         </div>
     </div>
 </div>
-<div class='row content-container about-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #eee;'>
+<div class='row content-container about-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
     <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">About IsisCB Explore</h2>
     <div class="col-md-4 col-sm-12 col-xs-12" style="text-align: center;">
-        <iframe width="auto" height="150" src="https://www.youtube.com/embed/ntqtn0tyy-E" frameborder="0" allowfullscreen></iframe>
         <iframe width="auto" height="150" src="https://www.youtube.com/embed/Ijk7fuNlOeY" frameborder="0" allowfullscreen></iframe>
     </div>
     <div class="col-sm-12 col-md-8" id='about-text'>
@@ -306,7 +338,7 @@
         </div>
     </div>
 </div>
-<div class='row content-container sponsor-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #fff;'>
+<div class='row content-container sponsor-container' style='width: 100%; margin: 0px 15px 15px 0px; background-color: #eee;'>
     <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">With Support From</h2>
     <div class="col-xs-12 col-sm-3">
     </div>

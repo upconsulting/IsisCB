@@ -1277,7 +1277,7 @@ class IsisSearchView(FacetedSearchView):
                 page_citation = paginator_citation.page(1)
             except InvalidPage:
                 raise Http404("No such page!")
-
+        
         return ({'authority':paginator_authority, 'citation':paginator_citation}, {'authority':page_authority, 'citation':page_citation})
 
     def get_context_data(self, **kwargs):
@@ -1850,7 +1850,9 @@ def get_facet_boxes(authorities):
     return facets
 
 def rank(facets):
-    # This method arranges facet box items by related citation count in descending order and assigns a rank to each facet. Facets with the same count are assinged the same rank even though they'll have a different index value in the list
+    # This method arranges facet box items by related citation count in descending
+    # order and assigns a rank to each facet. Facets with the same count are assinged 
+    # the same rank even though they'll have a different index value in the list.
     new_facets = []
     prev = None
     place = 0

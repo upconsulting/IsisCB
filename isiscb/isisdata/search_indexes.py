@@ -270,9 +270,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['language'].append(row['language__name'])
             else:
                 data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
-        
+        print('-----a-----')
+        print(data_organized['ccrelations'])
         data_organized['ccrelations'] = list({v['id']:v for v in data_organized['ccrelations']}.values())
-
+        print(data_organized['ccrelations'])
         self._index_belongs_to(data)
 
         start = time.time()
@@ -447,19 +448,10 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         Attempt to retrieve the title of the work reviewed by the current
         :class:`.Citation` instance.
         """
-
-        # The review - reviewed CCRelation may go in either direction.
-        if 'ccrelations_from' in data:
-            for ccrelation in data['ccrelations_from']:
-                if ccrelation['relations_from__type_controlled'] == CCRelation.REVIEW_OF:
-                    return ccrelation['relations_from__object__title']
-
-        # If we're still here, it means that there is no posessive CCRelation
-        #  from this Citation; so we check the opposite direction.
-        if "ccrelations_to" in data:
-            for ccrelation in data['ccrelations_to']:
-                if ccrelation['relations_to__type_controlled'] == CCRelation.REVIEWED_BY:
-                    return ccrelation['relations_to__subject__title']
+        if 'ccrelations' in data:
+            for ccrelation in data['ccrelations']:
+                if ccrelation['type'] == CCRelation.REVIEWED_BY or ccrelation['type'] == CCRelation.REVIEW_OF:
+                    return ccrelation['title']
 
         return None
 
