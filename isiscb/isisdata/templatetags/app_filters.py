@@ -73,6 +73,10 @@ def get_uri(entry):
         return settings.URI_PREFIX + "citation/" + entry.id
     return ""
 
+@register.filter
+def get_authority_uri_from_id(id):
+    return settings.URI_PREFIX + "authority/" + id
+
 
 @register.filter
 def get_title(citation):
@@ -128,6 +132,9 @@ def get_pub_year(citation):
 def remove_facet(url, arg):
     return url.replace(arg, "").replace("&&", "&")
 
+@register.filter
+def remove_all_facets(path):
+    return re.sub(r"&selected_facets=[a-z_]*:[A-za-z0-9_]*", "", path)
 
 @register.filter
 def create_facet_string(facet, field):
@@ -270,6 +277,16 @@ def set_page(link, sort_str):
         return link + "&" + key + "=" + str(page_number)
     return re.sub(r"&" + key + "=[0-9]+&?", "&" + key + "=" + str(page_number) + "&", link)
 
+# This method figures out what page number each paginator button should link to given the current page number. Key is the url code for setting the page: 'page_citation'. 'sort_str' contains this key and the page number in question.
+@register.filter
+def set_bookshelf_page(link, sort_str):
+    [key, page_number] = sort_str.split(":")
+    if key in link:
+        return re.sub(key + "=[0-9]+", key + "=" + str(page_number), link)
+    else:
+        new_link = link + "?" if "?" not in link else link + "&"
+        return new_link + key + "=" + str(page_number)
+        
 
 @register.filter
 def set_index_model(link, model_str):
@@ -293,6 +310,15 @@ def get_current_sort_order_citation(sort_field):
         return 'Relevance'
     return sort_field
 
+@register.filter
+def get_current_sort_order_authority(sort_field):
+    if not sort_field:
+        return "Count"
+    if 'name' in sort_field:
+        return "Name"
+    if 'count' in sort_field:
+        return "Count"
+    return sort_field
 
 @register.filter
 def get_user_id(user):

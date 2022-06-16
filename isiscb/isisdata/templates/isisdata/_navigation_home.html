@@ -3,7 +3,10 @@
 <nav class="navbar navbar-inverse navbar-home">
     <div class="container-fluid">
         <div class="navbar-header col-md-3">
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="padding-top:1px; max-width: 250px;" src="{% static "isisdata/images/IsisCB-80px.png" %}"> </a>
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px;" src="{% static "isisdata/images/IsisCB-550.png" %}"> </a>
+            <div style="height: 100%; padding-top: 5px; position: relative; left: -6px;">
+                <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
+            </div>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -14,16 +17,9 @@
 
         <div class="navbar-collapse collapse navbar-right" id="navbar">
             <ul class="nav navbar-nav navbar-nav-home">
-                <li class="{% if active == 'home' %}active{% endif %}"><a href="/">Home</a></li>
-                <li class="{% if active == 'about' %}active{% endif %}" class="dropdown">
-                    <a class="dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                      <li><a href="{% url 'about' %}">About IsisCB Explore</a></li>
-                      <li><a href="{% url 'statistics' %}">Statistics </a></li>
-                    </ul>
-                </li>
-                <li><a href="http://isiscb.org">Blog</a></li>
-                <li class="{% if active == 'help' %}active{% endif %}"><a href="http://wiki.isiscb.org/User_Guide:Welcome_to_the_IsisCB">Help</a></li>
+                <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
+                <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                <li><a href="http://isiscb.org" target="_blank">Blog</a></li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
                   <ul class="dropdown-menu">
@@ -34,7 +30,7 @@
                 {% if user.is_authenticated %}
                 <li class="{% if active == 'user' %}active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        {{ user.username }} <span class="caret"></span>
+                        <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
                     <!-- <button class="btn btn-default dropdown-toggler" type="button" id="usermenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     </button> -->
                     </a>

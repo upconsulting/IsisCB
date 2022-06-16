@@ -74,6 +74,11 @@ $('body').ready(function() {
         </ul>
     </span>
 
+    <a class="btn btn-primary btn-xs" href="#" id="featured">
+      <i class="far fa-star"></i>
+      Featured
+    </a>
+
     <table class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
@@ -525,6 +530,11 @@ $(document).ready(function() {
         form.attr('action', '{% url "curation:add-authority-collection" %}');
         form.submit();
     });
+    $('#featured').click(function() {
+      form.attr('action', '{% url "curation:featured-authorities" %}');
+      form.attr('target', '_blank');
+      form.submit();
+  });
 });
 </script>
 {% endblock %}

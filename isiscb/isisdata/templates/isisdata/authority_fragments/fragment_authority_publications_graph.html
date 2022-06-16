@@ -2,10 +2,17 @@
 {% load static %}
 {% load authority_filters %}
 
-<div style="margin-left: 15px; margin-bottom: 10px;" class="small"><b>Publication dates of IsisCB bibliographic records</b><br>(click to expand)</div>
-<div id="publication_chart_sm" data-toggle="modal" data-target="#timelineModal">
-  <div style="margin-bottom: 10px;" id="spinner_sm"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
-  <div id="chart_sm"></div>
+<div class="panel-heading-subjects panel panel-default facet-box" id="author-timeline">
+  <div class="panel-heading-subjects panel-heading">
+    <strong>Publications timeline | </strong><span>Click to expand</span>
+  </div>
+
+  <div class="panel-body">
+    <div id="publication_chart_sm" data-toggle="modal" data-target="#timelineModal">
+      <div style="margin-bottom: 10px;" id="spinner_sm"><i class="fa fa-spinner fa-spin"></i> Updated timeline is loading. Please wait. The server may be processing several jobs...</div>
+      <div id="chart_sm"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Load c3.css -->
@@ -299,24 +306,6 @@ $(document).ready(function() {
            },
         },
       });
-
-      d3.select('.container').insert('div', '.chart').attr('class', 'legend').selectAll('span')
-          .data(['books', 'chapters', 'reviews'])
-        .enter().append('span')
-          .attr('data-id', function (id) { return id; })
-          .html(function (id) { return id; })
-          .each(function (id) {
-              d3.select(this).style('background-color', chart.color(id));
-          })
-          .on('mouseover', function (id) {
-              chart.focus(id);
-          })
-          .on('mouseout', function (id) {
-              chart.revert();
-          })
-          .on('click', function (id) {
-              chart.toggle(id);
-          });
 
       hideTicks();
     }

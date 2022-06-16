@@ -36,6 +36,7 @@ def model_choices(using=DEFAULT_ALIAS):
 
 class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='publication_date_for_sort')
+    sort_order_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='citation_count')
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
@@ -77,12 +78,12 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return sort_order
 
     def get_sort_order_authority(self):
-        sort_order = 'name'
+        sort_order = 'citation_count'
 
         if self.is_valid():
-            sort_order = self.cleaned_data.get('sort_order_authority', 'name')
+            sort_order = self.cleaned_data.get('sort_order_authority', 'citation_count')
             if not sort_order:
-                sort_order = 'name'
+                sort_order = 'citation_count'
             #if not sort_order and self.cleaned_data['models'] == 'isisdata.authority':
             #    sort_order = 'name'
 
@@ -104,13 +105,13 @@ class MyFacetedSearchForm(FacetedSearchForm):
         return sort_order_dir
 
     def get_sort_order_direction_authority(self):
-        sort_order_dir = 'ascend'
+        sort_order_dir = 'descend'
 
         if self.is_valid():
-            sort_order_dir = self.cleaned_data.get('sort_order_dir_authority', 'ascend')
+            sort_order_dir = self.cleaned_data.get('sort_order_dir_authority', 'descend')
 
             if not sort_order_dir:
-                sort_order_dir = 'ascend'
+                sort_order_dir = 'descend'
 
         return sort_order_dir
 
@@ -179,7 +180,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         results_authority = sqs_authority.models(*self.get_authority_model()).filter(public=True).order_by(sort_order_authority)
         results_citation = sqs_citation.models(*self.get_citation_model()).filter(public=True).order_by(sort_order_citation)
 
-        return {'authority' : results_authority,
+        return {'authority': results_authority,
                 'citation': results_citation}
 
     def set_facets(self, selected_facets, sqs, type_string, facet_operators):
@@ -216,11 +217,11 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         return sqs
 
-    def exclude_facets(sef, excluded_facets, sqs, type_string):
+    def exclude_facets(self, excluded_facets, sqs, type_string):
         for facet in excluded_facets:
             if ":" not in facet:
                 continue
-
+            
             field, value = facet.split(":", 1)
             field = field.strip()
             value = value.strip()
@@ -252,9 +253,6 @@ class UserRegistrationForm(SignupForm):
             return username
 
         raise forms.ValidationError(u'Username "%s" is already in use.' % username)
-
-
-
 
 class UserProfileForm(forms.Form):
     email = forms.CharField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
