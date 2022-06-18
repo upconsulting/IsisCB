@@ -14,6 +14,7 @@ from django.core.cache.backends.base import InvalidCacheBackendError
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db import connection
 from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
@@ -1694,6 +1695,7 @@ def user_profile(request, username):
         template = 'isisdata/userprofile.html'
     return render(request, template, context)
 
+@ensure_csrf_cookie
 def graph_explorer(request):
     context = {}
 
@@ -1752,6 +1754,7 @@ def graph_explorer(request):
 
     return render(request, 'isisdata/graph_explorer.html', context)
 
+@ensure_csrf_cookie
 def term_explorer(request):
     leftSelected = rightSelected = []
 
@@ -1887,6 +1890,7 @@ def get_facets_authority_name(facets, total_citations):
 def remove_self_from_facets(facet, authority_ids):
     return [x for x in facet if x[0].upper() not in authority_ids]
 
+@ensure_csrf_cookie
 def ngram_explorer(request):
 
     context = {
