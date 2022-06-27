@@ -1,0 +1,233 @@
+{% load render_object %}
+{% load rules %}
+{% load permission_tags %}
+{% load addcss %}
+{% load general_tags %}
+
+{% with 'acrelation'|create_perm_tuple:instance.id as permTuple %}
+{% test_rule 'can_update_citation_field' user permTuple as can_update %}
+{% test_rule 'can_view_citation_field' user permTuple as can_view %}
+
+<div class="clearfix"></div>
+
+<div class="form-group row">
+  <div class="col-xs-12">
+    <div class="row" style="padding-top: 10px;">
+      <div class="col-sm-12 text-left">
+        <table width="100%" style="margin-bottom: 3px;">
+          <tr class="categoryHeader">
+            <td >
+              <div class="input-xs">Subjects</div>
+            </td>
+            <td class="text-right" style="padding-right: 5px;">
+              {% if can_update %}
+              <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" ><i class="fa fa-pencil" aria-hidden="true"></i></a>
+              {% endif %}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+        <table>
+            <tr>
+                <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;">
+                    {% for acrelation in instance.acrelation_set.all %}
+                        {% if acrelation.type_controlled == 'SU' %}
+                            <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
+                                {% if not acrelation.public %}
+                                <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                                {% endif %}
+                                {% if acrelation.authority %}
+                                {{ acrelation.authority.name|truncatechars:30 }}
+                                {% else %}
+                                No authority selected
+                                {% endif %}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+    </div>
+  </div>
+{% endwith %}
+
+<div class="clearfix"></div>
+
+<div class="row">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs" style="height: 20px;">Responsibility</div>
+        </td>
+        <td class="text-right">
+          {% for type in responsibility_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_controlled in personal_responsibility_types %}
+        <p class="author_editors" id="author_editors_{{acrelation.id}}" data-responsibility-type="{{ acrelation.type_controlled}}" style="margin-bottom: 2px;">
+          <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
+            ({{acrelation.data_display_order|floatformat:"0"}}) {{ acrelation.authority.name }}
+            {% if acrelation.name_for_display_in_citation %}
+            <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
+            {% endif %}
+          </a>
+          <span class="label label-info">{{acrelation.get_type_controlled_display}}</span>
+          <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        </p>
+        {% endif %}
+    {% endfor %}
+
+    </small>
+  </div>
+</div>
+
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Hosting body</div>
+        </td>
+        <td class="text-right">
+          {% for type in host_mapping|get_item:instance.type_controlled %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&type_controlled={{type}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> {{acrel_type_choices|get_item:type}}</span>
+          </a>
+          {% endfor %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_acrelation_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for acrelation in instance.acrelation_set.all|order_by:"data_display_order" %}
+        {% if acrelation.type_controlled in publisher_distributor_types %}
+        <p style="margin-bottom: 2px;" id="host_{{acrelation.id}}" class="host_type_{{acrelation.type_controlled}}">
+        <a href="{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        <a href="{% if acrelation.authority %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif %}">
+          {{ acrelation.authority.name }}
+          {% if acrelation.name_for_display_in_citation %}
+          <span class="text-muted">({{ acrelation.name_for_display_in_citation }})</span>
+          {% endif %}
+        </a>
+        <span class="label label-primary">{{acrelation.get_type_controlled_display}}</span>
+        <a href="{% if acrelation.authority %}{% url 'authority' acrelation.authority.id %}{% endif%}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+        </p>
+        {% endif %}
+    {% endfor %}
+    </small>
+  </div>
+</div>
+
+<div class="row" >
+  <div class="col-sm-12 text-left" style="padding-bottom: 10px;">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td >
+          <div class="input-xs">Linked Citations</div>
+        </td>
+        <td class="text-right">
+          {% if instance.type_controlled == 'BO' %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=IC">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Chapter</span>
+          </a><br>
+          {% endif %}
+          {% if instance.type_controlled == 'AR' %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=ISA">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Series Article</span>
+          </a><br>
+          {% endif %}
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=AS">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Associated with</span>
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}&type_controlled=RB">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Reviewed by</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-11 form-fields-indented">
+    <small>
+      {% for ccrel in instance.all_ccrelations.all %}
+          {% if ccrel.type_controlled in ccrel_contained_relations and ccrel.object.id != instance.id or ccrel.type_controlled in ccrel_related_citations %}
+          {% with ccrel|get_other_relation_side:instance as target %}
+          <p style="margin-bottom: 2px;" id="other_citations_{{ccrel.id}}">
+            {% if not ccrel.public or not target.public %}
+            <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+            {% endif %}
+            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+
+            <a href="{% url 'curation:curate_citation' target.id %}?search={{ search_key }}&current={{ current_index }}" {% if not target.public %}class="is_not_public"{% endif %}>{{ target.title_for_display }}</a>
+          {% if target.publication_date %}
+          ({{ target.publication_date }})
+          {% endif %}
+          <span class="label label-primary">{{target.get_type_controlled_display}}</span>
+          <a href="{% url 'citation' target.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+          </p>
+          {% endwith %}
+          {% endif %}
+      {% endfor %}
+    </small>
+  </div>
+</div>
+
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Links</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span class="gylphicon glyphicon-plus"></span> Add more
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented" style="padding-left:20px;">
+    <small>
+    {% for ld in instance.linkeddata_entries.all %}
+        <p style="margin-bottom: 2px;" id="links_linked_data_{{ld.id}}" class="linked_data_{{ld.type_controlled.name}}">
+          <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+          {% if ld.universal_resource_name|startswith:'http' %}
+          <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
+          {% else %}
+          <span>{{ ld.universal_resource_name }}</span>
+          {% endif %}
+        <span class="label label-success">{{ ld.type_controlled.name }}</span>
+        </p>
+    {% endfor %}
+    </small>
+  </div>
+</div>

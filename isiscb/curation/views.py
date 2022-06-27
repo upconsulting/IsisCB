@@ -1063,7 +1063,6 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def get_attribute_type_help_text(request, attribute_type_id):
-    print(attribute_type_id)
     attribute_type = get_object_or_404(AttributeType, pk=attribute_type_id)
 
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
@@ -1093,6 +1092,7 @@ def citation(request, citation_id):
     start = datetime.datetime.now()
 
     citation = get_object_or_404(Citation, pk=citation_id)
+
     _build_result_set_links(request, context)
 
     # we now use only one template for all types IEXP-15
@@ -1101,6 +1101,108 @@ def citation(request, citation_id):
     partdetails_form = None
     context.update({'tab': request.GET.get('tab', None)})
     if request.method == 'GET':
+        form = CitationForm(user=request.user, instance=citation)
+        tracking_records = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
+
+        tracking_workflow = TrackingWorkflow(citation)
+        context.update({
+            'form': form,
+            'instance': citation,
+            'tracking_records': tracking_records,
+            'can_create_fully_entered': tracking_workflow.is_workflow_action_allowed(Tracking.FULLY_ENTERED),
+            'can_create_proofed': tracking_workflow.is_workflow_action_allowed(Tracking.PROOFED),
+            'can_create_authorize': tracking_workflow.is_workflow_action_allowed(Tracking.AUTHORIZED),
+        })
+
+        part_details = getattr(citation, 'part_details', None)
+    
+        if not part_details:
+            part_details = PartDetails.objects.create()
+            citation.part_details = part_details
+            citation.save()
+
+        partdetails_form = PartDetailsForm(request.user, citation_id,
+                                           instance=part_details,
+                                           prefix='partdetails')
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
+
+        publication_date = Attribute.objects.filter()
+    elif request.method == 'POST':
+        print('-----a------')
+        print(citation.publication_date)
+        form = CitationForm(request.user, request.POST, instance=citation)
+        if hasattr(citation, 'part_details'):
+            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
+        if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.save()
+            if partdetails_form:
+                partdetails_form.save()
+
+            search = request.POST.get('search')
+            current_index = request.POST.get('current')
+
+            forward_type = request.POST.get('forward_type', None)
+            if forward_type == "list":
+                return HttpResponseRedirect(reverse('curation:citation_list') + "?search=%s&page=%s" % (search, str(page)))
+            if forward_type == "next":
+                target_object = context.get('next', citation)
+                target_index = context.get('next_index', current_index)
+            elif forward_type == "previous":
+                target_object = context.get('previous', citation)
+                target_index = context.get('previous_index', current_index)
+            else:
+                target_object = citation.id
+                target_index = current_index
+
+            target = reverse('curation:curate_citation', args=(target_object,))
+            if search and target_index:
+                target += '?search=%s&current=%s' % (search, target_index)
+            return HttpResponseRedirect(target)
+            # return HttpResponseRedirect()
+
+        context.update({
+            'form': form,
+            'instance': citation,
+            'partdetails_form': partdetails_form,
+        })
+
+    return render(request, template, context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def user_citation(request, citation_id):
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'type_choices': Citation.TYPE_CHOICES,
+        'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
+        'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
+        'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY],
+        'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
+        'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
+        'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
+        'host_mapping': ACRelation.HOST_MAPPING,
+        'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
+        'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
+        'doi_linked_date_name': settings.DOI_LINKED_DATA_NAME,
+        'isbn_linked_date_name': settings.ISBN_LINKED_DATA_NAME,
+    }
+
+    start = datetime.datetime.now()
+
+    citation = get_object_or_404(Citation, pk=citation_id)
+    _build_result_set_links(request, context)
+
+    # we now use only one template for all types IEXP-15
+    template = 'curation/citation_user_change_view.html'
+
+    partdetails_form = None
+    context.update({'tab': request.GET.get('tab', None)})
+    if request.method == 'GET':
+
         form = CitationForm(user=request.user, instance=citation)
         tracking_records = citation.tracking_records.all() #Tracking.objects.filter(subject_instance_id=citation_id)
 
@@ -1126,6 +1228,27 @@ def citation(request, citation_id):
         context.update({
             'partdetails_form': partdetails_form,
         })
+
+        print('-----a------')
+        print(citation.acrelation_set.all())
+
+        acrelations = citation.acrelation_set.all()
+        subjects = list(acrelations.filter(type_controlled=ACRelation.SUBJECT, public=True).values('id', 'authority_id', 'name_as_entered', 'type_controlled'))
+
+        print('-----b-----')
+        print(subjects)
+
+        acrelation_formset = formset_factory(ACRelationForm)
+        if subjects:
+            acrelation_formset = acrelation_formset(initial=subjects)
+        
+        print('-----c-----')
+        print(acrelation_formset)
+
+        context.update({
+            'acrelation_formset': acrelation_formset,
+        })
+
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
         if hasattr(citation, 'part_details'):

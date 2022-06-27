@@ -1,0 +1,148 @@
+{% load addcss %}
+{% load render_object %}
+{% load general_tags %}
+
+<label for="type_controlled">Type</label>
+<select name="type_controlled" class="form-control">
+  {% for key, type in type_choices %}
+    <option value="{{ key }}">{{ type }}</option>
+  {% endfor %}
+</select>
+
+{% for error in form.title.errors %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>Title</label>
+    {{ form.title|addcss:"form-control titleInput" }}
+</div>
+
+<div class="form-group">
+  <label>Language</label>
+  <ul style="margin-bottom: 0;" class="list-group">
+    <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
+    <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted" onclick="addLanguage();">
+        <span class="glyphicon glyphicon-plus"></span> Add
+    </a>
+  </ul>
+  <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
+        {% for language in instance.language.all %}
+        <li class="list-group-item language clearfix"
+            id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px;">
+            <span style="line-height: 28px;">{{ language }}</span>
+            <!-- TODO: implement permission check here. -->
+            <span class="button-group button-group-xs pull-right">
+                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                    type="button"
+                    language-id="{{ language.id }}"
+                    language-name="{{ language }}"></a>
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% for error in form.abstract.errors %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>Abstract</label>
+    {{ form.abstract|addcss:"form-control reduceIfEmpty" }}
+</div>
+
+{% if partdetails_form %}
+    <div class="col-sm-6" style="padding-left: 0px">
+        {% for error in partdetails_form.volume_free_text.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label>Volume</label>
+        {{ partdetails_form.volume_free_text|addcss:"form-control" }}
+    </div>
+    <div class="col-sm-6" style="padding-right: 0px">
+        {% for error in partdetails_form.issue_free_text.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <label>Number/Issue</label>
+        {{ partdetails_form.issue_free_text|addcss:"form-control" }}
+    </div>    
+
+    <label>Pages</label>
+    <br />
+    <div class="col-sm-5" style="padding-left: 0px">
+        {{ partdetails_form.page_begin|addcss:"form-control" }}
+    </div>
+    <div class="col-sm-2" style="padding-right: 0px; padding-left: 0px">
+        <label class="input-xs">to</label>
+    </div>
+    <div class="col-sm-5" style="padding-right: 0px; padding-left: 0px">
+        {{ partdetails_form.page_end|addcss:"form-control" }}
+    </div>
+    <br />
+
+    {% for error in partdetails_form.page_begin.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    {% for error in partdetails_form.page_end.errors %}
+      <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+
+    {% for error in partdetails_form.extent.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <label>Page length</label>
+    {{ partdetails_form.extent|addcss:"form-control" }}
+{% endif %}
+
+{% for error in form.administrator_notes.errors %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+
+<div class="form-group">
+    <label>Note</label>
+    {{ form.administrator_notes|addcss:"form-control reduceIfEmpty" }}
+</div>
+
+<div class="form-group">
+    <label>Publication Date</label>
+    {{ form.administrator_notes|addcss:"form-control" }}
+</div>
+
+<div class="row" style="padding-top: 10px;">
+  <div class="col-sm-12 text-left">
+    <table width="100%" style="margin-bottom: 3px;">
+      <tr class="categoryHeader">
+        <td width="100px">
+          <div class="input-xs">Dates</div>
+        </td>
+        <td class="text-right">
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{publication_date_attribute_name}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Published</span>
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}&typeName={{accessed_date_attribute_name}}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Accessed</span>
+          </a>
+          <a class="text-warning input-xs"
+              href="{% url 'curation:create_attribute_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}">
+              <span style="white-space:nowrap;"><span class="gylphicon glyphicon-plus"></span> Other</span>
+          </a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="col-sm-12 form-fields-indented">
+    <small>
+    {% for attribute in instance.attributes.all %}
+        {% if attribute.type_controlled.value_content_type.model_class in date_attribute_types %}
+        <p style="margin-bottom: 2px;" class="attributes_dates" data-date-type="{{attribute.type_controlled.name}}" id="attributes_dates_{{attribute.id}}">
+        <a href="{% url 'curation:update_attribute_for_citation' instance.id attribute.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+        {{ attribute.value.get_child_class }}
+        <span class="text-muted">{{ attribute.value_freeform}}</span>
+        <span class="label label-warning">{{ attribute.type_controlled.name }}{% if attribute.get_type_qualifier_display %} ({{ attribute.get_type_qualifier_display }}){% endif %}</span>
+        </p>
+        {% endif %}
+    {% endfor %}
+    </small>
+  </div>
+</div>
