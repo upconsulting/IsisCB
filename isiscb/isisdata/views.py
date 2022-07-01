@@ -26,12 +26,13 @@ from operator import itemgetter
 
 from haystack.generic_views import FacetedSearchView
 from haystack.query import EmptySearchQuerySet, SearchQuerySet
-from haystack.inputs import Raw
+from haystack.inputs import Raw, AutoQuery
 
 from rest_framework import viewsets, serializers, mixins, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.decorators import action
 
 # import rest_framework_filters as filters
 
@@ -275,6 +276,14 @@ class AARelationSparseSerializer(serializers.HyperlinkedModelSerializer):
                   'name',
                   'type_controlled')
 
+class AuthoritySearchResultSerializer(serializers.Serializer):
+    id = serializers.CharField(required=True, source="pk")
+    name = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    #attributes = serializers.ListField(
+    #   child=serializers.CharField(required=False)
+    #)
+    authority_type = serializers.CharField(required=False)
 
 class AuthoritySerializer(serializers.HyperlinkedModelSerializer):
     attributes = AttributeSerializer(many=True, read_only=True)
@@ -362,6 +371,15 @@ class AuthorityViewSet(mixins.ListModelMixin,
     serializer_class = AuthoritySerializer
     # filter_class = AuthorityFilterSet
     # filter_fields = ('name', )
+
+    @action(detail=False)
+    def search(self, request, *args, **kwargs):
+        query = request.query_params.get("query", '')
+
+        sqs = SearchQuerySet().models(Authority).filter(content=AutoQuery(query), public=True)
+
+        serializer = AuthoritySearchResultSerializer(sqs, many=True)
+        return Response(serializer.data)
 
 
 class UserViewSet(mixins.ListModelMixin,
@@ -1278,7 +1296,7 @@ class IsisSearchView(FacetedSearchView):
                 page_citation = paginator_citation.page(1)
             except InvalidPage:
                 raise Http404("No such page!")
-        
+
         return ({'authority':paginator_authority, 'citation':paginator_citation}, {'authority':page_authority, 'citation':page_citation})
 
     def get_context_data(self, **kwargs):
@@ -1473,7 +1491,7 @@ def home(request):
     else:
         #set default featured authorities in case no featured authorities have been selected
         featured_authority = Authority.objects.filter(pk=settings.FEATURED_AUTHORITY_ID).first()
-    
+
     #Get authority related citations and authors/contribs counts so they can be used to get wikipedia data
     sqs = SearchQuerySet().models(Citation)
 
@@ -1484,7 +1502,7 @@ def home(request):
             .filter_or(periodical_ids=featured_authority.id).filter_or(book_series_ids=featured_authority.id).filter_or(time_period_ids=featured_authority.id) \
             .filter_or(geographic_ids=featured_authority.id).filter_or(about_person_ids=featured_authority.id).filter_or(other_person_ids=featured_authority.id) \
             .count()
-    
+
     author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=featured_authority.id).filter_or(contributor_ids=featured_authority.id) \
             .filter_or(editor_ids=featured_authority.id).filter_or(advisor_ids=featured_authority.id).filter_or(translator_ids=featured_authority.id).count()
 
@@ -1766,7 +1784,7 @@ def term_explorer(request):
     context = {
         'selected': selected,
     }
-    
+
     if request.method == 'POST':
         left_ids = json.loads(request.body)['left']
         right_ids = json.loads(request.body)['right']
@@ -1794,7 +1812,7 @@ def get_facet_boxes(authorities):
                 facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
                 facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
                 facet('institutions_by_subject_ids', size=100).facet('geocodes', size=1000)
-    
+
     sqs = sqs.all().exclude(public="false")
 
     for authority in authorities:
@@ -1822,18 +1840,18 @@ def get_facet_boxes(authorities):
                 sqs = if_publisher_results
             else:
                 sqs = if_institution_results
-    
+
     total_citations = sqs.count()
 
     facet_types = ['all_contributor_ids', 'periodical_ids', 'publisher_ids', 'people_by_subject_ids', 'geographic_ids', 'concepts_by_subject_ids', 'time_period_ids', 'institutions_by_subject_ids']
     facet_name_map = {
-        'all_contributor_ids': 'contributors', 
-        'periodical_ids': 'journals', 
-        'publisher_ids': 'publishers', 
-        'people_by_subject_ids': 'people', 
-        'geographic_ids': 'places', 
-        'concepts_by_subject_ids': 'concepts', 
-        'time_period_ids': 'times', 
+        'all_contributor_ids': 'contributors',
+        'periodical_ids': 'journals',
+        'publisher_ids': 'publishers',
+        'people_by_subject_ids': 'people',
+        'geographic_ids': 'places',
+        'concepts_by_subject_ids': 'concepts',
+        'time_period_ids': 'times',
         'institutions_by_subject_ids': 'institutions',
     }
 
@@ -1842,7 +1860,7 @@ def get_facet_boxes(authorities):
     for facet_type in facet_types:
         facet = sqs.facet_counts()['fields'][facet_type] if 'fields' in sqs.facet_counts() else []
         # remove current authority from facet results
-        facet = remove_self_from_facets(facet, [authority.id for authority in authorities]) 
+        facet = remove_self_from_facets(facet, [authority.id for authority in authorities])
         # assign ranks to each authority
         facet = rank(facet)
         # get authority name for facet results
@@ -1854,7 +1872,7 @@ def get_facet_boxes(authorities):
 
 def rank(facets):
     # This method arranges facet box items by related citation count in descending
-    # order and assigns a rank to each facet. Facets with the same count are assinged 
+    # order and assigns a rank to each facet. Facets with the same count are assinged
     # the same rank even though they'll have a different index value in the list.
     new_facets = []
     prev = None
@@ -1895,7 +1913,7 @@ def ngram_explorer(request):
 
     context = {
     }
-    
+
     if request.method == 'POST':
         context = {}
         selected_groups = json.loads(request.body)
@@ -1916,7 +1934,7 @@ def ngram_explorer(request):
                 max_years.append(group_max_year)
                 min_years.append(group_min_year)
                 max_ngrams.append(group_max_ngram)
-        
+
         context['max_year'] = max(max_years)
         context['min_year'] = min(min_years)
         context['max_ngram'] = max(max_ngrams)
@@ -1945,7 +1963,7 @@ def get_ngram_data(authority_ids):
             .filter_or(publisher_ids__in=authority_ids).filter_or(school_ids__in=authority_ids).filter_or(meeting_ids__in=authority_ids) \
             .filter_or(periodical_ids__in=authority_ids).filter_or(book_series_ids__in=authority_ids).filter_or(time_period_ids__in=authority_ids) \
             .filter_or(geographic_ids__in=authority_ids).filter_or(about_person_ids__in=authority_ids).filter_or(other_person_ids__in=authority_ids)
-    
+
     pub_date_facet = facet_results.facet_counts()['fields']['publication_date'] if 'fields' in facet_results.facet_counts() else []
 
     pub_date_facet = clean_dates(pub_date_facet)
@@ -1963,11 +1981,11 @@ def get_ngram_data(authority_ids):
         all_ngrams.append(ngram)
         date_facet['ngram'] = ngram
         ngrams.append(date_facet)
-    
+
     ngrams = sorted(ngrams, key = lambda ngram: int(ngram['year']))
-    
+
     return ngrams, max(all_years), min(all_years), max(all_ngrams)
-    
+
 
 def clean_dates(date_facet):
     new_date_facet = []
@@ -1976,5 +1994,3 @@ def clean_dates(date_facet):
         if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)
     return new_date_facet
-
-    
