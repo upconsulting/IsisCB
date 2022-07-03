@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
     'rest_framework',
+    'rest_framework.authtoken',
     'simple_history',
     'isisdata',
     'storages',
@@ -180,7 +181,7 @@ LOGGING = {
 		"app_analyzer": {
 			"level": "DEBUG",
 			"class": "logging.FileHandler",
-			"filename": "/Users/paulvieth/Desktop/IsisCBCode/logs/app_analyzer.log",
+			"filename": "/Users/jdamerow/UpConsulting/logs/app_analyzer.log",
 			"formatter": "verbose",
 		}
 	},
@@ -211,7 +212,7 @@ HAYSTACK_CONNECTIONS = {
         'ENGINE': 'isisdata.elasticsearch_backend.IsisCBElasticsearchSearchEngine',
         #'ENGINE': 'elasticstack.backends.ConfigurableElasticSearchEngine',
         'URL': os.environ.get('ELASTIC_HOST', 'localhost:9200/'),
-        'INDEX_NAME': 'haystack2',
+        'INDEX_NAME': 'haystack1',
     },
 }
 HAYSTACK_IDENTIFIER_METHOD = 'isisdata.search_utils.get_isiscb_identifier'
@@ -266,6 +267,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication'
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
