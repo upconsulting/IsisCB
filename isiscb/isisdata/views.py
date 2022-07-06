@@ -378,6 +378,11 @@ class AuthorityViewSet(mixins.ListModelMixin,
 
         sqs = SearchQuerySet().models(Authority).filter(content=AutoQuery(query), public=True)
 
+        page = self.paginate_queryset(sqs)
+        if page is not None:
+            serializer = AuthoritySearchResultSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = AuthoritySearchResultSerializer(sqs, many=True)
         return Response(serializer.data)
 
