@@ -260,6 +260,7 @@ class UserProfileForm(forms.Form):
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     affiliation = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     location = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    url = forms.URLField(widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control'}), required=False)
     share_email = forms.BooleanField(required=False)
     resolver_institution = forms.ModelChoiceField(queryset=Institution.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), required=False)

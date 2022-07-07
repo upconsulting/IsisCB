@@ -173,6 +173,12 @@ def is_action_allowed(user, obj, action):
     roles = user.isiscbrole_set.all()
     dataset = getattr(obj, 'belongs_to', None)
 
+    if is_instance(obj, Citation):
+        creator_id = obj.created_by_native_id
+
+    if creator_id:
+        return creator_id == user.id
+
     if dataset:
         relevant_roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
     else:

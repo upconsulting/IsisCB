@@ -2558,6 +2558,7 @@ class UserProfile(models.Model):
 
     affiliation = models.CharField(max_length=255, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
+    url = models.URLField(max_length=255, blank=True, null=True)
     bio = MarkupField(markup_type='markdown', blank=True, null=True)
 
     share_email = models.BooleanField(default=False, help_text=help_text("""

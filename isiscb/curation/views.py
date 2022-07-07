@@ -107,42 +107,101 @@ def datasets(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 #@check_rules('can_create_record')
 def create_citation(request):
+    default_dataset_id = settings.DEFAULT_DATASET_ID
+    default_dataset = Dataset.objects.get(pk=default_dataset_id)
+
+    value_form, value_form_class = None, None
+    value_forms = view_helpers._create_attribute_value_forms()
+    publication_date_attr_type = get_object_or_404(AttributeType, pk=1)
 
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
+        'regular_user': 'false'
     }
+
+    if request.user.is_authenticated and not request.user.is_staff:
+        context.update({'regular_user': True})
 
     template = 'curation/citation_create_view.html'
 
+    AcrFormset = formset_factory(ACRelationForm)
+
     if request.method == 'GET':
-        form = CitationForm(user=request.user)
+        form = CitationForm(user=request.user, initial={'belongs_to': default_dataset})
+
+        acr_formset = AcrFormset()
+        attribute_form = AttributeForm(prefix='attribute', initial={'type_controlled': publication_date_attr_type, 'record_status_value': CuratedMixin.ACTIVE})
+        
+        value_form_class = value_forms[1]
+        value_form = value_form_class(prefix='value')
+
+        partdetails_form = PartDetailsForm(request.user)
 
         context.update({
             'form': form,
-        })
-        partdetails_form = PartDetailsForm(request.user)
-        context.update({
+            'acr_formset': acr_formset,
+            'attribute_form': attribute_form,
+            'value_form': value_form,
+            'value_forms': value_forms,
             'partdetails_form': partdetails_form,
         })
+        
     elif request.method == 'POST':
+        print('----a-----')
+        print(request.POST)
         form = CitationForm(request.user, request.POST)
+        acr_formset = AcrFormset(request.POST or None, request.FILES or None)
         partdetails_form = PartDetailsForm(request.user, citation_id = None, data=request.POST)
 
-        if form.is_valid() and partdetails_form.is_valid():
+        attribute_form = AttributeForm(request.POST, prefix='attribute')
+        value_form_class = value_forms[1]
+        value_form = value_form_class(request.POST, prefix='value')
+
+        print(form.is_valid())
+        print(partdetails_form.is_valid())
+        print(acr_formset.is_valid())
+        print(attribute_form.is_valid())
+        print(value_form.is_valid())
+
+        print('----nnnn-----')
+        print(attribute_form.errors)
+
+        if form.is_valid() and partdetails_form.is_valid() and acr_formset.is_valid() and attribute_form.is_valid() and value_form.is_valid() and value_form:
+
             form.cleaned_data['public'] = False
             #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
             citation = form.save()
             citation.record_status_value = CuratedMixin.INACTIVE
+            if form.cleaned_data.get('language').first():
+                citation.language.add(form.cleaned_data.get('language').first())
             citation.save()
+
+            for acr_form in acr_formset:
+                acr_form = acr_form.save(commit=False)
+                acr_form.citation_id = citation.id
+                acr_form.save()
 
             if partdetails_form:
                 partdetails_form.save()
+            
+            attribute_form.instance.source = citation
+            attribute_form.save()
+            value_form.instance.attribute = attribute_form.instance
+            value_form.save()
+            if not attribute_form.instance.value_freeform:
+                attribute_form.instance.value_freeform = value_form.instance.render()
+                attribute_form.instance.save()
+
             return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
         else:
             context.update({
                 'form' : form,
                 'partdetails_form': partdetails_form,
+                'acr_formset': acr_formset,
+                'attribute_form': attribute_form,
+                'value_forms': value_forms,
+                'value_form': value_form,
             })
 
     return render(request, template, context)
@@ -949,6 +1008,7 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             attribute_form = AttributeForm(prefix='attribute')
 
     elif request.method == 'POST':
+        print(request.POST)
         if attribute:    # Update.
             attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
 
@@ -1128,9 +1188,12 @@ def citation(request, citation_id):
         })
     elif request.method == 'POST':
         form = CitationForm(request.user, request.POST, instance=citation)
+        
         if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            print('----c----')
+            print(form.cleaned_data)
             form.save()
             if partdetails_form:
                 partdetails_form.save()

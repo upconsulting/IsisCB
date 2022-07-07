@@ -51,9 +51,11 @@
               <strong class="text-warning">
               {{ form.instance.id }}</strong> | <strong>ACR record</strong>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              {{ form.record_status_value|addcss:"form-control input-sm" }}
-              &nbsp;
-              {{ form.record_status_explanation|addcss:"form-control input-sm" }}
+              {% if user.is_superuser or user.is_staff %}
+                {{ form.record_status_value|addcss:"form-control input-sm" }}
+                &nbsp;
+                {{ form.record_status_explanation|addcss:"form-control input-sm" }}
+              {% endif %}
             </div>
             <div class="col-md-12">
                 {% for error in form.record_status_value.errors %}
@@ -90,136 +92,138 @@
 
     <div class="container-fluid form-horizontal">
         <div class="row">
-            <div class="col-sm-6">
-                {% for error in form.name_for_display_in_citation.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ form.name_for_display_in_citation.label }}</label>
-                    <div class="col-md-8">
-                      {{ form.name_for_display_in_citation|addcss:"form-control" }}
-                    </div>
-                </div>
+          <div class="col-sm-12" style="padding: 0 20%;">
 
-                {% for error in form.type_controlled.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ form.type_controlled.label }}</label>
-                    <div class="col-md-8">
-                      {{ form.type_controlled|addcss:"form-control" }}
-                    </div>
-                </div>
+            <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
+              <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+            </strong>
 
+            <p>
+              <span id="citation_type_full" data-code-type="{{ instance.type_controlled }}" class="text-success">{{ instance.get_type_controlled_display }}</span>
+              <br>
+              <em>{{ instance.title }}</em>
+              <br>
+              {% with instance|get_authors_editors as authors_editors %}
+              {% if authors_editors %}
+                          {{ authors_editors }}
+              {% endif %}
+              {% endwith %}
 
-                {% for error in form.data_display_order.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ form.data_display_order.label }}</label>
-                    <div class="col-md-8">
-                      {{ form.data_display_order|addcss:"form-control" }}
-                    </div>
-                </div>
-
-                {% for error in form.confidence_measure.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ form.confidence_measure.label }}</label>
-                    <div class="col-md-8">
-                      {{ form.confidence_measure|addcss:"form-control" }}
-                    </div>
-                </div>
-
-
-                {% for error in form.administrator_notes.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-12">{{ form.administrator_notes.label }}</label>
-                    <div class="col-md-12">
-                      {{ form.administrator_notes|addcss:"form-control" }}
-                    </div>
-                </div>
-
-                {% for error in form.record_history.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-12">{{ form.record_history.label }}</label>
-                    <div class="col-md-12">
-                      {{ form.record_history|addcss:"form-control" }}
-                    </div>
-                </div>
-                
-                {{ form.authority }}
-                {{ form.citation }}
-
-                <div class="form-group">
-                  <label class="col-md-12">Last updated on <span class="date">{{ acrelation.modified_on|get_iso_date }}</span> by {{ acrelation.modified_by }}</label>
-                </div>
-            </div>
-            <div class="col-sm-6">
-
-              <strong>Citation record: </strong><strong class="text-warning">{{ instance.id }} &nbsp;&nbsp;
-                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-              </strong>
-
-              <p>
-                <span id="citation_type_full" data-code-type="{{ instance.type_controlled }}" class="text-success">{{ instance.get_type_controlled_display }}</span>
-                <br>
-                <em>{{ instance.title }}</em>
-                <br>
-                {% with instance|get_authors_editors as authors_editors %}
-                {% if authors_editors %}
-                            {{ authors_editors }}
-                {% endif %}
-                {% endwith %}
-
-              </p>
-              <hr>
+            </p>
+            <hr>
+            {% if user.is_superuser or user.is_staff %}
               <div class="text-right">
                 <a href="{% url 'curation:create_authority' %}?search={{ search_key }}&current={{ current_index }}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
               </div>
-              <div class="form-horizontal">
-                <div id="authority_info">
-                  <strong>Authority record: </strong><strong class="text-warning">{% if form.instance.authority %}{{ form.instance.authority.id }}{% endif %}</strong> &nbsp;&nbsp;
-                    <a id="authority_link" href="{% if form.instance.authority %}{% url 'curation:curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+            {% endif %}
+            <div class="form-horizontal">
+              <div id="authority_info">
+                <strong>Authority record: </strong><strong class="text-warning">{% if form.instance.authority %}{{ form.instance.authority.id }}{% endif %}</strong> &nbsp;&nbsp;
+                  <a id="authority_link" href="{% if form.instance.authority %}{% url 'curation:curate_authority' form.instance.authority.id %}{% endif %}"><i class="fa fa-external-link" aria-hidden="true"></i> </a>
+
+                <p>
+                  <span id="authority_type_full" {% if form.instance.authority %}data-type-code="{{ form.instance.authority.type_controlled }}"{% endif %} class="text-success">{% if form.instance.authority %}{{ form.instance.authority.get_type_controlled_display }}{% endif %}</span>
+                  <br>
+                  <span {% if form.instance.authority %}data-type="{{form.instance.authority.type_controlled}}"{% endif %} id="authority_name">{% if form.instance.authority %}{{ form.instance.authority.name }}{% endif %}</span>
+                  <br>
 
 
+                </p>
 
-                  <p>
-                    <span id="authority_type_full" {% if form.instance.authority %}data-type-code="{{ form.instance.authority.type_controlled }}"{% endif %} class="text-success">{% if form.instance.authority %}{{ form.instance.authority.get_type_controlled_display }}{% endif %}</span>
-                    <br>
-                    <span {% if form.instance.authority %}data-type="{{form.instance.authority.type_controlled}}"{% endif %} id="authority_name">{% if form.instance.authority %}{{ form.instance.authority.name }}{% endif %}</span>
-                    <br>
-
-
-                  </p>
-
-              </div>
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <div class="input-group">
-                            <input type="text"
-                                class="form-control"
-                                name="authority-search"
-                                autocomplete="off"
-                                id="authority-search">
-                            <span class="input-group-btn">
-                                <a
-                                    class="btn glyphicon glyphicon-pencil enable-search-input"
-                                    data-target="#authority-search">
-                                </a>
-                            </span>
-                        </div>
-                      </div>
-                </div>
-
-                <ul class="list-group" id="results-container"></ul>
-              </div>
             </div>
+              <div class="form-group">
+                  <div class="col-sm-12">
+                      <div class="input-group">
+                          <input type="text"
+                              class="form-control"
+                              name="authority-search"
+                              autocomplete="off"
+                              placeholder="Search for authority . . ."
+                              id="authority-search">
+                          <span class="input-group-btn">
+                              <a
+                                  class="btn glyphicon glyphicon-pencil enable-search-input"
+                                  data-target="#authority-search">
+                              </a>
+                          </span>
+                      </div>
+                    </div>
+              </div>
+
+              <ul class="list-group" id="results-container"></ul>
+            </div>
+
+            <hr>
+            {% for error in form.name_for_display_in_citation.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                <label class="col-md-4">{{ form.name_for_display_in_citation.label }}</label>
+                <div class="col-md-8">
+                  {{ form.name_for_display_in_citation|addcss:"form-control" }}
+                </div>
+            </div>
+
+            {% for error in form.type_controlled.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                <label class="col-md-4">{{ form.type_controlled.label }}</label>
+                <div class="col-md-8">
+                  {{ form.type_controlled|addcss:"form-control" }}
+                </div>
+            </div>
+
+            {% if user.is_superuser or user.is_staff %}
+              {% for error in form.data_display_order.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label class="col-md-4">{{ form.data_display_order.label }}</label>
+                  <div class="col-md-8">
+                    {{ form.data_display_order|addcss:"form-control" }}
+                  </div>
+              </div>
+
+              {% for error in form.confidence_measure.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label class="col-md-4">{{ form.confidence_measure.label }}</label>
+                  <div class="col-md-8">
+                    {{ form.confidence_measure|addcss:"form-control" }}
+                  </div>
+              </div>
+
+
+              {% for error in form.administrator_notes.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label class="col-md-12">{{ form.administrator_notes.label }}</label>
+                  <div class="col-md-12">
+                    {{ form.administrator_notes|addcss:"form-control" }}
+                  </div>
+              </div>
+
+              {% for error in form.record_history.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+              {% endfor %}
+              <div class="form-group">
+                  <label class="col-md-12">{{ form.record_history.label }}</label>
+                  <div class="col-md-12">
+                    {{ form.record_history|addcss:"form-control" }}
+                  </div>
+              </div>
+              
+              {{ form.authority }}
+              {{ form.citation }}
+
+              <div class="form-group">
+                <label class="col-md-12">Last updated on <span class="date">{{ acrelation.modified_on|get_iso_date }}</span> by {{ acrelation.modified_by }}</label>
+              </div>
+            {% endif %}
+          </div>
         </div>
 
     </div>
@@ -258,7 +262,6 @@ $(document).ready(function() {
         })
         return _doc;
     }
-
 
     var max_results = 10;
 
@@ -432,59 +435,73 @@ $(document).ready(function() {
     $('#save_confirmed').click(function() {
       $('#acrelation_form').submit();
     });
+
+    //If the ACR already has a display name but isn't linked to an authority, automatically plug the display name into the search bar and execute the search
+    let authority_display_name = $('#id_acrelation-name_for_display_in_citation').val();
+    if (authority_display_name) {
+      $('#authority-search').val(authority_display_name).focus();
+      triggerSearch();
+    }
 });
 </script>
 
 {% if acrelation %}
+  <script>
+  $(document).ready(function() {
+      bind_acrelation();
+  });
+
+  var bind_acrelation = function() {
+      $('.delete-acrelation').click(function() {
+          var elem = $(this);
+          var acrelation_id = elem.attr('acrelation-id');
+          var acrelation_title = elem.attr('acrelation-title');
+          $('#acrelation-id-container').val(acrelation_id);
+          $('#delete-acrelation-target-name').html(acrelation_title);
+          $('#delete-acrelation-modal').modal('show');
+      });
+  }
+
+  var delete_acrelation = function() {
+      $('#delete-acrelation-modal').modal('hide');
+      var acrelation_id = $('#acrelation-id-container').val();
+      if (acrelation_id) {
+          window.location.replace("{% url "curation:delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
+      }
+  }
+  </script>
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="delete-acrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-acrelation-modal-label">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="delete-acrelation-modal-label">Are you sure?</h4>
+              </div>
+              <div class="modal-body">
+                  <p>
+                      You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
+                  </p>
+                  <p>
+                      This will not delete the related authority itself, only the relation between the authority and this citation.
+                  </p>
+                  <input type="hidden" id="acrelation-id-container" />
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
+                  <button type="button" class="btn btn-danger" onclick="delete_acrelation();">Delete forever</button>
+              </div>
+          </div>
+      </div>
+  </div>
+{% endif %}
+
 <script>
-$(document).ready(function() {
-    bind_acrelation();
-});
-
-var bind_acrelation = function() {
-    $('.delete-acrelation').click(function() {
-        var elem = $(this);
-        var acrelation_id = elem.attr('acrelation-id');
-        var acrelation_title = elem.attr('acrelation-title');
-        $('#acrelation-id-container').val(acrelation_id);
-        $('#delete-acrelation-target-name').html(acrelation_title);
-        $('#delete-acrelation-modal').modal('show');
-    });
-}
-
-var delete_acrelation = function() {
-    $('#delete-acrelation-modal').modal('hide');
-    var acrelation_id = $('#acrelation-id-container').val();
-    if (acrelation_id) {
-        window.location.replace("{% url "curation:delete_acrelation_for_citation" instance.id acrelation.id %}?confirm=true&search={{ search_key }}&current={{ current_index }}");
-    }
-}
+  $(document).ready(function() {
+    
+  });
 </script>
 
-
-<!-- Modal -->
-<div class="modal fade" id="delete-acrelation-modal" tabindex="-1" role="dialog" aria-labelledby="delete-acrelation-modal-label">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="delete-acrelation-modal-label">Are you sure?</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    You are about to delete an authority-citation relation with <span class="text-warning" id="delete-acrelation-target-name"></span>. Deletion cannot be undone!
-                </p>
-                <p>
-                    This will not delete the related authority itself, only the relation between the authority and this citation.
-                </p>
-                <input type="hidden" id="acrelation-id-container" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Take me back!</button>
-                <button type="button" class="btn btn-danger" onclick="delete_acrelation();">Delete forever</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 {% endblock %}

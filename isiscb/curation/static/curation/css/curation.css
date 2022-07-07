@@ -333,6 +333,7 @@ a:hover.delete {
 
 .glyphicon-plus {
     color: green;
+}
 
 a:hover.list_entry_link {
     text-decoration: none;
@@ -383,4 +384,8 @@ label {
 
 .curation-tabs {
     font-size: 9pt;
+}
+
+.white-background {
+  background-color: #fff;
 }

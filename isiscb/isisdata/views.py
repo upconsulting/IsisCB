@@ -1639,6 +1639,8 @@ def user_profile(request, username):
 
     edit = request.GET.get('edit')
 
+    contributions = Citation.objects.filter(created_by_native_id=user.id).order_by('-created_native')[:20]
+
     # Only the owner of the profile can change it. We use a regular Form rather
     #  than a ModelForm because some fields belong to User and other fields
     #  belong to UserProfile.
@@ -1650,6 +1652,7 @@ def user_profile(request, username):
             user.first_name = data.get('first_name')
             user.last_name = data.get('last_name')
             user.email = data.get('email')
+            user.profile.url = data.get('url')
             user.profile.affiliation = data.get('affiliation')
             user.profile.location = data.get('location')
             user.profile.bio = data.get('bio')    # Assings to bio.raw.
@@ -1669,6 +1672,7 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
+        'contributions': contributions
     }
 
     # User has elected to edit their own profile.

@@ -61,7 +61,7 @@
                             {% endfor %}
                         {% endif %}
                         <div class="input-group">
-                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Email address"><span class="fa fa-envelope-o"></span></span>
+                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Email address"><span><i class="far fa-envelope"></i> email</span></span>
                             {{ form.email }}
                         </div>
                     </p>
@@ -70,7 +70,17 @@
                             {{ form.share_email }} Make email public
                         </div>
                     </p>
-
+                    <p>
+                        {% if form.url.errors %}
+                            {% for error in form.url.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        <div class="input-group">
+                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="URL"><span><i class="fas fa-link"></i> personal URL</span></span>
+                            {{ form.url }}
+                        </div>
+                    </p>
                     <p>
                         {% if form.affiliation.errors %}
                             {% for error in form.affiliation.errors %}
@@ -78,7 +88,7 @@
                             {% endfor %}
                         {% endif %}
                         <div class="input-group">
-                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Affiliation"><span class="fa fa-building"></span></span>
+                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Affiliation"><span><i class="fa fa-building"></i> institution</span></span>
                             {{ form.affiliation }}
                         </div>
                     </p>
@@ -89,7 +99,7 @@
                             {% endfor %}
                         {% endif %}
                         <div class="input-group">
-                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Location"><span class="fa fa-home"></span></span>
+                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="Location"><span><i class="fas fa-map-marker-alt"></i> location</span></span>
                             {{ form.location }}
                         </div>
                     </p>
@@ -100,7 +110,7 @@
                             {% endfor %}
                         {% endif %}
                         <div class="input-group">
-                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="OpenURL Resolver"><span class="fa fa-book"></span></span>
+                            <span class="input-group-addon addon" data-toggle="tooltip" data-placement="top" title="OpenURL Resolver"><span><i class="fa fa-book"></i> OpenURL resolver insitution</span></span>
                             {{ form.resolver_institution }}
                         </div>
                     </p>

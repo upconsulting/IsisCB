@@ -3,6 +3,7 @@
 {% load render_object %}
 {% load permission_tags %}
 
+{% block body_class %} white-background {% endblock %}
 
 {% block content %}
 <script>
@@ -12,14 +13,14 @@ var toggleTab = function(name) {
 }
 </script>
 
-<form class="form" action="{% url 'curation:create_citation' %}" method="POST">
+<form class="form" style="background-color: #fff;" action="{% url 'curation:create_citation' %}" method="POST">
     {% csrf_token %}
 
 {% include "curation/fragment_create_citation_header.html" %}
 
 <div id="citationView">
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-sm-12" style="padding: 0 20%;">
         {% include "curation/fragment_create_citation_fields.html" %}
     </div>
     <!--
@@ -124,7 +125,7 @@ var toggleTab = function(name) {
     </div>
 </div>
 
-<div>
+<div style="padding: 0 20%;">
   <div class="button-group pull-right" style="padding: 10px;">
       <input type="submit" value="Create & Continue" class="btn btn-success" />
   </div>

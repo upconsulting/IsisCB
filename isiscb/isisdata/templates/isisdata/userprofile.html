@@ -12,7 +12,7 @@
             <div class="panel-heading clearfix">
                 <span class="h2">{{ username }}</span>
                 {% if is_staff %}<span class="label label-danger">Admin</span>{% endif %}
-                {% if username == user.username %}<span class="pull-right"><a class="btn" href="?edit=true">Edit my profile&nbsp;<span class="fa fa-pencil"></span></a></span>{% endif %}
+                {% if username == user.username %}<span class="pull-right"><a class="btn" href="?edit=true"><i class="fas fa-edit"></i> Edit my profile&nbsp;<span class="fa fa-pencil"></span></a></span>{% endif %}
                 {% if profile.authority_record %}
                 <div>
                     <a class="btn" href="{% url 'authority' profile.authority_record.id %}"><span class="fa fa-user"></span> View authority record</a>
@@ -24,7 +24,12 @@
                 <div class="h4">{{ full_name }}</div>
                 {% if profile.share_email %}
                 <p><!-- The user may elect not to share their email address. -->
-                    <span class="fa fa-envelope-o"></span>&nbsp;<a href="mailto:{{ user.email }}">{{ email }}</a>
+                    <span class="fas fa-envelope-open"></span>&nbsp;<a href="mailto:{{ user.email }}">{{ email }}</a>
+                </p>
+                {% endif %}
+                {% if profile.url %}
+                <p>
+                    <span class="fas fa-link" alt-text="URL"></span>&nbsp;<a href="{{ profile.url }}">{{ profile.url }}</a>
                 </p>
                 {% endif %}
                 {% if profile.affiliation %}
@@ -48,16 +53,40 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <span class="h4">
+                    Contributed Citations
+                </span>
+            </div>
+            <div class="panel-body">
+                {% if contributions %}
+                    <ul class="list-group" style="max-height: 400px; overflow-y: scroll;">
+                        {% for citation in contributions %}
+                        <li class="list-group-item">
+                            <a style="color: #000;" href="{% url 'curation:curate_citation' citation.id %}"><i class="fas fa-wrench"></i></a>&nbsp;&nbsp;<span class="label label-primary">{{ citation.get_type_controlled_display }}</span>&nbsp;<a href="{% url 'citation' citation.id %}" class="h5">{{ citation.title }}</a>&nbsp;<span class="label label-default">created: {{ citation.created_native|date:"Y-m-d" }}</span>&nbsp;<span class="label {% if citation.tracking_state == None %}label-default{% elif citation.tracking_state == "FU"%}label-warning{% elif citation.tracking_state == "PD" %}label-success{% endif %}">{% if citation.tracking_state == None %}Draft{% elif citation.tracking_state == "FU"%}Awaiting Approval{% elif citation.tracking_state == "PD" %}Published{% endif %}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="alert alert-info" style="margin: 10px;" role="alert">You haven't contributed any citations</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="h4">
                     Recent comments
                 </span>
             </div>
             <ul class="list-group" style="max-height: 400px; overflow-y: scroll;">
-                {% for comment in usercomments %}
-                <li class="list-group-item">
-                    <span class="label label-primary">{{ comment.created_on }}</span>&nbsp;<a href="/isis/{{comment.subject.id}}" class="h5">{{ comment.subject }}</a>
-                    <p class="text text-warning">{{ comment.linkified|safe }}</p>
-                </li>
-                {% endfor %}
+                {% if usercomments %}
+                    {% for comment in usercomments %}
+                    <li class="list-group-item">
+                        <span class="label label-primary">{{ comment.created_on }}</span>&nbsp;<a href="/isis/{{comment.subject.id}}" class="h5">{{ comment.subject }}</a>
+                        <p class="text text-warning">{{ comment.linkified|safe }}</p>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info" style="margin: 10px;" role="alert">You haven't posted any comments</div>
+                {% endif %}
             </ul>
         </div>
     </div>

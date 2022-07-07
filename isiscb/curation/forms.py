@@ -337,6 +337,8 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
+    publication_date = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
+
     belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 

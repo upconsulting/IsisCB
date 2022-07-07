@@ -24,13 +24,63 @@
     {{ form.title|addcss:"form-control" }}
 </div>
 
-{% for error in form.edition_details.errors %}
+{% comment %} {% for error in form.publication_date.errors %}
 <div class="alert alert-danger">{{ error }}</div>
 {% endfor %}
 <div class="form-group">
-    <label>{{ form.edition_details.label }}</label>
-    {{ form.edition_details|addcss:"form-control" }}
+    <label>{{ form.publication_date.label }}</label>
+    {{ form.publication_date|addcss:"form-control" }}
+</div> {% endcomment %}
+
+<div class="form-group">
+    {{ attribute_form.type_controlled.as_hidden}}
 </div>
+
+{% if value_form %}
+    {% for field in value_form %}
+    {% for error in field.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>Publication Date (YYYY-MM-DD)</label>
+        {{ field|addcss:"form-control" }}
+    </div>
+    {% endfor %}
+{% else %}
+<div id="value_form_container"></div>
+{% endif %}
+
+{% for error in form.language.errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+<div class="form-group">
+    <label>{{ form.language.label }}</label>
+    {{ form.language|addcss:"form-control" }}
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Add Authors, Publishers, etc.</div>
+    <div class="panel-body">
+        <div id="acr-forms-container">
+            {{ acr_formset.management_form }}
+            {% for form in acr_formset %}
+            <div class="form-group acr-form">
+                <div class="col-sm-3">
+                    <label>Type</label>
+                    {{ form.type_controlled|addcss:"form-control" }}
+                </div>
+                <div class="col-sm-9">
+                    <label>Name</label>
+                    {{ form.name_for_display_in_citation|addcss:"form-control" }}
+                </div>
+                <input type="hidden" name="form-0-data_display_order" id="form-0-data_display_order" value="1">
+                <input type="hidden" name="form-0-confidence_measure" id="form-0-confidence_measure" value="1.0">
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-primary" onclick="add_acr_form()" style="margin: 10px 0 0 15px;"><i class="fas fa-plus"></i> Add another Author, Publisher, etc.</button>
+    </div>
+  </div>
 
 {% if partdetails_form %}
 <div class="row">
@@ -38,29 +88,31 @@
         {% for error in partdetails_form.volume_free_text.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
+        <div class="form-group" id="{{partdetails_form.volume_free_text.name}}">
             <label>Volume</label>
             {{ partdetails_form.volume_free_text|addcss:"form-control" }}
         </div>
     </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.volume_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.volume_begin.label }}</label>
-            {{ partdetails_form.volume_begin|addcss:"form-control" }}
+    {% if user.is_superuser or user.is_staff %}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.volume_begin.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.volume_begin.name}}">
+                <label>{{ partdetails_form.volume_begin.label }}</label>
+                {{ partdetails_form.volume_begin|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.volume_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.volume_end.label }}</label>
-            {{ partdetails_form.volume_end|addcss:"form-control" }}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.volume_end.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.volume_end.name}}">
+                <label>{{ partdetails_form.volume_end.label }}</label>
+                {{ partdetails_form.volume_end|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 
 <div class="row">
@@ -68,58 +120,62 @@
         {% for error in partdetails_form.issue_free_text.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
+        <div class="form-group" id="{{partdetails_form.issue_free_text.name}}">
             <label>Issue</label>
             {{ partdetails_form.issue_free_text|addcss:"form-control" }}
         </div>
     </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.issue_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.issue_begin.label }}</label>
-            {{ partdetails_form.issue_begin|addcss:"form-control" }}
+    {% if user.is_superuser or user.is_staff %}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.issue_begin.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.issue_begin.name}}">
+                <label>{{ partdetails_form.issue_begin.label }}</label>
+                {{ partdetails_form.issue_begin|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.issue_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.issue_end.label }}</label>
-            {{ partdetails_form.issue_end|addcss:"form-control" }}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.issue_end.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.issue_end.name}}">
+                <label>{{ partdetails_form.issue_end.label }}</label>
+                {{ partdetails_form.issue_end|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 <div class="row">
     <div class="col-xs-4">
         {% for error in partdetails_form.pages_free_text.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
+        <div class="form-group" id="{{partdetails_form.pages_free_text.name}}">
             <label>Pages</label>
             {{ partdetails_form.pages_free_text|addcss:"form-control" }}
         </div>
     </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.page_begin.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.page_begin.label }}</label>
-            {{ partdetails_form.page_begin|addcss:"form-control" }}
+    {% if user.is_superuser or user.is_staff %}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.page_begin.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.page_begin.name}}">
+                <label>{{ partdetails_form.page_begin.label }}</label>
+                {{ partdetails_form.page_begin|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
-    <div class="col-xs-4">
-        {% for error in partdetails_form.page_end.errors %}
-        <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.page_end.label }}</label>
-            {{ partdetails_form.page_end|addcss:"form-control" }}
+        <div class="col-xs-4">
+            {% for error in partdetails_form.page_end.errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group" id="{{partdetails_form.page_end.name}}">
+                <label>{{ partdetails_form.page_end.label }}</label>
+                {{ partdetails_form.page_end|addcss:"form-control" }}
+            </div>
         </div>
-    </div>
+    {% endif %}
 </div>
 <div class="row">
   <!--  <div class="col-xs-4">
@@ -135,8 +191,8 @@
         {% for error in partdetails_form.extent.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.extent.label }}</label>
+        <div class="form-group" id="{{partdetails_form.extent.name}}">
+            <label>Length</label>
             {{ partdetails_form.extent|addcss:"form-control" }}
         </div>
     </div>
@@ -144,8 +200,8 @@
         {% for error in partdetails_form.extent_note.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
-        <div class="form-group">
-            <label>{{ partdetails_form.extent_note.label }}</label>
+        <div class="form-group" id="{{partdetails_form.extent_note.name}}">
+            <label>Length Unit</label>
             {{ partdetails_form.extent_note|addcss:"form-control" }}
         </div>
     </div>
@@ -159,34 +215,103 @@
     </div>
 </div>-->
 
-{% for error in form.book_series.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.book_series.label }}</label>
-    {{ form.book_series|addcss:"form-control" }}
-</div>
+{% if user.is_superuser or user.is_staff %}
+    {% for error in form.edition_details.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group" id="{{form.edition_details.label}}">
+        <label>{{ form.edition_details.label }}</label>
+        {{ form.edition_details|addcss:"form-control" }}
+    </div>
 
-{% for error in form.additional_titles.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.additional_titles.label }}</label>
-    {{ form.additional_titles|addcss:"form-control" }}
-</div>
+    {% for error in form.book_series.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group" id="{{form.book_series.label}}">
+        <label>{{ form.book_series.label }}</label>
+        {{ form.book_series|addcss:"form-control" }}
+    </div>
 
-{% for error in form.dataset.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.belongs_to.label }}</label>
-    {{ form.belongs_to|addcss:"form-control" }}
-</div>
+    {% for error in form.additional_titles.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group" id="{{form.book_series.label}}">
+        <label>{{ form.additional_titles.label }}</label>
+        {{ form.additional_titles|addcss:"form-control" }}
+    </div>
 
-{% for error in form.administrator_notes.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-    <label>{{ form.administrator_notes.label }}</label>
-    {{ form.administrator_notes|addcss:"form-control" }}
-</div>
+    {% for error in form.dataset.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ form.belongs_to.label }}</label>
+        {{ form.belongs_to|addcss:"form-control" }}
+    </div>
+
+    {% for error in form.administrator_notes.errors %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endfor %}
+    <div class="form-group">
+        <label>{{ form.administrator_notes.label }}</label>
+        {{ form.administrator_notes|addcss:"form-control" }}
+    </div>
+{% endif %}
+
+<script>
+
+    function add_acr_form() {
+        let acr_form_count = $('.acr-form').length;
+        let new_acr_form = document.querySelectorAll('.acr-form')[0].cloneNode(true);
+        let form_regex = RegExp(`form-(\\d){1}-`,'g') 
+        new_acr_form.innerHTML = new_acr_form.innerHTML.replace(form_regex, `form-${acr_form_count}-`);
+        $("#id_form-TOTAL_FORMS").attr('value', acr_form_count + 1)
+        $('#acr-forms-container').append(new_acr_form);
+    }
+
+    $('#id_type_controlled').change((event) => {
+        console.log(event);
+        const type_selected = event.currentTarget.value;
+
+        resetHiddenElements();
+
+        if (type_selected == 'BO') {
+            $('#volume_free_text').addClass('hidden');
+            $('#volume_begin').addClass('hidden');
+            $('#volume_end').addClass('hidden');
+            $('#issue_free_text').addClass('hidden');
+            $('#issue_begin').addClass('hidden');
+            $('#issue_end').addClass('hidden');
+            $('#pages_free_text').addClass('hidden');
+            $('#page_begin').addClass('hidden');
+            $('#page_end').addClass('hidden');
+
+            $('#extent_note textarea').val('pages');
+        } else if (type_selected == 'AR' || type_selected == 'ES' || type_selected == 'RE') {
+            $('#extent').addClass('hidden');
+            $('#extent_note').addClass('hidden');
+        } else if (type_selected == 'CH') {
+            $('#volume_free_text').addClass('hidden');
+            $('#volume_begin').addClass('hidden');
+            $('#volume_end').addClass('hidden');
+            $('#issue_free_text').addClass('hidden');
+            $('#issue_begin').addClass('hidden');
+            $('#issue_end').addClass('hidden');
+            $('#extent').addClass('hidden');
+            $('#extent_note').addClass('hidden');
+        }
+    })
+
+    function resetHiddenElements() {
+        $('#volume_free_text').removeClass('hidden');
+        $('#volume_begin').removeClass('hidden');
+        $('#volume_end').removeClass('hidden');
+        $('#issue_free_text').removeClass('hidden');
+        $('#issue_begin').removeClass('hidden');
+        $('#issue_end').removeClass('hidden');
+        $('#pages_free_text').removeClass('hidden');
+        $('#page_begin').removeClass('hidden');
+        $('#page_end').removeClass('hidden');
+        $('#extent').removeClass('hidden');
+        $('#extent_note').removeClass('hidden');
+    }
+</script>
