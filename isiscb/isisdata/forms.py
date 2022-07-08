@@ -141,7 +141,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         is_raw_search = self.cleaned_data['raw_search']
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
-
+        
         # Removed: query sanitization already occurs (by design) in the
         #  (haystack) Query used by the SearchEngine. We're clobbering wildcards
         #  here.  We can add it back if there is a security issue, but it seems
@@ -221,7 +221,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
         for facet in excluded_facets:
             if ":" not in facet:
                 continue
-            
+
             field, value = facet.split(":", 1)
             field = field.strip()
             value = value.strip()
