@@ -38,7 +38,25 @@ from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
+class Tenant(models.Model):
+    """
+    A tenant is a partition of the system for specific projects. A tenant has
+    its own entry portal and a separate dataset.
+    """
+    """
+    The name is how the tenant is represented in the curation system.
+    """
+    name = models.CharField(max_length=255, blank=False, null=False)
+    """
+    The title is used on the public portal.
+    """
+    title = models.CharField(max_length=255, blank=False, null=False)
+    description = models.TextField(null=True, blank=True)
 
+    users = models.ManyToManyField(User)
+
+    def __str__(self):
+        return u'{0}'.format(self.name)
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \
@@ -857,6 +875,8 @@ class Citation(ReferencedEntity, CuratedMixin):
     complete_citation =  models.TextField(blank=True, null=True,
                                          help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
 
+    tenants = models.ManyToManyField(Tenant)
+
     STUB_RECORD = 'SR'
     REGULAR_RECORD = 'RR'
     RECORD_STATUS_CHOICES = (
@@ -1540,7 +1560,7 @@ class FeaturedAuthority(models.Model):
 
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
-    
+
 class ACRelation(ReferencedEntity, CuratedMixin):
     """
     A relation between a :class:`.Authority` and a :class:`.Citaton`\.
@@ -2627,7 +2647,6 @@ class CachedTimelineTitle(models.Model):
 
 # ---------------------- Curation models ----------------------------
 
-
 class IsisCBRole(models.Model):
     """
     Supports permission mechanism for IsisCB
@@ -2656,6 +2675,10 @@ class IsisCBRole(models.Model):
     @property
     def zotero_rules(self):
         return ZoteroRule.objects.filter(role=self.pk)
+
+    @property
+    def tenant_rules(self):
+        return TenantRule.objects.filter(role=self.pk)
 
     def __unicode__(self):
         return self.name
@@ -2746,6 +2769,14 @@ class ZoteroRule(AccessRule):
     This rule allows a user access to the Zotero module.
     """
     # so far no properties
+
+class TenantRule(AccessRule):
+    """
+    This rule allows a user access to a specific tenant.
+    """
+    tenant = models.ForeignKey(Tenant, null=True, blank=True,
+                             help_text=help_text("""The tenant this rule allows access to."""), on_delete=models.SET_NULL)
+
 
 
 class Dataset(CuratedMixin):

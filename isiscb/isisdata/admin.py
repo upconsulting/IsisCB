@@ -1158,6 +1158,10 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
     def def_crud_rules(self, obj):
         return CRUDRule.objects.filter(role=obj.pk)
 
+class TenantAdmin(admin.ModelAdmin):
+    fields = ['name', 'title', 'description']
+    exlude = ('attributes')
+
 
 admin.site.register(Citation, CitationAdmin)
 admin.site.register(Authority, AuthorityAdmin)
@@ -1178,6 +1182,7 @@ admin.site.register(Tracking, TrackingAdmin)
 admin.site.register(AuthorityTracking, AuthorityTrackingAdmin)
 admin.site.register(CitationCollection, CitationCollectionAdmin)
 #admin.site.register(IsisCBRole, IsisCBRoleAdmin)
+admin.site.register(Tenant, TenantAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, IsisCBUserAdmin)

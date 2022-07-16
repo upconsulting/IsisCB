@@ -8,6 +8,7 @@ from curation.bulk_views import citation_views
 from curation.authority_views import relation_views as authority_relation_views
 from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
+from curation.citation_views import user_views
 import rules
 from .rules import *
 from django.urls import re_path
@@ -152,24 +153,25 @@ urlpatterns = [
     re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type$', aarset_views.change_aartype, name='create_aartype'),
     re_path(r'^aarsets/aarset/(?P<aarset_id>[A-Z0-9]+)/type/(?P<aartype_id>[A-Z0-9]+)$', aarset_views.change_aartype, name='edit_aartype'),
 
-    re_path(r'^users/$', views.users, name='user_list'),
-    re_path(r'^users/(?P<user_id>[0-9]+)$', views.user, name='user'),
-    re_path(r'^users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', views.remove_role, name='remove_role'),
-    re_path(r'^users/addrole/(?P<user_edit_id>[0-9]+)/$', views.add_role_to_user, name='add_role_to_user'),
+    re_path(r'^users/$', user_views.users, name='user_list'),
+    re_path(r'^users/(?P<user_id>[0-9]+)$', user_views.user, name='user'),
+    re_path(r'^users/role/remove/(?P<user_id>[0-9]+)/(?P<role_id>[0-9]+)$', user_views.remove_role, name='remove_role'),
+    re_path(r'^users/addrole/(?P<user_edit_id>[0-9]+)/$', user_views.add_role_to_user, name='add_role_to_user'),
     re_path(r'^qdsearch/authority/$', views.quick_and_dirty_authority_search, name='quick_and_dirty_authority_search'),
     re_path(r'^qdsearch/citation/$', views.quick_and_dirty_citation_search, name='quick_and_dirty_citation_search'),
     re_path(r'^qdsearch/language/$', views.quick_and_dirty_language_search, name='quick_and_dirty_language_search'),
 
-    re_path(r'^users/role/$', views.add_role, name='create_role'),
-    re_path(r'^users/roles/$', views.roles, name='roles'),
-    re_path(r'^users/role/delete/(?P<role_id>[0-9]+)/$', views.delete_role, name='delete_role'),
-    re_path(r'^users/role/(?P<role_id>[0-9]+)/$', views.role, name='role'),
-    re_path(r'^users/rule/dataset/(?P<role_id>[0-9]+)/$', views.add_dataset_rule, name='create_rule_dataset'),
-    re_path(r'^users/rule/crud/(?P<role_id>[0-9]+)/$', views.add_crud_rule, name='create_rule_crud'),
-    re_path(r'^users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', views.add_field_rule, name='create_rule_citation_field'),
-    re_path(r'^users/rule/user_module/(?P<role_id>[0-9]+)/$', views.add_user_module_rule, name='create_user_module_rule'),
-    re_path(r'^users/rule/zotero/(?P<role_id>[0-9]+)/$', views.add_zotero_rule, name='add_zotero_rule'),
-    re_path(r'^users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', views.remove_rule, name='remove_rule'),
-    re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', views.change_is_staff, name='change_is_staff'),
-    re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', views.change_is_superuser, name='change_is_superuser'),
+    re_path(r'^users/role/$', user_views.add_role, name='create_role'),
+    re_path(r'^users/roles/$', user_views.roles, name='roles'),
+    re_path(r'^users/role/delete/(?P<role_id>[0-9]+)/$', user_views.delete_role, name='delete_role'),
+    re_path(r'^users/role/(?P<role_id>[0-9]+)/$', user_views.role, name='role'),
+    re_path(r'^users/rule/dataset/(?P<role_id>[0-9]+)/$', user_views.add_dataset_rule, name='create_rule_dataset'),
+    re_path(r'^users/rule/crud/(?P<role_id>[0-9]+)/$', user_views.add_crud_rule, name='create_rule_crud'),
+    re_path(r'^users/rule/tenant/(?P<role_id>[0-9]+)/$', user_views.add_tenant_rule, name='create_tenant_rule'),
+    re_path(r'^users/rule/field/(?P<role_id>[0-9]+)/(?P<object_type>((authority)|(citation))?)/$', user_views.add_field_rule, name='create_rule_citation_field'),
+    re_path(r'^users/rule/user_module/(?P<role_id>[0-9]+)/$', user_views.add_user_module_rule, name='create_user_module_rule'),
+    re_path(r'^users/rule/zotero/(?P<role_id>[0-9]+)/$', user_views.add_zotero_rule, name='add_zotero_rule'),
+    re_path(r'^users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', user_views.remove_rule, name='remove_rule'),
+    re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', user_views.change_is_staff, name='change_is_staff'),
+    re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', user_views.change_is_superuser, name='change_is_superuser'),
 ]
