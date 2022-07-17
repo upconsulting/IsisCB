@@ -35,6 +35,9 @@ rules.add_rule('can_access_and_view', can_access_and_view)
 can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
 rules.add_rule('can_access_view_edit', can_access_view_edit)
 
+can_view_edit = can_view_record & can_edit_record
+rules.add_rule('can_view_edit', can_view_edit)
+
 rules.add_rule('has_zotero_access', has_zotero_access)
 
 app_name = "curation"

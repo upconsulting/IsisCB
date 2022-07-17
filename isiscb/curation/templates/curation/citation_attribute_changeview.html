@@ -17,17 +17,21 @@
                   <strong class="text-warning">
                     {% if attribute_form.instance.id %}{{ attribute_form.instance.id }}{% else %}New{% endif %}</strong> | <strong>Attribute</strong>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  {{ attribute_form.record_status_value|addcss:"form-control input-sm" }}
-                  &nbsp;
-                  {{ attribute_form.record_status_explanation|addcss:"form-control input-sm" }}
+                  {% if user.is_superuser or user.is_staff %}
+                    {{ attribute_form.record_status_value|addcss:"form-control input-sm" }}
+                    &nbsp;
+                    {{ attribute_form.record_status_explanation|addcss:"form-control input-sm" }}
+                  {% endif %}
                 </div>
                 <div class="col-md-12">
+                  {% if user.is_superuser or user.is_staff %}
                     {% for error in attribute_form.record_status_value.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     {% for error in attribute_form.record_status_explanation.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -54,47 +58,25 @@
 
     <div class="container-fluid form-horizontal">
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12" style="padding: 0 20%;">
                 {% for error in attribute_form.type_controlled.errors %}
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ attribute_form.type_controlled.label }}</label>
-                    <div class="col-md-8">
+                    <label>{{ attribute_form.type_controlled.label }}</label>
+                    <div>
                       {{ attribute_form.type_controlled|addcss:"form-control"}}
                     </div>
                 </div>
 
-                {% for error in attribute_form.description.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ attribute_form.description.label }}</label>
-                    <div class="col-md-8">
-                      {{ attribute_form.description|addcss:"form-control" }}
-                    </div>
-                </div>
-
-                <div class="panel panel-default">
-                  <div class="panel-heading"><i class="fa fa-info-circle" aria-hidden="true"></i> How should I use this type?</div>
-                  <div class="panel-body">
-                    <div id="typeHelpText">Please select a type.</div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="col-md-12">Last updated on <span class="date">{{ attribute.modified_on|get_iso_date }}</span> by {{ attribute.modified_by }}</label>
-                </div>
-            </div>
-            <div class="col-sm-6">
                 {% if value_form %}
                     {% for field in value_form %}
                     {% for error in field.errors %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endfor %}
                     <div class="form-group">
-                        <label class="col-md-4">{{ field.label }}</label>
-                        <div class="col-md-8">
+                        <label>{{ field.label }}</label>
+                        <div>
                           {{ field|addcss:"form-control" }}
                         </div>
                     </div>
@@ -107,10 +89,33 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label class="col-md-4">{{ attribute_form.value_freeform.label }}</label>
-                    <div class="col-md-8">
+                    <label>{{ attribute_form.value_freeform.label }}</label>
+                    <div>
                       {{ attribute_form.value_freeform|addcss:"form-control" }}
                     </div>
+                </div>
+                
+                {% if user.is_superuser or user.is_staff %}
+                  {% for error in attribute_form.description.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ attribute_form.description.label }}</label>
+                      <div>
+                        {{ attribute_form.description|addcss:"form-control" }}
+                      </div>
+                  </div>
+                {% endif %}
+
+                <div class="panel panel-default">
+                  <div class="panel-heading"><i class="fa fa-info-circle" aria-hidden="true"></i> How should I use this type?</div>
+                  <div class="panel-body">
+                    <div id="typeHelpText">Please select a type.</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-md-12">Last updated on <span class="date">{{ attribute.modified_on|get_iso_date }}</span> by {{ attribute.modified_by }}</label>
                 </div>
             </div>
         </div>

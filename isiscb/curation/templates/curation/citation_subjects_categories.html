@@ -95,7 +95,11 @@
             </div>
             <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
               <div class="panel-body">
-                {{ instance.abstract }}
+                {% if instance.abstract %}
+                  {{ instance.abstract }}
+                {% else %}
+                  <i>Abstract missing. Go back to citation and add one.</i>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -106,23 +110,25 @@
 
   <!-- BEGIN category/subject column -->
   <div class="col-md-4">
-    <div class="col-md-12" style="margin-top: 10px;">
-      <h5><b>Categories</b></h5>
-      <ul id="category-list-group" class="list-group">
-        {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
-           {% if can_update %}
-           <span class="button-group button-group-xs">
-               <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
-                   acrelation-id="{{ acrel.id }}"
-                   data-acrelation-type="category"
-                   acrelation-title="{{ acrel.authority.name }}"></a>
-           </span>
-           {% endif %}
-           </li>
-        {% endfor %}
-      </ul>
-    </div>
+    {% if user.is_superuser or user.is_staff %}
+      <div class="col-md-12" style="margin-top: 10px;">
+        <h5><b>Categories</b></h5>
+        <ul id="category-list-group" class="list-group">
+          {% for acrel in instance|get_categories %}
+            <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+            {% if can_update %}
+            <span class="button-group button-group-xs">
+                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
+                    acrelation-id="{{ acrel.id }}"
+                    data-acrelation-type="category"
+                    acrelation-title="{{ acrel.authority.name }}"></a>
+            </span>
+            {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
 
     <div class="col-md-12" style="margin-top: 10px;">
       <h5><b>Subjects</b></h5>
@@ -154,7 +160,7 @@
     {% if can_update %}
     <ul class="nav nav-tabs" role="tablist">
       <li id="subjectsTab" role="presentation" class="active"><a href="#addSubjects" aria-controls="addSubjects" role="tab" data-toggle="tab">Subjects</a></li>
-      <li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>
+      {% if user.is_superuser or user.is_staff %}<li id="categoriesTab" role="presentation"><a href="#addCategories" aria-controls="addCategories" role="tab" data-toggle="tab">Categories</a></li>{% endif %}
       <li id="timePeriodsTab" role="presentation"><a href="#addTimePeriods" aria-controls="addTimePeriods" role="tab" data-toggle="tab">Eras</a></li>
       <li id="suggestTab" role="presentation"><a href="#suggest" aria-controls="suggest" role="tab" data-toggle="tab">Suggest</a></li>
     </ul>
@@ -201,10 +207,11 @@
         <ul class="list-group" id="subjectSearchResultsContainer">
 
         </ul>
-
-        <div class="text-right">
-          <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
-        </div>
+        {% if user.is_superuser or user.is_staff %}
+          <div class="text-right">
+            <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+          </div>
+        {% endif %}
       </div>
 
       <!-- Category tab -->
@@ -253,6 +260,8 @@ var delete_handler = function() {
 var INITIAL_MAX_RESULTS = 10;
 var max_results = INITIAL_MAX_RESULTS;
 var types = [];
+var is_superuser = "{{user.is_superuser}}";
+var is_staff = "{{user.is_staff }}";
 
 var searchTimerSubjects = 0;
 function triggerSearchSubjects(force) {
@@ -278,13 +287,23 @@ function triggerSearchSubjects(force) {
             var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
             suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
             newLi.append(suggestLink);
-            newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+            if (r.type == 'Serial Publication'){
+              newLi.append($('<span class="label label-danger pull-right">' + r.type + '</span>'));
+            } else {
+              newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+            }
+            
             resultsContainer.append(newLi);
 
             suggestLink.click(suggestSubjects);
 
             var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
-            addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+            if (r.type !== 'Cross-reference') {
+              addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+            }
+            if (r.type == 'Serial Publication'){
+              addBtn.css('color', '#f0ad4e')
+            }
             addBtn.click(addConcept);
             newLi.prepend(addBtn);
           });

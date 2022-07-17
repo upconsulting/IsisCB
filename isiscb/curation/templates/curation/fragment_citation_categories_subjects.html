@@ -16,7 +16,7 @@
         <table width="100%" style="margin-bottom: 3px;">
           <tr class="categoryHeader">
             <td >
-              <div class="input-xs">Categories and Subjects</div>
+              <div class="input-xs">{% if user.is_superuser or user.is_staff %}Categories and {% endif %}Subjects</div>
             </td>
             <td class="text-right" style="padding-right: 5px;">
               {% if can_update %}
@@ -27,27 +27,29 @@
         </table>
       </div>
     </div>
-      <table>
-          <tr>
-          <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" ">
-            {% for acrelation in instance.acrelation_set.all %}
-                {% if acrelation.type_controlled == 'CA' %}
-                      <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
-                        {% if not acrelation.public %}
-                        <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-                        {% endif %}
-                        {% if acrelation.authority %}
-                        {{ acrelation.authority.name|truncatechars:80 }}
-                        {% else %}
-                        No authority selected
-                        {% endif %}
-                      </a><br>
-                {% endif %}
-            {% endfor %}
-          </td>
-        </tr>
+      {% if user.is_superuser or user.is_staff %}
+        <table>
+            <tr>
+            <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" ">
+              {% for acrelation in instance.acrelation_set.all %}
+                  {% if acrelation.type_controlled == 'CA' %}
+                        <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
+                          {% if not acrelation.public %}
+                          <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                          {% endif %}
+                          {% if acrelation.authority %}
+                          {{ acrelation.authority.name|truncatechars:80 }}
+                          {% else %}
+                          No authority selected
+                          {% endif %}
+                        </a><br>
+                  {% endif %}
+              {% endfor %}
+            </td>
+          </tr>
         </table>
         <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
+      {% endif %}
 
         <table>
           <tr>
@@ -87,20 +89,24 @@
     </td>
   </tr>
   {% endfor %}
-  {% for error in partdetails_form.volume_begin.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
-  {% for error in partdetails_form.volume_end.errors %}
-  <tr>
-    <td colspan="6">
+
+  {% if user.is_superuser or user.is_staff %}
+    {% for error in partdetails_form.volume_begin.errors %}
+    <tr>
+      <td colspan="6">
       <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+    {% for error in partdetails_form.volume_end.errors %}
+    <tr>
+      <td colspan="6">
+        <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+  {% endif %}
+
   <tr>
     <td>
         <label class="input-xs">Volume</label>
@@ -108,18 +114,20 @@
     <td>
         {{ partdetails_form.volume_free_text|addcss:"form-control input-xs" }}
     </td>
-    <td>
-      <label class="input-xs">From</label>
-    </td>
-    <td>
-      {{ partdetails_form.volume_begin|addcss:"form-control input-xs input-shaded" }}
-    </td>
-    <td>
-        <label class="input-xs">to</label>
-    </td>
-    <td>
-          {{ partdetails_form.volume_end|addcss:"form-control input-xs input-shaded" }}
-    </td>
+    {% if user.is_superuser or user.is_staff %}
+      <td>
+        <label class="input-xs">From</label>
+      </td>
+      <td>
+        {{ partdetails_form.volume_begin|addcss:"form-control input-xs input-shaded" }}
+      </td>
+      <td>
+          <label class="input-xs">to</label>
+      </td>
+      <td>
+            {{ partdetails_form.volume_end|addcss:"form-control input-xs input-shaded" }}
+      </td>
+    {% endif %}
   </tr>
   {% for error in partdetails_form.issue_free_text.errors %}
   <tr>
@@ -128,20 +136,24 @@
     </td>
   </tr>
   {% endfor %}
-  {% for error in partdetails_form.issue_begin.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  <tr>
-  {% endfor %}
-  {% for error in partdetails_form.issue_end.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
+
+  {% if user.is_superuser or user.is_staff %}
+    {% for error in partdetails_form.issue_begin.errors %}
+    <tr>
+      <td colspan="6">
+      <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    <tr>
+    {% endfor %}
+    {% for error in partdetails_form.issue_end.errors %}
+    <tr>
+      <td colspan="6">
+      <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+  {% endif %}
+
   <tr>
     <td>
       <label class="input-xs">No./Episode</label>
@@ -149,18 +161,20 @@
     <td>
       {{ partdetails_form.issue_free_text|addcss:"form-control input-xs" }}
     </td>
-    <td>
-      <label class="input-xs">From</label>
-    </td>
-    <td>
-        {{ partdetails_form.issue_begin|addcss:"form-control input-xs input-shaded" }}
-    </td>
-    <td>
-      <label class="input-xs">to</label>
-    </td>
-    <td>
-        {{ partdetails_form.issue_end|addcss:"form-control input-xs input-shaded" }}
-    </td>
+    {% if user.is_superuser or user.is_staff %}
+      <td>
+        <label class="input-xs">From</label>
+      </td>
+      <td>
+          {{ partdetails_form.issue_begin|addcss:"form-control input-xs input-shaded" }}
+      </td>
+      <td>
+        <label class="input-xs">to</label>
+      </td>
+      <td>
+          {{ partdetails_form.issue_end|addcss:"form-control input-xs input-shaded" }}
+      </td>
+    {% endif %}
   </tr>
 
   {% for error in partdetails_form.pages_free_text.errors %}
@@ -170,20 +184,22 @@
     </td>
   </tr>
   {% endfor %}
-  {% for error in partdetails_form.page_begin.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
-  {% for error in partdetails_form.page_end.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
+  {% if user.is_superuser or user.is_staff %}
+    {% for error in partdetails_form.page_begin.errors %}
+    <tr>
+      <td colspan="6">
+      <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    {% for error in partdetails_form.page_end.errors %}
+    <tr>
+      <td colspan="6">
+      <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+  {% endif %}
 
   <tr>
     <td>
@@ -192,18 +208,20 @@
     <td>
       {{ partdetails_form.pages_free_text|addcss:"form-control input-xs" }}
     </td>
-    <td>
-      <label class="input-xs">From</label>
-    </td>
-    <td>
-      {{ partdetails_form.page_begin|addcss:"form-control input-xs input-shaded" }}
-    </td>
-    <td>
-      <label class="input-xs">to</label>
-    </td>
-    <td>
-      {{ partdetails_form.page_end|addcss:"form-control input-xs input-shaded" }}
-    </td>
+    {% if user.is_superuser or user.is_staff %}
+      <td>
+        <label class="input-xs">From</label>
+      </td>
+      <td>
+        {{ partdetails_form.page_begin|addcss:"form-control input-xs input-shaded" }}
+      </td>
+      <td>
+        <label class="input-xs">to</label>
+      </td>
+      <td>
+        {{ partdetails_form.page_end|addcss:"form-control input-xs input-shaded" }}
+      </td>
+      {% endif %}
   </tr>
 
   {% for error in partdetails_form.extent.errors %}
@@ -223,43 +241,45 @@
 
   <tr>
     <td>
-      <label class="input-xs">Extent</label>
+      <label class="input-xs">Length</label>
     </td>
     <td>
       {{ partdetails_form.extent|addcss:"form-control input-xs" }}
     </td>
     <td>
-      <label class="input-xs">Note</label>
+      <label class="input-xs">Length units</label>
     </td>
-    <td colspan="3">
+    <td>
       {{ partdetails_form.extent_note|addcss:"form-control input-xs" }}
     </td>
   </tr>
 
-  {% for error in form.physical_details.errors %}
-  <tr>
-    <td colspan="6">
-    <div class="alert alert-danger">{{ error }}</div>
-    </td>
-  </tr>
-  {% endfor %}
-  <tr>
-    <td>
-      <label class="input-xs">Phys. det.</label>
-    </td>
-    <td colspan="6">
-      {{ form.physical_details|addcss:"form-control input-xs oneLine" }}
-    </td>
-  </tr>
+  {% if user.is_superuser or user.is_staff %}
+    {% for error in form.physical_details.errors %}
+    <tr>
+      <td colspan="6">
+      <div class="alert alert-danger">{{ error }}</div>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td>
+        <label class="input-xs">Phys. det.</label>
+      </td>
+      <td colspan="6">
+        {{ form.physical_details|addcss:"form-control input-xs oneLine" }}
+      </td>
+    </tr>
+  {% endif %}
 </table>
 </div>
 {% endif %}
 
-<div class="row" >
+<div class="row">
   <div class="col-sm-12 text-left" style="padding-bottom: 10px;">
     <table width="100%" style="margin-bottom: 3px;">
       <tr class="categoryHeader">
-        <td >
+        <td>
           <div class="input-xs">Linked Citations</div>
         </td>
         <td class="text-right">

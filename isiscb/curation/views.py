@@ -7,6 +7,7 @@ from past.builtins import cmp
 from builtins import str
 from past.utils import old_div
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import EmptyPage
 
@@ -104,8 +105,9 @@ def datasets(request):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-#@check_rules('can_create_record')
+# @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
+@check_rules('can_create_record')
 def create_citation(request):
     default_dataset_id = settings.DEFAULT_DATASET_ID
     default_dataset = Dataset.objects.get(pk=default_dataset_id)
@@ -131,7 +133,7 @@ def create_citation(request):
         form = CitationForm(user=request.user, initial={'belongs_to': default_dataset})
 
         acr_formset = AcrFormset()
-        attribute_form = AttributeForm(prefix='attribute', initial={'type_controlled': publication_date_attr_type, 'record_status_value': CuratedMixin.ACTIVE})
+        attribute_form = AttributeForm(prefix='attribute', initial={'type_controlled': publication_date_attr_type})
         
         value_form_class = value_forms[1]
         value_form = value_form_class(prefix='value')
@@ -378,8 +380,8 @@ def quick_create_acrelation(request):
         return JsonResponse(response_data)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_ccrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
     search_key = request.GET.get('search', request.POST.get('search'))
@@ -396,6 +398,7 @@ def create_ccrelation_for_citation(request, citation_id):
     if request.method == 'GET':
         ccrelation = CCRelation()
         initial={}
+        initial['data_display_order'] = 1.0
         if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
             ccrelation.object = citation
             ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
@@ -417,6 +420,8 @@ def create_ccrelation_for_citation(request, citation_id):
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
+        else:
+            print(form.errors)
 
     context.update({
         'form': form,
@@ -425,8 +430,8 @@ def create_ccrelation_for_citation(request, citation_id):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = None if not ccrelation_id else get_object_or_404(CCRelation, pk=ccrelation_id)
@@ -463,8 +468,8 @@ def ccrelation_for_citation(request, citation_id, ccrelation_id=None):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def create_acrelation_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -503,8 +508,8 @@ def create_acrelation_for_citation(request, citation_id):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def acrelation_for_citation(request, citation_id, acrelation_id=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = None if not acrelation_id else get_object_or_404(ACRelation, pk=acrelation_id)
@@ -614,8 +619,8 @@ def tracking_for_authority(request, authority_id):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_attribute_for_citation(request, citation_id, attribute_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     attribute = get_object_or_404(Attribute, pk=attribute_id)
@@ -736,8 +741,8 @@ def add_language_for_citation(request, citation_id):
     return JsonResponse(result)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     ccrelation = get_object_or_404(CCRelation, pk=ccrelation_id)
@@ -765,8 +770,8 @@ def delete_ccrelation_for_citation(request, citation_id, ccrelation_id, format=N
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     acrelation = get_object_or_404(ACRelation, pk=acrelation_id)
@@ -971,8 +976,8 @@ def linkeddata_for_authority(request, authority_id, linkeddata_id=None):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def attribute_for_citation(request, citation_id, attribute_id=None):
 
     template = 'curation/citation_attribute_changeview.html'
@@ -1121,16 +1126,15 @@ def attribute_for_authority(request, authority_id, attribute_id=None):
     })
     return render(request, template, context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def get_attribute_type_help_text(request, attribute_type_id):
-    print(attribute_type_id)
     attribute_type = get_object_or_404(AttributeType, pk=attribute_type_id)
 
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
     return JsonResponse({'help_text': safe_text})
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id):
     context = {
         'curation_section': 'datasets',
@@ -1139,7 +1143,7 @@ def citation(request, citation_id):
         'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
         'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
         'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
-        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY, CCRelation.REVIEW_OF],
         'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
         'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
         'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
@@ -1192,8 +1196,6 @@ def citation(request, citation_id):
         if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
-            print('----c----')
-            print(form.cleaned_data)
             form.save()
             if partdetails_form:
                 partdetails_form.save()
@@ -1451,8 +1453,8 @@ def delete_duplicates(deleted_ids):
             linkeddata = get_object_or_404(LinkedData, pk=ld_id)
             linkeddata.delete()
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def subjects_and_categories(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -1586,7 +1588,7 @@ def _citations_get_filter_params(request):
     return filter_params, all_params
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def citations(request):
     template = 'curation/citation_list_view.html'
 
@@ -1914,7 +1916,7 @@ def authority_acrelations(request, authority_id):
         })
     return render(request, template, context)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def quick_and_dirty_language_search(request):
     q = request.GET.get('q', None)
     if not q or len(q) < 3:    # TODO: this should be configurable in the GET.
@@ -2211,7 +2213,7 @@ def get_citation_by_id(request):
         'title': citation.title_for_display,
     })
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def quick_and_dirty_citation_search(request):
     q = request.GET.get('q', None)
     N = int(request.GET.get('max', 20))

@@ -34,6 +34,7 @@
 
 <div class="form-group">
     {{ attribute_form.type_controlled.as_hidden}}
+    {{ attribute_form.record_status_value.as_hidden }}
 </div>
 
 {% if value_form %}
@@ -42,7 +43,7 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
-        <label>Publication Date (YYYY-MM-DD)</label>
+        <label>Publication Date or Year (YYYY-MM-DD or YYYY)</label>
         {{ field|addcss:"form-control" }}
     </div>
     {% endfor %}

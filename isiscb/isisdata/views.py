@@ -1439,8 +1439,6 @@ def unapi_server_root(request):
 
     return HttpResponse('')
 
-
-
 def home(request):
     """
     The landing view, at /.
@@ -1530,7 +1528,6 @@ def home(request):
         'tweet_image': recent_tweet_image,
     }
     return render(request, 'isisdata/home.html', context=context)
-
 
 def rdf_authority_view(request, authority_id):
     """

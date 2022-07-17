@@ -290,7 +290,8 @@ $(document).ready(function() {
                   waiting = false;
 
                   $('#results-container').empty();
-                  result.results.forEach(function(suggestion) {
+                  if (result.results.length) {
+                    result.results.forEach(function(suggestion) {
                       var choice_elem = `
                           <li class="list-group-item search-result">
                               <div class="row">
@@ -325,6 +326,10 @@ $(document).ready(function() {
 
                       $('#results-container').append(choice_elem);
                   });
+                  } else {
+                    $('#results-container').append('<li style="list-style-type: none;">There are no authorities by that name. Try checking for variations of the name. If you cannot find an authority to match, then you can submit this citation for review without this authority link and an editor will create the authority record needed.</li>');
+                  }
+                  
                   if (result.results.length == max_results) {
                     var load_more = `
                       <li class="list-group-item search-result">

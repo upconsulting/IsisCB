@@ -133,7 +133,8 @@ def can_edit_authority_record_using_id(user, object):
 
 @predicate
 def can_create_record(user, object):
-    return is_action_allowed(user, object, CRUDRule.CREATE)
+    # return is_action_allowed(user, object, CRUDRule.CREATE)
+    return True
 
 
 @predicate
@@ -170,14 +171,15 @@ def is_action_allowed(user, obj, action):
     if user.is_superuser:
         return True
 
-    roles = user.isiscbrole_set.all()
-    dataset = getattr(obj, 'belongs_to', None)
-
-    if is_instance(obj, Citation):
+    # if the object is a citation and the user created that citation, then they can edit it
+    if isinstance(obj, Citation):
         creator_id = obj.created_by_native_id
 
     if creator_id:
         return creator_id == user.id
+
+    roles = user.isiscbrole_set.all()
+    dataset = getattr(obj, 'belongs_to', None)
 
     if dataset:
         relevant_roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)

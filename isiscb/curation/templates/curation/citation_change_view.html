@@ -111,11 +111,21 @@ $(function() {
                   <span class="glyphicon glyphicon-new-window" ></span>
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              {{ form.record_status_value|addcss:"form-control input-sm" }}
+              {% if user.is_superuser or user.is_staff %}
+                {{ form.record_status_value|addcss:"form-control input-sm" }}
 
-              {{ form.type_controlled }}
+                {{ form.type_controlled }}
 
-              <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
+                <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
+              {% else %}
+                {% if instance.tracking_state == 'PD' %}
+                  <span class="label label-success">Published</span>
+                {% elif instance.tracking_state == 'FU' %}
+                  <span class="label label-warning">Under Review</span>
+                {% else %}
+                <span class="label label-danger">Draft</span>
+                {% endif %}
+              {% endif %}
             </div>
           </div>
           <div class="col-md-12">
@@ -165,24 +175,26 @@ Back to List </a>
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified" role="tablist">
-            <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Fields</a>
-            </li>
-            <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Attributes ({{ instance.attributes.count }})</a>
-            </li>
-            <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
-            </li>
-            <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Cit. ({{ instance.all_ccrelations.count }})</a>
-            </li>
-            <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Auth. ({{ instance.related_authorities.count }})</a>
-            </li>
-            <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
-                <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;" id="tracking_tab">Tracking: {% if instance.tracking_state == "FU" %}Entered{% elif instance.tracking_state == "HS" %}HSTM{% else %}{{ instance.get_tracking_state_display }}{% endif %}</a>
-            </li>
+            {% if user.is_superuser or user.is_staff %}
+              <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Fields</a>
+              </li>
+              <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Attributes ({{ instance.attributes.count }})</a>
+              </li>
+              <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
+              </li>
+              <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Cit. ({{ instance.all_ccrelations.count }})</a>
+              </li>
+              <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Auth. ({{ instance.related_authorities.count }})</a>
+              </li>
+              <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
+                  <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;" id="tracking_tab">Tracking: {% if instance.tracking_state == "FU" %}Entered{% elif instance.tracking_state == "HS" %}HSTM{% else %}{{ instance.get_tracking_state_display }}{% endif %}</a>
+              </li>
+            {% endif %}
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
@@ -244,36 +256,6 @@ Back to List </a>
                           </div>
                         </div>
 
-                        {% for error in form.complete_citation.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Full Cit.</label>
-                            </div>
-                            <div class="col-sm-11" >
-                            {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
-                            </div>
-                          </div>
-                        </div>
-
-                        {% for error in form.description.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Desc.</label>
-                            </div>
-                            <div class="col-sm-11">
-                            {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
-                            </div>
-                          </div>
-                        </div>
-
-
-
                         {% for error in form.administrator_notes.errors %}
                         <div class="alert alert-danger">{{ error }}</div>
                         {% endfor %}
@@ -288,47 +270,77 @@ Back to List </a>
                           </div>
                         </div>
 
-                        {% for error in form.record_status_explanation.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left" style="margin-top: -7px;">
-                              <label class="input-sm">Status Expl.</label>
-                            </div>
-                            <div class="col-sm-11">
-                            {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
+                        {% if user.is_superuser or user.is_staff %}
+                          {% for error in form.complete_citation.errors %}
+                          <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                          <div class="form-group">
+                            <div class="row">
+                              <div class="col-sm-1 text-left">
+                                <label class="input-sm">Full Cit.</label>
+                              </div>
+                              <div class="col-sm-11" >
+                              {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {% for error in form.belongs_to.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Set</label>
-                            </div>
-                            <div class="col-sm-11">
-                              {{ form.belongs_to|addcss:"form-control input-sm" }}
+                          {% for error in form.description.errors %}
+                          <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                          <div class="form-group">
+                            <div class="row">
+                              <div class="col-sm-1 text-left">
+                                <label class="input-sm">Desc.</label>
+                              </div>
+                              <div class="col-sm-11">
+                              {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {% for error in form.record_history.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Hist.</label>
-                            </div>
-                            <div class="col-sm-11">
-                              {{ form.record_history|addcss:"form-control input-sm" }}
+                          {% for error in form.record_status_explanation.errors %}
+                          <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                          <div class="form-group">
+                            <div class="row">
+                              <div class="col-sm-1 text-left" style="margin-top: -7px;">
+                                <label class="input-sm">Status Expl.</label>
+                              </div>
+                              <div class="col-sm-11">
+                              {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
+                              </div>
                             </div>
                           </div>
-                        </div>
+
+                          {% for error in form.belongs_to.errors %}
+                          <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                          <div class="form-group">
+                            <div class="row">
+                              <div class="col-sm-1 text-left">
+                                <label class="input-sm">Set</label>
+                              </div>
+                              <div class="col-sm-11">
+                                {{ form.belongs_to|addcss:"form-control input-sm" }}
+                              </div>
+                            </div>
+                          </div>
+
+                          {% for error in form.record_history.errors %}
+                          <div class="alert alert-danger">{{ error }}</div>
+                          {% endfor %}
+                          <div class="form-group">
+                            <div class="row">
+                              <div class="col-sm-1 text-left">
+                                <label class="input-sm">Hist.</label>
+                              </div>
+                              <div class="col-sm-11">
+                                {{ form.record_history|addcss:"form-control input-sm" }}
+                              </div>
+                            </div>
+                          </div>
+                        {% endif %}
 
                     </div>
 
