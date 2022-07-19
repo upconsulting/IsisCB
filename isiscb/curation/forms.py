@@ -265,7 +265,7 @@ class CitationValueForm(forms.ModelForm):
         fields = ['value']
 
 class PartDetailsForm(forms.ModelForm):
-    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1'}), required=False)
+    extent_note = forms.CharField(widget=forms.widgets.Textarea({'rows': '1', 'cols': '12'}), required=False)
 
     def __init__(self, user, citation_id=None, *args, **kwargs):
         super(PartDetailsForm, self).__init__( *args, **kwargs)
@@ -326,7 +326,7 @@ class StubCheckboxInput(forms.widgets.CheckboxInput):
 
 class CitationForm(forms.ModelForm):
 
-    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
+    abstract = forms.CharField(widget=forms.widgets.Textarea({'rows': '17'}), required=False)
     complete_citation = forms.CharField(widget=forms.widgets.Textarea({'rows': '7'}), required=False)
     description = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
@@ -351,11 +351,11 @@ class CitationForm(forms.ModelForm):
     class Meta(object):
         model = Citation
         fields = [
-            'type_controlled', 'title', 'description', 'edition_details',
-              'physical_details', 'abstract', 'additional_titles',
-              'book_series', 'record_status_value', 'record_status_explanation',
-              'belongs_to', 'administrator_notes', 'record_history', 'subtype',
-              'complete_citation', 'stub_record_status'
+            'title', 'description', 'edition_details',
+            'physical_details', 'abstract', 'additional_titles',
+            'book_series', 'record_status_value', 'record_status_explanation',
+            'belongs_to', 'administrator_notes', 'record_history', 'subtype',
+            'complete_citation', 'stub_record_status'
         ]
         labels = {
             'belongs_to': 'Dataset',
@@ -367,6 +367,8 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
+        #  self.fields['administrator_notes'].widget.attrs['placeholder'] = 'test'
+
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
@@ -374,7 +376,7 @@ class CitationForm(forms.ModelForm):
         # disable fields user doesn't have access to
         if self.instance.pk:
             self.fields['title'].widget.attrs['placeholder'] = "No title"
-            self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
+            # self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE, Citation.ESSAY_REVIEW]:
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()

@@ -150,8 +150,6 @@ def create_citation(request):
         })
         
     elif request.method == 'POST':
-        print('----a-----')
-        print(request.POST)
         form = CitationForm(request.user, request.POST)
         acr_formset = AcrFormset(request.POST or None, request.FILES or None)
         partdetails_form = PartDetailsForm(request.user, citation_id = None, data=request.POST)
@@ -159,15 +157,6 @@ def create_citation(request):
         attribute_form = AttributeForm(request.POST, prefix='attribute')
         value_form_class = value_forms[1]
         value_form = value_form_class(request.POST, prefix='value')
-
-        print(form.is_valid())
-        print(partdetails_form.is_valid())
-        print(acr_formset.is_valid())
-        print(attribute_form.is_valid())
-        print(value_form.is_valid())
-
-        print('----nnnn-----')
-        print(attribute_form.errors)
 
         if form.is_valid() and partdetails_form.is_valid() and acr_formset.is_valid() and attribute_form.is_valid() and value_form.is_valid() and value_form:
 
@@ -343,7 +332,7 @@ def get_subject_suggestions(request, citation_id):
 
 
 # TODO this method needs to be logged down!
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def quick_create_acrelation(request):
     if request.method == 'POST':
         authority_id = request.POST.get('authority_id')
@@ -397,8 +386,7 @@ def create_ccrelation_for_citation(request, citation_id):
     }
     if request.method == 'GET':
         ccrelation = CCRelation()
-        initial={}
-        initial['data_display_order'] = 1.0
+        # initial['data_display_order'] = 1.0
         if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
             ccrelation.object = citation
             ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
@@ -420,8 +408,6 @@ def create_ccrelation_for_citation(request, citation_id):
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
-        else:
-            print(form.errors)
 
     context.update({
         'form': form,
@@ -486,6 +472,7 @@ def create_acrelation_for_citation(request, citation_id):
     if request.method == 'GET':
         initial = {
             'citation': citation.id,
+            'confidence_measure': 1.0,
         }
         type_controlled = request.GET.get('type_controlled', None)
         if type_controlled:
@@ -545,8 +532,8 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def tracking_for_citation(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -646,8 +633,8 @@ def delete_attribute_for_citation(request, citation_id, attribute_id, format=Non
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_linkeddata_for_citation(request, citation_id, linkeddata_id, format=None):
     citation = get_object_or_404(Citation, pk=citation_id)
     linkeddata = get_object_or_404(LinkedData, pk=linkeddata_id)
@@ -860,8 +847,8 @@ def delete_attribute_for_authority(request, authority_id, attribute_id, format=N
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
 
     template = 'curation/citation_linkeddata_changeview.html'
@@ -1010,10 +997,9 @@ def attribute_for_citation(request, citation_id, attribute_id=None):
             if value:
                 value_form = value_form_class(instance=value, prefix='value')
         else:
-            attribute_form = AttributeForm(prefix='attribute')
+            attribute_form = AttributeForm(prefix='attribute', initial={'record_status_value': CuratedMixin.ACTIVE})
 
     elif request.method == 'POST':
-        print(request.POST)
         if attribute:    # Update.
             attribute_form = AttributeForm(request.POST, instance=attribute, prefix='attribute')
 
@@ -1324,8 +1310,8 @@ def _build_result_set_links(request, context, model=Citation):
         'current_offset': (page_number - 1) * PAGE_SIZE
     })
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def change_record_type(request, citation_id):
     citation = get_object_or_404(Citation, pk=citation_id)
 
@@ -1535,7 +1521,6 @@ def _citations_get_filter_params(request):
     Build ``filter_params`` for GET request in citation list view.
     """
 
-
     if request.method == 'POST':
         post_or_get = request.POST
     else:
@@ -1585,6 +1570,7 @@ def _citations_get_filter_params(request):
     #  curator is originating in the collections view.
     if "in_collections" in all_params:
         filter_params["in_collections"] = all_params["in_collections"]
+    
     return filter_params, all_params
 
 
@@ -2187,7 +2173,7 @@ def search_datasets(request):
     } for ds in queryset[:20]]
     return JsonResponse(results, safe=False)
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@login_required()
 def search_users(request):
     q = request.GET.get('query', None)
     if q:

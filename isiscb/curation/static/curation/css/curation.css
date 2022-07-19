@@ -160,9 +160,9 @@ select.high_input {
   border-radius: 3px;
 }
 
-.date-input {
+/* .date-input {
   background-color: #fdf7e6;
-}
+} */
 
 #citationView a, #authorityView a {
   cursor: pointer;

@@ -62,8 +62,8 @@
     {% include "curation/fragment_citation_header.html" %}
 
     <div class="container-fluid form-horizontal">
-        <div class="row">
-            <div class="col-sm-12" style="padding: 0 20%;">
+        <div class="row" style="padding: 0 20%;">
+            <div class="col-sm-11">
               <div class="text-right">
                 <a href="{% url 'curation:create_citation' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new citation</a>
               </div>
@@ -76,31 +76,20 @@
                 </div>
                 {% endfor %}
 
-                <div id="subject_info_container">
-                  <div id="subject_info">
-                    <strong>Citation record: </strong>
-                    {% if form.instance.subject %}
-                    <strong class="text-warning"><span class="show_id">{{ form.instance.subject.id }}</span> &nbsp;&nbsp;
-                      <a class="link_to_citation" href="{% url 'curation:curate_citation' form.instance.subject.id %}"><i class="fa fa-external-link" aria-hidden="true"></i></a>
-                    </strong>
-
-                    <p>
-                      <span {% if form.instance.subject %}data-type_id="{{ form.instance.subject.type_controlled }}"{% endif %} class="text-success show_type_controlled">{{ form.instance.subject.get_type_controlled_display }}</span>
-                      <br>
-                      <em class="show_title">{{ form.instance.subject|get_citation_title }}</em>
-                      <br>
-                      {% with form.instance.subject|get_authors_editors as authors_editors %}
-                      <span class="show_authors">
-                      {% if authors_editors %}
-                                  {{ authors_editors }}
-                      {% endif %}
-                      </span>
-                      {% endwith %}
-
-                    </p>
-                    {% endif %}
-                  </div>
+                <div id="subject_info_container" style="margin-right: 39px;">
+                  {% if form.instance.subject %}
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <span class="label label-primary">{{form.instance.subject.get_type_controlled_display}}</span>
+                        {% with form.instance.subject|get_authors_editors as authors_editors %}
+                          {% if authors_editors %} <b>{{ authors_editors }}</b> {% endif %}
+                        {% endwith %}
+                        <a href="{% url 'citation' form.instance.subject.id %}" style="color: #337ab7;">{{ form.instance.subject|get_citation_title }}</a>
+                      </li>
+                    </ul>
+                  {% endif %}
                 </div>
+
 
                 <div class="form-group">
                   <div class="col-sm-12">
@@ -125,26 +114,16 @@
 
                 <ul class="list-group" id="subject-results-container"></ul>
 
-
-                <div class="row">
-                  <div class="col-sm-3">
-                    <div class="button-group" title="Reverse order of citations for relationship">
-                      <span class="btn btn-lg glyphicon glyphicon-refresh"
-                          id="swap-subject-object">
-                      </span>
+                {% for error in form.type_controlled.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group" style="margin-right: 24px;">
+                    <div class="col-sm-12">
+                      <label>{{ form.type_controlled.label }}</label>
+                      <div>
+                        {{ form.type_controlled|addcss:"form-control" }}
+                      </div>
                     </div>
-                  </div>
-                  <div class="col-sm-9">
-                    {% for error in form.type_controlled.errors %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                    {% endfor %}
-                    <div class="form-group" style="margin-right: 37px;">
-                        <label>{{ form.type_controlled.label }}</label>
-                        <div>
-                          {{ form.type_controlled|addcss:"form-control" }}
-                        </div>
-                    </div>
-                  </div>
                 </div>
 
                 {% for error in form.object.errors %}
@@ -155,7 +134,21 @@
                 </div>
                 {% endfor %}
 
-                <div id="object_info_container">
+                <div id="object_info_container" style="margin-right: 39px;">
+                  {% if form.instance.object %}
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <span class="label label-primary">{{form.instance.object.get_type_controlled_display}}</span>
+                        {% with form.instance.object|get_authors_editors as authors_editors %}
+                          {% if authors_editors %} <b>{{ authors_editors }}</b> {% endif %}
+                        {% endwith %}
+                        <a href="{% url 'citation' form.instance.object.id %}" style="color: #337ab7;">{{ form.instance.object|get_citation_title }}</a>
+                      </li>
+                    </ul>
+                  {% endif %}
+                </div>
+
+                {% comment %} <div id="object_info_container">
                   <div id="object_info">
                     <strong>Citation record: </strong>
 
@@ -184,7 +177,7 @@
                       </span>
                     </p>
                   </div>
-                </div>
+                </div> {% endcomment %}
 
                 <div class="form-group">
                     <div class="col-sm-12">
@@ -209,17 +202,18 @@
 
                 <ul class="list-group" id="object-results-container"></ul>
 
-                {% if user.is_superuser or user.is_staff %}
-                  {% for error in form.data_display_order.errors %}
-                  <div class="alert alert-danger">{{ error }}</div>
-                  {% endfor %}
-                  <div class="form-group">
-                      <label class="col-md-4">{{ form.data_display_order.label }}</label>
-                      <div class="col-md-8">
-                        {{ form.data_display_order|addcss:"form-control" }}
-                      </div>
-                  </div>
-                  
+                
+                {% for error in form.data_display_order.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+                <div class="form-group">
+                    {% if user.is_staff or user.is_superuser %} <label class="col-md-4">{{ form.data_display_order.label }}</label> {% endif %}
+                    <div class="col-md-8">
+                      {% if user.is_staff or user.is_superuser %} {{ form.data_display_order|addcss:"form-control" }} {% else %} {{ form.data_display_order.as_hidden }} {% endif %}
+                    </div>
+                </div>
+                
+                {% if user.is_staff or user.is_superuser %}
                   {% for error in form.administrator_notes.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
@@ -247,6 +241,13 @@
 
                 {{ form.subject }}
                 {{ form.object }}
+            </div>
+            <div class="col-sm-1" style="padding-top: 181px; padding-left: 0;">
+              <div class="button-group" title="Reverse order of citations for relationship">
+                <span class="btn btn-lg glyphicon glyphicon-refresh"
+                    id="swap-subject-object">
+                </span>
+              </div>
             </div>
         </div>
     </div>

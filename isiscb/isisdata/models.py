@@ -1706,7 +1706,7 @@ class ACRelation(ReferencedEntity, CuratedMixin):
         Citation.ESSAY_REVIEW: [PERIODICAL],
         Citation.THESIS: [SCHOOL],
         Citation.EVENT: [HOST],
-        Citation.WEB_OBJECT: [PUBLISHER, DISTRIBUTOR, HOST],
+        Citation.WEB_OBJECT: [PUBLISHER, HOST],
         Citation.MULTIMEDIA_OBJECT: [PUBLISHER, DISTRIBUTOR],
         Citation.ARCHIVE_OBJECT: [ARCHIVAL_REPOSITORY],
         Citation.DIGITAL_RESOURCE: [MAINTAINING_INSTITUTION],

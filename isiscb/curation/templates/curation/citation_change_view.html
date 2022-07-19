@@ -31,10 +31,42 @@ $(function() {
    })
 
 });
+
+  //# sourceURL=tracking.js
+  function createTracking(trackType) {
+    var form = $("<form action='{% url 'curation:tracking-citation' instance.id %}?search={{ search_key }}&current={{ current_index }}' method='POST'></form>")
+    var trackTypeInput = $("<input id='trackType' type='hidden' name='type' value='" + trackType + "'>")
+    form.append(trackTypeInput)
+    form.append('{% csrf_token %}')
+    $("body").append(form)
+    form.submit()
+  }
 </script>
 <style>
 .acrelation.search-result {
     font-size: 9pt;
+}
+
+.list-group {
+  font-size: 14px;
+}
+
+.list-group-item {
+  border: none;
+}
+
+.panel {
+  margin-bottom: 10px;
+}
+
+.panel-default>.panel-heading {
+  background-color: #fff;
+  color: #666;
+}
+
+label {
+  font-size: 14px;
+  color: #000;
 }
 </style>
 
@@ -98,16 +130,15 @@ $(function() {
       <div class="row">
           <div class="col-md-12">
             <div class="form-group form-inline">
-              <a href="#" data-toggle="modal" data-target="#change_type_controlled_modal">
-                <i class="fa fa-pencil" aria-hidden="true"></i></a>
-
-              <strong id="citation_type" data-type="{{instance.type_controlled}}">
- {{ instance.get_type_controlled_display }}</strong>:
-              <strong class="text-warning">{{ instance.id }}</strong>
-              &nbsp;
+              <span class="label label-primary" id="citation_type" data-type="{{instance.type_controlled}}" style="font-size: 14px;">
+                <a href="#" data-toggle="modal" data-target="#change_type_controlled_modal"><i class="fa fa-pencil" aria-hidden="true" style="color: #fff;"></i></a>
+                {{ instance.get_type_controlled_display }}
+              </span>
+              &nbsp;&nbsp;
               <a
                   href="{{ instance|get_uri }}"
                   target="_blank">
+                  <strong class="text-warning">{{ instance.id }}</strong>
                   <span class="glyphicon glyphicon-new-window" ></span>
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -119,11 +150,11 @@ $(function() {
                 <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
               {% else %}
                 {% if instance.tracking_state == 'PD' %}
-                  <span class="label label-success">Published</span>
+                  <span class="label label-success" style="font-size: 14px;">Published</span>
                 {% elif instance.tracking_state == 'FU' %}
-                  <span class="label label-warning">Under Review</span>
+                  <span class="label label-warning" style="font-size: 14px;">Under Review</span>
                 {% else %}
-                <span class="label label-danger">Draft</span>
+                <span class="label label-danger" style="font-size: 14px;">Draft</span>
                 {% endif %}
               {% endif %}
             </div>
@@ -145,8 +176,7 @@ $(function() {
       {% endif %}
       &nbsp; &nbsp; &nbsp;
 
-      <a id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>
-Back to List </a>
+      <a id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>Back to List </a>
       &nbsp; &nbsp; &nbsp;
       {% if next %}
       <a id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
@@ -156,24 +186,23 @@ Back to List </a>
         {% if index %}Record {{ index }} of {{ total }}{% endif %}
 
         <div class="btn-group ">
-            <div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>
+            {% if user.is_staff or user.is_superuser %}<div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>{% endif %}
 
             <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
-            <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
+            <a data-href="" class="btn btn-sm btn-success citation_submit">{% if user.is_staff or user.is_superuser %}Save{% else %} Save Draft{% endif %}</a>
+            {% if not user.is_staff or not user.is_superuser %}<a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-sm btn-primary" style="color: #fff;">Submit for Review</a>{% endif %}
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
-
-
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-sm-4" style="border-right: 1px dotted #ccc9c9; height: 90%;">
+    <div class="col-sm-4" style="margin-top: 15px;">
         {% block citation_panel_left %}
         {% include "curation/fragment_citation_fields.html" %}
         {% endblock %}
     </div>
-    <div class="col-sm-8">
+    <div class="col-sm-8" style="padding-left: 0;">
         <ul class="nav nav-tabs nav-justified" role="tablist">
             {% if user.is_superuser or user.is_staff %}
               <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
@@ -200,150 +229,290 @@ Back to List </a>
             <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
                 {% block fields_tab %}
                 <div class="row">
-                    <div class="col-sm-6">
-                      {% block citation_middle_panel %}
-                        {% include "curation/fragment_citation_categories_subjects.html" %}
-                      {% endblock %}
-                    </div>
-                    <div class="col-sm-6">
-
-                      <div class="form-group">
-                        <div class="row">
-                          <div class="col-sm-1 text-left">
-                            <label class="input-sm">Lang.</label>
-                          </div>
-                          <div class="col-sm-3" style="padding-right: 0px;">
-                            <ul style="margin-bottom: 0;" class="list-group">
-                              <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
-                              <a style="cursor: pointer; padding: 5px; padding-left: 10px;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
-                                  <span class="glyphicon glyphicon-plus"></span> Add
-                              </a>
+                  <div class="col-sm-6">
+                    <div class="panel panel-default">
+                      <div class="panel-heading">Language</div>
+                      <div class="panel-body">
+                        <div class="col-sm-3" style="padding-right: 0px;">
+                          <ul style="margin-bottom: 0;" class="list-group">
+                            <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
+                            <a style="cursor: pointer; padding: 5px; padding-left: 10px; border: 1px solid #ccc;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                                <span class="glyphicon glyphicon-plus"></span> Add
+                            </a>
+                          </ul>
+                        </div>
+                        <div class="col-sm-8">
+                          <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
+                                {% for language in instance.language.all %}
+                                <li class="list-group-item language clearfix"
+                                    id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px; border: 1px solid #ccc;">
+                                    <small style="line-height: 28px;">{{ language }}</small>
+                                    <!-- TODO: implement permission check here. -->
+                                    <span class="button-group button-group-xs pull-right">
+                                        <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                                            type="button"
+                                            language-id="{{ language.id }}"
+                                            language-name="{{ language }}"></a>
+                                    </span>
+                                </li>
+                                {% endfor %}
                             </ul>
-                          </div>
-                          <div class="col-sm-8">
-                            <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
-                                  {% for language in instance.language.all %}
-                                  <li class="list-group-item language clearfix"
-                                      id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px;">
-                                      <small style="line-height: 28px;">{{ language }}</small>
-                                      <!-- TODO: implement permission check here. -->
-                                      <span class="button-group button-group-xs pull-right">
-                                          <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
-                                              type="button"
-                                              language-id="{{ language.id }}"
-                                              language-name="{{ language }}"></a>
-                                      </span>
-                                  </li>
-                                  {% endfor %}
-
-
-                              </ul>
-                          </div>
                         </div>
                       </div>
-
-                        {% for error in form.abstract.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Abst.</label>
-                            </div>
-                            <div class="col-sm-11" >
-                            {{ form.abstract|addcss:"form-control reduceIfEmpty input-sm" }}
-                            </div>
-                          </div>
-                        </div>
-
-                        {% for error in form.administrator_notes.errors %}
-                        <div class="alert alert-danger">{{ error }}</div>
-                        {% endfor %}
-                        <div class="form-group">
-                          <div class="row">
-                            <div class="col-sm-1 text-left">
-                              <label class="input-sm">Note</label>
-                            </div>
-                            <div class="col-sm-11">
-                            {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
-                            </div>
-                          </div>
-                        </div>
-
-                        {% if user.is_superuser or user.is_staff %}
-                          {% for error in form.complete_citation.errors %}
-                          <div class="alert alert-danger">{{ error }}</div>
-                          {% endfor %}
-                          <div class="form-group">
-                            <div class="row">
-                              <div class="col-sm-1 text-left">
-                                <label class="input-sm">Full Cit.</label>
-                              </div>
-                              <div class="col-sm-11" >
-                              {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
-                              </div>
-                            </div>
-                          </div>
-
-                          {% for error in form.description.errors %}
-                          <div class="alert alert-danger">{{ error }}</div>
-                          {% endfor %}
-                          <div class="form-group">
-                            <div class="row">
-                              <div class="col-sm-1 text-left">
-                                <label class="input-sm">Desc.</label>
-                              </div>
-                              <div class="col-sm-11">
-                              {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
-                              </div>
-                            </div>
-                          </div>
-
-                          {% for error in form.record_status_explanation.errors %}
-                          <div class="alert alert-danger">{{ error }}</div>
-                          {% endfor %}
-                          <div class="form-group">
-                            <div class="row">
-                              <div class="col-sm-1 text-left" style="margin-top: -7px;">
-                                <label class="input-sm">Status Expl.</label>
-                              </div>
-                              <div class="col-sm-11">
-                              {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
-                              </div>
-                            </div>
-                          </div>
-
-                          {% for error in form.belongs_to.errors %}
-                          <div class="alert alert-danger">{{ error }}</div>
-                          {% endfor %}
-                          <div class="form-group">
-                            <div class="row">
-                              <div class="col-sm-1 text-left">
-                                <label class="input-sm">Set</label>
-                              </div>
-                              <div class="col-sm-11">
-                                {{ form.belongs_to|addcss:"form-control input-sm" }}
-                              </div>
-                            </div>
-                          </div>
-
-                          {% for error in form.record_history.errors %}
-                          <div class="alert alert-danger">{{ error }}</div>
-                          {% endfor %}
-                          <div class="form-group">
-                            <div class="row">
-                              <div class="col-sm-1 text-left">
-                                <label class="input-sm">Hist.</label>
-                              </div>
-                              <div class="col-sm-11">
-                                {{ form.record_history|addcss:"form-control input-sm" }}
-                              </div>
-                            </div>
-                          </div>
-                        {% endif %}
-
                     </div>
+                    
+                    {% if partdetails_form %}
+                      <div class="panel panel-default">
+                        <div class="panel-heading">Details</div>
+                        <div class="panel-body">
+                          <table style="border-collapse: separate; border-spacing: 0 10px;">
+                            {% for error in partdetails_form.volume_free_text.errors %}
+                            <tr>
+                              <td colspan="6">
+                              <div class="alert alert-danger">{{ error }}</div>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                      
+                            {% if user.is_superuser or user.is_staff %}
+                              {% for error in partdetails_form.volume_begin.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                              {% for error in partdetails_form.volume_end.errors %}
+                              <tr>
+                                <td colspan="6">
+                                  <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            {% endif %}
+                      
+                            <tr>
+                              <td>
+                                  <label>Volume</label>
+                              </td>
+                              <td>
+                                  {{ partdetails_form.volume_free_text|addcss:"form-control" }}
+                              </td>
+                              {% if user.is_superuser or user.is_staff %}
+                                <td>
+                                  <label>From</label>
+                                </td>
+                                <td>
+                                  {{ partdetails_form.volume_begin|addcss:"form-control input-shaded" }}
+                                </td>
+                                <td>
+                                    <label>to</label>
+                                </td>
+                                <td>
+                                      {{ partdetails_form.volume_end|addcss:"form-control input-shaded" }}
+                                </td>
+                              {% endif %}
+                            </tr>
+                            {% for error in partdetails_form.issue_free_text.errors %}
+                            <tr>
+                              <td colspan="6">
+                              <div class="alert alert-danger">{{ error }}</div>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                      
+                            {% if user.is_superuser or user.is_staff %}
+                              {% for error in partdetails_form.issue_begin.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              <tr>
+                              {% endfor %}
+                              {% for error in partdetails_form.issue_end.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            {% endif %}
+                      
+                            <tr>
+                              <td>
+                                <label>No./Episode</label>
+                              </td>
+                              <td>
+                                {{ partdetails_form.issue_free_text|addcss:"form-control" }}
+                              </td>
+                              {% if user.is_superuser or user.is_staff %}
+                                <td>
+                                  <label>From</label>
+                                </td>
+                                <td>
+                                    {{ partdetails_form.issue_begin|addcss:"form-control input-shaded" }}
+                                </td>
+                                <td>
+                                  <label>to</label>
+                                </td>
+                                <td>
+                                    {{ partdetails_form.issue_end|addcss:"form-control input-shaded" }}
+                                </td>
+                              {% endif %}
+                            </tr>
+                      
+                            {% for error in partdetails_form.pages_free_text.errors %}
+                            <tr>
+                              <td colspan="6">
+                              <div class="alert alert-danger">{{ error }}</div>
+                              </td>
+                            </tr>
+                            {% endfor %}
+                            {% if user.is_superuser or user.is_staff %}
+                              {% for error in partdetails_form.page_begin.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                              {% for error in partdetails_form.page_end.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                            {% endif %}
+                      
+                            <tr>
+                              <td>
+                                <label>Pages</label>
+                              </td>
+                              <td>
+                                {{ partdetails_form.pages_free_text|addcss:"form-control" }}
+                              </td>
+                              {% if user.is_superuser or user.is_staff %}
+                                <td>
+                                  <label>From</label>
+                                </td>
+                                <td>
+                                  {{ partdetails_form.page_begin|addcss:"form-control input-shaded" }}
+                                </td>
+                                <td>
+                                  <label>to</label>
+                                </td>
+                                <td>
+                                  {{ partdetails_form.page_end|addcss:"form-control input-shaded" }}
+                                </td>
+                                {% endif %}
+                            </tr>
+                      
+                            {% for error in form.physical_details.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                              <tr>
+                                <td>
+                                  <label>Additional Item Details</label>
+                                </td>
+                                <td colspan="6">
+                                  {{ form.physical_details|addcss:"form-control oneLine" }}
+                                </td>
+                              </tr>
+                      
+                            {% if user.is_superuser or user.is_staff %}
+                              {% for error in partdetails_form.extent.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                              {% for error in partdetails_form.extent_note.errors %}
+                              <tr>
+                                <td colspan="6">
+                                <div class="alert alert-danger">{{ error }}</div>
+                                </td>
+                              </tr>
+                              {% endfor %}
+                      
+                              <tr>
+                                <td>
+                                  <label>Length</label>
+                                </td>
+                                <td>
+                                  {{ partdetails_form.extent|addcss:"form-control" }}
+                                </td>
+                                <td>
+                                  <label>Length units</label>
+                                </td>
+                                <td>
+                                  {{ partdetails_form.extent_note|addcss:"form-control" }}
+                                </td>
+                              </tr>
+                            {% endif %}
+                          </table>
+                        </div>
+                      </div>
+                    {% endif %}
 
+                    <div class="panel panel-default" style="margin-top: 10px;">
+                      <div class="panel-heading">Links to Other Citation
+                        <a class="text-warning input-xs" href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}" style="float: right;">
+                          <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add citation link</span>
+                        </a>
+                      </div>
+                      <div class="panel-body">
+                        <ul class="list-group" style="margin-bottom: 0;">
+                          {% for ccrel in instance.all_ccrelations.all %}
+                            {% if ccrel.subject.id != instance.id %}
+                              <li class="list-group-item">
+                                {% if not ccrel.public or not ccrel.subject.public %}
+                                  <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                                {% endif %}
+                                <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
+                                <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
+                                <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div class="panel panel-default" style="margin-top: 10px;">
+                      <div class="panel-heading">DOI, ISBN, or URL
+                        <a class="text-warning input-xs" href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" style="float: right;">
+                          <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add link</span>
+                        </a>
+                      </div>
+                      <div class="panel-body">
+                        <ul class="list-group" style="margin-bottom: 0;">
+                          {% for ld in instance.linkeddata_entries.all %}
+                            <li class="list-group-item">
+                              <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                              <span class="label label-success">{{ ld.type_controlled.name }}</span>
+                              {% if ld.universal_resource_name|startswith:'http' %}
+                                <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
+                              {% else %}
+                                <span>{{ ld.universal_resource_name }}</span>
+                              {% endif %}
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    {% block citation_middle_panel %}
+                      {% include "curation/fragment_citation_categories_subjects.html" %}
+                    {% endblock %}
+                  </div>
                 </div>
                 {% endblock %}
             </div>

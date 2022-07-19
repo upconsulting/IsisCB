@@ -21,6 +21,8 @@
                     {{ attribute_form.record_status_value|addcss:"form-control input-sm" }}
                     &nbsp;
                     {{ attribute_form.record_status_explanation|addcss:"form-control input-sm" }}
+                  {% else %}
+                  {{ attribute_form.record_status_value.as_hidden }}
                   {% endif %}
                 </div>
                 <div class="col-md-12">
@@ -63,7 +65,7 @@
                 <div class="alert alert-danger">{{ error }}</div>
                 {% endfor %}
                 <div class="form-group">
-                    <label>{{ attribute_form.type_controlled.label }}</label>
+                    <label>Type</label>
                     <div>
                       {{ attribute_form.type_controlled|addcss:"form-control"}}
                     </div>
@@ -84,18 +86,18 @@
                 {% else %}
                 <div id="value_form_container"></div>
                 {% endif %}
-
-                {% for error in attribute_form.value_freeform.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label>{{ attribute_form.value_freeform.label }}</label>
-                    <div>
-                      {{ attribute_form.value_freeform|addcss:"form-control" }}
-                    </div>
-                </div>
                 
                 {% if user.is_superuser or user.is_staff %}
+                  {% for error in attribute_form.value_freeform.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label>{{ attribute_form.value_freeform.label }}</label>
+                      <div>
+                        {{ attribute_form.value_freeform|addcss:"form-control" }}
+                      </div>
+                  </div>
+
                   {% for error in attribute_form.description.errors %}
                   <div class="alert alert-danger">{{ error }}</div>
                   {% endfor %}
@@ -131,10 +133,8 @@
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         <div class="form-group">
-            <label class="col-md-4">{{ field.label }}</label>
-            <div class="col-md-8">
-              {{ field|addcss:"form-control" }}
-            </div>
+            <label>{{ field.label }}</label>
+            {{ field|addcss:"form-control" }}
         </div>
         {% endfor %}
     </div>

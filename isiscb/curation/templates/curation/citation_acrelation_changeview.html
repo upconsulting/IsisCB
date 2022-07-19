@@ -174,55 +174,69 @@
                 </div>
             </div>
 
-            {% if user.is_superuser or user.is_staff %}
-              {% for error in form.data_display_order.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-4">{{ form.data_display_order.label }}</label>
-                  <div class="col-md-8">
+            {% for error in form.data_display_order.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                {% if user.is_superuser or user.is_staff %}<label class="col-md-4">{{ form.data_display_order.label }}</label>{% endif %}
+                <div class="col-md-8">
+                  {% if user.is_superuser or user.is_staff %}
                     {{ form.data_display_order|addcss:"form-control" }}
-                  </div>
-              </div>
+                  {% else %}
+                    {{ form.data_display_order.as_hidden }}
+                  {% endif %}
+                </div>
+            </div>
 
-              {% for error in form.confidence_measure.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-4">{{ form.confidence_measure.label }}</label>
-                  <div class="col-md-8">
+            {% for error in form.confidence_measure.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                {% if user.is_superuser or user.is_staff %}<label class="col-md-4">{{ form.confidence_measure.label }}</label>{% endif %}
+                <div class="col-md-8">
+                  {% if user.is_superuser or user.is_staff %}
                     {{ form.confidence_measure|addcss:"form-control" }}
-                  </div>
-              </div>
+                  {% else %}
+                    {{ form.confidence_measure.as_hidden }}
+                  {% endif %}
+                </div>
+            </div>
 
 
-              {% for error in form.administrator_notes.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-12">{{ form.administrator_notes.label }}</label>
-                  <div class="col-md-12">
+            {% for error in form.administrator_notes.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                {% if user.is_superuser or user.is_staff %}<label class="col-md-12">{{ form.administrator_notes.label }}</label>{% endif %}
+                <div class="col-md-12">
+                  {% if user.is_superuser or user.is_staff %}
                     {{ form.administrator_notes|addcss:"form-control" }}
-                  </div>
-              </div>
+                  {% else %}
+                    {{ form.administrator_notes.as_hidden }}
+                  {% endif %}
+                </div>
+            </div>
 
-              {% for error in form.record_history.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label class="col-md-12">{{ form.record_history.label }}</label>
-                  <div class="col-md-12">
+            {% for error in form.record_history.errors %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                {% if user.is_superuser or user.is_staff %}<label class="col-md-12">{{ form.record_history.label }}</label>{% endif %}
+                <div class="col-md-12">
+                  {% if user.is_superuser or user.is_staff %}
                     {{ form.record_history|addcss:"form-control" }}
-                  </div>
-              </div>
-              
-              {{ form.authority }}
-              {{ form.citation }}
+                  {% else %}
+                    {{ form.record_history.as_hidden }}
+                  {% endif %}
+                </div>
+            </div>
+            
+            {{ form.authority }}
+            {{ form.citation }}
 
-              <div class="form-group">
-                <label class="col-md-12">Last updated on <span class="date">{{ acrelation.modified_on|get_iso_date }}</span> by {{ acrelation.modified_by }}</label>
-              </div>
-            {% endif %}
+            <div class="form-group">
+              <label class="col-md-12">Last updated on <span class="date">{{ acrelation.modified_on|get_iso_date }}</span> by {{ acrelation.modified_by }}</label>
+            </div>
           </div>
         </div>
 
