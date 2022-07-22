@@ -7,10 +7,14 @@ from django.contrib.admin.views.decorators import staff_member_required, user_pa
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import get_template
 
+from django.core.paginator import Paginator, EmptyPage
+
 from isisdata.models import *
 from curation.forms import *
 
 from curation.contrib.views import check_rules
+
+PAGE_SIZE = 40    # TODO: this should be configurable.
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

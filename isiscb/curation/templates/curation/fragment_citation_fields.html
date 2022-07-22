@@ -240,3 +240,22 @@
     </small>
   </div>
 </div>
+  <div class="row" style="padding-top: 10px;">
+    <div class="col-sm-12 text-left">
+      <table width="100%" style="margin-bottom: 3px;">
+        <tr class="categoryHeader">
+          <td width="100px">
+            <div class="input-xs">Tenants</div>
+          </td>
+
+        </tr>
+      </table>
+    </div>
+    <div class="col-sm-12 form-fields-indented" style="padding-left:20px;">
+      <small>
+        {% for t in instance.tenants.all %}
+        {{t}}
+        {% endfor %}
+      </small>
+    </div>
+</div>

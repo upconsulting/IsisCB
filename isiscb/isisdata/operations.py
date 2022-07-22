@@ -41,10 +41,17 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
             query |= Q(belongs_to__isnull=True)
         queryset = queryset.exclude(query)
 
+
     # If ``include`` is empty, this will have the effect of excluding all
     #  records, unless ``include_isnull`` is True and the record has no dataset.
     query = Q(belongs_to__in=include)
     if include_isnull:
         query |= Q(belongs_to__isnull=True)
+
+    ## if a user has a tenant role, then they should only see citations from the assigned tenants
+    tenant_ids = list(roles.filter(accessrule__tenantrule__isnull=False).values_list('accessrule__tenantrule__tenant__id', flat=True))
+    if tenant_ids:
+        query &= Q(tenants__id__in=tenant_ids)
     queryset = queryset.filter(query)
+
     return queryset

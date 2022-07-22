@@ -130,9 +130,16 @@ def create_citation(request):
         partdetails_form = PartDetailsForm(request.user, citation_id = None, data=request.POST)
 
         if form.is_valid() and partdetails_form.is_valid():
+            # FIXME: user needs to select tenant
+            roles = request.user.isiscbrole_set.all()
+            for role in roles:
+                tenant_rules = role.tenant_rules.all()
+                if tenant_rules:
+                    form.cleaned_data['tenants'] = [tenant_rules.first().tenant]
             form.cleaned_data['public'] = False
             #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
             citation = form.save()
+            print(citation.tenants)
             citation.record_status_value = CuratedMixin.INACTIVE
             citation.save()
 

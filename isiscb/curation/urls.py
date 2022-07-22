@@ -8,7 +8,7 @@ from curation.bulk_views import citation_views
 from curation.authority_views import relation_views as authority_relation_views
 from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
-from curation.citation_views import user_views
+from curation.other_views import user_views
 import rules
 from .rules import *
 from django.urls import re_path
@@ -30,13 +30,14 @@ rules.add_rule('is_user_superuser', is_user_superuser)
 rules.add_rule('can_view_user_module', can_view_user_module)
 rules.add_rule('can_update_user_module', can_update_user_module)
 
-can_access_and_view = is_accessible_by_dataset & can_view_record
+can_access_and_view = is_accessible_by_dataset & can_view_record & is_accessible_by_tenant
 rules.add_rule('can_access_and_view', can_access_and_view)
 
-can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record
+can_access_view_edit = is_accessible_by_dataset & can_view_record & can_edit_record & is_accessible_by_tenant
 rules.add_rule('can_access_view_edit', can_access_view_edit)
 
 rules.add_rule('has_zotero_access', has_zotero_access)
+rules.add_rule('is_accessible_by_tenant', is_accessible_by_tenant)
 
 app_name = "curation"
 urlpatterns = [

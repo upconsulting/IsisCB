@@ -18,7 +18,6 @@ def is_accessible_by_dataset(user, obj):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
-
     roles = user.isiscbrole_set.all()
     dataset = getattr(obj, 'belongs_to', None)
     if dataset:
@@ -27,6 +26,26 @@ def is_accessible_by_dataset(user, obj):
         roles = roles.filter((Q(accessrule__datasetrule__dataset__isnull=True)\
                               | Q(accessrule__datasetrule__dataset=''))\
                              & Q(accessrule__datasetrule__isnull=False))
+    return roles.count() > 0
+
+@predicate
+def is_accessible_by_tenant(user, obj):
+    """
+    Checks if the user has a role that has a dataset rule that applies to
+    ``obj``.
+    """
+    # if user is superuser they can always do everything
+    if user.is_superuser:
+        return True
+
+    roles = user.isiscbrole_set.all()
+    tenants = getattr(obj, 'tenants', None)
+    if tenants:
+        roles = roles.filter(accessrule__tenantrule__tenant__in=[t.id for t in tenants.all()])
+    else:
+        roles = roles.filter((Q(accessrule__tenantrule__tenant__isnull=True)\
+                              | Q(accessrule__tenantrule__tenant=''))\
+                             & Q(accessrule__tenantrule__isnull=False))
     return roles.count() > 0
 
 
@@ -169,18 +188,26 @@ def is_action_allowed(user, obj, action):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
-
     roles = user.isiscbrole_set.all()
     dataset = getattr(obj, 'belongs_to', None)
 
+    print("is_action_allowed")
+    relevant_roles = roles
+    query = (Q(accessrule__datasetrule__dataset__isnull=True) \
+         | Q(accessrule__datasetrule__dataset='')) \
+         & Q(accessrule__datasetrule__isnull=False)
     if dataset:
-        relevant_roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
-    else:
-        relevant_roles = roles.filter(
-            (Q(accessrule__datasetrule__dataset__isnull=True)
-             | Q(accessrule__datasetrule__dataset=''))
-            & Q(accessrule__datasetrule__isnull=False)
-        )
+        query = Q(accessrule__datasetrule__dataset=dataset.id)
+
+    tenants = getattr(obj, 'tenants', None)
+    print(tenants)
+    for t in tenants.all():
+        print(t.name)
+    if tenants:
+        query = query | Q(accessrule__tenantrule__tenant__in=[t.id for t in tenants.all()])
+
+    relevant_roles = roles.filter(query)
+    print(relevant_roles)
 
     grant_roles = roles.filter(pk__in=relevant_roles.values_list('id', flat=True))
     if grant_roles.count() > 0:

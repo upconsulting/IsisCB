@@ -12,6 +12,7 @@ from isisdata import export_authority
 from curation import actions
 
 import rules
+import itertools
 
 
 class CCRelationForm(forms.ModelForm):
@@ -346,6 +347,9 @@ class CitationForm(forms.ModelForm):
     subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
     stub_record_status = forms.BooleanField(label='Stub', widget=StubCheckboxInput(), required=False)
 
+    tenants = forms.ChoiceField(label='Tenant', required=False)
+
+
     class Meta(object):
         model = Citation
         fields = [
@@ -353,7 +357,7 @@ class CitationForm(forms.ModelForm):
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to', 'administrator_notes', 'record_history', 'subtype',
-              'complete_citation', 'stub_record_status'
+              'complete_citation', 'stub_record_status', 'tenants'
         ]
         labels = {
             'belongs_to': 'Dataset',
@@ -368,6 +372,11 @@ class CitationForm(forms.ModelForm):
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+
+            tenant_roles = user.isiscbrole_set.filter(Q(accessrule__tenantrule__tenant__isnull=False))
+            tenants_rules = [t.tenant_rules for t in tenant_roles]
+            tenants = [t.tenant for t in itertools.chain.from_iterable(tenants_rules)]
+            self.fields['tenants'].initial = tenants
 
         # disable fields user doesn't have access to
         if self.instance.pk:
