@@ -347,7 +347,7 @@ class CitationForm(forms.ModelForm):
     subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
     stub_record_status = forms.BooleanField(label='Stub', widget=StubCheckboxInput(), required=False)
 
-    tenants = forms.ChoiceField(label='Tenant', required=False)
+    tenants = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
 
 
     class Meta(object):
@@ -369,14 +369,14 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
+        tenant_roles = user.isiscbrole_set.filter(Q(accessrule__tenantrule__tenant__isnull=False))
+        tenants_rules = [t.tenant_rules for t in tenant_roles]
+        tenants = [t.tenant.id for t in itertools.chain.from_iterable(tenants_rules)]
+        self.fields['tenants'].queryset = Tenant.objects.filter(id__in=tenants)
+
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
-
-            tenant_roles = user.isiscbrole_set.filter(Q(accessrule__tenantrule__tenant__isnull=False))
-            tenants_rules = [t.tenant_rules for t in tenant_roles]
-            tenants = [t.tenant for t in itertools.chain.from_iterable(tenants_rules)]
-            self.fields['tenants'].initial = tenants
 
         # disable fields user doesn't have access to
         if self.instance.pk:
@@ -412,6 +412,10 @@ class CitationForm(forms.ModelForm):
             self.cleaned_data['stub_record_status'] = Citation.STUB_RECORD
         else:
             self.cleaned_data['stub_record_status'] = None
+
+        if self.cleaned_data['tenants']:
+            self.cleaned_data['tenants'] = [self.cleaned_data['tenants']]
+
 
     def _get_validation_exclusions(self):
         exclude = super(CitationForm, self)._get_validation_exclusions()
