@@ -351,7 +351,7 @@ class CitationForm(forms.ModelForm):
     class Meta(object):
         model = Citation
         fields = [
-            'title', 'description', 'edition_details',
+            'type_controlled', 'title', 'description', 'edition_details',
             'physical_details', 'abstract', 'additional_titles',
             'book_series', 'record_status_value', 'record_status_explanation',
             'belongs_to', 'administrator_notes', 'record_history', 'subtype',

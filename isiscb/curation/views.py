@@ -105,7 +105,6 @@ def datasets(request):
     return render(request, template, context)
 
 
-# @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @login_required()
 @check_rules('can_create_record')
 def create_citation(request):
@@ -119,11 +118,7 @@ def create_citation(request):
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
-        'regular_user': 'false'
     }
-
-    if request.user.is_authenticated and not request.user.is_staff:
-        context.update({'regular_user': True})
 
     template = 'curation/citation_create_view.html'
 
@@ -377,6 +372,9 @@ def create_ccrelation_for_citation(request, citation_id):
     current_index = request.GET.get('current', request.POST.get('current'))
     is_object = request.GET.get('is_object', 'false')
 
+    print('aaaaa')
+    print(is_object)
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
@@ -386,11 +384,12 @@ def create_ccrelation_for_citation(request, citation_id):
     }
     if request.method == 'GET':
         ccrelation = CCRelation()
+        initial = {}
         # initial['data_display_order'] = 1.0
-        if citation.type_controlled == Citation.CHAPTER or is_object == 'true':
+        if citation.type_controlled == Citation.BOOK or is_object == 'true':
             ccrelation.object = citation
-            ccrelation.type_controlled = CCRelation.INCLUDES_CHAPTER
-            initial['type_controlled'] = CCRelation.INCLUDES_CHAPTER
+            ccrelation.type_controlled = CCRelation.REVIEWED_BY
+            initial['type_controlled'] = CCRelation.REVIEWED_BY
             initial['object'] = citation.id
         else:
             initial['subject'] = citation.id
@@ -404,7 +403,7 @@ def create_ccrelation_for_citation(request, citation_id):
         form = CCRelationForm(request.POST, prefix='ccrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?' if request.user.is_staff or request.user.is_superuser else reverse('curation:guest_curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -520,7 +519,7 @@ def acrelation_for_citation(request, citation_id, acrelation_id=None):
         if form.is_valid():
             form.instance.modified_by = request.user
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?' if request.user.is_superuser or request.user.is_staff else reverse('curation:guest_curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -561,7 +560,7 @@ def tracking_for_citation(request, citation_id):
         tracking.save()
         citation.save()
 
-    target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking'
+    target = reverse('curation:curate_citation', args=(citation_id,)) + '?tab=tracking' if request.user.is_staff or request.user.is_superuser else reverse('curation:guest_curate_citation', args=(citation_id,)) + '?'
     if search_key and current_index:
         target += '&search=%s&current=%s' % (search_key, current_index)
     return HttpResponseRedirect(target)
@@ -896,7 +895,7 @@ def linkeddata_for_citation(request, citation_id, linkeddata_id=None):
             linkeddata_form.instance.subject = citation
             linkeddata_form.save()
 
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?' if request.user.is_staff or request.user.is_superuser else reverse('curation:guest_curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -1119,8 +1118,8 @@ def get_attribute_type_help_text(request, attribute_type_id):
     safe_text = bleach.clean(attribute_type.attribute_help_text, strip=True)
     return JsonResponse({'help_text': safe_text})
 
-@login_required()
-@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def citation(request, citation_id):
     context = {
         'curation_section': 'datasets',
@@ -1203,6 +1202,98 @@ def citation(request, citation_id):
                 target_index = current_index
 
             target = reverse('curation:curate_citation', args=(target_object,))
+            if search and target_index:
+                target += '?search=%s&current=%s' % (search, target_index)
+            return HttpResponseRedirect(target)
+            # return HttpResponseRedirect()
+
+        context.update({
+            'form': form,
+            'instance': citation,
+            'partdetails_form': partdetails_form,
+        })
+
+    return render(request, template, context)
+
+@login_required()
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
+def citation_guest(request, citation_id):
+    context = {
+        'type_choices': Citation.TYPE_CHOICES,
+        'publisher_distributor_types': ACRelation.TYPE_CATEGORY_PUB_DISTR,
+        'personal_responsibility_types': ACRelation.PERSONAL_RESPONS_TYPES,
+        'date_attribute_types': [DateTimeValue, ISODateRangeValue, DateRangeValue, ISODateValue, DateValue],
+        'ccrel_contained_relations': [CCRelation.INCLUDES_CHAPTER, CCRelation.INCLUDES_SERIES_ARTICLE, CCRelation.INCLUDES_CITATION_OBJECT, CCRelation.REVIEWED_BY, CCRelation.REVIEW_OF],
+        'ccrel_related_citations': [CCRelation.ASSOCIATED_WITH],
+        'responsibility_mapping': ACRelation.RESPONSIBILITY_MAPPING,
+        'acrel_type_choices': dict(ACRelation.TYPE_CHOICES),
+        'host_mapping': ACRelation.HOST_MAPPING,
+        'publication_date_attribute_name': settings.TIMELINE_PUBLICATION_DATE_ATTRIBUTE,
+        'accessed_date_attribute_name': settings.ACCESSED_ATTRIBUTE_NAME,
+        'doi_linked_date_name': settings.DOI_LINKED_DATA_NAME,
+        'isbn_linked_date_name': settings.ISBN_LINKED_DATA_NAME,
+    }
+
+    start = datetime.datetime.now()
+
+    citation = get_object_or_404(Citation, pk=citation_id)
+
+    _build_result_set_links(request, context)
+
+    # we now use only one template for all types IEXP-15
+    template = 'curation/citation_guest_change_view.html'
+
+    partdetails_form = None
+    context.update({'tab': request.GET.get('tab', None)})
+    if request.method == 'GET':
+        form = CitationForm(user=request.user, instance=citation)
+
+        tracking_workflow = TrackingWorkflow(citation)
+        context.update({
+            'form': form,
+            'instance': citation,
+        })
+
+        part_details = getattr(citation, 'part_details', None)
+        if not part_details:
+            part_details = PartDetails.objects.create()
+            citation.part_details = part_details
+            citation.save()
+
+        partdetails_form = PartDetailsForm(request.user, citation_id,
+                                           instance=part_details,
+                                           prefix='partdetails')
+        context.update({
+            'partdetails_form': partdetails_form,
+        })
+    elif request.method == 'POST':
+        form = CitationForm(request.user, request.POST, instance=citation)
+        
+        if hasattr(citation, 'part_details'):
+            partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
+        if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            form.save()
+
+            if partdetails_form:
+                partdetails_form.save()
+
+            search = request.POST.get('search')
+            current_index = request.POST.get('current')
+
+            forward_type = request.POST.get('forward_type', None)
+            if forward_type == "list":
+                return HttpResponseRedirect(reverse('curation:contributions') + "?search=%s&page=%s" % (search, str(page)))
+            if forward_type == "next":
+                target_object = context.get('next', citation)
+                target_index = context.get('next_index', current_index)
+            elif forward_type == "previous":
+                target_object = context.get('previous', citation)
+                target_index = context.get('previous_index', current_index)
+            else:
+                target_object = citation.id
+                target_index = current_index
+
+            target = reverse('curation:guest_curate_citation', args=(target_object,))
             if search and target_index:
                 target += '?search=%s&current=%s' % (search, target_index)
             return HttpResponseRedirect(target)
@@ -1320,7 +1411,7 @@ def change_record_type(request, citation_id):
         'curation_subsection': 'citations',
     }
 
-    target = reverse('curation:curate_citation', args=(citation_id,))
+    target = reverse('curation:curate_citation', args=(citation_id,)) if request.user.is_staff or request.user.is_superuser else reverse('curation:guest_curate_citation', args=(citation_id,))
     if request.method == 'POST':
         new_type = request.POST.get('type_controlled', None)
         if dict(Citation.TYPE_CHOICES).get(new_type, None):
@@ -1574,7 +1665,7 @@ def _citations_get_filter_params(request):
     return filter_params, all_params
 
 
-@login_required()
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def citations(request):
     template = 'curation/citation_list_view.html'
 
@@ -1635,6 +1726,100 @@ def citations(request):
               'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
     qs = queryset.select_related('part_details').values(*fields)
+    filtered_objects = CitationFilter(filter_params, queryset=qs)
+
+    paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
+    currentPage = all_params.get('page', 1)
+    if not currentPage:
+        currentPage = 1
+    currentPage = int(currentPage)
+    page = paginator.page(currentPage)
+    paginated_objects = list(page)
+
+    if filtered_objects.form.is_valid():
+        request_params = filtered_objects.form.cleaned_data
+        all_params.update(request_params)
+
+        user_session['citation_filter_params'] = filter_params
+        user_session['citation_request_params'] = all_params
+        user_session['citation_page'] = int(currentPage)
+
+    result_count = filtered_objects.qs.count()
+    user_session['%s_citation_search_params' % str(search_key)] = filter_params
+    user_session['%s_citation_search_count' % str(search_key)] = result_count
+    user_session['%s_citation_page_%i' % (str(search_key), currentPage)] = [o['id'] for o in paginated_objects]
+    user_session['%s_citation_current_prior_%i' % (str(search_key), currentPage)] = paginator.page(currentPage - 1)[-1]['id'] if currentPage > 1 else None
+    try:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = paginator.page(currentPage + 1)[0]['id']
+    except EmptyPage:
+        user_session['%s_citation_current_antecedent_%i' % (str(search_key), currentPage)] = None
+
+    context.update({
+        'objects': filtered_objects,
+        # 'filters_active': filters_active,
+        'result_count': result_count,
+        'filter_list': paginated_objects,
+        'current_page': currentPage,
+        'current_offset': (currentPage - 1) * PAGE_SIZE,
+        'page': page,
+        'paginator': paginator,
+    })
+    return render(request, template, context)
+
+@login_required()
+def contributions(request):
+
+    template = 'curation/contributions_list_view.html'
+
+    user_session = request.session
+    # We need to be able to amend the filter parameters, so we create a new
+    #  mutable QueryDict from the POST payload.
+    #  - ``filter_params`` are the parameters that will be passed to the
+    #     CitationFilter.
+    #  - ``all_params`` includes the parameters in ``filter_params`` plus any
+    #     additional parameters not used by the CitationFilter (e.g. page).
+    filter_params, all_params = _citations_get_filter_params(request)
+
+    # We use the filter parameters in this form to specify the queryset for
+    #  bulk actions.
+    if isinstance(filter_params, QueryDict):
+        encoded_params = filter_params.urlencode().encode('utf-8')
+    else:
+        _params = QueryDict(mutable=True)
+        for k, v in [k_v for k_v in list(filter_params.items()) if k_v[1] is not None]:
+            _params[k] = v
+        encoded_params = _params.urlencode().encode('utf-8')
+
+    # In order to isolate search result progressions, we generate a unique key
+    #  for this particular set of search results. The search key refers to the
+    #  filter and sort parameters, but _not_ the page number.
+    search_key = hashlib.md5(encoded_params).hexdigest()
+
+    context = {
+        'curation_section': 'datasets',
+        'curation_subsection': 'citations',
+        'filter_params': urllibparse.urlencode(filter_params, quote_via=urllibparse.quote_plus),
+        'search_key': search_key,
+        'show_filters': all_params['show_filters'] if 'show_filters' in all_params else 'False',
+        'record_status_redirect': CuratedMixin.REDIRECT,
+        'ccrelation_choices': [(choice, value) for (choice, value) in CCRelation.TYPE_CHOICES if choice is not CCRelation.REVIEW_OF],
+    }
+
+    queryset = operations.filter_queryset(request.user, Citation.objects.all())
+
+    fields = ('record_status_value', 'id', 'type_controlled', 'public',
+              'tracking_state', 'modified_on', 'created_native',
+              'publication_date', 'title_for_display', 'part_details_id',
+              'part_details__page_begin', 'part_details__page_end',
+              'part_details__pages_free_text', 'part_details__volume_free_text',
+              'part_details__issue_free_text', 'created_on_fm',
+              'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
+              'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
+
+    qs = queryset.select_related('part_details').values(*fields)
+
+    filter_params['created_by_native'] = str(request.user.id)
+
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)

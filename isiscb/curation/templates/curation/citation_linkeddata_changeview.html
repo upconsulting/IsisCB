@@ -17,9 +17,11 @@
                   <strong class="text-warning">
                     {% if linkeddata_form.instance.id %}{{ linkeddata_form.instance.id }}{% else %}New{% endif %}</strong> | <strong>Linked Data</strong>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  {{ linkeddata_form.record_status_value|addcss:"form-control input-sm" }}
-                  &nbsp;
-                  {{ linkeddata_form.record_status_explanation|addcss:"form-control input-sm" }}
+                  {% if user.is_staff or user.is_superuser %}
+                    {{ linkeddata_form.record_status_value|addcss:"form-control input-sm" }}
+                    &nbsp;
+                    {{ linkeddata_form.record_status_explanation|addcss:"form-control input-sm" }}
+                  {% endif %}
                 </div>
                 <div class="col-md-12">
                     {% for error in linkeddata_form.record_status_value.errors %}
@@ -38,7 +40,7 @@
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+                <a {% if user.is_staff or user.is_superuser %}href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% else %}href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% endif %} class="btn btn-sm btn-default">Cancel</a>
                 <input type="submit" value="Save" class="btn btn-sm btn-success" />
                 <a href="#"
                   class="btn btn-danger btn-sm delete-linkeddata"
@@ -100,28 +102,28 @@
                       <p class="text-muted text-small">{{ linkeddata_form.url.help_text }}</p>
                     </div>
                 </div>
+                {% if user.is_staff or user.is_superuser %}
+                  {% for error in linkeddata_form.administrator_notes.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label class="col-md-4">{{ linkeddata_form.administrator_notes.label }}</label>
+                      <div class="col-md-8">
+                        {{ linkeddata_form.administrator_notes|addcss:"form-control" }}
+                        <p class="text-muted text-small">{{ linkeddata_form.administrator_notes.help_text }}</p>
+                      </div>
+                  </div>
 
-                {% for error in linkeddata_form.administrator_notes.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.administrator_notes.label }}</label>
-                    <div class="col-md-8">
-                      {{ linkeddata_form.administrator_notes|addcss:"form-control" }}
-                      <p class="text-muted text-small">{{ linkeddata_form.administrator_notes.help_text }}</p>
-                    </div>
-                </div>
-
-                {% for error in linkeddata_form.record_history.errors %}
-                <div class="alert alert-danger">{{ error }}</div>
-                {% endfor %}
-                <div class="form-group">
-                    <label class="col-md-4">{{ linkeddata_form.record_history.label }}</label>
-                    <div class="col-md-8">
-                      {{ linkeddata_form.record_history|addcss:"form-control" }}
-                    </div>
-                </div>
-
+                  {% for error in linkeddata_form.record_history.errors %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endfor %}
+                  <div class="form-group">
+                      <label class="col-md-4">{{ linkeddata_form.record_history.label }}</label>
+                      <div class="col-md-8">
+                        {{ linkeddata_form.record_history|addcss:"form-control" }}
+                      </div>
+                  </div>
+                {% endif %}
             </div>
 
             <div class="form-group">

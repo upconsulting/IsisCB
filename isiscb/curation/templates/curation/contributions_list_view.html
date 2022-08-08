@@ -60,6 +60,13 @@ function toggleLinkRecordsBtn() {
 }
 </script>
 
+<style>
+    .notpublic {
+        background-color: #fff;
+        border-left: 5px solid #f0ad4e;
+      }
+</style>
+
 <div id="msgBoxError" class="alert alert-danger" role="alert" style="display: none;">
   <button type="button" class="close" id="closeErrorBoxBtn" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   <div id="msgBoxErrorText"></div>
@@ -86,66 +93,25 @@ function toggleLinkRecordsBtn() {
 <form action="{% url "curation:citation-bulk-action" %}" method="POST" id="bulk-form" target="_blank">
     {% csrf_token %}
     &nbsp;&nbsp;
-    <a class="btn btn-primary btn-xs" href="{% url 'curation:create_citation' %}">Create new citation record</a>
-
-    <input class="btn btn-success btn-xs" id="bulk_change_submit" type="submit" value="Bulk change" />
-    <a class="btn btn-primary btn-xs" href="{% url 'curation:citation-bulk-select' %}">
-      <i class="fa fa-check-circle" aria-hidden="true"></i> Bulk select
-    </a>
-
-    <a class="btn btn-primary btn-xs" href="#" id="export">
-        <span class="glyphicon glyphicon-cloud-download"></span>
-        Export
-    </a>
-    <span class="dropdown">
-        <button class="btn btn-primary dropdown-toggle btn-xs" type="button" data-toggle="dropdown">
-            <span class="glyphicon glyphicon-folder-open"></span>
-            Collections
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li><a class="" href="#" id="collection-create"><span class="glyphicon glyphicon-certificate"></span> Create new collection</a></li>
-            <li><a class="" href="#" id="collection-add"><span class="glyphicon glyphicon-plus"></span> Add to existing collection</a></li>
-            <li><a class="" href="{% url "curation:collections" %}" id="collections"><span class="glyphicon glyphicon-th-list"></span> List collections</a></li>
-        </ul>
-    </span>
-    <a class="btn btn-primary btn-xs" disabled href="#" id="link_records_btn">
-      <i class="fa fa-link" aria-hidden="true"></i>
-        Link Records
-    </a>
+    <a class="btn btn-success" href="{% url 'curation:create_citation' %}"><i class="fas fa-plus"></i> Create new citation record</a>
 
     <input type="hidden" value="{{ filter_params }}" name="filters" />
-    <span class="pull-right" style="margin-right: 10px;">Count of total records: {{ result_count }}</span>
+    <span class="pull-right" style="margin-right: 10px;">Results Count: {{ result_count }}</span>
     <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
-                <th style="width:20px;">
-                    <input type="checkbox" name="select_all" id="select_all" />
-                    <script>
-                    $('#select_all').change(function(e) {
-                        if ($(this).prop('checked')) {
-                            $('.queryset-checkbox').prop('checked', true);
-                        } else {
-                            $('.queryset-checkbox').prop('checked', false);
-                        }
-                    });
-                    </script>
-                </th>
-                <th width="2%"><i class="fa fa-thumbs-o-up" aria-hidden="true" title="Status"></i></th>
+                <th width="5%">Status</th>
                 <th width="5%">ID</th>
                 <th width="2%"><i class="fa fa-file-text-o" aria-hidden="true" title="Type"></i></th>
                 <th width="15%" style="min-width:300px">Title  <span style="cursor: pointer;" id="sort_title"></span></th>
                 <th>Author/Editor(s)</th>
                 <th width="5%">Publi. <span style="cursor: pointer;" id="sort_published"></span></th>
-                <th width="10%">Periodical</th>
+                <th width="15%">Periodical</th>
                 <th width="3%">Vol.</th>
                 <th width="3%">Nr.</th>
                 <th width="5%">Pages</th>
-                <th width="2%"><i class="fa fa-check-square-o" aria-hidden="true" title="Tracking"></i></th>
-                <th width="9%">Modified</th>
-                <th width="5%">Mod. by</th>
-                <th width="8%">Created</th>
-                <th width="5%">Created by</th>
+                <th width="7%">Modified</th>
+                <th width="7%">Created</th>
             </tr>
         </thead>
         <tbody>
@@ -157,16 +123,10 @@ function toggleLinkRecordsBtn() {
             {% with object.attributes as attributes %}
             <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %} {% if object.stub_record_status == 'SR'%}stubrecord{%endif%}">
                 <td>
-                    <input type="checkbox" name="queryset" class="queryset-checkbox" value="{{object.id}}" data-citation-type="{{object.type_controlled}}"/>
+                  {% if object.tracking_state == 'None' %}<span class="label label-default label-xs">Draft</span>{% elif object.tracking_state == 'FU' %}<span class="label label-warning label-xs">Under Review</span>{% else %}<span class="label label-success label-xs">Published</span>{% endif %}
                 </td>
                 <td>
-                  {% if object.record_status_value %}<span title="{{object.record_status_value|get_status_label}}">{{ object.record_status_value|get_status_label|cut_characters:2 }}</span>{% endif %}
-                </td>
-                <td>
-                    <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
-                    {% if not object.public %}
-                    <i class="fa fa-eye-slash" aria-hidden="true" title="This citation is not public."></i>
-                    {% endif %}
+                    <a href="{% url "curation:guest_curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
 
                     {% if not object.id|are_related_authorities_public or not object.id|are_related_citations_public or not object.id|are_attributes_public %}
                     <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
@@ -181,7 +141,7 @@ function toggleLinkRecordsBtn() {
                     <i style="color: #d0254c" class="fa fa-flag" aria-hidden="true" title="This record is a stub record."></i>
                     {% endif %}
                 </td>
-                <td><span title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}</span></td>
+                <td><span class="label label-xs label-primary" title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display }}</span></td>
                 <td id="title-{{object.id}}">{{ object.title_for_display|safe }}</td>
                 <td id="authors-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}&tab=acrelations">
@@ -195,7 +155,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td id="periodical-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?tab=acrelations">
-                        {{ object.id|get_citation_periodical|truncatechars:25 }}
+                        {{ object.id|get_citation_periodical|truncatechars:31 }}
                     </a>
                 </td>
                 <td>
@@ -208,19 +168,11 @@ function toggleLinkRecordsBtn() {
                     {{ object|get_page_numbers }}
                 </td>
                 <td>
-                    {% if object.tracking_state %}<span title="{{object.tracking_state|get_tracking_state_display}}">{{ object.tracking_state|get_tracking_state_display|cut_characters:3 }}</span>{% endif %}
-                </td>
-                <td>
                     {% if object.modified_on %}
                       <span class="list_date">{{ object.modified_on|date:"c" }}</span>
                     {% else %}
                       <span class="list_date">{{ object.modified_on_fm|date:"c" }}</span>
                     {% endif %}
-                </td>
-                <td>
-                  {% if object.modified_by %}
-                    {{ object.modified_by__first_name }} {{ object.modified_by__last_name }}
-                  {% endif %}
                 </td>
                 <td>
                     {% if object.created_native %}
@@ -230,11 +182,6 @@ function toggleLinkRecordsBtn() {
                         <span class="list_date">{{ object.created_on_fm|date:"c" }}</span>
                       {% endif %}
                     {% endif %}
-                </td>
-                <td>
-                  {% if object.created_by_native %}
-                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
-                  {% endif %}
                 </td>
             </tr>
             {% endwith %}
@@ -539,256 +486,80 @@ function toggleLinkRecordsBtn() {
 {% endblock %}
 
 {% block filter_form %}
-<form id="filter_form" action="{% url 'curation:citation_list' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
+<form id="filter_form" action="{% url 'curation:contributions' %}" class="form-horizontal clearfix" method="GET" style="margin-bottom: 0px; margin-top: 10px;">
     <div>
-        <div class="col-sm-4">
-            {% for error in objects.form.multi_field_filter.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <label class="col-lg-2 control-label">Combined</label>
-                <div class="col-lg-10">
-                  {{ objects.form.multi_field_filter|addcss:"form-control;Title, Author, Description, Abstract, Subject, Category" }}
-                </div>
-            </div>
+      <div class="col-sm-12">
 
-            {% for error in objects.form.title.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <label class="col-lg-2 control-label">{{ objects.form.title.label }}</label>
-                <div class="col-lg-10">
-                  {{ objects.form.title|addcss:"form-control;Title" }}
-                </div>
-            </div>
-
-
-            {% for error in objects.form.author_or_editor.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <label class="col-lg-2 control-label">Au./Ed.</label>
-                <div class="col-lg-10">
-                  {{ objects.form.author_or_editor|addcss:"form-control;Author/Ed." }}
-                </div>
-            </div>
-
-            {% for error in objects.form.periodical.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-               <label class="col-lg-2 control-label">Periodical</label>
-                <div class="col-lg-10">
-                  {{ objects.form.periodical|addcss:"form-control;Periodical" }}
-                </div>
-            </div>
-
-            {% for error in objects.form.publisher.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable">
-                <label class="col-lg-2 control-label">Publisher</label>
-                <div class="col-lg-10">
-                  {{ objects.form.publisher|addcss:"form-control;Publisher" }}
-                </div>
-            </div>
-
-            {% for error in objects.form.publication_date_from.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            {% for error in objects.form.publication_date_before.errors %}
-            <div class="alert alert-warning">{{ error }}</div>
-            {% endfor %}
-            <div class="form-group form-group-xs clearable has-feedback">
-                <label class="col-lg-2 control-label">Pub date</label>
-                <div class="col-lg-5" style="padding-right:2px">
-                  {{ objects.form.publication_date_from|add_popover:"form-control date-input;after" }}
-                </div>
-                <div class="col-lg-5" style="padding-left:2px">
-                  {{ objects.form.publication_date_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
-                  <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-3">
-          {% for error in objects.form.id.errors %}
+          {% for error in objects.form.title.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="padding-left:5px;">Id</label>
+              <label class="col-lg-2 control-label">{{ objects.form.title.label }}</label>
               <div class="col-lg-10">
-                {{ objects.form.id|addcss:"form-control;Id" }}
+                {{ objects.form.title|addcss:"form-control;Title" }}
               </div>
           </div>
 
-          {% for error in objects.form.complete_citation.errors %}
+
+          {% for error in objects.form.author_or_editor.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="padding-left:5px;">Stub</label>
+              <label class="col-lg-2 control-label">Au./Ed.</label>
               <div class="col-lg-10">
-                {{ objects.form.complete_citation|addcss:"form-control;Complete Citation/Stub text" }}
+                {{ objects.form.author_or_editor|addcss:"form-control;Author/Ed." }}
               </div>
           </div>
 
-          {% for error in objects.form.abstract.errors %}
+          {% for error in objects.form.periodical.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="padding-left:5px;">Abstract</label>
+              <label class="col-lg-2 control-label">Periodical</label>
               <div class="col-lg-10">
-                {{ objects.form.abstract|addcss:"form-control;Abstract" }}
+                {{ objects.form.periodical|addcss:"form-control;Periodical" }}
               </div>
           </div>
 
-          {% for error in objects.form.description.errors %}
+          {% for error in objects.form.publisher.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="padding-left:5px;">Descript</label>
+              <label class="col-lg-2 control-label">Publisher</label>
               <div class="col-lg-10">
-                {{ objects.form.description|addcss:"form-control;Description" }}
+                {{ objects.form.publisher|addcss:"form-control;Publisher" }}
               </div>
           </div>
 
-          {% for error in objects.form.subject.errors %}
+          {% for error in objects.form.publication_date_from.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="padding-left:5px;">Subject</label>
-              <div class="col-lg-10">
-                {{ objects.form.subject|addcss:"form-control;Subject" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.publication_date_contains.errors %}
+          {% for error in objects.form.publication_date_before.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-4 control-label" style="padding-left:5px; margin-right:0px;">Pub. date free</label>
-              <div class="col-lg-8" style="padding-left: 0px">
-                {{ objects.form.publication_date_contains|add_popover:"form-control;Freetext publication date contains;Enter 'null' to search for an empty freetext publication date.;bottom" }}
-                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info" style="margin-right: 10px"></a>
+          <div class="form-group form-group-xs clearable has-feedback">
+              <label class="col-lg-2 control-label">Pub date</label>
+              <div class="col-lg-5" style="padding-right:2px">
+                {{ objects.form.publication_date_from|add_popover:"form-control date-input;after" }}
+              </div>
+              <div class="col-lg-5" style="padding-left:2px">
+                {{ objects.form.publication_date_to|add_popover:"form-control date-input;before;All dates in format 2017-05-31;bottom" }}
+                <a href="" class="glyphicon glyphicon-question-sign form-control-feedback popover_info"></a>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-xs-12">
+
               </div>
           </div>
 
-
-        </div>
-
-        <div class="col-sm-2">
           {% for error in objects.form.type_controlled.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
           <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Type</label>
+              <label class="col-lg-2 control-label">Type</label>
               <div class="col-lg-10">
                 {{ objects.form.type_controlled|addcss:"form-control;Rec. Type" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.record_status.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Status</label>
-              <div class="col-lg-10">
-                {{ objects.form.record_status|addcss:"form-control;Rec. Status" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.tracking_state.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Tracking</label>
-              <div class="col-lg-10">
-                {{ objects.form.tracking_state|addcss:"form-control" }}
-              </div>
-          </div>
-
-          {% for error in objects.form.modified_by.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modifier</label>
-              <div class="col-lg-10">
-                {{ objects.form.modified_by }}
-                <input id="modifier_input" placeholder="Modified by: type at least 3 characters to search" type="text" value="{{objects.modifier_name}}" class="form-control">
-              </div>
-          </div>
-
-          {% for error in objects.form.modified_on_from.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          {% for error in objects.form.modified_on_to.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label" style="margin-left:-10px; margin-right:10px;">Modified</label>
-              <div class="col-lg-5" style="padding-right:2px">
-                {{ objects.form.modified_on_from|add_popover:"form-control date-input;after" }}
-              </div>
-              <div class="col-lg-5" style="padding-left:2px">
-                {{ objects.form.modified_on_to|add_popover:"form-control date-input;before" }}
-              </div>
-          </div>
-
-          <div class="pull-left">
-            <div class="btn-group">
-              <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
-              <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-sm-3">
-
-          {% for error in objects.form.belongs_to.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Database</label>
-              <div class="col-lg-10">
-                {{ objects.form.belongs_to|addcss:"form-control" }}
-                <input id="belongs_to_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.dataset_name}}" class="form-control">
-              </div>
-          </div>
-
-          {% for error in objects.form.in_collections.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Collection</label>
-              <div class="col-lg-10">
-                {{ objects.form.in_collections|addcss:""}}
-                <input id="in_collections_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.collection_name}}" class="form-control">
-              </div>
-          </div>
-
-          {% for error in objects.form.zotero_accession.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Zotero</label>
-              <div class="col-lg-10">
-                {{ objects.form.zotero_accession|addcss:"form-control" }}
-                <input id="zotero_accession_input" placeholder="Type at least 3 characters to search" type="text" class="form-control">
-              </div>
-          </div>
-
-          {% for error in objects.form.created_by_native.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Creator</label>
-              <div class="col-lg-10">
-                {{ objects.form.created_by_native }}
-                <input id="creator_input" placeholder="Type at least 3 characters to search" type="text" value="{{objects.creator_name}}" class="form-control">
               </div>
           </div>
 
@@ -808,18 +579,15 @@ function toggleLinkRecordsBtn() {
 
               </div>
           </div>
-
-          {% for error in objects.form.print_status.errors %}
-          <div class="alert alert-warning">{{ error }}</div>
-          {% endfor %}
-          <div class="form-group form-group-xs clearable">
-              <label class="col-lg-2 control-label">Print</label>
-              <div class="col-lg-10">
-                {{ objects.form.print_status|addcss:"form-control" }}
-              </div>
-          </div>
-        </div>
       </div>
+
+      <div class="col-sm-12" style="text-align: center;">
+          <div class="btn-group">
+            <input class="btn btn-primary btn-xs" type="submit" id="submit-form-btn" value="Apply Filters"></input>
+            <button class="btn btn-warning btn-xs" type="" id="clear-filters" value="Clear Filters">Clear Filters</button>
+          </div>
+      </div>
+    </div>
 </form>
 
 <script>

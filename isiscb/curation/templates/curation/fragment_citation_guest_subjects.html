@@ -8,35 +8,23 @@
 {% test_rule 'can_view_citation_field' user permTuple as can_view %}
 
 <div class="panel panel-default">
+    <div class="panel-heading">Notes/Questions (end each line with your name and date)</div>
+    <div class="panel-body">
+        {% for error in form.administrator_notes.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
+    </div>
+</div>
+
+<div class="panel panel-default">
   <div class="panel-heading">
-    Categories and Subjects
+    Subjects
     {% if can_update %}
       <a href="{% url 'curation:subjects_and_categories' instance.id %}?search={{ search_key }}&current={{ current_index }}" style="float: right;"><i class="fa fa-pencil" aria-hidden="true"></i></a>
     {% endif %}
   </div>
   <div class="panel-body">
-    <table>
-        <tr>
-        <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;" ">
-          {% for acrelation in instance.acrelation_set.all %}
-              {% if acrelation.type_controlled == 'CA' %}
-                    <a href="{% if acrelation.authority %}{% if acrelation.authority.public %}{% url 'authority' acrelation.authority.id %}{% else %}{% url 'curation:curate_authority' acrelation.authority.id %}{% endif%}{% else %}{% url 'curation:update_acrelation_for_citation' instance.id acrelation.id %}{% endif %}" class="categories_subject_list label {% if acrelation.authority %}label-{{ acrelation.authority|get_label_class }}{%else%}label-none{% endif %} {% if not acrelation.authority.public %}not_public{% endif %}">
-                      {% if not acrelation.public %}
-                      <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-                      {% endif %}
-                      {% if acrelation.authority %}
-                      {{ acrelation.authority.name|truncatechars:80 }}
-                      {% else %}
-                      No authority selected
-                      {% endif %}
-                    </a><br>
-              {% endif %}
-          {% endfor %}
-        </td>
-      </tr>
-    </table>
-    <hr style="margin-top: 5px; margin-bottom: 5px; border-color: #ccc;">
-
     <table>
       <tr>
       <td class="form-fields-xs phaedra-colors" style="margin-top: 5px; vertical-align: top;">
@@ -68,15 +56,5 @@
       <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     {{ form.abstract|addcss:"form-control reduceIfEmpty input-sm" }}
-  </div>
-</div>
-
-<div class="panel panel-default">
-  <div class="panel-heading">Notes/Questions (end each line with your name and date)</div>
-  <div class="panel-body">
-    {% for error in form.administrator_notes.errors %}
-      <div class="alert alert-danger">{{ error }}</div>
-    {% endfor %}
-    {{ form.administrator_notes|addcss:"form-control reduceIfEmpty input-sm" }}
   </div>
 </div>

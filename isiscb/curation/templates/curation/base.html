@@ -103,8 +103,21 @@
                 </ul>
               </li>
             {% else %}
-            <li><a href="{% url 'curation:citation_list' %}?filters=true"><i class="fas fa-search"></i> Search Citations</a></li>
+            <li><a href="{% url 'curation:contributions' %}?filters=true"><i class="fas fa-search"></i> Search Citations</a></li>
             {% endif %}
+            <li>
+              <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
+                  <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                  <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
+                  <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                  <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                  <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                  <li><a id="logout" href="{% url 'account_logout' %}">Logout</a></li>
+              </ul>
+            </li>
           </ul>
         </div>
       </div>

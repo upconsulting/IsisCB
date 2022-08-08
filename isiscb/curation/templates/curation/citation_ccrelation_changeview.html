@@ -41,12 +41,12 @@
             </div>
           </div>
         <div class="col-md-3">
-          <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+          <a {% if user.is_staff or user.is_superuser %}href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% else %}href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% endif %}><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
      Back to Citation</a>
         </div>
         <div class="col-md-4">
             <div class="btn-group pull-right">
-                <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+                <a {% if user.is_staff or user.is_superuser %}href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% else %}href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% endif %} class="btn btn-sm btn-default">Cancel</a>
                 <a href="#" class="btn btn-sm btn-success save-ccrelation" >Save</a>
                 {% if ccrelation.id %}
                 <a href="#"
@@ -77,17 +77,19 @@
                 {% endfor %}
 
                 <div id="subject_info_container" style="margin-right: 39px;">
-                  {% if form.instance.subject %}
+                  <div id="subject_info">
+                    {% if form.instance.subject %}
                     <ul class="list-group">
                       <li class="list-group-item">
                         <span class="label label-primary">{{form.instance.subject.get_type_controlled_display}}</span>
                         {% with form.instance.subject|get_authors_editors as authors_editors %}
                           {% if authors_editors %} <b>{{ authors_editors }}</b> {% endif %}
                         {% endwith %}
-                        <a href="{% url 'citation' form.instance.subject.id %}" style="color: #337ab7;">{{ form.instance.subject|get_citation_title }}</a>
+                        {{ form.instance.subject|get_citation_title }}
                       </li>
                     </ul>
                   {% endif %}
+                  </div>
                 </div>
 
 
@@ -135,17 +137,19 @@
                 {% endfor %}
 
                 <div id="object_info_container" style="margin-right: 39px;">
-                  {% if form.instance.object %}
+                  <div id="object_info">
+                    {% if form.instance.object %}
                     <ul class="list-group">
                       <li class="list-group-item">
                         <span class="label label-primary">{{form.instance.object.get_type_controlled_display}}</span>
                         {% with form.instance.object|get_authors_editors as authors_editors %}
                           {% if authors_editors %} <b>{{ authors_editors }}</b> {% endif %}
                         {% endwith %}
-                        <a href="{% url 'citation' form.instance.object.id %}" style="color: #337ab7;">{{ form.instance.object|get_citation_title }}</a>
+                        {{ form.instance.object|get_citation_title }}
                       </li>
                     </ul>
                   {% endif %}
+                  </div>
                 </div>
 
                 {% comment %} <div id="object_info_container">

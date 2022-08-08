@@ -55,13 +55,18 @@
                 <span class="h4">
                     Contributed Citations
                 </span>
+                <div style="float: right;">
+                    <a class="btn btn-success btn-xs" href="{% url 'curation:create_citation' %}"><i class="fas fa-plus"></i> Create New Citation</a>
+                    &nbsp;
+                    <a class="btn btn-primary btn-xs" href="{% url 'curation:contributions' %}"><i class="far fa-list-alt"></i> All Contributions</a>
+                </div>
             </div>
             <div class="panel-body">
                 {% if contributions %}
                     <ul class="list-group" style="max-height: 400px; overflow-y: scroll;">
                         {% for citation in contributions %}
                         <li class="list-group-item">
-                            <a style="color: #000;" href="{% url 'curation:curate_citation' citation.id %}"><i class="fas fa-wrench"></i></a>&nbsp;&nbsp;<span class="label label-primary">{{ citation.get_type_controlled_display }}</span>&nbsp;<a href="{% url 'citation' citation.id %}" class="h5">{{ citation.title }}</a>&nbsp;<span class="label label-default">created: {{ citation.created_native|date:"Y-m-d" }}</span>&nbsp;<span class="label {% if citation.tracking_state == None %}label-default{% elif citation.tracking_state == "FU"%}label-warning{% elif citation.tracking_state == "PD" %}label-success{% endif %}">{% if citation.tracking_state == None %}Draft{% elif citation.tracking_state == "FU"%}Awaiting Approval{% elif citation.tracking_state == "PD" %}Published{% endif %}</span>
+                            <a style="color: #000;" href="{% url 'curation:guest_curate_citation' citation.id %}"><i class="fas fa-wrench"></i></a>&nbsp;&nbsp;<span class="label label-primary">{{ citation.get_type_controlled_display }}</span>&nbsp;{% if citation.record_status_value == 'Active' %}<a href="{% url 'citation' citation.id %}" class="h5">{{ citation.title }}</a>{% else %}<span>{{ citation.title }}</span>{% endif %}&nbsp;<span class="label label-default">created: {{ citation.created_native|date:"Y-m-d" }}</span>&nbsp;<span class="label {% if citation.tracking_state == None %}label-default{% elif citation.tracking_state == "FU"%}label-warning{% elif citation.tracking_state == "PD" %}label-success{% endif %}">{% if citation.tracking_state == None %}Draft{% elif citation.tracking_state == "FU"%}Awaiting Approval{% elif citation.tracking_state == "PD" %}Published{% endif %}</span>
                         </li>
                         {% endfor %}
                     </ul>

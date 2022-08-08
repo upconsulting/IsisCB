@@ -46,10 +46,12 @@ urlpatterns = [
     re_path(r'^dashboard/$', views.dashboard, name='dashboard'),
     re_path(r'^datasets/$', views.datasets, name='datasets'),
     re_path(r'^citation/$', views.citations, name='citation_list'),
+    re_path(r'^contributions/$', views.contributions, name='contributions'),
     re_path(r'^bulk$', bulk_change_csv_views.bulk_changes, name='bulk_changes'),
     re_path(r'^bulk/csv$', bulk_change_csv_views.bulk_change_from_csv, name='general_bulk_change_from_csv'),
     re_path(r'^bulk/csv/status$', bulk_change_csv_views.bulk_csv_status, name="bulk-csv-status"),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/$', views.citation, name='curate_citation'),
+    re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/guest/$', views.citation_guest, name='guest_curate_citation'),
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/$', views.authority, name='curate_authority'),
 
     re_path(r'^api/citation$', views.get_citation_by_id, name='api_citation'),

@@ -69,12 +69,12 @@
         </div>
       </div>
     <div class="col-md-3">
-      <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
+      <a {% if user.is_staff or user.is_superuser %}href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% else %}href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% endif %}><i class="fa fa-arrow-circle-left" aria-hidden="true"></i>
  Back to Citation</a>
     </div>
     <div class="col-md-4">
         <div class="btn-group pull-right">
-            <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+            <a {% if user.is_staff or user.is_superuser %}href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% else %}href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}"{% endif %} class="btn btn-sm btn-default">Cancel</a>
             <a href="#" class="btn btn-sm btn-success save-acrelation" >Save</a>
             <a href="#"
                 class="btn btn-danger btn-sm delete-acrelation"

@@ -6,6 +6,8 @@ from isisdata.models import *
 
 
 def filter_queryset(user, queryset, do=CRUDRule.VIEW):
+    return queryset
+    
     """
     Limit a :class:`.QuerySet` to what ``user`` has permission to ``do``.
     """

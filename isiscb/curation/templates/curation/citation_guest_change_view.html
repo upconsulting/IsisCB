@@ -133,6 +133,7 @@ label {
               <span class="label label-primary" id="citation_type" data-type="{{instance.type_controlled}}" style="font-size: 14px;">
                 <a href="#" data-toggle="modal" data-target="#change_type_controlled_modal"><i class="fa fa-pencil" aria-hidden="true" style="color: #fff;"></i></a>
                 {{ instance.get_type_controlled_display }}
+                {{ form.type_controlled.as_hidden}}
               </span>
               &nbsp;&nbsp;
               <a
@@ -142,11 +143,13 @@ label {
                   <span class="glyphicon glyphicon-new-window" ></span>
               </a>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              {{ form.record_status_value|addcss:"form-control input-sm" }}
-
-              {{ form.type_controlled }}
-
-              <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
+                {% if instance.tracking_state == 'PD' %}
+                  <span class="label label-success" style="font-size: 14px;">Published</span>
+                {% elif instance.tracking_state == 'FU' %}
+                  <span class="label label-warning" style="font-size: 14px;">Under Review</span>
+                {% else %}
+                <span class="label label-danger" style="font-size: 14px;">Draft</span>
+                {% endif %}
             </div>
           </div>
           <div class="col-md-12">
@@ -160,13 +163,13 @@ label {
       </div>
     </div>
 
-    <div class="col-md-4 text-center">
+    <div class="col-md-4 text-center" style="font-size: 16px;">
       {% if previous %}
       <a id="citation_previous"><i class="fa fa-caret-left" aria-hidden="true"></i> Prev</a>
       {% endif %}
       &nbsp; &nbsp; &nbsp;
 
-      <a id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i>Back to List </a>
+      <a id="citation_back_to_list"><i class="fa fa-reply" aria-hidden="true"></i> Back to List </a>
       &nbsp; &nbsp; &nbsp;
       {% if next %}
       <a id="citation_next">Next <i class="fa fa-caret-right" aria-hidden="true"></i></a>
@@ -176,10 +179,11 @@ label {
         {% if index %}Record {{ index }} of {{ total }}{% endif %}
 
         <div class="btn-group ">
-            <div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>
+            {% if user.is_staff or user.is_superuser %}<div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>{% endif %}
 
-            <a href="{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
-            <a data-href="" class="btn btn-sm btn-success citation_submit">Save</a>
+            <a href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
+            <a data-href="" class="btn btn-sm btn-primary citation_submit" style="color: #fff;">{% if user.is_staff or user.is_superuser %}Save{% else %} Save Draft{% endif %}</a>
+            {% if not user.is_staff or not user.is_superuser %}<a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-sm btn-success" style="color: #fff;">Submit for Review</a>{% endif %}
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
     </div>
@@ -188,213 +192,185 @@ label {
 <div class="row">
     <div class="col-sm-4" style="margin-top: 15px;">
         {% block citation_panel_left %}
-        {% include "curation/fragment_citation_fields.html" %}
+        {% include "curation/fragment_citation_guest_fields.html" %}
         {% endblock %}
     </div>
-    <div class="col-sm-8" style="padding-left: 0;">
-      <ul class="nav nav-tabs nav-justified" role="tablist">
-        <li role="presentation"{% if not tab or tab == 'fields' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#fields" aria-controls="fields" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Fields</a>
-        </li>
-        <li role="presentation"{% if tab == 'attributes' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#attributes" aria-controls="attributes" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Attributes ({{ instance.attributes.count }})</a>
-        </li>
-        <li role="presentation"{% if tab == 'linkeddata' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#linkeddata" aria-controls="linkeddata" role="tab" data-toggle="tab" style="padding:3px; font-size: 13px;">Linked Data ({{ instance.linkeddata_entries.count }})</a>
-        </li>
-        <li role="presentation"{% if tab == 'ccrelations' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#ccrelations" aria-controls="ccrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Cit. ({{ instance.all_ccrelations.count }})</a>
-        </li>
-        <li role="presentation"{% if tab == 'acrelations' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#acrelations" aria-controls="acrelations" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;">Related Auth. ({{ instance.related_authorities.count }})</a>
-        </li>
-        <li role="presentation"{% if tab == 'tracking' %} class="active"{% endif %}>
-            <a class="cursor-link" href="#tracking" aria-controls="tracking" role="tab" data-toggle="tab"  style="padding:3px; font-size: 13px;" id="tracking_tab">Tracking: {% if instance.tracking_state == "FU" %}Entered{% elif instance.tracking_state == "HS" %}HSTM{% else %}{{ instance.get_tracking_state_display }}{% endif %}</a>
-        </li>
-      </ul>
-      <div class="tab-content">
-        <div role="tabpanel" class="tab-pane{% if not tab or tab == 'fields' %} active{% endif %} panel-body" id="fields">
-          {% block fields_tab %}
-            <div class="row">
-              <div class="col-sm-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Language</div>
-                    <div class="panel-body">
-                    <div class="col-sm-3" style="padding-right: 0px;">
-                        <ul style="margin-bottom: 0;" class="list-group">
-                        <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
-                        <a style="cursor: pointer; padding: 5px; padding-left: 10px; border: 1px solid #ccc;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
-                            <span class="glyphicon glyphicon-plus"></span> Add
-                        </a>
-                        </ul>
-                    </div>
-                    <div class="col-sm-8">
-                        <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
-                            {% for language in instance.language.all %}
-                            <li class="list-group-item language clearfix"
-                                id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px; border: 1px solid #ccc;">
-                                <small style="line-height: 28px;">{{ language }}</small>
-                                <!-- TODO: implement permission check here. -->
-                                <span class="button-group button-group-xs pull-right">
-                                    <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
-                                        type="button"
-                                        language-id="{{ language.id }}"
-                                        language-name="{{ language }}"></a>
-                                </span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    </div>
-                </div>
-                
-                {% if partdetails_form %}
-                    <div class="panel panel-default">
-                    <div class="panel-heading">Details</div>
-                    <div class="panel-body">
-                        <table style="border-collapse: separate; border-spacing: 0 10px;">
-                        {% for error in partdetails_form.volume_free_text.errors %}
-                        <tr>
-                            <td colspan="6">
-                            <div class="alert alert-danger">{{ error }}</div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    
-                        <tr>
-                            <td>
-                                <label>Volume</label>
-                            </td>
-                            <td>
-                                {{ partdetails_form.volume_free_text|addcss:"form-control" }}
-                            </td>
-                        </tr>
-                        {% for error in partdetails_form.issue_free_text.errors %}
-                        <tr>
-                            <td colspan="6">
-                            <div class="alert alert-danger">{{ error }}</div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    
-                        <tr>
-                            <td>
-                            <label>No./Episode</label>
-                            </td>
-                            <td>
-                            {{ partdetails_form.issue_free_text|addcss:"form-control" }}
-                            </td>
-                        </tr>
-                    
-                        {% for error in partdetails_form.pages_free_text.errors %}
-                        <tr>
-                            <td colspan="6">
-                            <div class="alert alert-danger">{{ error }}</div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    
-                        <tr>
-                            <td>
-                            <label>Pages</label>
-                            </td>
-                            <td>
-                            {{ partdetails_form.pages_free_text|addcss:"form-control" }}
-                            </td>
-                        </tr>
-                    
-                        {% for error in form.physical_details.errors %}
-                            <tr>
-                            <td colspan="6">
-                            <div class="alert alert-danger">{{ error }}</div>
-                            </td>
-                            </tr>
-                            {% endfor %}
-                            <tr>
-                            <td>
-                                <label>Additional Item Details</label>
-                            </td>
-                            <td colspan="6">
-                                {{ form.physical_details|addcss:"form-control oneLine" }}
-                            </td>
-                            </tr>
-                        </table>
-                    </div>
-                    </div>
-                {% endif %}
-
-                <div class="panel panel-default" style="margin-top: 10px;">
-                    <div class="panel-heading">Links to Other Citation
-                    <a class="text-warning input-xs" href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}" style="float: right;">
-                        <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add citation link</span>
+    <div class="col-sm-8" style="margin-top: 15px; padding-left: 0;">
+        <div class="row">
+            <div class="col-sm-6" style="padding-right: 0;">
+            <div class="panel panel-default">
+                <div class="panel-heading">Language</div>
+                <div class="panel-body">
+                <div class="col-sm-3" style="padding-right: 0px;">
+                    <ul style="margin-bottom: 0;" class="list-group">
+                    <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
+                    <a style="cursor: pointer; padding: 5px; padding-left: 10px; border: 1px solid #ccc;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                        <span class="glyphicon glyphicon-plus"></span> Add
                     </a>
-                    </div>
-                    <div class="panel-body">
-                    <ul class="list-group" style="margin-bottom: 0;">
-                        {% for ccrel in instance.all_ccrelations.all %}
-                        {% if ccrel.subject.id != instance.id %}
-                            <li class="list-group-item">
-                            {% if not ccrel.public or not ccrel.subject.public %}
-                                <i class="fa fa-eye-slash" title="The linked record is not public."></i>
-                            {% endif %}
-                            <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                            <span class="label label-primary">{{ccrel.subject.get_type_controlled_display}}</span>
-                            <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
-                            <span class="label label-danger" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
-                            </li>
-                        {% endif %}
-                        {% endfor %}
                     </ul>
-                    </div>
                 </div>
-                
-                <div class="panel panel-default" style="margin-top: 10px;">
-                    <div class="panel-heading">DOI, ISBN, or URL
-                    <a class="text-warning input-xs" href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" style="float: right;">
-                        <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add link</span>
-                    </a>
-                    </div>
-                    <div class="panel-body">
-                    <ul class="list-group" style="margin-bottom: 0;">
-                        {% for ld in instance.linkeddata_entries.all %}
-                        <li class="list-group-item">
-                            <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                            <span class="label label-success">{{ ld.type_controlled.name }}</span>
-                            {% if ld.universal_resource_name|startswith:'http' %}
-                            <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
-                            {% else %}
-                            <span>{{ ld.universal_resource_name }}</span>
-                            {% endif %}
+                <div class="col-sm-8">
+                    <ul style="margin-bottom: 0;" class="list-group" id="language-list-group">
+                        {% for language in instance.language.all %}
+                        <li class="list-group-item language clearfix"
+                            id="language-{{ language.id }}" style="padding-bottom: 0px; padding-top: 0px; border: 1px solid #ccc;">
+                            <small style="line-height: 28px;">{{ language }}</small>
+                            <!-- TODO: implement permission check here. -->
+                            <span class="button-group button-group-xs pull-right">
+                                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-language"
+                                    type="button"
+                                    language-id="{{ language.id }}"
+                                    language-name="{{ language }}"></a>
+                            </span>
                         </li>
                         {% endfor %}
                     </ul>
-                    </div>
                 </div>
-              </div>
-              <div class="col-sm-6">
-              {% block citation_middle_panel %}
-                  {% include "curation/fragment_citation_categories_subjects.html" %}
-              {% endblock %}
-              </div>
+                </div>
             </div>
-          {% endblock %}
+            
+            {% if partdetails_form %}
+                <div class="panel panel-default">
+                <div class="panel-heading">Details</div>
+                <div class="panel-body">
+                    <table style="border-collapse: separate; border-spacing: 0 10px;">
+                    {% for error in partdetails_form.volume_free_text.errors %}
+                    <tr>
+                        <td colspan="6">
+                        <div class="alert alert-danger">{{ error }}</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                
+                    <tr>
+                        <td>
+                            <label>Volume</label>
+                        </td>
+                        <td>
+                            {{ partdetails_form.volume_free_text|addcss:"form-control" }}
+                        </td>
+                    </tr>
+                    {% for error in partdetails_form.issue_free_text.errors %}
+                    <tr>
+                        <td colspan="6">
+                        <div class="alert alert-danger">{{ error }}</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                
+                    <tr>
+                        <td>
+                        <label>No./Episode</label>
+                        </td>
+                        <td>
+                        {{ partdetails_form.issue_free_text|addcss:"form-control" }}
+                        </td>
+                    </tr>
+                
+                    {% for error in partdetails_form.pages_free_text.errors %}
+                    <tr>
+                        <td colspan="6">
+                        <div class="alert alert-danger">{{ error }}</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                
+                    <tr>
+                        <td>
+                        <label>Pages</label>
+                        </td>
+                        <td>
+                        {{ partdetails_form.pages_free_text|addcss:"form-control" }}
+                        </td>
+                    </tr>
+                
+                    {% for error in form.physical_details.errors %}
+                        <tr>
+                        <td colspan="6">
+                        <div class="alert alert-danger">{{ error }}</div>
+                        </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                        <td>
+                            <label>Additional Item Details</label>
+                        </td>
+                        <td colspan="6">
+                            {{ form.physical_details|addcss:"form-control oneLine" }}
+                        </td>
+                        </tr>
+                    </table>
+                </div>
+                </div>
+            {% endif %}
+
+            <div class="panel panel-default" style="margin-top: 10px;">
+                <div class="panel-heading">Links to Other Citations
+                <a class="text-warning input-xs" href="{% url 'curation:create_ccrelation_for_citation' instance.id %}?is_object=true&search={{ search_key }}&current={{ current_index }}" style="float: right;">
+                    <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add citation link</span>
+                </a>
+                </div>
+                <div class="panel-body">
+                <ul class="list-group" style="margin-bottom: 0;">
+                    {% for ccrel in instance.all_ccrelations.all %}
+                      {% if ccrel.subject and ccrel.subject.id != instance.id %}
+                          <li class="list-group-item">
+                          {% if not ccrel.public or not ccrel.subject.public %}
+                              <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                          {% endif %}
+                          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                          <span class="label label-primary label-xs">{{ccrel.subject.get_type_controlled_display}}</span>
+                          <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
+                          <span class="label label-danger label-xs" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+                          this citation
+                          </li>
+                      {% endif %}
+                      {% if ccrel.object and ccrel.object.id != instance.id %}
+                          <li class="list-group-item">
+                          {% if not ccrel.public or not ccrel.object.public %}
+                              <i class="fa fa-eye-slash" title="The linked record is not public."></i>
+                          {% endif %}
+                          <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                          This citation
+                          <span class="label label-danger label-xs" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
+                          <span class="label label-primary label-xs">{{ccrel.object.get_type_controlled_display}}</span>
+                          <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.object.public %}class="is_not_public"{% endif %}>{{ ccrel.object.title }}</a>
+                          </li>
+                      {% endif %}
+                    {% endfor %}
+                </ul>
+                </div>
+            </div>
+            
+            <div class="panel panel-default" style="margin-top: 10px;">
+                <div class="panel-heading">DOI, ISBN, or URL
+                <a class="text-warning input-xs" href="{% url 'curation:create_linkeddata_for_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" style="float: right;">
+                    <span class="btn btn-xs btn-success"><i class="fas fa-plus"></i> Add link</span>
+                </a>
+                </div>
+                <div class="panel-body">
+                <ul class="list-group" style="margin-bottom: 0;">
+                    {% for ld in instance.linkeddata_entries.all %}
+                    <li class="list-group-item">
+                        <a href="{% url 'curation:update_linkeddata_for_citation' instance.id ld.id %}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                        <span class="label label-success">{{ ld.type_controlled.name }}</span>
+                        {% if ld.universal_resource_name|startswith:'http' %}
+                        <a href="{{ ld.universal_resource_name}}">{{ ld.universal_resource_name }}</a>
+                        {% else %}
+                        <span>{{ ld.universal_resource_name }}</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                </div>
+            </div>
+            </div>
+            <div class="col-sm-6">
+            {% block citation_middle_panel %}
+                {% include "curation/fragment_citation_guest_subjects.html" %}
+            {% endblock %}
+            </div>
         </div>
-        <div role="tabpanel" class="tab-pane{% if tab == 'attributes' %} active{% endif %} panel-body" id="attributes">
-          {% include "curation/fragment_citation_attributes.html" %}
-        </div>
-        <div role="tabpanel" class="tab-pane{% if tab == 'linkeddata' %} active{% endif %} panel-body" id="linkeddata">
-          {% include "curation/fragment_citation_linkeddata.html" %}
-        </div>
-        <div role="tabpanel" class="tab-pane{% if tab == 'ccrelations' %} active{% endif %} panel-body" id="ccrelations">
-          {% include "curation/fragment_citation_ccrelations.html" %}
-        </div>
-        <div role="tabpanel" class="tab-pane{% if tab == 'acrelations' %} active{% endif %} panel-body" id="acrelations">
-          {% include "curation/fragment_citation_acrelations.html" %}
-        </div>
-        <div role="tabpanel" class="tab-pane{% if tab == 'tracking' %} active{% endif %} panel-body" id="tracking">
-          {% include "curation/fragment_citation_tracking.html" %}
-        </div>
-      </div>
     </div>
 </div>
 
@@ -615,7 +591,7 @@ $( document ).ready(function() {
     $('#data_changed_modal').modal('hide');
     $("#input_back_to_list").val("True");
     // IEXP-15: we are not checking the record any longer
-    $('#citation_form').attr('href', '{% url 'curation:curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
+    $('#citation_form').attr('href', '{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}');
     $('#citation_form').submit();
   });
 
@@ -637,7 +613,7 @@ $( document ).ready(function() {
     }
     {% if next %}
     else {
-      window.location.href = '{% url 'curation:curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
+      window.location.href = '{% url 'curation:guest_curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
     }
     {% endif %}
   });
@@ -649,7 +625,7 @@ $( document ).ready(function() {
     }
     {% if previous %}
     else {
-      window.location.href = '{% url 'curation:curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
+      window.location.href = '{% url 'curation:guest_curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
     }
     {% endif %}
   });
@@ -659,22 +635,22 @@ $( document ).ready(function() {
       $('#data_changed_modal').attr('data-forward-type', 'list');
       $('#data_changed_modal').modal('show');
     } else {
-      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page }}';
+      window.location.href = '{% url 'curation:contributions' %}?search={{ search_key }}&page={{ current_page }}';
     }
   });
 
   $("#data_changed_cancel").on('click', function() {
     {% if next and previous %}
     if ($('#data_changed_modal').attr('data-forward-type') == "next") {
-      window.location.href = '{% url 'curation:curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
+      window.location.href = '{% url 'curation:guest_curate_citation' next %}?search={{ search_key }}&current={{ next_index }}';
     } else if ($('#data_changed_modal').attr('data-forward-type') == "previous") {
-      window.location.href = '{% url 'curation:curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
+      window.location.href = '{% url 'curation:guest_curate_citation' previous %}?search={{ search_key }}&current={{ previous_index }}';
     }
     else {
-      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page }}';
+      window.location.href = '{% url 'curation:contributions' %}?search={{ search_key }}&page={{ current_page }}';
     }
     {% else %}
-      window.location.href = '{% url 'curation:citation_list' %}?search={{ search_key }}&page={{ current_page}}';
+      window.location.href = '{% url 'curation:contributions' %}?search={{ search_key }}&page={{ current_page}}';
     {% endif %}
 
   });

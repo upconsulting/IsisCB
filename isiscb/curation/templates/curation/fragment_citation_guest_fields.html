@@ -2,17 +2,6 @@
 {% load render_object %}
 {% load general_tags %}
 
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-2 text-left">
-      <label class="input-xs">Subtype</label>
-    </div>
-    <div class="col-sm-10">
-      {{ form.subtype|addcss:"form-control input-xs" }}
-    </div>
-  </div>
-</div>
-
 <div class="panel panel-default">
   <div class="panel-heading">Title</div>
   <div class="panel-body">
@@ -20,20 +9,6 @@
       <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
       {{ form.title|addcss:"form-control titleInput" }}
-  </div>
-</div>
-
-{% for error in form.edition_details.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-2 text-left" style="padding-right: 5px;">
-      <label class="input-xs">Ed. det.</label>
-    </div>
-    <div class="col-sm-10">
-      {{ form.edition_details|addcss:"form-control oneLine input-xs" }}
-    </div>
   </div>
 </div>
 
@@ -113,75 +88,5 @@
         {% endif %}
       {% endfor %}
     </ul>
-  </div>
-</div>
-
-{% for error in form.complete_citation.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-1 text-left">
-      <label class="input-sm">Full Cit.</label>
-    </div>
-    <div class="col-sm-11" >
-    {{ form.complete_citation|addcss:"form-control reduceIfEmpty input-sm" }}
-    </div>
-  </div>
-</div>
-
-{% for error in form.description.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-1 text-left">
-      <label class="input-sm">Desc.</label>
-    </div>
-    <div class="col-sm-11">
-    {{ form.description|addcss:"form-control reduceIfEmpty input-sm" }}
-    </div>
-  </div>
-</div>
-
-{% for error in form.record_status_explanation.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-1 text-left" style="margin-top: -7px;">
-      <label class="input-sm">Status Expl.</label>
-    </div>
-    <div class="col-sm-11">
-    {{ form.record_status_explanation|addcss:"form-control reduceIfEmpty input-sm" }}
-    </div>
-  </div>
-</div>
-
-{% for error in form.belongs_to.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-1 text-left">
-      <label class="input-sm">Set</label>
-    </div>
-    <div class="col-sm-11">
-      {{ form.belongs_to|addcss:"form-control input-sm" }}
-    </div>
-  </div>
-</div>
-
-{% for error in form.record_history.errors %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endfor %}
-<div class="form-group">
-  <div class="row">
-    <div class="col-sm-1 text-left">
-      <label class="input-sm">Hist.</label>
-    </div>
-    <div class="col-sm-11">
-      {{ form.record_history|addcss:"form-control input-sm" }}
-    </div>
   </div>
 </div>
