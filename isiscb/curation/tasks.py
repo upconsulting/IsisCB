@@ -7,7 +7,7 @@ from builtins import str
 from celery import shared_task
 from django.http import QueryDict
 from django.db.models import Q
-from isisdata.models import Citation, CRUDRule, Authority
+from isisdata.models import Citation, CRUDRule, Authority, AsyncTask, Tenant
 from isisdata.filters import CitationFilter, AuthorityFilter
 from isisdata.operations import filter_queryset
 from django.contrib.auth.models import User
@@ -201,6 +201,36 @@ def bulk_change_tracking_state(user_id, filter_params_raw, target_state, info,
                                     tracking_info=info,
                                     notes=notes,
                                     modified_by_id=user_id)
+
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+            task.state = 'SUCCESS'
+            task.save()
+            print('success:: %s' % str(task_id))
+    except Exception as E:
+        logger.error('bulk_change_tracking_state failed for %s:: %s' % (filter_params_raw, target_state))
+        logger.error(E)
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+            task.value = str(E)
+            task.state = 'FAILURE'
+            task.save()
+
+@shared_task
+def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, object_type='CITATION'):
+    queryset, _ = _get_filtered_record_queryset(filter_params_raw, user_id, type=object_type)
+    try:
+        # update tenant
+        if task_id:
+            task = AsyncTask.objects.get(pk=task_id)
+        tenant = Tenant.objects.filter(pk=tenant_id).first()
+        for i, citation in enumerate(queryset):
+            if task_id:
+                task.current_value += 1
+                task.save()
+
+            citation.tenants.add(tenant)
+            citation.save()
 
         if task_id:
             task = AsyncTask.objects.get(pk=task_id)

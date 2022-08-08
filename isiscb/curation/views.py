@@ -2287,7 +2287,7 @@ def bulk_action(request):
     if isinstance(queryset, CitationFilter) or isinstance(queryset, AuthorityFilter):
         queryset = queryset.qs
 
-    form_class = bulk_action_form_factory(queryset=queryset, object_type=object_type)
+    form_class = bulk_action_form_factory(queryset=queryset, user=request.user, object_type=object_type)
     context = {
         'extra_data': '\n'.join(list(form_class.extra_data.values()))
     }

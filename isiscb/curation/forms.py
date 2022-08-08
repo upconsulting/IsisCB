@@ -13,6 +13,7 @@ from curation import actions
 
 import rules
 import itertools
+import curation.curation_util as cutil
 
 
 class CCRelationForm(forms.ModelForm):
@@ -369,10 +370,7 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
-        tenant_roles = user.isiscbrole_set.filter(Q(accessrule__tenantrule__tenant__isnull=False))
-        tenants_rules = [t.tenant_rules for t in tenant_roles]
-        tenants = [t.tenant.id for t in itertools.chain.from_iterable(tenants_rules)]
-        self.fields['tenants'].queryset = Tenant.objects.filter(id__in=tenants)
+        self.fields['tenants'].queryset = cutil.get_tenants(self.user)
 
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
@@ -778,13 +776,13 @@ class BulkActionForm(forms.Form):
             if extra:
                 extra_data.update(extra)
             # Load and instantiate the corresponding action class.
-            action = getattr(actions, action_name)()    # Object is callable.
+            action = getattr(actions, action_name)(user)    # Object is callable.
             tasks.append(action.apply(user, filter_params_raw, action_value, **extra_data))
         return tasks
 
 
 # Emulates django's modelform_factory
-def bulk_action_form_factory(form=BulkActionForm, **kwargs):
+def bulk_action_form_factory(form=BulkActionForm, user=None, **kwargs):
     attrs = {}    # For the form's Meta inner class.
 
     # For the Media inner class.
@@ -808,7 +806,7 @@ def bulk_action_form_factory(form=BulkActionForm, **kwargs):
 
         if hasattr(action_class, 'get_extra_data'):
             extra_data[action_class.__name__] = action_class.get_extra_data(queryset=queryset)
-        action = action_class()
+        action = action_class(user)
         action_choices.append((action_class.__name__, action.label))
         form_class_attrs[action_class.__name__] = action.get_value_field(required=False)
         extras = action.get_extra_fields()
