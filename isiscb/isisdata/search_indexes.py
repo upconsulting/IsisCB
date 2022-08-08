@@ -427,7 +427,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
             self.prepared_data['author_for_sort'] = u""
 
         self.prepared_data.update(multivalue_data)
-        
+
         return self.prepared_data
 
     def _index_belongs_to(self, data):
