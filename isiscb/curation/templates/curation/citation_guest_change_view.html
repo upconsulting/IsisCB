@@ -52,7 +52,7 @@ $(function() {
 }
 
 .list-group-item {
-  border: none;
+  border: none !important;
 }
 
 .panel {
@@ -179,11 +179,9 @@ label {
         {% if index %}Record {{ index }} of {{ total }}{% endif %}
 
         <div class="btn-group ">
-            {% if user.is_staff or user.is_superuser %}<div style="padding-right: 5px;" class="pull-left input-sm">Stub Record</div> <div style="padding-top: 3px; padding-right:20px;" class="pull-left">{{ form.stub_record_status }} </div>{% endif %}
-
             <a href="{% url 'curation:guest_curate_citation' instance.id %}?search={{ search_key }}&current={{ current_index }}" class="btn btn-sm btn-default">Cancel</a>
-            <a data-href="" class="btn btn-sm btn-primary citation_submit" style="color: #fff;">{% if user.is_staff or user.is_superuser %}Save{% else %} Save Draft{% endif %}</a>
-            {% if not user.is_staff or not user.is_superuser %}<a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-sm btn-success" style="color: #fff;">Submit for Review</a>{% endif %}
+            <a data-href="" class="btn btn-sm btn-primary citation_submit" style="color: #fff;">Save Draft</a>
+            <a onClick="createTracking('FU')" id="fully_entered-btn" href="#" class="btn btn-sm btn-success" style="color: #fff;">Submit for Review</a>
             <!--<button class="btn btn-sm btn-danger">Delete</button>-->
         </div>
     </div>
@@ -204,7 +202,7 @@ label {
                 <div class="col-sm-3" style="padding-right: 0px;">
                     <ul style="margin-bottom: 0;" class="list-group">
                     <li class="list-group-item" id="create-language-item" style="display: none; padding:0;"></li>
-                    <a style="cursor: pointer; padding: 5px; padding-left: 10px; border: 1px solid #ccc;" class="list-group-item language text-muted input-sm" onclick="addLanguage();">
+                    <a style="cursor: pointer; padding: 5px; padding-left: 10px; border: 1px solid #ccc;" class="language text-muted input-sm" onclick="addLanguage();">
                         <span class="glyphicon glyphicon-plus"></span> Add
                     </a>
                     </ul>
@@ -283,6 +281,23 @@ label {
                         {{ partdetails_form.pages_free_text|addcss:"form-control" }}
                         </td>
                     </tr>
+
+                    <tr>
+                        <td>
+                          <label>Length</label>
+                        </td>
+                        <td>
+                          {{ partdetails_form.extent|addcss:"form-control" }}
+                        </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label>Length Units</label>
+                      </td>
+                      <td>
+                        {{ partdetails_form.extent_note|addcss:"form-control" }}
+                      </td>
+                    </tr>
                 
                     {% for error in form.physical_details.errors %}
                         <tr>
@@ -313,30 +328,32 @@ label {
                 <div class="panel-body">
                 <ul class="list-group" style="margin-bottom: 0;">
                     {% for ccrel in instance.all_ccrelations.all %}
+                    {% with ccrel|get_other_relation_side:instance as target %}
                       {% if ccrel.subject and ccrel.subject.id != instance.id %}
                           <li class="list-group-item">
-                          {% if not ccrel.public or not ccrel.subject.public %}
+                          {% if not ccrel.public or not target.public %}
                               <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                           {% endif %}
                           <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                          <span class="label label-primary label-xs">{{ccrel.subject.get_type_controlled_display}}</span>
-                          <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.subject.public %}class="is_not_public"{% endif %}>{{ ccrel.subject.title }}</a>
+                          <span class="label label-primary label-xs">{{target.get_type_controlled_display}}</span>
+                          <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not target.public %}class="is_not_public"{% endif %}>{{ target.title }}</a>
                           <span class="label label-danger label-xs" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
                           this citation
                           </li>
                       {% endif %}
                       {% if ccrel.object and ccrel.object.id != instance.id %}
                           <li class="list-group-item">
-                          {% if not ccrel.public or not ccrel.object.public %}
+                          {% if not ccrel.public or not target.public %}
                               <i class="fa fa-eye-slash" title="The linked record is not public."></i>
                           {% endif %}
                           <a href="{% url 'curation:ccrelation_for_citation' instance.id ccrel.id %}?search={{ search_key }}&current={{ current_index }}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                           This citation
                           <span class="label label-danger label-xs" {% if not ccrel.public %}style="text-decoration:line-through"{% endif %}>{{ ccrel.get_type_controlled_display }}</span>
-                          <span class="label label-primary label-xs">{{ccrel.object.get_type_controlled_display}}</span>
-                          <a target="_blank" href="{% url 'citation' ccrel.subject.id %}" {% if not ccrel.object.public %}class="is_not_public"{% endif %}>{{ ccrel.object.title }}</a>
+                          <span class="label label-primary label-xs">{{target.get_type_controlled_display}}</span>
+                          <a target="_blank" href="{% url 'citation' target.id %}" {% if not target.public %}class="is_not_public"{% endif %}>{{ target.title_for_display }}</a>
                           </li>
                       {% endif %}
+                    {% endwith %}
                     {% endfor %}
                 </ul>
                 </div>

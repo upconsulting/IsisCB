@@ -698,8 +698,8 @@ def delete_linkeddata_for_authority(request, authority_id, linkeddata_id, format
     return render(request, template, context)
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def delete_language_for_citation(request, citation_id):
     # TODO: format?
     citation = get_object_or_404(Citation, pk=citation_id)
@@ -712,8 +712,8 @@ def delete_language_for_citation(request, citation_id):
     return JsonResponse({'result': True})
 
 
-@user_passes_test(lambda u: u.is_superuser or u.is_staff)
-@check_rules('can_access_view_edit', fn=objectgetter(Citation, 'citation_id'))
+@login_required
+@check_rules('can_view_edit', fn=objectgetter(Citation, 'citation_id'))
 def add_language_for_citation(request, citation_id):
     # TODO: format?
     citation = get_object_or_404(Citation, pk=citation_id)
