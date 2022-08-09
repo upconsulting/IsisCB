@@ -85,6 +85,7 @@ class CitationFilter(django_filters.FilterSet):
     zotero_accession = django_filters.CharFilter(widget=forms.HiddenInput())
     belongs_to = django_filters.CharFilter(widget=forms.HiddenInput())
     created_by_native = django_filters.CharFilter(widget=forms.HiddenInput())
+    created_by_guest = django_filters.BooleanFilter(method='filter_guest')
     modified_by = django_filters.CharFilter(widget=forms.HiddenInput())
 
     tracking_state = django_filters.ChoiceFilter(empty_label="Tracking (select one)",choices=[('', 'All')] + list(Citation.TRACKING_CHOICES), method='filter_tracking_state')
@@ -355,6 +356,16 @@ class CitationFilter(django_filters.FilterSet):
         q = Q()
 
         return queryset.filter(Q(in_collections=value))
+    
+    def filter_guest(self, queryset, field, value):
+        if value == 'unknown':
+            return queryset
+        guests = User.objects.exclude(is_superuser=True).exclude(is_staff=True)
+
+        if value == True:
+            return queryset.filter(created_by_native_id__in=guests)
+        else:
+            return queryset.exclude(created_by_native_id__in=guests)
 
     def filter_in_multiple_fields(self, queryset, field, value):
         if not value:

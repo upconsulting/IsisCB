@@ -111,6 +111,8 @@
               </a>
               <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
                   <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                  <li style="padding: 3px 20px;">{{ user.username }}</li>
+                  <hr style="margin: 10px 0;">
                   <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
                   <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
                   <li><a href="{% url 'search_history' %}">My Search History</a></li>

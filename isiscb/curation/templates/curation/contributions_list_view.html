@@ -63,8 +63,12 @@ function toggleLinkRecordsBtn() {
 <style>
     .notpublic {
         background-color: #fff;
-        border-left: 5px solid #f0ad4e;
-      }
+        {% comment %} border-left: 5px solid #f0ad4e; {% endcomment %}
+    }
+
+    .citation_issue_button:hover {
+        color: #777 !important;
+    }
 </style>
 
 <div id="msgBoxError" class="alert alert-danger" role="alert" style="display: none;">
@@ -100,6 +104,7 @@ function toggleLinkRecordsBtn() {
     <table style="margin-top: 5px;" class="table table-responsive table-hover table-curation">
         <thead>
             <tr>
+                <th width="2%">Issues</th>
                 <th width="5%">Status</th>
                 <th width="5%">ID</th>
                 <th width="2%"><i class="fa fa-file-text-o" aria-hidden="true" title="Type"></i></th>
@@ -121,28 +126,29 @@ function toggleLinkRecordsBtn() {
             {% with object.all_ccrelations as ccrelations %}
             {% with object|get_citations:ccrelations as related_citations %}
             {% with object.attributes as attributes %}
+            {% with object.id|add:"_authors_editors_preloaded" as authors_editors_preloaded_js_variable %}
+            {% with object.id|add:"_are_related_citations_public" as are_related_citations_public_js_variable %}
+            {% with object.id|add:"_citation_periodical" as citation_periodical_js_variable %}
+            {% with object.id|add:"_has_related_citations" as has_related_citations_js_variable %}
+            {% with object.id|add:"_are_related_authorities_missing_links" as are_related_authorities_missing_links_js_variable %}
+            {{ object.id|get_authors_editors_preloaded|json_script:authors_editors_preloaded_js_variable }}
+            {{ object.id|are_related_citations_public|json_script:are_related_citations_public_js_variable }}
+            {{ object.id|get_citation_periodical|json_script:citation_periodical_js_variable }}
+            {{ object.id|has_related_citations|json_script:has_related_citations_js_variable }}
+            {{ object.id|are_related_authorities_missing_links|json_script:are_related_authorities_missing_links_js_variable }}
+            
             <tr class="{% if not object.public or not object.id|are_linked_books_public:related_citations or not object.id|are_linked_journals_public:authorities %}notpublic{% endif %} {% if object.stub_record_status == 'SR'%}stubrecord{%endif%}">
+                <td style="text-align: center;">
+                  {% if not object.tracking_state or not object.title_for_display|safe or object.title_for_display|safe == ' ' or not object.type_controlled or object.type_controlled|get_type_controlled_display == 'None' or not object.id|are_related_authorities_public or not object.id|are_related_citations_public or not object.id|get_authors_editors_preloaded or not object.publication_date or not object.id|get_citation_periodical %}<a data-toggle="modal" class="open-issues-modal" data-id="{{object.id}}" data-target="#issuesModal" title="Click to view issues with citation"><span class="citation_issue_button" style="color: #f0ad4e; font-size: 1.4em;"><i class="fas fa-exclamation-triangle"></i></span></a>{% endif %}
+                </td>
                 <td>
-                  {% if object.tracking_state == 'None' %}<span class="label label-default label-xs">Draft</span>{% elif object.tracking_state == 'FU' %}<span class="label label-warning label-xs">Under Review</span>{% else %}<span class="label label-success label-xs">Published</span>{% endif %}
+                  {% if not object.tracking_state %}<span class="label label-default label-xs">Draft</span>{% elif object.tracking_state == 'FU' %}<span class="label label-warning label-xs">Under Review</span>{% else %}<span class="label label-success label-xs">Published</span>{% endif %}
                 </td>
                 <td>
                     <a href="{% url "curation:guest_curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}">{{ object.id }}</a>
-
-                    {% if not object.id|are_related_authorities_public or not object.id|are_related_citations_public or not object.id|are_attributes_public %}
-                    <i class="fa fa-exclamation-circle" aria-hidden="true" title="At least one linked record is not public."></i>
-                    {% endif %}
-                    {% if object|is_public_inconsistent %}
-                    <i class="fa fa-exclamation-triangle" aria-hidden="true" title="The public/record status fields are inconsistent."></i>
-                    {% endif %}
-                    {% if object.record_status_value == record_status_redirect %}
-                    <i class="fa fa-share" aria-hidden="true" title="This authority records redirects to another one."></i>
-                    {% endif %}
-                    {% if object.stub_record_status == 'SR' %}
-                    <i style="color: #d0254c" class="fa fa-flag" aria-hidden="true" title="This record is a stub record."></i>
-                    {% endif %}
                 </td>
                 <td><span class="label label-xs label-primary" title="{{object.type_controlled|get_type_controlled_display}}">{{ object.type_controlled|get_type_controlled_display }}</span></td>
-                <td id="title-{{object.id}}">{{ object.title_for_display|safe }}</td>
+                <td id="title-{{object.id}}">{{ object.title_for_display|safe }}{{object.language}}</td>
                 <td id="authors-{{object.id}}">
                     <a href="{% url "curation:curate_citation" object.id %}?search={{ search_key }}&current={{ forloop.counter0|add:current_offset }}&tab=acrelations">
                         {{ object.id|get_authors_editors_preloaded }}
@@ -189,6 +195,11 @@ function toggleLinkRecordsBtn() {
             {% endwith %}
             {% endwith %}
             {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
+            {% endwith %}
             {% endfor %}
         </tbody>
 
@@ -197,71 +208,77 @@ function toggleLinkRecordsBtn() {
     </table>
 </form>
 
-<div id="linkRecordsModal" class="modal fade" tabindex="-1" role="dialog">
+{{ filter_list|json_script:"filter_list_data" }}
+
+<div class="modal fade" id="issuesModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form id="link_citations_form">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Link Records</h4>
-        </div>
-        <div class="modal-body">
-
-          <div id="ccrCreationValidationBox" class="alert alert-danger" role="alert" style="display: none"></div>
-
-          <p>Please select the subject citation for the new CCRelations:</p>
-          <select id="ccrSubjectDropdown" name="ccrSubject" class="form-control">
-            <option value="">Select one or paste citation ID below</option>
-            {% for object in filter_list %}
-            <option value="{{object.id}}" data-citation-type="{{object.type_controlled}}">
-              [{{ object.type_controlled|get_type_controlled_display|cut_characters:2 }}]
-              {{ object.id|get_authors_editors_preloaded }}. {{ object.title_for_display|safe }} ({{ object.publication_date.year }})
-            </option>
-            {% endfor %}
-          <select>
-          <p style="margin-top: 20px;">Or enter a citation ID:</p>
-          <input type="text" class="form-control" name="pastedCitationId" id="pastedSubjectId" />
-
-          <p style="margin-top: 20px;">Please select the type of the new CCRelations:</p>
-          <select name="CCRType" id="CCRType" class="form-control">
-              <option value="">--- Select one</option>
-            {% for choice in ccrelation_choices %}
-              <option value="{{choice.0}}">{{choice.1}}</option>
-            {% endfor %}
-          </select>
-
-          <div id="hiddenCitationFields"></div>
-
-          <p style="margin-top: 20px;">You have selected the following citations to be linked:</p>
-          <div id="citationInListTemplate" data-citation-id="" style="display:none;"></div>
-          <div>
-            <small id="link_citations_list">
-
-            </small>
-          </div>
+      <div class="modal-header">
+        <h5 class="modal-title">Issues with Citation</h5>
+      </div>
+      <div class="modal-body" id="issues-modal-body">
       </div>
       <div class="modal-footer">
-        <div id="ccrCreationButtons">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="submitCCRButton">Link Records</button>
-        </div>
-        <div id="ccrCreationWarning" style="display: none;">
-          <div class="alert alert-warning text-left" role="alert">
-            <span id="ccrCreationWarningText"></span>
-            <p class="text-right">
-            <button id="ccrContinueCreation" class="btn btn-primary btn-sm">Yes, continue!</button>
-            <button id="ccrCancelCreation" class="btn btn-default btn-sm">Go back</button>
-            </p>
-          </div>
-        </div>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
-    </form>
+    </div>
+  </div>
+</div>
 
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 
 <script>
+  $(document).on("click", ".open-issues-modal", function () {
+    let filter_list = JSON.parse(document.getElementById('filter_list_data').textContent);
+    
+    let citationId = $(this).data('id');
+    let citation = filter_list.find(obj => {
+      return obj.id == citationId;
+    })
+    console.log(citation);
+
+    let authors_editors_preloaded = JSON.parse(document.getElementById(`${citationId}_authors_editors_preloaded`).textContent);
+    let are_related_citations_public = JSON.parse(document.getElementById(`${citationId}_are_related_citations_public`).textContent);
+    let citation_periodical = JSON.parse(document.getElementById(`${citationId}_citation_periodical`).textContent);
+    let has_related_citations = JSON.parse(document.getElementById(`${citationId}_has_related_citations`).textContent);
+    let are_related_authorities_missing_links = JSON.parse(document.getElementById(`${citationId}_are_related_authorities_missing_links`).textContent);
+
+    console.log(authors_editors_preloaded);
+    console.log(are_related_citations_public);
+    console.log(citation_periodical);
+    console.log(citation.publication_date);
+
+    $('#issues-modal-body').empty();
+    let issuesListContainer = `<ul id='${citationId}-issues-modal-list'></ul>`;
+    $('#issues-modal-body').append(issuesListContainer);
+    let issuesList = $(`#${citationId}-issues-modal-list`);
+    if (citation) {
+      if (are_related_authorities_missing_links) {
+        $(issuesList).append("<li><span>If you have authors, editors, journals, or publishers listed, but you have not linked them to their authorities, you need to do so.</span></li>");
+      }
+      if (!citation.publication_date) {
+        $(issuesList).append("<li><span>You need to add a publication date to your citation.</span></li>");
+      }
+      if (!authors_editors_preloaded) {
+        $(issuesList).append("<li><span>If your citation has authors or editors, make sure you've added them.</span></li>");
+      }
+      if (has_related_citations && !are_related_citations_public) {
+        $(issuesList).append("<li><span>You may have linked this citation to other citation(s) but the citation you linked it to hasn't been approved and isn't public. Make sure it's the citation you want to link to. If it's your citation, get it approved first, or, wait for it to become approved.</span></li>");
+      }
+      if (!citation_periodical) {
+        $(issuesList).append("<li><span>You need to add the journal or press that published the citation.</span></li>");
+      }
+      if (!citation.type_controlled) {
+        $(issuesList).append("<li><span>You need add give the citation a type.</span></li>");
+      }
+      if (!citation.title_for_display || citation.title_for_display == '' || citation.title_for_display == ' ') {
+        $(issuesList).append("<li><span>You need to add a title to the citation.</span></li>");
+      }
+      if (!citation.tracking_state) {
+        $(issuesList).append("<li><span>You need to submit the citation for review.</span></li>");
+      }
+    }
+    
+  });
 //# sourceURL=modals.js
   $(window).load(function() {
     var sortOrder = $("#id_o").val();
@@ -296,7 +313,7 @@ function toggleLinkRecordsBtn() {
       e.preventDefault();
       if (sortOrder == "-title_for_sort") {
         $("#id_o").val('title_for_sort');
-      } else {
+      } else { 
         $("#id_o").val('-title_for_sort');
       }
       submitSearchForm();
@@ -312,172 +329,6 @@ function toggleLinkRecordsBtn() {
 
         $(this).text(m.format("YYYY-MM-DD"));
         $(this).attr('title', m.format("YYYY-MM-DD h:mma"));
-      });
-    }
-
-    $("#linkRecordsModal").on("show.bs.modal", function(e) {
-      var citationTypes = [];
-      $(".table-curation td").find("input:checked").each(function(idx, input) {
-        var citationId = $(input).val();
-        var citationDiv = $("#citationInListTemplate").clone();
-        citationDiv.removeAttr("id");
-        var title = $("#title-" + citationId).text();
-        var authors = $("#authors-" + citationId + ">a");
-        var authorsArray = [];
-        authors.each(function(idx, elem) {
-          authorsArray.push($(elem).text());
-        });
-        var authorsText = authorsArray.join(", ");
-        var date = $("#date-" + citationId + ">a").text();
-        var page = $("#page-" + citationId).text();
-        var periodical = $("#periodical-" + citationId).text();
-
-        var citationText = '<i class="fa fa-check-square-o" aria-hidden="true"></i> ' + authorsText.trim() + ". " + title
-        if (periodical) {
-          citationText += ". In: " + periodical;
-        }
-        if (date.trim()) {
-          citationText += " (" + date.trim() + ")";
-        }
-        citationDiv.html(citationText);
-        citationDiv.show();
-        $("#link_citations_list").append(citationDiv);
-
-        var hiddenInput = $('<input type="hidden" name="citationId"/>');
-        hiddenInput.val(citationId);
-        hiddenInput.data("citation-type", $(input).data("citation-type"));
-        $("#hiddenCitationFields").append(hiddenInput);
-
-        citationTypes.push($(input).data("citation-type"));
-      });
-
-      setDefaultCCRType(citationTypes);
-    });
-
-    function setDefaultCCRType(citationTypes) {
-      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "RE") {
-        $("#CCRType").val("RB");
-        return;
-      }
-      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "CH") {
-        $("#CCRType").val("IC");
-        return;
-      }
-      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "AR") {
-        $("#CCRType").val("ISA");
-        return;
-      }
-    }
-
-    $('#linkRecordsModal').on('hidden.bs.modal', function (e) {
-      $("#link_citations_list").empty();
-      $("#hiddenCitationFields").empty();
-      $("#ccrSubjectDropdown").val('');
-      $("#pastedSubjectId").val('');
-      $("#CCRType").val('');
-      $("#ccrCreationValidationBox").hide();
-    });
-
-    $("#submitCCRButton").click(function(e) {
-      e.preventDefault();
-
-      var subjectDropDownId = $("#ccrSubjectDropdown").val();
-      var subjectPastedId = $("#pastedSubjectId").val();
-      var selectedType = $("#CCRType").val();
-
-      if ((subjectDropDownId == null || subjectDropDownId.trim() == "")
-              && (subjectPastedId == null || subjectPastedId.trim() == "")) {
-        $("#ccrCreationValidationBox").text("Please select a subject citation from the drop down menu or past a citation ID.");
-        $("#ccrCreationValidationBox").show();
-        return;
-      }
-
-      if (selectedType == null || selectedType.trim() == "") {
-        $("#ccrCreationValidationBox").text("Please select a type for the new CCRelation.");
-        $("#ccrCreationValidationBox").show();
-        return;
-      }
-
-      if ($("#hiddenCitationFields input").length == 0) {
-        $("#ccrCreationValidationBox").text("Please select at least one citation from the list.");
-        $("#ccrCreationValidationBox").show();
-        return;
-      }
-
-      var citationTypes = [];
-      $("#hiddenCitationFields input").each(function(idx, input) {
-        citationTypes.push($(input).data("citation-type"));
-      });
-      if (citationTypes.every( (val, i, types) => val === types[0] ) && citationTypes[0] == "RE") {
-        var subjectType = $("#ccrSubjectDropdown option:selected").data("citation-type");
-        if (subjectType == 'RE' || subjectType == 'ES') {
-          $("#ccrCreationValidationBox").text("Subject of CCRelation cannot be a Review or Essay Review. Please select another one.");
-          $("#ccrCreationValidationBox").show();
-          return;
-        }
-      }
-
-      var showWarning = false;
-      $("#hiddenCitationFields input").each(function(idx, elem) {
-        if ($(elem).val() == subjectPastedId || ((subjectPastedId == null || subjectPastedId == '') && $(elem).val() == subjectDropDownId)) {
-          $("#ccrCreationButtons").hide();
-          $("#ccrCreationWarningText").text("You are about to link " + $(elem).val() + " to itself. Are you sure you want to continue?");
-          $("#ccrCreationWarning").show();
-          showWarning = true;
-          return;
-        }
-      });
-
-      if (showWarning) {
-        $("#ccrCreationValidationBox").hide();
-        return;
-      }
-
-      submitCCR();
-    });
-
-    $("#ccrCancelCreation").click(function(e) {
-      e.preventDefault();
-      $("#ccrCreationWarningText").text("");
-      $("#ccrCreationWarning").hide();
-      $("#ccrCreationButtons").show();
-    });
-
-    $("#ccrContinueCreation").click(function(e) {
-      e.preventDefault();
-      submitCCR();
-    });
-
-    function submitCCR() {
-      data = new FormData(document.querySelector("form#link_citations_form"));
-      $.ajax({
-        url: '{% url 'curation:bulk-create-ccr' %}',
-        data: data,
-        contentType : false,
-	      processData : false,
-	      enctype: 'multipart/form-data',
-        type: 'POST',
-        success: function ( data ) {
-            $('#linkRecordsModal').modal('hide');
-            if (data["failed"] == null || data["failed"].length > 0) {
-              var failed = $("<div></div>");
-              var failedText = "CCRelation creation failed for the following citations (all other succeeded): " + data["failed"];
-              failed.text(failedText);
-              $("#msgBoxErrorText").append(failed);
-              $("#msgBoxError").show();
-            } else {
-              $("#msgBoxSuccessText").text("CCRelations successfully created.");
-              $("#msgBoxSuccess").show();
-            }
-        },
-        error: function (xhr) {
-          $('#linkRecordsModal').modal('hide');
-          var failed = $("<div></div>");
-          var failedText = "An error occured: " + $.parseJSON(xhr.responseText)["msg"];
-          failed.text(failedText);
-          $("#msgBoxErrorText").append(failed);
-          $("#msgBoxError").show();
-        }
       });
     }
 

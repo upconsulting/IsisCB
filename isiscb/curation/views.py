@@ -178,8 +178,11 @@ def create_citation(request):
             if not attribute_form.instance.value_freeform:
                 attribute_form.instance.value_freeform = value_form.instance.render()
                 attribute_form.instance.save()
-
-            return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
+            
+            if request.user.is_superuser or request.user.is_staff:
+                return HttpResponseRedirect(reverse('curation:curate_citation', args=(citation.id,)))
+            else:
+                return HttpResponseRedirect(reverse('curation:guest_curate_citation', args=(citation.id,)))
         else:
             context.update({
                 'form' : form,
@@ -482,7 +485,10 @@ def create_acrelation_for_citation(request, citation_id):
         form = ACRelationForm(request.POST, prefix='acrelation')
         if form.is_valid():
             form.save()
-            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+            if request.user.is_superuser or request.user.is_staff:
+                target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+            else:
+                target = reverse('curation:guest_curate_citation', args=(citation.id,)) + '?'
             if search_key and current_index:
                 target += '&search=%s&current=%s' % (search_key, current_index)
             return HttpResponseRedirect(target)
@@ -778,8 +784,10 @@ def delete_acrelation_for_citation(request, citation_id, acrelation_id, format=N
         acrelation.delete()
         if format == 'json':
             return JsonResponse({'result': True})
-
-        target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+        if request.user.is_superuser or request.user.is_staff:
+            target = reverse('curation:curate_citation', args=(citation.id,)) + '?'
+        else:
+            target = reverse('curation:guest_curate_citation', args=(citation.id,)) + '?'
         if search_key and current_index:
             target += '&search=%s&current=%s' % (search_key, current_index)
         return HttpResponseRedirect(target)

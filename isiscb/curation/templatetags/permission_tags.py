@@ -164,6 +164,10 @@ def are_related_citations_public(citation_id):      #ccrelations, citations):
     return CCRelation.objects.filter(Q(subject_id=citation_id)).filter(Q(public=False) | Q(object__public=False)).count() == 0\
             and CCRelation.objects.filter(Q(object_id=citation_id)).filter(Q(public=False) | Q(subject__public=False)).count() == 0
 
+@register.filter
+def has_related_citations(citation_id):
+    return CCRelation.objects.filter(Q(subject_id=citation_id)).count() > 0 or CCRelation.objects.filter(Q(object_id=citation_id)).count() > 0
+
 
 @register.filter
 def are_attributes_public(attributes):
@@ -201,6 +205,9 @@ def are_linked_journals_public(citation_id, authorities):
                     return False
     return True
 
+@register.filter
+def are_related_authorities_missing_links(citation):
+    return ACRelation.objects.filter(citation_id=citation, name_for_display_in_citation__isnull=False, authority_id__isnull=True).count() > 0
 
 @register.filter
 def are_related_objects_for_authority_public(authority):

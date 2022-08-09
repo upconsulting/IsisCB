@@ -144,7 +144,7 @@ label {
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               {{ form.record_status_value|addcss:"form-control input-sm" }}
 
-              {{ form.type_controlled }}
+              {{ form.type_controlled.as_hidden }}
 
               <button class="btn btn-warning btn-xs" id="proofed_setactive_btn">Proof and Activate</button>
             </div>

@@ -792,6 +792,16 @@ function toggleLinkRecordsBtn() {
               </div>
           </div>
 
+          {% for error in objects.form.created_by_guest.errors %}
+          <div class="alert alert-warning">{{ error }}</div>
+          {% endfor %}
+          <div class="form-group form-group-xs clearable">
+              <label class="col-lg-2 control-label">Include Guests</label>
+              <div class="col-lg-10">
+                {{ objects.form.created_by_guest|addcss:"form-control" }}
+              </div>
+          </div>
+
           {% for error in objects.form.created_on_from.errors %}
           <div class="alert alert-warning">{{ error }}</div>
           {% endfor %}
