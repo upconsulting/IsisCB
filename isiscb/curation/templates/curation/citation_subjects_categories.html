@@ -168,8 +168,7 @@
       <div role="tabpanel" class="tab-pane active" id="addSubjects">
         <p>
           <div class="input-group">
-            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em">
-            </input>
+            <input type="text" id="subjectSearchQuery" class="form-control" placeholder="Search for subject..." style="height:3.4em"></input>
 
             <span class="input-group-btn">
               <span class="button-checkbox">
@@ -217,6 +216,8 @@
       <!-- Category tab -->
       <div role="tabpanel" class="tab-pane" id="addCategories">
         {% include "curation/fragment_categories_page_categories.html" %}
+        <div id="category-guesses-container">
+        </div>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="addTimePeriods">

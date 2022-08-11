@@ -1,0 +1,46 @@
+{% extends "curation/base.html" %}
+{% load addcss %}
+
+{% block content %}
+<style>
+    td {
+        border: 1px solid black;
+        padding: 10px;
+    }
+</style>
+<div>
+    <h2>Results Summary:</h2>
+    <h4>{{results_summary.number_of_citations}} citations tested</h4>
+    {% for inc in results_summary.inc_success_rates %}
+    <h4>{{inc.name }}: {{inc.percent}}%</h4>
+    {% endfor %}
+    <h2>Results</h2>
+    <table style="border-spacing: 15px;">
+        <tr>
+            <th>Citation</th>
+            <th>Category</th>
+            <th>Subjects</th>
+            <th>Increment Results</th>
+        </tr>
+        {% for res in test_results %}
+        <tr>
+            <td><a href="{% url 'curation:subjects_and_categories' res.citation_id %}">{{res.citation_title}}</a> <a href="{% url 'citation' res.citation_id %}">public</a></td>
+            <td>{{res.citation_category}}</td>
+            <td>{{res.citation_subjects}}</td>
+            <td>
+                <table>
+                    {% for inc in res.increment_results %}
+                        <tr {% if inc.matches_human_category %}style="background-color: #90EE90;"{% endif %}>
+                            <td>{{inc.increment}}</td>
+                            <td>{{inc.category}}</td>
+                            <td>{{inc.count}} ({{inc.percent}}%)</td>
+                        <tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}

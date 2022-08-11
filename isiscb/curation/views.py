@@ -54,8 +54,11 @@ import iso8601, rules, datetime, hashlib, math
 from dateutil.relativedelta import relativedelta
 from itertools import chain
 from unidecode import unidecode
+from collections import Counter, defaultdict
+from operator import itemgetter
 import bleach
 import logging
+import statistics
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -825,6 +828,133 @@ def delete_acrelation_for_authority(request, authority_id, acrelation_id, format
     template = 'curation/authority_acrelation_delete.html'
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def generate_category(request):
+    if request.method == 'POST':
+        citation_id = request.POST.get('citation_id')
+        subjects = ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=citation_id)
+        subject_ids = [subject.authority.id for subject in subjects if subject.authority]
+        
+        if subjects:
+            sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                    facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                    facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                    facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                    facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                    facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                    facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                    facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+            sqs.query.set_limits(low=0, high=50)
+
+            results = sqs.all().exclude(public="false")
+            similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).exclude(publication_date__lt=2014).query.get_results()
+            similar_citation_ids = [citation.id for citation in similar_citations]
+        
+            similar_citations_category_acrelations = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id__in=similar_citation_ids)
+            similar_citations_category_ids = [(acrelation.authority.name, acrelation.authority.id) for acrelation in similar_citations_category_acrelations if acrelation.authority]
+            categories = Counter(similar_citations_category_ids).most_common()
+            categories = [category for category in categories if category[1] > 1]
+            categories = [{'name': category[0][0], 'id': category[0][1], 'count': category[1], 'percent': round((category[1]/similar_citations_category_acrelations.count())*100), 'decimal': round(category[1]/similar_citations_category_acrelations.count(), 2)} for category in categories]
+
+        response_data = {
+            'category_guesses': categories,
+        }
+
+        return JsonResponse(response_data)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def test_category_generator(request):
+    if request.method == 'GET':
+        number_of_citations_to_test = 200
+        increments = [50]
+
+        all_citations = Citation.objects.filter(type_controlled__in=[Citation.BOOK,Citation.ARTICLE], publication_date__gt=('2013-12-31'))
+        random = randint(0, all_citations.count()-number_of_citations_to_test)
+        test_citations = all_citations[random:random+number_of_citations_to_test]
+
+        test_results = []
+        results_summary = {
+            'increments': {},
+        }
+
+        increment_success_counts = defaultdict(int)
+
+        for citation in test_citations:
+            subjects = ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=citation.id)
+            subject_names = [subject.authority.name for subject in subjects if subject.authority]
+            subject_ids = [subject.authority.id for subject in subjects if subject.authority]
+            human_categories = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id=citation.id)
+            human_category = None
+            human_category_id = None
+            human_category_name = None
+
+            if human_categories:
+                human_category = human_categories[0]
+                human_category_id = human_category.authority.id
+                human_category_name = human_category.authority.name
+
+            if subjects:
+                sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
+                        facet('subject_ids', size=100).facet('institution_ids', size=100). \
+                        facet('geographic_ids', size=1000).facet('time_period_ids', size=100).\
+                        facet('category_ids', size=100).facet('other_person_ids', size=100).\
+                        facet('publisher_ids', size=100).facet('periodical_ids', size=100).\
+                        facet('concepts_by_subject_ids', size=100).facet('people_by_subject_ids', size=100).\
+                        facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
+                        facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
+                
+                increment_results = []
+                for inc in increments:
+                    inc_name = str(inc)
+                    sqs.query.set_limits(low=0, high=inc)
+
+                    results = sqs.all().exclude(public="false")
+                    similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation.id).query.get_results()
+                    similar_citation_ids = [citation.id for citation in similar_citations]
+                
+                    similar_citations_category_acrelations = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id__in=similar_citation_ids)
+                    similar_citations_category_names = [(acrelation.authority.name, acrelation.authority.id) for acrelation in similar_citations_category_acrelations if acrelation.authority]
+                    top_category = Counter(similar_citations_category_names).most_common()[0]
+                    increment_result = {}
+                    increment_result['category'] = top_category[0][0]
+                    increment_result['increment'] = str(inc)
+                    increment_result['count'] = top_category[1]
+                    increment_result['percent'] = round(top_category[1]/inc*100, 1)
+                    increment_result['matches_human_category'] = True if top_category[0][1] == human_category_id else False
+                    if top_category[0][1] == human_category_id:
+                        increment_success_counts[inc_name] += 1
+                    else:
+                        increment_success_counts[inc_name] += 0
+                    increment_results.append(increment_result)
+
+            test_result = {}
+            test_result['citation_title'] = citation.title_for_display
+            test_result['citation_id'] = citation.id
+            test_result['citation_category'] = human_category_name
+            test_result['citation_subjects'] = subject_names
+            test_result['increment_results'] = increment_results if increment_results else []
+            test_results.append(test_result)
+
+        results_summary['number_of_citations'] = test_citations.count()
+        for inc in increments:
+            inc_name = str(inc)
+            increment_success_counts[inc_name] = round(increment_success_counts[inc_name]/number_of_citations_to_test*100, 1)
+        
+        inc_success_rates = []
+        for key in increment_success_counts:
+            inc_success_rate = {}
+            inc_success_rate['name'] = key
+            inc_success_rate['percent'] = increment_success_counts[key]
+            inc_success_rates.append(inc_success_rate)
+
+        results_summary['inc_success_rates'] = inc_success_rates
+
+        context = {
+            'test_results': test_results,
+            'results_summary': results_summary,
+        }
+        template = 'curation/test_category_generator.html'
+        return render(request, template, context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_access_view_edit', fn=objectgetter(Authority, 'authority_id'))
