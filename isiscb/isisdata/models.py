@@ -2432,6 +2432,8 @@ class CitationCollection(models.Model):
     createdBy = models.ForeignKey(User, related_name='citation_collections', on_delete=models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
+    subjects = models.ManyToManyField(Authority)
+    coverimage_url = models.URLField(blank=True)
 
     def __unicode__(self):
         return '%s (%s)' % (self.name, self.createdBy.username)

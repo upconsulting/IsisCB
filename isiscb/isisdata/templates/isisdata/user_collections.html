@@ -1,0 +1,29 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block content %}
+    <div class="col-sm-12" style="padding: 0 15%;">
+        <div class="col-sm-12">
+            <h3>user: <a href="{% url 'user_profile' username %}">{{username}}</a></h3>
+            <h2>Collections</h2>
+        </div>
+        {% for collection in collections %}
+            <div class="col-sm-3">
+                <div class="thumbnail" style="width: auto;">
+                    <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="object-fit: cover; width: 150px;height: 150px;">
+                    <div class="caption" style="text-overflow: ellipsis; overflow: hidden;">
+                        <a href="{% url 'collection' collection.id %}"><h4 style="margin: 5px 0; overflow-wrap: break-word;">{{collection.name}}</h4></a>
+                        <span>{{collection.description}}</span><br/>
+                        <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
+                    </div>
+                </div>
+            </div>
+        {% empty%}
+            <h5>You don't have any collections yet . . .</h5>
+        {% endfor %}
+    </div>
+{% endblock %}

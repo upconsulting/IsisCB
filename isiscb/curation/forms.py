@@ -807,7 +807,7 @@ class CitationCollectionForm(forms.ModelForm):
     filters = forms.CharField(widget=forms.widgets.HiddenInput())
     class Meta(object):
         model = CitationCollection
-        exclude = ('created', 'createdBy', 'citations')
+        exclude = ('created', 'createdBy', 'citations', 'subjects')
 
 class AuthorityCollectionForm(forms.ModelForm):
     filters = forms.CharField(widget=forms.widgets.HiddenInput())

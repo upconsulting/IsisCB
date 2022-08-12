@@ -1,0 +1,38 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block content %}
+    <div class="col-sm-12">
+        <div class="col-sm-4">
+            <div class="thumbnail">
+                <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="max-height: 300px;">
+                <div class="caption">
+                    <h3>{{collection.name}}</h3>
+                    {% if collection.subjects.all %}
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {% for subject in collection.subjects.all %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <span>{{collection.description}}</span><br/>
+                    <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
+                </div>
+              </div>          
+        </div>
+        <div class="col-sm-8">
+            {% if citations %}
+            <ul class="list-group">
+                {% for citation in citations %}
+                <li class="list-group-item"><span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="(url 'citation' citation.id)">{{citation.title_for_display}}</a> ({{citation.publication_date.year}})</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

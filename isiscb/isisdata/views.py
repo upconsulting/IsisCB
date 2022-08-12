@@ -1639,6 +1639,12 @@ def user_profile(request, username):
 
     edit = request.GET.get('edit')
 
+    recent_collections = CitationCollection.objects.filter(createdBy=user).order_by('-created')[:3]
+
+    searchqueries = request.user.searches.order_by('-created_on')
+    print('aaaa')
+    print(request.session.items())
+
     # Only the owner of the profile can change it. We use a regular Form rather
     #  than a ModelForm because some fields belong to User and other fields
     #  belong to UserProfile.
@@ -1669,6 +1675,7 @@ def user_profile(request, username):
         'email': user.email,
         'profile': user.profile,
         'usercomments': comments,
+        'recent_collections': recent_collections,
     }
 
     # User has elected to edit their own profile.
@@ -1692,6 +1699,31 @@ def user_profile(request, username):
         template = 'isisdata/userprofile_edit.html'
     else:
         template = 'isisdata/userprofile.html'
+    return render(request, template, context)
+
+def user_collections(request, username):
+    user = get_object_or_404(User, username=username)
+
+    collections = CitationCollection.objects.filter(createdBy=user).order_by('-created')
+    context = {
+        'collections': collections,
+        'username': user.username,
+    }
+    template = 'isisdata/user_collections.html'
+    return render(request, template, context)
+
+def collection(request, *args, **kwargs):
+    print('bbbbbb')
+    collection_id = kwargs.get('collection_id')
+    collection = get_object_or_404(CitationCollection, id=collection_id)
+    citation_ids = [citation.id for citation in collection.citations.all()]
+    citations = Citation.objects.filter(pk__in=citation_ids)
+    print(citations[0].__dict__)
+    context = {
+        'collection': collection,
+        'citations': citations,
+    }
+    template = 'isisdata/collection.html'
     return render(request, template, context)
 
 def graph_explorer(request):
