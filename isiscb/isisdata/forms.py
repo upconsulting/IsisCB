@@ -142,8 +142,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
 
         is_raw_search = self.cleaned_data['raw_search']
 
-        # Normalize query string before running query so that it matches the normalized title in the search index
-        self.cleaned_data['q'] = normalize(self.cleaned_data['q'])
+        # Normalize query string before running query so that it matches the normalized title in the search index if isn't raw search
+        if not is_raw_search and not self.cleaned_data['q'] == '*':
+            self.cleaned_data['q'] = normalize(self.cleaned_data['q'])
 
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
 
