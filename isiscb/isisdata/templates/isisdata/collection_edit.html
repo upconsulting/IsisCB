@@ -1,0 +1,226 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load addcss %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block content %}
+<div class="col-sm-12" style="padding: 0 10%;">
+    <div class="col-sm-4">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <h3>Collection Details</h3>
+                <form class="form" action="?confirmed=true" method="POST">
+                    {% csrf_token %}
+                
+                    {% for field in form %}
+                        {% if field.label in "'Citations', 'Filters'" %}
+                            {{ field }}
+                        {% elif field.label != "Subjects" %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-group">
+                                <label>{{ field.label }}</label>
+                                {{ field|addcss:"form-control input-sm"}}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    <hr>
+                    <ul id="subject-list-group" class="list-group">
+                        {% for subject in subjects %}
+                           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
+                             
+                             <a class="btn btn-xs delete delete-subject pull-right"
+                             subject-id="{{ subject.id }}"
+                             data-type="subject"
+                             subject-title="{{ subject.name }}">
+                                <span class="label label-primary">{{ subject.name }}</span>
+                            </a>
+                           </li>
+                        {% endfor %}
+                    </ul>
+                    <input type="text" id="subjectSearchQuery" class="form-control input-sm" placeholder="Search for subject...">
+                    </input>
+                    <div class="text-center">
+                        <input type="submit" class="btn btn-success" value="Save" />
+                    </div>
+                    <ul class="list-group" id="subjectSearchResultsContainer">
+                    </ul>
+            
+                    <div class="text-right">
+                      <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
+                    </div>
+                </form>
+            </div>
+          </div>
+    </div>
+    <div class="col-sm-8">
+        {% if citations %}
+            <ul class="list-group">
+                {% for citation in citations %}
+                <li class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}})</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    var delete_handler = function() {
+        var elem = $(this);
+        var acrelation_id = elem.attr('acrelation-id');
+        var acrelation_type = elem.attr('data-acrelation-type')
+        if (acrelation_id) {
+            $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
+                'success': function(r) {
+                    $('#' + acrelation_type + '-entry-' + acrelation_id).remove();
+                },
+            });
+        }
+    }
+    
+    var INITIAL_MAX_RESULTS = 5;
+    var max_results = INITIAL_MAX_RESULTS;
+    var types = [];
+    
+    var searchTimerSubjects = 0;
+    function triggerSearchSubjects(force) {
+      if (searchTimerSubjects) {
+          clearTimeout(searchTimerSubjects);
+      }
+    
+      var query = $('#subjectSearchQuery').val();
+      searchTimerSubjects = setTimeout(function() {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+            success: function(result) {
+              var resultsContainer = $('#subjectSearchResultsContainer');
+              resultsContainer.empty();
+              result.results.forEach(function(r) {
+                var newLi = $("<li></li>");
+                newLi.addClass("list-group-item");
+                newLi.attr('data-acrelation-id', r.name);
+                var publicLink = $('<a></a>');
+                publicLink.attr('href', '{% url 'isis-index' %}authority/' + r.id);
+                publicLink.attr('target', "_blank");
+                publicLink.html(r.name + ' (' + r.citation_count + ')' );
+                newLi.append(publicLink);
+                var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
+                suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
+                newLi.append(suggestLink);
+                newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
+                resultsContainer.append(newLi);
+    
+                suggestLink.click(suggestSubjects);
+    
+                var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
+                addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
+                addBtn.click(addConcept);
+                newLi.prepend(addBtn);
+              });
+    
+              if (result.results.length == 0 && ((force && query.length < 3) || (!force && query.length > 2))) {
+                var msg = $('<p>There are no results for "' + $('#subjectSearchQuery').val() +'".</p>');
+                resultsContainer.append(msg);
+              } else if (result.results.length == 0 && !force && query.length < 3) {
+                var msg = $('<p>Your query was too short. </p>');
+                var forceLink = $('<a>Press <i class="fa fa-search" aria-hidden="true"></i></a>');
+                forceLink.click(function() {
+                  triggerSearchSubjects(true);
+                });
+                msg.append(forceLink);
+                msg.append(" to force the search.");
+                resultsContainer.append(msg);
+              }
+    
+              if (result.results.length == max_results) {
+                var load_more = `
+                  <li class="list-group-item search-result">
+                    <div class="text-right" id="load-more-subjects"><a>Load more...</a></div>
+                  </li>
+                `;
+                resultsContainer.append(load_more);
+                $('#load-more-subjects').click(function() {
+                    max_results += 10;
+                    triggerSearchSubjects(force);
+                });
+              }
+            }
+          });
+      }, 500);
+    }
+
+    $(document).ready(function() {
+
+        $("#forceSearch").click(function() {
+          triggerSearchSubjects(true);
+        });
+      
+        $('#subjectSearchQuery').on('keyup', function() {
+          max_results = INITIAL_MAX_RESULTS;
+          triggerSearchSubjects(false);
+        });
+    });
+      
+    // checkbox update display
+    function updateDisplay($checkbox) {
+        var isChecked = $checkbox.is(':checked');
+        var $button = $checkbox.siblings('button')
+        var color = $button.data('color');
+    
+        // Set the button's state
+        $button.data('state', (isChecked) ? "on" : "off");
+    
+        if ($button.data('state') == 'on' || $button.data('state') == 'off') {
+        // Set the button's icon
+        $button.find('.state-icon')
+            .removeClass()
+            .addClass('state-icon ' + settings[$button.data('state')].icon);
+    
+        }
+    
+        // Update the button's color
+        if (isChecked) {
+            $button
+                .removeClass('btn-default')
+                .addClass('btn-' + color + ' active');
+        }
+        else {
+            $button
+                .removeClass('btn-' + color + ' active')
+                .addClass('btn-default');
+        }
+    }
+
+    function addConcept(event) {
+        var link = event.target.closest('a');
+        var acRelId = $(link).data('id');
+      
+        var payload = {
+            'citation_id': "{{ instance.id }}",
+            'authority_id': acRelId,
+            'type_controlled': 'SU',    // subject.
+            'type_broad_controlled': 'SC',    // subject content.
+        };
+      
+        $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
+          var ul = $('#subject-list-group');
+          var newId = result.acrelation.id;
+          var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
+      
+          var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
+          ul.append(li);
+          {% if can_update %}
+          var span = $('<span class="button-group button-group-xs"></span>');
+          li.append(span);
+      
+          var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
+          span.append(a);
+          a.click(delete_handler);
+          {% endif %}
+        });
+      }
+</script>
+{% endblock %}

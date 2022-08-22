@@ -22,6 +22,19 @@
                     {% endif %}
                     <span>{{collection.description}}</span><br/>
                     <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
+                    {% if collection.createdBy.id == user.id %}<a class="pull-right" href="?edit=true"><i class="fas fa-pencil-alt"></i> edit collection details</a>{% endif %}
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-external-link-alt"></i> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a href="{% url 'generate_csv_from_collection' collection.id %}"><i class="fas fa-file-csv"></i> Download CSV File</a></li>
+                          <li><a href="#">Another action</a></li>
+                          <li><a href="#">Something else here</a></li>
+                          <li role="separator" class="divider"></li>
+                          <li><a href="#">Separated link</a></li>
+                        </ul>
+                      </div>
                 </div>
               </div>          
         </div>
@@ -29,7 +42,7 @@
             {% if citations %}
             <ul class="list-group">
                 {% for citation in citations %}
-                <li class="list-group-item"><span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="(url 'citation' citation.id)">{{citation.title_for_display}}</a> ({{citation.publication_date.year}})</li>
+                <li class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}})</li>
                 {% endfor %}
             </ul>
             {% endif %}

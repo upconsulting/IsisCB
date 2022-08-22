@@ -14,18 +14,17 @@
     {% csrf_token %}
 
     {% for field in form %}
-    {% if field.label in "'Citations', 'Filters'" %}
-    {{ field }}
-    {% else %}
-
-    {% for error in field.errors %}
-    <div class="alert alert-danger">{{ error }}</div>
-    {% endfor %}
-    <div class="form-group">
-        <label>{{ field.label }}</label>
-        {{ field|addcss:"form-control" }}
-    </div>
-    {% endif %}
+        {% if field.label in "'Citations', 'Filters'" %}
+            {{ field }}
+        {% elif field.label != "Subjects" %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field|addcss:"form-control" }}
+            </div>
+        {% endif %}
     {% endfor %}
     <div class="text-center">
         <input type="submit" class="btn btn-success" value="Create" />

@@ -36,7 +36,7 @@ from rest_framework.reverse import reverse
 
 from urllib.parse import quote
 from urllib.request import urlopen
-import codecs, datetime, uuid, base64, zlib, locale, json, requests, random
+import codecs, datetime, uuid, base64, zlib, locale, json, requests, random, csv
 import pytz
 
 from collections import defaultdict, Counter
@@ -47,6 +47,7 @@ import xml.etree.ElementTree as ET
 
 from isisdata.models import *
 from isisdata.forms import UserRegistrationForm, UserProfileForm
+from curation.forms import UserCitationCollectionForm
 from isisdata.templatetags.metadata_filters import get_coins_from_citation
 from isisdata import helper_methods
 from isisdata.twitter_methods import get_featured_tweet
@@ -953,9 +954,9 @@ def get_google_books_image(citation, featured):
         parent_id = parent_relations[0].subject.id
 
     if citation.type_controlled in [Citation.CHAPTER] and parent_id:
-        google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id).first()
+        google_books_data = GoogleBooksData.objects.filter(citation__id=parent_id, image_size="standard").first()
     else:
-        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id).first()
+        google_books_data = GoogleBooksData.objects.filter(citation__id=citation.id, image_size="standard").first()
 
     google_books_refresh_time = settings.GOOGLE_BOOKS_REFRESH_TIME
 
@@ -1031,6 +1032,8 @@ def get_google_books_image(citation, featured):
             elif citation.type_controlled in [Citation.CHAPTER] and parent_id:
                 google_books_data = GoogleBooksData(image_url=cover_image['url'], image_size=cover_image['size'], citation_id=parent_id)
             google_books_data.save()
+
+            
 
     return cover_image
 
@@ -1642,8 +1645,6 @@ def user_profile(request, username):
     recent_collections = CitationCollection.objects.filter(createdBy=user).order_by('-created')[:3]
 
     searchqueries = request.user.searches.order_by('-created_on')
-    print('aaaa')
-    print(request.session.items())
 
     # Only the owner of the profile can change it. We use a regular Form rather
     #  than a ModelForm because some fields belong to User and other fields
@@ -1713,19 +1714,85 @@ def user_collections(request, username):
     return render(request, template, context)
 
 def collection(request, *args, **kwargs):
-    print('bbbbbb')
+    user = request.user
+    edit = request.GET.get('edit')
     collection_id = kwargs.get('collection_id')
     collection = get_object_or_404(CitationCollection, id=collection_id)
     citation_ids = [citation.id for citation in collection.citations.all()]
     citations = Citation.objects.filter(pk__in=citation_ids)
-    print(citations[0].__dict__)
+    for citation in citations:
+        citation.cover_image = get_google_books_image(citation, False)
+        if not citation.cover_image:
+            citation.cover_image = {'url': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/Hieroglyphs-temple-Ombos-Egypt.jpg'}
+
+    # Only the owner of the collection can change it. 
+    form_error = False
+    if request.method == 'POST' and request.user.id == user.id:
+        form = UserCitationCollectionForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            collection.name = data.get('name')
+            collection.description = data.get('description')
+            collection.coverimage_url = data.get('coverimage_url')
+            collection.save()
+        else:
+            form_error = True
+
     context = {
+        'user': user,
         'collection': collection,
         'citations': citations,
     }
-    template = 'isisdata/collection.html'
+    # User has elected to edit their own profile.
+    if edit and user.id == request.user.id:
+        template = 'isisdata/collection_edit.html'
+        form = UserCitationCollectionForm(initial={
+            'name': collection.name,
+            'description': collection.description,
+            'coverimage_url': collection.coverimage_url,
+        })
+        
+        context.update({'form': form})
+    elif form_error:
+        context.update({'form': form})
+        template = 'isisdata/collection_edit.html'
+    else:
+        template = 'isisdata/collection.html'
+
     return render(request, template, context)
 
+def generate_csv_from_collection(request, *args, **kwargs):
+    collection_id = kwargs.get('collection_id')
+    collection = get_object_or_404(CitationCollection, id=collection_id)
+    citation_ids = [citation.id for citation in collection.citations.all()]
+    citations = Citation.objects.filter(pk__in=citation_ids)
+
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
+    )
+
+    writer = csv.writer(response)
+    writer.writerow(['Title', 'Authors/Editors', 'Publication Year', 'Type', 'Abstract', 'Publisher', 'Volume', 'Issue/Number', 'Language'])
+    for citation in citations:
+        authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
+        author_names = ','.join([author.authority.name if author.authority else author.name_for_display_in_citation for author in authors]) if authors else ''
+
+        publishers = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(type_controlled__in=ACRelation.PERIODICAL).filter(type_controlled__in=ACRelation.PUBLISHER).filter(public=True)
+        publisher_names = ','.join([publisher.authority.name if publisher.authority else publisher.name_for_display_in_citation for publisher in publishers]) if publishers else ''
+
+        volume = citation.part_details.volume if citation.part_details.volume else citation.part_details.volume_free_text if citation.part_details.volume_free_text else ''
+        if citation.part_details.issue_begin:
+            issue = citation.part_details.issue_begin
+            if citation.part_details.issue_end:
+                issue += '-' + citation.part_details.issue_end
+
+        languages = ','.join([language for language in citation.languages.all]) if citation.languages else ''
+        writer.writerow([citation.title, author_names, citation.publication_date.year, citation.get_type_controlled_display, citation.abstract, publisher_names, volume, issue, languages])
+
+    print('xxxxxx')
+    print(writer)
+    # return response
 def graph_explorer(request):
     context = {}
 
