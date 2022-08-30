@@ -19,6 +19,7 @@ import time
 from isisdata import helper_methods
 from isisdata.models import Citation, Authority
 from openurl.models import *
+from isisdata.utils import normalize
 
 import re
 
@@ -140,6 +141,11 @@ class MyFacetedSearchForm(FacetedSearchForm):
                     'citation': self.no_query_found()}
 
         is_raw_search = self.cleaned_data['raw_search']
+
+        # Normalize query string before running query so that it matches the normalized title in the search index if isn't raw search
+        if not is_raw_search and not self.cleaned_data['q'] == '*':
+            self.cleaned_data['q'] = normalize(self.cleaned_data['q'])
+
         query_tuple = self.has_specified_field(self.cleaned_data['q'])
         
         # Removed: query sanitization already occurs (by design) in the
