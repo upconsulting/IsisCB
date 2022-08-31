@@ -77,10 +77,11 @@
                         </a>
                         <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
                             <!-- <li><a href="/profile/">Dashboard</a></li> -->
-                            <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
+                            <li><a href="{% url 'user_profile' user.username %}">Profile</a></li>
+                            <li><a href="{% url 'user_playlists' user.username %}">Playlists</a></li>
                             <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
-                            <li><a href="{% url 'search_history' %}">My Search History</a></li>
-                            <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                            <li><a href="{% url 'search_history' %}">Search History</a></li>
+                            <li><a href="{% url 'search_saved' %}">Saved Searches</a></li>
                             <li><a id="logout" href="{% url 'account_logout' %}">Logout</a></li>
                         </ul>
                     </li>

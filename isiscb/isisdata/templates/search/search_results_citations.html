@@ -164,8 +164,7 @@
     </div>
 
     {% for result in page.citation.object_list %}
-      <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is incomplete {% endif %}">
-        <p style="margin-bottom: 20px;">
+      <div class="{% if result.stub_record_status == 'SR' %}stub-search-result{% else %}search-result{% endif %}" title="{% if result.stub_record_status == 'SR' %} This record is incomplete {% endif %}" style="margin-bottom: 20px;" id="{{result.id}}">
           {% if result.stub_record_status == 'SR' %}
             <span class="stub-search-result-label"><i class="fas fa-exclamation-triangle" style="color: #B7337A" label="This record is incomplete."></i></span>
           {% endif %}
@@ -184,7 +183,23 @@
             <i class="far fa-file-alt"></i>
           {% endif %}
 
-          <span class="label label-primary label-xs citation-type-label">{{ result.type }}</span><br>
+          <span class="label label-primary label-xs citation-type-label">{{ result.type }}</span>
+          <div class="btn-group pull-right" id="{{result.id}}-options-button" style="display: none;">
+            <a type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn dropdown-toggle"><i class="fas fa-ellipsis-h"></i></a>
+            <ul class="dropdown-menu multi-level">
+              <li class="dropdown-submenu" style="display: inline-block">
+                <a class="test" tabindex="-1" href="#">Add to Playlist <i class="fas fa-caret-right"></i></a>
+                <ul class="dropdown-menu" style="left: 100%; top: -8%;">
+                  <li><a href="#">Create New Playlist</a></li>
+                  <li role="separator" class="divider"></li>
+                  {% for playlist in user_playlists %}
+                    <li><a class="add-citation-button" data-id="{{result.id}}" id="{{playlist.id}}" href="#">{{playlist.name}}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <br>
 
           {% url 'citation' result.id|get_pk as citation_url %}
           {% if result.title == 'Title missing' and result.complete_citation %}
@@ -255,7 +270,6 @@
                               }
                               linkElem += '</a>';
                               $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);
-                              console.log(document.getElementById('linkElem_{{ result.id|get_pk }}'))
                           } else {
                               // This tag provides data for latent OpenURL functionality (e.g. browser plugins, etc). -->
                               $('.linkresolver_{{ result.id|get_pk }}').append('<span class="Z3988" title="{{ result|get_coins_from_result }}"></span>');
@@ -278,7 +292,6 @@
               {% endif %}
             {% endwith %}
           {% endif %}
-        </p>
       </div>
     {% empty %}
         <h3>No results found . . . <i class="fas fa-child"></i></h3>
@@ -393,4 +406,46 @@ $('input[name="exclude_stubs"]').on('switchChange.bootstrapSwitch', function(eve
     window.location = "{{  request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_stub_record_status_facet:'SR'|add_facet_or_operator|safe }}"
   }
 });
+
+$(document).ready(function() {
+  $(".dropdown-submenu a.test").on("mouseover", function(e) {
+   $(this)
+    .next("ul")
+    .toggle();
+   e.stopPropagation();
+   e.preventDefault();
+  });
+
+  $('.search-result').on("mouseover", function(e) {
+    let citation_id = this.id;
+    $(`#${citation_id}-options-button`).css('display', 'inline-block');
+  })
+
+  $('.search-result').on("mouseleave", function(e) {
+    let citation_id = this.id;
+    $(`#${citation_id}-options-button`).css('display', 'none');
+  })
+ });
+
+$(document).on("click",".add-citation-button", function () {
+  let payload = {
+    'collection_id': $(this).attr('id'),
+    'citation_id': $(this).data('id')
+  };
+
+  $.ajax({
+    url: "{% url "add_citation_to_playlist" %}",
+    method: "POST",
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    data: payload,
+    dataType: "json"
+  }).done(function(response) {
+    $('#alert-container').empty()
+    let success_alert = `<div class="alert alert-success" id="add-citation-to-playlist-alert" role="alert" style="z-index: 1000; position: absolute; display: none;">Citation Added to <a href="${response.collection_url}">${response.collection_name}</a></div>`;
+    $('#alert-container').append(success_alert);
+    $('#add-citation-to-playlist-alert').show().delay(5000).fadeOut();
+  }).fail(function (error) {
+      console.log(error);
+  });
+})
 </script>

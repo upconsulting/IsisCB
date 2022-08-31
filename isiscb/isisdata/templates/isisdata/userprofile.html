@@ -45,8 +45,8 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title" style="display: inline-block;">Collections</h3>
-              <a href="{% url 'user_collections' username %}" class="btn btn-primary btn-xs pull-right">All Collections</a>
+              <h3 class="panel-title" style="display: inline-block;">Playlists</h3>
+              <a href="{% url 'user_playlists' username %}" class="btn btn-primary btn-xs pull-right">All Playlists</a>
             </div>
             <div class="panel-body" style="padding-left: 0; padding-bottom: 0;">
                 {% for collection in recent_collections %}
@@ -55,7 +55,7 @@
                             <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="object-fit: cover; width: 150px;height: 150px;">
                             <div class="caption" style="text-overflow: ellipsis; overflow: hidden;">
                                 <h4 style="margin: 5px 0; overflow-wrap: break-word;">{{collection.name}}</h4>
-                                <span style="text-align: center; display: block;"><a href="#" class="btn btn-primary btn-sm" role="button">View Collection</a></span>
+                                <span style="text-align: center; display: block;"><a href="#" class="btn btn-primary btn-sm" role="button">View Playlist</a></span>
                             </div>
                         </div>
                     </div>

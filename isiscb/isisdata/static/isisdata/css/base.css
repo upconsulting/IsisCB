@@ -159,10 +159,12 @@ div.timeline {
 
 .search-result:hover {
   border-left: 2px solid #337AB7;
+  padding-left: 10px;
 }
 
 .authority-search-result:hover {
   border-left: 2px solid #777777;
+
 }
 
 .stub-search-result {

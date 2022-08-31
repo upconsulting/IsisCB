@@ -1,0 +1,94 @@
+{% extends "isisdata/__base.html" %}
+{% load app_filters %}
+{% load citation_filters %}
+{% load static %}
+{% load metadata_filters %}
+{% load search_filters %}
+
+{% block extra_head %}
+    <style>
+        .remove-button:hover {
+            color: #FF0000 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="alert-container" style="position: absolute; z-index: 9999; right: 185px;"></div>
+    <div class="col-sm-12">
+        <div class="col-sm-4">
+            <div class="thumbnail">
+                <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="max-height: 300px;">
+                <div class="caption">
+                    <h3>{{collection.name}}</h3>
+                    {% if collection.subjects.all %}
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                {% for subject in collection.subjects.all %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <span>{{collection.description}}</span><br/>
+                    <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-h"></i> <i class="fas fa-caret-down"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'generate_csv_from_playlist' collection.id %}"><i class="fas fa-file-csv"></i> Download CSV of Playlist</a></li>
+                            {% if collection.createdBy.id == user.id %}<li><a href="?edit=true"><i class="fas fa-pencil-alt"></i> Edit Playlist Details</a></li>{% endif %}
+                            {% if collection.createdBy.id == user.id %}<li><a style="color: #FF0000;" href="#"><i class="fas fa-trash"></i> Delete Playlist</a></li>{% endif %}
+                        </ul>
+                    </div>
+                </div>
+              </div>          
+        </div>
+        <div class="col-sm-8">
+            {% if citations %}
+            <ul class="list-group">
+                {% for citation in citations %}
+                <li id="{{citation.id}}-list-item" class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}}) {% if collection.createdBy.id == user.id %}<a href="#" class="pull-right remove-button" id="{{citation.id}}" title="remove citation from playlist" style="color: #777; text-align: center; display: none;"><i class="fas fa-trash"></i></a>{% endif %}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        $('.list-group-item').on("mouseover", function(e) {
+            let citation_id = this.id.substring(0,12);
+            console.log(citation_id);
+            $(`#${citation_id}`).css('display', 'inline-block');
+        })
+    
+        $('.list-group-item').on("mouseleave", function(e) {
+            let citation_id = this.id.substring(0,12);
+            $(`#${citation_id}`).css('display', 'none');
+        })
+
+        $(document).on("click",".remove-button", function () {
+            console.log('test');
+            let payload = {
+            'citation_id': $(this).attr('id'),
+            'collection_id': "{{collection.id}}",
+            };
+        
+            $.ajax({
+            url: "{% url "remove_citation_from_playlist" %}",
+            method: "POST",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            data: payload,
+            dataType: "json"
+            }).done(function(response) {
+                $(`#${response.citation_id}-list-item`).remove();
+                $('#alert-container').empty()
+                let success_alert = `<div class="alert alert-success" id="add-citation-to-playlist-alert" role="alert" style="z-index: 1000; position: absolute; display: none;">${response.citation_title} removed from ${response.collection_name}</div>`;
+                $('#alert-container').append(success_alert);
+                $('#add-citation-to-playlist-alert').show().delay(5000).fadeOut();
+            }).fail(function (error) {
+                console.log(error);
+            });
+        })
+    </script>
+{% endblock %}

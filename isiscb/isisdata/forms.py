@@ -17,7 +17,7 @@ from allauth.account.forms import SignupForm
 
 import time
 from isisdata import helper_methods
-from isisdata.models import Citation, Authority
+from isisdata.models import Citation, Authority, CitationCollection
 from openurl.models import *
 
 import re

@@ -19,6 +19,7 @@ from django.db.models import Q, Prefetch, Count, Subquery, OuterRef, Case, When,
 from django.http import HttpResponse, HttpResponseForbidden, Http404, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView
 from django.utils.translation import get_language
+from django.urls import reverse
 
 from itertools import chain
 from operator import itemgetter
@@ -1222,6 +1223,10 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
+        user_playlists = CitationCollection.objects.filter(createdBy=self.request.user.id)
+
+        context.update({'user_playlists': user_playlists})
+
         return self.render_to_response(context)
 
     def build_page(self):
@@ -1702,7 +1707,7 @@ def user_profile(request, username):
         template = 'isisdata/userprofile.html'
     return render(request, template, context)
 
-def user_collections(request, username):
+def user_playlists(request, username):
     user = get_object_or_404(User, username=username)
 
     collections = CitationCollection.objects.filter(createdBy=user).order_by('-created')
@@ -1710,10 +1715,10 @@ def user_collections(request, username):
         'collections': collections,
         'username': user.username,
     }
-    template = 'isisdata/user_collections.html'
+    template = 'isisdata/user_playlists.html'
     return render(request, template, context)
 
-def collection(request, *args, **kwargs):
+def playlist(request, *args, **kwargs):
     user = request.user
     edit = request.GET.get('edit')
     collection_id = kwargs.get('collection_id')
@@ -1745,7 +1750,7 @@ def collection(request, *args, **kwargs):
     }
     # User has elected to edit their own profile.
     if edit and user.id == request.user.id:
-        template = 'isisdata/collection_edit.html'
+        template = 'isisdata/playlist_edit.html'
         form = UserCitationCollectionForm(initial={
             'name': collection.name,
             'description': collection.description,
@@ -1755,13 +1760,62 @@ def collection(request, *args, **kwargs):
         context.update({'form': form})
     elif form_error:
         context.update({'form': form})
-        template = 'isisdata/collection_edit.html'
+        template = 'isisdata/playlist_edit.html'
     else:
-        template = 'isisdata/collection.html'
+        template = 'isisdata/playlist.html'
 
     return render(request, template, context)
 
-def generate_csv_from_collection(request, *args, **kwargs):
+@login_required()
+def create_playlist(request):
+    template = 'isisdata/create_playlist.html'
+    context = {}
+
+    if request.method == 'POST':
+        print('aaaa')
+    else:
+        form = UserCitationCollectionForm()
+        context.update({
+            'form': form
+        })
+
+    return render(request, template, context)
+
+@login_required()
+def add_citation_to_playlist(request):
+    if request.method == 'POST':
+        collection_id = request.POST.get('collection_id')
+        citation_id = request.POST.get('citation_id')
+        collection = get_object_or_404(CitationCollection, id=collection_id)
+        collection.citations.add(Citation.objects.get(id=citation_id))
+
+        context = {
+            'collection_name': collection.name,
+            'collection_id': collection.id,
+            'collection_url': reverse('playlist', kwargs={'collection_id': collection.id})
+        }
+
+        return JsonResponse(context)
+
+@login_required()
+def remove_citation_from_playlist(request):
+    if request.method == 'POST':
+        collection_id = request.POST.get('collection_id')
+        citation_id = request.POST.get('citation_id')
+        collection = get_object_or_404(CitationCollection, id=collection_id)
+        citation = get_object_or_404(Citation, pk=citation_id)
+        collection.citations.remove(citation)
+
+        context = {
+            'collection_name': collection.name,
+            'collection_id': collection.id,
+            'citation_title': citation.title,
+            'citation_id': citation.id,
+        }
+
+        return JsonResponse(context)
+
+def generate_csv_from_playlist(request, *args, **kwargs):
     collection_id = kwargs.get('collection_id')
     collection = get_object_or_404(CitationCollection, id=collection_id)
     citation_ids = [citation.id for citation in collection.citations.all()]
@@ -1769,17 +1823,18 @@ def generate_csv_from_collection(request, *args, **kwargs):
 
     response = HttpResponse(
         content_type='text/csv',
-        headers={'Content-Disposition': 'attachment; filename="somefilename.csv"'},
     )
+
+    response['Content-Disposition'] = 'attachment; filename="{name}_playlist_{playlist_name}.csv"'.format(name=request.user, playlist_name=collection.name)
 
     writer = csv.writer(response)
     writer.writerow(['Title', 'Authors/Editors', 'Publication Year', 'Type', 'Abstract', 'Publisher', 'Volume', 'Issue/Number', 'Language'])
     for citation in citations:
         authors = citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
-        author_names = ','.join([author.authority.name if author.authority else author.name_for_display_in_citation for author in authors]) if authors else ''
+        author_names = ';'.join([author.authority.name if author.authority else author.name_for_display_in_citation for author in authors]) if authors else ''
 
         publishers = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(type_controlled__in=ACRelation.PERIODICAL).filter(type_controlled__in=ACRelation.PUBLISHER).filter(public=True)
-        publisher_names = ','.join([publisher.authority.name if publisher.authority else publisher.name_for_display_in_citation for publisher in publishers]) if publishers else ''
+        publisher_names = ';'.join([publisher.authority.name if publisher.authority else publisher.name_for_display_in_citation for publisher in publishers]) if publishers else ''
 
         volume = citation.part_details.volume if citation.part_details.volume else citation.part_details.volume_free_text if citation.part_details.volume_free_text else ''
         if citation.part_details.issue_begin:
@@ -1787,12 +1842,10 @@ def generate_csv_from_collection(request, *args, **kwargs):
             if citation.part_details.issue_end:
                 issue += '-' + citation.part_details.issue_end
 
-        languages = ','.join([language for language in citation.languages.all]) if citation.languages else ''
-        writer.writerow([citation.title, author_names, citation.publication_date.year, citation.get_type_controlled_display, citation.abstract, publisher_names, volume, issue, languages])
+        languages = ';'.join([language.name for language in citation.language.all()]) if citation.language else ''
+        writer.writerow([citation.title, author_names, citation.publication_date.year, citation.get_type_controlled_display(), citation.abstract, publisher_names, volume, issue, languages])
 
-    print('xxxxxx')
-    print(writer)
-    # return response
+    return response
 def graph_explorer(request):
     context = {}
 
