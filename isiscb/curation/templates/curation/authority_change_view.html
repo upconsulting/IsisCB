@@ -135,6 +135,15 @@
             <label>{{ form.record_history.label }}</label>
             {{ form.record_history|addcss:"form-control input-sm"}}
         </div>
+
+        <div class="form-group">
+            <label>Tenants</label>
+            <ul class="list-group">
+            {% for t in instance.tenants.all %}
+            <li class="list-group-item">{{t}}</li>
+            {% endfor %}
+            </ul>
+        </div>
     </div>
     <div class="col-sm-8">
         <ul class="nav nav-tabs nav-justified curation-tabs" role="tablist">

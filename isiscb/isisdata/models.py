@@ -1298,6 +1298,7 @@ class Authority(ReferencedEntity, CuratedMixin):
                                     help_text=help_text("""
     The user who created this object."""), related_name="creator_of_object", on_delete=models.SET_NULL)
 
+    tenants = models.ManyToManyField(Tenant)
 
     def save(self, *args, **kwargs):
         self.name_for_sort = normalize(unidecode.unidecode(self.name))
