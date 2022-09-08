@@ -524,8 +524,6 @@ class AuthorityForm(forms.ModelForm):
             self.cleaned_data['tenants'] = []
             if not self.user.is_superuser:
                 self._errors['tenants'] = self.error_class(["A tenant needs to be specified."])
-        if not self.cleaned_data['belongs_to']:
-            self.cleaned_data['belongs_to'] = []
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()

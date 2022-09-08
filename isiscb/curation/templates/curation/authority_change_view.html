@@ -141,6 +141,7 @@
             <ul class="list-group">
             {% for t in instance.tenants.all %}
             <li class="list-group-item">{{t}}</li>
+            <input type="hidden" name="tenants" value="{{t.id}}" />
             {% endfor %}
             </ul>
         </div>

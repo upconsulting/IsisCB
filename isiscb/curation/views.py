@@ -131,6 +131,8 @@ def create_citation(request):
 
         if form.is_valid() and partdetails_form.is_valid():
             form.cleaned_data['public'] = False
+            if not form.cleaned_data['tenants']:
+                form.cleaned_data['tenants'] = []
             #form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE why does this not work?
             citation = form.save()
             citation.record_status_value = CuratedMixin.INACTIVE
@@ -1131,6 +1133,8 @@ def citation(request, citation_id):
         if hasattr(citation, 'part_details'):
             partdetails_form = PartDetailsForm(request.user, citation_id, request.POST, prefix='partdetails', instance=citation.part_details)
         if form.is_valid() and (partdetails_form is None or partdetails_form.is_valid()):
+            if not form.cleaned_data['tenants']:
+                form.cleaned_data['tenants'] = []
             form.save()
             if partdetails_form:
                 partdetails_form.save()
@@ -1804,6 +1808,9 @@ def authority(request, authority_id):
 
         form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
         if form.is_valid() and (person_form is None or person_form.is_valid()):
+            if not form.cleaned_data['tenants']:
+                form.cleaned_data['tenants'] = []
+                
             if person_form:
                 person_form.save()
 

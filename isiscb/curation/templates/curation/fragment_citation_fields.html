@@ -255,6 +255,7 @@
       <small>
         {% for t in instance.tenants.all %}
         {{t}}<br/>
+        <input type="hidden" name="tenants" value="{{t.id}}" />
         {% endfor %}
       </small>
     </div>
