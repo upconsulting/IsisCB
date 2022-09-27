@@ -1587,7 +1587,7 @@ def citations(request):
               'created_by_native', 'created_by_native__first_name', 'created_by_native__last_name',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by', 'stub_record_status' )
 
-    qs = queryset.select_related('part_details').values(*fields)
+    qs = queryset.select_related('part_details').values(*fields).distinct()
     filtered_objects = CitationFilter(filter_params, queryset=qs)
 
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
@@ -1810,7 +1810,7 @@ def authority(request, authority_id):
         if form.is_valid() and (person_form is None or person_form.is_valid()):
             if not form.cleaned_data['tenants']:
                 form.cleaned_data['tenants'] = []
-                
+
             if person_form:
                 person_form.save()
 

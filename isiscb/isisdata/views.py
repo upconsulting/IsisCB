@@ -1133,7 +1133,7 @@ class IsisSearchView(FacetedSearchView):
     """
     Provides the search view at /isis/.
     """
-
+    template_name = 'search/search.html'
     results_per_page = 20
 
     def get_form_kwargs(self):
@@ -1243,6 +1243,9 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
+        if self.request.GET.get('tenant', None):
+            self.template_name = 'tenants/search/search.html'
+
         return self.render_to_response(context)
 
     def build_page(self):
@@ -1334,6 +1337,7 @@ class IsisSearchView(FacetedSearchView):
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')
+        extra['tenant_id'] = self.request.GET.get('tenant', '')
 
         if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0

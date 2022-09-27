@@ -1159,7 +1159,7 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
         return CRUDRule.objects.filter(role=obj.pk)
 
 class TenantAdmin(admin.ModelAdmin):
-    fields = ['name', 'title', 'description']
+    fields = ['name', 'title', 'description', 'identifier']
     exlude = ('attributes')
 
 

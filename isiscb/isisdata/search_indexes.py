@@ -142,6 +142,9 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
     dataset_names = indexes.MultiValueField(faceted=True, indexed=False)
     dataset_ids = indexes.MultiValueField(faceted=True, indexed=False, null=True)
 
+    tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+
     data_fields = [
         'id',
         'title',
@@ -155,6 +158,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
         'language__name',
         'belongs_to',
         'belongs_to__name',
+        'tenants',
+        'tenants__name',
         'complete_citation',
         'stub_record_status',
         'attributes__id',
@@ -272,6 +277,7 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 data_organized['language'].append(settings.DATABASE_DEFAULT_LANGUAGE)
         data_organized['ccrelations'] = list({v['id']:v for v in data_organized['ccrelations']}.values())
         self._index_belongs_to(data)
+        self._index_tenants(data)
 
         start = time.time()
         for field_name, field in list(self.fields.items()):
@@ -439,6 +445,12 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_ISISCB_NAME_DISPLAY
             elif data[0]['belongs_to__name'].startswith(settings.DATASET_SHOT_NAME_PREFIX):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_SHOT_NAME_DISPLAY
+
+    def _index_tenants(self, data):
+        if data[0]['tenants']:
+            self.prepared_data['tenant_ids'] = data[0]['tenants']
+        if data[0]['tenants__name']:
+            self.prepared_data['tenant_names'] = data[0]['tenants__name']
 
     def _get_reviewed_book(self, data):
         """
@@ -633,6 +645,9 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     dates = indexes.MultiValueField(indexed=False)
     citation_count = indexes.IntegerField(indexed=False)
     #citation_nr = indexes.CharField(indexed=False)
+    tenant_names = indexes.MultiValueField(faceted=True, indexed=False, null=True)
+    tenant_ids = indexes.MultiValueField(faceted=True, indexed=True, null=True)
+
 
     def get_model(self):
         return Authority
@@ -687,3 +702,9 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_citation_count(self, obj):
         return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
+
+    def prepare_tenant_names(self, obj):
+        return [t.name for t in obj.tenants.all()]
+
+    def prepare_tenant_ids(self, obj):
+        return [t.id for t in obj.tenants.all()]

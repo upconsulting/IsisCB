@@ -52,6 +52,11 @@ class Tenant(models.Model):
     """
     title = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(null=True, blank=True)
+    """
+    The string that will be used for the path to the public page of the tenant.
+    Should be valid to be used in URLs (e.g. no spaces).
+    """
+    identifier = models.CharField(max_length=255, blank=False, null=False)
 
     users = models.ManyToManyField(User)
 

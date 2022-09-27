@@ -129,6 +129,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'tenants.context_processors.add_tenants',
             ],
         },
     },

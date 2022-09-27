@@ -1,0 +1,100 @@
+{% load static %}
+
+<nav class="navbar navbar-inverse navbar-home" style="background-color:#4a0742">
+    <div class="container-fluid">
+
+        <div class="navbar-header col-md-2" style="padding-top: 5px;"><!--  width: 250px;"-->
+            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
+            <div style="height: 100%; padding-top: 5px; position: relative; left: -3px;">
+                <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
+            </div>
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="col-md-6" style='padding: 0;'>
+            <div class='form-inline'>
+                <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
+                    <form method="get" action="/portal/{{tenant_id}}/search" style='width: 100%'>
+                        <div class="input-group" style='width: 100%'>
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <span class="input-group-btn" style='width: 20px;'>
+                                <button class="btn btn-default" type="submit">Search</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input name="tenant" type="hidden" value="{{ tenant_id }}" />
+                        </div>
+                    </form>
+                </div>
+                <div class="navbar-center" style="padding: 14px 0;">
+                    <form method="get" action="/portal/{{tenant_id}}/search">
+                        <div class="input-group">
+                            <input id="id_q" name="q" type="hidden" class="form-control" value="*">
+                            <span>
+                                <button class="btn btn-default" type="submit">Browse</button>
+                            </span>
+                        </div>
+                        <div>
+                            <input id="id_models" name="models" type="hidden" value="isisdata.citation">
+                            <input id="id_sort_order_citation" maxlength="255" name="sort_order_citation" type="hidden" value="publication_date_for_sort">
+                            <input id="id_sort_order_authority" maxlength="255" name="sort_order_authority" type="hidden" value="citation_count">
+                            <input id="id_sort_order_dir_citation" maxlength="255" name="sort_order_dir_citation" type="hidden" value="descend">
+                            <input id="id_sort_order_dir_authority" maxlength="255" name="sort_order_dir_authority" type="hidden" value="descend">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_stub_record_status:SR">
+                            <input id="id_excluded_facets" maxlength="255" name="excluded_facets" type="hidden" value="citation_type:Review">
+                            <input name="tenant" type="hidden" value="{{ tenant_id }}" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4" style="padding-right: 0;">
+            <div class="navbar-collapse collapse pull-right" id="navbar" style="padding-top: 5px; margin-bottom: 5px;">
+                <ul class="nav navbar-nav navbar-nav-home">
+                    <li class="{% if active == 'playground' %}active{% endif %}"><a href="{% url "playground" %}">Playground</a></li>
+                    <li class="{% if active == 'about' %}active{% endif %}"><a href="{% url "about" %}">About</a></li>
+                    <li><a href="https://isiscb.org" target="_blank">Blog</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feedback <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="feedback">Submit Feedback</a></li>
+                            <li><a href="#" id="submitCitation">Submit Citation</a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="{% if active == 'user' %}active{% endif %}">
+                        <a class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-user-circle" style="font-size: 1.4em"></i> <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu pull-right" id="usercontext" aria-labelledby="usermenu">
+                            <!-- <li><a href="/profile/">Dashboard</a></li> -->
+                            <li><a href="{% url 'user_profile' user.username %}">My Profile</a></li>
+                            <li><a href="{% url 'account_change_password' %}?next={{ request.get_full_path|urlencode }}">Change Password</a></li>
+                            <li><a href="{% url 'search_history' %}">My Search History</a></li>
+                            <li><a href="{% url 'search_saved' %}">My Saved Searches</a></li>
+                            <li><a id="logout" href="{% url 'account_logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}"><span class="glyphicon glyphicon-user" ></span> Log In</a>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</nav>

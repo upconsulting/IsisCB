@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'zotero',
     'openurl',
     'curation',
+    'tenants',
     'rules.apps.AutodiscoverRulesConfig',
     #'dj_pagination',
     #'debug_toolbar',
@@ -164,6 +165,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'tenants.context_processors.add_tenants'
             ],
         },
     },

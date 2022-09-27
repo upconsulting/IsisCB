@@ -76,11 +76,11 @@ urlpatterns = [
     url(r'^statistics', views.statistics, name='statistics'),
     url(r'^api', views.api_documentation, name='api'),
     url(r'^(?P<authority_id>[A-Z]+[0-9]+)/timeline/recalculate', authority_views.timeline_recalculate, name='recalculate_timeline'),
-    url(r'^curation/', include('curation.urls', namespace="curation")),
     url(r'^playground', views.playground, name="playground"),
     url(r'^graphexplorer', views.graph_explorer, name="graph_explorer"),
     url(r'^termexplorer', views.term_explorer, name="term_explorer"),
     url(r'^ngramexplorer', views.ngram_explorer, name="ngram_explorer"),
+    url(r'^curation/', include('curation.urls', namespace="curation")),
 ]
 
 #if settings.DEBUG:
