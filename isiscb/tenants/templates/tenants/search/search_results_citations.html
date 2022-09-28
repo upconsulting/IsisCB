@@ -50,7 +50,7 @@
               </div>
             </div>
             <hr style="margin-top: 4px; margin-bottom: 4px;">
-            
+
             <div class="row panel-row">
               <div class="col-md-12 panel-cell">
                 <h5 style="margin:4px 0"><small>Select the type of publication you would like see.</small></h5>
@@ -133,7 +133,7 @@
                 {% if not request.get_full_path|are_reviews_excluded %}
                 <input type="checkbox" name="exclude_reviews" checked>
                 <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation'|add_excluded_citation_type_facet:'Review'|add_facet_or_operator }}"> Book Reviews are included</a>
-                {% endif %} 
+                {% endif %}
               </small>
             </div>
 
@@ -186,7 +186,7 @@
 
           <span class="label label-primary label-xs citation-type-label">{{ result.type }}</span><br>
 
-          {% url 'citation' result.id|get_pk as citation_url %}
+          {% url 'tenants:citation' tenant_id result.id|get_pk as citation_url %}
           {% if result.title == 'Title missing' and result.complete_citation %}
             <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
               {{result.complete_citation}}
@@ -248,10 +248,10 @@
                       success: function(result) {
                           if (result.url.length > 0 && document.getElementById('linkElem_{{ result.id|get_pk }}') == null) {
                               var linkElem = '<a id="linkElem_{{ result.id|get_pk }}" target="_blank" href="'+ result.url +'">';
-                              if (result.icon.length > 0) { 
-                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">'; 
-                              } else { 
-                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>'; 
+                              if (result.icon.length > 0) {
+                                linkElem += '<img src="'+ result.icon +'" alt="'+ result.text +'">';
+                              } else {
+                                linkElem += '<span class="h6 text-warning">' + result.text + '</span>';
                               }
                               linkElem += '</a>';
                               $('.linkresolver_{{ result.id|get_pk }}').append(linkElem);

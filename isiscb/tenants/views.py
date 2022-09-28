@@ -2,11 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 
-def home(request, tenantid):
-    print("here")
-
+def home(request, tenant_id):
     context = {
         'active': 'home',
-        'tenant_id': tenantid,
+        'tenant_id': tenant_id,
     }
     return render(request, 'tenants/home.html', context=context)

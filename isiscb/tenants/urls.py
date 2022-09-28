@@ -49,6 +49,8 @@ sqs = SearchQuerySet().facet('authors', size=100). \
 
 app_name = "tenants"
 urlpatterns = [
-    url(r'^(?P<tenantid>[A-Za-z0-9]+)/$', views.home, name='home'),
-    url(r'^(?P<tenantid>[A-Za-z0-9]+)/search$', isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs), name='index'),
+    url(r'^(?P<tenant_id>[A-Za-z0-9]+)/$', views.home, name='home'),
+    url(r'^(?P<tenant_id>[A-Za-z0-9]+)/search$', isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs), name='index'),
+    url(r'^(?P<tenant_id>[A-Za-z0-9]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', isiscbviews.citation, name='citation'),
+
 ]

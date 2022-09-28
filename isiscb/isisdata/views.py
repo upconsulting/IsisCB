@@ -721,7 +721,7 @@ def _get_count_by_dataset(cache_name, curator_str, cache_timeout):
         cache.set(cache_name, count, cache_timeout)
     return count
 
-def citation(request, citation_id):
+def citation(request, citation_id, tenant_id=None):
     """
     View for individual citation record.
     """
@@ -783,8 +783,9 @@ def citation(request, citation_id):
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         sqs.query.set_limits(low=0, high=20)
-
         results = sqs.all().exclude(public="false")
+        if tenant_id:
+            results = results.filter(tenant_ids=tenant_id)
         similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
 
     elif citation.type_controlled not in ['RE']:
@@ -797,6 +798,9 @@ def citation(request, citation_id):
                 facet('institutions_by_subject_ids', size=100).facet('dataset_typed_names', size=100).\
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         mlt.query.set_limits(low=0, high=20)
+        if tenant_id:
+            print("filter by " + tenant_id)
+            mlt = mlt.filter(tenant_ids=tenant_id)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
     else:
         similar_citations = []
@@ -930,6 +934,9 @@ def citation(request, citation_id):
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
     }
+
+    if tenant_id:
+        return render(request, 'tenants/citation.html', context)
     return render(request, 'isisdata/citation.html', context)
 
 def get_facets_from_similar_citations(similar_citations):
