@@ -132,6 +132,12 @@
 </div>
 
 <div class="col-sm-12 col-md-6" style="padding: 0;">
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' %}
+  </div>
+  <div>
+    {% include 'isisdata/authority_fragments/fragment_authority_places_facet.html' %}
+  </div>
   <div class="panel panel-default facet-box">
     <div class="panel-heading-links panel-heading">
       <strong>Outside Links</strong>
@@ -180,12 +186,6 @@
       <br>
       <i class="fab fa-twitter"></i> <a target="_blank" href="https://twitter.com/search?q={{authority.name}}&src=typed_query">Twitter</a>
     </div>
-  </div>
-  <div>
-    {% include 'isisdata/authority_fragments/fragment_authority_publications_graph.html' %}
-  </div>
-  <div>
-    {% include 'isisdata/authority_fragments/fragment_authority_places_facet.html' %}
   </div>
 </div>
 
