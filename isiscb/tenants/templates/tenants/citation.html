@@ -330,14 +330,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
            <div class='col-sm-12 col-md-6' style='padding: 0;'>
              {% if authors|length > 0 %}
              <p>
-             {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'authority' acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
+             {% for acrelation in citation.get_all_contributors %}{% if acrelation.authority %}<a href="{% url 'tenants:authority' tenant_id acrelation.authority.id %}">{{ acrelation.authority.name }}</a> ({{acrelation.get_type_controlled_display}})<br/> {% endif %}{% endfor %}
              </p>
              <hr style="margin: 10px 0">
              {% endif %}
 
              {% if properties_map|length > 0 or citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 or citation.part_details.page_begin or citation.part_details.pages_free_text|length > 0 %}
                {% for prop in properties_map %}
-               {% if prop.authority %}<a href="{% url 'authority' prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
+               {% if prop.authority %}<a href="{% url 'tenants:authority' tenant_id prop.authority.id %}">{{ prop.authority.name }}</a>{% else %} {{ prop.name_for_display_in_citation }}{% endif %}
                <br/>
                {% endfor %}
 
@@ -477,7 +477,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if concepts %}
                    {% for concept in concepts %}
                    {% if concept.authority %}
-                   <a href="{% url 'authority' concept.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{% url 'tenants:authority' tenant_id concept.authority.id %}" style="font-size: 1.1em;">
                        <span class="label label-concepts link-label">{{ concept.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -486,7 +486,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if time_periods %}
                    {% for time in time_periods %}
                    {% if time.authority %}
-                   <a href="{% url 'authority' time.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{% url 'tenants:authority' tenant_id time.authority.id %}" style="font-size: 1.1em;">
                        <span class="label label-times link-label">{{ time.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -495,7 +495,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if places %}
                    {% for place in places %}
                    {% if place.authority %}
-                   <a href="{% url 'authority' place.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{% url 'tenants:authority' tenant_id place.authority.id %}" style="font-size: 1.1em;">
                        <span class="label label-places link-label">{{ place.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -504,7 +504,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if people %}
                    {% for person in people %}
                    {% if person.authority %}
-                   <a href="{% url 'authority' person.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{% url 'tenants:authority' tenant_id person.authority.id %}" style="font-size: 1.1em;">
                        <span class="label label-people link-label">{{ person.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -513,7 +513,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% if institutions %}
                    {% for institution in institutions %}
                    {% if institution.authority %}
-                   <a href="{% url 'authority' institution.authority.id %}" style="font-size: 1.1em;">
+                   <a href="{% url 'tenants:authority' tenant_id institution.authority.id %}" style="font-size: 1.1em;">
                        <span class="label label-institutions link-label">{{ institution.authority.name }}</span>
                    </a>
                    {% endif %}
@@ -543,7 +543,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <div class="panel-body">
                    {% for cc_rel in related_citations_rb %}
                      {% with cc_rel.object as citation_object %}
-                       {% include "isisdata/citation_entry.html" %}
+                       {% include "tenants/citation_entry.html" %}
                      {% endwith %}
                    {% endfor %}
                </div>
@@ -560,11 +560,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% for cc_rel in related_citations_ro %}
                  {% if cc_rel.subject.id == citation_id %}
                    {% with cc_rel.object as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% else %}
                    {% with cc_rel.subject as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% endif %}
                  {% endfor %}
@@ -581,7 +581,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                <div class="panel-body">
                    {% for cc_rel in related_citations_ic %}
                      {% with cc_rel.object as citation_object %}
-                       {% include "isisdata/citation_entry.html" %}
+                       {% include "tenants/citation_entry.html" %}
                      {% endwith %}
                    {% endfor %}
                </div>
@@ -596,7 +596,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              <div class="panel-body">
                  {% for cc_rel in related_citations_inv_ic %}
                  {% with cc_rel.subject as citation_object %}
-                   {% include "isisdata/citation_entry.html" %}
+                   {% include "tenants/citation_entry.html" %}
                  {% endwith %}
                  {% endfor %}
              </div>
@@ -612,7 +612,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              <div class="panel-body">
                  {% for cc_rel in related_citations_isa %}
                    {% with cc_rel.object as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% endfor %}
              </div>
@@ -627,7 +627,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              <div class="panel-body">
                  {% for cc_rel in related_citations_inv_isa %}
                    {% with cc_rel.subject as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% endfor %}
              </div>
@@ -643,7 +643,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              <div class="panel-body">
                  {% for cc_rel in related_citations_re %}
                    {% with cc_rel.object as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% endfor %}
              </div>
@@ -658,7 +658,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
              <div class="panel-body">
                  {% for cc_rel in related_citations_inv_re %}
                    {% with cc_rel.subject as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                  {% endfor %}
              </div>
@@ -675,11 +675,11 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% for cc_rel in related_citations_as %}
                    {% if cc_rel.subject.id == citation.id %}
                    {% with cc_rel.object as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                    {% else %}
                    {% with cc_rel.subject as citation_object %}
-                     {% include "isisdata/citation_entry.html" %}
+                     {% include "tenants/citation_entry.html" %}
                    {% endwith %}
                    {% endif %}
                  {% endfor %}
@@ -732,7 +732,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                           <i class="far fa-file-alt"></i> <span class="label label-primary">{{ citation.type }}</span>
                         {% endif %}
 
-                        {% url 'citation' citation.id|get_pk as citation_url %}
+                        {% url 'tenants:citation' tenant_id citation.id|get_pk as citation_url %}
                         {% if citation.title == 'Title missing' and citation.complete_citation %}
                         <a href="{{ citation_url }}?fromsearch=true&query_string={{ query }}&last_query={{ request.get_full_path|encode_query }}">
                           {{citation.complete_citation}}
@@ -800,7 +800,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                           <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
                         {% endif %}
                         {% endfor %}
@@ -823,7 +823,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                           <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                          <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                          <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
                         {% endif %}
                         {% endfor %}
@@ -846,7 +846,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                           <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -871,7 +871,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -894,7 +894,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -917,7 +917,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -940,7 +940,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -963,7 +963,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                         {% if facet.authority %}
                         <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                         {{facet.authority.name}}
-                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                         <br>
                         {% endif %}
                         {% endfor %}
@@ -994,7 +994,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
           {% endif %}
           {% endfor %}
@@ -1021,7 +1021,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
               {{facet.authority.name}}
-              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
           {% endfor %}
@@ -1048,7 +1048,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1076,7 +1076,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <li>
               <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
               {{facet.authority.name}}
-              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
             </li>
           {% endif %}
           {% endfor %}
@@ -1104,7 +1104,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1132,7 +1132,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1160,7 +1160,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}
@@ -1189,7 +1189,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           <li>
             <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
             {{facet.authority.name}}
-            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
           </li>
         {% endif %}
         {% endfor %}

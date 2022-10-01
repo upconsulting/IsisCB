@@ -1,0 +1,48 @@
+{% load app_filters %}
+{% load citation_filters %}
+
+<p>
+  {% if citation_object.type_controlled == "BO" %}
+    <i class="fa fa-book"></i>
+  {% elif citation_object.type_controlled == "TH" %}
+    <i class="fa fa-graduation-cap"></i>
+  {% elif citation_object.type_controlled == "MO" %}
+    <i class="fa fa-photo-video"></i>
+  {% elif citation.type_controlled == "CH" %}
+    <i class="fa fa-book-open"></i>
+  {% else %}
+    <i class="far fa-file-alt"></i>
+  {% endif %}
+
+  <span class="label label-primary">{{ citation_object.get_type_controlled_display }}</span>
+
+  <!-- author -->
+  {% if citation_object.get_all_contributors %}
+    {{ citation_object.get_all_contributors|join_authors:"" }}
+  {% else %}
+    Author missing;
+  {% endif %}
+  <!-- title -->
+  {% if citation_object|get_pub_year %}({{ citation_object|get_pub_year }}){% endif %}
+  <a href="{% url 'index' citation_object.id %}" class="titleLink">{{ citation_object|get_title|bleach_safe }}</a>.
+  <!-- book title -->
+  {% if citation_object|get_book_title %}
+  In: <em>{{ citation_object|get_book_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}
+  {% endif %}
+  <!-- journal title -->
+  {% if citation_object|get_journal_title %}
+    <em>{{ citation_object|get_journal_title }}</em>{% if not citation_object|get_page_string %}.{% endif %}
+  {% endif %}
+
+  <!-- get school -->
+  {% if citation_object|get_school %}{{citation_object|get_school}}.{% endif %}
+
+<!-- page numbers -->
+  {% if citation_object|get_page_string %}({{citation_object|get_page_string}}).{% endif %}
+
+  <!-- Zotero -->
+  <span style="display:none;">
+     <abbr class="unapi-id" title="{{ citation_object.id|get_pk }}">unapi</abbr>
+  </span>
+
+</p>

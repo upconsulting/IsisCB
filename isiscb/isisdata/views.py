@@ -933,6 +933,7 @@ def citation(request, citation_id, tenant_id=None):
         'similar_citations': similar_citations,
         'cover_image': googleBooksImage,
         'similar_objects': similar_objects,
+        'tenant_id': tenant_id,
     }
 
     if tenant_id:

@@ -44,7 +44,7 @@ def authority_catalog(request, authority_id):
     """
 
     authority = Authority.objects.get(id=authority_id)
-    
+
     redirect_from = _get_redirect_from(authority, request)
 
     redirect = _handle_authority_redirects(authority)
@@ -319,19 +319,20 @@ def authority_catalog(request, authority_id):
 
     return render(request, 'isisdata/authority_catalog.html', context)
 
-def authority(request, authority_id):
+def authority(request, authority_id, tenant_id=None):
 
     authority = Authority.objects.get(id=authority_id)
-    
+
     redirect_from = _get_redirect_from(authority, request)
 
     redirect = _handle_authority_redirects(authority)
+
     if redirect:
         return redirect
 
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
-    
+
     sqs, related_citations = _get_word_cloud_results(authority.id)
 
     related_citations = related_citations.order_by('-publication_date_for_sort')
@@ -343,9 +344,9 @@ def authority(request, authority_id):
     subject_category_count = sqs.all().exclude(public="false").filter_or(subject_ids=authority_id).filter_or(category_ids=authority_id).count()
     author_contributor_count = sqs.all().exclude(public="false").filter_or(author_ids=authority_id).filter_or(contributor_ids=authority_id) \
             .filter_or(editor_ids=authority_id).filter_or(advisor_ids=authority_id).filter_or(translator_ids=authority_id).count()
-    
+
     publisher_count = sqs.all().exclude(public="false").filter_or(publisher_ids=authority_id).count()
-    
+
     display_type = _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count)
 
     page_number = request.GET.get('page_citation', 1)
@@ -374,6 +375,9 @@ def authority(request, authority_id):
         'publisher_count': publisher_count,
         'subject_category_count': subject_category_count,
     }
+
+    if tenant_id:
+        return render(request, 'tenants/authority.html', context)
     return render(request, 'isisdata/authority.html', context)
 
 def _get_word_cloud_results(authority_id):
@@ -392,7 +396,7 @@ def _get_word_cloud_results(authority_id):
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
-    
+
     return sqs, word_cloud_results
 
 def _get_display_type(authority, author_contributor_count, publisher_count, related_citations_count):
@@ -449,7 +453,7 @@ def _get_wikipedia_image_synopsis(authority, author_contributor_count, related_c
                     extract = list(introJSON['query']['pages'].items())[0][1]['extract']
                     if extract.find('may refer to') < 0:
                         wikiIntro = extract
-            
+
             wikipedia_data = WikipediaData(img_url=wikiImage, credit=wikiCredit, intro=wikiIntro, authority_id=authority.id)
             wikipedia_data.save()
 
@@ -531,7 +535,7 @@ def _get_redirect_from(authority, request):
         redirect_from = Authority.objects.get(pk=redirect_from_id)
     else:
         redirect_from = None
-    
+
     return redirect_from
 
 def _handle_authority_redirects(authority):

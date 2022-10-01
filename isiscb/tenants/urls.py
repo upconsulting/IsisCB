@@ -1,6 +1,8 @@
 from . import views
 from isisdata import views as isiscbviews
 from isisdata import forms as isiscbforms
+from isisdata.isiscbviews import authority_views
+
 from django.conf.urls import url
 
 from haystack.forms import FacetedSearchForm
@@ -52,5 +54,5 @@ urlpatterns = [
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/$', views.home, name='home'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/search$', isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs), name='index'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', isiscbviews.citation, name='citation'),
-
+    url(r'^(?P<tenant_id>[A-Za-z0-9]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
 ]
