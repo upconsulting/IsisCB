@@ -216,6 +216,56 @@
       </div>
     </div>
 
+    <!-- People panel -->
+    <div class="panel-group hidden-print" id="people_panel">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>People</strong>
+          {% if facets_citation.fields.people_by_subject_ids|length > 5 and facets_citation.fields.people_by_subject_ids|length > 0 %}
+                <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style='float:right;'>
+                  More <i class="fas fa-angle-down"></i>
+                </button>
+          {% endif %}
+        </div>
+        <div id="collapsePeople" class="panel-collapse collapse in collapsePeople">
+          <div class="facet_panel panel-body">
+
+            {% if facets_citation.fields.people_by_subject_ids %}
+
+              <div class="row panel-row">
+
+                {% for person in selected_facets.citation_people_by_subject_ids %}
+                {% with person|create_facet_string:'citation_people_by_subject_ids' as encoded_person %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|remove_facet:encoded_person|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{person|get_authority_name}} <a title="Go to authority record for {{person|get_authority_name}}" href="{% url 'authority' person %}?"><i class="fas fa-external-link-alt"></i></a>
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+                {% if selected_facets.citation_people_by_subject_ids %}
+                <div class="col-md-12">
+                  <hr style="margin-top: 4px; margin-bottom: 4px;">
+                </div>
+                {% endif %}
+
+                {% for person in facets_citation.fields.people_by_subject_ids|slice:":5" %}
+                {% if "citation_people_by_subject_ids" not in selected_facets.keys or person.0 not in selected_facets.citation_people_by_subject_ids %}
+                <div class="col-md-12">
+                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_people_by_subject_ids:{{ person.0|urlencode }}" title="Show only results involving {{ person.0|get_authority_name }}"><i class="far fa-square"></i> ({{ person.1 }})</a> {{ person.0|get_authority_name }} <a title="Go to authority record for {{person.0|get_authority_name}}" href="{% url 'authority' person.0 %}?"><i class="fas fa-external-link-alt"></i></a>
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+            <div class="col-md-12">
+              <p>No people facets.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Time Periods panel -->
     <div class="panel-group hidden-print" id="time_panel">
       <div class="panel panel-default">
@@ -307,56 +357,6 @@
             {% else %}
             <div class="col-md-12">
               <p>No place facets.</p>
-            </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- People panel -->
-    <div class="panel-group hidden-print" id="people_panel">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <strong>People</strong>
-          {% if facets_citation.fields.people_by_subject_ids|length > 5 and facets_citation.fields.people_by_subject_ids|length > 0 %}
-                <button type="button" class="btn btn-primary btn-xs pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style='float:right;'>
-                  More <i class="fas fa-angle-down"></i>
-                </button>
-          {% endif %}
-        </div>
-        <div id="collapsePeople" class="panel-collapse collapse in collapsePeople">
-          <div class="facet_panel panel-body">
-
-            {% if facets_citation.fields.people_by_subject_ids %}
-
-              <div class="row panel-row">
-
-                {% for person in selected_facets.citation_people_by_subject_ids %}
-                {% with person|create_facet_string:'citation_people_by_subject_ids' as encoded_person %}
-                <div class="col-md-12">
-                  <a href="{{ request.get_full_path|remove_facet:encoded_person|set_page_to_one|set_index_model:'models:isisdata.citation' }}"><i class="fa fa-check-square"></i></a> {{person|get_authority_name}} <a title="Go to authority record for {{person|get_authority_name}}" href="{% url 'authority' person %}?"><i class="fas fa-external-link-alt"></i></a>
-                </div>
-                {% endwith %}
-                {% endfor %}
-
-                {% if selected_facets.citation_people_by_subject_ids %}
-                <div class="col-md-12">
-                  <hr style="margin-top: 4px; margin-bottom: 4px;">
-                </div>
-                {% endif %}
-
-                {% for person in facets_citation.fields.people_by_subject_ids|slice:":5" %}
-                {% if "citation_people_by_subject_ids" not in selected_facets.keys or person.0 not in selected_facets.citation_people_by_subject_ids %}
-                <div class="col-md-12">
-                  <a href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_people_by_subject_ids:{{ person.0|urlencode }}" title="Show only results involving {{ person.0|get_authority_name }}"><i class="far fa-square"></i> ({{ person.1 }})</a> {{ person.0|get_authority_name }} <a title="Go to authority record for {{person.0|get_authority_name}}" href="{% url 'authority' person.0 %}?"><i class="fas fa-external-link-alt"></i></a>
-                </div>
-                {% endif %}
-                {% endfor %}
-              </div>
-            {% else %}
-            <div class="col-md-12">
-              <p>No people facets.</p>
             </div>
             {% endif %}
           </div>
