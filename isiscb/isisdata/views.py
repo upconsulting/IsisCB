@@ -589,13 +589,13 @@ def help(request):
 
     return render(request, 'isisdata/help.html', context={'active': 'help'})
 
-def about(request):
+def about(request, tenant_id=None):
     """
     View for about page
     """
     return render(request, 'isisdata/about.html', context={'active': 'about'})
 
-def playground(request):
+def playground(request, tenant_id=None):
     """
     View for playground page
     """
@@ -799,7 +799,6 @@ def citation(request, citation_id, tenant_id=None):
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         mlt.query.set_limits(low=0, high=20)
         if tenant_id:
-            print("filter by " + tenant_id)
             mlt = mlt.filter(tenant_ids=tenant_id)
         similar_citations = mlt.all().exclude(public="false").query.get_results()
     else:
@@ -1251,7 +1250,7 @@ class IsisSearchView(FacetedSearchView):
             # self.form_name: form,
         })
 
-        if self.request.GET.get('tenant', None):
+        if self.request.GET.get('tenant_id', None):
             self.template_name = 'tenants/search/search.html'
 
         return self.render_to_response(context)
@@ -1345,7 +1344,7 @@ class IsisSearchView(FacetedSearchView):
         extra['page'] = page
         extra['paginator'] = paginator
         extra['query'] = self.request.GET.get('q', '')
-        extra['tenant_id'] = self.request.GET.get('tenant', '')
+        extra['tenant_id'] = self.request.GET.get('tenant_id', '')
 
         if isinstance(self.queryset, EmptySearchQuerySet):
             extra['facets_citation'] = 0

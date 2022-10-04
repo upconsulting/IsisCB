@@ -46,7 +46,7 @@
                   {% for author in facets_citation.fields.persons_ids|slice:":5" %}
                   {% if "citation_persons_ids" not in selected_facets.keys or author.0 not in selected_facets.citation_persons_ids %}
                   <div class="col-md-12" style="padding:0 0 0 15px">
-                    <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i> ({{ author.1 }})</a> {{ author.0|get_authority_name }} <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'authority' author.0 %}?"><i class="fas fa-external-link-alt"></i></a>
+                    <a title="Show only results involving {{ author.0|get_authority_name }}." href="{{ request.get_full_path|set_page_to_one|set_index_model:'models:isisdata.citation' }}&amp;selected_facets=citation_persons_ids:{{ author.0|urlencode }}"><i class="far fa-square"></i> ({{ author.1 }})</a> {{ author.0|get_authority_name }} <a title="Go to authority record for {{author.0|get_authority_name}}" href="{% url 'tenants:authority' tenant_id author.0 %}?"><i class="fas fa-external-link-alt"></i></a>
                   </div>
                   {% endif %}
                   {% endfor %}
@@ -417,5 +417,3 @@
 </div>
 
 {% endif %}
-
-
