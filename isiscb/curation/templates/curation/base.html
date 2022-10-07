@@ -101,6 +101,13 @@
                   <li><a href="{% url "curation:timeline_tasks" %}">Timelines</a></li>
                 </ul>
               </li>
+              <li{% if curation_section == "tenants" %} class="active"{% endif %}>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tenants <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{% url "curation:tenant_list" %}">Overview</a></li>
+
+                </ul>
+              </li>
 
           </ul>
         </div>

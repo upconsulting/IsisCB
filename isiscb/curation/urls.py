@@ -9,6 +9,8 @@ from curation.authority_views import relation_views as authority_relation_views
 from curation.authority_views import aarset_views as aarset_views
 from curation.citation_views import tracking_views
 from curation.other_views import user_views
+from curation.tenant_views import settings_views
+
 import rules
 from .rules import *
 from django.urls import re_path
@@ -175,4 +177,6 @@ urlpatterns = [
     re_path(r'^users/rule/remove/(?P<role_id>[0-9]+)/(?P<rule_id>[0-9]+)/$', user_views.remove_rule, name='remove_rule'),
     re_path(r'^users/role/staff/(?P<user_id>[0-9]+)$', user_views.change_is_staff, name='change_is_staff'),
     re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', user_views.change_is_superuser, name='change_is_superuser'),
+
+    re_path(r'^tenants$', settings_views.list_tenants, name='tenant_list'),
 ]

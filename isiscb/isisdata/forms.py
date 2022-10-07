@@ -40,7 +40,7 @@ class MyFacetedSearchForm(FacetedSearchForm):
     sort_order_dir_citation = forms.CharField(required=False, widget=forms.HiddenInput, initial='descend')
     sort_order_dir_authority = forms.CharField(required=False, widget=forms.HiddenInput, initial='ascend')
     raw_search = forms.BooleanField(required=False, widget=forms.HiddenInput, initial='')
-    tenant = forms.CharField(required=False, widget=forms.HiddenInput)
+    tenant_id = forms.CharField(required=False, widget=forms.HiddenInput)
 
     def __init__(self, *args, **kwargs):
         super(MyFacetedSearchForm, self).__init__(*args, **kwargs)
@@ -178,8 +178,9 @@ class MyFacetedSearchForm(FacetedSearchForm):
         if sort_order_dir_authority == 'descend':
             sort_order_authority = "-" + sort_order_authority
 
-        if self.cleaned_data['tenant']:
-            tenant = Tenant.objects.filter(identifier=self.cleaned_data['tenant']).first()
+        print(self.cleaned_data)
+        if self.cleaned_data.get('tenant_id', None):
+            tenant = Tenant.objects.filter(identifier=self.cleaned_data['tenant_id']).first()
             if tenant:
                 sqs_citation = sqs_citation.filter(tenant_ids=tenant.id)
                 sqs_authority = sqs_authority.filter(tenant_ids=tenant.id)
