@@ -5,13 +5,13 @@ from dateutil.relativedelta import relativedelta
 
 register = template.Library()
 
-
+# this method also exists in app_filters; need to be consolidated
 @register.filter
-def get_uri(entry):
+def get_uri(entry, tenant=None):
     if to_class_name(entry) == 'Authority':
-        return settings.URI_PREFIX + "authority/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "authority/" + entry.id
     if to_class_name(entry) == 'Citation':
-        return settings.URI_PREFIX + "citation/" + entry.id
+        return (settings.URI_PREFIX if not tenant else settings.URI_HOST + "portal/" + tenant + "/") + "citation/" + entry.id
     return ""
 
 @register.filter

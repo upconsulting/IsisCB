@@ -298,7 +298,9 @@ AWS_HEADERS = {
 AWS_IMPORT_BUCKET_NAME = os.environ.get('AWS_IMPORT_BUCKET_NAME')
 
 DOMAIN = 'data.isiscb.org'
-URI_PREFIX = 'http://localhost:8000/isis/'
+URI_HOST = 'http://localhost:8000/'
+URI_ISIS_EP = "isis/"
+URI_PREFIX = URI_HOST + URI_ISIS_EP
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', False)
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 

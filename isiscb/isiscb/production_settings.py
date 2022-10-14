@@ -312,7 +312,9 @@ S3_IMPORT_PATH = 's3://%s:%s@%s/' % (AWS_ACCESS_KEY_ID,
 UPLOAD_IMPORT_PATH = os.environ.get('UPLOAD_IMPORT_PATH', S3_IMPORT_PATH)
 
 DOMAIN = os.environ.get('DJANGO_DOMAIN','')
-URI_PREFIX = os.environ.get('DJANGO_URI_PREFIX', '')
+URI_HOST = os.environ.get('DJANGO_URI_HOST', '')
+URI_ISIS_EP = os.environ.get('DJANGO_URI_ISIS_EP', 'isis/')
+URI_PREFIX = URI_HOST + URI_ISIS_EP
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', True)
 EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', False)
 
