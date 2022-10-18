@@ -38,7 +38,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../countr
         country_code_map[row['code2']] = row['code3']
         name_map[row['code2']] = row['Name']
 
-def authority_catalog(request, authority_id):
+def authority_catalog(request, authority_id, tenant_id=None):
     """
     View for individual Authority entries.
     """
@@ -315,12 +315,14 @@ def authority_catalog(request, authority_id):
         'wikiIntro': wikiIntro,
         'wikiImage': wikiImage,
         'wikiCredit': wikiCredit,
+        'tenant_id': tenant_id,
     }
 
+    if tenant_id:
+        return render(request, 'tenants/authority_catalog.html', context)
     return render(request, 'isisdata/authority_catalog.html', context)
 
 def authority(request, authority_id, tenant_id=None):
-
     authority = Authority.objects.get(id=authority_id)
 
     redirect_from = _get_redirect_from(authority, request)
@@ -374,6 +376,7 @@ def authority(request, authority_id, tenant_id=None):
         'author_contributor_count': author_contributor_count,
         'publisher_count': publisher_count,
         'subject_category_count': subject_category_count,
+        'tenant_id': tenant_id,
     }
 
     if tenant_id:

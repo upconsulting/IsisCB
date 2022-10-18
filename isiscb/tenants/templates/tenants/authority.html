@@ -178,7 +178,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     </div>
     <div class='panel-body'>
       <div class="col-sm-12 col-md-7" style="padding-right:0;">
-        {% include 'isisdata/authority_fragments/fragment_authority_info_box.html' %}
+        {% include 'tenants/authority_fragments/fragment_authority_info_box.html' %}
       </div>
       <div class="col-sm-12 col-md-5">
         <div class="row" style="text-align:center; margin: 15px 0 30px 0;">
@@ -186,7 +186,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             <a id="bookshelf-tab" href="#" class="btn tab-btn-default active" role="tab" data-toggle="tab" style="border-color:#337ab7">
               <input type="radio" />Citations
             </a>
-            <a id="catalog-tab" onclick="location.href='{% url 'authority_catalog' authority_id|upper %}';" class="btn tab-btn-default" role="tab" data-toggle="tab" style="border-color: #337ab7; color: #337ab7;">
+            <a id="catalog-tab" onclick="location.href='{% url 'tenants:authority_catalog' tenant_id authority_id|upper %}';" class="btn tab-btn-default" role="tab" data-toggle="tab" style="border-color: #337ab7; color: #337ab7;">
               <input type="radio" />Indexes
             </a>
          </div>

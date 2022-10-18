@@ -55,6 +55,8 @@ urlpatterns = [
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/search$', isiscbviews.IsisSearchView.as_view(form_class=isiscbforms.MyFacetedSearchForm, queryset=sqs), name='index'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/citation/(?P<citation_id>[A-Z]+[0-9]+)/$', isiscbviews.citation, name='citation'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/$', authority_views.authority, name='authority'),
+    url(r'^(?P<tenant_id>[A-Za-z0-9]+)/authority/(?P<authority_id>[A-Za-z]+[0-9]+)/catalog$', authority_views.authority_catalog, name='authority_catalog'),
+
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/help', isiscbviews.help, name='help'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/about', isiscbviews.about, name='about'),
     url(r'^(?P<tenant_id>[A-Za-z0-9]+)/playground', isiscbviews.playground, name="playground"),

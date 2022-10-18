@@ -798,7 +798,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                       <div class="panel-body">
                         {% for facet in similar_objects.PR|slice:"6" %}
                         {% if facet.authority %}
-                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                          <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'tenants:index' tenant_id %}?tenant_id={{tenant_id}}&q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
                           {{facet.authority.name}}
                           <a title="Go to page for {{facet.authority.name}}" href={% url 'tenants:authority' tenant_id facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
                           <br>
