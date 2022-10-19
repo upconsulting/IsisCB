@@ -785,9 +785,10 @@ def citation(request, citation_id, tenant_id=None):
         sqs.query.set_limits(low=0, high=20)
         results = sqs.all().exclude(public="false")
         if tenant_id:
-            results = results.filter(tenant_ids=tenant_id)
+            tenant = Tenant.objects.filter(identifier=tenant_id).first()
+            if tenant:
+                results = results.filter(tenant_ids=tenant.pk)
         similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
-
     elif citation.type_controlled not in ['RE']:
         mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
