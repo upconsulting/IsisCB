@@ -299,10 +299,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                 {% endfor %}
               </div>
             </div>
-    
+
             <div class="panel panel-default facet-box">
               <div class="panel-heading-subjects panel-heading">
-                <strong>Times</strong>
+                <strong>Time Periods</strong>
                 {% if related_timeperiod_facet|length > 6 %}
                 <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
                   More <i class="far fa-caret-square-down"></i>
@@ -312,6 +312,22 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
               <div class="panel-body">
                 {% for facet in related_timeperiod_facet|slice:"6" %}
                 {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_time_period_ids_exact'%}
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="panel panel-default facet-box">
+              <div class="panel-heading-subjects panel-heading">
+                <strong>Places</strong>
+                {% if related_geographics_facet|length > 6 %}
+                <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
+                  More <i class="far fa-caret-square-down"></i>
+                </button>
+                {% endif %}
+              </div>
+              <div class="panel-body">
+                {% for facet in related_geographics_facet|slice:"6" %}
+                {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids_exact'%}
                 {% endfor %}
               </div>
             </div>
@@ -472,7 +488,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
   </div>
 </div><!-- /modal -->
 
-<!-- categories Modal -->
+<!-- time period Modal -->
 <div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -521,7 +537,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </div><!-- /modal -->
 
 
-<!-- publisher Modal -->
+<!-- journals Modal -->
 <div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -534,6 +550,30 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           {% for facet in related_journal_facet %}
             <li>
               {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_periodical_ids' %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div><!-- /modal -->
+
+<!-- places Modal -->
+<div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Places</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in related_geographics_facet %}
+            <li>
+              {% include 'isisdata/fragment_facet_link.html' with facet_field='citation_geographic_ids' %}
             </li>
           {% endfor %}
         </ul>
