@@ -367,8 +367,6 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
-        #  self.fields['administrator_notes'].widget.attrs['placeholder'] = 'test'
-
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
@@ -376,7 +374,6 @@ class CitationForm(forms.ModelForm):
         # disable fields user doesn't have access to
         if self.instance.pk:
             self.fields['title'].widget.attrs['placeholder'] = "No title"
-            # self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
             if self.instance.type_controlled in [Citation.REVIEW, Citation.CHAPTER, Citation.ARTICLE, Citation.ESSAY_REVIEW]:
                 self.fields['book_series'].widget = forms.widgets.HiddenInput()
