@@ -641,7 +641,7 @@ class TenantRuleForm(forms.ModelForm):
     class Meta(object):
         model = TenantRule
         fields = [
-            'tenant',
+            'tenant', 'allowed_action'
         ]
 
 class DatasetRuleForm(forms.ModelForm):

@@ -58,7 +58,7 @@ class Tenant(models.Model):
     """
     identifier = models.CharField(max_length=255, blank=False, null=False)
 
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, related_name="tenants")
 
     def __str__(self):
         return u'{0}'.format(self.name)
@@ -2780,6 +2780,14 @@ class TenantRule(AccessRule):
     """
     This rule allows a user access to a specific tenant.
     """
+    VIEW = 'view'
+    UPDATE = 'update'
+    FIELD_CHOICES = (
+        (VIEW, 'Editor'),
+        (UPDATE, 'Administrator'),
+    )
+    allowed_action = models.CharField(max_length=255, null=False, blank=False, choices=FIELD_CHOICES)
+
     tenant = models.ForeignKey(Tenant, null=True, blank=True,
                              help_text=help_text("""The tenant this rule allows access to."""), on_delete=models.SET_NULL)
 
