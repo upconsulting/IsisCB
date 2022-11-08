@@ -11,7 +11,15 @@ def list_tenants(request):
     for rules in [role.tenant_rules.all() for role in roles]:
         tenant_rules.append(rules)
     context = {
-        'tenants': [rule.tenant for rule in rules if rule.allowed_action == TenantRule.UPDATE],
+        'tenants': [(rule.tenant, rule.allowed_action) for rule in rules if rule.allowed_action in [TenantRule.UPDATE, TenantRule.VIEW]],
         'all':Tenant.objects.all()
     }
     return render(request, 'curation/tenants_list.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_settings(request, tenant_id):
+    tenant = get_object_or_404(Tenant, pk=tenant_id)
+    context = {
+        'tenant': tenant,
+    }
+    return render(request, 'curation/tenant_settings.html', context=context)
