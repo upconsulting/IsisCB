@@ -27,6 +27,12 @@
             <script src="{% static 'isisdata/js/ui-bootstrap-tpls-0.13.0.min.js' %}"></script>
         {% endblock %}
 
+        <style>
+          a {
+            color: {{tenant.settings.link_color}}
+          }
+        </style>
+
         {% block extra_head %}{% endblock %}
     </head>
     <body>

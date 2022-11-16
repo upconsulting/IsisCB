@@ -38,6 +38,15 @@ from openurl.models import Institution
 
 #from isisdata.templatetags.app_filters import linkify
 
+class TenantSettings(models.Model):
+    """
+    Settings for a tenant. This class is used to define things like navigation bar color,
+    logo, or link color.
+    """
+
+    navigation_color = models.CharField(max_length=255, blank=True, null=True)
+    link_color = models.CharField(max_length=255, blank=True, null=True)
+
 class Tenant(models.Model):
     """
     A tenant is a partition of the system for specific projects. A tenant has
@@ -60,8 +69,11 @@ class Tenant(models.Model):
 
     users = models.ManyToManyField(User, related_name="tenants")
 
+    settings = models.OneToOneField(TenantSettings, null=True, on_delete=models.CASCADE, related_name="tenant")
+
     def __str__(self):
         return u'{0}'.format(self.name)
+
 
 VALUETYPES = Q(model='textvalue') | Q(model='charvalue') | Q(model='intvalue') \
             | Q(model='datetimevalue') | Q(model='datevalue') \

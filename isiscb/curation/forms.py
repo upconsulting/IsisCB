@@ -930,3 +930,13 @@ class BulkChangeCSVForm(forms.Form):
         (MERGE_AUTHORITIES, 'Duplicate Authority Merge and Redirect'),
     ]
     action = forms.ChoiceField(choices=CHOICES)
+
+class TenantSettingsForm(forms.ModelForm):
+    navigation_color = forms.CharField(help_text='Background color of the navigation bar.', widget=forms.TextInput(attrs={'type': "color"}))
+    link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
+
+    class Meta(object):
+        model = TenantSettings
+        fields = [
+            'navigation_color', 'link_color',
+        ]
