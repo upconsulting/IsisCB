@@ -1,0 +1,49 @@
+{% extends "curation/base.html" %}
+
+{% block content %}
+
+<h2>Tenant: {{tenant.name}}</h2>
+
+<p class="pull-right">
+<a href="{% url 'curation:tenant_settings' tenant.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+ Edit Settings</a>
+</p>
+<table class="table table-striped">
+    <tr>
+      <th width="20%">Title</th>
+      <td>{{tenant.title}}</td>
+    </tr>
+    <tr>
+      <th>Navigation Color</th>
+      <td><i style="color: {{tenant.settings.navigation_color}}" class="fa fa-square" aria-hidden="true"></i></td>
+    </tr>
+    <tr>
+      <th>Link Color</th>
+      <td><i style="color: {{tenant.settings.link_color}}" class="fa fa-square" aria-hidden="true"></i></td>
+    </tr>
+</table>
+
+<div class="pull-right">
+<a href="{% url 'curation:tenant_add_page_block' tenant.id %}"><i class="fa fa-th-large" aria-hidden="true"></i>
+ Add Homepage Block</a>
+</div>
+<div style="margin-bottom: 20px;" class="clearfix"></div>
+
+{% for block in tenant.settings.page_blocks.all %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    <table class="table table-striped">
+        <tr>
+          <th width="20%">Index</th>
+          <td>{{block.block_index}}</td>
+        </tr>
+        <tr>
+          <th width="20%">Number of Columns</th>
+          <td>{{block.nr_of_columns}}</td>
+        </tr>
+    </table>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

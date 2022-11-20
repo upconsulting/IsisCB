@@ -934,9 +934,22 @@ class BulkChangeCSVForm(forms.Form):
 class TenantSettingsForm(forms.ModelForm):
     navigation_color = forms.CharField(help_text='Background color of the navigation bar.', widget=forms.TextInput(attrs={'type': "color"}))
     link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
+    title = forms.CharField(help_text='Title of bibliography')
 
     class Meta(object):
         model = TenantSettings
         fields = [
             'navigation_color', 'link_color',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super(TenantSettingsForm, self).__init__(*args, **kwargs)
+
+        self.fields['title'].initial = self.instance.tenant.title
+
+    def clean_fields(self):
+        title = self.cleaned_data['title']
+
+class TenantPageBlockForm(forms.Form):
+    nr_of_columns = forms.IntegerField(help_text="Number of columns in block.")
+    block_index = forms.IntegerField(help_text="Number of columns in block.")

@@ -6,7 +6,7 @@
   {% for tenant in tenants %}
 
     {% if tenant.1 == 'update' %}
-    <a href="{% url 'curation:tenant_settings' tenant.0.id %}" class="list-group-item">
+    <a href="{% url 'curation:tenant' tenant.0.id %}" class="list-group-item">
     {% else %}
     <li class="list-group-item">
     {% endif %}

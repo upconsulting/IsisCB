@@ -179,5 +179,7 @@ urlpatterns = [
     re_path(r'^users/role/superuser/(?P<user_id>[0-9]+)$', user_views.change_is_superuser, name='change_is_superuser'),
 
     re_path(r'^tenants$', settings_views.list_tenants, name='tenant_list'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)$', settings_views.tenant, name='tenant'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/add$', settings_views.tenant_add_page_block, name='tenant_add_page_block'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/settings$', settings_views.tenant_settings, name='tenant_settings'),
 ]

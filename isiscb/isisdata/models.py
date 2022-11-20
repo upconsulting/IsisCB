@@ -47,6 +47,26 @@ class TenantSettings(models.Model):
     navigation_color = models.CharField(max_length=255, blank=True, null=True)
     link_color = models.CharField(max_length=255, blank=True, null=True)
 
+
+class TenantPageBlock(models.Model):
+    """
+    Blocks to be configured on home page.
+    """
+    block_index = models.IntegerField()
+    nr_of_columns = models.IntegerField()
+
+    tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="page_blocks")
+
+class TenantPageBlockColumn(models.Model):
+    """
+    One column in a page block on the homepage.
+    """
+    column_index = models.IntegerField()
+    content = models.TextField()
+
+    page_block = models.ForeignKey('TenantPageBlock', on_delete=models.CASCADE, related_name="block_columns")
+
+
 class Tenant(models.Model):
     """
     A tenant is a partition of the system for specific projects. A tenant has
