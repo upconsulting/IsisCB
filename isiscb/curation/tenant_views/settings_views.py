@@ -47,6 +47,17 @@ def tenant_add_page_block(request, tenant_pk):
     return render(request, 'curation/tenants/add_page_block.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_delete_page_block(request, tenant_pk, page_block_id):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
+
+    if request.method == 'POST':
+        page_block.delete()
+
+    return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_settings(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {

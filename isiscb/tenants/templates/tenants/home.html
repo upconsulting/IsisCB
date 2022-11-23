@@ -257,4 +257,9 @@
     </div>
 </div>
 
+{% for block in tenant.settings.page_blocks.all %}
+<div class='row content-container new-container' style="width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: {% if block.block_index|divisibleby:'2' %} #eee {% else %} #fff {% endif %};">
+  {{ block.block_index }}
+</div>
+{% endfor %}
 {% endblock %}

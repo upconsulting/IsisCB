@@ -32,6 +32,12 @@
 {% for block in tenant.settings.page_blocks.all %}
 <div class="panel panel-default">
   <div class="panel-body">
+    <div class="pull-right">
+      <form action="{% url 'curation:tenant_delete_page_block' tenant.id block.id %}" method="POST">
+        {% csrf_token %}
+        <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+      </form>
+    </div>
     <table class="table table-striped">
         <tr>
           <th width="20%">Index</th>

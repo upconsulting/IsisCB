@@ -57,6 +57,9 @@ class TenantPageBlock(models.Model):
 
     tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="page_blocks")
 
+    class Meta:
+        ordering = ['block_index',]
+
 class TenantPageBlockColumn(models.Model):
     """
     One column in a page block on the homepage.
