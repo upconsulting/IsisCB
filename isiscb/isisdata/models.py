@@ -54,7 +54,8 @@ class TenantPageBlock(models.Model):
     """
     block_index = models.IntegerField()
     nr_of_columns = models.IntegerField()
-
+    title = models.TextField(blank=True, null=True)
+    
     tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="page_blocks")
 
     class Meta:
@@ -69,6 +70,8 @@ class TenantPageBlockColumn(models.Model):
 
     page_block = models.ForeignKey('TenantPageBlock', on_delete=models.CASCADE, related_name="block_columns")
 
+    class Meta:
+        ordering = ['column_index',]
 
 class Tenant(models.Model):
     """

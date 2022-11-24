@@ -953,3 +953,8 @@ class TenantSettingsForm(forms.ModelForm):
 class TenantPageBlockForm(forms.Form):
     nr_of_columns = forms.IntegerField(help_text="Number of columns in block.")
     block_index = forms.IntegerField(help_text="Number of columns in block.")
+    title = forms.CharField(help_text="Title for a block on the home page.")
+
+class TenantPageBlockColumnForm(forms.Form):
+    column_index = forms.IntegerField(help_text="Index of column content should be added to.")
+    content = forms.CharField(help_text="Content of column.")

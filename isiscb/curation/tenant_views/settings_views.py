@@ -1,5 +1,5 @@
 from isisdata.models import *
-from curation.forms import TenantSettingsForm, TenantPageBlockForm
+from curation.forms import TenantSettingsForm, TenantPageBlockForm, TenantPageBlockColumnForm
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 
 from django.contrib.admin.views.decorators import user_passes_test
@@ -37,6 +37,7 @@ def tenant_add_page_block(request, tenant_pk):
             block = TenantPageBlock()
             block.block_index = form.cleaned_data['block_index']
             block.nr_of_columns = form.cleaned_data['nr_of_columns']
+            block.title = form.cleaned_data['title']
             block.tenant_settings = tenant.settings
             block.save()
             return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
@@ -45,6 +46,29 @@ def tenant_add_page_block(request, tenant_pk):
             'form': TenantPageBlockForm()
         })
     return render(request, 'curation/tenants/add_page_block.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_add_column_content(request, tenant_pk, page_block_id):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
+    context = {
+        'tenant': tenant,
+        'page_block': page_block,
+        'form': TenantPageBlockColumnForm()
+    }
+
+    if request.method == 'POST':
+        form = TenantPageBlockColumnForm(request.POST)
+        if form.is_valid():
+            column = TenantPageBlockColumn()
+            column.column_index = form.cleaned_data['column_index']
+            column.content = form.cleaned_data['content']
+            column.page_block = page_block
+            column.save()
+
+            return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+
+    return render(request, 'curation/tenants/add_column_content.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_delete_page_block(request, tenant_pk, page_block_id):

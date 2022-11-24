@@ -259,7 +259,13 @@
 
 {% for block in tenant.settings.page_blocks.all %}
 <div class='row content-container new-container' style="width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: {% if block.block_index|divisibleby:'2' %} #eee {% else %} #fff {% endif %};">
-  {{ block.block_index }}
+{% if block.title %}
+<h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">{{ block.title }}</h2>
+
+{% endif %}
+{% for column in block.block_columns.all %}
+  {{ column.content }}
+{% endfor %}
 </div>
 {% endfor %}
 {% endblock %}

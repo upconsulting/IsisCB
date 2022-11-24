@@ -31,13 +31,16 @@
 
 {% for block in tenant.settings.page_blocks.all %}
 <div class="panel panel-default">
-  <div class="panel-body">
+  <div class="panel-heading">
+    {{ block.title|default_if_none:"" }}&nbsp;
     <div class="pull-right">
       <form action="{% url 'curation:tenant_delete_page_block' tenant.id block.id %}" method="POST">
         {% csrf_token %}
         <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
       </form>
     </div>
+  </div>
+  <div class="panel-body">
     <table class="table table-striped">
         <tr>
           <th width="20%">Index</th>
@@ -48,6 +51,13 @@
           <td>{{block.nr_of_columns}}</td>
         </tr>
     </table>
+
+    <div class="pull-right">
+      <form action="{% url 'curation:tenant_add_column_content' tenant.id block.id %}" method="GET">
+        {% csrf_token %}
+        <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Add Column Content</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endfor %}
