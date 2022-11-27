@@ -5,6 +5,7 @@
 {% load metadata_filters %}
 {% load search_filters %}
 {% load static %}
+{% load content_tags %}
 
 {% block extra_head%}
 <script type="text/javascript">
@@ -263,8 +264,11 @@
 <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">{{ block.title }}</h2>
 
 {% endif %}
+
 {% for column in block.block_columns.all %}
-  {{ column.content }}
+  <div class="col-md-{{12|divide:block.nr_of_columns}}">
+  {{ column.content|markdown|safe }}
+  </div>
 {% endfor %}
 </div>
 {% endfor %}
