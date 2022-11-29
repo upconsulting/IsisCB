@@ -71,6 +71,17 @@ def tenant_add_column_content(request, tenant_pk, page_block_id):
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_delete_column_content(request, tenant_pk, page_block_id, content_id):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)
+    content = get_object_or_404(TenantPageBlockColumn, pk=content_id)
+
+    if request.method == 'POST':
+        content.delete()
+
+    return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_delete_page_block(request, tenant_pk, page_block_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     page_block = get_object_or_404(TenantPageBlock, pk=page_block_id)

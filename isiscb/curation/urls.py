@@ -183,5 +183,6 @@ urlpatterns = [
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/add$', settings_views.tenant_add_page_block, name='tenant_add_page_block'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/delete$', settings_views.tenant_delete_page_block, name='tenant_delete_page_block'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/add$', settings_views.tenant_add_column_content, name='tenant_add_column_content'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/(?P<content_id>[0-9]+)/delete$', settings_views.tenant_delete_column_content, name='tenant_delete_column_content'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/settings$', settings_views.tenant_settings, name='tenant_settings'),
 ]

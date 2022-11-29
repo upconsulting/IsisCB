@@ -1,5 +1,7 @@
 {% extends "curation/base.html" %}
 
+{% load content_tags %}
+
 {% block content %}
 
 <h2>Tenant: {{tenant.name}}</h2>
@@ -58,6 +60,24 @@
         <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Add Column Content</button>
       </form>
     </div>
+
+    <table class="table table-striped">
+      {% for column in block.block_columns.all %}
+        <tr>
+          <th width="100px"> {{ column.column_index }}</th>
+          <td>
+            {{ column.content|markdown_snippet:30}}
+          </td>
+          <td width="100px" align="right">
+            <form action="{% url 'curation:tenant_delete_column_content' tenant.id block.id column.id %}" method="POST">
+              {% csrf_token %}
+              <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+
   </div>
 </div>
 {% endfor %}
