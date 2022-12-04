@@ -618,15 +618,19 @@ class IngestManager(object):
     def _related_citation(self, datum, draft_citation, ccrelation_type):
         # We used handle_name to process reviewed works, so this looks odd.
         identifier = datum.get('name', '').strip()
+        # If the book is also ingested, its title is in the tille field
+        title = datum.get('title', '').strip()
         ldata = datum.get('linkeddata', None)
         if not identifier and ldata:
             identifier = ldata[0][1]
+        elif not identifier and title:
+            identifier = title
         if not identifier:
             return None, None
 
         # This may refer to a Book that we are adding in this accession.
         draft_altcitation = self.draft_citation_map.get(identifier, None)
-
+        
         # Sometimes explicit Citation IDs are used.
         # ISISCB-1048: let's link drafts to existing citations so there are no duplicates
         reviewed_citation = None
@@ -663,13 +667,7 @@ class IngestManager(object):
             IngestManager.resolve(draft_altcitation, reviewed_citation)
 
         if not draft_altcitation:
-            if 'title' not in datum:
-                return None, None
-            # try:
-            #     self._unique_or_complain(datum)
-            # except EntryNotUnique:
-            #     return None, None
-            title = datum.get('title')
+            # if we look for a book by its title
             draft_altcitation = None
             for book in list(self.draft_citation_map.values()):
                 if book.title == title:
@@ -685,12 +683,20 @@ class IngestManager(object):
 
                 IngestManager.generate_citation_linkeddata(datum, draft_altcitation)
 
+            publishers = DraftACRelation.objects.filter(citation=draft_citation,type_controlled__in=[ACRelation.PUBLISHER, ACRelation.EDITOR])
+            # publisher of chapter needs to be publisher of book
+            for publisher in publishers:
+                publisher.citation = draft_altcitation
+                publisher.save()
+
+
         draft_ccrelation = DraftCCRelation.objects.create(
             subject = draft_altcitation,
             object = draft_citation,
             type_controlled = ccrelation_type,
             part_of = draft_citation.part_of
         )
+       
         return draft_altcitation, draft_ccrelation
 
     def generate_book_chapter_relations(self, entry, draft_citation):
