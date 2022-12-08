@@ -13,7 +13,7 @@ cached-property==1.5.1
 cachetools==4.0.0
 celery==4.4.2
 cement==2.8.2
-certifi==2020.4.5.1
+certifi==2022.12.7
 cffi==1.14.0
 chardet==3.0.4
 colorama==0.4.3
