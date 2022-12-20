@@ -111,10 +111,31 @@ function triggerSearchCategories() {
 }
 
 $(document).ready(function() {
+  generateCategoryGuesses();
+
   $('#categorySearchQuery').on('keyup', function(e) {
     max_results_categories = INITIAL_MAX_RESULTS;
     triggerSearchCategories();
   });
 });
+
+function generateCategoryGuesses() {
+  let colorScale = chroma.scale('YlGn').gamma(1);
+  let payload = {
+    'citation_id': "{{instance.id}}",
+  };
+  $.post("{% url 'curation:generate_category' %}", payload, function(result) {
+    let categories = result.category_guesses;
+    console.log(categories);
+    colorScale.domain([0, .25, 1]);
+    let categoryGuessesList = '<ul id="category-guesses-list"></ul>';
+    $('#category-guesses-container').append(categoryGuessesList);
+    categories.map(cat => {
+      let catListItem = `<li class="list-group-item" style="background-color:${colorScale(cat.decimal)}"><span class="button-group button-group-xs"><a class="glyphicon glyphicon-ok btn btn-xs select-citation-categories" data-id="${cat.id}" data-name="${cat.name}"></a></span> ${cat.name} | ${cat.count} (${cat.percent}%)</li>`;
+      $('#category-guesses-list').append(catListItem);
+    })
+    $('.select-citation-categories').click(addCategory);
+  });
+}
 
 </script>

@@ -143,6 +143,7 @@ urlpatterns = [
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.authority_delete_linkeddata_duplicates, name='authority_delete_linkeddata_duplicates'),
 
     re_path(r'^acrelation/quickcreate/$', views.quick_create_acrelation, name='quick_create_acrelation'),
+    re_path(r'^acrelation/generatecategory/$', views.generate_category, name='generate_category'),
 
     re_path(r'^aarsets/$', aarset_views.aarsets, name='aarsets'),
     re_path(r'^aarsets/aarset/$', aarset_views.change_aarset, name='create_aarset'),
