@@ -26,24 +26,43 @@ def tenant(request, tenant_pk):
     return render(request, 'curation/tenants/tenant.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def tenant_add_page_block(request, tenant_pk):
+def tenant_home_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
         'tenant': tenant
     }
+    return render(request, 'curation/tenants/tenant_home_page.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_add_page_block(request, tenant_pk, block_type=None):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    context = {
+        'tenant': tenant,
+        'block_type': block_type if block_type else 'main'
+    }
+
+    type_map = {
+        'home': TenantPageBlock.HOME_MAIN,
+        'main': TenantPageBlock.HOME_OTHER,
+        'about': TenantPageBlock.ABOUT
+    }
+    block_type = type_map[block_type] if block_type else type_map['main']
+    
     if request.method == 'POST':
         form = TenantPageBlockForm(request.POST)
+
         if form.is_valid():
             block = TenantPageBlock()
             block.block_index = form.cleaned_data['block_index']
             block.nr_of_columns = form.cleaned_data['nr_of_columns']
             block.title = form.cleaned_data['title']
             block.tenant_settings = tenant.settings
+            block.block_type = block_type
             block.save()
-            return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+            return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
     else:
         context.update({
-            'form': TenantPageBlockForm()
+            'form': TenantPageBlockForm(),
         })
     return render(request, 'curation/tenants/add_page_block.html', context=context)
 
@@ -79,7 +98,7 @@ def tenant_delete_column_content(request, tenant_pk, page_block_id, content_id):
     if request.method == 'POST':
         content.delete()
 
-    return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+    return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_delete_page_block(request, tenant_pk, page_block_id):
@@ -89,7 +108,7 @@ def tenant_delete_page_block(request, tenant_pk, page_block_id):
     if request.method == 'POST':
         page_block.delete()
 
-    return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+    return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)

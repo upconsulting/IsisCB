@@ -1,0 +1,150 @@
+{% extends "curation/base.html" %}
+
+{% load content_tags %}
+
+{% block content %}
+
+<h2>Tenant: {{tenant.name}}</h2>
+
+<div class="row">
+  <div class="col-md-2" style="padding-top:30px">
+    <div class="list-group">
+      <a href="{% url 'curation:tenant' tenant.id %}" class="list-group-item">
+        General Settings
+      </a>
+      <a href="{% url 'curation:tenant_home_page' tenant.id %}" class="list-group-item active">
+        Home Page Settings
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-10">
+    <h3>First Block</h3>
+
+    <div class="panel panel-default">
+      
+      {% if tenant.settings.home_main_block %}
+      <div class="panel-heading">
+        {{ tenant.settings.home_main_block.title|default_if_none:"" }}&nbsp;
+        <div class="pull-right">
+          <form action="{% url 'curation:tenant_delete_page_block' tenant.id tenant.settings.home_main_block.id %}" method="POST">
+            {% csrf_token %}
+            <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+          </form>
+        </div>
+      </div>
+      <div class="panel-body">
+        <table class="table table-striped">
+            <tr>
+              <th width="20%">Index</th>
+              <td>{{tenant.settings.home_main_block.block_index}}</td>
+            </tr>
+            <tr>
+              <th width="20%">Number of Columns</th>
+              <td>{{tenant.settings.home_main_block.nr_of_columns}}</td>
+            </tr>
+        </table>
+    
+        <div class="pull-right">
+          <form action="{% url 'curation:tenant_add_column_content' tenant.id tenant.settings.home_main_block.id %}" method="GET">
+            {% csrf_token %}
+            <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Add Column Content</button>
+          </form>
+        </div>
+    
+        <table class="table table-striped">
+          {% for column in tenant.settings.home_main_block.block_columns.all %}
+            <tr>
+              <th width="100px"> {{ column.column_index }}</th>
+              <td>
+                {{ column.content|markdown_snippet:30}}
+              </td>
+              <td width="100px" align="right">
+                <form action="{% url 'curation:tenant_delete_column_content' tenant.id tenant.settings.home_main_block.id column.id %}" method="POST">
+                  {% csrf_token %}
+                  <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </table>
+    
+      </div>
+      {% else %}
+      <div class="panel-heading">
+       Main homepage block not yet configured. Please add one.&nbsp;
+        <div class="pull-right">
+          <a class="text-primary" href="{% url 'curation:tenant_add_page_block_type' tenant.id 'home' %}">
+            <i class="fa fa-th-large" aria-hidden="true"></i> Add
+          </a>
+          
+        </div>
+      </div>
+      {% endif %}
+    </div>
+      
+    <h3>Homepage Content</h3>
+    <div class="pull-right">
+      <a href="{% url 'curation:tenant_add_page_block' tenant.id %}"><i class="fa fa-th-large" aria-hidden="true"></i>
+       Add Homepage Block</a>
+      </div>
+      <div style="margin-bottom: 20px;" class="clearfix"></div>
+      
+      {% for block in tenant.settings.home_other_blocks %}
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          {{ block.title|default_if_none:"" }}&nbsp;
+          <div class="pull-right">
+            <form action="{% url 'curation:tenant_delete_page_block' tenant.id block.id %}" method="POST">
+              {% csrf_token %}
+              <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
+            </form>
+          </div>
+        </div>
+        <div class="panel-body">
+          <table class="table table-striped">
+              <tr>
+                <th width="20%">Index</th>
+                <td>{{block.block_index}}</td>
+              </tr>
+              <tr>
+                <th width="20%">Number of Columns</th>
+                <td>{{block.nr_of_columns}}</td>
+              </tr>
+          </table>
+      
+          <div class="pull-right">
+            <form action="{% url 'curation:tenant_add_column_content' tenant.id block.id %}" method="GET">
+              {% csrf_token %}
+              <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Add Column Content</button>
+            </form>
+          </div>
+      
+          <table class="table table-striped">
+            {% for column in block.block_columns.all %}
+              <tr>
+                <th width="100px"> {{ column.column_index }}</th>
+                <td>
+                  {{ column.content|markdown_snippet:30}}
+                </td>
+                <td width="100px" align="right">
+                  <form action="{% url 'curation:tenant_delete_column_content' tenant.id block.id column.id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+      
+        </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+
+
+
+
+{% endblock %}

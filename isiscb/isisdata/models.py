@@ -47,6 +47,14 @@ class TenantSettings(models.Model):
     navigation_color = models.CharField(max_length=255, blank=True, null=True)
     link_color = models.CharField(max_length=255, blank=True, null=True)
 
+    @property
+    def home_main_block(self):
+        print(self.page_blocks.filter(block_type='HM').all())
+        return self.page_blocks.filter(block_type='HM').first()
+
+    @property
+    def home_other_blocks(self):
+        return self.page_blocks.filter(block_type='HO')
 
 class TenantPageBlock(models.Model):
     """
@@ -55,6 +63,21 @@ class TenantPageBlock(models.Model):
     block_index = models.IntegerField()
     nr_of_columns = models.IntegerField()
     title = models.TextField(blank=True, null=True)
+
+    HOME_MAIN = 'HM'
+    HOME_OTHER = 'HO'
+    ABOUT = 'AB'
+    TYPE_CHOICES = (
+        (HOME_MAIN, 'Main home block'),
+        (HOME_OTHER, 'Main other blocks'),
+        (ABOUT, 'About pagge blocks'),
+    )
+    block_type = models.CharField(choices=TYPE_CHOICES,
+                                           max_length=255,
+                                           blank=True,
+                                           null=True,
+                                           default=HOME_OTHER,
+                                           db_index=True)
     
     tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="page_blocks")
 
