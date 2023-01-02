@@ -21,15 +21,14 @@
                 <img src="{% if collection.coverimage_url %}{{collection.coverimage_url}}{% else %}https://upload.wikimedia.org/wikipedia/commons/b/b8/Museum_Wormiani_Historia_1655_Wellcome_L0000128.jpg{% endif %}" alt="{{collection.name}} citation collection cover image" style="max-height: 300px;">
                 <div class="caption">
                     <h3>{{collection.name}}</h3>
-                    {% if collection.subjects.all %}
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                {% for subject in collection.subjects.all %}
-                                {% endfor %}
-                            </div>
-                        </div>
+                    {% if subjects %}
+                        <p>
+                            {% for subject in subjects %}
+                                <a data-id="{{ subject.id }}" class="label label-primary link-label subject-tag">{{ subject.name }}</a>
+                            {% endfor %}
+                        </p>
                     {% endif %}
-                    <span>{{collection.description}}</span><br/>
+                    <p>{{collection.description}}</p>
                     <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -68,7 +67,6 @@
         })
 
         $(document).on("click",".remove-button", function () {
-            console.log('test');
             let payload = {
             'citation_id': $(this).attr('id'),
             'collection_id': "{{collection.id}}",

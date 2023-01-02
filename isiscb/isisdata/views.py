@@ -1747,8 +1747,9 @@ def playlist(request, *args, **kwargs):
         'user': user,
         'collection': collection,
         'citations': citations,
+        'subjects': collection.subjects.all(),
     }
-    # User has elected to edit their own profile.
+    # User has elected to edit their playlist details.
     if edit and user.id == request.user.id:
         template = 'isisdata/playlist_edit.html'
         form = UserCitationCollectionForm(initial={
@@ -2124,5 +2125,36 @@ def clean_dates(date_facet):
         if re.search(date_pattern, date[0]) and int(date[0]) >= 1965:
             new_date_facet.append(date)
     return new_date_facet
+
+def quick_create_aprelation(request):
+    if request.method == 'POST':
+        authority_id = request.POST.get('authority_id')
+        playlist_id = request.POST.get('playlist_id')
+        playlist = CitationCollection.objects.get(pk=playlist_id)
+        authority = Authority.objects.get(pk=authority_id)
+        playlist.subjects.add(authority)
+
+        response_data = {
+            'authority': {
+                'id': authority.id,
+                'name': authority.name,
+            },
+        }
+        return JsonResponse(response_data)
+
+def quick_delete_aprelation(request):
+    if request.method == 'POST':
+        authority_id = request.POST.get('authority_id')
+        playlist_id = request.POST.get('playlist_id')
+        playlist = CitationCollection.objects.get(pk=playlist_id)
+        authority = Authority.objects.get(pk=authority_id)
+        playlist.subjects.remove(authority)
+
+        response_data = {
+            'authority': {
+                'id': authority.id,
+            },
+        }
+        return JsonResponse(response_data)
 
     

@@ -29,33 +29,29 @@
                         {% endif %}
                     {% endfor %}
                     <hr>
-                    <ul id="subject-list-group" class="list-group">
-                        {% for subject in subjects %}
-                           <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
-                             
-                             <a class="btn btn-xs delete delete-subject pull-right"
-                             subject-id="{{ subject.id }}"
-                             data-type="subject"
-                             subject-title="{{ subject.name }}">
-                                <span class="label label-primary">{{ subject.name }}</span>
-                            </a>
-                           </li>
-                        {% endfor %}
-                    </ul>
-                    <input type="text" id="subjectSearchQuery" class="form-control input-sm" placeholder="Search for subject...">
-                    </input>
                     <div class="text-center">
                         <input type="submit" class="btn btn-success" value="Save" />
                     </div>
-                    <ul class="list-group" id="subjectSearchResultsContainer">
-                    </ul>
-            
-                    <div class="text-right">
-                      <a href="{% url 'curation:create_authority' %}" target="_blank"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add new authority</a>
-                    </div>
                 </form>
             </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <label>Tags</label>
+            <div id="subject-list-group">
+              {% if subjects %}
+                {% for subject in subjects %}
+                  <a data-id="{{ subject.id }}" class="label label-primary link-label subject-tag">{{ subject.name }}</a>
+                {% endfor %}
+              {% endif %}
+            </div>
+            <hr>
+            <input type="text" id="subjectSearchQuery" class="form-control input-sm" placeholder="Search for subject...">
+            </input>
+            <ul class="list-group" id="subjectSearchResultsContainer">
+            </ul>
           </div>
+        </div>
     </div>
     <div class="col-sm-8">
         {% if citations %}
@@ -69,19 +65,6 @@
 </div>
 
 <script>
-    var delete_handler = function() {
-        var elem = $(this);
-        var acrelation_id = elem.attr('acrelation-id');
-        var acrelation_type = elem.attr('data-acrelation-type')
-        if (acrelation_id) {
-            $.ajax("{% url "curation:create_acrelation_for_citation" instance.id %}" + acrelation_id + '/delete.json?confirm=true', {
-                'success': function(r) {
-                    $('#' + acrelation_type + '-entry-' + acrelation_id).remove();
-                },
-            });
-        }
-    }
-    
     var INITIAL_MAX_RESULTS = 5;
     var max_results = INITIAL_MAX_RESULTS;
     var types = [];
@@ -94,8 +77,9 @@
     
       var query = $('#subjectSearchQuery').val();
       searchTimerSubjects = setTimeout(function() {
-        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
+        $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT,SE&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types + "&max=" + max_results + "&force=" + force + "&q=" + $('#subjectSearchQuery').val(), {
             success: function(result) {
+              console.log(result);
               var resultsContainer = $('#subjectSearchResultsContainer');
               resultsContainer.empty();
               result.results.forEach(function(r) {
@@ -107,13 +91,8 @@
                 publicLink.attr('target', "_blank");
                 publicLink.html(r.name + ' (' + r.citation_count + ')' );
                 newLi.append(publicLink);
-                var suggestLink = $('<a href="#" data-acrid="' + r.id + '" data-query="' + r.name + '"></a>');
-                suggestLink.append($('<span class="label label-warning pull-right" style="margin-left: 5px;">S</span>'));
-                newLi.append(suggestLink);
                 newLi.append($('<span class="label label-primary pull-right">' + r.type + '</span>'));
                 resultsContainer.append(newLi);
-    
-                suggestLink.click(suggestSubjects);
     
                 var addBtn = $('<a href="#" data-id="' + r.id + '"></a>');
                 addBtn.append('<i class="fa fa-plus-circle" aria-hidden="true" style="margin-right:10px;"></i>');
@@ -197,30 +176,67 @@
     function addConcept(event) {
         var link = event.target.closest('a');
         var acRelId = $(link).data('id');
-      
-        var payload = {
-            'citation_id': "{{ instance.id }}",
-            'authority_id': acRelId,
-            'type_controlled': 'SU',    // subject.
-            'type_broad_controlled': 'SC',    // subject content.
+        var headers = {
+          'X-CSRFToken': '{{ csrf_token }}'
         };
-      
-        $.post("{% url "curation:quick_create_acrelation"  %}", payload, function(result) {
-          var ul = $('#subject-list-group');
-          var newId = result.acrelation.id;
-          var url = '{% url 'curation:authority_list' %}' + result.acrelation.authority.id
-      
-          var li = $('<li id="subject-entry-' + newId + '" class="list-group-item"><a href="' + url + '">' + result.acrelation.authority.name + '</a></li>');
-          ul.append(li);
-          {% if can_update %}
-          var span = $('<span class="button-group button-group-xs"></span>');
-          li.append(span);
-      
-          var a = $('<a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right" acrelation-id="' + newId + '" data-acrelation-type="subject" acrelation-title="' + result.acrelation.authority.name + '"></a>');
-          span.append(a);
-          a.click(delete_handler);
-          {% endif %}
+        var payload = {
+          'playlist_id': "{{ collection.id }}",
+          'authority_id': acRelId,
+        };
+
+        $.ajax({
+          url: "{% url "quick_create_aprelation" %}",
+          method: "POST",
+          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+          data: payload,
+          dataType: "json"
+          }).done(function(response) {
+              let div = $('#subject-list-group');
+              let tagId = response.authority.id;
+              let tagName = response.authority.name;
+
+              let newTag = $(`<span data-id="${tagId}" class="label label-primary link-label subject-tag"><span>${tagName}</span></span>`);
+
+              div.append(newTag);
+
+          }).fail(function (error) {
+              console.log(error);
+          });
+    }
+
+    function removeConcept(event) {
+      authorityId = $(event.target).data('id');
+
+      var headers = {
+        'X-CSRFToken': '{{ csrf_token }}'
+      };
+      var payload = {
+        'playlist_id': "{{ collection.id }}",
+        'authority_id': authorityId,
+      };
+
+      $.ajax({
+        url: "{% url "quick_delete_aprelation" %}",
+        method: "POST",
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        data: payload,
+        dataType: "json"
+        }).done(function(response) {
+            console.log("success");
+
+            $('#subject-list-group').find(`[data-id='${response.authority.id}']`).remove();
+        }).fail(function (error) {
+            console.log(error);
         });
-      }
+    }
+
+    $(document.body).on('mouseenter', '.subject-tag', function(){
+        $(this).css({"background-color": "red"}).append('<span class="delete-icon">&nbsp;<i class="far fa-times-circle"></i></span>');
+    }).on('mouseleave', '.subject-tag', function(){
+        $(this).css({"background-color": "#337ab7"});
+        $(this).find(".delete-icon").remove();
+    });
+
+    $('.subject-tag').click(removeConcept);
 </script>
 {% endblock %}
