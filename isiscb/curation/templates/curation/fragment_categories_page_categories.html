@@ -121,12 +121,9 @@ $(document).ready(function() {
 
 function generateCategoryGuesses() {
   let colorScale = chroma.scale('YlGn').gamma(1);
-  let payload = {
-    'citation_id': "{{instance.id}}",
-  };
-  $.post("{% url 'curation:generate_category' %}", payload, function(result) {
+
+  $.post("{% url 'curation:generate_category_suggestions' instance.id %}", function(result) {
     let categories = result.category_guesses;
-    console.log(categories);
     colorScale.domain([0, .25, 1]);
     let categoryGuessesList = '<ul id="category-guesses-list"></ul>';
     $('#category-guesses-container').append(categoryGuessesList);
