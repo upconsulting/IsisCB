@@ -1483,14 +1483,11 @@ def _citations_get_filter_params(request):
                                'collection_only', 'show_filters']
     user_session = request.session
     filter_params = None
-    print("serach key getting", search_key)
     if search_key:
         filter_params = user_session.get('%s_citation_search_params' % search_key)
-        print("get filter params", filter_params)
         if filter_params:
             all_params = {k: v for k, v in list(filter_params.items())}
-    print("all aprams", all_params)
-
+    
     # if we don't have any filters set yet, or there is just one parameter 'page'
     if len(list(post_or_get.keys())) == 0 or (len(list(post_or_get.keys())) == 1 and post_or_get.get('page', None)):
         if filter_params is None:
@@ -1516,18 +1513,14 @@ def _citations_get_filter_params(request):
              else:
                  filter_params['o'] = "publication_date"
 
-    print("additional params", post_or_get)
     for key in additional_params_names:
         all_params[key] = post_or_get.get(key, '')
-    print("after addit params", all_params)
-
+    
     # Let the GET parameter override the cached POST parameter, in case the
     #  curator is originating in the collections view.
-    print("before in coll all params", all_params)
     if "in_collections" in all_params:
         filter_params["in_collections"] = all_params["in_collections"]
 
-    print("returning filter params", filter_params)
     return filter_params, all_params
 
 
