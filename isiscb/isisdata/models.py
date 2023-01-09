@@ -49,7 +49,6 @@ class TenantSettings(models.Model):
 
     @property
     def home_main_block(self):
-        print(self.page_blocks.filter(block_type='HM').all())
         return self.page_blocks.filter(block_type='HM').first()
 
     @property
