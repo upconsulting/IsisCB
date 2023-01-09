@@ -1515,7 +1515,7 @@ def _citations_get_filter_params(request):
 
     for key in additional_params_names:
         all_params[key] = post_or_get.get(key, '')
- 
+
     # Let the GET parameter override the cached POST parameter, in case the
     #  curator is originating in the collections view.
     if "in_collections" in all_params:
@@ -1550,7 +1550,7 @@ def citations(request):
     #  for this particular set of search results. The search key refers to the
     #  filter and sort parameters, but _not_ the page number.
     search_key = hashlib.md5(encoded_params).hexdigest()
-    
+
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
