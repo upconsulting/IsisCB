@@ -1487,7 +1487,7 @@ def _citations_get_filter_params(request):
         filter_params = user_session.get('%s_citation_search_params' % search_key)
         if filter_params:
             all_params = {k: v for k, v in list(filter_params.items())}
-    
+
     # if we don't have any filters set yet, or there is just one parameter 'page'
     if len(list(post_or_get.keys())) == 0 or (len(list(post_or_get.keys())) == 1 and post_or_get.get('page', None)):
         if filter_params is None:
@@ -1498,7 +1498,7 @@ def _citations_get_filter_params(request):
             if post_or_get.get('page'):
                 all_params['page'] = post_or_get.get('page')
             return filter_params, all_params
-    
+
     if filter_params is None:
         raw_params = post_or_get.urlencode()#.encode('utf-8')
         filter_params = QueryDict(raw_params, mutable=True)
@@ -1515,12 +1515,11 @@ def _citations_get_filter_params(request):
 
     for key in additional_params_names:
         all_params[key] = post_or_get.get(key, '')
-    
+ 
     # Let the GET parameter override the cached POST parameter, in case the
     #  curator is originating in the collections view.
     if "in_collections" in all_params:
         filter_params["in_collections"] = all_params["in_collections"]
-
     return filter_params, all_params
 
 
@@ -1551,9 +1550,7 @@ def citations(request):
     #  for this particular set of search results. The search key refers to the
     #  filter and sort parameters, but _not_ the page number.
     search_key = hashlib.md5(encoded_params).hexdigest()
-    print("serach key view", search_key)
-    print("filter param ", filter_params)
-
+    
     context = {
         'curation_section': 'datasets',
         'curation_subsection': 'citations',
