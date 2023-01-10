@@ -78,18 +78,16 @@
     <div class="container" style='margin: 0px; width: 100%;'>
         <div class="row">
             <div class="col-sm-12 col-md-6">
-                <div class='row content-container new-container' style="width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; ">
-                    {% if tenant.settings.home_main_block.title %}
-                    <h2 style="font-weight: 400; margin-bottom: 50px">{{ tenant.settings.home_main_block.title }}</h2>
-                    {% endif %}
-                    
-                    
-                    {% for column in tenant.settings.home_main_block.block_columns.all %}
-                    <div class="col-md-{{12|divide:tenant.settings.home_main_block.nr_of_columns}}">
-                    {{ column.content|markdown|safe }}
-                    </div>
-                    {% endfor %}
+                {% if tenant.settings.home_main_block.title %}
+                <h2 style="font-weight: 400; margin-bottom: 50px">{{ tenant.settings.home_main_block.title }}</h2>
+                {% endif %}
+                
+                
+                {% for column in tenant.settings.home_main_block.block_columns.all %}
+                <div style="padding-left: 0px" class="col-md-{{12|divide:tenant.settings.home_main_block.nr_of_columns}}">
+                {{ column.content|markdown|safe }}
                 </div>
+                {% endfor %}
             </div>
             <div class="col-sm-12 col-md-6">
                 <div class="search-bar">

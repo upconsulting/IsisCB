@@ -11,8 +11,11 @@
 
 {% block content %}
 
-
+{% if content_id %}
+<form class="form" action="{% url 'curation:tenant_edit_column_content' tenant.id page_block.id content_id %}" method="POST" class="form-horizontal">
+{% else %}
 <form class="form" action="{% url 'curation:tenant_add_column_content' tenant.id page_block.id %}" method="POST" class="form-horizontal">
+{% endif %}
   <div class=" form-group col-md-12">
   <h2>Add Column Content</h2>
   </div>
@@ -29,7 +32,7 @@
   </div>
 
 <div class="form-group  col-md-12">
-  <textarea name="content" id="content-input"></textarea>
+  <textarea name="content" id="content-input">{{form.content.value}}</textarea>
   <script>
   const easyMDE = new EasyMDE({element: document.getElementById('content-input')});
   </script>

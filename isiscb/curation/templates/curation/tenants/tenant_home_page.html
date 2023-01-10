@@ -60,6 +60,7 @@
                 {{ column.content|markdown_snippet:30}}
               </td>
               <td width="100px" align="right">
+                <a class="btn-link pull-left" href="{% url 'curation:tenant_edit_column_content' tenant.id tenant.settings.home_main_block.id column.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
                 <form action="{% url 'curation:tenant_delete_column_content' tenant.id tenant.settings.home_main_block.id column.id %}" method="POST">
                   {% csrf_token %}
                   <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
@@ -128,6 +129,7 @@
                   {{ column.content|markdown_snippet:30}}
                 </td>
                 <td width="100px" align="right">
+                  <a class="btn-link pull-left" href="{% url 'curation:tenant_edit_column_content' tenant.id block.id column.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
                   <form action="{% url 'curation:tenant_delete_column_content' tenant.id block.id column.id %}" method="POST">
                     {% csrf_token %}
                     <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
