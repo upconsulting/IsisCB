@@ -191,7 +191,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <meta property="og:site_name"          content="Isis Current Bibliography" />
 <meta property="og:type"               content="article" />
 <meta property="fb:app_id"             content="{{ facebook_app_id}}" />
-<meta property="og:title"              content="{{ citation|get_title|strip_tags }}" />
+<meta property="og:title"              content="{{ citation|get_title_for_link|strip_tags }}" />
 <meta property="og:description"        content="{% if citation.abstract|length > 0 %}{{ citation.abstract|strip_tags|filter_abstract }}{% elif citation.description %}{{ citation.description|strip_tags }}{% endif %}" />
 <!-- TODO: -vv- if we add images for entries, this should be changed. -vv-  -->
 <meta property="og:image"              content="{% static "isisdata/images/isis_final_black.png" %}" />
@@ -439,31 +439,31 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                  {% endif %}
 
                  {% if "Medicine" in categories.0.authority.name %}
-                   <img src="https://cdn.ncbi.nlm.nih.gov/coreutils/nwds/img/favicons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/?term={{citation|get_title|bleach_safe}}">PubMed</a>
+                   <img src="https://cdn.ncbi.nlm.nih.gov/coreutils/nwds/img/favicons/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/?term={{citation|get_title_for_link|bleach_safe}}">PubMed</a>
                    <br>
                  {% endif %}
                  {% if "Air and space" in categories.0.authority.name %}
-                   <img src="https://ui.adsabs.harvard.edu/styles/img/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://ui.adsabs.harvard.edu/search/q=title%3A%22{{citation|get_title|bleach_safe}}%22&sort=date%20desc%2C%20bibcode%20desc&p_=0">Astrophysics Data System</a>
+                   <img src="https://ui.adsabs.harvard.edu/styles/img/favicon.ico" height="14px" width="14px"> <a target="_blank" href="https://ui.adsabs.harvard.edu/search/q=title%3A%22{{citation|get_title_for_link|bleach_safe}}%22&sort=date%20desc%2C%20bibcode%20desc&p_=0">Astrophysics Data System</a>
                    <br>
                  {% endif %}
 
                  {% if citation.type_controlled == "BO" or citation.type_controlled == "CH"%}
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title_for_link|bleach_safe}}">WorldCat</a>
                    <br>
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title_for_link|bleach_safe}}&btnG=">Google Scholar</a>
                    <br>
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?tbm=bks&q={{citation|get_title|bleach_safe}}">Google Books</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://www.google.com/search?tbm=bks&q={{citation|get_title_for_link|bleach_safe}}">Google Books</a>
                    <br>
                  {% endif %}
                  {% if citation.type_controlled == "AR" or citation.type_controlled == "RE" or citation.type_controlled == "ES"%}
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title|bleach_safe}}">WorldCat</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/WorldCat_logo.svg/440px-WorldCat_logo.svg.png" height="14px" width="46px" style="height: 14px; width: 14px; object-fit: cover; object-position: top left;"> <a target="_blank" href="https://www.worldcat.org/search?qt=worldcat_org_bks&q={{citation|get_title_for_link|bleach_safe}}">WorldCat</a>
                    <br>
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title|bleach_safe}}&btnG=">Google Scholar</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Google_Scholar_logo.svg/2048px-Google_Scholar_logo.svg.png" height="14px" width="14px"> <a target="_blank" href="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C36&q={{citation|get_title_for_link|bleach_safe}}&btnG=">Google Scholar</a>
                    <br>
-                   <img src="https://upload.wikimedia.org/wikipedia/sco/thumb/5/56/JSTOR_vector_logo.svg/1200px-JSTOR_vector_logo.svg.png" height="14px" width="11px"> <a target="_blank" href="https://www.jstor.org/action/doBasicSearch?Query={{citation|get_title|bleach_safe}}&so=rel">JSTOR</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/sco/thumb/5/56/JSTOR_vector_logo.svg/1200px-JSTOR_vector_logo.svg.png" height="14px" width="11px"> <a target="_blank" href="https://www.jstor.org/action/doBasicSearch?Query={{citation|get_title_for_link|bleach_safe}}&so=rel">JSTOR</a>
                    <br>
                  {% endif %}
-                   <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Academia-logo-2021.svg" height="14px" width="11px"> <a target="_blank" href="https://www.academia.edu/search?utf8=%E2%9C%93&q={{citation|get_title|bleach_safe}}&so=rel">Academia.edu</a>
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/6/66/Academia-logo-2021.svg" height="14px" width="11px"> <a target="_blank" href="https://www.academia.edu/search?utf8=%E2%9C%93&q={{citation|get_title_for_link|bleach_safe}}&so=rel">Academia.edu</a>
                    <br>
                </div>
              </div>
