@@ -26,6 +26,7 @@ BIB = Namespace('http://purl.org/net/biblio#')
 RSS = Namespace('http://purl.org/rss/1.0/modules/link/')
 ZOTERO = Namespace('http://www.zotero.org/namespaces/export#')
 PRISM = Namespace('http://prismstandard.org/namespaces/1.2/basic/')
+VCARD = Namespace('http://nwalsh.com/rdf/vCard#')
 
 RESOURCE_CLASSES = [
     BIB.Illustration, BIB.Recording, BIB.Legislation, BIB.Document,
@@ -336,6 +337,7 @@ class ZoteroIngest(object):
 
         """
         parent_document = []
+        # this is a nested object and needs to be marked as such
         for p, o in self.graph.predicate_objects(node):
             if p == DC.identifier:
                 # Zotero (in all of its madness) makes some identifiers, like
@@ -519,6 +521,12 @@ class ZoteroIngest(object):
         if entry is None:
             raise RuntimeError('entry must be a specific node')
 
+        # figure out if entry is a nested entry (e.g. book referenced by book chapter)
+        # since subjects returns a generator we have to attempt to iterate over it
+        for subject in self.graph.subjects(DCTERMS.isPartOf, entry):
+            self._set_value("role", "fallback")
+            break
+        
         list([self._set_value(*self.handle(*p_o)) for p_o in self.graph.predicate_objects(entry)])
 
     def __iter__(self):

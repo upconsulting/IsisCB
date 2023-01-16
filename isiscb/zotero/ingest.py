@@ -615,7 +615,7 @@ class IngestManager(object):
             return draft_authority, draft_acrelation
         return list(map(_cast, entry.get(field, [])))
 
-    def _related_citation(self, datum, draft_citation, ccrelation_type):
+    def _related_citation(self, datum, draft_object_citation, ccrelation_type):
         # We used handle_name to process reviewed works, so this looks odd.
         identifier = datum.get('name', '').strip()
         # If the book is also ingested, its title is in the tille field
@@ -628,76 +628,76 @@ class IngestManager(object):
         if not identifier:
             return None, None
 
-        # This may refer to a Book that we are adding in this accession.
-        draft_altcitation = self.draft_citation_map.get(identifier, None)
-        
+       # This may refer to a Book that we are adding in this accession.
+        draft_subject_citation = self.draft_citation_map.get(identifier, None)
+
         # Sometimes explicit Citation IDs are used.
         # ISISCB-1048: let's link drafts to existing citations so there are no duplicates
-        reviewed_citation = None
+        subject_citation = None
         if identifier.startswith('CBB'):
             try:
-                reviewed_citation = Citation.objects.get(pk=identifier)
+                subject_citation = Citation.objects.get(pk=identifier)
             except Citation.DoesNotExist:
                 pass
 
         # In other cases, the identifier is an ISBN; query by LinkedData.
-        if not reviewed_citation and identifier:
+        if not subject_citation and identifier:
             linkeddata = LinkedData.objects.filter(
                 type_controlled__name__icontains = 'isbn',
                 universal_resource_name = identifier).first()
             if linkeddata:
-                reviewed_citation = linkeddata.subject
+                subject_citation = linkeddata.subject
 
-        if reviewed_citation:
-            if not draft_altcitation:
+        if subject_citation:
+            if not draft_subject_citation:
                 # We have a Citation, but need a DraftCitation so that we can
                 # create a DraftCCRelation.
-                draft_altcitation = self._update_or_create_draft_citation({
-                    'title': reviewed_citation.title,
-                    'type_controlled': reviewed_citation.type_controlled,
-                    'part_of': draft_citation.part_of,
+                draft_subject_citation = self._update_or_create_draft_citation({
+                    'title': subject_citation.title,
+                    'type_controlled': subject_citation.type_controlled,
+                    'part_of': draft_object_citation.part_of,
                 }, ldata, None)
-                # draft_altcitation = DraftCitation.objects.create(
+                # draft_subject_citation = DraftCitation.objects.create(
                 #
                 # )
 
             # This DraftCitation is already resolved, since we have
             #  identified the record of interest in the production
             #  database.
-            IngestManager.resolve(draft_altcitation, reviewed_citation)
+            IngestManager.resolve(draft_subject_citation, subject_citation)
 
-        if not draft_altcitation:
+        if not draft_subject_citation:
             # if we look for a book by its title
-            draft_altcitation = None
+            draft_subject_citation = None
+            
             for book in list(self.draft_citation_map.values()):
                 if book.title == title:
-                    draft_altcitation = book
-
+                    draft_subject_citation = book
+                    
                     break
-            if not draft_altcitation:
-                draft_altcitation = self._update_or_create_draft_citation({
+            if not draft_subject_citation:
+                draft_subject_citation = self._update_or_create_draft_citation({
                     'title': title,
                     'type_controlled': IngestManager._get_dtype(datum, Citation.BOOK)['type_controlled'],
-                    'part_of': draft_citation.part_of
+                    'part_of': draft_object_citation.part_of
                 }, ldata, None, datum)
 
-                IngestManager.generate_citation_linkeddata(datum, draft_altcitation)
+                IngestManager.generate_citation_linkeddata(datum, draft_subject_citation)
 
-            publishers = DraftACRelation.objects.filter(citation=draft_citation,type_controlled__in=[ACRelation.PUBLISHER, ACRelation.EDITOR])
+            publishers = DraftACRelation.objects.filter(citation=draft_object_citation,type_controlled__in=[ACRelation.PUBLISHER, ACRelation.EDITOR])
             # publisher of chapter needs to be publisher of book
             for publisher in publishers:
-                publisher.citation = draft_altcitation
+                publisher.citation = draft_subject_citation
                 publisher.save()
 
-
         draft_ccrelation = DraftCCRelation.objects.create(
-            subject = draft_altcitation,
-            object = draft_citation,
+            subject = draft_subject_citation,
+            object = draft_object_citation,
             type_controlled = ccrelation_type,
-            part_of = draft_citation.part_of
+            part_of = draft_object_citation.part_of
         )
        
-        return draft_altcitation, draft_ccrelation
+        return draft_subject_citation, draft_ccrelation
 
     def generate_book_chapter_relations(self, entry, draft_citation):
         """
@@ -854,13 +854,22 @@ class IngestManager(object):
 
     def process(self, errors=[]):
         for entry in self.parser:
-            try:
+            try:    
                 draft_citation = self.process_entry(entry, self.accession)
                 linkeddata = IngestManager.generate_citation_linkeddata(entry, draft_citation)
-                self.draft_citation_map[draft_citation.id] = draft_citation
                 for linkeddatum in linkeddata:
-                    self.draft_citation_map[linkeddatum.value] = draft_citation
-                self.draft_citations.append((entry, draft_citation))
+                    # if we are dealing with a nested reference to a book
+                    if 'fallback' in entry.get('role', []) and linkeddatum.value in self.draft_citation_map:
+                        # if the book is already presents, we don't want the nested one
+                        break
+                    else:  
+                        if 'fallback' not in entry.get('role', []) and linkeddatum.value in self.draft_citation_map:
+                            # it looks like there is a fallback already that we should delete 
+                            self.draft_citation_map[linkeddatum.value].delete()
+                        self.draft_citation_map[linkeddatum.value] = draft_citation
+                # only execute this if for loop did not break
+                else:
+                    self.draft_citations.append((entry, draft_citation))
             except Exception as e:
                 errors.append((e, entry))
 
