@@ -56,6 +56,7 @@ class IngestManager(object):
         self.accession = accession
         self.draft_citation_map = {}
         self.draft_citations = []
+        self.draft_citations_fallbacks = []
         self.unique = set()
         self.draft_citation_hash = {}
 
@@ -157,7 +158,6 @@ class IngestManager(object):
                 page_end = IngestManager._extract_page_number(page_end)
 
             except ValueError:    # free_text only.
-                print("value error")
                 page_start, page_end, pages_free_text = IngestManager._extract_page_number(value[0]), None, value[0]
         return {
             'page_start': page_start,
@@ -628,7 +628,7 @@ class IngestManager(object):
         if not identifier:
             return None, None
 
-       # This may refer to a Book that we are adding in this accession.
+        # This may refer to a Book that we are adding in this accession.
         draft_subject_citation = self.draft_citation_map.get(identifier, None)
 
         # Sometimes explicit Citation IDs are used.
@@ -852,6 +852,28 @@ class IngestManager(object):
         IngestManager.generate_language_relations(entry, draft_citation)
         return draft_citation
 
+    def _handle_fallback(self, entry, draft_citation, identifier):
+        """
+        Method to handle adding a draft citation to the draft citation map.
+        If draft citation is a fallback, only add it if not present. If it is not
+        a draft citation, remove existing (fallback) draft citation if there is one.
+        """
+        if 'fallback' in entry.get('role', []):
+            self.draft_citations_fallbacks.append(draft_citation)
+
+        if 'fallback' in entry.get('role', []) and identifier in self.draft_citation_map:
+            # if the book is already presents, we don't want the nested one
+            return False
+        else:  
+            if 'fallback' not in entry.get('role', []) and \
+                    identifier in self.draft_citation_map and \
+                    self.draft_citation_map[identifier] in self.draft_citations_fallbacks:
+                # it looks like there is a fallback already that we should delete 
+                if self.draft_citation_map[identifier].id:
+                    self.draft_citation_map[identifier].delete()
+            self.draft_citation_map[identifier] = draft_citation
+        return True
+
     def process(self, errors=[]):
         for entry in self.parser:
             try:    
@@ -859,20 +881,16 @@ class IngestManager(object):
                 linkeddata = IngestManager.generate_citation_linkeddata(entry, draft_citation)
                 for linkeddatum in linkeddata:
                     # if we are dealing with a nested reference to a book
-                    if 'fallback' in entry.get('role', []) and linkeddatum.value in self.draft_citation_map:
-                        # if the book is already presents, we don't want the nested one
+                    if not self._handle_fallback(entry, draft_citation, linkeddatum.value):
                         break
-                    else:  
-                        if 'fallback' not in entry.get('role', []) and linkeddatum.value in self.draft_citation_map:
-                            # it looks like there is a fallback already that we should delete 
-                            self.draft_citation_map[linkeddatum.value].delete()
-                        self.draft_citation_map[linkeddatum.value] = draft_citation
                 # only execute this if for loop did not break
                 else:
+                    if 'title' in entry and entry.get('title', '')[0]:
+                        self._handle_fallback(entry, draft_citation, entry.get('title', '')[0])
                     self.draft_citations.append((entry, draft_citation))
             except Exception as e:
                 errors.append((e, entry))
-
+            
         for entry, draft_citation in self.draft_citations:
             self.generate_reviewed_works_relations(entry, draft_citation)
             self.generate_book_chapter_relations(entry, draft_citation)
