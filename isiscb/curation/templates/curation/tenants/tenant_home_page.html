@@ -26,8 +26,9 @@
       {% if tenant.settings.home_main_block %}
       <div class="panel-heading">
         {{ tenant.settings.home_main_block.title|default_if_none:"" }}&nbsp;
+        <a class="btn-link" href="{% url 'curation:tenant_edit_page_block' tenant.id tenant.settings.home_main_block.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
         <div class="pull-right">
-          <form action="{% url 'curation:tenant_delete_page_block' tenant.id tenant.settings.home_main_block.id %}" method="POST">
+         <form action="{% url 'curation:tenant_delete_page_block' tenant.id tenant.settings.home_main_block.id %}" method="POST">
             {% csrf_token %}
             <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
           </form>

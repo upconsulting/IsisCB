@@ -5,7 +5,11 @@
 
 {% block content %}
 
+{% if block_id %}
+<form class="form" action="{% url 'curation:tenant_edit_page_block' tenant.id block_id %}" method="POST" class="form-horizontal">
+{% else %}
 <form class="form" action="{% url 'curation:tenant_add_page_block_type' tenant.id block_type %}" method="POST" class="form-horizontal">
+{% endif %}
   <div class=" form-group col-md-12">
   <h2>Add Homepage Block</h2>
   </div>

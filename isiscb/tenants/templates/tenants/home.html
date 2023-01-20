@@ -93,7 +93,7 @@
                 <div class="search-bar">
                     <form method="get" action="/portal/{{ tenant_id }}/search">
                         <div class="input-group">
-                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the IsisCB...">
+                            <input id="id_q" name="q" type="search" type="text" class="form-control" value="{{ query }}" placeholder="Explore the {{ tenant.title }}...">
                             <span class="input-group-btn">
                                 <button class="btn btn-default btn-lg" type="submit">Search</button>
                             </span>
