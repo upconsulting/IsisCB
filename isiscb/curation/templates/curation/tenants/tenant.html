@@ -31,6 +31,14 @@
             <td>{{tenant.identifier}} <small>(<span class="fa fa-warning"></span> This value can only be changed by a system administrator.)</small></td>
           </tr>
           <tr>
+            <th width="20%">Logo</th>
+            <td>
+              {% if tenant.logo %}
+              <img src="{{ tenant.logo.url }}" />
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <th>Navigation Color</th>
             <td><i style="color: {{tenant.settings.navigation_color}}" class="fa fa-square" aria-hidden="true"></i></td>
           </tr>

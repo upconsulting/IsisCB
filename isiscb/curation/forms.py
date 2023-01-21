@@ -935,20 +935,28 @@ class TenantSettingsForm(forms.ModelForm):
     navigation_color = forms.CharField(help_text='Background color of the navigation bar.', widget=forms.TextInput(attrs={'type': "color"}))
     link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
     title = forms.CharField(help_text='Title of bibliography')
+    logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
 
     class Meta(object):
         model = TenantSettings
         fields = [
-            'navigation_color', 'link_color',
+            'navigation_color', 'link_color'
         ]
 
     def __init__(self, *args, **kwargs):
         super(TenantSettingsForm, self).__init__(*args, **kwargs)
 
         self.fields['title'].initial = self.instance.tenant.title
+        self.fields['logo'].initial = self.instance.tenant.logo
 
-    def clean_fields(self):
-        title = self.cleaned_data['title']
+    def clean(self):
+        print("clean")
+        print(self.cleaned_data)
+
+    def save(self, *args, **kwargs):
+        print(self.fields['logo'])
+        print(self.cleaned_data)
+
 
 class TenantPageBlockForm(forms.Form):
     nr_of_columns = forms.IntegerField(help_text="Number of columns in block.")

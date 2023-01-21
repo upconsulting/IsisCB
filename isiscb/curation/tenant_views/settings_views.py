@@ -182,18 +182,18 @@ def tenant_settings(request, tenant_pk):
         'tenant': tenant
     }
 
-    form = TenantSettingsForm(request.POST or None, instance=tenant.settings)
+    form = TenantSettingsForm(request.POST or None, request.FILES or None, instance=tenant.settings)
     if request.method == 'POST':
         if form.is_valid():
             # if it's the first time, set the settings object
+            tenant.title = form.cleaned_data['title']
+            tenant.logo = form.cleaned_data['logo']
             if not tenant.settings:
-                tenant.title = form.cleaned_data['title']
                 tenant.settings = form.save()
-                tenant.save()
             else:
-                tenant.title = form.cleaned_data['title']
                 form.save()
-                tenant.save()
+            tenant.save()
+            return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
 
     context.update({
         'form': form

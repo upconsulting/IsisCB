@@ -3,7 +3,10 @@
 <nav class="navbar navbar-inverse navbar-home" style="background-color:{{tenant.settings.navigation_color}}">
     <div class="container-fluid">
         <div class="navbar-header col-md-5">
-            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><div style="line-height:50px; font-size: 25px; color: white">{{ tenant.title }}</div> </a>
+            {% if tenant.logo %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
+            {% endif %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><div style="line-height:50px; font-size: 22px; color: white">{{ tenant.title }}</div> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>

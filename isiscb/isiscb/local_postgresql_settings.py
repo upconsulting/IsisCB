@@ -284,6 +284,7 @@ REST_FRAMEWORK = {
 
 
 STATIC_ROOT = os.environ.get('STATIC_ROOT', '')
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', 'media')
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 

@@ -46,6 +46,13 @@ class TenantSettings(models.Model):
 
     navigation_color = models.CharField(max_length=255, blank=True, null=True)
     link_color = models.CharField(max_length=255, blank=True, null=True)
+    citations_external_links_color = models.CharField(max_length=255, blank=True, null=True)
+
+    """
+    Default image for authorities.
+    """
+    authority_default_image = models.ImageField(upload_to='tenant_authorities', blank=True, null=True)
+
 
     @property
     def home_main_block(self):
@@ -114,6 +121,12 @@ class Tenant(models.Model):
     Should be valid to be used in URLs (e.g. no spaces).
     """
     identifier = models.CharField(max_length=255, blank=False, null=False)
+    """
+    The logo of a tenant project.
+    """
+    logo = models.ImageField(upload_to='tenant_logos', blank=True, null=True)
+
+    contact_email = models.CharField(max_length=255, blank=True, null=True)
 
     users = models.ManyToManyField(User, related_name="tenants")
 
@@ -129,6 +142,7 @@ class Tenant(models.Model):
     Set this value to True if the template specified via 'home page template' should be used
     instead of the configurable page blocks. A template path needs to be specified for this
     to work. Do not change this value unless you know what you are doing."""))
+
 
     def __str__(self):
         return u'{0}'.format(self.name)

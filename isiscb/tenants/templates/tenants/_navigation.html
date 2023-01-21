@@ -3,11 +3,11 @@
 <nav class="navbar navbar-inverse navbar-home" style="background-color:{{tenant.settings.navigation_color}}">
     <div class="container-fluid">
 
-        <div class="navbar-header col-md-2" style="padding-top: 5px;"><!--  width: 250px;"-->
-            <a class="navbar-brand" href="/"><img class="img img-responsive" style="height: 45px; max-height: 45px; max-width: 165px;" src="{% static "isisdata/images/IsisCB-550.png" %}"></a>
-            <div style="height: 100%; padding-top: 5px; position: relative; left: -3px;">
-                <a href="https://isiscb.org/welcome-to-the-new-isiscb-explore/" target="_blank" style="text-decoration: none;"><span class="label" style="color: #fff; background-color: red;"><strong>new!</strong></span></a>
-            </div>
+        <div class="navbar-header col-md-3" style="padding-top: 5px;"><!--  width: 250px;"-->
+            {% if tenant.logo %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><img class="img img-responsive" style="height: 50px; max-height: 50px; max-width: 184px; padding-right:15px" src="{{ tenant.logo.url }}"> </a>
+            {% endif %}
+            <a class="navbar-brand" href="{% url "tenants:home" tenant_id %}"><div style="line-height:50px; font-size: 22px; color: white">{{ tenant.title }}</div> </a>
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
@@ -15,7 +15,7 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div class="col-md-6" style='padding: 0;'>
+        <div class="col-md-5" style='padding: 0;'>
             <div class='form-inline'>
                 <div class="navbar-center" id="search-bar" style="width: 76%; padding-top:14px; margin-left: 20px;">
                     <form method="get" action="/portal/{{tenant_id}}/search" style='width: 100%'>
