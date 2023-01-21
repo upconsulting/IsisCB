@@ -119,7 +119,7 @@ def tenant_add_column_content(request, tenant_pk, page_block_id):
             column.page_block = page_block
             column.save()
 
-            return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk}))
+            return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
@@ -159,7 +159,7 @@ def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
             content.page_block = page_block
             content.save()
 
-            return redirect(reverse('curation:tenant', kwargs={'tenant_pk':tenant_pk})) 
+            return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk})) 
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 

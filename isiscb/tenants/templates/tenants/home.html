@@ -265,7 +265,8 @@
     </div>
 </div>
 
-{% for block in tenant.settings.page_blocks.all %}
+<!-- page blocks-->
+{% for block in tenant.settings.home_other_blocks %}
 <div class='row content-container new-container' style="width: 100%; padding: 0 15%; margin-bottom: 15px; margin-left: 0px; background-color: {% if block.block_index|divisibleby:'2' %} #eee {% else %} #fff {% endif %};">
 {% if block.title %}
 <h2 style="text-align: center; font-weight: 400; margin-bottom: 50px">{{ block.title }}</h2>

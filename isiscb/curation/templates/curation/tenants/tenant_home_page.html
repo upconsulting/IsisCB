@@ -84,7 +84,9 @@
       </div>
       {% endif %}
     </div>
-      
+
+
+    <!-- Home page blocks-->
     <h3>Homepage Content</h3>
     <div class="pull-right">
       <a href="{% url 'curation:tenant_add_page_block' tenant.id %}"><i class="fa fa-th-large" aria-hidden="true"></i>
@@ -96,6 +98,8 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           {{ block.title|default_if_none:"" }}&nbsp;
+          <a class="btn-link" href="{% url 'curation:tenant_edit_page_block' tenant.id block.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+        
           <div class="pull-right">
             <form action="{% url 'curation:tenant_delete_page_block' tenant.id block.id %}" method="POST">
               {% csrf_token %}

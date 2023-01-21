@@ -119,6 +119,17 @@ class Tenant(models.Model):
 
     settings = models.OneToOneField(TenantSettings, null=True, on_delete=models.CASCADE, related_name="tenant")
 
+    home_page_template = models.CharField(max_length=255, blank=True, null=True, help_text=help_text("""
+    If there is a customized template that should be used instead of the configurable page block,
+    the path to the template needs to go here. Do not change this value unless you really know what
+    your are doing. A developer of IsisCB Explore will need to create the template.
+    """))
+
+    use_home_page_template = models.BooleanField(default=False, help_text=help_text("""
+    Set this value to True if the template specified via 'home page template' should be used
+    instead of the configurable page blocks. A template path needs to be specified for this
+    to work. Do not change this value unless you know what you are doing."""))
+
     def __str__(self):
         return u'{0}'.format(self.name)
 

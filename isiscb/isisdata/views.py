@@ -1477,7 +1477,7 @@ def unapi_server_root(request):
 
 
 
-def home(request):
+def home(request, template='isisdata/home.html'):
     """
     The landing view, at /.
     """
@@ -1565,7 +1565,7 @@ def home(request):
         'tweet_url': recent_tweet_url,
         'tweet_image': recent_tweet_image,
     }
-    return render(request, 'isisdata/home.html', context=context)
+    return render(request, template, context=context)
 
 
 def rdf_authority_view(request, authority_id):
