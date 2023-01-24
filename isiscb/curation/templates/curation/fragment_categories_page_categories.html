@@ -122,7 +122,7 @@ $(document).ready(function() {
 function generateCategoryGuesses() {
   let colorScale = chroma.scale('YlGn').gamma(1);
 
-  $.post("{% url 'curation:generate_category_suggestions' instance.id %}", function(result) {
+  $.get("{% url 'curation:generate_category_suggestions' instance.id %}", function(result) {
     let categories = result.category_guesses;
     colorScale.domain([0, .25, 1]);
     let categoryGuessesList = '<ul id="category-guesses-list"></ul>';

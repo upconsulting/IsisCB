@@ -53,7 +53,7 @@ import iso8601, rules, datetime, hashlib, math
 from dateutil.relativedelta import relativedelta
 from itertools import chain
 from unidecode import unidecode
-from collections import Counter, defaultdict
+from collections import Counter
 import bleach
 import logging
 
@@ -1408,9 +1408,10 @@ def subjects_and_categories(request, citation_id):
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def generate_category_suggestions(request, citation_id):
-    if request.method == 'POST':
+    if request.method == 'GET':
         subjects = ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=citation_id)
         subject_ids = [subject.authority.id for subject in subjects if subject.authority]
+        categories = []
         
         if subjects:
             sqs = SearchQuerySet().models(Citation)
