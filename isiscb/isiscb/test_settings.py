@@ -193,7 +193,7 @@ DATABASES = {
     'default': {
 
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test_isiscb_new',
+        'NAME': 'test_isiscb',
         'USER': 'postgres',
         'PASSWORD': '',
         'HOST': 'localhost',
