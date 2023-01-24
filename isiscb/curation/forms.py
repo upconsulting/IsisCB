@@ -936,6 +936,7 @@ class TenantSettingsForm(forms.ModelForm):
     link_color = forms.CharField(help_text='Color of links.', widget=forms.TextInput(attrs={'type': "color"}))
     title = forms.CharField(help_text='Title of bibliography')
     logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
+    contact_email = forms.EmailField(help_text='Email address for contacting the bilbiographer.')
 
     class Meta(object):
         model = TenantSettings
@@ -948,14 +949,7 @@ class TenantSettingsForm(forms.ModelForm):
 
         self.fields['title'].initial = self.instance.tenant.title
         self.fields['logo'].initial = self.instance.tenant.logo
-
-    def clean(self):
-        print("clean")
-        print(self.cleaned_data)
-
-    def save(self, *args, **kwargs):
-        print(self.fields['logo'])
-        print(self.cleaned_data)
+        self.fields['contact_email'].initial = self.instance.tenant.contact_email
 
 
 class TenantPageBlockForm(forms.Form):

@@ -62,6 +62,10 @@ class TenantSettings(models.Model):
     def home_other_blocks(self):
         return self.page_blocks.filter(block_type='HO')
 
+    @property
+    def about_blocks(self):
+        return self.page_blocks.filter(block_type='AB')
+
 class TenantPageBlock(models.Model):
     """
     Blocks to be configured on home page.

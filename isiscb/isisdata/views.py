@@ -593,7 +593,16 @@ def about(request, tenant_id=None):
     """
     View for about page
     """
-    return render(request, 'isisdata/about.html', context={'active': 'about'})
+    context={
+        'active': 'about',
+        'tenant_id': tenant_id,
+    }
+
+    template = 'isisdata/about.html'
+    if tenant_id:
+        template = 'tenants/about.html'
+    
+    return render(request, template, context)
 
 def playground(request, tenant_id=None):
     """

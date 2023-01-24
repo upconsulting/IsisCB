@@ -21,7 +21,8 @@ def list_tenants(request):
 def tenant(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
-        'tenant': tenant
+        'tenant': tenant,
+        'selected': 'general'
     }
     return render(request, 'curation/tenants/tenant.html', context=context)
 
@@ -29,7 +30,8 @@ def tenant(request, tenant_pk):
 def tenant_home_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
-        'tenant': tenant
+        'tenant': tenant,
+        'selected': 'home_page'
     }
     return render(request, 'curation/tenants/tenant_home_page.html', context=context)
 
@@ -174,6 +176,14 @@ def tenant_delete_page_block(request, tenant_pk, page_block_id):
 
     return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk}))
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_about_page(request, tenant_pk):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    context = {
+        'tenant': tenant,
+        'selected': 'about'
+    }
+    return render(request, 'curation/tenants/about.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_settings(request, tenant_pk):
@@ -188,6 +198,7 @@ def tenant_settings(request, tenant_pk):
             # if it's the first time, set the settings object
             tenant.title = form.cleaned_data['title']
             tenant.logo = form.cleaned_data['logo']
+            tenant.contact_email = form.cleaned_data['contact_email']
             if not tenant.settings:
                 tenant.settings = form.save()
             else:
@@ -199,3 +210,4 @@ def tenant_settings(request, tenant_pk):
         'form': form
     })
     return render(request, 'curation/tenants/tenant_settings.html', context=context)
+

@@ -31,6 +31,10 @@
           a {
             color: {{tenant.settings.link_color}}
           }
+
+          .navbar-inverse .navbar-nav> .active>a {
+              background-color: {{tenant.settings.link_color}};
+          }
         </style>
 
         {% block extra_head %}{% endblock %}
