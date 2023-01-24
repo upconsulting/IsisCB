@@ -768,12 +768,6 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
                           {% endif %}
                         {% endif %}
                           <span class="visible-print-inline">({{ citation_url }})</span>
-
-                          <!-- Zotero -->
-                          <span style="display:none;">
-                              <abbr class="unapi-id" title="{{ citation.id|get_pk }}">unapi</abbr>
-                          </span>
-
                       </p>
                     </div>
                   {% empty %}
