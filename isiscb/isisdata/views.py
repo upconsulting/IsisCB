@@ -1725,6 +1725,7 @@ def playlist(request, *args, **kwargs):
     collection = get_object_or_404(CitationCollection, id=collection_id)
     citation_ids = [citation.id for citation in collection.citations.all()]
     citations = Citation.objects.filter(pk__in=citation_ids)
+    facets = get_facets_from_similar_citations(citations)
     for citation in citations:
         citation.cover_image = get_google_books_image(citation, False)
         if not citation.cover_image:
@@ -1748,6 +1749,7 @@ def playlist(request, *args, **kwargs):
         'collection': collection,
         'citations': citations,
         'subjects': collection.subjects.all(),
+        'facets': facets,
     }
     # User has elected to edit their playlist details.
     if edit and user.id == request.user.id:
@@ -1785,10 +1787,11 @@ def create_playlist(request):
 @login_required()
 def add_citation_to_playlist(request):
     if request.method == 'POST':
-        collection_id = request.POST.get('collection_id')
+        playlist_id = request.POST.get('playlist_id')
         citation_id = request.POST.get('citation_id')
-        collection = get_object_or_404(CitationCollection, id=collection_id)
-        collection.citations.add(Citation.objects.get(id=citation_id))
+        collection = get_object_or_404(CitationCollection, id=playlist_id)
+        if request.user.is_authenticated and collection.createdBy == request.user:
+            collection.citations.add(Citation.objects.get(id=citation_id))
 
         context = {
             'collection_name': collection.name,
@@ -1805,7 +1808,8 @@ def remove_citation_from_playlist(request):
         citation_id = request.POST.get('citation_id')
         collection = get_object_or_404(CitationCollection, id=collection_id)
         citation = get_object_or_404(Citation, pk=citation_id)
-        collection.citations.remove(citation)
+        if request.user.is_authenticated and collection.createdBy == request.user:
+            collection.citations.remove(citation)
 
         context = {
             'collection_name': collection.name,

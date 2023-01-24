@@ -187,13 +187,14 @@
           <div class="btn-group pull-right" id="{{result.id}}-options-button" style="display: none;">
             <a type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn dropdown-toggle"><i class="fas fa-ellipsis-h"></i></a>
             <ul class="dropdown-menu multi-level">
+              {% if result.author_ids %}<li><a href="{% url 'authority' result.author_ids|first %}" target="_blank">Go to author</a></li>{% endif %}
+              {% if result.periodical_ids %}<li><a href="{% url 'authority' result.periodical_ids|first %}" target="_blank">Go to journal</a></li>{% endif %}
+              {% if result.type in show_publisher_types and result.publisher_ids %}<li><a href="{% url 'authority' result.publisher_ids|first %}" target="_blank">Go to publisher</a></li>{% endif %}
               <li class="dropdown-submenu" style="display: inline-block">
                 <a class="test" tabindex="-1" href="#">Add to Playlist <i class="fas fa-caret-right"></i></a>
                 <ul class="dropdown-menu" style="left: 100%; top: -8%;">
-                  <li><a href="#">Create New Playlist</a></li>
-                  <li role="separator" class="divider"></li>
                   {% for playlist in user_playlists %}
-                    <li><a class="add-citation-button" data-id="{{result.id}}" id="{{playlist.id}}" href="#">{{playlist.name}}</a></li>
+                    <li><a class="add-citation-button" data-citation-id="{{result.id}}" data-playlist-id="{{playlist.id}}" href="#">{{playlist.name}}</a></li>
                   {% endfor %}
                 </ul>
               </li>
@@ -429,12 +430,12 @@ $(document).ready(function() {
 
 $(document).on("click",".add-citation-button", function () {
   let payload = {
-    'collection_id': $(this).attr('id'),
-    'citation_id': $(this).data('id')
+    'playlist_id': $(this).attr('data-playlist-id'),
+    'citation_id': $(this).attr('data-citation-id')
   };
 
   $.ajax({
-    url: "{% url "add_citation_to_playlist" %}",
+    url: "{% url 'add_citation_to_playlist' %}",
     method: "POST",
     headers: {'X-CSRFToken': '{{ csrf_token }}'},
     data: payload,

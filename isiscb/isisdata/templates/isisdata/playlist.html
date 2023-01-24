@@ -29,6 +29,7 @@
                         </p>
                     {% endif %}
                     <p>{{collection.description}}</p>
+                    <span style="color: #777">{{collection.citations.all.count}} citation(s)</span>
                     <p style="color: #777">created: {{collection.created|date:"Y-m-d"}}</p>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -45,19 +46,430 @@
         </div>
         <div class="col-sm-8">
             {% if citations %}
-            <ul class="list-group">
-                {% for citation in citations %}
-                <li id="{{citation.id}}-list-item" class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}}) {% if collection.createdBy.id == user.id %}<a href="#" class="pull-right remove-button" id="{{citation.id}}" title="remove citation from playlist" style="color: #777; text-align: center; display: none;"><i class="fas fa-trash"></i></a>{% endif %}</li>
-                {% endfor %}
-            </ul>
+                <ul class="list-group">
+                    {% for citation in citations %}
+                    <li id="{{citation.id}}-list-item" class="list-group-item" style="padding: 7px 12px;"><img src="{{citation.cover_image.url}}" style="border: 1px solid #999; object-fit: cover; width: 40px; height: 40px; {% if not citation.cover_image.size %}-webkit-filter: grayscale(100%); filter: grayscale(100%);{% endif %}">&nbsp;&nbsp;&nbsp;<span class="label label-primary">{{citation.get_type_controlled_display}}</span> <a href="{% url 'citation' citation.id %}">{{citation.title_for_display}}</a> ({{citation.publication_date.year}}) {% if collection.createdBy.id == user.id %}<a href="#" class="pull-right remove-button" id="{{citation.id}}" data-citation-id="{{citation.id}}" title="remove citation from playlist" style="color: #777; text-align: center; display: none;"><i class="fas fa-trash"></i></a>{% endif %}</li>
+                    {% endfor %}
+                </ul>
             {% endif %}
+            <div class="row">
+                <div class="col-sm-12 col-md-4">
+                    {% if facets.PR %}
+                        <div class="panel panel-default facet-box">
+                        <div class="panel-heading-relation panel-heading">
+                            <strong>Authors & Contributors</strong>
+                            {% if facets.PR|length > 6 %}
+                            <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#authorModal" style="float:right">
+                            More <i class="far fa-caret-square-down"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="panel-body">
+                            {% for facet in facets.PR|slice:"6" %}
+                            {% if facet.authority %}
+                            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                            {{facet.authority.name}}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                            <br>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        </div>
+                    {% endif %}
+        
+                    {% if facets.PH %}
+                        <div class="panel panel-default facet-box">
+                        <div class="panel-heading panel-heading-relation">
+                            <strong>Journals</strong>
+                            {% if facets.PH|length > 6 %}
+                            <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#journalModal" style="float:right">
+                            More <i class="far fa-caret-square-down"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="panel-body">
+                            {% for facet in facets.PH|slice:"6" %}
+                            {% if facet.authority %}
+                            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                            {{facet.authority.name}}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                            <br>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        </div>
+                    {% endif %}
+        
+                    {% if facets.IH %}
+                        <div class="panel panel-default facet-box">
+                        <div class="panel-heading panel-heading-relation">
+                            <strong>Publishers</strong>
+                            {% if facets.IH|length > 6 %}
+                            <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#publisherModal" style="float:right">
+                            More <i class="far fa-caret-square-down"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="panel-body">
+                            {% for facet in facets.IH|slice:"6" %}
+                            {% if facet.authority %}
+                            <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                            {{facet.authority.name}}
+                            <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                            <br>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    {% if facets.CO %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Concepts</strong>
+                        {% if facets.CO|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#subjectModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.CO|slice:"6" %}
+                        {% if facet.authority %}
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+      
+                  {% if facets.PE %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>People</strong>
+                        {% if facets.PE|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#peopleModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.PE|slice:"6" %}
+                        {% if facet.authority %}
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    {% if facets.GE %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Places</strong>
+                        {% if facets.GE|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#placesModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.GE|slice:"6" %}
+                        {% if facet.authority %}
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+      
+                  {% if facets.TI %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Times</strong>
+                        {% if facets.TI|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#timePeriodModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.TI|slice:"6" %}
+                        {% if facet.authority %}
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+      
+                  {% if facets.IN %}
+                    <div class="panel panel-default facet-box">
+                      <div class="panel-heading-subjects panel-heading">
+                        <strong>Institutions </strong>
+                        {% if facets.IN|length > 6 %}
+                        <button type="button" class="btn btn-xs btn-primary pull-right subject-more-btn" data-toggle="modal" data-target="#institutionModal" style="float:right">
+                          More <i class="far fa-caret-square-down"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                      <div class="panel-body">
+                        {% for facet in facets.IN|slice:"6" %}
+                        {% if facet.authority %}
+                        <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                        {{facet.authority.name}}
+                        <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+                        <br>
+                        {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- authors modal -->
+<div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-labelledby="authorModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Authors & Contributors</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in facets.PR %}
+            {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_persons_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+  <!-- concepts Modal -->
+  <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Concepts</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in facets.CO %}
+            {% if facet.authority %}
+              <li>
+                <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_concepts_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                {{facet.authority.name}}
+                <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              </li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /modal -->
+  <!-- people Modal -->
+  <div class="modal fade" id="peopleModal" tabindex="-1" role="dialog" aria-labelledby="peopleModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">People</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.PE %}
+          {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_people_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
+  
+  <!-- places Modal -->
+  <div class="modal fade" id="placesModal" tabindex="-1" role="dialog" aria-labelledby="placesModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel">Places</h4>
+        </div>
+        <div class="modal-body">
+          <ul class="unselected_facets">
+            {% for facet in facets.GE %}
+            {% if facet.authority %}
+              <li>
+                <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_geographic_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+                {{facet.authority.name}}
+                <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+              </li>
+            {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+    </div><!-- /modal -->
+  
+  <!-- institution Modal -->
+  <div class="modal fade" id="institutionModal" tabindex="-1" role="dialog" aria-labelledby="institutionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Institutions</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.IN %}
+          {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_institutions_by_subject_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
+  
+  <!-- times Modal -->
+  <div class="modal fade" id="timePeriodModal" tabindex="-1" role="dialog" aria-labelledby="timePeriodModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Time Periods</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.TI %}
+          {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_time_period_ids_exact:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
+  
+  <!-- publisher Modal -->
+  <div class="modal fade" id="publisherModal" tabindex="-1" role="dialog" aria-labelledby="publisherModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Publishers</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.IH %}
+          {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_publisher_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
+  
+  
+  <!-- periodical Modal -->
+  <div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Journals</h4>
+      </div>
+      <div class="modal-body">
+        <ul class="unselected_facets">
+          {% for facet in facets.PH %}
+          {% if facet.authority %}
+            <li>
+              <a title="See all citations connected to {{facet.authority.name}}" style="display: inline;" href="{% url 'haystack_search' %}?q=*&models=isisdata.citation&sort_order=publication_date_for_sort&sort_order_dir=descend&raw_search=True&selected_facets=citation_periodical_ids:{{ facet.authority.id }}"><i class="fas fa-search"></i></a>
+              {{facet.authority.name}}
+              <a title="Go to page for {{facet.authority.name}}" href={% url 'authority' facet.authority.id %}><i class="fas fa-external-link-alt"></i></a>
+            </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div><!-- /modal -->
 
     <script>
         $('.list-group-item').on("mouseover", function(e) {
             let citation_id = this.id.substring(0,12);
-            console.log(citation_id);
             $(`#${citation_id}`).css('display', 'inline-block');
         })
     
@@ -68,7 +480,7 @@
 
         $(document).on("click",".remove-button", function () {
             let payload = {
-            'citation_id': $(this).attr('id'),
+            'citation_id': $(this).attr('data-citation-id'),
             'collection_id': "{{collection.id}}",
             };
         
