@@ -1,0 +1,7 @@
+<div class="list-group">
+    <a href="{% url 'curation:tenant' tenant.id %}" class="list-group-item {% if selected == 'general' %}active{% endif %}">
+        General Settings
+    </a>
+    <a href="{% url 'curation:tenant_home_page' tenant.id %}" class="list-group-item {% if selected == 'home_page' %}active{% endif %}">Home Page Settings</a>
+    <a href="{% url 'curation:tenant_about' tenant.id %}" class="list-group-item {% if selected == 'about' %}active{% endif %}">About Page</a>
+</div>

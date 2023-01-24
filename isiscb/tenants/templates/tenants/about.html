@@ -1,0 +1,107 @@
+{% extends "tenants/__base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="row" ng-app="commentsApp">
+<!--  <div class="col-sm-3 col-md-2">
+    <div class="menu">
+      <a href="{% if last_query %}{{ last_query }}{% else %}javascript:window.history.back(){% endif %}"><span class="glyphicon glyphicon-arrow-left"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'index' %}"><span class="glyphicon glyphicon-home"></span></a>
+      &nbsp; &nbsp;
+      <a href="{% url 'haystack_search' %}"><span class="glyphicon glyphicon-search"></span></a>
+      <hr>
+    </div>
+  </div>-->
+
+  <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-7 main">
+
+<h3>About <i>IsisCB Explore</i></h3>
+
+<p><i>IsisCB Explore</i> is a research tool for the history of science, whose
+core dataset comes from bibliographical citations in the <a href="http://isisbibliography.org/">Isis Bibliography of the History of Science</a>. The IsisCB contains a half century of curated bibliographical data.</p>
+
+<p>The dataset is composed of three main
+types of records:</p>
+
+<ul type=disc>
+ <li><i>Citations</i>. Citations are bibliographic entries that have been classified and indexed.</li>
+ <li><i>Objects</i>. Objects include all of the people, institutions, and concepts related to a bibliographic citation. They include authors and contributors, publishers, journals, schools that grant doctoral degrees, and subjects and classification terms used to identify the content of each work. In library and information science parlance, these are known as identities or authorities.</li>
+ <li><i>Relationships</i>. Relationship records are the workhorses of the system. They link citations and objects to each other. This linkage creates a semantic web between all of the records, making it possible to accomplish the complex searching and similarity matching that takes place in order to display pages of related material.</li>
+</ul>
+
+<p><i>IsisCB Explore</i> is wholly open access. We do not charge for the site and we encourage users to share what they find with others. To this end, we allow comments by users, we encourage feedback using the links available on each page, and we include ways to share material using Facebook and Twitter.</p>
+
+<p>Our data are available via a <a href="http://data.isiscb.org/rest/">REST API</a> (accessible through the icons on this site), and all of
+our source code is at <a href="https://github.com/upconsulting/IsisCB">GitHub</a>. Our data is open for use
+following the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons
+Attribution-NonCommercial 4.0 International License</a>.</p>
+
+<p>For those using the system, you can find our privacy policy <a href="https://isiscb.org/privacy-policy/">here</a>.</p>
+
+<h4>Current features</h4>
+
+<p>One can use the IsisCB to do a
+standard bibliographical search. This is the mode that we expect most users
+will find valuable on a day-to-day basis.</p>
+
+<ul type=disc>
+ <li ><i>Account registration</i>. You can register for
+     an account or log in through Facebook or Twitter.</li>
+ <li ><i>Zotero integration</i>. All bibliographic
+     records can be saved in Zotero, either individually or in search results.</li>
+ <li ><i>Search history</i>. The system
+     automatically logs your search history and gives you the ability to
+     bookmark and save certain searches.</li>
+ <li ><i>Public user comments</i>. Once logged in, you
+     can add public comments on any record so that you can identify missing
+     information or suggest outside links.</li>
+ <li ><i>Faceted searching</i>. The facets are indexed
+     items that you can access directly using the Authorities tab.</li>
+</ul>
+
+<h4>Acknowledgement of those who helped with the initial development of this project between 2013 and 2015</h4>
+
+<p>The following individuals have been especially helpful in making this project possible: Sylwester Ratowt, Colin Allen, Margaret Gaida, Amy Rodgers, Gavan McCarthy, Marco La Rosa, Ailie Smith, John Stewart, Erick Peirson, Julia Damerow, Tara Carlisle, Nathan Kapoor, Younes Mahdavi, Carolyn Scearce, Kirsty Gaither, Sam Fellows. In addition, we want to thank the many individuals associated with the sponsoring institutions listed on this page. The project could not have been completed without their help. Faculty and administrative staff in many different departments across the University of Oklahoma have been extraordinarily supportive throughout this endeavor.</p>
+
+<p>Questions and information
+regarding this project can be directed to:</p>
+
+<p>Stephen P. Weldon<br>
+Editor, Isis Bibliography of the History of Science<br>
+Associate Professor of History of Science<br>
+601 Elm Street, Physical Sciences 618<br>
+University of Oklahoma<br>
+Norman, Oklahoma 73019<br>
+spweldon [at] ou [dot] edu</p>
+
+<p>This website was
+developed by <a href="http://aplacecalledup.com/">A
+Place Called Up Consulting</a>. A
+Place Called Up Consulting works with academic units, teams, and individual
+scholars to advance excellence in digital humanities research, training, and
+outreach. From planning to maturity, A Place Called Up Consulting provides
+guidance, software and infrastructure development services, training, and
+support for projects of all sizes.</p>
+
+</div>
+
+<div class="col-md-3 col-xs-offset-1 col-sm-offset-1 col-md-offset-0 col-sm-10">
+  <div style="margin-top: 20px;">
+    <a href="http://hssonline.org/" target="blank"><img width="350px"src="{% static "isisdata/images/hss_banner.png" %}"></a>
+  <div style="margin-top: 20px;">
+  <div>
+    <a href="http://cas.ou.edu/hsci" target="blank"><img width="350px" src="{% static "isisdata/images/hsci_banner.png" %}"></a>
+  </div>
+  <div style="margin-top: 20px;">
+    <a href="https://libraries.ou.edu/" target="blank"><img width="350px" src="{% static "isisdata/images/oulib_banner.png" %}"></a>
+  </div>
+  <div style="margin-top: 20px;">
+    <a href="http://www.sloan.org/" target="blank"><img width="350px" src="{% static "isisdata/images/sloan_banner.png" %}"></a>
+  </div>
+</div>
+
+</div>
+
+{% endblock %}
