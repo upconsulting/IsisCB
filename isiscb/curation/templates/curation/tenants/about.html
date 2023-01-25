@@ -12,11 +12,28 @@
   </div>
 
   <div class="col-md-10">
-    <p class="pull-right">
-      <a href="{% url 'curation:tenant_settings' tenant.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-       Edit Settings</a>
-      </p>
-      
+    <div class="pull-right">
+      <a href="{% url 'curation:tenant_add_page_block_type' tenant.id 'about' %}"><i class="fa fa-th-large" aria-hidden="true"></i>
+        Add About Text Block
+      </a>
+    </div>
+    <div style="margin-bottom: 20px;" class="clearfix"></div>
+    
+    {% if not tenant.settings.about_blocks %}
+    <div class="panel-heading">
+      About page is not yet configured. Please add an about page block.&nbsp;
+       <div class="pull-right">
+         <a class="text-primary" href="{% url 'curation:tenant_add_page_block_type' tenant.id 'about' %}">
+           <i class="fa fa-th-large" aria-hidden="true"></i> Add
+         </a>
+         
+       </div>
+     </div>
+    {% else %}
+      {% for block in tenant.settings.about_blocks %}
+        {% include 'curation/tenants/fragment_page_block.html' with block=block %}
+      {% endfor %}
+    {% endif %}
   </div>
 </div>
 
