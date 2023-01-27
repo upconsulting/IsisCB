@@ -1,5 +1,5 @@
 from isisdata.models import *
-from curation.forms import TenantSettingsForm, TenantPageBlockForm, TenantPageBlockColumnForm
+from curation.forms import TenantSettingsForm, TenantPageBlockForm, TenantPageBlockColumnForm, TenantImageUploadForm
 from django.shortcuts import get_object_or_404, render, redirect, reverse
 
 from django.contrib.admin.views.decorators import user_passes_test
@@ -208,9 +208,36 @@ def tenant_about_page(request, tenant_pk):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
         'tenant': tenant,
-        'selected': 'about'
+        'selected': 'about',
+        'images': tenant.settings.about_images
     }
     return render(request, 'curation/tenants/about.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_add_about_image(request, tenant_pk):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    context = {
+        'tenant': tenant,
+        'selected': 'about'
+    }
+
+    form = TenantImageUploadForm(request.POST or None, request.FILES or None)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            image = TenantImage()
+            image.title = form.cleaned_data['title']
+            image.image = form.cleaned_data['image']
+            image.image_type = TenantImage.ABOUT
+            image.tenant_settings = tenant.settings
+            image.save()
+            return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+    else:
+        context.update({
+            'form': form
+        })
+    
+    return render(request, 'curation/tenants/tenant_edit_about_image.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_settings(request, tenant_pk):

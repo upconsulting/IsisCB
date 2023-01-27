@@ -190,4 +190,5 @@ urlpatterns = [
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/blocks/(?P<page_block_id>[0-9]+)/content/(?P<content_id>[0-9]+)/edit$', settings_views.tenant_edit_column_content, name='tenant_edit_column_content'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/settings$', settings_views.tenant_settings, name='tenant_settings'),
     re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/about$', settings_views.tenant_about_page, name='tenant_about'),
+    re_path(r'^tenants/(?P<tenant_pk>[0-9]+)/about/image$', settings_views.tenant_add_about_image, name='tenant_add_about_image'),
 ]

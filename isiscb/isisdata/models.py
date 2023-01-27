@@ -19,6 +19,7 @@ from django.urls import reverse as core_reverse
 from django.utils.safestring import mark_safe
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import jsonpickle
+from datetime import date
 
 
 from markupfield.fields import MarkupField
@@ -66,6 +67,34 @@ class TenantSettings(models.Model):
     def about_blocks(self):
         return self.page_blocks.filter(block_type='AB')
 
+    @property
+    def about_images(self):
+        return self.images.filter(image_type='AB')
+
+class TenantImage(models.Model):
+    title = models.TextField(blank=True, null=True)
+    tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="images")
+
+    def upload_path(instance, filename):
+        return 'tenant_images/{0}/{1}-{2}'.format(instance.tenant_settings.tenant.id, date.today().strftime("%m-%d-%y"), filename) 
+    image = models.ImageField(upload_to=upload_path, blank=True, null=True)
+
+    HOME_MAIN = 'HM'
+    HOME_OTHER = 'HO'
+    ABOUT = 'AB'
+    TYPE_CHOICES = (
+        (HOME_MAIN, 'Main home image'),
+        (HOME_OTHER, 'Main other image'),
+        (ABOUT, 'About page image'),
+    )
+    image_type = models.CharField(choices=TYPE_CHOICES,
+                                           max_length=255,
+                                           blank=True,
+                                           null=True,
+                                           default=HOME_OTHER,
+                                           db_index=True)
+
+
 class TenantPageBlock(models.Model):
     """
     Blocks to be configured on home page.
@@ -80,7 +109,7 @@ class TenantPageBlock(models.Model):
     TYPE_CHOICES = (
         (HOME_MAIN, 'Main home block'),
         (HOME_OTHER, 'Main other blocks'),
-        (ABOUT, 'About pagge blocks'),
+        (ABOUT, 'About page blocks'),
     )
     block_type = models.CharField(choices=TYPE_CHOICES,
                                            max_length=255,
