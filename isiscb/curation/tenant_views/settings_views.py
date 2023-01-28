@@ -214,22 +214,70 @@ def tenant_about_page(request, tenant_pk):
     return render(request, 'curation/tenants/about.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def tenant_add_about_image(request, tenant_pk):
+def tenant_delete_about_image(request, tenant_pk, image_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
         'tenant': tenant,
         'selected': 'about'
     }
 
+    if request.method == "POST":
+        image =get_object_or_404(TenantImage, pk=image_id)
+        image.delete()
+
+    return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_edit_about_image(request, tenant_pk, image_id):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    image = get_object_or_404(TenantImage, pk=image_id)
+    context = {
+        'tenant': tenant,
+        'selected': 'about',
+        'image': image
+    }
+
+    if request.method == 'GET':
+        form = TenantImageUploadForm({
+            'title': image.title, 
+            'image_index': image.image_index,
+            'image_type': image.image_type,
+            })
+        context.update({
+            'form': form
+        })
+        return render(request, 'curation/tenants/tenant_edit_about_image.html', context=context)
+
+    return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+    
+
+
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_add_save_about_image(request, tenant_pk, image_id=None):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    context = {
+        'tenant': tenant,
+        'selected': 'about'
+    }
+    print('add save')
+    if image_id:
+        request.FILES['image'] = get_object_or_404(TenantImage, pk=image_id).image
     form = TenantImageUploadForm(request.POST or None, request.FILES or None)
+
+    print(form)
 
     if request.method == 'POST':
         if form.is_valid():
-            image = TenantImage()
+            if not image_id:
+                image = TenantImage()
+                image.tenant_settings = tenant.settings
+                image.image = form.cleaned_data['image']
+                image.image_type = TenantImage.ABOUT
+            else:
+                image = get_object_or_404(TenantImage, pk=image_id)
             image.title = form.cleaned_data['title']
-            image.image = form.cleaned_data['image']
-            image.image_type = TenantImage.ABOUT
-            image.tenant_settings = tenant.settings
+            image.image_index = form.cleaned_data['image_index']
             image.save()
             return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     else:

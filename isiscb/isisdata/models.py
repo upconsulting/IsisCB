@@ -73,6 +73,7 @@ class TenantSettings(models.Model):
 
 class TenantImage(models.Model):
     title = models.TextField(blank=True, null=True)
+    image_index = models.IntegerField()
     tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="images")
 
     def upload_path(instance, filename):
@@ -93,6 +94,9 @@ class TenantImage(models.Model):
                                            null=True,
                                            default=HOME_OTHER,
                                            db_index=True)
+
+    class Meta:
+        ordering = ['image_index',]
 
 
 class TenantPageBlock(models.Model):
