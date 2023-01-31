@@ -75,12 +75,16 @@ class TenantImage(models.Model):
     title = models.TextField(blank=True, null=True)
     image_index = models.IntegerField()
     tenant_settings = models.ForeignKey('TenantSettings', on_delete=models.CASCADE, related_name="images")
+    link = models.CharField(max_length=255, blank=True, null=True)
 
+    link_color = models.CharField(max_length=255, blank=True, null=True)
     def upload_path(instance, filename):
         return 'tenant_images/{0}/{1}-{2}'.format(instance.tenant_settings.tenant.id, date.today().strftime("%m-%d-%y"), filename) 
     image = models.ImageField(upload_to=upload_path, blank=True, null=True)
 
+    # For the text block on the first top part of the home page
     HOME_MAIN = 'HM'
+    # For the blocks after the first one (as many as required)
     HOME_OTHER = 'HO'
     ABOUT = 'AB'
     TYPE_CHOICES = (

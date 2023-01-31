@@ -46,7 +46,9 @@
     {% for image in images %}
     <div class="panel panel-default">
     <div class="panel-heading">
-      {{ image.title|default_if_none:"" }}&nbsp;
+      {{ image.title|default_if_none:"" }}
+      {% if image.link %} (<a href="{{ image.link }}" target="_blank">{{image.link}}</a>){% endif %}
+      &nbsp;
       <a class="btn-link" href="{% url 'curation:tenant_edit_about_image' tenant.id image.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
     
       

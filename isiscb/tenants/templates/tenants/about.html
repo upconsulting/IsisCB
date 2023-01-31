@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="row" ng-app="commentsApp">
+<div class="row">
 
 
   <div class="col-xs-offset-1 col-xs-10 col-sm-10 col-md-7 main">
@@ -20,10 +20,14 @@
 <div class="col-md-3 col-xs-offset-1 col-sm-offset-1 col-md-offset-0 col-sm-10">
   {% for image in tenant.settings.about_images %}
   <div style="margin-top: 20px;">
-    <a href="http://hssonline.org/" target="blank"><img width="350px"src="{{ image.image.url }}"></a>
-  <div style="margin-top: 20px;">
+    {% if image.link %}
+    <a href="{{ image.link }}" target="_blank"><img width="350px"src="{{ image.image.url }}"></a>
+    {% else %}
+    <img width="350px"src="{{ image.image.url }}">
+    {% endif %}
+  </div>
   {% endfor %}
-</div>
+
 
 </div>
 

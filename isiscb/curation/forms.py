@@ -965,6 +965,7 @@ class TenantImageUploadForm(forms.Form):
     title = forms.CharField(help_text="Title for the image.")
     image_index = forms.IntegerField(help_text="Index of the image. The index specifies the order images are shown in.")
     image = forms.ImageField(help_text='Image to upload.', required=True)
+    link = forms.CharField(help_text="Link image to link to.", required=False)
 
     def __init__(self, *args, **kwargs):
         super(TenantImageUploadForm, self).__init__(*args, **kwargs)

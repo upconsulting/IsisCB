@@ -199,7 +199,13 @@ def tenant_edit_column_content(request, tenant_pk, page_block_id, content_id):
             content.page_block = page_block
             content.save()
 
-            return redirect(reverse('curation:tenant_home_page', kwargs={'tenant_pk':tenant_pk})) 
+            redirect_view = {
+                TenantPageBlock.ABOUT: 'curation:tenant_about',
+                TenantPageBlock.HOME_MAIN: 'curation:tenant_home_page',
+                TenantPageBlock.HOME_OTHER: 'curation:tenant_home_page'
+            }
+
+            return redirect(reverse(redirect_view[page_block.block_type], kwargs={'tenant_pk':tenant_pk})) 
 
     return render(request, 'curation/tenants/add_column_content.html', context=context)
 
@@ -260,12 +266,9 @@ def tenant_add_save_about_image(request, tenant_pk, image_id=None):
         'tenant': tenant,
         'selected': 'about'
     }
-    print('add save')
     if image_id:
         request.FILES['image'] = get_object_or_404(TenantImage, pk=image_id).image
     form = TenantImageUploadForm(request.POST or None, request.FILES or None)
-
-    print(form)
 
     if request.method == 'POST':
         if form.is_valid():
@@ -278,6 +281,7 @@ def tenant_add_save_about_image(request, tenant_pk, image_id=None):
                 image = get_object_or_404(TenantImage, pk=image_id)
             image.title = form.cleaned_data['title']
             image.image_index = form.cleaned_data['image_index']
+            image.link = form.cleaned_data['link']
             image.save()
             return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     else:
