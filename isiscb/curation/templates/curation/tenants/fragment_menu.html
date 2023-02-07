@@ -4,4 +4,5 @@
     </a>
     <a href="{% url 'curation:tenant_home_page' tenant.id %}" class="list-group-item {% if selected == 'home_page' %}active{% endif %}">Home Page Settings</a>
     <a href="{% url 'curation:tenant_about' tenant.id %}" class="list-group-item {% if selected == 'about' %}active{% endif %}">About Page</a>
+    <a href="{% url 'curation:tenant_content_page' tenant.id %}" class="list-group-item {% if selected == 'content' %}active{% endif %}">Record Pages</a>
 </div>

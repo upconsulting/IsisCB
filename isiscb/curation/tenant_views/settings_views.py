@@ -220,21 +220,28 @@ def tenant_about_page(request, tenant_pk):
     return render(request, 'curation/tenants/about.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def tenant_delete_about_image(request, tenant_pk, image_id):
+def tenant_delete_image(request, tenant_pk, image_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     context = {
         'tenant': tenant,
         'selected': 'about'
     }
 
+    redirect_map = {
+        TenantImage.ABOUT: 'curation:tenant_about',
+        TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
+    }
+
+    redirect_to = 'curation:about'
     if request.method == "POST":
         image =get_object_or_404(TenantImage, pk=image_id)
+        redirect_to = redirect_map[image.image_type]
         image.delete()
 
-    return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+    return redirect(reverse(redirect_to, kwargs={'tenant_pk':tenant_pk}))
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def tenant_edit_about_image(request, tenant_pk, image_id):
+def tenant_edit_image(request, tenant_pk, image_id):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
     image = get_object_or_404(TenantImage, pk=image_id)
     context = {
@@ -250,22 +257,35 @@ def tenant_edit_about_image(request, tenant_pk, image_id):
             'image_type': image.image_type,
             })
         context.update({
-            'form': form
+            'form': form,
+            'image_type': 'about' if image.image_type == TenantImage.ABOUT else 'authority_default'
         })
-        return render(request, 'curation/tenants/tenant_edit_about_image.html', context=context)
+        return render(request, 'curation/tenants/tenant_edit_image.html', context=context)
 
-    return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+    redirect_map = {
+        TenantImage.ABOUT: 'curation:tenant_about',
+        TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
+    }
+
+    return redirect(reverse(redirect_map[image.image_type] if image.image_type in redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     
 
 
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
-def tenant_add_save_about_image(request, tenant_pk, image_id=None):
+def tenant_add_save_image(request, tenant_pk, image_id=None, image_type=None):
     tenant = get_object_or_404(Tenant, pk=tenant_pk)
+
+    page_map = {
+        'about': 'about',
+        'authority_default': 'content'
+    }
     context = {
         'tenant': tenant,
-        'selected': 'about'
+        'image_type': image_type,
+        'selected': page_map[image_type] if image_type else 'about'
     }
+
     if image_id:
         request.FILES['image'] = get_object_or_404(TenantImage, pk=image_id).image
     form = TenantImageUploadForm(request.POST or None, request.FILES or None)
@@ -276,20 +296,49 @@ def tenant_add_save_about_image(request, tenant_pk, image_id=None):
                 image = TenantImage()
                 image.tenant_settings = tenant.settings
                 image.image = form.cleaned_data['image']
-                image.image_type = TenantImage.ABOUT
+
+                if image_type == 'about':
+                    image.image_type = TenantImage.ABOUT
+                else:
+                    image.image_type = request.GET.get('default_type', TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR)
             else:
                 image = get_object_or_404(TenantImage, pk=image_id)
             image.title = form.cleaned_data['title']
             image.image_index = form.cleaned_data['image_index']
             image.link = form.cleaned_data['link']
             image.save()
-            return redirect(reverse('curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
+            
+            redirect_map = {
+                TenantImage.ABOUT: 'curation:tenant_about',
+                TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR: 'curation:tenant_content_page',
+            }
+    
+            return redirect(reverse(redirect_map[image.image_type] if image.image_type in redirect_map else 'curation:tenant_about', kwargs={'tenant_pk':tenant_pk}))
     else:
         context.update({
-            'form': form
+            'form': form,
+            'image_choices': [
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR, "Default image for author"), 
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_PERSON, "Default image for person"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, "Default image for classification term"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_CONCEPT, "Default image for concept"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_GEO_TERM, "Default image for geographic term"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_INSTITUTION, "Default image for institution"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_PUBLISHER, "Default image for publisher"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD, "Default image for time period"),
+            ]
         })
     
-    return render(request, 'curation/tenants/tenant_edit_about_image.html', context=context)
+    return render(request, 'curation/tenants/tenant_edit_image.html', context=context)
+
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def tenant_content_page(request, tenant_pk):
+    tenant = get_object_or_404(Tenant, pk=tenant_pk)
+    context = {
+        'tenant': tenant,
+        'selected': 'content',
+    }
+    return render(request, 'curation/tenants/tenant_content_page.html', context=context)
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def tenant_settings(request, tenant_pk):

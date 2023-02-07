@@ -49,12 +49,6 @@ class TenantSettings(models.Model):
     link_color = models.CharField(max_length=255, blank=True, null=True)
     citations_external_links_color = models.CharField(max_length=255, blank=True, null=True)
 
-    """
-    Default image for authorities.
-    """
-    authority_default_image = models.ImageField(upload_to='tenant_authorities', blank=True, null=True)
-
-
     @property
     def home_main_block(self):
         return self.page_blocks.filter(block_type='HM').first()
@@ -71,6 +65,42 @@ class TenantSettings(models.Model):
     def about_images(self):
         return self.images.filter(image_type='AB')
 
+    @property
+    def authority_default_images(self):
+        return self.images.filter(image_type__in=['DAU', 'DPE', 'DCO', 'DIN', 'DGE', 'DPU', 'DTI', 'DCL'])
+   
+    @property
+    def authority_default_image_author(self):
+        return self.images.filter(image_type='DAU').first()
+
+    @property
+    def authority_default_image_person(self):
+        return self.images.filter(image_type='DPE').first()
+
+    @property
+    def authority_default_image_concept(self):
+        return self.images.filter(image_type='DCO').first()
+
+    @property
+    def authority_default_image_institution(self):
+        return self.images.filter(image_type='DIN').first()
+
+    @property
+    def authority_default_image_geo_term(self):
+        return self.images.filter(image_type='DGE').first()
+
+    @property
+    def authority_default_image_publisher(self):
+        return self.images.filter(image_type='DPU').first()
+
+    @property
+    def authority_default_image_timeperiod(self):
+        return self.images.filter(image_type='DTI').first()
+
+    @property
+    def authority_default_image_class_term(self):
+        return self.images.filter(image_type='DCL').first()
+
 class TenantImage(models.Model):
     title = models.TextField(blank=True, null=True)
     image_index = models.IntegerField()
@@ -82,21 +112,31 @@ class TenantImage(models.Model):
         return 'tenant_images/{0}/{1}-{2}'.format(instance.tenant_settings.tenant.id, date.today().strftime("%m-%d-%y"), filename) 
     image = models.ImageField(upload_to=upload_path, blank=True, null=True)
 
-    # For the text block on the first top part of the home page
-    HOME_MAIN = 'HM'
-    # For the blocks after the first one (as many as required)
-    HOME_OTHER = 'HO'
+    AUTHORITY_DEFAULT_IMAGE_AUTHOR = 'DAU'
+    AUTHORITY_DEFAULT_IMAGE_PERSON = 'DPE'
+    AUTHORITY_DEFAULT_IMAGE_CONCEPT = 'DCO'
+    AUTHORITY_DEFAULT_IMAGE_INSTITUTION = 'DIN'
+    AUTHORITY_DEFAULT_IMAGE_GEO_TERM = 'DGE'
+    AUTHORITY_DEFAULT_IMAGE_PUBLISHER = 'DPU'
+    AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD = 'DTI'
+    AUTHORITY_DEFAULT_IMAGE_CLASS_TERM = 'DCL'
     ABOUT = 'AB'
     TYPE_CHOICES = (
-        (HOME_MAIN, 'Main home image'),
-        (HOME_OTHER, 'Main other image'),
+        (AUTHORITY_DEFAULT_IMAGE_AUTHOR, 'Authority Default Image Author'),
+        (AUTHORITY_DEFAULT_IMAGE_PERSON, 'Authority Default Image Person'),
+        (AUTHORITY_DEFAULT_IMAGE_CONCEPT, 'Authority Default Image Concept'),
+        (AUTHORITY_DEFAULT_IMAGE_INSTITUTION, 'Authority Default Image Institution'),
+        (AUTHORITY_DEFAULT_IMAGE_GEO_TERM, 'Authority Default Image Geographic Term'),
+        (AUTHORITY_DEFAULT_IMAGE_PUBLISHER, 'Authority Default Image Publisher'),
+        (AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD, 'Authority Default Image Timeperiod'),
+        (AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, 'Authority Default Image Classification Term'),
         (ABOUT, 'About page image'),
     )
     image_type = models.CharField(choices=TYPE_CHOICES,
                                            max_length=255,
                                            blank=True,
                                            null=True,
-                                           default=HOME_OTHER,
+                                           default=ABOUT,
                                            db_index=True)
 
     class Meta:

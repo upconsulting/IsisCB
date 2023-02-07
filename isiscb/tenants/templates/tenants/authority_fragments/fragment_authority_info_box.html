@@ -202,23 +202,23 @@
 
 <!-- gets wikimedia image and synopsis where possible -->
 <script type="text/javascript">
-
+//@ sourceURL=wiki.js
   let wikiImage = "{{ wikiImage|safe }}";
   let wikiIntro = `{{ wikiIntro }}`;
   let wikiCredit = "{{ wikiCredit|safe }}";
   let type = "{{display_type}}";
 
-  console.log(wikiImage);
+  //console.log(wikiImage);
 
   let default_image_map = {
-    "Concept": "{% static 'isisdata/images/concept_default_image.png' %}",
-    "Person": "{% static 'isisdata/images/person_default_image.jpeg' %}",
-    "Author": "{% static 'isisdata/images/person_default_image.jpeg' %}",
-    "Geographic Term": "{% static 'isisdata/images/place_default_image.png' %}",
-    "Institution": "{% static 'isisdata/images/institution_default_image.png' %}",
-    "Publisher": "{% static 'isisdata/images/publisher_default_image.jpeg' %}",
-    "Time Period": "{% static 'isisdata/images/time_default_image.jpeg' %}",
-    "Classification Term": "{% static 'isisdata/images/category_default_image.png' %}",
+    "Concept": "{% if tenant.settings.authority_default_image_concept %}{{ tenant.settings.authority_default_image_concept.image.url }}{% else %}{% static 'isisdata/images/concept_default_image.png' %}{% endif %}",
+    "Person": "{% if tenant.settings.authority_default_image_person %}{{ tenant.settings.authority_default_image_person.image.url }}{% else %}{% static 'isisdata/images/person_default_image.jpeg' %}{% endif %}",
+    "Author": "{% if tenant.settings.authority_default_image_author %}{{ tenant.settings.authority_default_image_author.image.url }}{% else %}{% static 'isisdata/images/person_default_image.jpeg' %}{% endif %}",
+    "Geographic Term": "{% if tenant.settings.authority_default_image_geo_term %}{{ tenant.settings.authority_default_image_geo_term.image.url }}{% else %}{% static 'isisdata/images/place_default_image.png' %}{% endif %}",
+    "Institution": "{% if tenant.settings.authority_default_image_institution %}{{ tenant.settings.authority_default_image_institution.image.url }}{% else %}{% static 'isisdata/images/institution_default_image.png' %}{% endif %}",
+    "Publisher": "{% if tenant.settings.authority_default_image_publisher %}{{ tenant.settings.authority_default_image_publisher.image.url }}{% else %}{% static 'isisdata/images/publisher_default_image.jpeg' %}{% endif %}",
+    "Time Period": "{% if tenant.settings.authority_default_image_timeperiod %}{{ tenant.settings.authority_default_image_timeperiod.image.url }}{% else %}{% static 'isisdata/images/time_default_image.jpeg' %}{% endif %}",
+    "Classification Term": "{% if tenant.settings.authority_default_class_term %}{{ tenant.settings.authority_default_image_class_term.image.url }}{% else %}{% static 'isisdata/images/category_default_image.png' %}{% endif %}",
   };
 
   let default_background_map = {

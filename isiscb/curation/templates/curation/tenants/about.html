@@ -37,32 +37,14 @@
   
 
     <div class="pull-right">
-      <a href="{% url 'curation:tenant_add_about_image' tenant.id %}"><i class="fa fa-th-large" aria-hidden="true"></i>
+      <a href="{% url 'curation:tenant_add_image' tenant.id 'about' %}"><i class="fa fa-th-large" aria-hidden="true"></i>
         Add About Image
       </a>
     </div>
     <div style="margin-bottom: 20px;" class="clearfix"></div>
 
     {% for image in images %}
-    <div class="panel panel-default">
-    <div class="panel-heading">
-      {{ image.title|default_if_none:"" }}
-      {% if image.link %} (<a href="{{ image.link }}" target="_blank">{{image.link}}</a>){% endif %}
-      &nbsp;
-      <a class="btn-link" href="{% url 'curation:tenant_edit_about_image' tenant.id image.id %}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-    
-      
-      <div class="pull-right">
-        <form action="{% url 'curation:tenant_delete_about_image' tenant.id image.id %}" method="POST">
-          {% csrf_token %}
-          <button class="btn-link" type="submit"><i class="fa fa-trash-o" aria-hidden="true"></i> Delete</button>
-        </form>
-      </div>
-    </div>
-    <div class="panel-body">
-      <img width="100%" src="{{ image.image.url }}" />
-    </div>
-    </div>
+    {% include 'curation/tenants/fragment_image.html' with image=image %}
     {% endfor %}
   </div>
 

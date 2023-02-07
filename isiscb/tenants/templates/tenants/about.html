@@ -21,9 +21,9 @@
   {% for image in tenant.settings.about_images %}
   <div style="margin-top: 20px;">
     {% if image.link %}
-    <a href="{{ image.link }}" target="_blank"><img width="350px"src="{{ image.image.url }}"></a>
+    <a href="{{ image.link }}" target="_blank"><img title="{{ image.title|default:'Logo' }}" width="350px"src="{{ image.image.url }}"></a>
     {% else %}
-    <img width="350px"src="{{ image.image.url }}">
+    <img title="{{ image.title|default:'Logo' }}" width="350px"src="{{ image.image.url }}">
     {% endif %}
   </div>
   {% endfor %}
