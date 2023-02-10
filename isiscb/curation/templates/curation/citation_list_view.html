@@ -233,7 +233,7 @@ function toggleLinkRecordsBtn() {
                 </td>
                 <td>
                   {% if object.created_by_native %}
-                    {{ object.created_by_native__first_name }} {{ object.created_by_native__last_name }}
+                    {{ object.created_by_native|get_user_name }}
                   {% endif %}
                 </td>
             </tr>
