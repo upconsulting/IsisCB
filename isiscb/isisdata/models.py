@@ -710,7 +710,8 @@ class CuratedMixin(models.Model):
             else:
                 try:
                     return self.history.order_by('modified_on')[0].history_user
-                except:
+                except Exception as e:
+                    print(e)
                     return None
 
     created_on_fm = models.DateTimeField(null=True, help_text=help_text("""

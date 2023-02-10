@@ -52,6 +52,10 @@ def render_object(obj):
 
     return SafeText(elem)
 
+@register.filter 
+def get_user_name(obj):
+    user = User.objects.get(pk=obj)
+    return user.username if not user.last_name and not user.first_name else " ".join([user.first_name, user.last_name])
 
 @register.filter(name='get_citation_title')
 def get_citation_title(obj):
