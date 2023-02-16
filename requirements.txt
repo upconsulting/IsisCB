@@ -14,12 +14,12 @@ cachetools==4.0.0
 celery==4.4.2
 cement==2.8.2
 certifi==2020.4.5.1
-cffi==1.14.0
+cffi==1.15.1
 chardet==3.0.4
 colorama==0.4.3
 colorclass==2.2.0
 confusable-homoglyphs==3.2.0
-cryptography==2.9
+cryptography==39.0.1
 defusedxml==0.6.0
 Django==3.1.13
 django-allauth==0.41.0

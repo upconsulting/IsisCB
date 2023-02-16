@@ -346,7 +346,6 @@ def tenant_settings(request, tenant_pk):
     context = {
         'tenant': tenant
     }
-
     form = TenantSettingsForm(request.POST or None, request.FILES or None, instance=tenant.settings)
     if request.method == 'POST':
         if form.is_valid():
@@ -355,7 +354,7 @@ def tenant_settings(request, tenant_pk):
             tenant.logo = form.cleaned_data['logo']
             tenant.contact_email = form.cleaned_data['contact_email']
             if not tenant.settings:
-                tenant.settings = form.save()
+                tenant.settings = form.save()                
             else:
                 form.save()
             tenant.save()

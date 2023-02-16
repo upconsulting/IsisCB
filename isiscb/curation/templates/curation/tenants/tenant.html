@@ -38,6 +38,14 @@
             </td>
           </tr>
           <tr>
+            <th width="20%">Google API Key</th>
+            <td>
+              {% if tenant.settings.google_api_key %}
+                **********
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
             <th>Navigation Color</th>
             <td><i style="color: {{tenant.settings.navigation_color}}" class="fa fa-square" aria-hidden="true"></i></td>
           </tr>

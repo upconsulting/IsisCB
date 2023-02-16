@@ -9,6 +9,7 @@ from django.http import QueryDict
 from isisdata.models import *
 from isisdata import export    # This never gets old...
 from isisdata import export_authority
+import isisdata.helpers.api_keys as api_keys
 from curation import actions
 
 import rules
@@ -937,11 +938,12 @@ class TenantSettingsForm(forms.ModelForm):
     title = forms.CharField(help_text='Title of bibliography')
     logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
     contact_email = forms.EmailField(help_text='Email address for contacting the bilbiographer.')
+    google_api_key = forms.CharField(help_text='API key for Google')
 
     class Meta(object):
         model = TenantSettings
         fields = [
-            'navigation_color', 'link_color'
+            'navigation_color', 'link_color', 'google_api_key'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -950,7 +952,11 @@ class TenantSettingsForm(forms.ModelForm):
         self.fields['title'].initial = self.instance.tenant.title
         self.fields['logo'].initial = self.instance.tenant.logo
         self.fields['contact_email'].initial = self.instance.tenant.contact_email
+        self.fields['google_api_key'].initial = api_keys.decrypt_key(self.instance.tenant.settings.google_api_key)
 
+    def clean(self):
+        self.cleaned_data['google_api_key'] = api_keys.encrypt_key(self.cleaned_data['google_api_key']).decode("utf-8") 
+       
 
 class TenantPageBlockForm(forms.Form):
     nr_of_columns = forms.IntegerField(help_text="Number of columns in block.")
