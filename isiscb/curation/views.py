@@ -53,6 +53,7 @@ import iso8601, rules, datetime, hashlib, math
 from dateutil.relativedelta import relativedelta
 from itertools import chain
 from unidecode import unidecode
+from collections import Counter
 import bleach
 import logging
 
@@ -1405,6 +1406,31 @@ def subjects_and_categories(request, citation_id):
 
     return render(request, template, context)
 
+@user_passes_test(lambda u: u.is_superuser or u.is_staff)
+def generate_category_suggestions(request, citation_id):
+    if request.method == 'GET':
+        subjects = ACRelation.objects.filter(type_controlled=ACRelation.SUBJECT, citation_id=citation_id)
+        subject_ids = [subject.authority.id for subject in subjects if subject.authority]
+        categories = []
+        
+        if subjects:
+            sqs = SearchQuerySet().models(Citation)
+            sqs.query.set_limits(low=0, high=50)
+
+            results = sqs.all().exclude(public="false")
+            similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).exclude(publication_date__lt=2014).query.get_results()
+            similar_citation_ids = [citation.id for citation in similar_citations]
+            similar_citations_category_ids = ACRelation.objects.filter(type_controlled=ACRelation.CATEGORY, citation_id__in=similar_citation_ids).values_list('authority__name', 'authority__id')
+            # similar_citations_category_ids = [(acrelation.authority.name, acrelation.authority.id) for acrelation in similar_citations_category_acrelations if acrelation.authority]
+            categories = Counter(similar_citations_category_ids).most_common()
+            categories = [category for category in categories if category[1] > 1]
+            categories = [{'name': category[0][0], 'id': category[0][1], 'count': category[1], 'percent': round((category[1]/similar_citations_category_ids.count())*100), 'decimal': round(category[1]/similar_citations_category_ids.count(), 2)} for category in categories]
+
+        response_data = {
+            'category_guesses': categories,
+        }
+
+        return JsonResponse(response_data)
 
 
 def _authorities_get_filter_params(request):
@@ -3165,3 +3191,5 @@ def remove_rule(request, role_id, rule_id):
         rule.delete()
 
     return redirect('curation:role', role_id=role.pk)
+
+
