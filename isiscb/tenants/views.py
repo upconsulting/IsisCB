@@ -15,4 +15,5 @@ def home(request, tenant_id):
         # this is super ugly but works for our special case right now
         # TODO: extract common code and make configurable
         return isisdata_views.home(request, tenant.home_page_template)
-    return render(request, 'tenants/home.html', context=context)
+    #return render(request, 'tenants/home.html', context=context)
+    return isisdata_views.home(request, 'tenants/home.html')

@@ -1495,7 +1495,7 @@ def home(request, template='isisdata/home.html'):
     current_featured_authorities = FeaturedAuthority.objects.filter(start_date__lt=now).filter(end_date__gt=now)
     current_featured_authority_ids = [featured_authority.authority.id for featured_authority in current_featured_authorities]
     featured_authorities = Authority.objects.filter(id__in=current_featured_authority_ids).exclude(wikipediadata__intro='')
-
+    
     sqs = SearchQuerySet().models(Citation)
     sqs.query.set_limits(low=0, high=30)
     # featured_citations = sqs.all().exclude(public="false").filter(abstract = Raw("[* TO *]")).filter(title = Raw("[* TO *]")).query.get_results()
