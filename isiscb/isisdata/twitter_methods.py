@@ -1,21 +1,21 @@
 import requests, random, re
 from django.conf import settings
 
-recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
-twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
+#recent_tweets_url = settings.TWITTER_API_RECENT_TWEETS_PATH
+#twitter_bearer_token = settings.TWITTER_API_BEARER_TOKEN
 tweet_url = settings.TWITTER_API_TWEET_PATH
 
-def get_five_most_recent_tweets(): 
+def get_five_most_recent_tweets(api_key, user_name): 
 
-    with requests.get(recent_tweets_url, headers={"Authorization": f"Bearer {twitter_bearer_token}"}) as resp:
+    with requests.get(recent_tweets_url.format(user_id=user_name), headers={"Authorization": f"Bearer {api_key}"}) as resp:
         if resp.status_code != 200:
             return []
         return resp.json()
 
-def get_featured_tweet():
+def get_featured_tweet(api_key, user_name):
     recent_tweet_image = recent_tweet_text = recent_tweet_url = ''
 
-    recent_tweets = get_five_most_recent_tweets()
+    recent_tweets = get_five_most_recent_tweets(api_key, user_name)
 
     recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id'] if 'data' in recent_tweets and len(recent_tweets['data']) > 0 else ''
 

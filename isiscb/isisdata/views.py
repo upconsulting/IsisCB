@@ -1486,7 +1486,7 @@ def unapi_server_root(request):
 
 
 
-def home(request, template='isisdata/home.html'):
+def home(request, template='isisdata/home.html', tenant_id=None):
     """
     The landing view, at /.
     """
@@ -1536,7 +1536,12 @@ def home(request, template='isisdata/home.html'):
     wikiImage, wikiIntro, wikiCredit = _get_wikipedia_image_synopsis(featured_authority, author_contributor_count, related_citations_count)
 
     #Get featured tweet
-    recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet()
+    recent_tweet_url = '' 
+    recent_tweet_text = ''
+    recent_tweet_image = ''
+    if tenant_id:
+        tenant = get_object_or_404(Tenant, identifier=tenant_id)
+        recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet(tenant.settings.twitter_api_key, tenant.settings.twitter_user_name)
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
 

@@ -939,11 +939,13 @@ class TenantSettingsForm(forms.ModelForm):
     logo = forms.ImageField(help_text='Project Logo to be shown on homepage.', required=False)
     contact_email = forms.EmailField(help_text='Email address for contacting the bilbiographer.')
     google_api_key = forms.CharField(help_text='API key for Google', required=False)
+    twitter_api_key = forms.CharField(help_text='API key for Twitter', required=False)
+    twitter_user_name = forms.CharField(help_text='User id for Twitter', required=False)
 
     class Meta(object):
         model = TenantSettings
         fields = [
-            'navigation_color', 'link_color', 'google_api_key'
+            'navigation_color', 'link_color', 'google_api_key', 'twitter_api_key', 'twitter_user_name'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -954,12 +956,19 @@ class TenantSettingsForm(forms.ModelForm):
         self.fields['contact_email'].initial = self.instance.tenant.contact_email
         if self.instance.tenant.settings.google_api_key:
             self.initial['google_api_key'] = api_keys.decrypt_key(self.instance.tenant.settings.google_api_key).decode("utf-8")
+        if self.instance.tenant.settings.twitter_api_key:
+            self.initial['twitter_api_key'] = api_keys.decrypt_key(self.instance.tenant.settings.twitter_api_key).decode("utf-8")
 
     def clean(self):
         if self.cleaned_data['google_api_key']:
             self.cleaned_data['google_api_key'] = api_keys.encrypt_key(self.cleaned_data['google_api_key']).decode("utf-8") 
         else:
             self.cleaned_data['google_api_key'] = None
+
+        if self.cleaned_data['twitter_api_key']:
+            self.cleaned_data['twitter_api_key'] = api_keys.encrypt_key(self.cleaned_data['twitter_api_key']).decode("utf-8") 
+        else:
+            self.cleaned_data['twitter_api_key'] = None
        
 
 class TenantPageBlockForm(forms.Form):

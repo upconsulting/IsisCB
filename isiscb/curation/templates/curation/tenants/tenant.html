@@ -46,6 +46,18 @@
             </td>
           </tr>
           <tr>
+            <th width="20%">Twitter API Key</th>
+            <td>
+              {% if tenant.settings.twitter_api_key %}
+              <span class="label label-default">Key Specified</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <th width="20%">Twitter User ID</th>
+            <td>{{tenant.settings.twitter_user_name|default_if_none:''}}</td>
+          </tr>
+          <tr>
             <th>Navigation Color</th>
             <td><i style="color: {{tenant.settings.navigation_color}}" class="fa fa-square" aria-hidden="true"></i></td>
           </tr>

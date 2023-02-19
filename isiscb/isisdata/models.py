@@ -50,6 +50,7 @@ class TenantSettings(models.Model):
     citations_external_links_color = models.CharField(max_length=255, blank=True, null=True)
     google_api_key = models.CharField(max_length=255, blank=True, null=True)
     twitter_api_key = models.CharField(max_length=255, blank=True, null=True)
+    twitter_user_name = models.CharField(max_length=255, blank=True, null=True)
 
     @property
     def home_main_block(self):
