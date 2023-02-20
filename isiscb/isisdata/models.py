@@ -1183,6 +1183,10 @@ class Citation(ReferencedEntity, CuratedMixin):
         return self.abstract
 
     @property
+    def tenant_ids(self):
+        return [t.id for t in self.tenants.all()]
+
+    @property
     def label(self):
         return self.title
 

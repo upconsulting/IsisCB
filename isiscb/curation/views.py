@@ -1929,7 +1929,11 @@ def quick_and_dirty_authority_search(request):
 
     use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'
 
-    query = Q()
+    if request.GET.get("tenant_ids", ""):
+        query = Q(tenants__in=request.GET.get("tenant_ids", ""))
+    else:
+        query = Q()
+
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
@@ -1980,7 +1984,7 @@ def quick_and_dirty_authority_search(request):
     queryset_sw = queryset_sw.filter(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
     #queryset_exact = queryset_exact.filter(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset_exact = queryset_exact.filter(Q(name_for_sort__exact=q.lower()))
-
+    
     # we don't need to duplicate results we've already captured with other queries
     #queryset = queryset.exclude(name_for_sort__istartswith=q).exclude(Q(name_for_sort__iexact=q) | Q(name__iexact=q))
     queryset = queryset.exclude(name_for_sort__startswith=q.lower()).exclude(Q(name_for_sort__exact=q.lower()))
@@ -2068,7 +2072,8 @@ def quick_and_dirty_authority_search(request):
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
-            'type_controlled': obj.get_type_controlled_display()
+            'type_controlled': obj.get_type_controlled_display(),
+            'tenants': [t.id for t in obj.tenants.all()]
         })
 
     return JsonResponse({'results': results})
