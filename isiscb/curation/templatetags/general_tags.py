@@ -41,3 +41,7 @@ def field_type(field):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def is_external_tenant(obj, tenant_ids):
+    return not any([id in obj.tenant_ids for id in tenant_ids])

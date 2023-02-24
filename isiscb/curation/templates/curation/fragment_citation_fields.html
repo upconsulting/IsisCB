@@ -251,8 +251,13 @@
         </tr>
       </table>
     </div>
-    <div class="col-sm-12 form-fields-indented" style="padding-left:20px;">
+    <div class="col-sm-12 form-fields-indented" >
       <small>
+        <div class="panel panel-default tenant-panel">
+          <div class="panel-body">
+            {{instance.owning_tenant}}
+          </div>
+        </div>
         {% for t in instance.tenants.all %}
         {{t}}<br/>
         <input type="hidden" name="tenants" value="{{t.id}}" />

@@ -40,8 +40,12 @@ def is_accessible_by_tenant(user, obj):
 
     roles = user.isiscbrole_set.all()
     tenants = getattr(obj, 'tenants', None)
+    owner = getattr(obj, 'owning_tenant', None)
+    all_tenants = list(tenants.all())
+    if owner:
+        all_tenants.append(owner)
     if tenants:
-        roles = roles.filter(accessrule__tenantrule__tenant__in=[t.id for t in tenants.all()])
+        roles = roles.filter(accessrule__tenantrule__tenant__in=[t.id for t in all_tenants])
     else:
         roles = roles.filter((Q(accessrule__tenantrule__tenant__isnull=True)\
                               | Q(accessrule__tenantrule__tenant=''))\

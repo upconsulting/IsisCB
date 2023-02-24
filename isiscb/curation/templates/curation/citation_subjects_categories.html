@@ -4,6 +4,7 @@
 {% load rules %}
 {% load permission_tags %}
 {% load search_filters %}
+{% load general_tags %}
 
 {% block content %}
 
@@ -110,7 +111,7 @@
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
            {% if can_update %}
            <span class="button-group button-group-xs">
                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -130,9 +131,9 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{{ acrel.authority.name }}</a>
+             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
              {% else %}
-             <span class="text-muted">{{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">

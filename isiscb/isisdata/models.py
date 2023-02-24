@@ -1049,6 +1049,13 @@ class Citation(ReferencedEntity, CuratedMixin):
     complete_citation =  models.TextField(blank=True, null=True,
                                          help_text="A complete citation that can be used to show a record if detailed information has not been entered yet.")
 
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_citations",
+        null=True
+    )
+
     tenants = models.ManyToManyField(Tenant)
 
     STUB_RECORD = 'SR'
@@ -1184,7 +1191,10 @@ class Citation(ReferencedEntity, CuratedMixin):
 
     @property
     def tenant_ids(self):
-        return [t.id for t in self.tenants.all()]
+        tenant_ids = [t.id for t in self.tenants.all()]
+        if self.owning_tenant:
+            tenant_ids.append(self.owning_tenant.id)
+        return tenant_ids
 
     @property
     def label(self):
@@ -1476,6 +1486,12 @@ class Authority(ReferencedEntity, CuratedMixin):
                                     help_text=help_text("""
     The user who created this object."""), related_name="creator_of_object", on_delete=models.SET_NULL)
 
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_authorities",
+        null=True
+    )
     tenants = models.ManyToManyField(Tenant)
 
     def save(self, *args, **kwargs):
@@ -1502,6 +1518,13 @@ class Authority(ReferencedEntity, CuratedMixin):
         Description stripped of HTML, punctuation, and normalized to ASCII.
         """
         return normalize(self.description)
+
+    @property
+    def tenant_ids(self):
+        tenant_ids = [t.id for t in self.tenants.all()]
+        if self.owning_tenant:
+            tenant_ids.append(self.owning_tenant.id)
+        return tenant_ids
 
     @property
     def label(self):

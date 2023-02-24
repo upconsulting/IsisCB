@@ -349,7 +349,7 @@ class CitationForm(forms.ModelForm):
     subtype = forms.ModelChoiceField(queryset=CitationSubtype.objects.all(), label='Subtype', required=False)
     stub_record_status = forms.BooleanField(label='Stub', widget=StubCheckboxInput(), required=False)
 
-    tenants = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
+    owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
 
 
     class Meta(object):
@@ -359,7 +359,7 @@ class CitationForm(forms.ModelForm):
               'physical_details', 'abstract', 'additional_titles',
               'book_series', 'record_status_value', 'record_status_explanation',
               'belongs_to', 'administrator_notes', 'record_history', 'subtype',
-              'complete_citation', 'stub_record_status', 'tenants'
+              'complete_citation', 'stub_record_status', 'owning_tenant'
         ]
         labels = {
             'belongs_to': 'Dataset',
@@ -371,7 +371,7 @@ class CitationForm(forms.ModelForm):
         super(CitationForm, self).__init__( *args, **kwargs)
         self.user = user
 
-        self.fields['tenants'].queryset = cutil.get_tenants(self.user)
+        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
 
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
@@ -412,8 +412,6 @@ class CitationForm(forms.ModelForm):
         else:
             self.cleaned_data['stub_record_status'] = None
 
-        if self.cleaned_data['tenants']:
-            self.cleaned_data['tenants'] = [self.cleaned_data['tenants']]
 
 
     def _get_validation_exclusions(self):

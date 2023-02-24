@@ -6,12 +6,12 @@
 
 <div class="row">
     <div class="col-xs-12">
-        {% for error in form.tenants.errors %}
+        {% for error in form.owning_tenant.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}
         <div class="form-group">
-            <label>{{ form.tenants.label }}</label>
-            {{ form.tenants|addcss:"form-control" }}
+            <label>{{ form.owning_tenant.label }}</label>
+            {{ form.owning_tenant|addcss:"form-control" }}
         </div>
     </div>
 </div>
