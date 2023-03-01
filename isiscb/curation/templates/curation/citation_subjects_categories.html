@@ -234,9 +234,19 @@ $('#subjectsTab a').click(function (e) {
   $(this).tab('show')
 })
 
+$("#categoriesTab a").click(function(e) {
+  if (!window.location.href.includes("#categories")) {
+    window.location.href += "#categories";
+  }
+  location.reload();
+})
+
 //@ sourceURL=delete.js
 $(document).ready(function() {
   $('.delete-category').click(delete_handler);
+  if (window.location.hash.includes("#categories")) {
+    $("#categoriesTab a").tab('show')
+  }
 });
 
 var delete_handler = function() {
