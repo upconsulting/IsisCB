@@ -379,6 +379,8 @@ class CitationForm(forms.ModelForm):
 
         # disable fields user doesn't have access to
         if self.instance.pk:
+            self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
+
             self.fields['title'].widget.attrs['placeholder'] = "No title"
             self.fields['type_controlled'].widget = forms.widgets.HiddenInput()
 
@@ -411,6 +413,11 @@ class CitationForm(forms.ModelForm):
             self.cleaned_data['stub_record_status'] = Citation.STUB_RECORD
         else:
             self.cleaned_data['stub_record_status'] = None
+        if self.instance.pk and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+            raise ValidationError(
+                "Owning tenant cannot be changed."
+            )
+
 
 
 

@@ -2,6 +2,10 @@
 {% load render_object %}
 {% load general_tags %}
 
+{% for error in form.non_field_errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+        
 <div class="form-group">
 <div class="row">
   <div class="col-sm-2 text-left">
@@ -258,6 +262,7 @@
             {{instance.owning_tenant}}
           </div>
         </div>
+        {{ form.owning_tenant }}
         {% for t in instance.tenants.all %}
         {{t}}<br/>
         <input type="hidden" name="tenants" value="{{t.id}}" />
