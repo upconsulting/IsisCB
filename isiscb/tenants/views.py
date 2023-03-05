@@ -14,6 +14,6 @@ def home(request, tenant_id):
     if tenant and tenant.use_home_page_template:
         # this is super ugly but works for our special case right now
         # TODO: extract common code and make configurable
-        return isisdata_views.home(request, tenant.home_page_template)
+        return isisdata_views.home(request, tenant.home_page_template, tenant_id)
     #return render(request, 'tenants/home.html', context=context)
-    return isisdata_views.home(request, 'tenants/home.html')
+    return isisdata_views.home(request, 'tenants/home.html', tenant_id)

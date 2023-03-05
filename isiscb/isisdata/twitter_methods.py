@@ -6,8 +6,8 @@ from django.conf import settings
 tweet_url = settings.TWITTER_API_TWEET_PATH
 
 def get_five_most_recent_tweets(api_key, user_name): 
-
-    with requests.get(recent_tweets_url.format(user_id=user_name), headers={"Authorization": f"Bearer {api_key}"}) as resp:
+    with requests.get(settings.TWITTER_API_RECENT_TWEETS_PATH.format(user_id=user_name), headers={"Authorization": f"Bearer {api_key}"}) as resp:
+        print("resp.status_code", resp.status_code)
         if resp.status_code != 200:
             return []
         return resp.json()
@@ -16,7 +16,7 @@ def get_featured_tweet(api_key, user_name):
     recent_tweet_image = recent_tweet_text = recent_tweet_url = ''
 
     recent_tweets = get_five_most_recent_tweets(api_key, user_name)
-
+    print(recent_tweets)
     recent_tweet_id = recent_tweets['data'][random.randint(0,len(recent_tweets['data'])-1)]['id'] if 'data' in recent_tweets and len(recent_tweets['data']) > 0 else ''
 
     if recent_tweet_id:

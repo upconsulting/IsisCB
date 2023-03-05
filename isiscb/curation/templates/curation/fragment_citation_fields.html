@@ -256,17 +256,15 @@
       </table>
     </div>
     <div class="col-sm-12 form-fields-indented" >
+      {% if instance.owning_tenant %}
       <small>
         <div class="panel panel-default tenant-panel">
           <div class="panel-body">
             {{instance.owning_tenant}}
+            <input type="hidden" name="owning_tenant" value="{{owning_tenant.id}}" />
           </div>
         </div>
-        {{ form.owning_tenant }}
-        {% for t in instance.tenants.all %}
-        {{t}}<br/>
-        <input type="hidden" name="tenants" value="{{t.id}}" />
-        {% endfor %}
       </small>
+      {% endif %}
     </div>
 </div>

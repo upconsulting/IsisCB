@@ -229,7 +229,7 @@ def bulk_change_tenant(user_id, filter_params_raw, tenant_id, task_id=None, obje
                 task.current_value += 1
                 task.save()
 
-            citation.tenants.add(tenant)
+            citation.owning_tenant = tenant
             citation.save()
 
         if task_id:

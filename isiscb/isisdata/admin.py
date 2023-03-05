@@ -56,10 +56,10 @@ class AutocompleteWidget(widgets.TextInput):
     def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, type=self.input_type, name=name)
-        if value != '':
+        final_attrs = self.build_attrs(attrs, extra_attrs={type:self.input_type, name:name})
+        #if value != '':
         # Only add the 'value' attribute if a value is non-empty.
-            final_attrs['value'] = widgets.force_text(self._format_value(value))
+        #    final_attrs['value'] = widgets.force_text(self._format_value(value))
 
         if 'class' not in final_attrs:
             final_attrs['class'] = ''
@@ -68,7 +68,7 @@ class AutocompleteWidget(widgets.TextInput):
         if self.datatarget:
             final_attrs['datatarget'] = self.datatarget
 
-        return widgets.format_html('<div class="input-group" id="'+ final_attrs['id'] +'_container"><input{} /><span class="autocomplete-status input-group-addon"></span></div>', widgets.flatatt(final_attrs))
+        return widgets.format_html('<div class="input-group" id="'+ final_attrs['id'] +'_container"><input{} /><span class="autocomplete-status input-group-addon"></span></div>', '') #, widgets.flatatt(final_attrs))
 
 
 class AutocompleteField(forms.CharField):
@@ -523,7 +523,7 @@ class CitationAdmin(SimpleHistoryAdmin,
 
     form = CitationForm
     list_display = ('id', 'title', 'type_controlled', 'modified_on',
-                    'modified_by', 'public', 'status_of_record',)
+                    'modified_by', 'public', 'status_of_record')
 
     # Filters in the changelist interfere with the advanced search. We can add
     #  it back, but we will need to find a way to pass the advanced search GET
@@ -579,7 +579,7 @@ class CitationAdmin(SimpleHistoryAdmin,
             'fields': ('record_action',
                        'status_of_record',
                        'administrator_notes',
-                       'record_history'),
+                       'record_history', 'owning_tenant'),
            'classes': ('extrapretty', 'collapse'),
         }),
     ]
