@@ -25,16 +25,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 <script src="{% static "isisdata/js/comments.js" %}"></script>
 
 <script type="text/javascript">
-
+//# sourceURL=images.js
   window.addEventListener('DOMContentLoaded', (event) => {
-    let citationType = "{{ citation.type_controlled }}";
+    {% if cover_image %}
     let coverImg = "{{ cover_image }}";
     let imgSize = "{{ cover_image.size }}";
     let imgUrl = "{{ cover_image.url|safe }}";
+    {% endif %} 
 
     // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
-
-    if (["BO","CH"].includes(citationType)){
+    {# this only works if type controlled is not a substring of a value in the list #}
+    {% if citation.type_controlled in 'BO,CH' %}
+    {% if cover_image %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
             document.getElementById("citationImage").style.height = "auto";
@@ -47,24 +49,18 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
           document.getElementById("citationImageAdjacent").classList.add("col-md-8");
           document.getElementById("citationImageCaption").style.display = "block";
         }
-
-    // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
-    // (using a selection from 3 color choices) to use as the citation's featured image.
-    // Weldon wanted each journal to have the same cover color everytime,
-    // so the journal title's location in the alphabet determines the color.
-
-    } else if (["AR","RE","ES"].includes(citationType)) {
-        let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+      {% else %}
+        let backgroundColors = ["#c95400", "#00284b", "#3d0034"];
         let backgroundColor;
 
         let alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-        let periodicalName = document.getElementsByClassName("periodicalName")[0].innerHTML;
+        let pubName = document.getElementsByClassName("pubName")[0].innerHTML;
 
-        if (periodicalName.length) {
-            if (alphabet.substring(0,8).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+        if (pubName.length) {
+            if (alphabet.substring(0,8).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
               backgroundColor = backgroundColors[0];
-            } else if (alphabet.substring(9,17).indexOf(periodicalName.charAt(0).toLowerCase()) >= 0) {
+            } else if (alphabet.substring(9,17).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
               backgroundColor = backgroundColors[1];
             } else {
               backgroundColor = backgroundColors[2];
@@ -76,7 +72,38 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
         document.getElementById("citatationImageBreak").style.display = "block";
         document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
         document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+      {% endif %}
+
+    {% elif citation.type_controlled in 'AR,RE,ES' %}
+    // if the citation is from an academic journal, we autogenerate a boilerplate jacket cover for the journal
+    // (using a selection from 3 color choices) to use as the citation's featured image.
+    // Weldon wanted each journal to have the same cover color everytime,
+    // so the journal title's location in the alphabet determines the color.
+
+    let backgroundColors = ["#780000", "#004b23", "#001d3d"];
+    let backgroundColor;
+
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+    let pubName = document.getElementsByClassName("pubName")[0].innerHTML;
+
+    if (pubName.length) {
+        if (alphabet.substring(0,8).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[0];
+        } else if (alphabet.substring(9,17).indexOf(pubName.charAt(0).toLowerCase()) >= 0) {
+          backgroundColor = backgroundColors[1];
+        } else {
+          backgroundColor = backgroundColors[2];
+        }
     }
+
+    document.getElementById("placeholderImage").style.display = "block";
+    document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
+    document.getElementById("citatationImageBreak").style.display = "block";
+    document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
+    document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+    
+  {% endif %}
   });
 </script>
 
@@ -308,10 +335,14 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
            <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
-             {% for prop in properties_map %}
-               {% if prop.type_controlled == "PE" %}<p class="periodicalName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
-             {% endfor %}
-             {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
+            {% if citation.type_controlled in 'BO,CH' %}
+            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{ citation.title }}</p>
+            {% else %}
+            {% for prop in properties_map %}
+               {% if prop.type_controlled == "PE" %}<p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}
+            {% endfor %}
+            {% endif %}
+            {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 or citation.part_details.issue_begin or citation.part_details.issue_free_text|length > 0 %}
                <div style="text-align: center;">
                    {% if citation.part_details.volume|length > 0 or citation.part_details.volume_free_text|length > 0 %}
                      <span style="color: #fff; text-align: center; font-size: 1.2em; margin-bottom: 0; font-family: 'Times New Roman', Times, serif;">Volume: {% if citation.part_details.volume|length > 0%}{{ citation.part_details.volume }}{% else %}{{ citation.part_details.volume_free_text}}{% endif %}</span>

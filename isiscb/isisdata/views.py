@@ -781,6 +781,10 @@ def citation(request, citation_id, tenant_id=None):
     as_query = Q(subject_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True) | Q(object_id=citation_id, type_controlled=CCRelation.ASSOCIATED_WITH, object__public=True)
     related_citations_as = CCRelation.objects.filter(as_query).filter(public=True)
 
+    tenant = None
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+
     # Similar Citations Generator
     if subjects:
         sqs = SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
@@ -793,10 +797,8 @@ def citation(request, citation_id, tenant_id=None):
                 facet('events_timeperiods_ids', size=100).facet('geocodes', size=1000)
         sqs.query.set_limits(low=0, high=20)
         results = sqs.all().exclude(public="false")
-        if tenant_id:
-            tenant = Tenant.objects.filter(identifier=tenant_id).first()
-            if tenant:
-                results = results.filter(tenant_ids=tenant.pk)
+        if tenant:
+            results = results.filter(tenant_ids=tenant.pk)
         similar_citations = results.filter(subject_ids__in=subject_ids).exclude(id=citation_id).query.get_results()
     elif citation.type_controlled not in ['RE']:
         mlt = SearchQuerySet().models(Citation).more_like_this(citation).facet('all_contributor_ids', size=100). \
@@ -824,7 +826,9 @@ def citation(request, citation_id, tenant_id=None):
 
     similar_objects = get_facets_from_similar_citations(similar_citations)
 
-    googleBooksImage = get_google_books_image(citation, False)
+    googleBooksImage = None
+    if tenant and tenant.settings.google_api_key:
+        googleBooksImage = get_google_books_image(citation, False, tenant.settings.google_api_key)
 
     properties = citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)
     properties_map = defaultdict(list)
@@ -980,7 +984,7 @@ def generate_similar_facets(similar_objects):
 
     return similar_objects
 
-def get_google_books_image(citation, featured):
+def get_google_books_image(citation, featured, apiKey):
 
     # Provide image for citation
     if citation.type_controlled not in [Citation.BOOK, Citation.CHAPTER]:
@@ -1026,7 +1030,7 @@ def get_google_books_image(citation, featured):
     elif ' ' in contrib:
         contrib = contrib[contrib.find(' '):]
 
-    apiKey = settings.GOOGLE_BOOKS_API_KEY
+    #apiKey = settings.GOOGLE_BOOKS_API_KEY
 
     url = settings.GOOGLE_BOOKS_TITLE_QUERY_PATH.format(title=title, apiKey=apiKey)
     url = url.replace(" ", "%20")
@@ -1509,8 +1513,14 @@ def home(request, template='isisdata/home.html', tenant_id=None):
         #set default featured citation in case no featured authorities have been selected
         featured_citation = Citation.objects.filter(pk=settings.FEATURED_CITATION_ID).first()
 
+    tenant = None
+    if tenant_id:
+        tenant = get_object_or_404(Tenant, identifier=tenant_id)
+
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
-    featured_citation_image = get_google_books_image(featured_citation, True)
+    featured_citation_image = None
+    if tenant and tenant.settings.google_api_key:
+        featured_citation_image = get_google_books_image(featured_citation, True, tenant.settings.google_api_key)
 
     if featured_authorities:
         featured_authority = featured_authorities[random.randint(0,len(featured_authorities)-1)]
@@ -1539,8 +1549,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     recent_tweet_url = '' 
     recent_tweet_text = ''
     recent_tweet_image = ''
-    if tenant_id:
-        tenant = get_object_or_404(Tenant, identifier=tenant_id)
+    if tenant:
         recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet(tenant.settings.twitter_api_key, tenant.settings.twitter_user_name)
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)

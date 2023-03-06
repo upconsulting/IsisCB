@@ -7,7 +7,6 @@ tweet_url = settings.TWITTER_API_TWEET_PATH
 
 def get_five_most_recent_tweets(api_key, user_name): 
     with requests.get(settings.TWITTER_API_RECENT_TWEETS_PATH.format(user_id=user_name), headers={"Authorization": f"Bearer {api_key}"}) as resp:
-        print("resp.status_code", resp.status_code)
         if resp.status_code != 200:
             return []
         return resp.json()
