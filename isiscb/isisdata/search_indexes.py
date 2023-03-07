@@ -704,7 +704,11 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return ACRelation.objects.filter(public=True).filter(citation__public=True).filter(authority__id=obj.id).count()
 
     def prepare_tenant_names(self, obj):
-        return [obj.owning_tenant.name]
+        if obj.owning_tenant:
+            return [obj.owning_tenant.name]
+        return []
 
     def prepare_tenant_ids(self, obj):
-        return [obj.owning_tenant.id]
+        if obj.owning_tenant:
+            return [obj.owning_tenant.id]
+        return []

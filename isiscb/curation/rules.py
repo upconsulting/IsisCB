@@ -42,6 +42,7 @@ def is_accessible_by_tenant(user, obj):
     tenants = getattr(obj, 'tenants', None)
     owner = getattr(obj, 'owning_tenant', None)
     all_tenants = list(tenants.all())
+    
     if owner:
         all_tenants.append(owner)
     if tenants:
@@ -202,7 +203,7 @@ def is_action_allowed(user, obj, action):
     if dataset:
         query = Q(accessrule__datasetrule__dataset=dataset.id)
 
-    tenants = getattr(obj, 'tenants', None)
+    tenants = getattr(obj, 'owning_tenant', None)
     if tenants:
         query = query | Q(accessrule__tenantrule__tenant__in=[t.id for t in tenants.all()])
 

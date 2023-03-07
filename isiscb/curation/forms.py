@@ -473,7 +473,7 @@ class AuthorityForm(forms.ModelForm):
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
     belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
 
-    tenants = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
+    owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
 
     class Meta(object):
         model = Authority
@@ -481,7 +481,7 @@ class AuthorityForm(forms.ModelForm):
             'type_controlled', 'name', 'description', 'classification_system',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
-            'administrator_notes', 'record_history', 'belongs_to', 'tenants'
+            'administrator_notes', 'record_history', 'belongs_to', 'owning_tenant'
         ]
 
         labels = {
@@ -498,7 +498,7 @@ class AuthorityForm(forms.ModelForm):
 
         self.user = user
 
-        self.fields['tenants'].queryset = cutil.get_tenants(self.user)
+        self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
 
         # disable fields user doesn't have access to
         if self.instance.pk:
@@ -521,15 +521,13 @@ class AuthorityForm(forms.ModelForm):
             self.cleaned_data['redirect_to'] = None
 
         tenants = cutil.get_tenants(self.user)
-        if self.cleaned_data['tenants']:
-            if self.cleaned_data['tenants'] in tenants:
-                self.cleaned_data['tenants'] = [self.cleaned_data['tenants']]
-            else:
-                self._errors['tenants'] = self.error_class(["No access to tenant."])
+        if self.cleaned_data['owning_tenant']:
+            if not self.cleaned_data['owning_tenant'] in tenants:
+                self._errors['owning_tenant'] = self.error_class(["No access to tenant."])
         else:
-            self.cleaned_data['tenants'] = []
+            self.cleaned_data['owning_tenant'] = None
             if not self.user.is_superuser:
-                self._errors['tenants'] = self.error_class(["A tenant needs to be specified."])
+                self._errors['owning_tenant'] = self.error_class(["A tenant needs to be specified."])
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
