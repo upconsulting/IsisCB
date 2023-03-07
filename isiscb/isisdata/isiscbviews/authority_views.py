@@ -134,7 +134,7 @@ def authority_catalog(request, authority_id, tenant_id=None):
     # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, word_cloud_results = _get_word_cloud_results(authority.id)
+    sqs, word_cloud_results = _get_word_cloud_results(authority.id, tenant_id)
 
     related_citations_count = word_cloud_results.count()
 
@@ -335,7 +335,7 @@ def authority(request, authority_id, tenant_id=None):
      # Location of authority in REST API
     api_view = reverse('authority-detail', args=[authority.id], request=request)
 
-    sqs, related_citations = _get_word_cloud_results(authority.id)
+    sqs, related_citations = _get_word_cloud_results(authority.id, tenant_id)
 
     related_citations = related_citations.order_by('-publication_date_for_sort')
 
@@ -383,7 +383,7 @@ def authority(request, authority_id, tenant_id=None):
         return render(request, 'tenants/authority.html', context)
     return render(request, 'isisdata/authority.html', context)
 
-def _get_word_cloud_results(authority_id):
+def _get_word_cloud_results(authority_id, tenant_id=None):
     # boxes
     sqs =SearchQuerySet().models(Citation).facet('all_contributor_ids', size=100). \
                 facet('subject_ids', size=100).facet('institution_ids', size=100). \
@@ -399,6 +399,9 @@ def _get_word_cloud_results(authority_id):
             .filter_or(publisher_ids=authority_id).filter_or(school_ids=authority_id).filter_or(meeting_ids=authority_id) \
             .filter_or(periodical_ids=authority_id).filter_or(book_series_ids=authority_id).filter_or(time_period_ids=authority_id) \
             .filter_or(geographic_ids=authority_id).filter_or(about_person_ids=authority_id).filter_or(other_person_ids=authority_id)
+    if tenant_id:
+        tenant = Tenant.objects.filter(identifier=tenant_id).first()
+        word_cloud_results = word_cloud_results.filter(tenant_ids=tenant.pk)
 
     return sqs, word_cloud_results
 
