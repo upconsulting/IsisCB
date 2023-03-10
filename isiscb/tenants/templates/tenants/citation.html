@@ -67,11 +67,15 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
             }
         }
 
-        document.getElementById("placeholderImage").style.display = "block";
-        document.getElementById("placeholderImage").style.backgroundColor = backgroundColor;
-        document.getElementById("citatationImageBreak").style.display = "block";
-        document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
-        document.getElementById("citationImageAdjacent").classList.add("col-md-8");
+        $('#placeholderImage').css('display', "block");
+        $('#placeholderImage').css('backgroundColor', backgroundColor);
+        $('#placeholderImage').append('<div class="effect" />');
+        $('#placeholderImage').append('<div class="light" />');
+
+        $('#placeholderImage').addClass("book-cover");
+        $("#citatationImageBreak").css('display', "block");
+        $("#citationImageAdjacent").removeClass("col-md-12");
+        $("#citationImageAdjacent").addClass("col-md-8");
       {% endif %}
 
     {% elif citation.type_controlled in 'AR,RE,ES' %}
@@ -108,6 +112,44 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 </script>
 
 <style>
+
+.book-cover {
+  z-index:1;
+  transform-origin: 0 50%;
+  -webkit-transform-origin: 0 50%;
+  background: #111;
+  background-size:cover;
+  border-radius: 3px;
+  box-shadow: 
+    inset 4px 1px 3px #ffffff60,
+    inset 0 -1px 2px #00000080;
+  transition: all .5s ease-in-out;
+  -webkit-transition: all .5s ease-in-out;
+}
+
+.effect {
+  width: 20px;
+  height: 100%;
+  margin-left: 10px;
+  border-left: 2px solid #00000010;
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+  transition: all .5s ease;
+}
+
+.light {
+  width: 90%;
+  height: 100%;
+  position: absolute;
+  border-radius: 3px; 
+  background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 100%);
+  top: 0;
+  right:0;
+  opacity: .1;
+  transition: all .5s ease;
+  -webkit-transition: all .5s ease;
+}
+
+
   .truncate {
   text-overflow: ellipsis;
   overflow: hidden;
@@ -333,9 +375,9 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
          </script>
 
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
-           <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; padding: 5% 7%; vertical-align: middle;">
+           <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; vertical-align: middle;">
             {% if citation.type_controlled in 'BO,CH' %}
-            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{{ citation.title }}</p>
+            <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title }}</p>
             {% else %}
             {% for prop in properties_map %}
                {% if prop.type_controlled == "PE" %}<p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin-top: 8%; font-family: 'Times New Roman', Times, serif;">{% if prop.authority%}{{ prop.authority.name }}{% else %}{{ prop.name_for_display_in_citation }}{% endif %}</p>{% endif %}

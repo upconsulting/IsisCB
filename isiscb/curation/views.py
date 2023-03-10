@@ -1805,9 +1805,6 @@ def authority(request, authority_id):
 
         form = AuthorityForm(request.user, request.POST, instance=authority, prefix='authority')
         if form.is_valid() and (person_form is None or person_form.is_valid()):
-            if not form.cleaned_data['tenants']:
-                form.cleaned_data['tenants'] = []
-
             if person_form:
                 person_form.save()
 

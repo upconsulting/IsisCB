@@ -42,6 +42,10 @@
 <div class="row">
     <div class="col-sm-4">
         <div class="h4">Authority Details</div>
+
+        {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
         <div class="row">
             <div class="col-xs-6">
                 {% for error in form.type_controlled.errors %}
@@ -138,11 +142,11 @@
 
         <div class="form-group">
             <label>Tenants</label>
+            {% if instance.owning_tenant %}
             <ul class="list-group">
-            {% for t in instance.tenants.all %}
-            <li class="list-group-item">{{t}}</li>
-            <input type="hidden" name="tenants" value="{{t.id}}" />
-            {% endfor %}
+            <li class="list-group-item">{{instance.owning_tenant}}</li>
+            <input type="hidden" name="authority-owning_tenant" value="{{instance.owning_tenant.id}}" />
+            {% endif %}
             </ul>
         </div>
     </div>
