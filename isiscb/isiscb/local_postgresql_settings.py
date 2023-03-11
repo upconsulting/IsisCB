@@ -165,6 +165,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 'isisdata.context_processors.social',
                 'isisdata.context_processors.google',
+                'curation.context_processors.add_tenants',
                 'tenants.context_processors.add_tenants'
             ],
         },

@@ -2856,7 +2856,7 @@ class IsisCBRole(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(null=True, blank=True)
 
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, related_name="isiscb_roles")
 
     @property
     def dataset_rules(self):
