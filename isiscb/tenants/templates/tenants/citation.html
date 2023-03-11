@@ -32,10 +32,10 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     let imgSize = "{{ cover_image.size }}";
     let imgUrl = "{{ cover_image.url|safe }}";
     {% endif %} 
-
-    // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
+    
     {# this only works if type controlled is not a substring of a value in the list #}
     {% if citation.type_controlled in 'BO,CH' %}
+    // if type is book or chapter, uses the book jacket cover image from google books as the featured image for the citation
     {% if cover_image %}
         if (imgUrl.length){
           if (imgSize == "thumbnail"){
@@ -107,6 +107,19 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
     document.getElementById("citationImageAdjacent").classList.remove("col-md-12");
     document.getElementById("citationImageAdjacent").classList.add("col-md-8");
     
+  {% elif citation.type_controlled == 'TH' %}
+    /** If citation is of type thesis, we'll just show a colored border with white
+     * background color.
+     **/
+    
+    $('#placeholderImage').css('display', "block");
+    $('#placeholderImage').css('border-color', "#111167");
+    $('#placeholderImage').css('border-style', "solid");
+    $('#placeholderImage').css('border-width', "3px");
+    $('.pubName').css('color', "#111167");
+    $("#citatationImageBreak").css('display', "block");
+    $("#citationImageAdjacent").removeClass("col-md-12");
+    $("#citationImageAdjacent").addClass("col-md-8");
   {% endif %}
   });
 </script>
@@ -376,7 +389,7 @@ var SUBJECT_CONTENT_TYPE = {{ source_content_type }};
 
          <div class="col-sm-12 col-md-4" style="padding: 0 0 0 8px;">
            <div id="placeholderImage" style="height: 314px; width: 100%; max-width: 225px; display: none; vertical-align: middle;">
-            {% if citation.type_controlled in 'BO,CH' %}
+            {% if citation.type_controlled in 'BO,CH,TH' %}
             <p class="pubName" style="color: #fff; text-align: center; font-size: 1.7em; font-weight: lighter; line-height: 110%; margin: 8%; font-family: 'Times New Roman', Times, serif; position:absolute">{{ citation.title }}</p>
             {% else %}
             {% for prop in properties_map %}
