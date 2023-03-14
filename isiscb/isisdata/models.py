@@ -227,6 +227,8 @@ class Tenant(models.Model):
     instead of the configurable page blocks. A template path needs to be specified for this
     to work. Do not change this value unless you know what you are doing."""))
 
+    default_dataset = models.OneToOneField('isisdata.Dataset', null=True, on_delete=models.SET_NULL)
+
 
     def __str__(self):
         return u'{0}'.format(self.name)
@@ -2993,6 +2995,9 @@ class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
     editor = models.CharField(max_length=255, null=True)
+    belongs_to_tenant = models.ForeignKey(Tenant, null=True, blank=True,
+                             help_text=help_text("""The tenant this dataset belongs to."""), on_delete=models.SET_NULL)
+
 
     def __unicode__(self):
         return u'{0}'.format(self.name)

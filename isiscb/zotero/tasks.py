@@ -90,6 +90,19 @@ def ingest_citation(request, accession, draftcitation):
                     continue
             citation_data[pfield] = value
 
+    tenant = None
+    for role in request.user.isiscb_roles.all():
+        if role.tenant_rules:
+            # there should only be one
+            if role.tenant_rules[0].tenant:
+                tenant = role.tenant_rules[0].tenant
+                break
+    
+    if tenant:
+        citation_data.update({
+            'owning_tenant': tenant
+        })
+
     # Records are inactive/non-public by default. The record_history message
     #  provides information about the Zotero accession.
     citation_data.update({
@@ -98,7 +111,7 @@ def ingest_citation(request, accession, draftcitation):
         'record_status_value': CuratedMixin.INACTIVE,
         'record_status_explanation': u'Inactive by default',
         'record_history': _record_history_message(request, accession),
-        'belongs_to': accession.ingest_to,
+        'belongs_to': tenant.default_dataset if tenant else None,
         'zotero_accession': accession,
     })
 

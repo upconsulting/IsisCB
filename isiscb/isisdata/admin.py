@@ -1143,7 +1143,7 @@ class CitationSubtypeAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 class DatasetAdmin(admin.ModelAdmin):
-    fields = ['name', 'description', 'editor']
+    fields = ['name', 'description', 'editor', 'belongs_to_tenant']
 
 class IsisCBRoleAdmin(admin.ModelAdmin):
     list_display = ('name', 'description')
@@ -1159,7 +1159,9 @@ class IsisCBRoleAdmin(admin.ModelAdmin):
         return CRUDRule.objects.filter(role=obj.pk)
 
 class TenantAdmin(admin.ModelAdmin):
-    fields = ['name', 'title', 'description', 'identifier', 'home_page_template', 'use_home_page_template']
+    fields = ['name', 'title', 'description', 
+            'identifier', 'home_page_template', 
+            'use_home_page_template', 'default_dataset']
     exlude = ('attributes')
 
 

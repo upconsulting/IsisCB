@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import user_passes_test
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def list_tenants(request):
 
-    roles = request.user.isiscbrole_set.filter(accessrule__tenantrule__tenant__isnull=False)
+    roles = request.user.isiscb_roles.filter(accessrule__tenantrule__tenant__isnull=False)
     tenant_rules = set()
     for rules in [role.tenant_rules.all() for role in roles]:
         tenant_rules.update(rules)

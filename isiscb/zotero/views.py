@@ -172,7 +172,14 @@ def create_accession(request):
 
     if request.method == 'GET':
         try:
-            initial = {'ingest_to': Dataset.objects.get(name='Isis Bibliography of the History of Science (Stephen P. Weldon, ed.)')}
+            tenant = None
+            for role in request.user.isiscb_roles.all():
+                if role.tenant_rules:
+                    # there should only be one
+                    if role.tenant_rules[0].tenant:
+                        tenant = role.tenant_rules[0].tenant
+                        break
+            initial = {'ingest_to': tenant.default_dataset }
         except Dataset.DoesNotExist:
             initial = {}
 

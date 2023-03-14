@@ -445,6 +445,8 @@ class CitationIndex(indexes.SearchIndex, indexes.Indexable):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_ISISCB_NAME_DISPLAY
             elif data[0]['belongs_to__name'].startswith(settings.DATASET_SHOT_NAME_PREFIX):
                 self.prepared_data['dataset_typed_names'] = settings.DATASET_SHOT_NAME_DISPLAY
+            else:
+                self.prepared_data['dataset_typed_names'] = data[0]['belongs_to__name']
 
     def _index_tenants(self, data):
         if data[0]['tenants']:
