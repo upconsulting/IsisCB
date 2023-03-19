@@ -11,6 +11,7 @@ from django.db.models import Q
 
 from isisdata.models import *
 from zotero.models import *
+import curation.curation_util as curation_util
 
 import iso8601
 
@@ -90,14 +91,7 @@ def ingest_citation(request, accession, draftcitation):
                     continue
             citation_data[pfield] = value
 
-    tenant = None
-    for role in request.user.isiscb_roles.all():
-        if role.tenant_rules:
-            # there should only be one
-            if role.tenant_rules[0].tenant:
-                tenant = role.tenant_rules[0].tenant
-                break
-    
+    tenant = curation_util.get_tenant(request.user)
     if tenant:
         citation_data.update({
             'owning_tenant': tenant

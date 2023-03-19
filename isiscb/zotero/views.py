@@ -15,6 +15,7 @@ from isisdata.utils import normalize
 from unidecode import unidecode
 
 from curation.contrib.views import check_rules
+import curation.curation_util as curation_util
 
 from zotero.models import *
 from zotero.filters import *
@@ -172,13 +173,7 @@ def create_accession(request):
 
     if request.method == 'GET':
         try:
-            tenant = None
-            for role in request.user.isiscb_roles.all():
-                if role.tenant_rules:
-                    # there should only be one
-                    if role.tenant_rules[0].tenant:
-                        tenant = role.tenant_rules[0].tenant
-                        break
+            tenant = curation_util.get_tenant(request.user)
             initial = {'ingest_to': tenant.default_dataset }
         except Dataset.DoesNotExist:
             initial = {}
@@ -327,6 +322,7 @@ def resolve_authority(request):
     return JsonResponse({'data': {
         'authority_id': authority.id,
         'authority_name': authority.name,
+        'authority_owner': authority.owning_tenant.id if authority.owning_tenant else '',
     }})
 
 @check_rules('has_zotero_access')

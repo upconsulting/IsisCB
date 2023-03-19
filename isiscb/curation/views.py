@@ -1924,7 +1924,7 @@ def quick_and_dirty_authority_search(request):
     use_custom_cmp = request.GET.get('use_custom_cmp', 'false') == 'true'
 
     if request.GET.get("tenant_ids", ""):
-        query = Q(tenants__in=request.GET.get("tenant_ids", ""))
+        query = Q(owning_tenant__in=request.GET.get("tenant_ids", ""))
     else:
         query = Q()
 
@@ -2067,7 +2067,8 @@ def quick_and_dirty_authority_search(request):
             'url': reverse("curation:curate_authority", args=(obj.id,)),
             'public': obj.public,
             'type_controlled': obj.get_type_controlled_display(),
-            'tenants': [t.id for t in obj.tenants.all()]
+            'tenants': [t.id for t in obj.tenants.all()],
+            'owning_tenant': obj.owning_tenant.id if obj.owning_tenant else '',
         })
 
     return JsonResponse({'results': results})
