@@ -111,7 +111,7 @@
       <h5><b>Categories</b></h5>
       <ul id="category-list-group" class="list-group">
         {% for acrel in instance|get_categories %}
-           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+           <li id="category-entry-{{ acrel.id }}" class="list-group-item"><a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
            {% if can_update %}
            <span class="button-group button-group-xs">
                <a class="btn btn-xs glyphicon glyphicon-remove delete delete-category pull-right"
@@ -131,9 +131,9 @@
         {% for acrel in instance|get_subjects %}
            <li id="subject-entry-{{ acrel.id }}" class="list-group-item {% if not acrel.authority %}record-notpublic{% endif %} ">
              {% if acrel.authority %}
-             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
+             <a href="{% url 'curation:curate_authority' acrel.authority.id %}">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.authority.name }}</a>
              {% else %}
-             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.tenant_ids %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
+             <span class="text-muted">{% if acrel.authority|is_external_tenant:instance.owning_tenant.id %}<i class="fas fa-share-alt"></i>{% endif %} {{ acrel.name_for_display_in_citation }} <i class="fa fa-chain-broken" aria-hidden="true"></i></span>
              {% endif %}
              {% if can_update %}
              <span class="button-group button-group-xs">
@@ -269,7 +269,7 @@ function triggerSearchSubjects(force, searchTenants=true) {
     var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types 
     url += "&max=" + max_results + "&force=" + force; 
     if (searchTenants) {
-      url += "&tenant_ids=" + {{instance.tenant_ids}};
+      url += "&tenant_ids={{instance.owning_tenant.id}}";
     }
     url += "&q=" + $('#subjectSearchQuery').val();
     $.ajax(url, {
@@ -285,7 +285,7 @@ function triggerSearchSubjects(force, searchTenants=true) {
             publicLink.attr('target', "_blank");
 
             var linkText = r.name + ' (' + r.citation_count + ')';
-            if (!r.tenants.some(r=> {{instance.tenant_ids}}.includes(r))) {
+            if (!r.tenants.some(r=> {{instance.owning_tenant.id}} == r)) {
               linkText = '<i class="fas fa-share-alt"></i> ' + linkText;
             }
             publicLink.html(linkText);
