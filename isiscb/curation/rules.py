@@ -18,10 +18,13 @@ def is_accessible_by_dataset(user, obj):
     # if user is superuser they can always do everything
     if user.is_superuser:
         return True
+    
     roles = user.isiscb_roles.all()
     dataset = getattr(obj, 'belongs_to', None)
+    
     if dataset:
-        roles = roles.filter(accessrule__datasetrule__dataset=dataset.id)
+        roles = roles.filter(Q(accessrule__datasetrule__dataset=dataset.id)\
+                            | Q(accessrule__tenantrule__tenant__default_dataset__id=dataset.id))
     else:
         roles = roles.filter((Q(accessrule__datasetrule__dataset__isnull=True)\
                               | Q(accessrule__datasetrule__dataset=''))\
@@ -201,7 +204,8 @@ def is_action_allowed(user, obj, action):
          | Q(accessrule__datasetrule__dataset='')) \
          & Q(accessrule__datasetrule__isnull=False)
     if dataset:
-        query = Q(accessrule__datasetrule__dataset=dataset.id)
+        query = Q(accessrule__datasetrule__dataset=dataset.id) \
+                | Q(accessrule__tenantrule__tenant__default_dataset__id=dataset.id)
 
     tenants = getattr(obj, 'tenants', None)
     owner = getattr(obj, 'owning_tenant', None)
