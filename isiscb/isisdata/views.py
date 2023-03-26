@@ -1519,7 +1519,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
 
     featured_citation_authors = featured_citation.acrelation_set.filter(type_controlled__in=[ACRelation.AUTHOR, ACRelation.CONTRIBUTOR, ACRelation.EDITOR], citation__public=True, public=True)
     featured_citation_image = None
-    if tenant and tenant.settings.google_api_key:
+    if tenant and tenant.settings and tenant.settings.google_api_key:
         featured_citation_image = get_google_books_image(featured_citation, True, tenant.settings.google_api_key)
 
     if featured_authorities:
@@ -1549,7 +1549,7 @@ def home(request, template='isisdata/home.html', tenant_id=None):
     recent_tweet_url = '' 
     recent_tweet_text = ''
     recent_tweet_image = ''
-    if tenant:
+    if tenant and tenant.settings and tenant.settings.twitter_api_key:
         recent_tweet_url, recent_tweet_text, recent_tweet_image = get_featured_tweet(tenant.settings.twitter_api_key, tenant.settings.twitter_user_name)
 
     properties = featured_citation.acrelation_set.exclude(type_controlled__in=[ACRelation.AUTHOR, ACRelation.EDITOR, ACRelation.CONTRIBUTOR, ACRelation.SUBJECT, ACRelation.CATEGORY]).filter(public=True)

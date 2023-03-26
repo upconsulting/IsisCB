@@ -954,13 +954,14 @@ class TenantSettingsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TenantSettingsForm, self).__init__(*args, **kwargs)
 
-        self.fields['title'].initial = self.instance.tenant.title
-        self.fields['logo'].initial = self.instance.tenant.logo
-        self.fields['contact_email'].initial = self.instance.tenant.contact_email
-        if self.instance.tenant.settings.google_api_key:
-            self.initial['google_api_key'] = api_keys.decrypt_key(self.instance.tenant.settings.google_api_key).decode("utf-8")
-        if self.instance.tenant.settings.twitter_api_key:
-            self.initial['twitter_api_key'] = api_keys.decrypt_key(self.instance.tenant.settings.twitter_api_key).decode("utf-8")
+        if kwargs['instance'] and kwargs['instance'].tenant:
+            self.fields['title'].initial = kwargs['instance'].tenant.title
+            self.fields['logo'].initial = kwargs['instance'].tenant.logo
+            self.fields['contact_email'].initial = kwargs['instance'].tenant.contact_email
+            if kwargs['instance'].tenant.settings.google_api_key:
+                self.initial['google_api_key'] = api_keys.decrypt_key(kwargs['instance'].tenant.settings.google_api_key).decode("utf-8")
+            if kwargs['instance'].tenant.settings.twitter_api_key:
+                self.initial['twitter_api_key'] = api_keys.decrypt_key(kwargs['instance'].tenant.settings.twitter_api_key).decode("utf-8")
 
     def clean(self):
         if self.cleaned_data['google_api_key']:
