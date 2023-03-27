@@ -132,8 +132,11 @@ def accessions(request):
     Curator should be able to see a list of Zotero ingests, with indication of
     whether all authorities have been resolved for a batch.
     """
-
-    queryset = ImportAccession.objects.all()
+    tenant = curation_util.get_tenant(request.user)
+    if tenant:
+        queryset = ImportAccession.objects.filter(tenant=tenant)
+    elif request.user.is_superuser:
+        queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
     paginator = Paginator(filtered_objects.qs, PAGE_SIZE)
     current_page = request.GET.get('page', 1)
@@ -174,7 +177,7 @@ def create_accession(request):
     if request.method == 'GET':
         try:
             tenant = curation_util.get_tenant(request.user)
-            initial = {'ingest_to': tenant.default_dataset }
+            initial = {'ingest_to': tenant.default_dataset, 'tenant': tenant }
         except Dataset.DoesNotExist:
             initial = {}
 

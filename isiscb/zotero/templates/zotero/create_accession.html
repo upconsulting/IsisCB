@@ -11,7 +11,9 @@
     <div class="alert alert-danger">{{ error }}</div>
     {% endfor %}
     <div class="form-group">
+        {% if not field.is_hidden %}
         <label>{{ field.label }}</label>
+        {% endif %}
         {{ field|addcss:"form-control" }}
     </div>
 

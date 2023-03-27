@@ -13,10 +13,11 @@ class ImportAccessionForm(forms.ModelForm):
     zotero_rdf = forms.FileField()
     ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
                                        empty_label='No dataset')
-
+    
     class Meta(object):
         model = ImportAccession
-        fields = ['name', 'ingest_to', 'zotero_rdf']
+        fields = ['name', 'ingest_to', 'zotero_rdf', 'tenant']
+        widgets = {'tenant': forms.HiddenInput()}
 
 
 class DraftAuthorityForm(forms.ModelForm):

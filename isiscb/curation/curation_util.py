@@ -13,7 +13,8 @@ def get_tenants(user):
 def get_tenant(user):
     """ A user should have access to only one tenant."""
     tenant_roles = filter(lambda role : role.tenant_rules and role.tenant_rules[0].tenant, user.isiscb_roles.all())
-    tenant_role = next(tenant_roles)
+    if tenant_roles:
+        tenant_role = next(tenant_roles, None)
     if tenant_role:
         return tenant_role.tenant_rules[0].tenant
     return None

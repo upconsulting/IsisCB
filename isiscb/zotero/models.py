@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.urls import reverse
 
-from isisdata.models import Dataset, Citation, Authority, Language
+from isisdata.models import Dataset, Citation, Authority, Language, Tenant
 from isisdata.utils import normalize
 from unidecode import unidecode
 
@@ -33,6 +33,7 @@ class ImportAccession(models.Model):
     ingest_to = models.ForeignKey(Dataset, null=True, on_delete=models.SET_NULL)
     processed = models.BooleanField(default=False)
     import_errors = models.TextField(null=True, blank=True)
+    tenant = models.ForeignKey(Tenant, null=True, on_delete=models.CASCADE)
 
     @property
     def citations_ok(self):
