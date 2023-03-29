@@ -134,7 +134,7 @@ def accessions(request):
     """
     tenant = curation_util.get_tenant(request.user)
     if tenant:
-        queryset = ImportAccession.objects.filter(tenant=tenant)
+        queryset = ImportAccession.objects.filter(owning_tenant=tenant)
     elif request.user.is_superuser:
         queryset = ImportAccession.objects.all()
     filtered_objects = ImportAccesionFilter(request.GET, queryset=queryset)
@@ -177,7 +177,7 @@ def create_accession(request):
     if request.method == 'GET':
         try:
             tenant = curation_util.get_tenant(request.user)
-            initial = {'ingest_to': tenant.default_dataset, 'tenant': tenant }
+            initial = {'ingest_to': tenant.default_dataset, 'owning_tenant': tenant }
         except Dataset.DoesNotExist:
             initial = {}
 

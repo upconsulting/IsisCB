@@ -2995,7 +2995,7 @@ class Dataset(CuratedMixin):
     name = models.CharField(max_length=255)
     description = models.TextField()
     editor = models.CharField(max_length=255, null=True)
-    belongs_to_tenant = models.ForeignKey(Tenant, null=True, blank=True,
+    owning_tenant = models.ForeignKey(Tenant, null=True, blank=True,
                              help_text=help_text("""The tenant this dataset belongs to."""), on_delete=models.SET_NULL)
 
 

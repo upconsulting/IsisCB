@@ -33,7 +33,7 @@ class ImportAccession(models.Model):
     ingest_to = models.ForeignKey(Dataset, null=True, on_delete=models.SET_NULL)
     processed = models.BooleanField(default=False)
     import_errors = models.TextField(null=True, blank=True)
-    tenant = models.ForeignKey(Tenant, null=True, on_delete=models.CASCADE)
+    owning_tenant = models.ForeignKey(Tenant, null=True, on_delete=models.CASCADE)
 
     @property
     def citations_ok(self):

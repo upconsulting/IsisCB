@@ -16,8 +16,8 @@ class ImportAccessionForm(forms.ModelForm):
     
     class Meta(object):
         model = ImportAccession
-        fields = ['name', 'ingest_to', 'zotero_rdf', 'tenant']
-        widgets = {'tenant': forms.HiddenInput()}
+        fields = ['name', 'ingest_to', 'zotero_rdf', 'owning_tenant']
+        widgets = {'owning_tenant': forms.HiddenInput()}
 
 
 class DraftAuthorityForm(forms.ModelForm):

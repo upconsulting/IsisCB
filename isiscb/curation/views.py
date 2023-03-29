@@ -36,6 +36,7 @@ from isisdata import operations
 from isisdata.filters import *
 from isisdata import tasks as data_tasks
 from curation import p3_port_utils
+from curation import curation_util as c_util
 
 
 from curation.tracking import TrackingWorkflow
@@ -2100,7 +2101,8 @@ def _search_collections(request, collection_class):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_zotero_accessions(request):
     q = request.GET.get('query', None)
-    queryset = ImportAccession.objects.filter(name__icontains=q)
+    tenant = c_util.get_tenant(request.user)
+    queryset = ImportAccession.objects.filter(name__icontains=q, tenant=tenant)
     results = [{
         'id': accession.id,
         'label': accession.name,
@@ -2122,7 +2124,8 @@ def search_linked_data_type(request):
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def search_datasets(request):
     q = request.GET.get('query', None)
-    queryset = Dataset.objects.filter(name__icontains=q)
+    tenant = c_util.get_tenant(request.user)
+    queryset = Dataset.objects.filter(name__icontains=q, tenant=tenant)
     results = [{
         'id': ds.id,
         'label': ds.name,
