@@ -174,17 +174,14 @@ def create_accession(request):
 
     template = 'zotero/create_accession.html'
 
+    tenant = curation_util.get_tenant(request.user)     
     if request.method == 'GET':
-        try:
-            tenant = curation_util.get_tenant(request.user)
-            initial = {'ingest_to': tenant.default_dataset, 'owning_tenant': tenant }
-        except Dataset.DoesNotExist:
-            initial = {}
-
-        form = ImportAccessionForm(initial=initial)
+        initial = {'ingest_to': tenant.default_dataset, 'owning_tenant': tenant }
+        
+        form = ImportAccessionForm(tenant, initial=initial)
 
     elif request.method == 'POST':
-        form = ImportAccessionForm(request.POST, request.FILES)
+        form = ImportAccessionForm(tenant, request.POST, request.FILES)
         if form.is_valid():
             instance = form.save()
             instance.imported_by = request.user

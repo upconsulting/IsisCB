@@ -13,6 +13,12 @@ class ImportAccessionForm(forms.ModelForm):
     zotero_rdf = forms.FileField()
     ingest_to = forms.ModelChoiceField(queryset=Dataset.objects.all(),
                                        empty_label='No dataset')
+
+    def __init__(self, tenant, *args, **kwargs):
+        super(ImportAccessionForm, self).__init__(*args, **kwargs)
+        if tenant:
+            self.fields['ingest_to'].queryset = Dataset.objects.filter(owning_tenant=tenant)
+
     
     class Meta(object):
         model = ImportAccession

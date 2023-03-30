@@ -223,8 +223,9 @@ def create_authority(request):
             form.cleaned_data['public'] = False
             form.cleaned_data['record_status_value'] = CuratedMixin.INACTIVE
             form.instance.created_by_stored = request.user
+            form.instance.owning_tenant = c_util.get_tenant(request.user)
             authority = form.save()
-
+            
             if linkeddata_form:
                 # we need to make sure the subjec type is authority, or the generic relations don't work
                 linkeddata_form.instance.subject = Authority.objects.get(pk=authority.id)
@@ -2102,7 +2103,7 @@ def _search_collections(request, collection_class):
 def search_zotero_accessions(request):
     q = request.GET.get('query', None)
     tenant = c_util.get_tenant(request.user)
-    queryset = ImportAccession.objects.filter(name__icontains=q, tenant=tenant)
+    queryset = ImportAccession.objects.filter(name__icontains=q, owning_tenant=tenant)
     results = [{
         'id': accession.id,
         'label': accession.name,
@@ -2125,7 +2126,7 @@ def search_linked_data_type(request):
 def search_datasets(request):
     q = request.GET.get('query', None)
     tenant = c_util.get_tenant(request.user)
-    queryset = Dataset.objects.filter(name__icontains=q, tenant=tenant)
+    queryset = Dataset.objects.filter(name__icontains=q, owning_tenant=tenant)
     results = [{
         'id': ds.id,
         'label': ds.name,
