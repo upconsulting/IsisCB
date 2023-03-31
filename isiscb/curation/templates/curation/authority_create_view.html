@@ -306,18 +306,6 @@ function searchService(url) {
 
 {% include "curation/fragment_create_authority_header.html" %}
 
-      <div class="row">
-          <div class="col-xs-12">
-              {% for error in form.owning_tenant.errors %}
-              <div class="alert alert-danger">{{ error }}</div>
-              {% endfor %}
-              <div class="form-group">
-                  <label>{{ form.owning_tenant.label }}</label>
-                  {{ form.owning_tenant|addcss:"form-control" }}
-              </div>
-          </div>
-      </div>
-
         <div class="form-group row" style="padding-top: 10px;">
           <div class="col-md-4 ">
           {% for error in form.type_controlled.errors %}

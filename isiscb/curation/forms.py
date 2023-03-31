@@ -471,7 +471,7 @@ class AuthorityForm(forms.ModelForm):
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
     redirect_to = forms.CharField(widget=forms.HiddenInput(), required = False)
     record_history = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False)
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.none(), label='Dataset', required=False)
 
     owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
 
@@ -495,11 +495,14 @@ class AuthorityForm(forms.ModelForm):
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
                 self.fields['record_status_value'].initial = CuratedMixin.ACTIVE
+                self.fields['owning_tenant'].initial = cutil.get_tenant(user)
 
         self.user = user
 
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
-
+        self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
+        self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user)).all()
+        
         # disable fields user doesn't have access to
         if self.instance.pk:
             for field in self.fields:
@@ -521,13 +524,10 @@ class AuthorityForm(forms.ModelForm):
             self.cleaned_data['redirect_to'] = None
 
         tenants = cutil.get_tenants(self.user)
-        if self.cleaned_data['owning_tenant']:
-            if not self.cleaned_data['owning_tenant'] in tenants:
-                self._errors['owning_tenant'] = self.error_class(["No access to tenant."])
-        else:
-            self.cleaned_data['owning_tenant'] = None
-            if not self.user.is_superuser:
-                self._errors['owning_tenant'] = self.error_class(["A tenant needs to be specified."])
+        if self.instance.pk and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+            raise ValidationError(
+                "Owning tenant cannot be changed."
+            )
 
     def _get_validation_exclusions(self):
         exclude = super(AuthorityForm, self)._get_validation_exclusions()
