@@ -1659,7 +1659,7 @@ def authorities(request):
               'tracking_state', 'modified_on', 'modified_on_fm',
               'modified_by__first_name', 'modified_by__last_name', 'modified_by',
               'created_by_stored', 'created_by_stored__last_name', 'created_by_stored__first_name',
-              'created_on_stored')
+              'created_on_stored', 'owning_tenant', 'belongs_to')
 
     # ISISCB-1157: don't show any result if there are no filters set
     # (or filters are only 'page, 'show_filters, or 'o')

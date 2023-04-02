@@ -25,11 +25,11 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
     #  we want access to adjacent accessrule entries rooted in the same role.
     include = list(roles.filter(pk__in=do_pks, accessrule__datasetrule__isnull=False).values_list('accessrule__datasetrule__dataset', flat=True))
     exclude = list(roles.filter(pk__in=dont_pks, accessrule__datasetrule__isnull=False).values_list('accessrule__datasetrule__dataset', flat=True))
-
+    
     # Some citations and authorities are not assigned to a dataset. So if the
     #  dataset is not set, then the rule applies to records without a dataset.
-    include_isnull = '' in include or None in include
-    exclude_isnull = '' in exclude or None in exclude
+    include_isnull = '' in include or None in include or not include
+    exclude_isnull = '' in exclude or None in exclude or not exclude
 
     # We can't use null values when filtering, below.
     include = list(filter(_not_null, include))
@@ -41,17 +41,20 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
             query |= Q(belongs_to__isnull=True)
         queryset = queryset.exclude(query)
 
-
     # If ``include`` is empty, this will have the effect of excluding all
     #  records, unless ``include_isnull`` is True and the record has no dataset.
-    query = Q(belongs_to__in=include)
-    if include_isnull:
-        query |= Q(belongs_to__isnull=True)
-    
+    query_include = Q()
+    if include:
+        query_include |= Q(belongs_to__in=include)
+        if include_isnull:
+            query_include |= Q(belongs_to__isnull=True)
+        
     ## if a user has a tenant role, then they should only see citations from the assigned tenants
     tenant_ids = list(roles.filter(accessrule__tenantrule__isnull=False).values_list('accessrule__tenantrule__tenant__id', flat=True))
     if tenant_ids:
-        query &= Q(owning_tenant__in=tenant_ids)
-    queryset = queryset.filter(query)
-
+        query_include &= Q(owning_tenant__in=tenant_ids)
+    
+    
+    queryset = queryset.filter(query_include)
+    
     return queryset

@@ -20,6 +20,16 @@ def is_accessible_by_dataset(user, obj):
         return True
     
     roles = user.isiscb_roles.all()
+
+    # if user is tenant admin, they have access to all datasets
+    # we don't need to check if the tenant is the right one, as a user can only have
+    # access to one tenant, and that will be checked by the tenant rule
+    tenant_roles = roles.filter(accessrule__tenantrule__tenant__isnull=False)
+    if tenant_roles:
+        if tenant_roles.first().tenant_rules[0].allowed_action == TenantRule.UPDATE:
+            return True
+
+
     dataset = getattr(obj, 'belongs_to', None)
     
     if dataset:
@@ -45,7 +55,6 @@ def is_accessible_by_tenant(user, obj):
     tenants = getattr(obj, 'tenants', None)
     owner = getattr(obj, 'owning_tenant', None)
     all_tenants = list(tenants.all())
-    
     if owner:
         all_tenants.append(owner)
     if tenants:
