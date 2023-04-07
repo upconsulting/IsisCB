@@ -340,7 +340,7 @@ class CitationForm(forms.ModelForm):
 
     language = forms.ModelMultipleChoiceField(queryset=Language.objects.all(), required=False)
 
-    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.all(), label='Dataset', required=False)
+    belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.none(), label='Dataset', required=False)
     record_status_value = forms.ChoiceField(choices=CuratedMixin.STATUS_CHOICES, required=False)
 
     administrator_notes = forms.CharField(widget=forms.widgets.Textarea({'rows': '3'}), required=False, label="Staff notes")
@@ -372,6 +372,10 @@ class CitationForm(forms.ModelForm):
         self.user = user
 
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
+        if cutil.get_tenant(self.user):
+            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
+        else:
+            self.fields['belongs_to'].queryset = Dataset.objects.all()
 
         if not self.is_bound:
             if not self.fields['record_status_value'].initial:
@@ -501,8 +505,12 @@ class AuthorityForm(forms.ModelForm):
 
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
         self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
-        self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user)).all()
         
+        if cutil.get_tenant(self.user):
+            self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
+        else:
+            self.fields['belongs_to'].queryset = Dataset.objects.all()
+       
         # disable fields user doesn't have access to
         if self.instance.pk:
             for field in self.fields:

@@ -217,7 +217,7 @@ def retrieve_accession(request, accession_id):
     matching_citations = {}
     ldtype_cache = {}
     for dcitation in draftcitations:
-        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, type_cache=ldtype_cache)
+        matching_citations[dcitation.id] = _find_citation_matches(dcitation, True, curation_util.get_tenant(request.user), type_cache=ldtype_cache)
 
     context = {
         'curation_section': 'zotero',
@@ -237,7 +237,7 @@ def possible_matching_citations(request, accession_id, draftcitation_id):
     template = 'zotero/show_citation_matches.html'
     accession = get_object_or_404(ImportAccession, pk=accession_id)
     draftcitation = get_object_or_404(DraftCitation, pk=draftcitation_id)
-    matches = _find_citation_matches(draftcitation, False)
+    matches = _find_citation_matches(draftcitation, curation_util.get_tenant(request.user), False)
     context = {
         'curation_section': 'zotero',
         'curation_subsection': 'accessions',
@@ -247,7 +247,7 @@ def possible_matching_citations(request, accession_id, draftcitation_id):
     }
     return render(request, template, context)
 
-def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
+def _find_citation_matches(dcitation, limit_matches, tenant, type_cache = {}):
     matches = []
     linkeddata = DraftCitationLinkedData.objects.filter(citation=dcitation)
     for draft_ld in linkeddata:
@@ -264,7 +264,7 @@ def _find_citation_matches(dcitation, limit_matches, type_cache = {}):
     if matches:
         matched_by = { match: ["Linked Data"] for match in matches }
 
-    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title) if dcitation.title else ""), type_controlled=dcitation.type_controlled)
+    possible_matches = Citation.objects.filter(title_for_sort=normalize(unidecode(dcitation.title) if dcitation.title else ""), type_controlled=dcitation.type_controlled, owning_tenant=tenant)
     possible_matches = possible_matches.prefetch_related('related_authorities')
     if dcitation.type_controlled in [Citation.ARTICLE, Citation.REVIEW]:
         series = dcitation.authority_relations.filter(type_controlled=DraftACRelation.PERIODICAL)
