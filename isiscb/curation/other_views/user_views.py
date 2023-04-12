@@ -219,8 +219,10 @@ def add_tenant_rule(request, role_id, user_id=None):
             'header': header_template
         })
     elif request.method == 'POST':
-        form = TenantRuleForm(request.POST)
+        if role.tenant_rules:
+            return redirect('curation:role', role_id=role.pk)
 
+        form = TenantRuleForm(request.POST)
         if form.is_valid():
             rule = form.save()
             rule.role = role

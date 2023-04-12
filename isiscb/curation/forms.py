@@ -691,9 +691,7 @@ class AddRoleForm(forms.Form):
         super(AddRoleForm, self).__init__( *args, **kwargs)
 
         roles = IsisCBRole.objects.all()
-        choices = []
-        for role in roles:
-            choices.append((role.pk, role.name))
+        choices = [(role.pk, role.name) for role in roles]
         self.fields['role'].choices = choices
 
 class CRUDRuleForm(forms.ModelForm):

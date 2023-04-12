@@ -58,9 +58,15 @@
    Add access to Zotero module</button>
     </form>
   </div>
+  {% if not role.tenant_rules %}
   <div class="btn-group">
     <a href="{% url 'curation:create_tenant_rule' role.pk %}" class="btn btn-sm btn-primary"><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
   </div>
+  {% else %}
+  <div class="btn-group">
+    <a class="btn btn-sm btn-default" disabled title="A role can only give access to one tenant."><i class="fas fa-pastafarianism"></i> Add access to a tenant</a>
+  </div>
+  {% endif %}
 </p>
 {% endif %}
 
