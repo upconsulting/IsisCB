@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 from django.contrib.admin.views.decorators import staff_member_required, user_passes_test
 from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import get_template
+from django.contrib import messages
 
 from django.core.paginator import Paginator, EmptyPage
 
@@ -13,6 +14,7 @@ from isisdata.models import *
 from curation.forms import *
 
 from curation.contrib.views import check_rules
+import curation.curation_util as cutils
 
 PAGE_SIZE = 40    # TODO: this should be configurable.
 
@@ -419,7 +421,6 @@ def add_user_module_rule(request, role_id):
 
     return render(request, template, context)
 
-
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 @check_rules('can_update_user_module')
 def add_role_to_user(request, user_edit_id, user_id=None):
@@ -441,8 +442,11 @@ def add_role_to_user(request, user_edit_id, user_id=None):
         if form.is_valid():
             role_id = form.cleaned_data['role']
             role = get_object_or_404(IsisCBRole, pk=role_id)
-            role.users.add(user)
-            role.save()
+            if role.tenant_rules and cutils.get_tenants(user):
+                messages.add_message(request, messages.ERROR, "User already belongs to a tenant. You cannot add a second tenant role.")
+            else:
+                role.users.add(user)
+                role.save()
 
             if request.GET.get('from_user', False):
                 return redirect('curation:user', user.pk)
