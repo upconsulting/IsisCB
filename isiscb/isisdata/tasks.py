@@ -292,3 +292,36 @@ def create_timeline(authority_id, timeline_id):
 
     # delete previous timelines
     cached_timelines = CachedTimeline.objects.filter(authority_id=authority_id).exclude(pk=timeline_id).delete()
+
+@shared_task
+def migrate_all_classification_systems(task_id):
+         
+    task = AsyncTask.objects.get(pk=task_id)
+    task.max_value = Authority.objects.count()
+    task.save()
+
+    class_systems = dict([(sys.classification_system, sys) for sys in ClassificationSystem.objects.all()]) 
+    for authority in Authority.objects.all():
+        # if the authority has already been migrated to use the new classification system
+        # object or there is no classification system, then skip it 
+        # (we don't want to override changes already made)
+        if authority.classification_system_object or not authority.classification_system:
+            task.current_value += 1
+            task.save()
+            continue
+        if authority.classification_system in class_systems:
+            authority.classification_system_object = class_systems[authority.classification_system]
+            authority.save()
+        else:
+            new_system = ClassificationSystem()
+            new_system.classification_system = authority.classification_system
+            new_system.name = authority.get_classification_system_display()
+            new_system.description = authority.get_classification_system_display()
+            new_system.save()
+            class_systems[new_system.classification_system] = new_system
+        task.current_value += 1
+        task.save()    
+
+    task.state = 'SUCCESS'
+    task.save()
+    print('success:: %s' % str(task_id))

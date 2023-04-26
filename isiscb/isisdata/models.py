@@ -1466,6 +1466,51 @@ class GoogleBooksData(models.Model):
 
     last_modified = models.DateTimeField(auto_now=True)
 
+class ClassificationSystem(models.Model):
+    SPWT = 'SPWT'
+    SPWC = 'SPWC'
+    NEU = 'NEU'
+    MW = 'MW'
+    SHOT = 'SHOT'
+    SEARCH = 'SAC'
+    PROPER_NAME = 'PN'
+    GUE = 'GUE'
+    FHSA = 'FHSA'
+    NEW = 'NEW'
+    CLASS_SYSTEM_CHOICES = (
+        (SPWT, 'Weldon Thesaurus Terms (2002-present)'),
+        (SPWC, 'Weldon Classification System (2002-present)'),
+        (GUE, 'Guerlac Committee Classification System (1953-2001)'),
+        (NEU, 'Neu'),
+        (MW, 'Whitrow Classification System (1913-1999)'),
+        (SHOT, 'SHOT Thesaurus Terms'),
+        (FHSA, 'Forum for the History of Science in America'),
+        (SEARCH, 'Search App Concept'),
+        (PROPER_NAME, 'Proper name'),
+        (NEW, "Tenant Classification System")
+    )
+    classification_system = models.CharField(max_length=4, blank=True,
+                                             null=True, default=SPWC,
+                                             choices=CLASS_SYSTEM_CHOICES,
+                                             db_index=True,
+                                             help_text=help_text("""
+    This field is for legacy purposes only. For systems migrated from the previous
+    version of IsisCB when a simple database field was used for classification systems.
+    All new classification systems should be set to "Tenant Classification System".
+    """))
+
+    name = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Name of the classification system.
+    """))
+
+    description = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
+    Description of the classification system.
+    """))
+
+    def __str__(self):
+        return self.name
+
+
 class Authority(ReferencedEntity, CuratedMixin):
     ID_PREFIX = 'CBA'
 
@@ -1617,11 +1662,22 @@ class Authority(ReferencedEntity, CuratedMixin):
                                              choices=CLASS_SYSTEM_CHOICES,
                                              db_index=True,
                                              help_text=help_text("""
-    Specifies the classification system that is the source of the authority.
+    DEPRECATED! Use classification_system_object instead! Specifies the classification system that is the source of the authority.
     Used to group resources by the Classification system. The system used
     currently is the Weldon System. All the other ones are for reference or
     archival purposes only.
     """))
+
+    classification_system_object = models.ForeignKey('ClassificationSystem', 
+                                            blank=True, 
+                                            null=True, 
+                                            on_delete=models.SET_NULL,
+                                            help_text=help_text("""
+    Specifies the classification system that is the source of the authority.
+    Used to group resources by the Classification system. The system used
+    currently is the Weldon System. All the other ones are for reference or
+    archival purposes only."""))
+
 
     classification_code = models.CharField(max_length=255, blank=True,
                                            null=True, help_text=help_text("""
