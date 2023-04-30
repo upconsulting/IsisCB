@@ -478,11 +478,12 @@ class AuthorityForm(forms.ModelForm):
     belongs_to = forms.ModelChoiceField(queryset=Dataset.objects.none(), label='Dataset', required=False)
 
     owning_tenant = forms.ModelChoiceField(label='Tenant', required=False, queryset=Tenant.objects.none())
+    classification_system_object = forms.ModelChoiceField(label='ClassificationSystem', required=False, queryset=ClassificationSystem.objects.none())
 
     class Meta(object):
         model = Authority
         fields = [
-            'type_controlled', 'name', 'description', 'classification_system',
+            'type_controlled', 'name', 'description', 'classification_system', 'classification_system_object',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
             'administrator_notes', 'record_history', 'belongs_to', 'owning_tenant'
@@ -491,6 +492,7 @@ class AuthorityForm(forms.ModelForm):
         labels = {
             'belongs_to': 'Dataset',
             'administrator_notes': 'Staff notes',
+            'classification_system_object': 'Classification System (object)'
         }
 
 
@@ -505,6 +507,8 @@ class AuthorityForm(forms.ModelForm):
 
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
         self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
+
+        self.fields['classification_system_object'].queryset = ClassificationSystem.objects.filter(owning_tenant=cutil.get_tenant(user))
         
         if cutil.get_tenant(self.user):
             self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
@@ -532,7 +536,7 @@ class AuthorityForm(forms.ModelForm):
             self.cleaned_data['redirect_to'] = None
 
         tenants = cutil.get_tenants(self.user)
-        if self.instance.pk and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
+        if self.instance.pk and self.instance.owning_tenant and not (self.cleaned_data['owning_tenant'].pk is self.instance.owning_tenant.pk):
             raise ValidationError(
                 "Owning tenant cannot be changed."
             )

@@ -1203,9 +1203,24 @@ class TenantAdmin(admin.ModelAdmin):
     exlude = ('attributes')
 
 
+class ClassificationSystemAdminForm(forms.ModelForm):
+    default_for = forms.MultipleChoiceField(
+        choices = Authority.TYPE_CHOICES,
+        widget  = forms.CheckboxSelectMultiple,
+        required = False
+    )
+
+    class Meta:
+        model = ClassificationSystem
+        fields =['classification_system', 'name', 'description', 'owning_tenant',
+            'subject_search_searchable', 'is_default', 'default_for']
+
 class ClassificationSystemAdmin(admin.ModelAdmin):
-    fields = ['classification_system', 'name', 'description']
-    list_display = ['name']
+    #fields = ['classification_system', 'name', 'description', 'owning_tenant',
+    #        'subject_search_searchable', 'is_default', 'default_for']
+    form = ClassificationSystemAdminForm
+    list_display = ['name', 'owning_tenant', 'is_default', 'default_for']
+    
 
 class LogEntryAdmin(admin.ModelAdmin):
     # to have a date-based drilldown navigation in the admin page

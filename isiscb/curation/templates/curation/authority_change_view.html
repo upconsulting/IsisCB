@@ -116,6 +116,15 @@
             {{ form.classification_system|addcss:"form-control input-sm"}}
         </div>
 
+        {% for error in form.classification_system_object.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        <div class="form-group">
+            <label>{{ form.classification_system_object.label }}</label>
+            {{ form.classification_system_object|addcss:"form-control input-sm"}}
+        </div>
+
+    
         {% for error in form.classification_code.errors %}
         <div class="alert alert-danger">{{ error }}</div>
         {% endfor %}

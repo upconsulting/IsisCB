@@ -8,6 +8,7 @@ from builtins import object
 from django.db import models
 from django.db.models import Q
 from django.contrib.postgres import fields as pg_fields
+from django.contrib.postgres.fields import ArrayField
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractBaseUser
@@ -1506,6 +1507,33 @@ class ClassificationSystem(models.Model):
     description = models.CharField(max_length=1000, db_index=True, help_text=help_text("""
     Description of the classification system.
     """))
+
+    is_default = models.BooleanField(default=False, help_text=help_text("""
+    Marks a classification system as the default for authorities of types classification term, 
+    concept, cross reference, bibliographic list, and time period.
+    """))
+
+    subject_search_searchable = models.BooleanField(default=True, help_text=help_text("""
+    Marks a classification system as being included in the subject search.
+    """))
+
+    available_to_all = models.BooleanField(default=False, help_text=help_text("""
+    Marks a classification system as available to all tenants.
+    """))
+
+    owning_tenant = models.ForeignKey(
+        Tenant,
+        on_delete=models.SET_NULL,
+        related_name="owned_classification_systems",
+        null=True, blank=True
+    )
+
+    # if we ever swtich away from PostgreSQL this needs to be changed
+    # it's PostgreSQL specific
+    default_for = ArrayField(
+        models.CharField(max_length=2, blank=True, null=True),
+        null=True, blank=True,
+    )
 
     def __str__(self):
         return self.name
