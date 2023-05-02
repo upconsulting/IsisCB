@@ -18,3 +18,8 @@ def get_tenant(user):
     if tenant_role:
         return tenant_role.tenant_rules[0].tenant
     return None
+
+def get_classification_systems(user):
+    tenant_query = Q(owning_tenant=get_tenant(user)) | Q(owning_tenant__isnull=True)
+    return ClassificationSystem.objects.filter(tenant_query)
+        

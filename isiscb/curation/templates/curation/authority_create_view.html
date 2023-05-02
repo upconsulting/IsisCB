@@ -96,12 +96,11 @@ $(function() {
   });
 
   function setClassification(selectedType) {
-    var properNameTypes = ["PE", "IN", "GE", "SE", "CW"];
-    if (properNameTypes.includes(selectedType)) {
-      $("#id_authority-classification_system").val("PN");
-    } else {
-      $("#id_authority-classification_system").val("SPWC");
-    }
+    {% autoescape off %}
+    var properNameTypes = {{ class_system_dict | pprint }};
+    {% endautoescape %}
+
+    $("#id_authority-classification_system_object").val(properNameTypes[selectedType]);
   }
 
   function setPersonName() {
@@ -454,12 +453,12 @@ function searchService(url) {
 
         <div class="row">
         <div class="col-md-6">
-          {% for error in form.classification_system.errors %}
+          {% for error in form.classification_system_object.errors %}
           <div class="alert alert-danger">{{ error }}</div>
           {% endfor %}
           <div class="form-group no-gutter">
-              <label>{{ form.classification_system.label }}</label>
-              {{ form.classification_system|addcss:"form-control"}}
+              <label>{{ form.classification_system_object.label }}</label>
+              {{ form.classification_system_object|addcss:"form-control"}}
           </div>
 
           {% for error in form.belongs_to.errors %}

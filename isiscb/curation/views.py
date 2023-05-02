@@ -184,12 +184,31 @@ def create_authority(request):
                                 exclude=('attribute', 'child_class'))
         linkeddata_form = LinkedDataForm(prefix='linkeddata')
 
+        # get classification systems
+        classification_systems = c_util.get_classification_systems(request.user)
+        class_system_dict = {}
+        # first we check which classification systems have been selected
+        # as default systems
+        for class_system in classification_systems:
+            if class_system.default_for:
+                for default_sys in class_system.default_for:
+                    class_system_dict[default_sys] = class_system.id
+
+        default_system = next((sys for sys in classification_systems if sys.is_default), None)
+        # for classification term, concept, cross reference, bibliographic list, time period
+        # for everything else, we'll use the default one
+        if default_system:
+            for type_controlled in Authority.TYPE_CHOICES:
+                if type_controlled[0] not in class_system_dict:
+                    class_system_dict[type_controlled[0]] = default_system.id
+
         context.update({
             'form': form,
             'person_form': person_form,
             'attribute_form': attribute_form,
             'linkeddata_form': linkeddata_form,
             'value_forms': [(i, f(prefix='value')) for i, f in list(value_forms.items())],
+            'class_system_dict': class_system_dict
         })
     elif request.method == 'POST':
         authority = Authority()

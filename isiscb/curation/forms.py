@@ -508,7 +508,7 @@ class AuthorityForm(forms.ModelForm):
         self.fields['owning_tenant'].queryset = cutil.get_tenants(self.user)
         self.fields["owning_tenant"].widget = forms.widgets.HiddenInput()
 
-        self.fields['classification_system_object'].queryset = ClassificationSystem.objects.filter(owning_tenant=cutil.get_tenant(user))
+        self.fields['classification_system_object'].queryset = cutil.get_classification_systems(user)
         
         if cutil.get_tenant(self.user):
             self.fields['belongs_to'].queryset = Dataset.objects.filter(owning_tenant=cutil.get_tenant(self.user))
