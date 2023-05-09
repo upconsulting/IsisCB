@@ -483,7 +483,7 @@ class AuthorityForm(forms.ModelForm):
     class Meta(object):
         model = Authority
         fields = [
-            'type_controlled', 'name', 'description', 'classification_system', 'classification_system_object',
+            'type_controlled', 'name', 'description', 'classification_system_object',
             'classification_code', 'classification_hierarchy',
             'record_status_value', 'record_status_explanation', 'redirect_to',
             'administrator_notes', 'record_history', 'belongs_to', 'owning_tenant'

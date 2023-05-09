@@ -22,4 +22,8 @@ def get_tenant(user):
 def get_classification_systems(user):
     tenant_query = Q(owning_tenant=get_tenant(user)) | Q(owning_tenant__isnull=True)
     return ClassificationSystem.objects.filter(tenant_query)
+
+def get_default_classification_system(classification_systems):
+    return next((sys for sys in classification_systems if sys.is_default), None)
+
         

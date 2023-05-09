@@ -176,6 +176,23 @@ def create_authority(request):
 
     value_forms = view_helpers._create_attribute_value_forms()
 
+    # get classification systems
+    classification_systems = c_util.get_classification_systems(request.user)
+    class_system_dict = {}
+    # first we check which classification systems have been selected
+    # as default systems
+    for class_system in classification_systems:
+        if class_system.default_for:
+            for default_sys in class_system.default_for:
+                class_system_dict[default_sys] = class_system.id
+
+    default_system = c_util.get_default_classification_system(classification_systems)
+    # for everything without a system, we'll use the default one
+    if default_system:
+        for type_controlled in Authority.TYPE_CHOICES:
+            if type_controlled[0] not in class_system_dict:
+                class_system_dict[type_controlled[0]] = default_system.id
+
     if request.method == 'GET':
         form = AuthorityForm(user=request.user, prefix='authority')
         person_form = PersonForm(request.user, authority_id=None, prefix='person')
@@ -184,23 +201,7 @@ def create_authority(request):
                                 exclude=('attribute', 'child_class'))
         linkeddata_form = LinkedDataForm(prefix='linkeddata')
 
-        # get classification systems
-        classification_systems = c_util.get_classification_systems(request.user)
-        class_system_dict = {}
-        # first we check which classification systems have been selected
-        # as default systems
-        for class_system in classification_systems:
-            if class_system.default_for:
-                for default_sys in class_system.default_for:
-                    class_system_dict[default_sys] = class_system.id
-
-        default_system = next((sys for sys in classification_systems if sys.is_default), None)
-        # for classification term, concept, cross reference, bibliographic list, time period
-        # for everything else, we'll use the default one
-        if default_system:
-            for type_controlled in Authority.TYPE_CHOICES:
-                if type_controlled[0] not in class_system_dict:
-                    class_system_dict[type_controlled[0]] = default_system.id
+        
 
         context.update({
             'form': form,
@@ -235,7 +236,10 @@ def create_authority(request):
                 attribute_form.instance.record_status_value = CuratedMixin.ACTIVE
                 value_form_class = value_forms[int(selected_attr_type_controlled)]
                 value_form = value_form_class(request.POST, prefix='value')
-        if form.is_valid() and (person_form is None or person_form.is_valid()) and (linkeddata_form is None or linkeddata_form.is_valid()) and (attribute_form is None or (attribute_form.is_valid() and value_form and value_form.is_valid())):
+        if form.is_valid() and (person_form is None or person_form.is_valid()) and \
+            (linkeddata_form is None or linkeddata_form.is_valid()) and \
+            (attribute_form is None or \
+            (attribute_form.is_valid() and value_form and value_form.is_valid())):
             if person_form:
                 person_form.save()
 
@@ -269,6 +273,7 @@ def create_authority(request):
         else:
             context.update({
                 'form' : form,
+                'class_system_dict': class_system_dict,
                 'person_form': person_form if person_form else PersonForm(request.user, authority_id=None, prefix='person'),
                 'attribute_form': attribute_form if attribute_form else AttributeForm(prefix="attribute"),
                 'linkeddata_form': linkeddata_form if linkeddata_form else LinkedDataForm(prefix='linkeddata'),
