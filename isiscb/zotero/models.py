@@ -200,7 +200,7 @@ class DraftAuthority(ImportedData):
         (TIME_PERIOD, 'Time Period'),
         (GEOGRAPHIC_TERM, 'Geographic Term'),
         (SERIAL_PUBLICATION, 'Serial Publication'),
-        (CLASSIFICATION_TERM, 'Classification Term'),
+        (CLASSIFICATION_TERM, 'Category Division'), # as part of IEXP-389, classification term was renamed to Category Division
         (CONCEPT, 'Concept'),
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),

@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='draftauthority',
             name='type_controlled',
-            field=models.CharField(blank=True, max_length=2, null=True, choices=[('PE', 'Person'), ('IN', 'Institution'), ('TI', 'Time Period'), ('GE', 'Geographic Term'), ('SE', 'Serial Publication'), ('CT', 'Classification Term'), ('CO', 'Concept'), ('CW', 'Creative Work'), ('EV', 'Event'), ('CR', 'Cross-reference'), ('PU', 'Publisher')]),
+            field=models.CharField(blank=True, max_length=2, null=True, choices=[('PE', 'Person'), ('IN', 'Institution'), ('TI', 'Time Period'), ('GE', 'Geographic Term'), ('SE', 'Serial Publication'), ('CT', 'Category Division'), ('CO', 'Concept'), ('CW', 'Creative Work'), ('EV', 'Event'), ('CR', 'Cross-reference'), ('PU', 'Publisher')]),
         ),
         migrations.AlterField(
             model_name='draftcitation',

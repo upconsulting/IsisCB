@@ -320,7 +320,7 @@ def tenant_add_save_image(request, tenant_pk, image_id=None, image_type=None):
             'image_choices': [
                 (TenantImage.AUTHORITY_DEFAULT_IMAGE_AUTHOR, "Default image for author"), 
                 (TenantImage.AUTHORITY_DEFAULT_IMAGE_PERSON, "Default image for person"),
-                (TenantImage.AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, "Default image for classification term"),
+                (TenantImage.AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, "Default image for category division"),
                 (TenantImage.AUTHORITY_DEFAULT_IMAGE_CONCEPT, "Default image for concept"),
                 (TenantImage.AUTHORITY_DEFAULT_IMAGE_GEO_TERM, "Default image for geographic term"),
                 (TenantImage.AUTHORITY_DEFAULT_IMAGE_INSTITUTION, "Default image for institution"),

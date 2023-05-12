@@ -29,7 +29,7 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
     # Some citations and authorities are not assigned to a dataset. So if the
     #  dataset is not set, then the rule applies to records without a dataset.
     include_isnull = '' in include or None in include or not include
-    exclude_isnull = '' in exclude or None in exclude or not exclude
+    exclude_isnull = '' in exclude or None in exclude #or not exclude
 
     # We can't use null values when filtering, below.
     include = list(filter(_not_null, include))
@@ -53,7 +53,6 @@ def filter_queryset(user, queryset, do=CRUDRule.VIEW):
     tenant_ids = list(roles.filter(accessrule__tenantrule__isnull=False).values_list('accessrule__tenantrule__tenant__id', flat=True))
     if tenant_ids:
         query_include &= Q(owning_tenant__in=tenant_ids)
-    
     
     queryset = queryset.filter(query_include)
     

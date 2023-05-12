@@ -133,7 +133,7 @@ class TenantImage(models.Model):
         (AUTHORITY_DEFAULT_IMAGE_GEO_TERM, 'Authority Default Image Geographic Term'),
         (AUTHORITY_DEFAULT_IMAGE_PUBLISHER, 'Authority Default Image Publisher'),
         (AUTHORITY_DEFAULT_IMAGE_TIMEPERIOD, 'Authority Default Image Timeperiod'),
-        (AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, 'Authority Default Image Classification Term'),
+        (AUTHORITY_DEFAULT_IMAGE_CLASS_TERM, 'Authority Default Image Category Division'),
         (ABOUT, 'About page image'),
     )
     image_type = models.CharField(choices=TYPE_CHOICES,
@@ -1437,8 +1437,8 @@ class CitationSubtype(models.Model):
     description = models.TextField(blank=True, null=True,
                                    help_text=help_text("""
     A brief description that will be displayed to help identify the authority.
-    Such as, brief bio or a scope note. For classification terms will be text
-    like 'Classification term from the XXX classification schema.'
+    Such as, brief bio or a scope note. For Category Division will be text
+    like 'Category Division from the XXX classification schema.'
     """))
 
     related_citation_type = models.CharField(max_length=2, null=True, blank=True,
@@ -1509,8 +1509,7 @@ class ClassificationSystem(models.Model):
     """))
 
     is_default = models.BooleanField(default=False, help_text=help_text("""
-    Marks a classification system as the default for authorities of types classification term, 
-    concept, cross reference, bibliographic list, and time period.
+    Marks a classification system as the default for authorities that are not assigned another system.
     """))
 
     subject_search_searchable = models.BooleanField(default=True, help_text=help_text("""
@@ -1608,8 +1607,8 @@ class Authority(ReferencedEntity, CuratedMixin):
     description = models.TextField(blank=True, null=True,
                                    help_text=help_text("""
     A brief description that will be displayed to help identify the authority.
-    Such as, brief bio or a scope note. For classification terms will be text
-    like 'Classification term from the XXX classification schema.'
+    Such as, brief bio or a scope note. For Category Division will be text
+    like 'Category Division from the XXX classification schema.'
     """))
 
     PERSON = 'PE'
@@ -1629,7 +1628,7 @@ class Authority(ReferencedEntity, CuratedMixin):
         (TIME_PERIOD, 'Time Period'),
         (GEOGRAPHIC_TERM, 'Geographic Term'),
         (SERIAL_PUBLICATION, 'Serial Publication'),
-        (CLASSIFICATION_TERM, 'Classification Term'),
+        (CLASSIFICATION_TERM, 'Category Division'), # as part of IEXP-389, classification term was renamed to Category Division
         (CONCEPT, 'Concept'),
         (CREATIVE_WORK, 'Creative Work'),
         (EVENT, 'Event'),
@@ -1710,7 +1709,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification_code = models.CharField(max_length=255, blank=True,
                                            null=True, help_text=help_text("""
     alphanumeric code used in previous classification systems to describe
-    classification terms. Primarily of historical interest only. Used primarily
+    Category Divisions. Primarily of historical interest only. Used primarily
     for Codes for the classificationTerms. however, can be used for other
     kinds of terms as appropriate.
     """), db_index=True)
@@ -1718,7 +1717,7 @@ class Authority(ReferencedEntity, CuratedMixin):
     classification_hierarchy = models.CharField(max_length=255, blank=True,
                                                 null=True,
                                                 help_text=help_text("""
-    Used for Classification Terms to describe where they fall in the
+    Used for Category Divisions to describe where they fall in the
     hierarchy.
     """), db_index=True)
 

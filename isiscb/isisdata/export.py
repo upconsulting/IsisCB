@@ -246,7 +246,7 @@ def _advisor(obj, extra, config={}):
 
 def _category_numbers(obj, extra, config={}):
     """
-    "Classification code" for the linked Classification Term
+    "Classification code" for the linked Category Division
     """
     _q = Q(record_status_value=CuratedMixin.ACTIVE) \
          & Q(authority__type_controlled=Authority.CLASSIFICATION_TERM)

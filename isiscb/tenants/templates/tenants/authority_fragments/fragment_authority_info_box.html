@@ -218,7 +218,7 @@
     "Institution": "{% if tenant.settings.authority_default_image_institution %}{{ tenant.settings.authority_default_image_institution.image.url }}{% else %}{% static 'isisdata/images/institution_default_image.png' %}{% endif %}",
     "Publisher": "{% if tenant.settings.authority_default_image_publisher %}{{ tenant.settings.authority_default_image_publisher.image.url }}{% else %}{% static 'isisdata/images/publisher_default_image.jpeg' %}{% endif %}",
     "Time Period": "{% if tenant.settings.authority_default_image_timeperiod %}{{ tenant.settings.authority_default_image_timeperiod.image.url }}{% else %}{% static 'isisdata/images/time_default_image.jpeg' %}{% endif %}",
-    "Classification Term": "{% if tenant.settings.authority_default_class_term %}{{ tenant.settings.authority_default_image_class_term.image.url }}{% else %}{% static 'isisdata/images/category_default_image.png' %}{% endif %}",
+    "Category Division": "{% if tenant.settings.authority_default_class_term %}{{ tenant.settings.authority_default_image_class_term.image.url }}{% else %}{% static 'isisdata/images/category_default_image.png' %}{% endif %}",
   };
 
   let default_background_map = {
@@ -229,7 +229,7 @@
     "Institution": "rgb(52, 160, 164, 0.5)",
     "Publisher": "rgb(52, 160, 164, 0.5)",
     "Time Period": "rgb(82, 182, 154, 0.5)",
-    "Classification Term": "rgb(30, 96, 145, 0.5)",
+    "Category Division": "rgb(30, 96, 145, 0.5)",
   };
 
   if (wikiImage !== "") {
