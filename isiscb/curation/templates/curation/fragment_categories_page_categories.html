@@ -5,6 +5,11 @@
   <ul class="list-group" id="create-category-results-container">
   <li class="list-group-item" id="create-category-item" style="display: none;"></li>
   </ul>
+
+  <div class="text-right">
+    <a href="#" id="searchAllTenantsCT"><i class="fa fa-search" aria-hidden="true"></i> Search all tenants</a>
+  </div>
+  
 </p>
 
 
@@ -47,6 +52,7 @@ var category_creation_container = $('#create-category-item');
 
 var INITIAL_MAX_RESULTS = 10;
 var max_results_categories = INITIAL_MAX_RESULTS;
+var search_tenants_ct = true;
 
 var searchTimerCategories = 0;
 function triggerSearchCategories() {
@@ -56,7 +62,11 @@ function triggerSearchCategories() {
 
   var query = $('#categorySearchQuery').val();
   searchTimerCategories = setTimeout(function() {
-    $.ajax("{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&system=SPWC&type=CT&use_custom_cmp=true&max=" + max_results_categories + "&q=" + query, {
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?show_inactive=false&type=CT&use_custom_cmp=true&max=" + max_results_categories + "&q=" + query
+    if (search_tenants_ct) {
+      url += "&tenant_ids={{instance.owning_tenant.id}}";
+    }
+    $.ajax(url, {
         success: function(result) {
             var results_container = $('#create-category-results-container');
             results_container.empty();
@@ -113,6 +123,12 @@ function triggerSearchCategories() {
 $(document).ready(function() {
   $('#categorySearchQuery').on('keyup', function(e) {
     max_results_categories = INITIAL_MAX_RESULTS;
+    search_tenants_ct = true;
+    triggerSearchCategories();
+  });
+
+  $("#searchAllTenantsCT").click(function() {
+    search_tenants_ct = false;
     triggerSearchCategories();
   });
 });

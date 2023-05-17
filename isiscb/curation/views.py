@@ -1906,6 +1906,7 @@ def quick_and_dirty_authority_search(request):
       classification systems)
     * system_blank: allows classification system to be not set (default is 'true')
     * max: maximal number of results (default is 10)
+    * tenant_ids: ids of tenants to be searched or None to search all tenants
     * use_custom_cmp: if set to true, uses a custom compare function for ordering results;
       default is 'false'.
       Custom ordering works as follows:
@@ -1954,6 +1955,8 @@ def quick_and_dirty_authority_search(request):
     else:
         query = Q()
 
+    query &= Q(classification_system_object__subject_search_searchable=True)
+    
     if type_controlled:
         type_array = [t.upper() for t in type_controlled.split(",")]
         query &= Q(type_controlled__in=type_array)
@@ -2087,7 +2090,7 @@ def quick_and_dirty_authority_search(request):
             'type_code': obj.type_controlled,
             'name': obj.name,
             'description': obj.description,
-            'related_citations': [s.title() for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
+            'related_citations': [s.title() if s else '' for s in set(obj.acrelation_set.values_list('citation__title_for_sort', flat=True)[:10])],
             'citation_count': obj.acrelation_set.count(),
             'datestring': _get_datestring_for_authority(obj),
             'url': reverse("curation:curate_authority", args=(obj.id,)),

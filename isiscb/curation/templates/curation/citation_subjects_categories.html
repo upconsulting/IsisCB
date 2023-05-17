@@ -257,18 +257,19 @@ var delete_handler = function() {
 var INITIAL_MAX_RESULTS = 10;
 var max_results = INITIAL_MAX_RESULTS;
 var types = [];
+var search_tenants = true;
 
 var searchTimerSubjects = 0;
-function triggerSearchSubjects(force, searchTenants=true) {
+function triggerSearchSubjects(force) {
   if (searchTimerSubjects) {
       clearTimeout(searchTimerSubjects);
   }
 
   var query = $('#subjectSearchQuery').val();
   searchTimerSubjects = setTimeout(function() {
-    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&system=SPWT,SPWC,PN&use_custom_cmp=false&type=" + types 
+    var url = "{% url "curation:quick_and_dirty_authority_search" %}?exclude=CT&show_inactive=false&use_custom_cmp=false&type=" + types 
     url += "&max=" + max_results + "&force=" + force; 
-    if (searchTenants) {
+    if (search_tenants) {
       url += "&tenant_ids={{instance.owning_tenant.id}}";
     }
     url += "&q=" + $('#subjectSearchQuery').val();
@@ -358,15 +359,18 @@ function suggestSubjects(event) {
 $(document).ready(function() {
 
   $("#forceSearch").click(function() {
+    search_tenants = true
     triggerSearchSubjects(true);
   });
 
   $("#searchAllTenants").click(function() {
-    triggerSearchSubjects(true, false);
+    search_tenants = false
+    triggerSearchSubjects(true);
   });
 
   $('#subjectSearchQuery').on('keyup', function() {
     max_results = INITIAL_MAX_RESULTS;
+    search_tenants = true
     triggerSearchSubjects(false);
   });
 
