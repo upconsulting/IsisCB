@@ -42,9 +42,31 @@ def is_accessible_by_dataset(user, obj):
     return roles.count() > 0
 
 @predicate
+def is_generic_obj_accessible_by_tenant(user, obj):
+    have_source_attribute = ['Attribute']
+    have_subject_attribute = ['LinkedData', 'CCRelation']
+    have_object_attribute = ['CCRelation']
+    have_authority_attribute = []
+    have_citation_attribute = ['ACRelation']
+
+    if type(obj).__name__ in have_source_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'source', None))
+    if type(obj).__name__ in have_subject_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'subject', None))
+    if type(obj).__name__ in have_object_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'object', None))
+    if type(obj).__name__ in have_authority_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'authority', None))
+    if type(obj).__name__ in have_citation_attribute:
+        return is_accessible_by_tenant(user, getattr(obj, 'citation', None))
+    return False
+
+
+
+@predicate
 def is_accessible_by_tenant(user, obj):
     """
-    Checks if the user has a role that has a dataset rule that applies to
+    Checks if the user has a role that has a tenant rule that applies to
     ``obj``.
     """
     # if user is superuser they can always do everything

@@ -19,6 +19,7 @@ import time
 from past.utils import old_div
 import haystack
 import math
+import rules
 
 COLUMN_NAME_ATTR_SUBJ_ID = 'ATT Subj ID'
 COLUMN_NAME_ATTR_RELATED_NAME = 'Related Record Name'
@@ -83,7 +84,7 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
-
+    
     COL_MASTER_AUTH = 'CBA ID Master'
     COL_DUPLICATE_AUTH = 'CBA ID Duplicate'
     COL_NOTE = 'Note'
@@ -111,6 +112,12 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     master = Authority.objects.get(pk=master_id)
+                    can_access = rules.test_rule('is_accessible_by_tenant', User.objects.get(pk=user_id), master)
+                    if not can_access:
+                        logger.error('User does not have tenant access for authority with id %s. Skipping.' % (master_id))
+                        results.append((ERROR, master_id, 'User does not have tenant access for authority.', ""))
+                        current_count = _update_count(current_count, task)
+                        continue
                 except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (master_id))
                     results.append((ERROR, master_id, 'Authority record does not exist.', ""))
@@ -119,6 +126,12 @@ def merge_authorities(file_path, error_path, task_id, user_id):
 
                 try:
                     duplicate = Authority.objects.get(pk=duplicate_id)
+                    can_access = rules.test_rule('is_accessible_by_tenant', User.objects.get(pk=user_id), duplicate)
+                    if not can_access:
+                        logger.error('User does not have tenant access for authority with id %s. Skipping.' % (duplicate_id))
+                        results.append((ERROR, master_id, 'User does not have tenant access for duplicate authority.', ""))
+                        current_count = _update_count(current_count, task)
+                        continue
                 except Exception as e:
                     logger.error('Authority with id %s does not exist. Skipping.' % (duplicate_id))
                     results.append((ERROR, duplicate_id, 'Authority record does not exist.', ""))
@@ -172,6 +185,7 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
 
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
+    WARNING = "WARNING"
 
     with smart_open.open(file_path, 'rb', encoding='utf-8') as f:
         reader = csv.reader(f)
@@ -193,6 +207,12 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
                 subject_id = row[COLUMN_NAME_ATTR_SUBJ_ID]
                 try:
                     authority = Authority.objects.get(pk=subject_id)
+                    can_access = rules.test_rule('is_accessible_by_tenant', User.objects.get(pk=user_id), authority)
+                    if not can_access:
+                        logger.error('User does not have tenant access for authority with id %s. Skipping.' % (subject_id))
+                        results.append((ERROR, subject_id, 'User does not have tenant access for authority.', ""))
+                        current_count = _update_count(current_count, task)
+                        continue
                 except Authority.DoesNotExist:
                     logger.error('Authority with id %s does not exist. Skipping attribute.' % (subject_id))
                     results.append((ERROR, subject_id, subject_id, 'Authority record does not exist.'))
@@ -257,6 +277,11 @@ def add_attributes_to_authority(file_path, error_path, task_id, user_id):
                         val_init_values.update({
                             'value': place
                         })
+                        can_access = rules.test_rule('is_accessible_by_tenant', User.objects.get(pk=user_id), place)
+                        if not can_access:
+                            logger.warn('User does not have tenant access for authority with id %s. Skipping.' % (place.id))
+                            results.append((WARNING, subject_id, 'Authority from another tenant is being used.', ""))
+                        
                     except:
                         logger.error('Authority with id %s does not exist.' % (row[COLUMN_NAME_ATTR_PLACE_LINK]))
                         results.append((ERROR, subject_id, row[COLUMN_NAME_ATTR_PLACE_LINK], 'Adding place link. Authority does not exist.'))
@@ -341,11 +366,11 @@ FIELD_MAP = {
         'LED Notes': 'administrator_notes',
         'LED Status': 'record_status_value',
         'LED RecordStatusExplanation': 'record_status_explanation',
-        'LED Subj ID': 'typed:subject',
+        'LED Subj ID': 'typed:access_check:subject',
     },
     ACRelation: {
-        'ACR ID Auth': 'authority_id',
-        'ACR ID Cit': 'citation_id',
+        'ACR ID Auth': 'typed:authority',
+        'ACR ID Cit': 'typed:access_check:citation',
         'ACR NameDisplay': 'name_for_display_in_citation',
         'ACR Type': 'type_controlled',
         'ACR DataDisplayOrder': 'data_display_order',
@@ -419,6 +444,7 @@ RECORD_HISTORY = 'record_history'
 
 TYPED_PREFIX = 'typed:'
 FIND_PREFIX = 'find:'
+ACCESS_CHECK_PREFIX = 'access_check:'
 
 @shared_task
 def update_elements(file_path, error_path, task_id, user_id):
@@ -461,6 +487,11 @@ def update_elements(file_path, error_path, task_id, user_id):
                     # we need special handling of persons, this is ugly but ahh well
                     if elem_type == "Authority" and element.type_controlled == Authority.PERSON:
                         element = Person.objects.get(pk=element_id)
+                    can_access = rules.test_rule('is_generic_obj_accessible_by_tenant', User.objects.get(pk=user_id), element)
+                    if not can_access:
+                        results.append((ERROR, elem_type, element_id, 'User does not have access to tenant of %s with id %s.'%(type_class, element_id), current_time))
+                        current_count = _update_count(current_count, task)
+                        continue
                 except ObjectDoesNotExist:
                     results.append((ERROR, elem_type, element_id, '%s with id %s does not exist.'%(type_class, element_id), current_time))
                     current_count = _update_count(current_count, task)
@@ -489,10 +520,21 @@ def update_elements(file_path, error_path, task_id, user_id):
                                     # than authorities/citations
                                     if field_to_change.startswith(TYPED_PREFIX):
                                         field_to_change = field_to_change[len(TYPED_PREFIX):]
+                                        needs_access_check = field_to_change.startswith(ACCESS_CHECK_PREFIX)
+                                        if needs_access_check:
+                                            field_to_change = field_to_change[len(ACCESS_CHECK_PREFIX):]
+
                                         if new_value.startswith(Authority.ID_PREFIX):
                                             linked_element = Authority.objects.get(pk=new_value)
                                         else:
                                             linked_element = Citation.objects.get(pk=new_value)
+
+                                        # for some relations we need to check for tenant access, e.g. linked data subject
+                                        can_access = rules.test_rule('is_accessible_by_tenant', User.objects.get(pk=user_id), linked_element)
+                                        if needs_access_check and not can_access:
+                                            results.append((ERROR, elem_type, element_id, 'User does not have access to tenant of element with id %s.'%(new_value), current_time))
+                                            current_count = _update_count(current_count, task)
+                                            continue
                                         new_value = linked_element
 
                                     if field_to_change.startswith(FIND_PREFIX):

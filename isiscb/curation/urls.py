@@ -40,6 +40,7 @@ rules.add_rule('can_access_view_edit', can_access_view_edit)
 
 rules.add_rule('has_zotero_access', has_zotero_access)
 rules.add_rule('is_accessible_by_tenant', is_accessible_by_tenant)
+rules.add_rule('is_generic_obj_accessible_by_tenant', is_generic_obj_accessible_by_tenant)
 
 app_name = "curation"
 urlpatterns = [

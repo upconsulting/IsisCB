@@ -15,6 +15,7 @@ from isisdata.models import *
 import curation.tasks as curatetasks
 import curation.taskslib.citation_tasks as ctasks
 import curation.taskslib.authority_tasks as atasks
+import isisdata.tasks as dtasks
 
 from isisdata.filters import CitationFilter
 import json
