@@ -2196,10 +2196,18 @@ def quick_and_dirty_citation_search(request):
     # ISISCB-1132: ccr relations do not find titles with hyphens etc
     q = normalize(q)
 
-    queryset = Citation.objects.all()
-    queryset_exact = Citation.objects.all()
-    queryset_sw = Citation.objects.all()
-    queryset_by_id = Citation.objects.all()
+    
+    tenant_ids = request.GET.get("tenant_ids", "")
+    if tenant_ids:
+        queryset = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_exact = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_sw = Citation.objects.filter(owning_tenant__in=tenant_ids)
+        queryset_by_id = Citation.objects.filter(owning_tenant__in=tenant_ids)
+    else:
+        queryset = Citation.objects.all()
+        queryset_exact = Citation.objects.all()
+        queryset_sw = Citation.objects.all()
+        queryset_by_id = Citation.objects.all()
 
     queryset_exact = queryset_exact.filter(title_for_sort=q)
     queryset_sw = queryset_sw.filter(title_for_sort__istartswith=q)

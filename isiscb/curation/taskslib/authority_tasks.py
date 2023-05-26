@@ -380,8 +380,8 @@ FIELD_MAP = {
         'ACR RecordStatusExplanation': 'record_status_explanation',
     },
     CCRelation: {
-        'CCR ID Cit Subj': 'subject_id',
-        'CCR ID Cit Obj': 'object_id',
+        'CCR ID Cit Subj': 'typed:access_check:subject',
+        'CCR ID Cit Obj': 'typed:access_check:object',
         'CCR Name': 'name',
         'CCR Description': 'description',
         'CCR Type': 'type_controlled',
