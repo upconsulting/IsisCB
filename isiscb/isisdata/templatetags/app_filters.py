@@ -105,6 +105,10 @@ def get_title(citation):
     return 'Review of "' + book.title + '"'
 
 @register.filter
+def get_title_for_link(citation):
+    return get_title(citation).replace('"','')
+
+@register.filter
 def has_title(citation):
     # if citation is not a review simply return title
     if not citation.type_controlled == 'RE':

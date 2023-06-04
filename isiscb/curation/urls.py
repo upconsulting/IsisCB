@@ -138,6 +138,7 @@ urlpatterns = [
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/linkeddata/duplicates/delete$', views.citation_delete_linkeddata_duplicates, name='citation_delete_linkeddata_duplicates'),
 
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/subjects/$', views.subjects_and_categories, name='subjects_and_categories'),
+    re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/categories/suggest', views.generate_category_suggestions, name='generate_category_suggestions'),
     re_path(r'^citation/(?P<citation_id>[A-Z0-9]+)/suggestions/$', views.get_subject_suggestions, name='subjects_suggestions'),
 
     re_path(r'^authority/(?P<authority_id>[A-Z0-9]+)/linkeddata/(?P<linkeddata_id>[A-Z0-9]+)/delete/$', views.delete_linkeddata_for_authority, name='delete_linkeddata_for_authority'),

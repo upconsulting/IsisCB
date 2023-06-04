@@ -214,6 +214,8 @@
       <!-- Category tab -->
       <div role="tabpanel" class="tab-pane" id="addCategories">
         {% include "curation/fragment_categories_page_categories.html" %}
+        <div id="category-guesses-container">
+        </div>
       </div>
 
       <div role="tabpanel" class="tab-pane" id="addTimePeriods">
@@ -236,9 +238,19 @@ $('#subjectsTab a').click(function (e) {
   $(this).tab('show')
 })
 
+$("#categoriesTab a").click(function(e) {
+  if (!window.location.href.includes("#categories")) {
+    window.location.href += "#categories";
+  }
+  location.reload();
+})
+
 //@ sourceURL=delete.js
 $(document).ready(function() {
   $('.delete-category').click(delete_handler);
+  if (window.location.hash.includes("#categories")) {
+    $("#categoriesTab a").tab('show')
+  }
 });
 
 var delete_handler = function() {
